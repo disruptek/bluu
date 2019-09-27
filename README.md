@@ -1,6 +1,10 @@
 # bluu
 Microsoft Azure Cloud Computing Platform and Services (MAC) APIs
 
+## Work in Progress
+
+The request signing hasn't been implemented yet...
+
 ## Supported APIs
 
 [Sadly, only the 649 most popular Azure APIs are supported at this time.](https://github.com/disruptek/bluu/tree/master/src/bluu) :cry:
