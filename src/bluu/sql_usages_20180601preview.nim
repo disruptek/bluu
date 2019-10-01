@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-usages"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_UsagesListByInstancePool_593647 = ref object of OpenApiRestCall_593425
-proc url_UsagesListByInstancePool_593649(protocol: Scheme; host: string;
+  Call_UsagesListByInstancePool_567880 = ref object of OpenApiRestCall_567658
+proc url_UsagesListByInstancePool_567882(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -129,7 +129,7 @@ proc url_UsagesListByInstancePool_593649(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsagesListByInstancePool_593648(path: JsonNode; query: JsonNode;
+proc validate_UsagesListByInstancePool_567881(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all instance pool usage metrics
   ## 
@@ -145,21 +145,21 @@ proc validate_UsagesListByInstancePool_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = path.getOrDefault("resourceGroupName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "resourceGroupName", valid_568055
+  var valid_568056 = path.getOrDefault("subscriptionId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
-  var valid_593824 = path.getOrDefault("instancePoolName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_568056 != nil:
+    section.add "subscriptionId", valid_568056
+  var valid_568057 = path.getOrDefault("instancePoolName")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "instancePoolName", valid_593824
+  if valid_568057 != nil:
+    section.add "instancePoolName", valid_568057
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -169,15 +169,15 @@ proc validate_UsagesListByInstancePool_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_568058 = query.getOrDefault("api-version")
+  valid_568058 = validateParameter(valid_568058, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
-  var valid_593826 = query.getOrDefault("expandChildren")
-  valid_593826 = validateParameter(valid_593826, JBool, required = false, default = nil)
-  if valid_593826 != nil:
-    section.add "expandChildren", valid_593826
+  if valid_568058 != nil:
+    section.add "api-version", valid_568058
+  var valid_568059 = query.getOrDefault("expandChildren")
+  valid_568059 = validateParameter(valid_568059, JBool, required = false, default = nil)
+  if valid_568059 != nil:
+    section.add "expandChildren", valid_568059
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -186,20 +186,20 @@ proc validate_UsagesListByInstancePool_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593849: Call_UsagesListByInstancePool_593647; path: JsonNode;
+proc call*(call_568082: Call_UsagesListByInstancePool_567880; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all instance pool usage metrics
   ## 
-  let valid = call_593849.validator(path, query, header, formData, body)
-  let scheme = call_593849.pickScheme
+  let valid = call_568082.validator(path, query, header, formData, body)
+  let scheme = call_568082.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593849.url(scheme.get, call_593849.host, call_593849.base,
-                         call_593849.route, valid.getOrDefault("path"),
+  let url = call_568082.url(scheme.get, call_568082.host, call_568082.base,
+                         call_568082.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593849, url, valid)
+  result = hook(call_568082, url, valid)
 
-proc call*(call_593920: Call_UsagesListByInstancePool_593647;
+proc call*(call_568153: Call_UsagesListByInstancePool_567880;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           instancePoolName: string; expandChildren: bool = false): Recallable =
   ## usagesListByInstancePool
@@ -214,20 +214,20 @@ proc call*(call_593920: Call_UsagesListByInstancePool_593647;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   instancePoolName: string (required)
   ##                   : The name of the instance pool to be retrieved.
-  var path_593921 = newJObject()
-  var query_593923 = newJObject()
-  add(path_593921, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593923, "api-version", newJString(apiVersion))
-  add(query_593923, "expandChildren", newJBool(expandChildren))
-  add(path_593921, "subscriptionId", newJString(subscriptionId))
-  add(path_593921, "instancePoolName", newJString(instancePoolName))
-  result = call_593920.call(path_593921, query_593923, nil, nil, nil)
+  var path_568154 = newJObject()
+  var query_568156 = newJObject()
+  add(path_568154, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568156, "api-version", newJString(apiVersion))
+  add(query_568156, "expandChildren", newJBool(expandChildren))
+  add(path_568154, "subscriptionId", newJString(subscriptionId))
+  add(path_568154, "instancePoolName", newJString(instancePoolName))
+  result = call_568153.call(path_568154, query_568156, nil, nil, nil)
 
-var usagesListByInstancePool* = Call_UsagesListByInstancePool_593647(
+var usagesListByInstancePool* = Call_UsagesListByInstancePool_567880(
     name: "usagesListByInstancePool", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/instancePools/{instancePoolName}/usages",
-    validator: validate_UsagesListByInstancePool_593648, base: "",
-    url: url_UsagesListByInstancePool_593649, schemes: {Scheme.Https})
+    validator: validate_UsagesListByInstancePool_567881, base: "",
+    url: url_UsagesListByInstancePool_567882, schemes: {Scheme.Https})
 export
   rest
 

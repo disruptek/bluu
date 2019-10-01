@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Cosmos DB
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593439 = ref object of OpenApiRestCall
+  OpenApiRestCall_567668 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593439](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567668](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593439): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567668): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "cosmos-db"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DatabaseAccountsCheckNameExists_593661 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCheckNameExists_593663(protocol: Scheme; host: string;
+  Call_DatabaseAccountsCheckNameExists_567890 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCheckNameExists_567892(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +120,7 @@ proc url_DatabaseAccountsCheckNameExists_593663(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCheckNameExists_593662(path: JsonNode;
+proc validate_DatabaseAccountsCheckNameExists_567891(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks that the Azure Cosmos DB account name already exists. A valid account name may contain only lowercase letters, numbers, and the '-' character, and must be between 3 and 50 characters.
   ## 
@@ -132,11 +132,11 @@ proc validate_DatabaseAccountsCheckNameExists_593662(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `accountName` field"
-  var valid_593836 = path.getOrDefault("accountName")
-  valid_593836 = validateParameter(valid_593836, JString, required = true,
+  var valid_568065 = path.getOrDefault("accountName")
+  valid_568065 = validateParameter(valid_568065, JString, required = true,
                                  default = nil)
-  if valid_593836 != nil:
-    section.add "accountName", valid_593836
+  if valid_568065 != nil:
+    section.add "accountName", valid_568065
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +144,11 @@ proc validate_DatabaseAccountsCheckNameExists_593662(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593837 = query.getOrDefault("api-version")
-  valid_593837 = validateParameter(valid_593837, JString, required = true,
+  var valid_568066 = query.getOrDefault("api-version")
+  valid_568066 = validateParameter(valid_568066, JString, required = true,
                                  default = nil)
-  if valid_593837 != nil:
-    section.add "api-version", valid_593837
+  if valid_568066 != nil:
+    section.add "api-version", valid_568066
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,21 +157,21 @@ proc validate_DatabaseAccountsCheckNameExists_593662(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593860: Call_DatabaseAccountsCheckNameExists_593661;
+proc call*(call_568089: Call_DatabaseAccountsCheckNameExists_567890;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Checks that the Azure Cosmos DB account name already exists. A valid account name may contain only lowercase letters, numbers, and the '-' character, and must be between 3 and 50 characters.
   ## 
-  let valid = call_593860.validator(path, query, header, formData, body)
-  let scheme = call_593860.pickScheme
+  let valid = call_568089.validator(path, query, header, formData, body)
+  let scheme = call_568089.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593860.url(scheme.get, call_593860.host, call_593860.base,
-                         call_593860.route, valid.getOrDefault("path"),
+  let url = call_568089.url(scheme.get, call_568089.host, call_568089.base,
+                         call_568089.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593860, url, valid)
+  result = hook(call_568089, url, valid)
 
-proc call*(call_593931: Call_DatabaseAccountsCheckNameExists_593661;
+proc call*(call_568160: Call_DatabaseAccountsCheckNameExists_567890;
           apiVersion: string; accountName: string): Recallable =
   ## databaseAccountsCheckNameExists
   ## Checks that the Azure Cosmos DB account name already exists. A valid account name may contain only lowercase letters, numbers, and the '-' character, and must be between 3 and 50 characters.
@@ -179,27 +179,27 @@ proc call*(call_593931: Call_DatabaseAccountsCheckNameExists_593661;
   ##             : Version of the API to be used with the client request. The current version is 2015-04-08.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_593932 = newJObject()
-  var query_593934 = newJObject()
-  add(query_593934, "api-version", newJString(apiVersion))
-  add(path_593932, "accountName", newJString(accountName))
-  result = call_593931.call(path_593932, query_593934, nil, nil, nil)
+  var path_568161 = newJObject()
+  var query_568163 = newJObject()
+  add(query_568163, "api-version", newJString(apiVersion))
+  add(path_568161, "accountName", newJString(accountName))
+  result = call_568160.call(path_568161, query_568163, nil, nil, nil)
 
-var databaseAccountsCheckNameExists* = Call_DatabaseAccountsCheckNameExists_593661(
+var databaseAccountsCheckNameExists* = Call_DatabaseAccountsCheckNameExists_567890(
     name: "databaseAccountsCheckNameExists", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/providers/Microsoft.DocumentDB/databaseAccountNames/{accountName}",
-    validator: validate_DatabaseAccountsCheckNameExists_593662, base: "",
-    url: url_DatabaseAccountsCheckNameExists_593663, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsCheckNameExists_567891, base: "",
+    url: url_DatabaseAccountsCheckNameExists_567892, schemes: {Scheme.Https})
 type
-  Call_OperationsList_593973 = ref object of OpenApiRestCall_593439
-proc url_OperationsList_593975(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_568202 = ref object of OpenApiRestCall_567668
+proc url_OperationsList_568204(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593974(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_568203(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Cosmos DB Resource Provider operations.
@@ -214,11 +214,11 @@ proc validate_OperationsList_593974(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593976 = query.getOrDefault("api-version")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_568205 = query.getOrDefault("api-version")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "api-version", valid_593976
+  if valid_568205 != nil:
+    section.add "api-version", valid_568205
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -227,36 +227,36 @@ proc validate_OperationsList_593974(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593977: Call_OperationsList_593973; path: JsonNode; query: JsonNode;
+proc call*(call_568206: Call_OperationsList_568202; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Cosmos DB Resource Provider operations.
   ## 
-  let valid = call_593977.validator(path, query, header, formData, body)
-  let scheme = call_593977.pickScheme
+  let valid = call_568206.validator(path, query, header, formData, body)
+  let scheme = call_568206.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593977.url(scheme.get, call_593977.host, call_593977.base,
-                         call_593977.route, valid.getOrDefault("path"),
+  let url = call_568206.url(scheme.get, call_568206.host, call_568206.base,
+                         call_568206.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593977, url, valid)
+  result = hook(call_568206, url, valid)
 
-proc call*(call_593978: Call_OperationsList_593973; apiVersion: string): Recallable =
+proc call*(call_568207: Call_OperationsList_568202; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Cosmos DB Resource Provider operations.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2015-04-08.
-  var query_593979 = newJObject()
-  add(query_593979, "api-version", newJString(apiVersion))
-  result = call_593978.call(nil, query_593979, nil, nil, nil)
+  var query_568208 = newJObject()
+  add(query_568208, "api-version", newJString(apiVersion))
+  result = call_568207.call(nil, query_568208, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593973(name: "operationsList",
+var operationsList* = Call_OperationsList_568202(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.DocumentDB/operations",
-    validator: validate_OperationsList_593974, base: "", url: url_OperationsList_593975,
+    validator: validate_OperationsList_568203, base: "", url: url_OperationsList_568204,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsList_593980 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsList_593982(protocol: Scheme; host: string; base: string;
+  Call_DatabaseAccountsList_568209 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsList_568211(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -273,7 +273,7 @@ proc url_DatabaseAccountsList_593982(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsList_593981(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsList_568210(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the Azure Cosmos DB database accounts available under the subscription.
   ## 
@@ -285,11 +285,11 @@ proc validate_DatabaseAccountsList_593981(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593983 = path.getOrDefault("subscriptionId")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568212 = path.getOrDefault("subscriptionId")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "subscriptionId", valid_593983
+  if valid_568212 != nil:
+    section.add "subscriptionId", valid_568212
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -297,11 +297,11 @@ proc validate_DatabaseAccountsList_593981(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593984 = query.getOrDefault("api-version")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568213 = query.getOrDefault("api-version")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "api-version", valid_593984
+  if valid_568213 != nil:
+    section.add "api-version", valid_568213
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -310,20 +310,20 @@ proc validate_DatabaseAccountsList_593981(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_DatabaseAccountsList_593980; path: JsonNode;
+proc call*(call_568214: Call_DatabaseAccountsList_568209; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the Azure Cosmos DB database accounts available under the subscription.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_568214.validator(path, query, header, formData, body)
+  let scheme = call_568214.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
+                         call_568214.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_568214, url, valid)
 
-proc call*(call_593986: Call_DatabaseAccountsList_593980; apiVersion: string;
+proc call*(call_568215: Call_DatabaseAccountsList_568209; apiVersion: string;
           subscriptionId: string): Recallable =
   ## databaseAccountsList
   ## Lists all the Azure Cosmos DB database accounts available under the subscription.
@@ -331,20 +331,20 @@ proc call*(call_593986: Call_DatabaseAccountsList_593980; apiVersion: string;
   ##             : Version of the API to be used with the client request. The current version is 2015-04-08.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
-  result = call_593986.call(path_593987, query_593988, nil, nil, nil)
+  var path_568216 = newJObject()
+  var query_568217 = newJObject()
+  add(query_568217, "api-version", newJString(apiVersion))
+  add(path_568216, "subscriptionId", newJString(subscriptionId))
+  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
 
-var databaseAccountsList* = Call_DatabaseAccountsList_593980(
+var databaseAccountsList* = Call_DatabaseAccountsList_568209(
     name: "databaseAccountsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DocumentDB/databaseAccounts",
-    validator: validate_DatabaseAccountsList_593981, base: "",
-    url: url_DatabaseAccountsList_593982, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsList_568210, base: "",
+    url: url_DatabaseAccountsList_568211, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListByResourceGroup_593989 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListByResourceGroup_593991(protocol: Scheme; host: string;
+  Call_DatabaseAccountsListByResourceGroup_568218 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListByResourceGroup_568220(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -365,7 +365,7 @@ proc url_DatabaseAccountsListByResourceGroup_593991(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListByResourceGroup_593990(path: JsonNode;
+proc validate_DatabaseAccountsListByResourceGroup_568219(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the Azure Cosmos DB database accounts available under the given resource group.
   ## 
@@ -379,16 +379,16 @@ proc validate_DatabaseAccountsListByResourceGroup_593990(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593992 = path.getOrDefault("resourceGroupName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568221 = path.getOrDefault("resourceGroupName")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "resourceGroupName", valid_593992
-  var valid_593993 = path.getOrDefault("subscriptionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568221 != nil:
+    section.add "resourceGroupName", valid_568221
+  var valid_568222 = path.getOrDefault("subscriptionId")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "subscriptionId", valid_593993
+  if valid_568222 != nil:
+    section.add "subscriptionId", valid_568222
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -396,11 +396,11 @@ proc validate_DatabaseAccountsListByResourceGroup_593990(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568223 = query.getOrDefault("api-version")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
+  if valid_568223 != nil:
+    section.add "api-version", valid_568223
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -409,21 +409,21 @@ proc validate_DatabaseAccountsListByResourceGroup_593990(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593995: Call_DatabaseAccountsListByResourceGroup_593989;
+proc call*(call_568224: Call_DatabaseAccountsListByResourceGroup_568218;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all the Azure Cosmos DB database accounts available under the given resource group.
   ## 
-  let valid = call_593995.validator(path, query, header, formData, body)
-  let scheme = call_593995.pickScheme
+  let valid = call_568224.validator(path, query, header, formData, body)
+  let scheme = call_568224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593995.url(scheme.get, call_593995.host, call_593995.base,
-                         call_593995.route, valid.getOrDefault("path"),
+  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
+                         call_568224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593995, url, valid)
+  result = hook(call_568224, url, valid)
 
-proc call*(call_593996: Call_DatabaseAccountsListByResourceGroup_593989;
+proc call*(call_568225: Call_DatabaseAccountsListByResourceGroup_568218;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## databaseAccountsListByResourceGroup
   ## Lists all the Azure Cosmos DB database accounts available under the given resource group.
@@ -433,21 +433,21 @@ proc call*(call_593996: Call_DatabaseAccountsListByResourceGroup_593989;
   ##             : Version of the API to be used with the client request. The current version is 2015-04-08.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
-  var path_593997 = newJObject()
-  var query_593998 = newJObject()
-  add(path_593997, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593998, "api-version", newJString(apiVersion))
-  add(path_593997, "subscriptionId", newJString(subscriptionId))
-  result = call_593996.call(path_593997, query_593998, nil, nil, nil)
+  var path_568226 = newJObject()
+  var query_568227 = newJObject()
+  add(path_568226, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568227, "api-version", newJString(apiVersion))
+  add(path_568226, "subscriptionId", newJString(subscriptionId))
+  result = call_568225.call(path_568226, query_568227, nil, nil, nil)
 
-var databaseAccountsListByResourceGroup* = Call_DatabaseAccountsListByResourceGroup_593989(
+var databaseAccountsListByResourceGroup* = Call_DatabaseAccountsListByResourceGroup_568218(
     name: "databaseAccountsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts",
-    validator: validate_DatabaseAccountsListByResourceGroup_593990, base: "",
-    url: url_DatabaseAccountsListByResourceGroup_593991, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListByResourceGroup_568219, base: "",
+    url: url_DatabaseAccountsListByResourceGroup_568220, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsCreateOrUpdate_594010 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCreateOrUpdate_594012(protocol: Scheme; host: string;
+  Call_DatabaseAccountsCreateOrUpdate_568239 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCreateOrUpdate_568241(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -470,7 +470,7 @@ proc url_DatabaseAccountsCreateOrUpdate_594012(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCreateOrUpdate_594011(path: JsonNode;
+proc validate_DatabaseAccountsCreateOrUpdate_568240(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an Azure Cosmos DB database account.
   ## 
@@ -486,21 +486,21 @@ proc validate_DatabaseAccountsCreateOrUpdate_594011(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594013 = path.getOrDefault("resourceGroupName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  var valid_568242 = path.getOrDefault("resourceGroupName")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "resourceGroupName", valid_594013
-  var valid_594014 = path.getOrDefault("subscriptionId")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_568242 != nil:
+    section.add "resourceGroupName", valid_568242
+  var valid_568243 = path.getOrDefault("subscriptionId")
+  valid_568243 = validateParameter(valid_568243, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "subscriptionId", valid_594014
-  var valid_594015 = path.getOrDefault("accountName")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_568243 != nil:
+    section.add "subscriptionId", valid_568243
+  var valid_568244 = path.getOrDefault("accountName")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "accountName", valid_594015
+  if valid_568244 != nil:
+    section.add "accountName", valid_568244
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -508,11 +508,11 @@ proc validate_DatabaseAccountsCreateOrUpdate_594011(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594016 = query.getOrDefault("api-version")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_568245 = query.getOrDefault("api-version")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "api-version", valid_594016
+  if valid_568245 != nil:
+    section.add "api-version", valid_568245
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -526,20 +526,20 @@ proc validate_DatabaseAccountsCreateOrUpdate_594011(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_DatabaseAccountsCreateOrUpdate_594010; path: JsonNode;
+proc call*(call_568247: Call_DatabaseAccountsCreateOrUpdate_568239; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates an Azure Cosmos DB database account.
   ## 
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_568247.validator(path, query, header, formData, body)
+  let scheme = call_568247.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_568247.url(scheme.get, call_568247.host, call_568247.base,
+                         call_568247.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_568247, url, valid)
 
-proc call*(call_594019: Call_DatabaseAccountsCreateOrUpdate_594010;
+proc call*(call_568248: Call_DatabaseAccountsCreateOrUpdate_568239;
           resourceGroupName: string; apiVersion: string;
           createUpdateParameters: JsonNode; subscriptionId: string;
           accountName: string): Recallable =
@@ -555,25 +555,25 @@ proc call*(call_594019: Call_DatabaseAccountsCreateOrUpdate_594010;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594020 = newJObject()
-  var query_594021 = newJObject()
-  var body_594022 = newJObject()
-  add(path_594020, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594021, "api-version", newJString(apiVersion))
+  var path_568249 = newJObject()
+  var query_568250 = newJObject()
+  var body_568251 = newJObject()
+  add(path_568249, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568250, "api-version", newJString(apiVersion))
   if createUpdateParameters != nil:
-    body_594022 = createUpdateParameters
-  add(path_594020, "subscriptionId", newJString(subscriptionId))
-  add(path_594020, "accountName", newJString(accountName))
-  result = call_594019.call(path_594020, query_594021, nil, nil, body_594022)
+    body_568251 = createUpdateParameters
+  add(path_568249, "subscriptionId", newJString(subscriptionId))
+  add(path_568249, "accountName", newJString(accountName))
+  result = call_568248.call(path_568249, query_568250, nil, nil, body_568251)
 
-var databaseAccountsCreateOrUpdate* = Call_DatabaseAccountsCreateOrUpdate_594010(
+var databaseAccountsCreateOrUpdate* = Call_DatabaseAccountsCreateOrUpdate_568239(
     name: "databaseAccountsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}",
-    validator: validate_DatabaseAccountsCreateOrUpdate_594011, base: "",
-    url: url_DatabaseAccountsCreateOrUpdate_594012, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsCreateOrUpdate_568240, base: "",
+    url: url_DatabaseAccountsCreateOrUpdate_568241, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGet_593999 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGet_594001(protocol: Scheme; host: string; base: string;
+  Call_DatabaseAccountsGet_568228 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGet_568230(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -596,7 +596,7 @@ proc url_DatabaseAccountsGet_594001(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGet_594000(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsGet_568229(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Retrieves the properties of an existing Azure Cosmos DB database account.
@@ -613,21 +613,21 @@ proc validate_DatabaseAccountsGet_594000(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594002 = path.getOrDefault("resourceGroupName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_568231 = path.getOrDefault("resourceGroupName")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "resourceGroupName", valid_594002
-  var valid_594003 = path.getOrDefault("subscriptionId")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_568231 != nil:
+    section.add "resourceGroupName", valid_568231
+  var valid_568232 = path.getOrDefault("subscriptionId")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "subscriptionId", valid_594003
-  var valid_594004 = path.getOrDefault("accountName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  if valid_568232 != nil:
+    section.add "subscriptionId", valid_568232
+  var valid_568233 = path.getOrDefault("accountName")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "accountName", valid_594004
+  if valid_568233 != nil:
+    section.add "accountName", valid_568233
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -635,11 +635,11 @@ proc validate_DatabaseAccountsGet_594000(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594005 = query.getOrDefault("api-version")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_568234 = query.getOrDefault("api-version")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "api-version", valid_594005
+  if valid_568234 != nil:
+    section.add "api-version", valid_568234
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -648,20 +648,20 @@ proc validate_DatabaseAccountsGet_594000(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594006: Call_DatabaseAccountsGet_593999; path: JsonNode;
+proc call*(call_568235: Call_DatabaseAccountsGet_568228; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the properties of an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594006.validator(path, query, header, formData, body)
-  let scheme = call_594006.pickScheme
+  let valid = call_568235.validator(path, query, header, formData, body)
+  let scheme = call_568235.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594006.url(scheme.get, call_594006.host, call_594006.base,
-                         call_594006.route, valid.getOrDefault("path"),
+  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
+                         call_568235.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594006, url, valid)
+  result = hook(call_568235, url, valid)
 
-proc call*(call_594007: Call_DatabaseAccountsGet_593999; resourceGroupName: string;
+proc call*(call_568236: Call_DatabaseAccountsGet_568228; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; accountName: string): Recallable =
   ## databaseAccountsGet
   ## Retrieves the properties of an existing Azure Cosmos DB database account.
@@ -673,22 +673,22 @@ proc call*(call_594007: Call_DatabaseAccountsGet_593999; resourceGroupName: stri
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594008 = newJObject()
-  var query_594009 = newJObject()
-  add(path_594008, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594009, "api-version", newJString(apiVersion))
-  add(path_594008, "subscriptionId", newJString(subscriptionId))
-  add(path_594008, "accountName", newJString(accountName))
-  result = call_594007.call(path_594008, query_594009, nil, nil, nil)
+  var path_568237 = newJObject()
+  var query_568238 = newJObject()
+  add(path_568237, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568238, "api-version", newJString(apiVersion))
+  add(path_568237, "subscriptionId", newJString(subscriptionId))
+  add(path_568237, "accountName", newJString(accountName))
+  result = call_568236.call(path_568237, query_568238, nil, nil, nil)
 
-var databaseAccountsGet* = Call_DatabaseAccountsGet_593999(
+var databaseAccountsGet* = Call_DatabaseAccountsGet_568228(
     name: "databaseAccountsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}",
-    validator: validate_DatabaseAccountsGet_594000, base: "",
-    url: url_DatabaseAccountsGet_594001, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGet_568229, base: "",
+    url: url_DatabaseAccountsGet_568230, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsPatch_594034 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsPatch_594036(protocol: Scheme; host: string; base: string;
+  Call_DatabaseAccountsPatch_568263 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsPatch_568265(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -711,7 +711,7 @@ proc url_DatabaseAccountsPatch_594036(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsPatch_594035(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsPatch_568264(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Patches the properties of an existing Azure Cosmos DB database account.
   ## 
@@ -727,21 +727,21 @@ proc validate_DatabaseAccountsPatch_594035(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594037 = path.getOrDefault("resourceGroupName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  var valid_568266 = path.getOrDefault("resourceGroupName")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "resourceGroupName", valid_594037
-  var valid_594038 = path.getOrDefault("subscriptionId")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_568266 != nil:
+    section.add "resourceGroupName", valid_568266
+  var valid_568267 = path.getOrDefault("subscriptionId")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "subscriptionId", valid_594038
-  var valid_594039 = path.getOrDefault("accountName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_568267 != nil:
+    section.add "subscriptionId", valid_568267
+  var valid_568268 = path.getOrDefault("accountName")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "accountName", valid_594039
+  if valid_568268 != nil:
+    section.add "accountName", valid_568268
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -749,11 +749,11 @@ proc validate_DatabaseAccountsPatch_594035(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594040 = query.getOrDefault("api-version")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  var valid_568269 = query.getOrDefault("api-version")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "api-version", valid_594040
+  if valid_568269 != nil:
+    section.add "api-version", valid_568269
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -767,20 +767,20 @@ proc validate_DatabaseAccountsPatch_594035(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594042: Call_DatabaseAccountsPatch_594034; path: JsonNode;
+proc call*(call_568271: Call_DatabaseAccountsPatch_568263; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patches the properties of an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594042.validator(path, query, header, formData, body)
-  let scheme = call_594042.pickScheme
+  let valid = call_568271.validator(path, query, header, formData, body)
+  let scheme = call_568271.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594042.url(scheme.get, call_594042.host, call_594042.base,
-                         call_594042.route, valid.getOrDefault("path"),
+  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
+                         call_568271.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594042, url, valid)
+  result = hook(call_568271, url, valid)
 
-proc call*(call_594043: Call_DatabaseAccountsPatch_594034;
+proc call*(call_568272: Call_DatabaseAccountsPatch_568263;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           updateParameters: JsonNode; accountName: string): Recallable =
   ## databaseAccountsPatch
@@ -795,25 +795,25 @@ proc call*(call_594043: Call_DatabaseAccountsPatch_594034;
   ##                   : The tags parameter to patch for the current database account.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594044 = newJObject()
-  var query_594045 = newJObject()
-  var body_594046 = newJObject()
-  add(path_594044, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594045, "api-version", newJString(apiVersion))
-  add(path_594044, "subscriptionId", newJString(subscriptionId))
+  var path_568273 = newJObject()
+  var query_568274 = newJObject()
+  var body_568275 = newJObject()
+  add(path_568273, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568274, "api-version", newJString(apiVersion))
+  add(path_568273, "subscriptionId", newJString(subscriptionId))
   if updateParameters != nil:
-    body_594046 = updateParameters
-  add(path_594044, "accountName", newJString(accountName))
-  result = call_594043.call(path_594044, query_594045, nil, nil, body_594046)
+    body_568275 = updateParameters
+  add(path_568273, "accountName", newJString(accountName))
+  result = call_568272.call(path_568273, query_568274, nil, nil, body_568275)
 
-var databaseAccountsPatch* = Call_DatabaseAccountsPatch_594034(
+var databaseAccountsPatch* = Call_DatabaseAccountsPatch_568263(
     name: "databaseAccountsPatch", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}",
-    validator: validate_DatabaseAccountsPatch_594035, base: "",
-    url: url_DatabaseAccountsPatch_594036, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsPatch_568264, base: "",
+    url: url_DatabaseAccountsPatch_568265, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsDelete_594023 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsDelete_594025(protocol: Scheme; host: string; base: string;
+  Call_DatabaseAccountsDelete_568252 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsDelete_568254(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -836,7 +836,7 @@ proc url_DatabaseAccountsDelete_594025(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsDelete_594024(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsDelete_568253(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Azure Cosmos DB database account.
   ## 
@@ -852,21 +852,21 @@ proc validate_DatabaseAccountsDelete_594024(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594026 = path.getOrDefault("resourceGroupName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_568255 = path.getOrDefault("resourceGroupName")
+  valid_568255 = validateParameter(valid_568255, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "resourceGroupName", valid_594026
-  var valid_594027 = path.getOrDefault("subscriptionId")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_568255 != nil:
+    section.add "resourceGroupName", valid_568255
+  var valid_568256 = path.getOrDefault("subscriptionId")
+  valid_568256 = validateParameter(valid_568256, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "subscriptionId", valid_594027
-  var valid_594028 = path.getOrDefault("accountName")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  if valid_568256 != nil:
+    section.add "subscriptionId", valid_568256
+  var valid_568257 = path.getOrDefault("accountName")
+  valid_568257 = validateParameter(valid_568257, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "accountName", valid_594028
+  if valid_568257 != nil:
+    section.add "accountName", valid_568257
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -874,11 +874,11 @@ proc validate_DatabaseAccountsDelete_594024(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594029 = query.getOrDefault("api-version")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_568258 = query.getOrDefault("api-version")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "api-version", valid_594029
+  if valid_568258 != nil:
+    section.add "api-version", valid_568258
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -887,20 +887,20 @@ proc validate_DatabaseAccountsDelete_594024(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594030: Call_DatabaseAccountsDelete_594023; path: JsonNode;
+proc call*(call_568259: Call_DatabaseAccountsDelete_568252; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594030.validator(path, query, header, formData, body)
-  let scheme = call_594030.pickScheme
+  let valid = call_568259.validator(path, query, header, formData, body)
+  let scheme = call_568259.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594030.url(scheme.get, call_594030.host, call_594030.base,
-                         call_594030.route, valid.getOrDefault("path"),
+  let url = call_568259.url(scheme.get, call_568259.host, call_568259.base,
+                         call_568259.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594030, url, valid)
+  result = hook(call_568259, url, valid)
 
-proc call*(call_594031: Call_DatabaseAccountsDelete_594023;
+proc call*(call_568260: Call_DatabaseAccountsDelete_568252;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsDelete
@@ -913,22 +913,22 @@ proc call*(call_594031: Call_DatabaseAccountsDelete_594023;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594032 = newJObject()
-  var query_594033 = newJObject()
-  add(path_594032, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594033, "api-version", newJString(apiVersion))
-  add(path_594032, "subscriptionId", newJString(subscriptionId))
-  add(path_594032, "accountName", newJString(accountName))
-  result = call_594031.call(path_594032, query_594033, nil, nil, nil)
+  var path_568261 = newJObject()
+  var query_568262 = newJObject()
+  add(path_568261, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568262, "api-version", newJString(apiVersion))
+  add(path_568261, "subscriptionId", newJString(subscriptionId))
+  add(path_568261, "accountName", newJString(accountName))
+  result = call_568260.call(path_568261, query_568262, nil, nil, nil)
 
-var databaseAccountsDelete* = Call_DatabaseAccountsDelete_594023(
+var databaseAccountsDelete* = Call_DatabaseAccountsDelete_568252(
     name: "databaseAccountsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}",
-    validator: validate_DatabaseAccountsDelete_594024, base: "",
-    url: url_DatabaseAccountsDelete_594025, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsDelete_568253, base: "",
+    url: url_DatabaseAccountsDelete_568254, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListCassandraKeyspaces_594047 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListCassandraKeyspaces_594049(protocol: Scheme;
+  Call_DatabaseAccountsListCassandraKeyspaces_568276 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListCassandraKeyspaces_568278(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -952,7 +952,7 @@ proc url_DatabaseAccountsListCassandraKeyspaces_594049(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListCassandraKeyspaces_594048(path: JsonNode;
+proc validate_DatabaseAccountsListCassandraKeyspaces_568277(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Cassandra keyspaces under an existing Azure Cosmos DB database account.
   ## 
@@ -968,21 +968,21 @@ proc validate_DatabaseAccountsListCassandraKeyspaces_594048(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594050 = path.getOrDefault("resourceGroupName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  var valid_568279 = path.getOrDefault("resourceGroupName")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "resourceGroupName", valid_594050
-  var valid_594051 = path.getOrDefault("subscriptionId")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_568279 != nil:
+    section.add "resourceGroupName", valid_568279
+  var valid_568280 = path.getOrDefault("subscriptionId")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "subscriptionId", valid_594051
-  var valid_594052 = path.getOrDefault("accountName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_568280 != nil:
+    section.add "subscriptionId", valid_568280
+  var valid_568281 = path.getOrDefault("accountName")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "accountName", valid_594052
+  if valid_568281 != nil:
+    section.add "accountName", valid_568281
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -990,11 +990,11 @@ proc validate_DatabaseAccountsListCassandraKeyspaces_594048(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594053 = query.getOrDefault("api-version")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_568282 = query.getOrDefault("api-version")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "api-version", valid_594053
+  if valid_568282 != nil:
+    section.add "api-version", valid_568282
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1003,21 +1003,21 @@ proc validate_DatabaseAccountsListCassandraKeyspaces_594048(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594054: Call_DatabaseAccountsListCassandraKeyspaces_594047;
+proc call*(call_568283: Call_DatabaseAccountsListCassandraKeyspaces_568276;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the Cassandra keyspaces under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594054.validator(path, query, header, formData, body)
-  let scheme = call_594054.pickScheme
+  let valid = call_568283.validator(path, query, header, formData, body)
+  let scheme = call_568283.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594054.url(scheme.get, call_594054.host, call_594054.base,
-                         call_594054.route, valid.getOrDefault("path"),
+  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
+                         call_568283.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594054, url, valid)
+  result = hook(call_568283, url, valid)
 
-proc call*(call_594055: Call_DatabaseAccountsListCassandraKeyspaces_594047;
+proc call*(call_568284: Call_DatabaseAccountsListCassandraKeyspaces_568276;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsListCassandraKeyspaces
@@ -1030,23 +1030,23 @@ proc call*(call_594055: Call_DatabaseAccountsListCassandraKeyspaces_594047;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594056 = newJObject()
-  var query_594057 = newJObject()
-  add(path_594056, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594057, "api-version", newJString(apiVersion))
-  add(path_594056, "subscriptionId", newJString(subscriptionId))
-  add(path_594056, "accountName", newJString(accountName))
-  result = call_594055.call(path_594056, query_594057, nil, nil, nil)
+  var path_568285 = newJObject()
+  var query_568286 = newJObject()
+  add(path_568285, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568286, "api-version", newJString(apiVersion))
+  add(path_568285, "subscriptionId", newJString(subscriptionId))
+  add(path_568285, "accountName", newJString(accountName))
+  result = call_568284.call(path_568285, query_568286, nil, nil, nil)
 
-var databaseAccountsListCassandraKeyspaces* = Call_DatabaseAccountsListCassandraKeyspaces_594047(
+var databaseAccountsListCassandraKeyspaces* = Call_DatabaseAccountsListCassandraKeyspaces_568276(
     name: "databaseAccountsListCassandraKeyspaces", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces",
-    validator: validate_DatabaseAccountsListCassandraKeyspaces_594048, base: "",
-    url: url_DatabaseAccountsListCassandraKeyspaces_594049,
+    validator: validate_DatabaseAccountsListCassandraKeyspaces_568277, base: "",
+    url: url_DatabaseAccountsListCassandraKeyspaces_568278,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsCreateUpdateCassandraKeyspace_594070 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCreateUpdateCassandraKeyspace_594072(protocol: Scheme;
+  Call_DatabaseAccountsCreateUpdateCassandraKeyspace_568299 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCreateUpdateCassandraKeyspace_568301(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1072,7 +1072,7 @@ proc url_DatabaseAccountsCreateUpdateCassandraKeyspace_594072(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCreateUpdateCassandraKeyspace_594071(
+proc validate_DatabaseAccountsCreateUpdateCassandraKeyspace_568300(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Create or update an Azure Cosmos DB Cassandra keyspace
@@ -1091,26 +1091,26 @@ proc validate_DatabaseAccountsCreateUpdateCassandraKeyspace_594071(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594073 = path.getOrDefault("resourceGroupName")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  var valid_568302 = path.getOrDefault("resourceGroupName")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "resourceGroupName", valid_594073
-  var valid_594074 = path.getOrDefault("keyspaceName")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_568302 != nil:
+    section.add "resourceGroupName", valid_568302
+  var valid_568303 = path.getOrDefault("keyspaceName")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "keyspaceName", valid_594074
-  var valid_594075 = path.getOrDefault("subscriptionId")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  if valid_568303 != nil:
+    section.add "keyspaceName", valid_568303
+  var valid_568304 = path.getOrDefault("subscriptionId")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "subscriptionId", valid_594075
-  var valid_594076 = path.getOrDefault("accountName")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  if valid_568304 != nil:
+    section.add "subscriptionId", valid_568304
+  var valid_568305 = path.getOrDefault("accountName")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "accountName", valid_594076
+  if valid_568305 != nil:
+    section.add "accountName", valid_568305
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1118,11 +1118,11 @@ proc validate_DatabaseAccountsCreateUpdateCassandraKeyspace_594071(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594077 = query.getOrDefault("api-version")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  var valid_568306 = query.getOrDefault("api-version")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "api-version", valid_594077
+  if valid_568306 != nil:
+    section.add "api-version", valid_568306
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1136,21 +1136,21 @@ proc validate_DatabaseAccountsCreateUpdateCassandraKeyspace_594071(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594079: Call_DatabaseAccountsCreateUpdateCassandraKeyspace_594070;
+proc call*(call_568308: Call_DatabaseAccountsCreateUpdateCassandraKeyspace_568299;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update an Azure Cosmos DB Cassandra keyspace
   ## 
-  let valid = call_594079.validator(path, query, header, formData, body)
-  let scheme = call_594079.pickScheme
+  let valid = call_568308.validator(path, query, header, formData, body)
+  let scheme = call_568308.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594079.url(scheme.get, call_594079.host, call_594079.base,
-                         call_594079.route, valid.getOrDefault("path"),
+  let url = call_568308.url(scheme.get, call_568308.host, call_568308.base,
+                         call_568308.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594079, url, valid)
+  result = hook(call_568308, url, valid)
 
-proc call*(call_594080: Call_DatabaseAccountsCreateUpdateCassandraKeyspace_594070;
+proc call*(call_568309: Call_DatabaseAccountsCreateUpdateCassandraKeyspace_568299;
           resourceGroupName: string; apiVersion: string;
           createUpdateCassandraKeyspaceParameters: JsonNode; keyspaceName: string;
           subscriptionId: string; accountName: string): Recallable =
@@ -1168,27 +1168,27 @@ proc call*(call_594080: Call_DatabaseAccountsCreateUpdateCassandraKeyspace_59407
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594081 = newJObject()
-  var query_594082 = newJObject()
-  var body_594083 = newJObject()
-  add(path_594081, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594082, "api-version", newJString(apiVersion))
+  var path_568310 = newJObject()
+  var query_568311 = newJObject()
+  var body_568312 = newJObject()
+  add(path_568310, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568311, "api-version", newJString(apiVersion))
   if createUpdateCassandraKeyspaceParameters != nil:
-    body_594083 = createUpdateCassandraKeyspaceParameters
-  add(path_594081, "keyspaceName", newJString(keyspaceName))
-  add(path_594081, "subscriptionId", newJString(subscriptionId))
-  add(path_594081, "accountName", newJString(accountName))
-  result = call_594080.call(path_594081, query_594082, nil, nil, body_594083)
+    body_568312 = createUpdateCassandraKeyspaceParameters
+  add(path_568310, "keyspaceName", newJString(keyspaceName))
+  add(path_568310, "subscriptionId", newJString(subscriptionId))
+  add(path_568310, "accountName", newJString(accountName))
+  result = call_568309.call(path_568310, query_568311, nil, nil, body_568312)
 
-var databaseAccountsCreateUpdateCassandraKeyspace* = Call_DatabaseAccountsCreateUpdateCassandraKeyspace_594070(
+var databaseAccountsCreateUpdateCassandraKeyspace* = Call_DatabaseAccountsCreateUpdateCassandraKeyspace_568299(
     name: "databaseAccountsCreateUpdateCassandraKeyspace",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}",
-    validator: validate_DatabaseAccountsCreateUpdateCassandraKeyspace_594071,
-    base: "", url: url_DatabaseAccountsCreateUpdateCassandraKeyspace_594072,
+    validator: validate_DatabaseAccountsCreateUpdateCassandraKeyspace_568300,
+    base: "", url: url_DatabaseAccountsCreateUpdateCassandraKeyspace_568301,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetCassandraKeyspace_594058 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetCassandraKeyspace_594060(protocol: Scheme;
+  Call_DatabaseAccountsGetCassandraKeyspace_568287 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetCassandraKeyspace_568289(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1214,7 +1214,7 @@ proc url_DatabaseAccountsGetCassandraKeyspace_594060(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetCassandraKeyspace_594059(path: JsonNode;
+proc validate_DatabaseAccountsGetCassandraKeyspace_568288(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Cassandra keyspaces under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -1232,26 +1232,26 @@ proc validate_DatabaseAccountsGetCassandraKeyspace_594059(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594061 = path.getOrDefault("resourceGroupName")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  var valid_568290 = path.getOrDefault("resourceGroupName")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "resourceGroupName", valid_594061
-  var valid_594062 = path.getOrDefault("keyspaceName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  if valid_568290 != nil:
+    section.add "resourceGroupName", valid_568290
+  var valid_568291 = path.getOrDefault("keyspaceName")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "keyspaceName", valid_594062
-  var valid_594063 = path.getOrDefault("subscriptionId")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  if valid_568291 != nil:
+    section.add "keyspaceName", valid_568291
+  var valid_568292 = path.getOrDefault("subscriptionId")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "subscriptionId", valid_594063
-  var valid_594064 = path.getOrDefault("accountName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_568292 != nil:
+    section.add "subscriptionId", valid_568292
+  var valid_568293 = path.getOrDefault("accountName")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "accountName", valid_594064
+  if valid_568293 != nil:
+    section.add "accountName", valid_568293
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1259,11 +1259,11 @@ proc validate_DatabaseAccountsGetCassandraKeyspace_594059(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594065 = query.getOrDefault("api-version")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  var valid_568294 = query.getOrDefault("api-version")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "api-version", valid_594065
+  if valid_568294 != nil:
+    section.add "api-version", valid_568294
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1272,21 +1272,21 @@ proc validate_DatabaseAccountsGetCassandraKeyspace_594059(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594066: Call_DatabaseAccountsGetCassandraKeyspace_594058;
+proc call*(call_568295: Call_DatabaseAccountsGetCassandraKeyspace_568287;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the Cassandra keyspaces under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594066.validator(path, query, header, formData, body)
-  let scheme = call_594066.pickScheme
+  let valid = call_568295.validator(path, query, header, formData, body)
+  let scheme = call_568295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594066.url(scheme.get, call_594066.host, call_594066.base,
-                         call_594066.route, valid.getOrDefault("path"),
+  let url = call_568295.url(scheme.get, call_568295.host, call_568295.base,
+                         call_568295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594066, url, valid)
+  result = hook(call_568295, url, valid)
 
-proc call*(call_594067: Call_DatabaseAccountsGetCassandraKeyspace_594058;
+proc call*(call_568296: Call_DatabaseAccountsGetCassandraKeyspace_568287;
           resourceGroupName: string; apiVersion: string; keyspaceName: string;
           subscriptionId: string; accountName: string): Recallable =
   ## databaseAccountsGetCassandraKeyspace
@@ -1301,23 +1301,23 @@ proc call*(call_594067: Call_DatabaseAccountsGetCassandraKeyspace_594058;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594068 = newJObject()
-  var query_594069 = newJObject()
-  add(path_594068, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594069, "api-version", newJString(apiVersion))
-  add(path_594068, "keyspaceName", newJString(keyspaceName))
-  add(path_594068, "subscriptionId", newJString(subscriptionId))
-  add(path_594068, "accountName", newJString(accountName))
-  result = call_594067.call(path_594068, query_594069, nil, nil, nil)
+  var path_568297 = newJObject()
+  var query_568298 = newJObject()
+  add(path_568297, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568298, "api-version", newJString(apiVersion))
+  add(path_568297, "keyspaceName", newJString(keyspaceName))
+  add(path_568297, "subscriptionId", newJString(subscriptionId))
+  add(path_568297, "accountName", newJString(accountName))
+  result = call_568296.call(path_568297, query_568298, nil, nil, nil)
 
-var databaseAccountsGetCassandraKeyspace* = Call_DatabaseAccountsGetCassandraKeyspace_594058(
+var databaseAccountsGetCassandraKeyspace* = Call_DatabaseAccountsGetCassandraKeyspace_568287(
     name: "databaseAccountsGetCassandraKeyspace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}",
-    validator: validate_DatabaseAccountsGetCassandraKeyspace_594059, base: "",
-    url: url_DatabaseAccountsGetCassandraKeyspace_594060, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetCassandraKeyspace_568288, base: "",
+    url: url_DatabaseAccountsGetCassandraKeyspace_568289, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsDeleteCassandraKeyspace_594084 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsDeleteCassandraKeyspace_594086(protocol: Scheme;
+  Call_DatabaseAccountsDeleteCassandraKeyspace_568313 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsDeleteCassandraKeyspace_568315(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1343,7 +1343,7 @@ proc url_DatabaseAccountsDeleteCassandraKeyspace_594086(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsDeleteCassandraKeyspace_594085(path: JsonNode;
+proc validate_DatabaseAccountsDeleteCassandraKeyspace_568314(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Azure Cosmos DB Cassandra keyspace.
   ## 
@@ -1361,26 +1361,26 @@ proc validate_DatabaseAccountsDeleteCassandraKeyspace_594085(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594087 = path.getOrDefault("resourceGroupName")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  var valid_568316 = path.getOrDefault("resourceGroupName")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "resourceGroupName", valid_594087
-  var valid_594088 = path.getOrDefault("keyspaceName")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  if valid_568316 != nil:
+    section.add "resourceGroupName", valid_568316
+  var valid_568317 = path.getOrDefault("keyspaceName")
+  valid_568317 = validateParameter(valid_568317, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "keyspaceName", valid_594088
-  var valid_594089 = path.getOrDefault("subscriptionId")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  if valid_568317 != nil:
+    section.add "keyspaceName", valid_568317
+  var valid_568318 = path.getOrDefault("subscriptionId")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "subscriptionId", valid_594089
-  var valid_594090 = path.getOrDefault("accountName")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  if valid_568318 != nil:
+    section.add "subscriptionId", valid_568318
+  var valid_568319 = path.getOrDefault("accountName")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "accountName", valid_594090
+  if valid_568319 != nil:
+    section.add "accountName", valid_568319
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1388,11 +1388,11 @@ proc validate_DatabaseAccountsDeleteCassandraKeyspace_594085(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594091 = query.getOrDefault("api-version")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  var valid_568320 = query.getOrDefault("api-version")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "api-version", valid_594091
+  if valid_568320 != nil:
+    section.add "api-version", valid_568320
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1401,21 +1401,21 @@ proc validate_DatabaseAccountsDeleteCassandraKeyspace_594085(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594092: Call_DatabaseAccountsDeleteCassandraKeyspace_594084;
+proc call*(call_568321: Call_DatabaseAccountsDeleteCassandraKeyspace_568313;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing Azure Cosmos DB Cassandra keyspace.
   ## 
-  let valid = call_594092.validator(path, query, header, formData, body)
-  let scheme = call_594092.pickScheme
+  let valid = call_568321.validator(path, query, header, formData, body)
+  let scheme = call_568321.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594092.url(scheme.get, call_594092.host, call_594092.base,
-                         call_594092.route, valid.getOrDefault("path"),
+  let url = call_568321.url(scheme.get, call_568321.host, call_568321.base,
+                         call_568321.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594092, url, valid)
+  result = hook(call_568321, url, valid)
 
-proc call*(call_594093: Call_DatabaseAccountsDeleteCassandraKeyspace_594084;
+proc call*(call_568322: Call_DatabaseAccountsDeleteCassandraKeyspace_568313;
           resourceGroupName: string; apiVersion: string; keyspaceName: string;
           subscriptionId: string; accountName: string): Recallable =
   ## databaseAccountsDeleteCassandraKeyspace
@@ -1430,24 +1430,24 @@ proc call*(call_594093: Call_DatabaseAccountsDeleteCassandraKeyspace_594084;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594094 = newJObject()
-  var query_594095 = newJObject()
-  add(path_594094, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594095, "api-version", newJString(apiVersion))
-  add(path_594094, "keyspaceName", newJString(keyspaceName))
-  add(path_594094, "subscriptionId", newJString(subscriptionId))
-  add(path_594094, "accountName", newJString(accountName))
-  result = call_594093.call(path_594094, query_594095, nil, nil, nil)
+  var path_568323 = newJObject()
+  var query_568324 = newJObject()
+  add(path_568323, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568324, "api-version", newJString(apiVersion))
+  add(path_568323, "keyspaceName", newJString(keyspaceName))
+  add(path_568323, "subscriptionId", newJString(subscriptionId))
+  add(path_568323, "accountName", newJString(accountName))
+  result = call_568322.call(path_568323, query_568324, nil, nil, nil)
 
-var databaseAccountsDeleteCassandraKeyspace* = Call_DatabaseAccountsDeleteCassandraKeyspace_594084(
+var databaseAccountsDeleteCassandraKeyspace* = Call_DatabaseAccountsDeleteCassandraKeyspace_568313(
     name: "databaseAccountsDeleteCassandraKeyspace", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}",
-    validator: validate_DatabaseAccountsDeleteCassandraKeyspace_594085, base: "",
-    url: url_DatabaseAccountsDeleteCassandraKeyspace_594086,
+    validator: validate_DatabaseAccountsDeleteCassandraKeyspace_568314, base: "",
+    url: url_DatabaseAccountsDeleteCassandraKeyspace_568315,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594108 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594110(
+  Call_DatabaseAccountsUpdateCassandraKeyspaceThroughput_568337 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsUpdateCassandraKeyspaceThroughput_568339(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1475,7 +1475,7 @@ proc url_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594110(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594109(
+proc validate_DatabaseAccountsUpdateCassandraKeyspaceThroughput_568338(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Update RUs per second of an Azure Cosmos DB Cassandra Keyspace
@@ -1494,26 +1494,26 @@ proc validate_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594109(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594111 = path.getOrDefault("resourceGroupName")
-  valid_594111 = validateParameter(valid_594111, JString, required = true,
+  var valid_568340 = path.getOrDefault("resourceGroupName")
+  valid_568340 = validateParameter(valid_568340, JString, required = true,
                                  default = nil)
-  if valid_594111 != nil:
-    section.add "resourceGroupName", valid_594111
-  var valid_594112 = path.getOrDefault("keyspaceName")
-  valid_594112 = validateParameter(valid_594112, JString, required = true,
+  if valid_568340 != nil:
+    section.add "resourceGroupName", valid_568340
+  var valid_568341 = path.getOrDefault("keyspaceName")
+  valid_568341 = validateParameter(valid_568341, JString, required = true,
                                  default = nil)
-  if valid_594112 != nil:
-    section.add "keyspaceName", valid_594112
-  var valid_594113 = path.getOrDefault("subscriptionId")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  if valid_568341 != nil:
+    section.add "keyspaceName", valid_568341
+  var valid_568342 = path.getOrDefault("subscriptionId")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = nil)
-  if valid_594113 != nil:
-    section.add "subscriptionId", valid_594113
-  var valid_594114 = path.getOrDefault("accountName")
-  valid_594114 = validateParameter(valid_594114, JString, required = true,
+  if valid_568342 != nil:
+    section.add "subscriptionId", valid_568342
+  var valid_568343 = path.getOrDefault("accountName")
+  valid_568343 = validateParameter(valid_568343, JString, required = true,
                                  default = nil)
-  if valid_594114 != nil:
-    section.add "accountName", valid_594114
+  if valid_568343 != nil:
+    section.add "accountName", valid_568343
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1521,11 +1521,11 @@ proc validate_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594109(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594115 = query.getOrDefault("api-version")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  var valid_568344 = query.getOrDefault("api-version")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "api-version", valid_594115
+  if valid_568344 != nil:
+    section.add "api-version", valid_568344
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1539,21 +1539,21 @@ proc validate_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594109(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594117: Call_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594108;
+proc call*(call_568346: Call_DatabaseAccountsUpdateCassandraKeyspaceThroughput_568337;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update RUs per second of an Azure Cosmos DB Cassandra Keyspace
   ## 
-  let valid = call_594117.validator(path, query, header, formData, body)
-  let scheme = call_594117.pickScheme
+  let valid = call_568346.validator(path, query, header, formData, body)
+  let scheme = call_568346.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594117.url(scheme.get, call_594117.host, call_594117.base,
-                         call_594117.route, valid.getOrDefault("path"),
+  let url = call_568346.url(scheme.get, call_568346.host, call_568346.base,
+                         call_568346.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594117, url, valid)
+  result = hook(call_568346, url, valid)
 
-proc call*(call_594118: Call_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594108;
+proc call*(call_568347: Call_DatabaseAccountsUpdateCassandraKeyspaceThroughput_568337;
           resourceGroupName: string; apiVersion: string; keyspaceName: string;
           subscriptionId: string; updateThroughputParameters: JsonNode;
           accountName: string): Recallable =
@@ -1571,27 +1571,27 @@ proc call*(call_594118: Call_DatabaseAccountsUpdateCassandraKeyspaceThroughput_5
   ##                             : The RUs per second of the parameters to provide for the current Cassandra Keyspace.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594119 = newJObject()
-  var query_594120 = newJObject()
-  var body_594121 = newJObject()
-  add(path_594119, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594120, "api-version", newJString(apiVersion))
-  add(path_594119, "keyspaceName", newJString(keyspaceName))
-  add(path_594119, "subscriptionId", newJString(subscriptionId))
+  var path_568348 = newJObject()
+  var query_568349 = newJObject()
+  var body_568350 = newJObject()
+  add(path_568348, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568349, "api-version", newJString(apiVersion))
+  add(path_568348, "keyspaceName", newJString(keyspaceName))
+  add(path_568348, "subscriptionId", newJString(subscriptionId))
   if updateThroughputParameters != nil:
-    body_594121 = updateThroughputParameters
-  add(path_594119, "accountName", newJString(accountName))
-  result = call_594118.call(path_594119, query_594120, nil, nil, body_594121)
+    body_568350 = updateThroughputParameters
+  add(path_568348, "accountName", newJString(accountName))
+  result = call_568347.call(path_568348, query_568349, nil, nil, body_568350)
 
-var databaseAccountsUpdateCassandraKeyspaceThroughput* = Call_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594108(
+var databaseAccountsUpdateCassandraKeyspaceThroughput* = Call_DatabaseAccountsUpdateCassandraKeyspaceThroughput_568337(
     name: "databaseAccountsUpdateCassandraKeyspaceThroughput",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}/settings/throughput",
-    validator: validate_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594109,
-    base: "", url: url_DatabaseAccountsUpdateCassandraKeyspaceThroughput_594110,
+    validator: validate_DatabaseAccountsUpdateCassandraKeyspaceThroughput_568338,
+    base: "", url: url_DatabaseAccountsUpdateCassandraKeyspaceThroughput_568339,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetCassandraKeyspaceThroughput_594096 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetCassandraKeyspaceThroughput_594098(protocol: Scheme;
+  Call_DatabaseAccountsGetCassandraKeyspaceThroughput_568325 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetCassandraKeyspaceThroughput_568327(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1618,7 +1618,7 @@ proc url_DatabaseAccountsGetCassandraKeyspaceThroughput_594098(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetCassandraKeyspaceThroughput_594097(
+proc validate_DatabaseAccountsGetCassandraKeyspaceThroughput_568326(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets the RUs per second of the Cassandra Keyspace under an existing Azure Cosmos DB database account with the provided name.
@@ -1637,26 +1637,26 @@ proc validate_DatabaseAccountsGetCassandraKeyspaceThroughput_594097(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594099 = path.getOrDefault("resourceGroupName")
-  valid_594099 = validateParameter(valid_594099, JString, required = true,
+  var valid_568328 = path.getOrDefault("resourceGroupName")
+  valid_568328 = validateParameter(valid_568328, JString, required = true,
                                  default = nil)
-  if valid_594099 != nil:
-    section.add "resourceGroupName", valid_594099
-  var valid_594100 = path.getOrDefault("keyspaceName")
-  valid_594100 = validateParameter(valid_594100, JString, required = true,
+  if valid_568328 != nil:
+    section.add "resourceGroupName", valid_568328
+  var valid_568329 = path.getOrDefault("keyspaceName")
+  valid_568329 = validateParameter(valid_568329, JString, required = true,
                                  default = nil)
-  if valid_594100 != nil:
-    section.add "keyspaceName", valid_594100
-  var valid_594101 = path.getOrDefault("subscriptionId")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  if valid_568329 != nil:
+    section.add "keyspaceName", valid_568329
+  var valid_568330 = path.getOrDefault("subscriptionId")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "subscriptionId", valid_594101
-  var valid_594102 = path.getOrDefault("accountName")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  if valid_568330 != nil:
+    section.add "subscriptionId", valid_568330
+  var valid_568331 = path.getOrDefault("accountName")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "accountName", valid_594102
+  if valid_568331 != nil:
+    section.add "accountName", valid_568331
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1664,11 +1664,11 @@ proc validate_DatabaseAccountsGetCassandraKeyspaceThroughput_594097(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594103 = query.getOrDefault("api-version")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  var valid_568332 = query.getOrDefault("api-version")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "api-version", valid_594103
+  if valid_568332 != nil:
+    section.add "api-version", valid_568332
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1677,21 +1677,21 @@ proc validate_DatabaseAccountsGetCassandraKeyspaceThroughput_594097(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594104: Call_DatabaseAccountsGetCassandraKeyspaceThroughput_594096;
+proc call*(call_568333: Call_DatabaseAccountsGetCassandraKeyspaceThroughput_568325;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the RUs per second of the Cassandra Keyspace under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594104.validator(path, query, header, formData, body)
-  let scheme = call_594104.pickScheme
+  let valid = call_568333.validator(path, query, header, formData, body)
+  let scheme = call_568333.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594104.url(scheme.get, call_594104.host, call_594104.base,
-                         call_594104.route, valid.getOrDefault("path"),
+  let url = call_568333.url(scheme.get, call_568333.host, call_568333.base,
+                         call_568333.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594104, url, valid)
+  result = hook(call_568333, url, valid)
 
-proc call*(call_594105: Call_DatabaseAccountsGetCassandraKeyspaceThroughput_594096;
+proc call*(call_568334: Call_DatabaseAccountsGetCassandraKeyspaceThroughput_568325;
           resourceGroupName: string; apiVersion: string; keyspaceName: string;
           subscriptionId: string; accountName: string): Recallable =
   ## databaseAccountsGetCassandraKeyspaceThroughput
@@ -1706,24 +1706,24 @@ proc call*(call_594105: Call_DatabaseAccountsGetCassandraKeyspaceThroughput_5940
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594106 = newJObject()
-  var query_594107 = newJObject()
-  add(path_594106, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594107, "api-version", newJString(apiVersion))
-  add(path_594106, "keyspaceName", newJString(keyspaceName))
-  add(path_594106, "subscriptionId", newJString(subscriptionId))
-  add(path_594106, "accountName", newJString(accountName))
-  result = call_594105.call(path_594106, query_594107, nil, nil, nil)
+  var path_568335 = newJObject()
+  var query_568336 = newJObject()
+  add(path_568335, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568336, "api-version", newJString(apiVersion))
+  add(path_568335, "keyspaceName", newJString(keyspaceName))
+  add(path_568335, "subscriptionId", newJString(subscriptionId))
+  add(path_568335, "accountName", newJString(accountName))
+  result = call_568334.call(path_568335, query_568336, nil, nil, nil)
 
-var databaseAccountsGetCassandraKeyspaceThroughput* = Call_DatabaseAccountsGetCassandraKeyspaceThroughput_594096(
+var databaseAccountsGetCassandraKeyspaceThroughput* = Call_DatabaseAccountsGetCassandraKeyspaceThroughput_568325(
     name: "databaseAccountsGetCassandraKeyspaceThroughput",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}/settings/throughput",
-    validator: validate_DatabaseAccountsGetCassandraKeyspaceThroughput_594097,
-    base: "", url: url_DatabaseAccountsGetCassandraKeyspaceThroughput_594098,
+    validator: validate_DatabaseAccountsGetCassandraKeyspaceThroughput_568326,
+    base: "", url: url_DatabaseAccountsGetCassandraKeyspaceThroughput_568327,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListCassandraTables_594122 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListCassandraTables_594124(protocol: Scheme; host: string;
+  Call_DatabaseAccountsListCassandraTables_568351 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListCassandraTables_568353(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1750,7 +1750,7 @@ proc url_DatabaseAccountsListCassandraTables_594124(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListCassandraTables_594123(path: JsonNode;
+proc validate_DatabaseAccountsListCassandraTables_568352(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Cassandra table under an existing Azure Cosmos DB database account.
   ## 
@@ -1768,26 +1768,26 @@ proc validate_DatabaseAccountsListCassandraTables_594123(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594125 = path.getOrDefault("resourceGroupName")
-  valid_594125 = validateParameter(valid_594125, JString, required = true,
+  var valid_568354 = path.getOrDefault("resourceGroupName")
+  valid_568354 = validateParameter(valid_568354, JString, required = true,
                                  default = nil)
-  if valid_594125 != nil:
-    section.add "resourceGroupName", valid_594125
-  var valid_594126 = path.getOrDefault("keyspaceName")
-  valid_594126 = validateParameter(valid_594126, JString, required = true,
+  if valid_568354 != nil:
+    section.add "resourceGroupName", valid_568354
+  var valid_568355 = path.getOrDefault("keyspaceName")
+  valid_568355 = validateParameter(valid_568355, JString, required = true,
                                  default = nil)
-  if valid_594126 != nil:
-    section.add "keyspaceName", valid_594126
-  var valid_594127 = path.getOrDefault("subscriptionId")
-  valid_594127 = validateParameter(valid_594127, JString, required = true,
+  if valid_568355 != nil:
+    section.add "keyspaceName", valid_568355
+  var valid_568356 = path.getOrDefault("subscriptionId")
+  valid_568356 = validateParameter(valid_568356, JString, required = true,
                                  default = nil)
-  if valid_594127 != nil:
-    section.add "subscriptionId", valid_594127
-  var valid_594128 = path.getOrDefault("accountName")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  if valid_568356 != nil:
+    section.add "subscriptionId", valid_568356
+  var valid_568357 = path.getOrDefault("accountName")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "accountName", valid_594128
+  if valid_568357 != nil:
+    section.add "accountName", valid_568357
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1795,11 +1795,11 @@ proc validate_DatabaseAccountsListCassandraTables_594123(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594129 = query.getOrDefault("api-version")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  var valid_568358 = query.getOrDefault("api-version")
+  valid_568358 = validateParameter(valid_568358, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "api-version", valid_594129
+  if valid_568358 != nil:
+    section.add "api-version", valid_568358
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1808,21 +1808,21 @@ proc validate_DatabaseAccountsListCassandraTables_594123(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594130: Call_DatabaseAccountsListCassandraTables_594122;
+proc call*(call_568359: Call_DatabaseAccountsListCassandraTables_568351;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the Cassandra table under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594130.validator(path, query, header, formData, body)
-  let scheme = call_594130.pickScheme
+  let valid = call_568359.validator(path, query, header, formData, body)
+  let scheme = call_568359.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594130.url(scheme.get, call_594130.host, call_594130.base,
-                         call_594130.route, valid.getOrDefault("path"),
+  let url = call_568359.url(scheme.get, call_568359.host, call_568359.base,
+                         call_568359.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594130, url, valid)
+  result = hook(call_568359, url, valid)
 
-proc call*(call_594131: Call_DatabaseAccountsListCassandraTables_594122;
+proc call*(call_568360: Call_DatabaseAccountsListCassandraTables_568351;
           resourceGroupName: string; apiVersion: string; keyspaceName: string;
           subscriptionId: string; accountName: string): Recallable =
   ## databaseAccountsListCassandraTables
@@ -1837,23 +1837,23 @@ proc call*(call_594131: Call_DatabaseAccountsListCassandraTables_594122;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594132 = newJObject()
-  var query_594133 = newJObject()
-  add(path_594132, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594133, "api-version", newJString(apiVersion))
-  add(path_594132, "keyspaceName", newJString(keyspaceName))
-  add(path_594132, "subscriptionId", newJString(subscriptionId))
-  add(path_594132, "accountName", newJString(accountName))
-  result = call_594131.call(path_594132, query_594133, nil, nil, nil)
+  var path_568361 = newJObject()
+  var query_568362 = newJObject()
+  add(path_568361, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568362, "api-version", newJString(apiVersion))
+  add(path_568361, "keyspaceName", newJString(keyspaceName))
+  add(path_568361, "subscriptionId", newJString(subscriptionId))
+  add(path_568361, "accountName", newJString(accountName))
+  result = call_568360.call(path_568361, query_568362, nil, nil, nil)
 
-var databaseAccountsListCassandraTables* = Call_DatabaseAccountsListCassandraTables_594122(
+var databaseAccountsListCassandraTables* = Call_DatabaseAccountsListCassandraTables_568351(
     name: "databaseAccountsListCassandraTables", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}/tables",
-    validator: validate_DatabaseAccountsListCassandraTables_594123, base: "",
-    url: url_DatabaseAccountsListCassandraTables_594124, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListCassandraTables_568352, base: "",
+    url: url_DatabaseAccountsListCassandraTables_568353, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsCreateUpdateCassandraTable_594147 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCreateUpdateCassandraTable_594149(protocol: Scheme;
+  Call_DatabaseAccountsCreateUpdateCassandraTable_568376 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCreateUpdateCassandraTable_568378(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1882,7 +1882,7 @@ proc url_DatabaseAccountsCreateUpdateCassandraTable_594149(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCreateUpdateCassandraTable_594148(path: JsonNode;
+proc validate_DatabaseAccountsCreateUpdateCassandraTable_568377(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an Azure Cosmos DB Cassandra Table
   ## 
@@ -1902,31 +1902,31 @@ proc validate_DatabaseAccountsCreateUpdateCassandraTable_594148(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594150 = path.getOrDefault("resourceGroupName")
-  valid_594150 = validateParameter(valid_594150, JString, required = true,
+  var valid_568379 = path.getOrDefault("resourceGroupName")
+  valid_568379 = validateParameter(valid_568379, JString, required = true,
                                  default = nil)
-  if valid_594150 != nil:
-    section.add "resourceGroupName", valid_594150
-  var valid_594151 = path.getOrDefault("keyspaceName")
-  valid_594151 = validateParameter(valid_594151, JString, required = true,
+  if valid_568379 != nil:
+    section.add "resourceGroupName", valid_568379
+  var valid_568380 = path.getOrDefault("keyspaceName")
+  valid_568380 = validateParameter(valid_568380, JString, required = true,
                                  default = nil)
-  if valid_594151 != nil:
-    section.add "keyspaceName", valid_594151
-  var valid_594152 = path.getOrDefault("subscriptionId")
-  valid_594152 = validateParameter(valid_594152, JString, required = true,
+  if valid_568380 != nil:
+    section.add "keyspaceName", valid_568380
+  var valid_568381 = path.getOrDefault("subscriptionId")
+  valid_568381 = validateParameter(valid_568381, JString, required = true,
                                  default = nil)
-  if valid_594152 != nil:
-    section.add "subscriptionId", valid_594152
-  var valid_594153 = path.getOrDefault("tableName")
-  valid_594153 = validateParameter(valid_594153, JString, required = true,
+  if valid_568381 != nil:
+    section.add "subscriptionId", valid_568381
+  var valid_568382 = path.getOrDefault("tableName")
+  valid_568382 = validateParameter(valid_568382, JString, required = true,
                                  default = nil)
-  if valid_594153 != nil:
-    section.add "tableName", valid_594153
-  var valid_594154 = path.getOrDefault("accountName")
-  valid_594154 = validateParameter(valid_594154, JString, required = true,
+  if valid_568382 != nil:
+    section.add "tableName", valid_568382
+  var valid_568383 = path.getOrDefault("accountName")
+  valid_568383 = validateParameter(valid_568383, JString, required = true,
                                  default = nil)
-  if valid_594154 != nil:
-    section.add "accountName", valid_594154
+  if valid_568383 != nil:
+    section.add "accountName", valid_568383
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1934,11 +1934,11 @@ proc validate_DatabaseAccountsCreateUpdateCassandraTable_594148(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594155 = query.getOrDefault("api-version")
-  valid_594155 = validateParameter(valid_594155, JString, required = true,
+  var valid_568384 = query.getOrDefault("api-version")
+  valid_568384 = validateParameter(valid_568384, JString, required = true,
                                  default = nil)
-  if valid_594155 != nil:
-    section.add "api-version", valid_594155
+  if valid_568384 != nil:
+    section.add "api-version", valid_568384
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1952,21 +1952,21 @@ proc validate_DatabaseAccountsCreateUpdateCassandraTable_594148(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594157: Call_DatabaseAccountsCreateUpdateCassandraTable_594147;
+proc call*(call_568386: Call_DatabaseAccountsCreateUpdateCassandraTable_568376;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update an Azure Cosmos DB Cassandra Table
   ## 
-  let valid = call_594157.validator(path, query, header, formData, body)
-  let scheme = call_594157.pickScheme
+  let valid = call_568386.validator(path, query, header, formData, body)
+  let scheme = call_568386.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594157.url(scheme.get, call_594157.host, call_594157.base,
-                         call_594157.route, valid.getOrDefault("path"),
+  let url = call_568386.url(scheme.get, call_568386.host, call_568386.base,
+                         call_568386.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594157, url, valid)
+  result = hook(call_568386, url, valid)
 
-proc call*(call_594158: Call_DatabaseAccountsCreateUpdateCassandraTable_594147;
+proc call*(call_568387: Call_DatabaseAccountsCreateUpdateCassandraTable_568376;
           resourceGroupName: string; apiVersion: string; keyspaceName: string;
           subscriptionId: string; tableName: string;
           createUpdateCassandraTableParameters: JsonNode; accountName: string): Recallable =
@@ -1986,28 +1986,28 @@ proc call*(call_594158: Call_DatabaseAccountsCreateUpdateCassandraTable_594147;
   ##                                       : The parameters to provide for the current Cassandra Table.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594159 = newJObject()
-  var query_594160 = newJObject()
-  var body_594161 = newJObject()
-  add(path_594159, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594160, "api-version", newJString(apiVersion))
-  add(path_594159, "keyspaceName", newJString(keyspaceName))
-  add(path_594159, "subscriptionId", newJString(subscriptionId))
-  add(path_594159, "tableName", newJString(tableName))
+  var path_568388 = newJObject()
+  var query_568389 = newJObject()
+  var body_568390 = newJObject()
+  add(path_568388, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568389, "api-version", newJString(apiVersion))
+  add(path_568388, "keyspaceName", newJString(keyspaceName))
+  add(path_568388, "subscriptionId", newJString(subscriptionId))
+  add(path_568388, "tableName", newJString(tableName))
   if createUpdateCassandraTableParameters != nil:
-    body_594161 = createUpdateCassandraTableParameters
-  add(path_594159, "accountName", newJString(accountName))
-  result = call_594158.call(path_594159, query_594160, nil, nil, body_594161)
+    body_568390 = createUpdateCassandraTableParameters
+  add(path_568388, "accountName", newJString(accountName))
+  result = call_568387.call(path_568388, query_568389, nil, nil, body_568390)
 
-var databaseAccountsCreateUpdateCassandraTable* = Call_DatabaseAccountsCreateUpdateCassandraTable_594147(
+var databaseAccountsCreateUpdateCassandraTable* = Call_DatabaseAccountsCreateUpdateCassandraTable_568376(
     name: "databaseAccountsCreateUpdateCassandraTable", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}/tables/{tableName}",
-    validator: validate_DatabaseAccountsCreateUpdateCassandraTable_594148,
-    base: "", url: url_DatabaseAccountsCreateUpdateCassandraTable_594149,
+    validator: validate_DatabaseAccountsCreateUpdateCassandraTable_568377,
+    base: "", url: url_DatabaseAccountsCreateUpdateCassandraTable_568378,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetCassandraTable_594134 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetCassandraTable_594136(protocol: Scheme; host: string;
+  Call_DatabaseAccountsGetCassandraTable_568363 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetCassandraTable_568365(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2036,7 +2036,7 @@ proc url_DatabaseAccountsGetCassandraTable_594136(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetCassandraTable_594135(path: JsonNode;
+proc validate_DatabaseAccountsGetCassandraTable_568364(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Cassandra table under an existing Azure Cosmos DB database account.
   ## 
@@ -2056,31 +2056,31 @@ proc validate_DatabaseAccountsGetCassandraTable_594135(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594137 = path.getOrDefault("resourceGroupName")
-  valid_594137 = validateParameter(valid_594137, JString, required = true,
+  var valid_568366 = path.getOrDefault("resourceGroupName")
+  valid_568366 = validateParameter(valid_568366, JString, required = true,
                                  default = nil)
-  if valid_594137 != nil:
-    section.add "resourceGroupName", valid_594137
-  var valid_594138 = path.getOrDefault("keyspaceName")
-  valid_594138 = validateParameter(valid_594138, JString, required = true,
+  if valid_568366 != nil:
+    section.add "resourceGroupName", valid_568366
+  var valid_568367 = path.getOrDefault("keyspaceName")
+  valid_568367 = validateParameter(valid_568367, JString, required = true,
                                  default = nil)
-  if valid_594138 != nil:
-    section.add "keyspaceName", valid_594138
-  var valid_594139 = path.getOrDefault("subscriptionId")
-  valid_594139 = validateParameter(valid_594139, JString, required = true,
+  if valid_568367 != nil:
+    section.add "keyspaceName", valid_568367
+  var valid_568368 = path.getOrDefault("subscriptionId")
+  valid_568368 = validateParameter(valid_568368, JString, required = true,
                                  default = nil)
-  if valid_594139 != nil:
-    section.add "subscriptionId", valid_594139
-  var valid_594140 = path.getOrDefault("tableName")
-  valid_594140 = validateParameter(valid_594140, JString, required = true,
+  if valid_568368 != nil:
+    section.add "subscriptionId", valid_568368
+  var valid_568369 = path.getOrDefault("tableName")
+  valid_568369 = validateParameter(valid_568369, JString, required = true,
                                  default = nil)
-  if valid_594140 != nil:
-    section.add "tableName", valid_594140
-  var valid_594141 = path.getOrDefault("accountName")
-  valid_594141 = validateParameter(valid_594141, JString, required = true,
+  if valid_568369 != nil:
+    section.add "tableName", valid_568369
+  var valid_568370 = path.getOrDefault("accountName")
+  valid_568370 = validateParameter(valid_568370, JString, required = true,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "accountName", valid_594141
+  if valid_568370 != nil:
+    section.add "accountName", valid_568370
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2088,11 +2088,11 @@ proc validate_DatabaseAccountsGetCassandraTable_594135(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594142 = query.getOrDefault("api-version")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  var valid_568371 = query.getOrDefault("api-version")
+  valid_568371 = validateParameter(valid_568371, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "api-version", valid_594142
+  if valid_568371 != nil:
+    section.add "api-version", valid_568371
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2101,21 +2101,21 @@ proc validate_DatabaseAccountsGetCassandraTable_594135(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594143: Call_DatabaseAccountsGetCassandraTable_594134;
+proc call*(call_568372: Call_DatabaseAccountsGetCassandraTable_568363;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the Cassandra table under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594143.validator(path, query, header, formData, body)
-  let scheme = call_594143.pickScheme
+  let valid = call_568372.validator(path, query, header, formData, body)
+  let scheme = call_568372.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594143.url(scheme.get, call_594143.host, call_594143.base,
-                         call_594143.route, valid.getOrDefault("path"),
+  let url = call_568372.url(scheme.get, call_568372.host, call_568372.base,
+                         call_568372.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594143, url, valid)
+  result = hook(call_568372, url, valid)
 
-proc call*(call_594144: Call_DatabaseAccountsGetCassandraTable_594134;
+proc call*(call_568373: Call_DatabaseAccountsGetCassandraTable_568363;
           resourceGroupName: string; apiVersion: string; keyspaceName: string;
           subscriptionId: string; tableName: string; accountName: string): Recallable =
   ## databaseAccountsGetCassandraTable
@@ -2132,24 +2132,24 @@ proc call*(call_594144: Call_DatabaseAccountsGetCassandraTable_594134;
   ##            : Cosmos DB table name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594145 = newJObject()
-  var query_594146 = newJObject()
-  add(path_594145, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594146, "api-version", newJString(apiVersion))
-  add(path_594145, "keyspaceName", newJString(keyspaceName))
-  add(path_594145, "subscriptionId", newJString(subscriptionId))
-  add(path_594145, "tableName", newJString(tableName))
-  add(path_594145, "accountName", newJString(accountName))
-  result = call_594144.call(path_594145, query_594146, nil, nil, nil)
+  var path_568374 = newJObject()
+  var query_568375 = newJObject()
+  add(path_568374, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568375, "api-version", newJString(apiVersion))
+  add(path_568374, "keyspaceName", newJString(keyspaceName))
+  add(path_568374, "subscriptionId", newJString(subscriptionId))
+  add(path_568374, "tableName", newJString(tableName))
+  add(path_568374, "accountName", newJString(accountName))
+  result = call_568373.call(path_568374, query_568375, nil, nil, nil)
 
-var databaseAccountsGetCassandraTable* = Call_DatabaseAccountsGetCassandraTable_594134(
+var databaseAccountsGetCassandraTable* = Call_DatabaseAccountsGetCassandraTable_568363(
     name: "databaseAccountsGetCassandraTable", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}/tables/{tableName}",
-    validator: validate_DatabaseAccountsGetCassandraTable_594135, base: "",
-    url: url_DatabaseAccountsGetCassandraTable_594136, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetCassandraTable_568364, base: "",
+    url: url_DatabaseAccountsGetCassandraTable_568365, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsDeleteCassandraTable_594162 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsDeleteCassandraTable_594164(protocol: Scheme;
+  Call_DatabaseAccountsDeleteCassandraTable_568391 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsDeleteCassandraTable_568393(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2178,7 +2178,7 @@ proc url_DatabaseAccountsDeleteCassandraTable_594164(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsDeleteCassandraTable_594163(path: JsonNode;
+proc validate_DatabaseAccountsDeleteCassandraTable_568392(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Azure Cosmos DB Cassandra table.
   ## 
@@ -2198,31 +2198,31 @@ proc validate_DatabaseAccountsDeleteCassandraTable_594163(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594165 = path.getOrDefault("resourceGroupName")
-  valid_594165 = validateParameter(valid_594165, JString, required = true,
+  var valid_568394 = path.getOrDefault("resourceGroupName")
+  valid_568394 = validateParameter(valid_568394, JString, required = true,
                                  default = nil)
-  if valid_594165 != nil:
-    section.add "resourceGroupName", valid_594165
-  var valid_594166 = path.getOrDefault("keyspaceName")
-  valid_594166 = validateParameter(valid_594166, JString, required = true,
+  if valid_568394 != nil:
+    section.add "resourceGroupName", valid_568394
+  var valid_568395 = path.getOrDefault("keyspaceName")
+  valid_568395 = validateParameter(valid_568395, JString, required = true,
                                  default = nil)
-  if valid_594166 != nil:
-    section.add "keyspaceName", valid_594166
-  var valid_594167 = path.getOrDefault("subscriptionId")
-  valid_594167 = validateParameter(valid_594167, JString, required = true,
+  if valid_568395 != nil:
+    section.add "keyspaceName", valid_568395
+  var valid_568396 = path.getOrDefault("subscriptionId")
+  valid_568396 = validateParameter(valid_568396, JString, required = true,
                                  default = nil)
-  if valid_594167 != nil:
-    section.add "subscriptionId", valid_594167
-  var valid_594168 = path.getOrDefault("tableName")
-  valid_594168 = validateParameter(valid_594168, JString, required = true,
+  if valid_568396 != nil:
+    section.add "subscriptionId", valid_568396
+  var valid_568397 = path.getOrDefault("tableName")
+  valid_568397 = validateParameter(valid_568397, JString, required = true,
                                  default = nil)
-  if valid_594168 != nil:
-    section.add "tableName", valid_594168
-  var valid_594169 = path.getOrDefault("accountName")
-  valid_594169 = validateParameter(valid_594169, JString, required = true,
+  if valid_568397 != nil:
+    section.add "tableName", valid_568397
+  var valid_568398 = path.getOrDefault("accountName")
+  valid_568398 = validateParameter(valid_568398, JString, required = true,
                                  default = nil)
-  if valid_594169 != nil:
-    section.add "accountName", valid_594169
+  if valid_568398 != nil:
+    section.add "accountName", valid_568398
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2230,11 +2230,11 @@ proc validate_DatabaseAccountsDeleteCassandraTable_594163(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594170 = query.getOrDefault("api-version")
-  valid_594170 = validateParameter(valid_594170, JString, required = true,
+  var valid_568399 = query.getOrDefault("api-version")
+  valid_568399 = validateParameter(valid_568399, JString, required = true,
                                  default = nil)
-  if valid_594170 != nil:
-    section.add "api-version", valid_594170
+  if valid_568399 != nil:
+    section.add "api-version", valid_568399
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2243,21 +2243,21 @@ proc validate_DatabaseAccountsDeleteCassandraTable_594163(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594171: Call_DatabaseAccountsDeleteCassandraTable_594162;
+proc call*(call_568400: Call_DatabaseAccountsDeleteCassandraTable_568391;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing Azure Cosmos DB Cassandra table.
   ## 
-  let valid = call_594171.validator(path, query, header, formData, body)
-  let scheme = call_594171.pickScheme
+  let valid = call_568400.validator(path, query, header, formData, body)
+  let scheme = call_568400.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594171.url(scheme.get, call_594171.host, call_594171.base,
-                         call_594171.route, valid.getOrDefault("path"),
+  let url = call_568400.url(scheme.get, call_568400.host, call_568400.base,
+                         call_568400.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594171, url, valid)
+  result = hook(call_568400, url, valid)
 
-proc call*(call_594172: Call_DatabaseAccountsDeleteCassandraTable_594162;
+proc call*(call_568401: Call_DatabaseAccountsDeleteCassandraTable_568391;
           resourceGroupName: string; apiVersion: string; keyspaceName: string;
           subscriptionId: string; tableName: string; accountName: string): Recallable =
   ## databaseAccountsDeleteCassandraTable
@@ -2274,24 +2274,24 @@ proc call*(call_594172: Call_DatabaseAccountsDeleteCassandraTable_594162;
   ##            : Cosmos DB table name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594173 = newJObject()
-  var query_594174 = newJObject()
-  add(path_594173, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594174, "api-version", newJString(apiVersion))
-  add(path_594173, "keyspaceName", newJString(keyspaceName))
-  add(path_594173, "subscriptionId", newJString(subscriptionId))
-  add(path_594173, "tableName", newJString(tableName))
-  add(path_594173, "accountName", newJString(accountName))
-  result = call_594172.call(path_594173, query_594174, nil, nil, nil)
+  var path_568402 = newJObject()
+  var query_568403 = newJObject()
+  add(path_568402, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568403, "api-version", newJString(apiVersion))
+  add(path_568402, "keyspaceName", newJString(keyspaceName))
+  add(path_568402, "subscriptionId", newJString(subscriptionId))
+  add(path_568402, "tableName", newJString(tableName))
+  add(path_568402, "accountName", newJString(accountName))
+  result = call_568401.call(path_568402, query_568403, nil, nil, nil)
 
-var databaseAccountsDeleteCassandraTable* = Call_DatabaseAccountsDeleteCassandraTable_594162(
+var databaseAccountsDeleteCassandraTable* = Call_DatabaseAccountsDeleteCassandraTable_568391(
     name: "databaseAccountsDeleteCassandraTable", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}/tables/{tableName}",
-    validator: validate_DatabaseAccountsDeleteCassandraTable_594163, base: "",
-    url: url_DatabaseAccountsDeleteCassandraTable_594164, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsDeleteCassandraTable_568392, base: "",
+    url: url_DatabaseAccountsDeleteCassandraTable_568393, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsUpdateCassandraTableThroughput_594188 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsUpdateCassandraTableThroughput_594190(protocol: Scheme;
+  Call_DatabaseAccountsUpdateCassandraTableThroughput_568417 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsUpdateCassandraTableThroughput_568419(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2321,7 +2321,7 @@ proc url_DatabaseAccountsUpdateCassandraTableThroughput_594190(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsUpdateCassandraTableThroughput_594189(
+proc validate_DatabaseAccountsUpdateCassandraTableThroughput_568418(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Update RUs per second of an Azure Cosmos DB Cassandra table
@@ -2342,31 +2342,31 @@ proc validate_DatabaseAccountsUpdateCassandraTableThroughput_594189(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594191 = path.getOrDefault("resourceGroupName")
-  valid_594191 = validateParameter(valid_594191, JString, required = true,
+  var valid_568420 = path.getOrDefault("resourceGroupName")
+  valid_568420 = validateParameter(valid_568420, JString, required = true,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "resourceGroupName", valid_594191
-  var valid_594192 = path.getOrDefault("keyspaceName")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  if valid_568420 != nil:
+    section.add "resourceGroupName", valid_568420
+  var valid_568421 = path.getOrDefault("keyspaceName")
+  valid_568421 = validateParameter(valid_568421, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "keyspaceName", valid_594192
-  var valid_594193 = path.getOrDefault("subscriptionId")
-  valid_594193 = validateParameter(valid_594193, JString, required = true,
+  if valid_568421 != nil:
+    section.add "keyspaceName", valid_568421
+  var valid_568422 = path.getOrDefault("subscriptionId")
+  valid_568422 = validateParameter(valid_568422, JString, required = true,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "subscriptionId", valid_594193
-  var valid_594194 = path.getOrDefault("tableName")
-  valid_594194 = validateParameter(valid_594194, JString, required = true,
+  if valid_568422 != nil:
+    section.add "subscriptionId", valid_568422
+  var valid_568423 = path.getOrDefault("tableName")
+  valid_568423 = validateParameter(valid_568423, JString, required = true,
                                  default = nil)
-  if valid_594194 != nil:
-    section.add "tableName", valid_594194
-  var valid_594195 = path.getOrDefault("accountName")
-  valid_594195 = validateParameter(valid_594195, JString, required = true,
+  if valid_568423 != nil:
+    section.add "tableName", valid_568423
+  var valid_568424 = path.getOrDefault("accountName")
+  valid_568424 = validateParameter(valid_568424, JString, required = true,
                                  default = nil)
-  if valid_594195 != nil:
-    section.add "accountName", valid_594195
+  if valid_568424 != nil:
+    section.add "accountName", valid_568424
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2374,11 +2374,11 @@ proc validate_DatabaseAccountsUpdateCassandraTableThroughput_594189(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594196 = query.getOrDefault("api-version")
-  valid_594196 = validateParameter(valid_594196, JString, required = true,
+  var valid_568425 = query.getOrDefault("api-version")
+  valid_568425 = validateParameter(valid_568425, JString, required = true,
                                  default = nil)
-  if valid_594196 != nil:
-    section.add "api-version", valid_594196
+  if valid_568425 != nil:
+    section.add "api-version", valid_568425
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2392,21 +2392,21 @@ proc validate_DatabaseAccountsUpdateCassandraTableThroughput_594189(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594198: Call_DatabaseAccountsUpdateCassandraTableThroughput_594188;
+proc call*(call_568427: Call_DatabaseAccountsUpdateCassandraTableThroughput_568417;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update RUs per second of an Azure Cosmos DB Cassandra table
   ## 
-  let valid = call_594198.validator(path, query, header, formData, body)
-  let scheme = call_594198.pickScheme
+  let valid = call_568427.validator(path, query, header, formData, body)
+  let scheme = call_568427.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594198.url(scheme.get, call_594198.host, call_594198.base,
-                         call_594198.route, valid.getOrDefault("path"),
+  let url = call_568427.url(scheme.get, call_568427.host, call_568427.base,
+                         call_568427.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594198, url, valid)
+  result = hook(call_568427, url, valid)
 
-proc call*(call_594199: Call_DatabaseAccountsUpdateCassandraTableThroughput_594188;
+proc call*(call_568428: Call_DatabaseAccountsUpdateCassandraTableThroughput_568417;
           resourceGroupName: string; apiVersion: string; keyspaceName: string;
           subscriptionId: string; tableName: string;
           updateThroughputParameters: JsonNode; accountName: string): Recallable =
@@ -2426,28 +2426,28 @@ proc call*(call_594199: Call_DatabaseAccountsUpdateCassandraTableThroughput_5941
   ##                             : The RUs per second of the parameters to provide for the current Cassandra table.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594200 = newJObject()
-  var query_594201 = newJObject()
-  var body_594202 = newJObject()
-  add(path_594200, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594201, "api-version", newJString(apiVersion))
-  add(path_594200, "keyspaceName", newJString(keyspaceName))
-  add(path_594200, "subscriptionId", newJString(subscriptionId))
-  add(path_594200, "tableName", newJString(tableName))
+  var path_568429 = newJObject()
+  var query_568430 = newJObject()
+  var body_568431 = newJObject()
+  add(path_568429, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568430, "api-version", newJString(apiVersion))
+  add(path_568429, "keyspaceName", newJString(keyspaceName))
+  add(path_568429, "subscriptionId", newJString(subscriptionId))
+  add(path_568429, "tableName", newJString(tableName))
   if updateThroughputParameters != nil:
-    body_594202 = updateThroughputParameters
-  add(path_594200, "accountName", newJString(accountName))
-  result = call_594199.call(path_594200, query_594201, nil, nil, body_594202)
+    body_568431 = updateThroughputParameters
+  add(path_568429, "accountName", newJString(accountName))
+  result = call_568428.call(path_568429, query_568430, nil, nil, body_568431)
 
-var databaseAccountsUpdateCassandraTableThroughput* = Call_DatabaseAccountsUpdateCassandraTableThroughput_594188(
+var databaseAccountsUpdateCassandraTableThroughput* = Call_DatabaseAccountsUpdateCassandraTableThroughput_568417(
     name: "databaseAccountsUpdateCassandraTableThroughput",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}/tables/{tableName}/settings/throughput",
-    validator: validate_DatabaseAccountsUpdateCassandraTableThroughput_594189,
-    base: "", url: url_DatabaseAccountsUpdateCassandraTableThroughput_594190,
+    validator: validate_DatabaseAccountsUpdateCassandraTableThroughput_568418,
+    base: "", url: url_DatabaseAccountsUpdateCassandraTableThroughput_568419,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetCassandraTableThroughput_594175 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetCassandraTableThroughput_594177(protocol: Scheme;
+  Call_DatabaseAccountsGetCassandraTableThroughput_568404 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetCassandraTableThroughput_568406(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2477,7 +2477,7 @@ proc url_DatabaseAccountsGetCassandraTableThroughput_594177(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetCassandraTableThroughput_594176(path: JsonNode;
+proc validate_DatabaseAccountsGetCassandraTableThroughput_568405(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the RUs per second of the Cassandra table under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -2497,31 +2497,31 @@ proc validate_DatabaseAccountsGetCassandraTableThroughput_594176(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594178 = path.getOrDefault("resourceGroupName")
-  valid_594178 = validateParameter(valid_594178, JString, required = true,
+  var valid_568407 = path.getOrDefault("resourceGroupName")
+  valid_568407 = validateParameter(valid_568407, JString, required = true,
                                  default = nil)
-  if valid_594178 != nil:
-    section.add "resourceGroupName", valid_594178
-  var valid_594179 = path.getOrDefault("keyspaceName")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  if valid_568407 != nil:
+    section.add "resourceGroupName", valid_568407
+  var valid_568408 = path.getOrDefault("keyspaceName")
+  valid_568408 = validateParameter(valid_568408, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "keyspaceName", valid_594179
-  var valid_594180 = path.getOrDefault("subscriptionId")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  if valid_568408 != nil:
+    section.add "keyspaceName", valid_568408
+  var valid_568409 = path.getOrDefault("subscriptionId")
+  valid_568409 = validateParameter(valid_568409, JString, required = true,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "subscriptionId", valid_594180
-  var valid_594181 = path.getOrDefault("tableName")
-  valid_594181 = validateParameter(valid_594181, JString, required = true,
+  if valid_568409 != nil:
+    section.add "subscriptionId", valid_568409
+  var valid_568410 = path.getOrDefault("tableName")
+  valid_568410 = validateParameter(valid_568410, JString, required = true,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "tableName", valid_594181
-  var valid_594182 = path.getOrDefault("accountName")
-  valid_594182 = validateParameter(valid_594182, JString, required = true,
+  if valid_568410 != nil:
+    section.add "tableName", valid_568410
+  var valid_568411 = path.getOrDefault("accountName")
+  valid_568411 = validateParameter(valid_568411, JString, required = true,
                                  default = nil)
-  if valid_594182 != nil:
-    section.add "accountName", valid_594182
+  if valid_568411 != nil:
+    section.add "accountName", valid_568411
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2529,11 +2529,11 @@ proc validate_DatabaseAccountsGetCassandraTableThroughput_594176(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594183 = query.getOrDefault("api-version")
-  valid_594183 = validateParameter(valid_594183, JString, required = true,
+  var valid_568412 = query.getOrDefault("api-version")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594183 != nil:
-    section.add "api-version", valid_594183
+  if valid_568412 != nil:
+    section.add "api-version", valid_568412
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2542,21 +2542,21 @@ proc validate_DatabaseAccountsGetCassandraTableThroughput_594176(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594184: Call_DatabaseAccountsGetCassandraTableThroughput_594175;
+proc call*(call_568413: Call_DatabaseAccountsGetCassandraTableThroughput_568404;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the RUs per second of the Cassandra table under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594184.validator(path, query, header, formData, body)
-  let scheme = call_594184.pickScheme
+  let valid = call_568413.validator(path, query, header, formData, body)
+  let scheme = call_568413.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594184.url(scheme.get, call_594184.host, call_594184.base,
-                         call_594184.route, valid.getOrDefault("path"),
+  let url = call_568413.url(scheme.get, call_568413.host, call_568413.base,
+                         call_568413.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594184, url, valid)
+  result = hook(call_568413, url, valid)
 
-proc call*(call_594185: Call_DatabaseAccountsGetCassandraTableThroughput_594175;
+proc call*(call_568414: Call_DatabaseAccountsGetCassandraTableThroughput_568404;
           resourceGroupName: string; apiVersion: string; keyspaceName: string;
           subscriptionId: string; tableName: string; accountName: string): Recallable =
   ## databaseAccountsGetCassandraTableThroughput
@@ -2573,25 +2573,25 @@ proc call*(call_594185: Call_DatabaseAccountsGetCassandraTableThroughput_594175;
   ##            : Cosmos DB table name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594186 = newJObject()
-  var query_594187 = newJObject()
-  add(path_594186, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594187, "api-version", newJString(apiVersion))
-  add(path_594186, "keyspaceName", newJString(keyspaceName))
-  add(path_594186, "subscriptionId", newJString(subscriptionId))
-  add(path_594186, "tableName", newJString(tableName))
-  add(path_594186, "accountName", newJString(accountName))
-  result = call_594185.call(path_594186, query_594187, nil, nil, nil)
+  var path_568415 = newJObject()
+  var query_568416 = newJObject()
+  add(path_568415, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568416, "api-version", newJString(apiVersion))
+  add(path_568415, "keyspaceName", newJString(keyspaceName))
+  add(path_568415, "subscriptionId", newJString(subscriptionId))
+  add(path_568415, "tableName", newJString(tableName))
+  add(path_568415, "accountName", newJString(accountName))
+  result = call_568414.call(path_568415, query_568416, nil, nil, nil)
 
-var databaseAccountsGetCassandraTableThroughput* = Call_DatabaseAccountsGetCassandraTableThroughput_594175(
+var databaseAccountsGetCassandraTableThroughput* = Call_DatabaseAccountsGetCassandraTableThroughput_568404(
     name: "databaseAccountsGetCassandraTableThroughput", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/cassandra/keyspaces/{keyspaceName}/tables/{tableName}/settings/throughput",
-    validator: validate_DatabaseAccountsGetCassandraTableThroughput_594176,
-    base: "", url: url_DatabaseAccountsGetCassandraTableThroughput_594177,
+    validator: validate_DatabaseAccountsGetCassandraTableThroughput_568405,
+    base: "", url: url_DatabaseAccountsGetCassandraTableThroughput_568406,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListGremlinDatabases_594203 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListGremlinDatabases_594205(protocol: Scheme;
+  Call_DatabaseAccountsListGremlinDatabases_568432 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListGremlinDatabases_568434(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2615,7 +2615,7 @@ proc url_DatabaseAccountsListGremlinDatabases_594205(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListGremlinDatabases_594204(path: JsonNode;
+proc validate_DatabaseAccountsListGremlinDatabases_568433(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Gremlin databases under an existing Azure Cosmos DB database account.
   ## 
@@ -2631,21 +2631,21 @@ proc validate_DatabaseAccountsListGremlinDatabases_594204(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594206 = path.getOrDefault("resourceGroupName")
-  valid_594206 = validateParameter(valid_594206, JString, required = true,
+  var valid_568435 = path.getOrDefault("resourceGroupName")
+  valid_568435 = validateParameter(valid_568435, JString, required = true,
                                  default = nil)
-  if valid_594206 != nil:
-    section.add "resourceGroupName", valid_594206
-  var valid_594207 = path.getOrDefault("subscriptionId")
-  valid_594207 = validateParameter(valid_594207, JString, required = true,
+  if valid_568435 != nil:
+    section.add "resourceGroupName", valid_568435
+  var valid_568436 = path.getOrDefault("subscriptionId")
+  valid_568436 = validateParameter(valid_568436, JString, required = true,
                                  default = nil)
-  if valid_594207 != nil:
-    section.add "subscriptionId", valid_594207
-  var valid_594208 = path.getOrDefault("accountName")
-  valid_594208 = validateParameter(valid_594208, JString, required = true,
+  if valid_568436 != nil:
+    section.add "subscriptionId", valid_568436
+  var valid_568437 = path.getOrDefault("accountName")
+  valid_568437 = validateParameter(valid_568437, JString, required = true,
                                  default = nil)
-  if valid_594208 != nil:
-    section.add "accountName", valid_594208
+  if valid_568437 != nil:
+    section.add "accountName", valid_568437
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2653,11 +2653,11 @@ proc validate_DatabaseAccountsListGremlinDatabases_594204(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594209 = query.getOrDefault("api-version")
-  valid_594209 = validateParameter(valid_594209, JString, required = true,
+  var valid_568438 = query.getOrDefault("api-version")
+  valid_568438 = validateParameter(valid_568438, JString, required = true,
                                  default = nil)
-  if valid_594209 != nil:
-    section.add "api-version", valid_594209
+  if valid_568438 != nil:
+    section.add "api-version", valid_568438
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2666,21 +2666,21 @@ proc validate_DatabaseAccountsListGremlinDatabases_594204(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594210: Call_DatabaseAccountsListGremlinDatabases_594203;
+proc call*(call_568439: Call_DatabaseAccountsListGremlinDatabases_568432;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the Gremlin databases under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594210.validator(path, query, header, formData, body)
-  let scheme = call_594210.pickScheme
+  let valid = call_568439.validator(path, query, header, formData, body)
+  let scheme = call_568439.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594210.url(scheme.get, call_594210.host, call_594210.base,
-                         call_594210.route, valid.getOrDefault("path"),
+  let url = call_568439.url(scheme.get, call_568439.host, call_568439.base,
+                         call_568439.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594210, url, valid)
+  result = hook(call_568439, url, valid)
 
-proc call*(call_594211: Call_DatabaseAccountsListGremlinDatabases_594203;
+proc call*(call_568440: Call_DatabaseAccountsListGremlinDatabases_568432;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsListGremlinDatabases
@@ -2693,22 +2693,22 @@ proc call*(call_594211: Call_DatabaseAccountsListGremlinDatabases_594203;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594212 = newJObject()
-  var query_594213 = newJObject()
-  add(path_594212, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594213, "api-version", newJString(apiVersion))
-  add(path_594212, "subscriptionId", newJString(subscriptionId))
-  add(path_594212, "accountName", newJString(accountName))
-  result = call_594211.call(path_594212, query_594213, nil, nil, nil)
+  var path_568441 = newJObject()
+  var query_568442 = newJObject()
+  add(path_568441, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568442, "api-version", newJString(apiVersion))
+  add(path_568441, "subscriptionId", newJString(subscriptionId))
+  add(path_568441, "accountName", newJString(accountName))
+  result = call_568440.call(path_568441, query_568442, nil, nil, nil)
 
-var databaseAccountsListGremlinDatabases* = Call_DatabaseAccountsListGremlinDatabases_594203(
+var databaseAccountsListGremlinDatabases* = Call_DatabaseAccountsListGremlinDatabases_568432(
     name: "databaseAccountsListGremlinDatabases", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases",
-    validator: validate_DatabaseAccountsListGremlinDatabases_594204, base: "",
-    url: url_DatabaseAccountsListGremlinDatabases_594205, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListGremlinDatabases_568433, base: "",
+    url: url_DatabaseAccountsListGremlinDatabases_568434, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsCreateUpdateGremlinDatabase_594226 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCreateUpdateGremlinDatabase_594228(protocol: Scheme;
+  Call_DatabaseAccountsCreateUpdateGremlinDatabase_568455 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCreateUpdateGremlinDatabase_568457(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2734,7 +2734,7 @@ proc url_DatabaseAccountsCreateUpdateGremlinDatabase_594228(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCreateUpdateGremlinDatabase_594227(path: JsonNode;
+proc validate_DatabaseAccountsCreateUpdateGremlinDatabase_568456(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an Azure Cosmos DB Gremlin database
   ## 
@@ -2752,26 +2752,26 @@ proc validate_DatabaseAccountsCreateUpdateGremlinDatabase_594227(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594229 = path.getOrDefault("resourceGroupName")
-  valid_594229 = validateParameter(valid_594229, JString, required = true,
+  var valid_568458 = path.getOrDefault("resourceGroupName")
+  valid_568458 = validateParameter(valid_568458, JString, required = true,
                                  default = nil)
-  if valid_594229 != nil:
-    section.add "resourceGroupName", valid_594229
-  var valid_594230 = path.getOrDefault("subscriptionId")
-  valid_594230 = validateParameter(valid_594230, JString, required = true,
+  if valid_568458 != nil:
+    section.add "resourceGroupName", valid_568458
+  var valid_568459 = path.getOrDefault("subscriptionId")
+  valid_568459 = validateParameter(valid_568459, JString, required = true,
                                  default = nil)
-  if valid_594230 != nil:
-    section.add "subscriptionId", valid_594230
-  var valid_594231 = path.getOrDefault("databaseName")
-  valid_594231 = validateParameter(valid_594231, JString, required = true,
+  if valid_568459 != nil:
+    section.add "subscriptionId", valid_568459
+  var valid_568460 = path.getOrDefault("databaseName")
+  valid_568460 = validateParameter(valid_568460, JString, required = true,
                                  default = nil)
-  if valid_594231 != nil:
-    section.add "databaseName", valid_594231
-  var valid_594232 = path.getOrDefault("accountName")
-  valid_594232 = validateParameter(valid_594232, JString, required = true,
+  if valid_568460 != nil:
+    section.add "databaseName", valid_568460
+  var valid_568461 = path.getOrDefault("accountName")
+  valid_568461 = validateParameter(valid_568461, JString, required = true,
                                  default = nil)
-  if valid_594232 != nil:
-    section.add "accountName", valid_594232
+  if valid_568461 != nil:
+    section.add "accountName", valid_568461
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2779,11 +2779,11 @@ proc validate_DatabaseAccountsCreateUpdateGremlinDatabase_594227(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594233 = query.getOrDefault("api-version")
-  valid_594233 = validateParameter(valid_594233, JString, required = true,
+  var valid_568462 = query.getOrDefault("api-version")
+  valid_568462 = validateParameter(valid_568462, JString, required = true,
                                  default = nil)
-  if valid_594233 != nil:
-    section.add "api-version", valid_594233
+  if valid_568462 != nil:
+    section.add "api-version", valid_568462
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2797,21 +2797,21 @@ proc validate_DatabaseAccountsCreateUpdateGremlinDatabase_594227(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594235: Call_DatabaseAccountsCreateUpdateGremlinDatabase_594226;
+proc call*(call_568464: Call_DatabaseAccountsCreateUpdateGremlinDatabase_568455;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update an Azure Cosmos DB Gremlin database
   ## 
-  let valid = call_594235.validator(path, query, header, formData, body)
-  let scheme = call_594235.pickScheme
+  let valid = call_568464.validator(path, query, header, formData, body)
+  let scheme = call_568464.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594235.url(scheme.get, call_594235.host, call_594235.base,
-                         call_594235.route, valid.getOrDefault("path"),
+  let url = call_568464.url(scheme.get, call_568464.host, call_568464.base,
+                         call_568464.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594235, url, valid)
+  result = hook(call_568464, url, valid)
 
-proc call*(call_594236: Call_DatabaseAccountsCreateUpdateGremlinDatabase_594226;
+proc call*(call_568465: Call_DatabaseAccountsCreateUpdateGremlinDatabase_568455;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           createUpdateGremlinDatabaseParameters: JsonNode; databaseName: string;
           accountName: string): Recallable =
@@ -2829,27 +2829,27 @@ proc call*(call_594236: Call_DatabaseAccountsCreateUpdateGremlinDatabase_594226;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594237 = newJObject()
-  var query_594238 = newJObject()
-  var body_594239 = newJObject()
-  add(path_594237, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594238, "api-version", newJString(apiVersion))
-  add(path_594237, "subscriptionId", newJString(subscriptionId))
+  var path_568466 = newJObject()
+  var query_568467 = newJObject()
+  var body_568468 = newJObject()
+  add(path_568466, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568467, "api-version", newJString(apiVersion))
+  add(path_568466, "subscriptionId", newJString(subscriptionId))
   if createUpdateGremlinDatabaseParameters != nil:
-    body_594239 = createUpdateGremlinDatabaseParameters
-  add(path_594237, "databaseName", newJString(databaseName))
-  add(path_594237, "accountName", newJString(accountName))
-  result = call_594236.call(path_594237, query_594238, nil, nil, body_594239)
+    body_568468 = createUpdateGremlinDatabaseParameters
+  add(path_568466, "databaseName", newJString(databaseName))
+  add(path_568466, "accountName", newJString(accountName))
+  result = call_568465.call(path_568466, query_568467, nil, nil, body_568468)
 
-var databaseAccountsCreateUpdateGremlinDatabase* = Call_DatabaseAccountsCreateUpdateGremlinDatabase_594226(
+var databaseAccountsCreateUpdateGremlinDatabase* = Call_DatabaseAccountsCreateUpdateGremlinDatabase_568455(
     name: "databaseAccountsCreateUpdateGremlinDatabase", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}",
-    validator: validate_DatabaseAccountsCreateUpdateGremlinDatabase_594227,
-    base: "", url: url_DatabaseAccountsCreateUpdateGremlinDatabase_594228,
+    validator: validate_DatabaseAccountsCreateUpdateGremlinDatabase_568456,
+    base: "", url: url_DatabaseAccountsCreateUpdateGremlinDatabase_568457,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetGremlinDatabase_594214 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetGremlinDatabase_594216(protocol: Scheme; host: string;
+  Call_DatabaseAccountsGetGremlinDatabase_568443 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetGremlinDatabase_568445(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2875,7 +2875,7 @@ proc url_DatabaseAccountsGetGremlinDatabase_594216(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetGremlinDatabase_594215(path: JsonNode;
+proc validate_DatabaseAccountsGetGremlinDatabase_568444(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Gremlin databases under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -2893,26 +2893,26 @@ proc validate_DatabaseAccountsGetGremlinDatabase_594215(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594217 = path.getOrDefault("resourceGroupName")
-  valid_594217 = validateParameter(valid_594217, JString, required = true,
+  var valid_568446 = path.getOrDefault("resourceGroupName")
+  valid_568446 = validateParameter(valid_568446, JString, required = true,
                                  default = nil)
-  if valid_594217 != nil:
-    section.add "resourceGroupName", valid_594217
-  var valid_594218 = path.getOrDefault("subscriptionId")
-  valid_594218 = validateParameter(valid_594218, JString, required = true,
+  if valid_568446 != nil:
+    section.add "resourceGroupName", valid_568446
+  var valid_568447 = path.getOrDefault("subscriptionId")
+  valid_568447 = validateParameter(valid_568447, JString, required = true,
                                  default = nil)
-  if valid_594218 != nil:
-    section.add "subscriptionId", valid_594218
-  var valid_594219 = path.getOrDefault("databaseName")
-  valid_594219 = validateParameter(valid_594219, JString, required = true,
+  if valid_568447 != nil:
+    section.add "subscriptionId", valid_568447
+  var valid_568448 = path.getOrDefault("databaseName")
+  valid_568448 = validateParameter(valid_568448, JString, required = true,
                                  default = nil)
-  if valid_594219 != nil:
-    section.add "databaseName", valid_594219
-  var valid_594220 = path.getOrDefault("accountName")
-  valid_594220 = validateParameter(valid_594220, JString, required = true,
+  if valid_568448 != nil:
+    section.add "databaseName", valid_568448
+  var valid_568449 = path.getOrDefault("accountName")
+  valid_568449 = validateParameter(valid_568449, JString, required = true,
                                  default = nil)
-  if valid_594220 != nil:
-    section.add "accountName", valid_594220
+  if valid_568449 != nil:
+    section.add "accountName", valid_568449
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2920,11 +2920,11 @@ proc validate_DatabaseAccountsGetGremlinDatabase_594215(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594221 = query.getOrDefault("api-version")
-  valid_594221 = validateParameter(valid_594221, JString, required = true,
+  var valid_568450 = query.getOrDefault("api-version")
+  valid_568450 = validateParameter(valid_568450, JString, required = true,
                                  default = nil)
-  if valid_594221 != nil:
-    section.add "api-version", valid_594221
+  if valid_568450 != nil:
+    section.add "api-version", valid_568450
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2933,21 +2933,21 @@ proc validate_DatabaseAccountsGetGremlinDatabase_594215(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594222: Call_DatabaseAccountsGetGremlinDatabase_594214;
+proc call*(call_568451: Call_DatabaseAccountsGetGremlinDatabase_568443;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the Gremlin databases under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594222.validator(path, query, header, formData, body)
-  let scheme = call_594222.pickScheme
+  let valid = call_568451.validator(path, query, header, formData, body)
+  let scheme = call_568451.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594222.url(scheme.get, call_594222.host, call_594222.base,
-                         call_594222.route, valid.getOrDefault("path"),
+  let url = call_568451.url(scheme.get, call_568451.host, call_568451.base,
+                         call_568451.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594222, url, valid)
+  result = hook(call_568451, url, valid)
 
-proc call*(call_594223: Call_DatabaseAccountsGetGremlinDatabase_594214;
+proc call*(call_568452: Call_DatabaseAccountsGetGremlinDatabase_568443;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsGetGremlinDatabase
@@ -2962,23 +2962,23 @@ proc call*(call_594223: Call_DatabaseAccountsGetGremlinDatabase_594214;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594224 = newJObject()
-  var query_594225 = newJObject()
-  add(path_594224, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594225, "api-version", newJString(apiVersion))
-  add(path_594224, "subscriptionId", newJString(subscriptionId))
-  add(path_594224, "databaseName", newJString(databaseName))
-  add(path_594224, "accountName", newJString(accountName))
-  result = call_594223.call(path_594224, query_594225, nil, nil, nil)
+  var path_568453 = newJObject()
+  var query_568454 = newJObject()
+  add(path_568453, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568454, "api-version", newJString(apiVersion))
+  add(path_568453, "subscriptionId", newJString(subscriptionId))
+  add(path_568453, "databaseName", newJString(databaseName))
+  add(path_568453, "accountName", newJString(accountName))
+  result = call_568452.call(path_568453, query_568454, nil, nil, nil)
 
-var databaseAccountsGetGremlinDatabase* = Call_DatabaseAccountsGetGremlinDatabase_594214(
+var databaseAccountsGetGremlinDatabase* = Call_DatabaseAccountsGetGremlinDatabase_568443(
     name: "databaseAccountsGetGremlinDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}",
-    validator: validate_DatabaseAccountsGetGremlinDatabase_594215, base: "",
-    url: url_DatabaseAccountsGetGremlinDatabase_594216, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetGremlinDatabase_568444, base: "",
+    url: url_DatabaseAccountsGetGremlinDatabase_568445, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsDeleteGremlinDatabase_594240 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsDeleteGremlinDatabase_594242(protocol: Scheme;
+  Call_DatabaseAccountsDeleteGremlinDatabase_568469 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsDeleteGremlinDatabase_568471(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3004,7 +3004,7 @@ proc url_DatabaseAccountsDeleteGremlinDatabase_594242(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsDeleteGremlinDatabase_594241(path: JsonNode;
+proc validate_DatabaseAccountsDeleteGremlinDatabase_568470(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Azure Cosmos DB Gremlin database.
   ## 
@@ -3022,26 +3022,26 @@ proc validate_DatabaseAccountsDeleteGremlinDatabase_594241(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594243 = path.getOrDefault("resourceGroupName")
-  valid_594243 = validateParameter(valid_594243, JString, required = true,
+  var valid_568472 = path.getOrDefault("resourceGroupName")
+  valid_568472 = validateParameter(valid_568472, JString, required = true,
                                  default = nil)
-  if valid_594243 != nil:
-    section.add "resourceGroupName", valid_594243
-  var valid_594244 = path.getOrDefault("subscriptionId")
-  valid_594244 = validateParameter(valid_594244, JString, required = true,
+  if valid_568472 != nil:
+    section.add "resourceGroupName", valid_568472
+  var valid_568473 = path.getOrDefault("subscriptionId")
+  valid_568473 = validateParameter(valid_568473, JString, required = true,
                                  default = nil)
-  if valid_594244 != nil:
-    section.add "subscriptionId", valid_594244
-  var valid_594245 = path.getOrDefault("databaseName")
-  valid_594245 = validateParameter(valid_594245, JString, required = true,
+  if valid_568473 != nil:
+    section.add "subscriptionId", valid_568473
+  var valid_568474 = path.getOrDefault("databaseName")
+  valid_568474 = validateParameter(valid_568474, JString, required = true,
                                  default = nil)
-  if valid_594245 != nil:
-    section.add "databaseName", valid_594245
-  var valid_594246 = path.getOrDefault("accountName")
-  valid_594246 = validateParameter(valid_594246, JString, required = true,
+  if valid_568474 != nil:
+    section.add "databaseName", valid_568474
+  var valid_568475 = path.getOrDefault("accountName")
+  valid_568475 = validateParameter(valid_568475, JString, required = true,
                                  default = nil)
-  if valid_594246 != nil:
-    section.add "accountName", valid_594246
+  if valid_568475 != nil:
+    section.add "accountName", valid_568475
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3049,11 +3049,11 @@ proc validate_DatabaseAccountsDeleteGremlinDatabase_594241(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594247 = query.getOrDefault("api-version")
-  valid_594247 = validateParameter(valid_594247, JString, required = true,
+  var valid_568476 = query.getOrDefault("api-version")
+  valid_568476 = validateParameter(valid_568476, JString, required = true,
                                  default = nil)
-  if valid_594247 != nil:
-    section.add "api-version", valid_594247
+  if valid_568476 != nil:
+    section.add "api-version", valid_568476
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3062,21 +3062,21 @@ proc validate_DatabaseAccountsDeleteGremlinDatabase_594241(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594248: Call_DatabaseAccountsDeleteGremlinDatabase_594240;
+proc call*(call_568477: Call_DatabaseAccountsDeleteGremlinDatabase_568469;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing Azure Cosmos DB Gremlin database.
   ## 
-  let valid = call_594248.validator(path, query, header, formData, body)
-  let scheme = call_594248.pickScheme
+  let valid = call_568477.validator(path, query, header, formData, body)
+  let scheme = call_568477.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594248.url(scheme.get, call_594248.host, call_594248.base,
-                         call_594248.route, valid.getOrDefault("path"),
+  let url = call_568477.url(scheme.get, call_568477.host, call_568477.base,
+                         call_568477.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594248, url, valid)
+  result = hook(call_568477, url, valid)
 
-proc call*(call_594249: Call_DatabaseAccountsDeleteGremlinDatabase_594240;
+proc call*(call_568478: Call_DatabaseAccountsDeleteGremlinDatabase_568469;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsDeleteGremlinDatabase
@@ -3091,23 +3091,23 @@ proc call*(call_594249: Call_DatabaseAccountsDeleteGremlinDatabase_594240;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594250 = newJObject()
-  var query_594251 = newJObject()
-  add(path_594250, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594251, "api-version", newJString(apiVersion))
-  add(path_594250, "subscriptionId", newJString(subscriptionId))
-  add(path_594250, "databaseName", newJString(databaseName))
-  add(path_594250, "accountName", newJString(accountName))
-  result = call_594249.call(path_594250, query_594251, nil, nil, nil)
+  var path_568479 = newJObject()
+  var query_568480 = newJObject()
+  add(path_568479, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568480, "api-version", newJString(apiVersion))
+  add(path_568479, "subscriptionId", newJString(subscriptionId))
+  add(path_568479, "databaseName", newJString(databaseName))
+  add(path_568479, "accountName", newJString(accountName))
+  result = call_568478.call(path_568479, query_568480, nil, nil, nil)
 
-var databaseAccountsDeleteGremlinDatabase* = Call_DatabaseAccountsDeleteGremlinDatabase_594240(
+var databaseAccountsDeleteGremlinDatabase* = Call_DatabaseAccountsDeleteGremlinDatabase_568469(
     name: "databaseAccountsDeleteGremlinDatabase", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}",
-    validator: validate_DatabaseAccountsDeleteGremlinDatabase_594241, base: "",
-    url: url_DatabaseAccountsDeleteGremlinDatabase_594242, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsDeleteGremlinDatabase_568470, base: "",
+    url: url_DatabaseAccountsDeleteGremlinDatabase_568471, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListGremlinGraphs_594252 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListGremlinGraphs_594254(protocol: Scheme; host: string;
+  Call_DatabaseAccountsListGremlinGraphs_568481 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListGremlinGraphs_568483(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3134,7 +3134,7 @@ proc url_DatabaseAccountsListGremlinGraphs_594254(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListGremlinGraphs_594253(path: JsonNode;
+proc validate_DatabaseAccountsListGremlinGraphs_568482(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Gremlin graph under an existing Azure Cosmos DB database account.
   ## 
@@ -3152,26 +3152,26 @@ proc validate_DatabaseAccountsListGremlinGraphs_594253(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594255 = path.getOrDefault("resourceGroupName")
-  valid_594255 = validateParameter(valid_594255, JString, required = true,
+  var valid_568484 = path.getOrDefault("resourceGroupName")
+  valid_568484 = validateParameter(valid_568484, JString, required = true,
                                  default = nil)
-  if valid_594255 != nil:
-    section.add "resourceGroupName", valid_594255
-  var valid_594256 = path.getOrDefault("subscriptionId")
-  valid_594256 = validateParameter(valid_594256, JString, required = true,
+  if valid_568484 != nil:
+    section.add "resourceGroupName", valid_568484
+  var valid_568485 = path.getOrDefault("subscriptionId")
+  valid_568485 = validateParameter(valid_568485, JString, required = true,
                                  default = nil)
-  if valid_594256 != nil:
-    section.add "subscriptionId", valid_594256
-  var valid_594257 = path.getOrDefault("databaseName")
-  valid_594257 = validateParameter(valid_594257, JString, required = true,
+  if valid_568485 != nil:
+    section.add "subscriptionId", valid_568485
+  var valid_568486 = path.getOrDefault("databaseName")
+  valid_568486 = validateParameter(valid_568486, JString, required = true,
                                  default = nil)
-  if valid_594257 != nil:
-    section.add "databaseName", valid_594257
-  var valid_594258 = path.getOrDefault("accountName")
-  valid_594258 = validateParameter(valid_594258, JString, required = true,
+  if valid_568486 != nil:
+    section.add "databaseName", valid_568486
+  var valid_568487 = path.getOrDefault("accountName")
+  valid_568487 = validateParameter(valid_568487, JString, required = true,
                                  default = nil)
-  if valid_594258 != nil:
-    section.add "accountName", valid_594258
+  if valid_568487 != nil:
+    section.add "accountName", valid_568487
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3179,11 +3179,11 @@ proc validate_DatabaseAccountsListGremlinGraphs_594253(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594259 = query.getOrDefault("api-version")
-  valid_594259 = validateParameter(valid_594259, JString, required = true,
+  var valid_568488 = query.getOrDefault("api-version")
+  valid_568488 = validateParameter(valid_568488, JString, required = true,
                                  default = nil)
-  if valid_594259 != nil:
-    section.add "api-version", valid_594259
+  if valid_568488 != nil:
+    section.add "api-version", valid_568488
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3192,21 +3192,21 @@ proc validate_DatabaseAccountsListGremlinGraphs_594253(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594260: Call_DatabaseAccountsListGremlinGraphs_594252;
+proc call*(call_568489: Call_DatabaseAccountsListGremlinGraphs_568481;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the Gremlin graph under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594260.validator(path, query, header, formData, body)
-  let scheme = call_594260.pickScheme
+  let valid = call_568489.validator(path, query, header, formData, body)
+  let scheme = call_568489.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594260.url(scheme.get, call_594260.host, call_594260.base,
-                         call_594260.route, valid.getOrDefault("path"),
+  let url = call_568489.url(scheme.get, call_568489.host, call_568489.base,
+                         call_568489.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594260, url, valid)
+  result = hook(call_568489, url, valid)
 
-proc call*(call_594261: Call_DatabaseAccountsListGremlinGraphs_594252;
+proc call*(call_568490: Call_DatabaseAccountsListGremlinGraphs_568481;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsListGremlinGraphs
@@ -3221,23 +3221,23 @@ proc call*(call_594261: Call_DatabaseAccountsListGremlinGraphs_594252;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594262 = newJObject()
-  var query_594263 = newJObject()
-  add(path_594262, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594263, "api-version", newJString(apiVersion))
-  add(path_594262, "subscriptionId", newJString(subscriptionId))
-  add(path_594262, "databaseName", newJString(databaseName))
-  add(path_594262, "accountName", newJString(accountName))
-  result = call_594261.call(path_594262, query_594263, nil, nil, nil)
+  var path_568491 = newJObject()
+  var query_568492 = newJObject()
+  add(path_568491, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568492, "api-version", newJString(apiVersion))
+  add(path_568491, "subscriptionId", newJString(subscriptionId))
+  add(path_568491, "databaseName", newJString(databaseName))
+  add(path_568491, "accountName", newJString(accountName))
+  result = call_568490.call(path_568491, query_568492, nil, nil, nil)
 
-var databaseAccountsListGremlinGraphs* = Call_DatabaseAccountsListGremlinGraphs_594252(
+var databaseAccountsListGremlinGraphs* = Call_DatabaseAccountsListGremlinGraphs_568481(
     name: "databaseAccountsListGremlinGraphs", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}/graphs",
-    validator: validate_DatabaseAccountsListGremlinGraphs_594253, base: "",
-    url: url_DatabaseAccountsListGremlinGraphs_594254, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListGremlinGraphs_568482, base: "",
+    url: url_DatabaseAccountsListGremlinGraphs_568483, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsCreateUpdateGremlinGraph_594277 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCreateUpdateGremlinGraph_594279(protocol: Scheme;
+  Call_DatabaseAccountsCreateUpdateGremlinGraph_568506 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCreateUpdateGremlinGraph_568508(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3266,7 +3266,7 @@ proc url_DatabaseAccountsCreateUpdateGremlinGraph_594279(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCreateUpdateGremlinGraph_594278(path: JsonNode;
+proc validate_DatabaseAccountsCreateUpdateGremlinGraph_568507(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an Azure Cosmos DB Gremlin graph
   ## 
@@ -3286,31 +3286,31 @@ proc validate_DatabaseAccountsCreateUpdateGremlinGraph_594278(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594280 = path.getOrDefault("resourceGroupName")
-  valid_594280 = validateParameter(valid_594280, JString, required = true,
+  var valid_568509 = path.getOrDefault("resourceGroupName")
+  valid_568509 = validateParameter(valid_568509, JString, required = true,
                                  default = nil)
-  if valid_594280 != nil:
-    section.add "resourceGroupName", valid_594280
-  var valid_594281 = path.getOrDefault("subscriptionId")
-  valid_594281 = validateParameter(valid_594281, JString, required = true,
+  if valid_568509 != nil:
+    section.add "resourceGroupName", valid_568509
+  var valid_568510 = path.getOrDefault("subscriptionId")
+  valid_568510 = validateParameter(valid_568510, JString, required = true,
                                  default = nil)
-  if valid_594281 != nil:
-    section.add "subscriptionId", valid_594281
-  var valid_594282 = path.getOrDefault("databaseName")
-  valid_594282 = validateParameter(valid_594282, JString, required = true,
+  if valid_568510 != nil:
+    section.add "subscriptionId", valid_568510
+  var valid_568511 = path.getOrDefault("databaseName")
+  valid_568511 = validateParameter(valid_568511, JString, required = true,
                                  default = nil)
-  if valid_594282 != nil:
-    section.add "databaseName", valid_594282
-  var valid_594283 = path.getOrDefault("graphName")
-  valid_594283 = validateParameter(valid_594283, JString, required = true,
+  if valid_568511 != nil:
+    section.add "databaseName", valid_568511
+  var valid_568512 = path.getOrDefault("graphName")
+  valid_568512 = validateParameter(valid_568512, JString, required = true,
                                  default = nil)
-  if valid_594283 != nil:
-    section.add "graphName", valid_594283
-  var valid_594284 = path.getOrDefault("accountName")
-  valid_594284 = validateParameter(valid_594284, JString, required = true,
+  if valid_568512 != nil:
+    section.add "graphName", valid_568512
+  var valid_568513 = path.getOrDefault("accountName")
+  valid_568513 = validateParameter(valid_568513, JString, required = true,
                                  default = nil)
-  if valid_594284 != nil:
-    section.add "accountName", valid_594284
+  if valid_568513 != nil:
+    section.add "accountName", valid_568513
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3318,11 +3318,11 @@ proc validate_DatabaseAccountsCreateUpdateGremlinGraph_594278(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594285 = query.getOrDefault("api-version")
-  valid_594285 = validateParameter(valid_594285, JString, required = true,
+  var valid_568514 = query.getOrDefault("api-version")
+  valid_568514 = validateParameter(valid_568514, JString, required = true,
                                  default = nil)
-  if valid_594285 != nil:
-    section.add "api-version", valid_594285
+  if valid_568514 != nil:
+    section.add "api-version", valid_568514
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3336,21 +3336,21 @@ proc validate_DatabaseAccountsCreateUpdateGremlinGraph_594278(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594287: Call_DatabaseAccountsCreateUpdateGremlinGraph_594277;
+proc call*(call_568516: Call_DatabaseAccountsCreateUpdateGremlinGraph_568506;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update an Azure Cosmos DB Gremlin graph
   ## 
-  let valid = call_594287.validator(path, query, header, formData, body)
-  let scheme = call_594287.pickScheme
+  let valid = call_568516.validator(path, query, header, formData, body)
+  let scheme = call_568516.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594287.url(scheme.get, call_594287.host, call_594287.base,
-                         call_594287.route, valid.getOrDefault("path"),
+  let url = call_568516.url(scheme.get, call_568516.host, call_568516.base,
+                         call_568516.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594287, url, valid)
+  result = hook(call_568516, url, valid)
 
-proc call*(call_594288: Call_DatabaseAccountsCreateUpdateGremlinGraph_594277;
+proc call*(call_568517: Call_DatabaseAccountsCreateUpdateGremlinGraph_568506;
           resourceGroupName: string; apiVersion: string;
           createUpdateGremlinGraphParameters: JsonNode; subscriptionId: string;
           databaseName: string; graphName: string; accountName: string): Recallable =
@@ -3370,28 +3370,28 @@ proc call*(call_594288: Call_DatabaseAccountsCreateUpdateGremlinGraph_594277;
   ##            : Cosmos DB graph name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594289 = newJObject()
-  var query_594290 = newJObject()
-  var body_594291 = newJObject()
-  add(path_594289, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594290, "api-version", newJString(apiVersion))
+  var path_568518 = newJObject()
+  var query_568519 = newJObject()
+  var body_568520 = newJObject()
+  add(path_568518, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568519, "api-version", newJString(apiVersion))
   if createUpdateGremlinGraphParameters != nil:
-    body_594291 = createUpdateGremlinGraphParameters
-  add(path_594289, "subscriptionId", newJString(subscriptionId))
-  add(path_594289, "databaseName", newJString(databaseName))
-  add(path_594289, "graphName", newJString(graphName))
-  add(path_594289, "accountName", newJString(accountName))
-  result = call_594288.call(path_594289, query_594290, nil, nil, body_594291)
+    body_568520 = createUpdateGremlinGraphParameters
+  add(path_568518, "subscriptionId", newJString(subscriptionId))
+  add(path_568518, "databaseName", newJString(databaseName))
+  add(path_568518, "graphName", newJString(graphName))
+  add(path_568518, "accountName", newJString(accountName))
+  result = call_568517.call(path_568518, query_568519, nil, nil, body_568520)
 
-var databaseAccountsCreateUpdateGremlinGraph* = Call_DatabaseAccountsCreateUpdateGremlinGraph_594277(
+var databaseAccountsCreateUpdateGremlinGraph* = Call_DatabaseAccountsCreateUpdateGremlinGraph_568506(
     name: "databaseAccountsCreateUpdateGremlinGraph", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}/graphs/{graphName}",
-    validator: validate_DatabaseAccountsCreateUpdateGremlinGraph_594278, base: "",
-    url: url_DatabaseAccountsCreateUpdateGremlinGraph_594279,
+    validator: validate_DatabaseAccountsCreateUpdateGremlinGraph_568507, base: "",
+    url: url_DatabaseAccountsCreateUpdateGremlinGraph_568508,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetGremlinGraph_594264 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetGremlinGraph_594266(protocol: Scheme; host: string;
+  Call_DatabaseAccountsGetGremlinGraph_568493 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetGremlinGraph_568495(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3420,7 +3420,7 @@ proc url_DatabaseAccountsGetGremlinGraph_594266(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetGremlinGraph_594265(path: JsonNode;
+proc validate_DatabaseAccountsGetGremlinGraph_568494(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Gremlin graph under an existing Azure Cosmos DB database account.
   ## 
@@ -3440,31 +3440,31 @@ proc validate_DatabaseAccountsGetGremlinGraph_594265(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594267 = path.getOrDefault("resourceGroupName")
-  valid_594267 = validateParameter(valid_594267, JString, required = true,
+  var valid_568496 = path.getOrDefault("resourceGroupName")
+  valid_568496 = validateParameter(valid_568496, JString, required = true,
                                  default = nil)
-  if valid_594267 != nil:
-    section.add "resourceGroupName", valid_594267
-  var valid_594268 = path.getOrDefault("subscriptionId")
-  valid_594268 = validateParameter(valid_594268, JString, required = true,
+  if valid_568496 != nil:
+    section.add "resourceGroupName", valid_568496
+  var valid_568497 = path.getOrDefault("subscriptionId")
+  valid_568497 = validateParameter(valid_568497, JString, required = true,
                                  default = nil)
-  if valid_594268 != nil:
-    section.add "subscriptionId", valid_594268
-  var valid_594269 = path.getOrDefault("databaseName")
-  valid_594269 = validateParameter(valid_594269, JString, required = true,
+  if valid_568497 != nil:
+    section.add "subscriptionId", valid_568497
+  var valid_568498 = path.getOrDefault("databaseName")
+  valid_568498 = validateParameter(valid_568498, JString, required = true,
                                  default = nil)
-  if valid_594269 != nil:
-    section.add "databaseName", valid_594269
-  var valid_594270 = path.getOrDefault("graphName")
-  valid_594270 = validateParameter(valid_594270, JString, required = true,
+  if valid_568498 != nil:
+    section.add "databaseName", valid_568498
+  var valid_568499 = path.getOrDefault("graphName")
+  valid_568499 = validateParameter(valid_568499, JString, required = true,
                                  default = nil)
-  if valid_594270 != nil:
-    section.add "graphName", valid_594270
-  var valid_594271 = path.getOrDefault("accountName")
-  valid_594271 = validateParameter(valid_594271, JString, required = true,
+  if valid_568499 != nil:
+    section.add "graphName", valid_568499
+  var valid_568500 = path.getOrDefault("accountName")
+  valid_568500 = validateParameter(valid_568500, JString, required = true,
                                  default = nil)
-  if valid_594271 != nil:
-    section.add "accountName", valid_594271
+  if valid_568500 != nil:
+    section.add "accountName", valid_568500
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3472,11 +3472,11 @@ proc validate_DatabaseAccountsGetGremlinGraph_594265(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594272 = query.getOrDefault("api-version")
-  valid_594272 = validateParameter(valid_594272, JString, required = true,
+  var valid_568501 = query.getOrDefault("api-version")
+  valid_568501 = validateParameter(valid_568501, JString, required = true,
                                  default = nil)
-  if valid_594272 != nil:
-    section.add "api-version", valid_594272
+  if valid_568501 != nil:
+    section.add "api-version", valid_568501
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3485,21 +3485,21 @@ proc validate_DatabaseAccountsGetGremlinGraph_594265(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594273: Call_DatabaseAccountsGetGremlinGraph_594264;
+proc call*(call_568502: Call_DatabaseAccountsGetGremlinGraph_568493;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the Gremlin graph under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594273.validator(path, query, header, formData, body)
-  let scheme = call_594273.pickScheme
+  let valid = call_568502.validator(path, query, header, formData, body)
+  let scheme = call_568502.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594273.url(scheme.get, call_594273.host, call_594273.base,
-                         call_594273.route, valid.getOrDefault("path"),
+  let url = call_568502.url(scheme.get, call_568502.host, call_568502.base,
+                         call_568502.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594273, url, valid)
+  result = hook(call_568502, url, valid)
 
-proc call*(call_594274: Call_DatabaseAccountsGetGremlinGraph_594264;
+proc call*(call_568503: Call_DatabaseAccountsGetGremlinGraph_568493;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; graphName: string; accountName: string): Recallable =
   ## databaseAccountsGetGremlinGraph
@@ -3516,24 +3516,24 @@ proc call*(call_594274: Call_DatabaseAccountsGetGremlinGraph_594264;
   ##            : Cosmos DB graph name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594275 = newJObject()
-  var query_594276 = newJObject()
-  add(path_594275, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594276, "api-version", newJString(apiVersion))
-  add(path_594275, "subscriptionId", newJString(subscriptionId))
-  add(path_594275, "databaseName", newJString(databaseName))
-  add(path_594275, "graphName", newJString(graphName))
-  add(path_594275, "accountName", newJString(accountName))
-  result = call_594274.call(path_594275, query_594276, nil, nil, nil)
+  var path_568504 = newJObject()
+  var query_568505 = newJObject()
+  add(path_568504, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568505, "api-version", newJString(apiVersion))
+  add(path_568504, "subscriptionId", newJString(subscriptionId))
+  add(path_568504, "databaseName", newJString(databaseName))
+  add(path_568504, "graphName", newJString(graphName))
+  add(path_568504, "accountName", newJString(accountName))
+  result = call_568503.call(path_568504, query_568505, nil, nil, nil)
 
-var databaseAccountsGetGremlinGraph* = Call_DatabaseAccountsGetGremlinGraph_594264(
+var databaseAccountsGetGremlinGraph* = Call_DatabaseAccountsGetGremlinGraph_568493(
     name: "databaseAccountsGetGremlinGraph", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}/graphs/{graphName}",
-    validator: validate_DatabaseAccountsGetGremlinGraph_594265, base: "",
-    url: url_DatabaseAccountsGetGremlinGraph_594266, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetGremlinGraph_568494, base: "",
+    url: url_DatabaseAccountsGetGremlinGraph_568495, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsDeleteGremlinGraph_594292 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsDeleteGremlinGraph_594294(protocol: Scheme; host: string;
+  Call_DatabaseAccountsDeleteGremlinGraph_568521 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsDeleteGremlinGraph_568523(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3562,7 +3562,7 @@ proc url_DatabaseAccountsDeleteGremlinGraph_594294(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsDeleteGremlinGraph_594293(path: JsonNode;
+proc validate_DatabaseAccountsDeleteGremlinGraph_568522(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Azure Cosmos DB Gremlin graph.
   ## 
@@ -3582,31 +3582,31 @@ proc validate_DatabaseAccountsDeleteGremlinGraph_594293(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594295 = path.getOrDefault("resourceGroupName")
-  valid_594295 = validateParameter(valid_594295, JString, required = true,
+  var valid_568524 = path.getOrDefault("resourceGroupName")
+  valid_568524 = validateParameter(valid_568524, JString, required = true,
                                  default = nil)
-  if valid_594295 != nil:
-    section.add "resourceGroupName", valid_594295
-  var valid_594296 = path.getOrDefault("subscriptionId")
-  valid_594296 = validateParameter(valid_594296, JString, required = true,
+  if valid_568524 != nil:
+    section.add "resourceGroupName", valid_568524
+  var valid_568525 = path.getOrDefault("subscriptionId")
+  valid_568525 = validateParameter(valid_568525, JString, required = true,
                                  default = nil)
-  if valid_594296 != nil:
-    section.add "subscriptionId", valid_594296
-  var valid_594297 = path.getOrDefault("databaseName")
-  valid_594297 = validateParameter(valid_594297, JString, required = true,
+  if valid_568525 != nil:
+    section.add "subscriptionId", valid_568525
+  var valid_568526 = path.getOrDefault("databaseName")
+  valid_568526 = validateParameter(valid_568526, JString, required = true,
                                  default = nil)
-  if valid_594297 != nil:
-    section.add "databaseName", valid_594297
-  var valid_594298 = path.getOrDefault("graphName")
-  valid_594298 = validateParameter(valid_594298, JString, required = true,
+  if valid_568526 != nil:
+    section.add "databaseName", valid_568526
+  var valid_568527 = path.getOrDefault("graphName")
+  valid_568527 = validateParameter(valid_568527, JString, required = true,
                                  default = nil)
-  if valid_594298 != nil:
-    section.add "graphName", valid_594298
-  var valid_594299 = path.getOrDefault("accountName")
-  valid_594299 = validateParameter(valid_594299, JString, required = true,
+  if valid_568527 != nil:
+    section.add "graphName", valid_568527
+  var valid_568528 = path.getOrDefault("accountName")
+  valid_568528 = validateParameter(valid_568528, JString, required = true,
                                  default = nil)
-  if valid_594299 != nil:
-    section.add "accountName", valid_594299
+  if valid_568528 != nil:
+    section.add "accountName", valid_568528
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3614,11 +3614,11 @@ proc validate_DatabaseAccountsDeleteGremlinGraph_594293(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594300 = query.getOrDefault("api-version")
-  valid_594300 = validateParameter(valid_594300, JString, required = true,
+  var valid_568529 = query.getOrDefault("api-version")
+  valid_568529 = validateParameter(valid_568529, JString, required = true,
                                  default = nil)
-  if valid_594300 != nil:
-    section.add "api-version", valid_594300
+  if valid_568529 != nil:
+    section.add "api-version", valid_568529
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3627,21 +3627,21 @@ proc validate_DatabaseAccountsDeleteGremlinGraph_594293(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594301: Call_DatabaseAccountsDeleteGremlinGraph_594292;
+proc call*(call_568530: Call_DatabaseAccountsDeleteGremlinGraph_568521;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing Azure Cosmos DB Gremlin graph.
   ## 
-  let valid = call_594301.validator(path, query, header, formData, body)
-  let scheme = call_594301.pickScheme
+  let valid = call_568530.validator(path, query, header, formData, body)
+  let scheme = call_568530.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594301.url(scheme.get, call_594301.host, call_594301.base,
-                         call_594301.route, valid.getOrDefault("path"),
+  let url = call_568530.url(scheme.get, call_568530.host, call_568530.base,
+                         call_568530.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594301, url, valid)
+  result = hook(call_568530, url, valid)
 
-proc call*(call_594302: Call_DatabaseAccountsDeleteGremlinGraph_594292;
+proc call*(call_568531: Call_DatabaseAccountsDeleteGremlinGraph_568521;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; graphName: string; accountName: string): Recallable =
   ## databaseAccountsDeleteGremlinGraph
@@ -3658,24 +3658,24 @@ proc call*(call_594302: Call_DatabaseAccountsDeleteGremlinGraph_594292;
   ##            : Cosmos DB graph name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594303 = newJObject()
-  var query_594304 = newJObject()
-  add(path_594303, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594304, "api-version", newJString(apiVersion))
-  add(path_594303, "subscriptionId", newJString(subscriptionId))
-  add(path_594303, "databaseName", newJString(databaseName))
-  add(path_594303, "graphName", newJString(graphName))
-  add(path_594303, "accountName", newJString(accountName))
-  result = call_594302.call(path_594303, query_594304, nil, nil, nil)
+  var path_568532 = newJObject()
+  var query_568533 = newJObject()
+  add(path_568532, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568533, "api-version", newJString(apiVersion))
+  add(path_568532, "subscriptionId", newJString(subscriptionId))
+  add(path_568532, "databaseName", newJString(databaseName))
+  add(path_568532, "graphName", newJString(graphName))
+  add(path_568532, "accountName", newJString(accountName))
+  result = call_568531.call(path_568532, query_568533, nil, nil, nil)
 
-var databaseAccountsDeleteGremlinGraph* = Call_DatabaseAccountsDeleteGremlinGraph_594292(
+var databaseAccountsDeleteGremlinGraph* = Call_DatabaseAccountsDeleteGremlinGraph_568521(
     name: "databaseAccountsDeleteGremlinGraph", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}/graphs/{graphName}",
-    validator: validate_DatabaseAccountsDeleteGremlinGraph_594293, base: "",
-    url: url_DatabaseAccountsDeleteGremlinGraph_594294, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsDeleteGremlinGraph_568522, base: "",
+    url: url_DatabaseAccountsDeleteGremlinGraph_568523, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsUpdateGremlinGraphThroughput_594318 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsUpdateGremlinGraphThroughput_594320(protocol: Scheme;
+  Call_DatabaseAccountsUpdateGremlinGraphThroughput_568547 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsUpdateGremlinGraphThroughput_568549(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3705,7 +3705,7 @@ proc url_DatabaseAccountsUpdateGremlinGraphThroughput_594320(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsUpdateGremlinGraphThroughput_594319(path: JsonNode;
+proc validate_DatabaseAccountsUpdateGremlinGraphThroughput_568548(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update RUs per second of an Azure Cosmos DB Gremlin graph
   ## 
@@ -3725,31 +3725,31 @@ proc validate_DatabaseAccountsUpdateGremlinGraphThroughput_594319(path: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594321 = path.getOrDefault("resourceGroupName")
-  valid_594321 = validateParameter(valid_594321, JString, required = true,
+  var valid_568550 = path.getOrDefault("resourceGroupName")
+  valid_568550 = validateParameter(valid_568550, JString, required = true,
                                  default = nil)
-  if valid_594321 != nil:
-    section.add "resourceGroupName", valid_594321
-  var valid_594322 = path.getOrDefault("subscriptionId")
-  valid_594322 = validateParameter(valid_594322, JString, required = true,
+  if valid_568550 != nil:
+    section.add "resourceGroupName", valid_568550
+  var valid_568551 = path.getOrDefault("subscriptionId")
+  valid_568551 = validateParameter(valid_568551, JString, required = true,
                                  default = nil)
-  if valid_594322 != nil:
-    section.add "subscriptionId", valid_594322
-  var valid_594323 = path.getOrDefault("databaseName")
-  valid_594323 = validateParameter(valid_594323, JString, required = true,
+  if valid_568551 != nil:
+    section.add "subscriptionId", valid_568551
+  var valid_568552 = path.getOrDefault("databaseName")
+  valid_568552 = validateParameter(valid_568552, JString, required = true,
                                  default = nil)
-  if valid_594323 != nil:
-    section.add "databaseName", valid_594323
-  var valid_594324 = path.getOrDefault("graphName")
-  valid_594324 = validateParameter(valid_594324, JString, required = true,
+  if valid_568552 != nil:
+    section.add "databaseName", valid_568552
+  var valid_568553 = path.getOrDefault("graphName")
+  valid_568553 = validateParameter(valid_568553, JString, required = true,
                                  default = nil)
-  if valid_594324 != nil:
-    section.add "graphName", valid_594324
-  var valid_594325 = path.getOrDefault("accountName")
-  valid_594325 = validateParameter(valid_594325, JString, required = true,
+  if valid_568553 != nil:
+    section.add "graphName", valid_568553
+  var valid_568554 = path.getOrDefault("accountName")
+  valid_568554 = validateParameter(valid_568554, JString, required = true,
                                  default = nil)
-  if valid_594325 != nil:
-    section.add "accountName", valid_594325
+  if valid_568554 != nil:
+    section.add "accountName", valid_568554
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3757,11 +3757,11 @@ proc validate_DatabaseAccountsUpdateGremlinGraphThroughput_594319(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594326 = query.getOrDefault("api-version")
-  valid_594326 = validateParameter(valid_594326, JString, required = true,
+  var valid_568555 = query.getOrDefault("api-version")
+  valid_568555 = validateParameter(valid_568555, JString, required = true,
                                  default = nil)
-  if valid_594326 != nil:
-    section.add "api-version", valid_594326
+  if valid_568555 != nil:
+    section.add "api-version", valid_568555
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3775,21 +3775,21 @@ proc validate_DatabaseAccountsUpdateGremlinGraphThroughput_594319(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594328: Call_DatabaseAccountsUpdateGremlinGraphThroughput_594318;
+proc call*(call_568557: Call_DatabaseAccountsUpdateGremlinGraphThroughput_568547;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update RUs per second of an Azure Cosmos DB Gremlin graph
   ## 
-  let valid = call_594328.validator(path, query, header, formData, body)
-  let scheme = call_594328.pickScheme
+  let valid = call_568557.validator(path, query, header, formData, body)
+  let scheme = call_568557.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594328.url(scheme.get, call_594328.host, call_594328.base,
-                         call_594328.route, valid.getOrDefault("path"),
+  let url = call_568557.url(scheme.get, call_568557.host, call_568557.base,
+                         call_568557.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594328, url, valid)
+  result = hook(call_568557, url, valid)
 
-proc call*(call_594329: Call_DatabaseAccountsUpdateGremlinGraphThroughput_594318;
+proc call*(call_568558: Call_DatabaseAccountsUpdateGremlinGraphThroughput_568547;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; updateThroughputParameters: JsonNode;
           graphName: string; accountName: string): Recallable =
@@ -3809,28 +3809,28 @@ proc call*(call_594329: Call_DatabaseAccountsUpdateGremlinGraphThroughput_594318
   ##            : Cosmos DB graph name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594330 = newJObject()
-  var query_594331 = newJObject()
-  var body_594332 = newJObject()
-  add(path_594330, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594331, "api-version", newJString(apiVersion))
-  add(path_594330, "subscriptionId", newJString(subscriptionId))
-  add(path_594330, "databaseName", newJString(databaseName))
+  var path_568559 = newJObject()
+  var query_568560 = newJObject()
+  var body_568561 = newJObject()
+  add(path_568559, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568560, "api-version", newJString(apiVersion))
+  add(path_568559, "subscriptionId", newJString(subscriptionId))
+  add(path_568559, "databaseName", newJString(databaseName))
   if updateThroughputParameters != nil:
-    body_594332 = updateThroughputParameters
-  add(path_594330, "graphName", newJString(graphName))
-  add(path_594330, "accountName", newJString(accountName))
-  result = call_594329.call(path_594330, query_594331, nil, nil, body_594332)
+    body_568561 = updateThroughputParameters
+  add(path_568559, "graphName", newJString(graphName))
+  add(path_568559, "accountName", newJString(accountName))
+  result = call_568558.call(path_568559, query_568560, nil, nil, body_568561)
 
-var databaseAccountsUpdateGremlinGraphThroughput* = Call_DatabaseAccountsUpdateGremlinGraphThroughput_594318(
+var databaseAccountsUpdateGremlinGraphThroughput* = Call_DatabaseAccountsUpdateGremlinGraphThroughput_568547(
     name: "databaseAccountsUpdateGremlinGraphThroughput",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}/graphs/{graphName}/settings/throughput",
-    validator: validate_DatabaseAccountsUpdateGremlinGraphThroughput_594319,
-    base: "", url: url_DatabaseAccountsUpdateGremlinGraphThroughput_594320,
+    validator: validate_DatabaseAccountsUpdateGremlinGraphThroughput_568548,
+    base: "", url: url_DatabaseAccountsUpdateGremlinGraphThroughput_568549,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetGremlinGraphThroughput_594305 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetGremlinGraphThroughput_594307(protocol: Scheme;
+  Call_DatabaseAccountsGetGremlinGraphThroughput_568534 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetGremlinGraphThroughput_568536(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3860,7 +3860,7 @@ proc url_DatabaseAccountsGetGremlinGraphThroughput_594307(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetGremlinGraphThroughput_594306(path: JsonNode;
+proc validate_DatabaseAccountsGetGremlinGraphThroughput_568535(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Gremlin graph throughput under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -3880,31 +3880,31 @@ proc validate_DatabaseAccountsGetGremlinGraphThroughput_594306(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594308 = path.getOrDefault("resourceGroupName")
-  valid_594308 = validateParameter(valid_594308, JString, required = true,
+  var valid_568537 = path.getOrDefault("resourceGroupName")
+  valid_568537 = validateParameter(valid_568537, JString, required = true,
                                  default = nil)
-  if valid_594308 != nil:
-    section.add "resourceGroupName", valid_594308
-  var valid_594309 = path.getOrDefault("subscriptionId")
-  valid_594309 = validateParameter(valid_594309, JString, required = true,
+  if valid_568537 != nil:
+    section.add "resourceGroupName", valid_568537
+  var valid_568538 = path.getOrDefault("subscriptionId")
+  valid_568538 = validateParameter(valid_568538, JString, required = true,
                                  default = nil)
-  if valid_594309 != nil:
-    section.add "subscriptionId", valid_594309
-  var valid_594310 = path.getOrDefault("databaseName")
-  valid_594310 = validateParameter(valid_594310, JString, required = true,
+  if valid_568538 != nil:
+    section.add "subscriptionId", valid_568538
+  var valid_568539 = path.getOrDefault("databaseName")
+  valid_568539 = validateParameter(valid_568539, JString, required = true,
                                  default = nil)
-  if valid_594310 != nil:
-    section.add "databaseName", valid_594310
-  var valid_594311 = path.getOrDefault("graphName")
-  valid_594311 = validateParameter(valid_594311, JString, required = true,
+  if valid_568539 != nil:
+    section.add "databaseName", valid_568539
+  var valid_568540 = path.getOrDefault("graphName")
+  valid_568540 = validateParameter(valid_568540, JString, required = true,
                                  default = nil)
-  if valid_594311 != nil:
-    section.add "graphName", valid_594311
-  var valid_594312 = path.getOrDefault("accountName")
-  valid_594312 = validateParameter(valid_594312, JString, required = true,
+  if valid_568540 != nil:
+    section.add "graphName", valid_568540
+  var valid_568541 = path.getOrDefault("accountName")
+  valid_568541 = validateParameter(valid_568541, JString, required = true,
                                  default = nil)
-  if valid_594312 != nil:
-    section.add "accountName", valid_594312
+  if valid_568541 != nil:
+    section.add "accountName", valid_568541
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3912,11 +3912,11 @@ proc validate_DatabaseAccountsGetGremlinGraphThroughput_594306(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594313 = query.getOrDefault("api-version")
-  valid_594313 = validateParameter(valid_594313, JString, required = true,
+  var valid_568542 = query.getOrDefault("api-version")
+  valid_568542 = validateParameter(valid_568542, JString, required = true,
                                  default = nil)
-  if valid_594313 != nil:
-    section.add "api-version", valid_594313
+  if valid_568542 != nil:
+    section.add "api-version", valid_568542
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3925,21 +3925,21 @@ proc validate_DatabaseAccountsGetGremlinGraphThroughput_594306(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594314: Call_DatabaseAccountsGetGremlinGraphThroughput_594305;
+proc call*(call_568543: Call_DatabaseAccountsGetGremlinGraphThroughput_568534;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the Gremlin graph throughput under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594314.validator(path, query, header, formData, body)
-  let scheme = call_594314.pickScheme
+  let valid = call_568543.validator(path, query, header, formData, body)
+  let scheme = call_568543.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594314.url(scheme.get, call_594314.host, call_594314.base,
-                         call_594314.route, valid.getOrDefault("path"),
+  let url = call_568543.url(scheme.get, call_568543.host, call_568543.base,
+                         call_568543.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594314, url, valid)
+  result = hook(call_568543, url, valid)
 
-proc call*(call_594315: Call_DatabaseAccountsGetGremlinGraphThroughput_594305;
+proc call*(call_568544: Call_DatabaseAccountsGetGremlinGraphThroughput_568534;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; graphName: string; accountName: string): Recallable =
   ## databaseAccountsGetGremlinGraphThroughput
@@ -3956,25 +3956,25 @@ proc call*(call_594315: Call_DatabaseAccountsGetGremlinGraphThroughput_594305;
   ##            : Cosmos DB graph name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594316 = newJObject()
-  var query_594317 = newJObject()
-  add(path_594316, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594317, "api-version", newJString(apiVersion))
-  add(path_594316, "subscriptionId", newJString(subscriptionId))
-  add(path_594316, "databaseName", newJString(databaseName))
-  add(path_594316, "graphName", newJString(graphName))
-  add(path_594316, "accountName", newJString(accountName))
-  result = call_594315.call(path_594316, query_594317, nil, nil, nil)
+  var path_568545 = newJObject()
+  var query_568546 = newJObject()
+  add(path_568545, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568546, "api-version", newJString(apiVersion))
+  add(path_568545, "subscriptionId", newJString(subscriptionId))
+  add(path_568545, "databaseName", newJString(databaseName))
+  add(path_568545, "graphName", newJString(graphName))
+  add(path_568545, "accountName", newJString(accountName))
+  result = call_568544.call(path_568545, query_568546, nil, nil, nil)
 
-var databaseAccountsGetGremlinGraphThroughput* = Call_DatabaseAccountsGetGremlinGraphThroughput_594305(
+var databaseAccountsGetGremlinGraphThroughput* = Call_DatabaseAccountsGetGremlinGraphThroughput_568534(
     name: "databaseAccountsGetGremlinGraphThroughput", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}/graphs/{graphName}/settings/throughput",
-    validator: validate_DatabaseAccountsGetGremlinGraphThroughput_594306,
-    base: "", url: url_DatabaseAccountsGetGremlinGraphThroughput_594307,
+    validator: validate_DatabaseAccountsGetGremlinGraphThroughput_568535,
+    base: "", url: url_DatabaseAccountsGetGremlinGraphThroughput_568536,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsUpdateGremlinDatabaseThroughput_594345 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsUpdateGremlinDatabaseThroughput_594347(protocol: Scheme;
+  Call_DatabaseAccountsUpdateGremlinDatabaseThroughput_568574 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsUpdateGremlinDatabaseThroughput_568576(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4001,7 +4001,7 @@ proc url_DatabaseAccountsUpdateGremlinDatabaseThroughput_594347(protocol: Scheme
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsUpdateGremlinDatabaseThroughput_594346(
+proc validate_DatabaseAccountsUpdateGremlinDatabaseThroughput_568575(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Update RUs per second of an Azure Cosmos DB Gremlin database
@@ -4020,26 +4020,26 @@ proc validate_DatabaseAccountsUpdateGremlinDatabaseThroughput_594346(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594348 = path.getOrDefault("resourceGroupName")
-  valid_594348 = validateParameter(valid_594348, JString, required = true,
+  var valid_568577 = path.getOrDefault("resourceGroupName")
+  valid_568577 = validateParameter(valid_568577, JString, required = true,
                                  default = nil)
-  if valid_594348 != nil:
-    section.add "resourceGroupName", valid_594348
-  var valid_594349 = path.getOrDefault("subscriptionId")
-  valid_594349 = validateParameter(valid_594349, JString, required = true,
+  if valid_568577 != nil:
+    section.add "resourceGroupName", valid_568577
+  var valid_568578 = path.getOrDefault("subscriptionId")
+  valid_568578 = validateParameter(valid_568578, JString, required = true,
                                  default = nil)
-  if valid_594349 != nil:
-    section.add "subscriptionId", valid_594349
-  var valid_594350 = path.getOrDefault("databaseName")
-  valid_594350 = validateParameter(valid_594350, JString, required = true,
+  if valid_568578 != nil:
+    section.add "subscriptionId", valid_568578
+  var valid_568579 = path.getOrDefault("databaseName")
+  valid_568579 = validateParameter(valid_568579, JString, required = true,
                                  default = nil)
-  if valid_594350 != nil:
-    section.add "databaseName", valid_594350
-  var valid_594351 = path.getOrDefault("accountName")
-  valid_594351 = validateParameter(valid_594351, JString, required = true,
+  if valid_568579 != nil:
+    section.add "databaseName", valid_568579
+  var valid_568580 = path.getOrDefault("accountName")
+  valid_568580 = validateParameter(valid_568580, JString, required = true,
                                  default = nil)
-  if valid_594351 != nil:
-    section.add "accountName", valid_594351
+  if valid_568580 != nil:
+    section.add "accountName", valid_568580
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4047,11 +4047,11 @@ proc validate_DatabaseAccountsUpdateGremlinDatabaseThroughput_594346(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594352 = query.getOrDefault("api-version")
-  valid_594352 = validateParameter(valid_594352, JString, required = true,
+  var valid_568581 = query.getOrDefault("api-version")
+  valid_568581 = validateParameter(valid_568581, JString, required = true,
                                  default = nil)
-  if valid_594352 != nil:
-    section.add "api-version", valid_594352
+  if valid_568581 != nil:
+    section.add "api-version", valid_568581
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4065,21 +4065,21 @@ proc validate_DatabaseAccountsUpdateGremlinDatabaseThroughput_594346(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594354: Call_DatabaseAccountsUpdateGremlinDatabaseThroughput_594345;
+proc call*(call_568583: Call_DatabaseAccountsUpdateGremlinDatabaseThroughput_568574;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update RUs per second of an Azure Cosmos DB Gremlin database
   ## 
-  let valid = call_594354.validator(path, query, header, formData, body)
-  let scheme = call_594354.pickScheme
+  let valid = call_568583.validator(path, query, header, formData, body)
+  let scheme = call_568583.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594354.url(scheme.get, call_594354.host, call_594354.base,
-                         call_594354.route, valid.getOrDefault("path"),
+  let url = call_568583.url(scheme.get, call_568583.host, call_568583.base,
+                         call_568583.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594354, url, valid)
+  result = hook(call_568583, url, valid)
 
-proc call*(call_594355: Call_DatabaseAccountsUpdateGremlinDatabaseThroughput_594345;
+proc call*(call_568584: Call_DatabaseAccountsUpdateGremlinDatabaseThroughput_568574;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; updateThroughputParameters: JsonNode;
           accountName: string): Recallable =
@@ -4097,27 +4097,27 @@ proc call*(call_594355: Call_DatabaseAccountsUpdateGremlinDatabaseThroughput_594
   ##                             : The RUs per second of the parameters to provide for the current Gremlin database.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594356 = newJObject()
-  var query_594357 = newJObject()
-  var body_594358 = newJObject()
-  add(path_594356, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594357, "api-version", newJString(apiVersion))
-  add(path_594356, "subscriptionId", newJString(subscriptionId))
-  add(path_594356, "databaseName", newJString(databaseName))
+  var path_568585 = newJObject()
+  var query_568586 = newJObject()
+  var body_568587 = newJObject()
+  add(path_568585, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568586, "api-version", newJString(apiVersion))
+  add(path_568585, "subscriptionId", newJString(subscriptionId))
+  add(path_568585, "databaseName", newJString(databaseName))
   if updateThroughputParameters != nil:
-    body_594358 = updateThroughputParameters
-  add(path_594356, "accountName", newJString(accountName))
-  result = call_594355.call(path_594356, query_594357, nil, nil, body_594358)
+    body_568587 = updateThroughputParameters
+  add(path_568585, "accountName", newJString(accountName))
+  result = call_568584.call(path_568585, query_568586, nil, nil, body_568587)
 
-var databaseAccountsUpdateGremlinDatabaseThroughput* = Call_DatabaseAccountsUpdateGremlinDatabaseThroughput_594345(
+var databaseAccountsUpdateGremlinDatabaseThroughput* = Call_DatabaseAccountsUpdateGremlinDatabaseThroughput_568574(
     name: "databaseAccountsUpdateGremlinDatabaseThroughput",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}/settings/throughput",
-    validator: validate_DatabaseAccountsUpdateGremlinDatabaseThroughput_594346,
-    base: "", url: url_DatabaseAccountsUpdateGremlinDatabaseThroughput_594347,
+    validator: validate_DatabaseAccountsUpdateGremlinDatabaseThroughput_568575,
+    base: "", url: url_DatabaseAccountsUpdateGremlinDatabaseThroughput_568576,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetGremlinDatabaseThroughput_594333 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetGremlinDatabaseThroughput_594335(protocol: Scheme;
+  Call_DatabaseAccountsGetGremlinDatabaseThroughput_568562 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetGremlinDatabaseThroughput_568564(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4144,7 +4144,7 @@ proc url_DatabaseAccountsGetGremlinDatabaseThroughput_594335(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetGremlinDatabaseThroughput_594334(path: JsonNode;
+proc validate_DatabaseAccountsGetGremlinDatabaseThroughput_568563(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the RUs per second of the Gremlin database under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -4162,26 +4162,26 @@ proc validate_DatabaseAccountsGetGremlinDatabaseThroughput_594334(path: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594336 = path.getOrDefault("resourceGroupName")
-  valid_594336 = validateParameter(valid_594336, JString, required = true,
+  var valid_568565 = path.getOrDefault("resourceGroupName")
+  valid_568565 = validateParameter(valid_568565, JString, required = true,
                                  default = nil)
-  if valid_594336 != nil:
-    section.add "resourceGroupName", valid_594336
-  var valid_594337 = path.getOrDefault("subscriptionId")
-  valid_594337 = validateParameter(valid_594337, JString, required = true,
+  if valid_568565 != nil:
+    section.add "resourceGroupName", valid_568565
+  var valid_568566 = path.getOrDefault("subscriptionId")
+  valid_568566 = validateParameter(valid_568566, JString, required = true,
                                  default = nil)
-  if valid_594337 != nil:
-    section.add "subscriptionId", valid_594337
-  var valid_594338 = path.getOrDefault("databaseName")
-  valid_594338 = validateParameter(valid_594338, JString, required = true,
+  if valid_568566 != nil:
+    section.add "subscriptionId", valid_568566
+  var valid_568567 = path.getOrDefault("databaseName")
+  valid_568567 = validateParameter(valid_568567, JString, required = true,
                                  default = nil)
-  if valid_594338 != nil:
-    section.add "databaseName", valid_594338
-  var valid_594339 = path.getOrDefault("accountName")
-  valid_594339 = validateParameter(valid_594339, JString, required = true,
+  if valid_568567 != nil:
+    section.add "databaseName", valid_568567
+  var valid_568568 = path.getOrDefault("accountName")
+  valid_568568 = validateParameter(valid_568568, JString, required = true,
                                  default = nil)
-  if valid_594339 != nil:
-    section.add "accountName", valid_594339
+  if valid_568568 != nil:
+    section.add "accountName", valid_568568
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4189,11 +4189,11 @@ proc validate_DatabaseAccountsGetGremlinDatabaseThroughput_594334(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594340 = query.getOrDefault("api-version")
-  valid_594340 = validateParameter(valid_594340, JString, required = true,
+  var valid_568569 = query.getOrDefault("api-version")
+  valid_568569 = validateParameter(valid_568569, JString, required = true,
                                  default = nil)
-  if valid_594340 != nil:
-    section.add "api-version", valid_594340
+  if valid_568569 != nil:
+    section.add "api-version", valid_568569
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4202,21 +4202,21 @@ proc validate_DatabaseAccountsGetGremlinDatabaseThroughput_594334(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594341: Call_DatabaseAccountsGetGremlinDatabaseThroughput_594333;
+proc call*(call_568570: Call_DatabaseAccountsGetGremlinDatabaseThroughput_568562;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the RUs per second of the Gremlin database under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594341.validator(path, query, header, formData, body)
-  let scheme = call_594341.pickScheme
+  let valid = call_568570.validator(path, query, header, formData, body)
+  let scheme = call_568570.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594341.url(scheme.get, call_594341.host, call_594341.base,
-                         call_594341.route, valid.getOrDefault("path"),
+  let url = call_568570.url(scheme.get, call_568570.host, call_568570.base,
+                         call_568570.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594341, url, valid)
+  result = hook(call_568570, url, valid)
 
-proc call*(call_594342: Call_DatabaseAccountsGetGremlinDatabaseThroughput_594333;
+proc call*(call_568571: Call_DatabaseAccountsGetGremlinDatabaseThroughput_568562;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsGetGremlinDatabaseThroughput
@@ -4231,24 +4231,24 @@ proc call*(call_594342: Call_DatabaseAccountsGetGremlinDatabaseThroughput_594333
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594343 = newJObject()
-  var query_594344 = newJObject()
-  add(path_594343, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594344, "api-version", newJString(apiVersion))
-  add(path_594343, "subscriptionId", newJString(subscriptionId))
-  add(path_594343, "databaseName", newJString(databaseName))
-  add(path_594343, "accountName", newJString(accountName))
-  result = call_594342.call(path_594343, query_594344, nil, nil, nil)
+  var path_568572 = newJObject()
+  var query_568573 = newJObject()
+  add(path_568572, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568573, "api-version", newJString(apiVersion))
+  add(path_568572, "subscriptionId", newJString(subscriptionId))
+  add(path_568572, "databaseName", newJString(databaseName))
+  add(path_568572, "accountName", newJString(accountName))
+  result = call_568571.call(path_568572, query_568573, nil, nil, nil)
 
-var databaseAccountsGetGremlinDatabaseThroughput* = Call_DatabaseAccountsGetGremlinDatabaseThroughput_594333(
+var databaseAccountsGetGremlinDatabaseThroughput* = Call_DatabaseAccountsGetGremlinDatabaseThroughput_568562(
     name: "databaseAccountsGetGremlinDatabaseThroughput",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/gremlin/databases/{databaseName}/settings/throughput",
-    validator: validate_DatabaseAccountsGetGremlinDatabaseThroughput_594334,
-    base: "", url: url_DatabaseAccountsGetGremlinDatabaseThroughput_594335,
+    validator: validate_DatabaseAccountsGetGremlinDatabaseThroughput_568563,
+    base: "", url: url_DatabaseAccountsGetGremlinDatabaseThroughput_568564,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListMongoDBDatabases_594359 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListMongoDBDatabases_594361(protocol: Scheme;
+  Call_DatabaseAccountsListMongoDBDatabases_568588 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListMongoDBDatabases_568590(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4272,7 +4272,7 @@ proc url_DatabaseAccountsListMongoDBDatabases_594361(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListMongoDBDatabases_594360(path: JsonNode;
+proc validate_DatabaseAccountsListMongoDBDatabases_568589(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the MongoDB databases under an existing Azure Cosmos DB database account.
   ## 
@@ -4288,21 +4288,21 @@ proc validate_DatabaseAccountsListMongoDBDatabases_594360(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594362 = path.getOrDefault("resourceGroupName")
-  valid_594362 = validateParameter(valid_594362, JString, required = true,
+  var valid_568591 = path.getOrDefault("resourceGroupName")
+  valid_568591 = validateParameter(valid_568591, JString, required = true,
                                  default = nil)
-  if valid_594362 != nil:
-    section.add "resourceGroupName", valid_594362
-  var valid_594363 = path.getOrDefault("subscriptionId")
-  valid_594363 = validateParameter(valid_594363, JString, required = true,
+  if valid_568591 != nil:
+    section.add "resourceGroupName", valid_568591
+  var valid_568592 = path.getOrDefault("subscriptionId")
+  valid_568592 = validateParameter(valid_568592, JString, required = true,
                                  default = nil)
-  if valid_594363 != nil:
-    section.add "subscriptionId", valid_594363
-  var valid_594364 = path.getOrDefault("accountName")
-  valid_594364 = validateParameter(valid_594364, JString, required = true,
+  if valid_568592 != nil:
+    section.add "subscriptionId", valid_568592
+  var valid_568593 = path.getOrDefault("accountName")
+  valid_568593 = validateParameter(valid_568593, JString, required = true,
                                  default = nil)
-  if valid_594364 != nil:
-    section.add "accountName", valid_594364
+  if valid_568593 != nil:
+    section.add "accountName", valid_568593
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4310,11 +4310,11 @@ proc validate_DatabaseAccountsListMongoDBDatabases_594360(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594365 = query.getOrDefault("api-version")
-  valid_594365 = validateParameter(valid_594365, JString, required = true,
+  var valid_568594 = query.getOrDefault("api-version")
+  valid_568594 = validateParameter(valid_568594, JString, required = true,
                                  default = nil)
-  if valid_594365 != nil:
-    section.add "api-version", valid_594365
+  if valid_568594 != nil:
+    section.add "api-version", valid_568594
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4323,21 +4323,21 @@ proc validate_DatabaseAccountsListMongoDBDatabases_594360(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594366: Call_DatabaseAccountsListMongoDBDatabases_594359;
+proc call*(call_568595: Call_DatabaseAccountsListMongoDBDatabases_568588;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the MongoDB databases under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594366.validator(path, query, header, formData, body)
-  let scheme = call_594366.pickScheme
+  let valid = call_568595.validator(path, query, header, formData, body)
+  let scheme = call_568595.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594366.url(scheme.get, call_594366.host, call_594366.base,
-                         call_594366.route, valid.getOrDefault("path"),
+  let url = call_568595.url(scheme.get, call_568595.host, call_568595.base,
+                         call_568595.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594366, url, valid)
+  result = hook(call_568595, url, valid)
 
-proc call*(call_594367: Call_DatabaseAccountsListMongoDBDatabases_594359;
+proc call*(call_568596: Call_DatabaseAccountsListMongoDBDatabases_568588;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsListMongoDBDatabases
@@ -4350,22 +4350,22 @@ proc call*(call_594367: Call_DatabaseAccountsListMongoDBDatabases_594359;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594368 = newJObject()
-  var query_594369 = newJObject()
-  add(path_594368, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594369, "api-version", newJString(apiVersion))
-  add(path_594368, "subscriptionId", newJString(subscriptionId))
-  add(path_594368, "accountName", newJString(accountName))
-  result = call_594367.call(path_594368, query_594369, nil, nil, nil)
+  var path_568597 = newJObject()
+  var query_568598 = newJObject()
+  add(path_568597, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568598, "api-version", newJString(apiVersion))
+  add(path_568597, "subscriptionId", newJString(subscriptionId))
+  add(path_568597, "accountName", newJString(accountName))
+  result = call_568596.call(path_568597, query_568598, nil, nil, nil)
 
-var databaseAccountsListMongoDBDatabases* = Call_DatabaseAccountsListMongoDBDatabases_594359(
+var databaseAccountsListMongoDBDatabases* = Call_DatabaseAccountsListMongoDBDatabases_568588(
     name: "databaseAccountsListMongoDBDatabases", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases",
-    validator: validate_DatabaseAccountsListMongoDBDatabases_594360, base: "",
-    url: url_DatabaseAccountsListMongoDBDatabases_594361, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListMongoDBDatabases_568589, base: "",
+    url: url_DatabaseAccountsListMongoDBDatabases_568590, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsCreateUpdateMongoDBDatabase_594382 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCreateUpdateMongoDBDatabase_594384(protocol: Scheme;
+  Call_DatabaseAccountsCreateUpdateMongoDBDatabase_568611 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCreateUpdateMongoDBDatabase_568613(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4391,7 +4391,7 @@ proc url_DatabaseAccountsCreateUpdateMongoDBDatabase_594384(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCreateUpdateMongoDBDatabase_594383(path: JsonNode;
+proc validate_DatabaseAccountsCreateUpdateMongoDBDatabase_568612(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or updates Azure Cosmos DB MongoDB database
   ## 
@@ -4409,26 +4409,26 @@ proc validate_DatabaseAccountsCreateUpdateMongoDBDatabase_594383(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594385 = path.getOrDefault("resourceGroupName")
-  valid_594385 = validateParameter(valid_594385, JString, required = true,
+  var valid_568614 = path.getOrDefault("resourceGroupName")
+  valid_568614 = validateParameter(valid_568614, JString, required = true,
                                  default = nil)
-  if valid_594385 != nil:
-    section.add "resourceGroupName", valid_594385
-  var valid_594386 = path.getOrDefault("subscriptionId")
-  valid_594386 = validateParameter(valid_594386, JString, required = true,
+  if valid_568614 != nil:
+    section.add "resourceGroupName", valid_568614
+  var valid_568615 = path.getOrDefault("subscriptionId")
+  valid_568615 = validateParameter(valid_568615, JString, required = true,
                                  default = nil)
-  if valid_594386 != nil:
-    section.add "subscriptionId", valid_594386
-  var valid_594387 = path.getOrDefault("databaseName")
-  valid_594387 = validateParameter(valid_594387, JString, required = true,
+  if valid_568615 != nil:
+    section.add "subscriptionId", valid_568615
+  var valid_568616 = path.getOrDefault("databaseName")
+  valid_568616 = validateParameter(valid_568616, JString, required = true,
                                  default = nil)
-  if valid_594387 != nil:
-    section.add "databaseName", valid_594387
-  var valid_594388 = path.getOrDefault("accountName")
-  valid_594388 = validateParameter(valid_594388, JString, required = true,
+  if valid_568616 != nil:
+    section.add "databaseName", valid_568616
+  var valid_568617 = path.getOrDefault("accountName")
+  valid_568617 = validateParameter(valid_568617, JString, required = true,
                                  default = nil)
-  if valid_594388 != nil:
-    section.add "accountName", valid_594388
+  if valid_568617 != nil:
+    section.add "accountName", valid_568617
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4436,11 +4436,11 @@ proc validate_DatabaseAccountsCreateUpdateMongoDBDatabase_594383(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594389 = query.getOrDefault("api-version")
-  valid_594389 = validateParameter(valid_594389, JString, required = true,
+  var valid_568618 = query.getOrDefault("api-version")
+  valid_568618 = validateParameter(valid_568618, JString, required = true,
                                  default = nil)
-  if valid_594389 != nil:
-    section.add "api-version", valid_594389
+  if valid_568618 != nil:
+    section.add "api-version", valid_568618
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4454,21 +4454,21 @@ proc validate_DatabaseAccountsCreateUpdateMongoDBDatabase_594383(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594391: Call_DatabaseAccountsCreateUpdateMongoDBDatabase_594382;
+proc call*(call_568620: Call_DatabaseAccountsCreateUpdateMongoDBDatabase_568611;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or updates Azure Cosmos DB MongoDB database
   ## 
-  let valid = call_594391.validator(path, query, header, formData, body)
-  let scheme = call_594391.pickScheme
+  let valid = call_568620.validator(path, query, header, formData, body)
+  let scheme = call_568620.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594391.url(scheme.get, call_594391.host, call_594391.base,
-                         call_594391.route, valid.getOrDefault("path"),
+  let url = call_568620.url(scheme.get, call_568620.host, call_568620.base,
+                         call_568620.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594391, url, valid)
+  result = hook(call_568620, url, valid)
 
-proc call*(call_594392: Call_DatabaseAccountsCreateUpdateMongoDBDatabase_594382;
+proc call*(call_568621: Call_DatabaseAccountsCreateUpdateMongoDBDatabase_568611;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; createUpdateMongoDBDatabaseParameters: JsonNode;
           accountName: string): Recallable =
@@ -4486,27 +4486,27 @@ proc call*(call_594392: Call_DatabaseAccountsCreateUpdateMongoDBDatabase_594382;
   ##                                        : The parameters to provide for the current MongoDB database.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594393 = newJObject()
-  var query_594394 = newJObject()
-  var body_594395 = newJObject()
-  add(path_594393, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594394, "api-version", newJString(apiVersion))
-  add(path_594393, "subscriptionId", newJString(subscriptionId))
-  add(path_594393, "databaseName", newJString(databaseName))
+  var path_568622 = newJObject()
+  var query_568623 = newJObject()
+  var body_568624 = newJObject()
+  add(path_568622, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568623, "api-version", newJString(apiVersion))
+  add(path_568622, "subscriptionId", newJString(subscriptionId))
+  add(path_568622, "databaseName", newJString(databaseName))
   if createUpdateMongoDBDatabaseParameters != nil:
-    body_594395 = createUpdateMongoDBDatabaseParameters
-  add(path_594393, "accountName", newJString(accountName))
-  result = call_594392.call(path_594393, query_594394, nil, nil, body_594395)
+    body_568624 = createUpdateMongoDBDatabaseParameters
+  add(path_568622, "accountName", newJString(accountName))
+  result = call_568621.call(path_568622, query_568623, nil, nil, body_568624)
 
-var databaseAccountsCreateUpdateMongoDBDatabase* = Call_DatabaseAccountsCreateUpdateMongoDBDatabase_594382(
+var databaseAccountsCreateUpdateMongoDBDatabase* = Call_DatabaseAccountsCreateUpdateMongoDBDatabase_568611(
     name: "databaseAccountsCreateUpdateMongoDBDatabase", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}",
-    validator: validate_DatabaseAccountsCreateUpdateMongoDBDatabase_594383,
-    base: "", url: url_DatabaseAccountsCreateUpdateMongoDBDatabase_594384,
+    validator: validate_DatabaseAccountsCreateUpdateMongoDBDatabase_568612,
+    base: "", url: url_DatabaseAccountsCreateUpdateMongoDBDatabase_568613,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetMongoDBDatabase_594370 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetMongoDBDatabase_594372(protocol: Scheme; host: string;
+  Call_DatabaseAccountsGetMongoDBDatabase_568599 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetMongoDBDatabase_568601(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4532,7 +4532,7 @@ proc url_DatabaseAccountsGetMongoDBDatabase_594372(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetMongoDBDatabase_594371(path: JsonNode;
+proc validate_DatabaseAccountsGetMongoDBDatabase_568600(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the MongoDB databases under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -4550,26 +4550,26 @@ proc validate_DatabaseAccountsGetMongoDBDatabase_594371(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594373 = path.getOrDefault("resourceGroupName")
-  valid_594373 = validateParameter(valid_594373, JString, required = true,
+  var valid_568602 = path.getOrDefault("resourceGroupName")
+  valid_568602 = validateParameter(valid_568602, JString, required = true,
                                  default = nil)
-  if valid_594373 != nil:
-    section.add "resourceGroupName", valid_594373
-  var valid_594374 = path.getOrDefault("subscriptionId")
-  valid_594374 = validateParameter(valid_594374, JString, required = true,
+  if valid_568602 != nil:
+    section.add "resourceGroupName", valid_568602
+  var valid_568603 = path.getOrDefault("subscriptionId")
+  valid_568603 = validateParameter(valid_568603, JString, required = true,
                                  default = nil)
-  if valid_594374 != nil:
-    section.add "subscriptionId", valid_594374
-  var valid_594375 = path.getOrDefault("databaseName")
-  valid_594375 = validateParameter(valid_594375, JString, required = true,
+  if valid_568603 != nil:
+    section.add "subscriptionId", valid_568603
+  var valid_568604 = path.getOrDefault("databaseName")
+  valid_568604 = validateParameter(valid_568604, JString, required = true,
                                  default = nil)
-  if valid_594375 != nil:
-    section.add "databaseName", valid_594375
-  var valid_594376 = path.getOrDefault("accountName")
-  valid_594376 = validateParameter(valid_594376, JString, required = true,
+  if valid_568604 != nil:
+    section.add "databaseName", valid_568604
+  var valid_568605 = path.getOrDefault("accountName")
+  valid_568605 = validateParameter(valid_568605, JString, required = true,
                                  default = nil)
-  if valid_594376 != nil:
-    section.add "accountName", valid_594376
+  if valid_568605 != nil:
+    section.add "accountName", valid_568605
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4577,11 +4577,11 @@ proc validate_DatabaseAccountsGetMongoDBDatabase_594371(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594377 = query.getOrDefault("api-version")
-  valid_594377 = validateParameter(valid_594377, JString, required = true,
+  var valid_568606 = query.getOrDefault("api-version")
+  valid_568606 = validateParameter(valid_568606, JString, required = true,
                                  default = nil)
-  if valid_594377 != nil:
-    section.add "api-version", valid_594377
+  if valid_568606 != nil:
+    section.add "api-version", valid_568606
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4590,21 +4590,21 @@ proc validate_DatabaseAccountsGetMongoDBDatabase_594371(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594378: Call_DatabaseAccountsGetMongoDBDatabase_594370;
+proc call*(call_568607: Call_DatabaseAccountsGetMongoDBDatabase_568599;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the MongoDB databases under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594378.validator(path, query, header, formData, body)
-  let scheme = call_594378.pickScheme
+  let valid = call_568607.validator(path, query, header, formData, body)
+  let scheme = call_568607.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594378.url(scheme.get, call_594378.host, call_594378.base,
-                         call_594378.route, valid.getOrDefault("path"),
+  let url = call_568607.url(scheme.get, call_568607.host, call_568607.base,
+                         call_568607.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594378, url, valid)
+  result = hook(call_568607, url, valid)
 
-proc call*(call_594379: Call_DatabaseAccountsGetMongoDBDatabase_594370;
+proc call*(call_568608: Call_DatabaseAccountsGetMongoDBDatabase_568599;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsGetMongoDBDatabase
@@ -4619,23 +4619,23 @@ proc call*(call_594379: Call_DatabaseAccountsGetMongoDBDatabase_594370;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594380 = newJObject()
-  var query_594381 = newJObject()
-  add(path_594380, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594381, "api-version", newJString(apiVersion))
-  add(path_594380, "subscriptionId", newJString(subscriptionId))
-  add(path_594380, "databaseName", newJString(databaseName))
-  add(path_594380, "accountName", newJString(accountName))
-  result = call_594379.call(path_594380, query_594381, nil, nil, nil)
+  var path_568609 = newJObject()
+  var query_568610 = newJObject()
+  add(path_568609, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568610, "api-version", newJString(apiVersion))
+  add(path_568609, "subscriptionId", newJString(subscriptionId))
+  add(path_568609, "databaseName", newJString(databaseName))
+  add(path_568609, "accountName", newJString(accountName))
+  result = call_568608.call(path_568609, query_568610, nil, nil, nil)
 
-var databaseAccountsGetMongoDBDatabase* = Call_DatabaseAccountsGetMongoDBDatabase_594370(
+var databaseAccountsGetMongoDBDatabase* = Call_DatabaseAccountsGetMongoDBDatabase_568599(
     name: "databaseAccountsGetMongoDBDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}",
-    validator: validate_DatabaseAccountsGetMongoDBDatabase_594371, base: "",
-    url: url_DatabaseAccountsGetMongoDBDatabase_594372, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetMongoDBDatabase_568600, base: "",
+    url: url_DatabaseAccountsGetMongoDBDatabase_568601, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsDeleteMongoDBDatabase_594396 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsDeleteMongoDBDatabase_594398(protocol: Scheme;
+  Call_DatabaseAccountsDeleteMongoDBDatabase_568625 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsDeleteMongoDBDatabase_568627(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4661,7 +4661,7 @@ proc url_DatabaseAccountsDeleteMongoDBDatabase_594398(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsDeleteMongoDBDatabase_594397(path: JsonNode;
+proc validate_DatabaseAccountsDeleteMongoDBDatabase_568626(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Azure Cosmos DB MongoDB database.
   ## 
@@ -4679,26 +4679,26 @@ proc validate_DatabaseAccountsDeleteMongoDBDatabase_594397(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594399 = path.getOrDefault("resourceGroupName")
-  valid_594399 = validateParameter(valid_594399, JString, required = true,
+  var valid_568628 = path.getOrDefault("resourceGroupName")
+  valid_568628 = validateParameter(valid_568628, JString, required = true,
                                  default = nil)
-  if valid_594399 != nil:
-    section.add "resourceGroupName", valid_594399
-  var valid_594400 = path.getOrDefault("subscriptionId")
-  valid_594400 = validateParameter(valid_594400, JString, required = true,
+  if valid_568628 != nil:
+    section.add "resourceGroupName", valid_568628
+  var valid_568629 = path.getOrDefault("subscriptionId")
+  valid_568629 = validateParameter(valid_568629, JString, required = true,
                                  default = nil)
-  if valid_594400 != nil:
-    section.add "subscriptionId", valid_594400
-  var valid_594401 = path.getOrDefault("databaseName")
-  valid_594401 = validateParameter(valid_594401, JString, required = true,
+  if valid_568629 != nil:
+    section.add "subscriptionId", valid_568629
+  var valid_568630 = path.getOrDefault("databaseName")
+  valid_568630 = validateParameter(valid_568630, JString, required = true,
                                  default = nil)
-  if valid_594401 != nil:
-    section.add "databaseName", valid_594401
-  var valid_594402 = path.getOrDefault("accountName")
-  valid_594402 = validateParameter(valid_594402, JString, required = true,
+  if valid_568630 != nil:
+    section.add "databaseName", valid_568630
+  var valid_568631 = path.getOrDefault("accountName")
+  valid_568631 = validateParameter(valid_568631, JString, required = true,
                                  default = nil)
-  if valid_594402 != nil:
-    section.add "accountName", valid_594402
+  if valid_568631 != nil:
+    section.add "accountName", valid_568631
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4706,11 +4706,11 @@ proc validate_DatabaseAccountsDeleteMongoDBDatabase_594397(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594403 = query.getOrDefault("api-version")
-  valid_594403 = validateParameter(valid_594403, JString, required = true,
+  var valid_568632 = query.getOrDefault("api-version")
+  valid_568632 = validateParameter(valid_568632, JString, required = true,
                                  default = nil)
-  if valid_594403 != nil:
-    section.add "api-version", valid_594403
+  if valid_568632 != nil:
+    section.add "api-version", valid_568632
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4719,21 +4719,21 @@ proc validate_DatabaseAccountsDeleteMongoDBDatabase_594397(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594404: Call_DatabaseAccountsDeleteMongoDBDatabase_594396;
+proc call*(call_568633: Call_DatabaseAccountsDeleteMongoDBDatabase_568625;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing Azure Cosmos DB MongoDB database.
   ## 
-  let valid = call_594404.validator(path, query, header, formData, body)
-  let scheme = call_594404.pickScheme
+  let valid = call_568633.validator(path, query, header, formData, body)
+  let scheme = call_568633.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594404.url(scheme.get, call_594404.host, call_594404.base,
-                         call_594404.route, valid.getOrDefault("path"),
+  let url = call_568633.url(scheme.get, call_568633.host, call_568633.base,
+                         call_568633.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594404, url, valid)
+  result = hook(call_568633, url, valid)
 
-proc call*(call_594405: Call_DatabaseAccountsDeleteMongoDBDatabase_594396;
+proc call*(call_568634: Call_DatabaseAccountsDeleteMongoDBDatabase_568625;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsDeleteMongoDBDatabase
@@ -4748,23 +4748,23 @@ proc call*(call_594405: Call_DatabaseAccountsDeleteMongoDBDatabase_594396;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594406 = newJObject()
-  var query_594407 = newJObject()
-  add(path_594406, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594407, "api-version", newJString(apiVersion))
-  add(path_594406, "subscriptionId", newJString(subscriptionId))
-  add(path_594406, "databaseName", newJString(databaseName))
-  add(path_594406, "accountName", newJString(accountName))
-  result = call_594405.call(path_594406, query_594407, nil, nil, nil)
+  var path_568635 = newJObject()
+  var query_568636 = newJObject()
+  add(path_568635, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568636, "api-version", newJString(apiVersion))
+  add(path_568635, "subscriptionId", newJString(subscriptionId))
+  add(path_568635, "databaseName", newJString(databaseName))
+  add(path_568635, "accountName", newJString(accountName))
+  result = call_568634.call(path_568635, query_568636, nil, nil, nil)
 
-var databaseAccountsDeleteMongoDBDatabase* = Call_DatabaseAccountsDeleteMongoDBDatabase_594396(
+var databaseAccountsDeleteMongoDBDatabase* = Call_DatabaseAccountsDeleteMongoDBDatabase_568625(
     name: "databaseAccountsDeleteMongoDBDatabase", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}",
-    validator: validate_DatabaseAccountsDeleteMongoDBDatabase_594397, base: "",
-    url: url_DatabaseAccountsDeleteMongoDBDatabase_594398, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsDeleteMongoDBDatabase_568626, base: "",
+    url: url_DatabaseAccountsDeleteMongoDBDatabase_568627, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListMongoDBCollections_594408 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListMongoDBCollections_594410(protocol: Scheme;
+  Call_DatabaseAccountsListMongoDBCollections_568637 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListMongoDBCollections_568639(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4791,7 +4791,7 @@ proc url_DatabaseAccountsListMongoDBCollections_594410(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListMongoDBCollections_594409(path: JsonNode;
+proc validate_DatabaseAccountsListMongoDBCollections_568638(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the MongoDB collection under an existing Azure Cosmos DB database account.
   ## 
@@ -4809,26 +4809,26 @@ proc validate_DatabaseAccountsListMongoDBCollections_594409(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594411 = path.getOrDefault("resourceGroupName")
-  valid_594411 = validateParameter(valid_594411, JString, required = true,
+  var valid_568640 = path.getOrDefault("resourceGroupName")
+  valid_568640 = validateParameter(valid_568640, JString, required = true,
                                  default = nil)
-  if valid_594411 != nil:
-    section.add "resourceGroupName", valid_594411
-  var valid_594412 = path.getOrDefault("subscriptionId")
-  valid_594412 = validateParameter(valid_594412, JString, required = true,
+  if valid_568640 != nil:
+    section.add "resourceGroupName", valid_568640
+  var valid_568641 = path.getOrDefault("subscriptionId")
+  valid_568641 = validateParameter(valid_568641, JString, required = true,
                                  default = nil)
-  if valid_594412 != nil:
-    section.add "subscriptionId", valid_594412
-  var valid_594413 = path.getOrDefault("databaseName")
-  valid_594413 = validateParameter(valid_594413, JString, required = true,
+  if valid_568641 != nil:
+    section.add "subscriptionId", valid_568641
+  var valid_568642 = path.getOrDefault("databaseName")
+  valid_568642 = validateParameter(valid_568642, JString, required = true,
                                  default = nil)
-  if valid_594413 != nil:
-    section.add "databaseName", valid_594413
-  var valid_594414 = path.getOrDefault("accountName")
-  valid_594414 = validateParameter(valid_594414, JString, required = true,
+  if valid_568642 != nil:
+    section.add "databaseName", valid_568642
+  var valid_568643 = path.getOrDefault("accountName")
+  valid_568643 = validateParameter(valid_568643, JString, required = true,
                                  default = nil)
-  if valid_594414 != nil:
-    section.add "accountName", valid_594414
+  if valid_568643 != nil:
+    section.add "accountName", valid_568643
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4836,11 +4836,11 @@ proc validate_DatabaseAccountsListMongoDBCollections_594409(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594415 = query.getOrDefault("api-version")
-  valid_594415 = validateParameter(valid_594415, JString, required = true,
+  var valid_568644 = query.getOrDefault("api-version")
+  valid_568644 = validateParameter(valid_568644, JString, required = true,
                                  default = nil)
-  if valid_594415 != nil:
-    section.add "api-version", valid_594415
+  if valid_568644 != nil:
+    section.add "api-version", valid_568644
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4849,21 +4849,21 @@ proc validate_DatabaseAccountsListMongoDBCollections_594409(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594416: Call_DatabaseAccountsListMongoDBCollections_594408;
+proc call*(call_568645: Call_DatabaseAccountsListMongoDBCollections_568637;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the MongoDB collection under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594416.validator(path, query, header, formData, body)
-  let scheme = call_594416.pickScheme
+  let valid = call_568645.validator(path, query, header, formData, body)
+  let scheme = call_568645.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594416.url(scheme.get, call_594416.host, call_594416.base,
-                         call_594416.route, valid.getOrDefault("path"),
+  let url = call_568645.url(scheme.get, call_568645.host, call_568645.base,
+                         call_568645.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594416, url, valid)
+  result = hook(call_568645, url, valid)
 
-proc call*(call_594417: Call_DatabaseAccountsListMongoDBCollections_594408;
+proc call*(call_568646: Call_DatabaseAccountsListMongoDBCollections_568637;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsListMongoDBCollections
@@ -4878,24 +4878,24 @@ proc call*(call_594417: Call_DatabaseAccountsListMongoDBCollections_594408;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594418 = newJObject()
-  var query_594419 = newJObject()
-  add(path_594418, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594419, "api-version", newJString(apiVersion))
-  add(path_594418, "subscriptionId", newJString(subscriptionId))
-  add(path_594418, "databaseName", newJString(databaseName))
-  add(path_594418, "accountName", newJString(accountName))
-  result = call_594417.call(path_594418, query_594419, nil, nil, nil)
+  var path_568647 = newJObject()
+  var query_568648 = newJObject()
+  add(path_568647, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568648, "api-version", newJString(apiVersion))
+  add(path_568647, "subscriptionId", newJString(subscriptionId))
+  add(path_568647, "databaseName", newJString(databaseName))
+  add(path_568647, "accountName", newJString(accountName))
+  result = call_568646.call(path_568647, query_568648, nil, nil, nil)
 
-var databaseAccountsListMongoDBCollections* = Call_DatabaseAccountsListMongoDBCollections_594408(
+var databaseAccountsListMongoDBCollections* = Call_DatabaseAccountsListMongoDBCollections_568637(
     name: "databaseAccountsListMongoDBCollections", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}/collections",
-    validator: validate_DatabaseAccountsListMongoDBCollections_594409, base: "",
-    url: url_DatabaseAccountsListMongoDBCollections_594410,
+    validator: validate_DatabaseAccountsListMongoDBCollections_568638, base: "",
+    url: url_DatabaseAccountsListMongoDBCollections_568639,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsCreateUpdateMongoDBCollection_594433 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCreateUpdateMongoDBCollection_594435(protocol: Scheme;
+  Call_DatabaseAccountsCreateUpdateMongoDBCollection_568662 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCreateUpdateMongoDBCollection_568664(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4924,7 +4924,7 @@ proc url_DatabaseAccountsCreateUpdateMongoDBCollection_594435(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCreateUpdateMongoDBCollection_594434(
+proc validate_DatabaseAccountsCreateUpdateMongoDBCollection_568663(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Create or update an Azure Cosmos DB MongoDB Collection
@@ -4945,31 +4945,31 @@ proc validate_DatabaseAccountsCreateUpdateMongoDBCollection_594434(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594436 = path.getOrDefault("resourceGroupName")
-  valid_594436 = validateParameter(valid_594436, JString, required = true,
+  var valid_568665 = path.getOrDefault("resourceGroupName")
+  valid_568665 = validateParameter(valid_568665, JString, required = true,
                                  default = nil)
-  if valid_594436 != nil:
-    section.add "resourceGroupName", valid_594436
-  var valid_594437 = path.getOrDefault("subscriptionId")
-  valid_594437 = validateParameter(valid_594437, JString, required = true,
+  if valid_568665 != nil:
+    section.add "resourceGroupName", valid_568665
+  var valid_568666 = path.getOrDefault("subscriptionId")
+  valid_568666 = validateParameter(valid_568666, JString, required = true,
                                  default = nil)
-  if valid_594437 != nil:
-    section.add "subscriptionId", valid_594437
-  var valid_594438 = path.getOrDefault("databaseName")
-  valid_594438 = validateParameter(valid_594438, JString, required = true,
+  if valid_568666 != nil:
+    section.add "subscriptionId", valid_568666
+  var valid_568667 = path.getOrDefault("databaseName")
+  valid_568667 = validateParameter(valid_568667, JString, required = true,
                                  default = nil)
-  if valid_594438 != nil:
-    section.add "databaseName", valid_594438
-  var valid_594439 = path.getOrDefault("collectionName")
-  valid_594439 = validateParameter(valid_594439, JString, required = true,
+  if valid_568667 != nil:
+    section.add "databaseName", valid_568667
+  var valid_568668 = path.getOrDefault("collectionName")
+  valid_568668 = validateParameter(valid_568668, JString, required = true,
                                  default = nil)
-  if valid_594439 != nil:
-    section.add "collectionName", valid_594439
-  var valid_594440 = path.getOrDefault("accountName")
-  valid_594440 = validateParameter(valid_594440, JString, required = true,
+  if valid_568668 != nil:
+    section.add "collectionName", valid_568668
+  var valid_568669 = path.getOrDefault("accountName")
+  valid_568669 = validateParameter(valid_568669, JString, required = true,
                                  default = nil)
-  if valid_594440 != nil:
-    section.add "accountName", valid_594440
+  if valid_568669 != nil:
+    section.add "accountName", valid_568669
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4977,11 +4977,11 @@ proc validate_DatabaseAccountsCreateUpdateMongoDBCollection_594434(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594441 = query.getOrDefault("api-version")
-  valid_594441 = validateParameter(valid_594441, JString, required = true,
+  var valid_568670 = query.getOrDefault("api-version")
+  valid_568670 = validateParameter(valid_568670, JString, required = true,
                                  default = nil)
-  if valid_594441 != nil:
-    section.add "api-version", valid_594441
+  if valid_568670 != nil:
+    section.add "api-version", valid_568670
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4995,21 +4995,21 @@ proc validate_DatabaseAccountsCreateUpdateMongoDBCollection_594434(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594443: Call_DatabaseAccountsCreateUpdateMongoDBCollection_594433;
+proc call*(call_568672: Call_DatabaseAccountsCreateUpdateMongoDBCollection_568662;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update an Azure Cosmos DB MongoDB Collection
   ## 
-  let valid = call_594443.validator(path, query, header, formData, body)
-  let scheme = call_594443.pickScheme
+  let valid = call_568672.validator(path, query, header, formData, body)
+  let scheme = call_568672.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594443.url(scheme.get, call_594443.host, call_594443.base,
-                         call_594443.route, valid.getOrDefault("path"),
+  let url = call_568672.url(scheme.get, call_568672.host, call_568672.base,
+                         call_568672.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594443, url, valid)
+  result = hook(call_568672, url, valid)
 
-proc call*(call_594444: Call_DatabaseAccountsCreateUpdateMongoDBCollection_594433;
+proc call*(call_568673: Call_DatabaseAccountsCreateUpdateMongoDBCollection_568662;
           resourceGroupName: string;
           createUpdateMongoDBCollectionParameters: JsonNode; apiVersion: string;
           subscriptionId: string; databaseName: string; collectionName: string;
@@ -5030,28 +5030,28 @@ proc call*(call_594444: Call_DatabaseAccountsCreateUpdateMongoDBCollection_59443
   ##                 : Cosmos DB collection name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594445 = newJObject()
-  var query_594446 = newJObject()
-  var body_594447 = newJObject()
-  add(path_594445, "resourceGroupName", newJString(resourceGroupName))
+  var path_568674 = newJObject()
+  var query_568675 = newJObject()
+  var body_568676 = newJObject()
+  add(path_568674, "resourceGroupName", newJString(resourceGroupName))
   if createUpdateMongoDBCollectionParameters != nil:
-    body_594447 = createUpdateMongoDBCollectionParameters
-  add(query_594446, "api-version", newJString(apiVersion))
-  add(path_594445, "subscriptionId", newJString(subscriptionId))
-  add(path_594445, "databaseName", newJString(databaseName))
-  add(path_594445, "collectionName", newJString(collectionName))
-  add(path_594445, "accountName", newJString(accountName))
-  result = call_594444.call(path_594445, query_594446, nil, nil, body_594447)
+    body_568676 = createUpdateMongoDBCollectionParameters
+  add(query_568675, "api-version", newJString(apiVersion))
+  add(path_568674, "subscriptionId", newJString(subscriptionId))
+  add(path_568674, "databaseName", newJString(databaseName))
+  add(path_568674, "collectionName", newJString(collectionName))
+  add(path_568674, "accountName", newJString(accountName))
+  result = call_568673.call(path_568674, query_568675, nil, nil, body_568676)
 
-var databaseAccountsCreateUpdateMongoDBCollection* = Call_DatabaseAccountsCreateUpdateMongoDBCollection_594433(
+var databaseAccountsCreateUpdateMongoDBCollection* = Call_DatabaseAccountsCreateUpdateMongoDBCollection_568662(
     name: "databaseAccountsCreateUpdateMongoDBCollection",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}/collections/{collectionName}",
-    validator: validate_DatabaseAccountsCreateUpdateMongoDBCollection_594434,
-    base: "", url: url_DatabaseAccountsCreateUpdateMongoDBCollection_594435,
+    validator: validate_DatabaseAccountsCreateUpdateMongoDBCollection_568663,
+    base: "", url: url_DatabaseAccountsCreateUpdateMongoDBCollection_568664,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetMongoDBCollection_594420 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetMongoDBCollection_594422(protocol: Scheme;
+  Call_DatabaseAccountsGetMongoDBCollection_568649 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetMongoDBCollection_568651(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5080,7 +5080,7 @@ proc url_DatabaseAccountsGetMongoDBCollection_594422(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetMongoDBCollection_594421(path: JsonNode;
+proc validate_DatabaseAccountsGetMongoDBCollection_568650(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the MongoDB collection under an existing Azure Cosmos DB database account.
   ## 
@@ -5100,31 +5100,31 @@ proc validate_DatabaseAccountsGetMongoDBCollection_594421(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594423 = path.getOrDefault("resourceGroupName")
-  valid_594423 = validateParameter(valid_594423, JString, required = true,
+  var valid_568652 = path.getOrDefault("resourceGroupName")
+  valid_568652 = validateParameter(valid_568652, JString, required = true,
                                  default = nil)
-  if valid_594423 != nil:
-    section.add "resourceGroupName", valid_594423
-  var valid_594424 = path.getOrDefault("subscriptionId")
-  valid_594424 = validateParameter(valid_594424, JString, required = true,
+  if valid_568652 != nil:
+    section.add "resourceGroupName", valid_568652
+  var valid_568653 = path.getOrDefault("subscriptionId")
+  valid_568653 = validateParameter(valid_568653, JString, required = true,
                                  default = nil)
-  if valid_594424 != nil:
-    section.add "subscriptionId", valid_594424
-  var valid_594425 = path.getOrDefault("databaseName")
-  valid_594425 = validateParameter(valid_594425, JString, required = true,
+  if valid_568653 != nil:
+    section.add "subscriptionId", valid_568653
+  var valid_568654 = path.getOrDefault("databaseName")
+  valid_568654 = validateParameter(valid_568654, JString, required = true,
                                  default = nil)
-  if valid_594425 != nil:
-    section.add "databaseName", valid_594425
-  var valid_594426 = path.getOrDefault("collectionName")
-  valid_594426 = validateParameter(valid_594426, JString, required = true,
+  if valid_568654 != nil:
+    section.add "databaseName", valid_568654
+  var valid_568655 = path.getOrDefault("collectionName")
+  valid_568655 = validateParameter(valid_568655, JString, required = true,
                                  default = nil)
-  if valid_594426 != nil:
-    section.add "collectionName", valid_594426
-  var valid_594427 = path.getOrDefault("accountName")
-  valid_594427 = validateParameter(valid_594427, JString, required = true,
+  if valid_568655 != nil:
+    section.add "collectionName", valid_568655
+  var valid_568656 = path.getOrDefault("accountName")
+  valid_568656 = validateParameter(valid_568656, JString, required = true,
                                  default = nil)
-  if valid_594427 != nil:
-    section.add "accountName", valid_594427
+  if valid_568656 != nil:
+    section.add "accountName", valid_568656
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5132,11 +5132,11 @@ proc validate_DatabaseAccountsGetMongoDBCollection_594421(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594428 = query.getOrDefault("api-version")
-  valid_594428 = validateParameter(valid_594428, JString, required = true,
+  var valid_568657 = query.getOrDefault("api-version")
+  valid_568657 = validateParameter(valid_568657, JString, required = true,
                                  default = nil)
-  if valid_594428 != nil:
-    section.add "api-version", valid_594428
+  if valid_568657 != nil:
+    section.add "api-version", valid_568657
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5145,21 +5145,21 @@ proc validate_DatabaseAccountsGetMongoDBCollection_594421(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594429: Call_DatabaseAccountsGetMongoDBCollection_594420;
+proc call*(call_568658: Call_DatabaseAccountsGetMongoDBCollection_568649;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the MongoDB collection under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594429.validator(path, query, header, formData, body)
-  let scheme = call_594429.pickScheme
+  let valid = call_568658.validator(path, query, header, formData, body)
+  let scheme = call_568658.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594429.url(scheme.get, call_594429.host, call_594429.base,
-                         call_594429.route, valid.getOrDefault("path"),
+  let url = call_568658.url(scheme.get, call_568658.host, call_568658.base,
+                         call_568658.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594429, url, valid)
+  result = hook(call_568658, url, valid)
 
-proc call*(call_594430: Call_DatabaseAccountsGetMongoDBCollection_594420;
+proc call*(call_568659: Call_DatabaseAccountsGetMongoDBCollection_568649;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; collectionName: string; accountName: string): Recallable =
   ## databaseAccountsGetMongoDBCollection
@@ -5176,24 +5176,24 @@ proc call*(call_594430: Call_DatabaseAccountsGetMongoDBCollection_594420;
   ##                 : Cosmos DB collection name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594431 = newJObject()
-  var query_594432 = newJObject()
-  add(path_594431, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594432, "api-version", newJString(apiVersion))
-  add(path_594431, "subscriptionId", newJString(subscriptionId))
-  add(path_594431, "databaseName", newJString(databaseName))
-  add(path_594431, "collectionName", newJString(collectionName))
-  add(path_594431, "accountName", newJString(accountName))
-  result = call_594430.call(path_594431, query_594432, nil, nil, nil)
+  var path_568660 = newJObject()
+  var query_568661 = newJObject()
+  add(path_568660, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568661, "api-version", newJString(apiVersion))
+  add(path_568660, "subscriptionId", newJString(subscriptionId))
+  add(path_568660, "databaseName", newJString(databaseName))
+  add(path_568660, "collectionName", newJString(collectionName))
+  add(path_568660, "accountName", newJString(accountName))
+  result = call_568659.call(path_568660, query_568661, nil, nil, nil)
 
-var databaseAccountsGetMongoDBCollection* = Call_DatabaseAccountsGetMongoDBCollection_594420(
+var databaseAccountsGetMongoDBCollection* = Call_DatabaseAccountsGetMongoDBCollection_568649(
     name: "databaseAccountsGetMongoDBCollection", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}/collections/{collectionName}",
-    validator: validate_DatabaseAccountsGetMongoDBCollection_594421, base: "",
-    url: url_DatabaseAccountsGetMongoDBCollection_594422, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetMongoDBCollection_568650, base: "",
+    url: url_DatabaseAccountsGetMongoDBCollection_568651, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsDeleteMongoDBCollection_594448 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsDeleteMongoDBCollection_594450(protocol: Scheme;
+  Call_DatabaseAccountsDeleteMongoDBCollection_568677 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsDeleteMongoDBCollection_568679(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5222,7 +5222,7 @@ proc url_DatabaseAccountsDeleteMongoDBCollection_594450(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsDeleteMongoDBCollection_594449(path: JsonNode;
+proc validate_DatabaseAccountsDeleteMongoDBCollection_568678(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Azure Cosmos DB MongoDB Collection.
   ## 
@@ -5242,31 +5242,31 @@ proc validate_DatabaseAccountsDeleteMongoDBCollection_594449(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594451 = path.getOrDefault("resourceGroupName")
-  valid_594451 = validateParameter(valid_594451, JString, required = true,
+  var valid_568680 = path.getOrDefault("resourceGroupName")
+  valid_568680 = validateParameter(valid_568680, JString, required = true,
                                  default = nil)
-  if valid_594451 != nil:
-    section.add "resourceGroupName", valid_594451
-  var valid_594452 = path.getOrDefault("subscriptionId")
-  valid_594452 = validateParameter(valid_594452, JString, required = true,
+  if valid_568680 != nil:
+    section.add "resourceGroupName", valid_568680
+  var valid_568681 = path.getOrDefault("subscriptionId")
+  valid_568681 = validateParameter(valid_568681, JString, required = true,
                                  default = nil)
-  if valid_594452 != nil:
-    section.add "subscriptionId", valid_594452
-  var valid_594453 = path.getOrDefault("databaseName")
-  valid_594453 = validateParameter(valid_594453, JString, required = true,
+  if valid_568681 != nil:
+    section.add "subscriptionId", valid_568681
+  var valid_568682 = path.getOrDefault("databaseName")
+  valid_568682 = validateParameter(valid_568682, JString, required = true,
                                  default = nil)
-  if valid_594453 != nil:
-    section.add "databaseName", valid_594453
-  var valid_594454 = path.getOrDefault("collectionName")
-  valid_594454 = validateParameter(valid_594454, JString, required = true,
+  if valid_568682 != nil:
+    section.add "databaseName", valid_568682
+  var valid_568683 = path.getOrDefault("collectionName")
+  valid_568683 = validateParameter(valid_568683, JString, required = true,
                                  default = nil)
-  if valid_594454 != nil:
-    section.add "collectionName", valid_594454
-  var valid_594455 = path.getOrDefault("accountName")
-  valid_594455 = validateParameter(valid_594455, JString, required = true,
+  if valid_568683 != nil:
+    section.add "collectionName", valid_568683
+  var valid_568684 = path.getOrDefault("accountName")
+  valid_568684 = validateParameter(valid_568684, JString, required = true,
                                  default = nil)
-  if valid_594455 != nil:
-    section.add "accountName", valid_594455
+  if valid_568684 != nil:
+    section.add "accountName", valid_568684
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5274,11 +5274,11 @@ proc validate_DatabaseAccountsDeleteMongoDBCollection_594449(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594456 = query.getOrDefault("api-version")
-  valid_594456 = validateParameter(valid_594456, JString, required = true,
+  var valid_568685 = query.getOrDefault("api-version")
+  valid_568685 = validateParameter(valid_568685, JString, required = true,
                                  default = nil)
-  if valid_594456 != nil:
-    section.add "api-version", valid_594456
+  if valid_568685 != nil:
+    section.add "api-version", valid_568685
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5287,21 +5287,21 @@ proc validate_DatabaseAccountsDeleteMongoDBCollection_594449(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594457: Call_DatabaseAccountsDeleteMongoDBCollection_594448;
+proc call*(call_568686: Call_DatabaseAccountsDeleteMongoDBCollection_568677;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing Azure Cosmos DB MongoDB Collection.
   ## 
-  let valid = call_594457.validator(path, query, header, formData, body)
-  let scheme = call_594457.pickScheme
+  let valid = call_568686.validator(path, query, header, formData, body)
+  let scheme = call_568686.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594457.url(scheme.get, call_594457.host, call_594457.base,
-                         call_594457.route, valid.getOrDefault("path"),
+  let url = call_568686.url(scheme.get, call_568686.host, call_568686.base,
+                         call_568686.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594457, url, valid)
+  result = hook(call_568686, url, valid)
 
-proc call*(call_594458: Call_DatabaseAccountsDeleteMongoDBCollection_594448;
+proc call*(call_568687: Call_DatabaseAccountsDeleteMongoDBCollection_568677;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; collectionName: string; accountName: string): Recallable =
   ## databaseAccountsDeleteMongoDBCollection
@@ -5318,25 +5318,25 @@ proc call*(call_594458: Call_DatabaseAccountsDeleteMongoDBCollection_594448;
   ##                 : Cosmos DB collection name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594459 = newJObject()
-  var query_594460 = newJObject()
-  add(path_594459, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594460, "api-version", newJString(apiVersion))
-  add(path_594459, "subscriptionId", newJString(subscriptionId))
-  add(path_594459, "databaseName", newJString(databaseName))
-  add(path_594459, "collectionName", newJString(collectionName))
-  add(path_594459, "accountName", newJString(accountName))
-  result = call_594458.call(path_594459, query_594460, nil, nil, nil)
+  var path_568688 = newJObject()
+  var query_568689 = newJObject()
+  add(path_568688, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568689, "api-version", newJString(apiVersion))
+  add(path_568688, "subscriptionId", newJString(subscriptionId))
+  add(path_568688, "databaseName", newJString(databaseName))
+  add(path_568688, "collectionName", newJString(collectionName))
+  add(path_568688, "accountName", newJString(accountName))
+  result = call_568687.call(path_568688, query_568689, nil, nil, nil)
 
-var databaseAccountsDeleteMongoDBCollection* = Call_DatabaseAccountsDeleteMongoDBCollection_594448(
+var databaseAccountsDeleteMongoDBCollection* = Call_DatabaseAccountsDeleteMongoDBCollection_568677(
     name: "databaseAccountsDeleteMongoDBCollection", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}/collections/{collectionName}",
-    validator: validate_DatabaseAccountsDeleteMongoDBCollection_594449, base: "",
-    url: url_DatabaseAccountsDeleteMongoDBCollection_594450,
+    validator: validate_DatabaseAccountsDeleteMongoDBCollection_568678, base: "",
+    url: url_DatabaseAccountsDeleteMongoDBCollection_568679,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsUpdateMongoDBCollectionThroughput_594474 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsUpdateMongoDBCollectionThroughput_594476(
+  Call_DatabaseAccountsUpdateMongoDBCollectionThroughput_568703 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsUpdateMongoDBCollectionThroughput_568705(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -5367,7 +5367,7 @@ proc url_DatabaseAccountsUpdateMongoDBCollectionThroughput_594476(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsUpdateMongoDBCollectionThroughput_594475(
+proc validate_DatabaseAccountsUpdateMongoDBCollectionThroughput_568704(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Update the RUs per second of an Azure Cosmos DB MongoDB collection
@@ -5388,31 +5388,31 @@ proc validate_DatabaseAccountsUpdateMongoDBCollectionThroughput_594475(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594477 = path.getOrDefault("resourceGroupName")
-  valid_594477 = validateParameter(valid_594477, JString, required = true,
+  var valid_568706 = path.getOrDefault("resourceGroupName")
+  valid_568706 = validateParameter(valid_568706, JString, required = true,
                                  default = nil)
-  if valid_594477 != nil:
-    section.add "resourceGroupName", valid_594477
-  var valid_594478 = path.getOrDefault("subscriptionId")
-  valid_594478 = validateParameter(valid_594478, JString, required = true,
+  if valid_568706 != nil:
+    section.add "resourceGroupName", valid_568706
+  var valid_568707 = path.getOrDefault("subscriptionId")
+  valid_568707 = validateParameter(valid_568707, JString, required = true,
                                  default = nil)
-  if valid_594478 != nil:
-    section.add "subscriptionId", valid_594478
-  var valid_594479 = path.getOrDefault("databaseName")
-  valid_594479 = validateParameter(valid_594479, JString, required = true,
+  if valid_568707 != nil:
+    section.add "subscriptionId", valid_568707
+  var valid_568708 = path.getOrDefault("databaseName")
+  valid_568708 = validateParameter(valid_568708, JString, required = true,
                                  default = nil)
-  if valid_594479 != nil:
-    section.add "databaseName", valid_594479
-  var valid_594480 = path.getOrDefault("collectionName")
-  valid_594480 = validateParameter(valid_594480, JString, required = true,
+  if valid_568708 != nil:
+    section.add "databaseName", valid_568708
+  var valid_568709 = path.getOrDefault("collectionName")
+  valid_568709 = validateParameter(valid_568709, JString, required = true,
                                  default = nil)
-  if valid_594480 != nil:
-    section.add "collectionName", valid_594480
-  var valid_594481 = path.getOrDefault("accountName")
-  valid_594481 = validateParameter(valid_594481, JString, required = true,
+  if valid_568709 != nil:
+    section.add "collectionName", valid_568709
+  var valid_568710 = path.getOrDefault("accountName")
+  valid_568710 = validateParameter(valid_568710, JString, required = true,
                                  default = nil)
-  if valid_594481 != nil:
-    section.add "accountName", valid_594481
+  if valid_568710 != nil:
+    section.add "accountName", valid_568710
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5420,11 +5420,11 @@ proc validate_DatabaseAccountsUpdateMongoDBCollectionThroughput_594475(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594482 = query.getOrDefault("api-version")
-  valid_594482 = validateParameter(valid_594482, JString, required = true,
+  var valid_568711 = query.getOrDefault("api-version")
+  valid_568711 = validateParameter(valid_568711, JString, required = true,
                                  default = nil)
-  if valid_594482 != nil:
-    section.add "api-version", valid_594482
+  if valid_568711 != nil:
+    section.add "api-version", valid_568711
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5438,21 +5438,21 @@ proc validate_DatabaseAccountsUpdateMongoDBCollectionThroughput_594475(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594484: Call_DatabaseAccountsUpdateMongoDBCollectionThroughput_594474;
+proc call*(call_568713: Call_DatabaseAccountsUpdateMongoDBCollectionThroughput_568703;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update the RUs per second of an Azure Cosmos DB MongoDB collection
   ## 
-  let valid = call_594484.validator(path, query, header, formData, body)
-  let scheme = call_594484.pickScheme
+  let valid = call_568713.validator(path, query, header, formData, body)
+  let scheme = call_568713.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594484.url(scheme.get, call_594484.host, call_594484.base,
-                         call_594484.route, valid.getOrDefault("path"),
+  let url = call_568713.url(scheme.get, call_568713.host, call_568713.base,
+                         call_568713.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594484, url, valid)
+  result = hook(call_568713, url, valid)
 
-proc call*(call_594485: Call_DatabaseAccountsUpdateMongoDBCollectionThroughput_594474;
+proc call*(call_568714: Call_DatabaseAccountsUpdateMongoDBCollectionThroughput_568703;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; updateThroughputParameters: JsonNode;
           collectionName: string; accountName: string): Recallable =
@@ -5472,28 +5472,28 @@ proc call*(call_594485: Call_DatabaseAccountsUpdateMongoDBCollectionThroughput_5
   ##                 : Cosmos DB collection name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594486 = newJObject()
-  var query_594487 = newJObject()
-  var body_594488 = newJObject()
-  add(path_594486, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594487, "api-version", newJString(apiVersion))
-  add(path_594486, "subscriptionId", newJString(subscriptionId))
-  add(path_594486, "databaseName", newJString(databaseName))
+  var path_568715 = newJObject()
+  var query_568716 = newJObject()
+  var body_568717 = newJObject()
+  add(path_568715, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568716, "api-version", newJString(apiVersion))
+  add(path_568715, "subscriptionId", newJString(subscriptionId))
+  add(path_568715, "databaseName", newJString(databaseName))
   if updateThroughputParameters != nil:
-    body_594488 = updateThroughputParameters
-  add(path_594486, "collectionName", newJString(collectionName))
-  add(path_594486, "accountName", newJString(accountName))
-  result = call_594485.call(path_594486, query_594487, nil, nil, body_594488)
+    body_568717 = updateThroughputParameters
+  add(path_568715, "collectionName", newJString(collectionName))
+  add(path_568715, "accountName", newJString(accountName))
+  result = call_568714.call(path_568715, query_568716, nil, nil, body_568717)
 
-var databaseAccountsUpdateMongoDBCollectionThroughput* = Call_DatabaseAccountsUpdateMongoDBCollectionThroughput_594474(
+var databaseAccountsUpdateMongoDBCollectionThroughput* = Call_DatabaseAccountsUpdateMongoDBCollectionThroughput_568703(
     name: "databaseAccountsUpdateMongoDBCollectionThroughput",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}/collections/{collectionName}/settings/throughput",
-    validator: validate_DatabaseAccountsUpdateMongoDBCollectionThroughput_594475,
-    base: "", url: url_DatabaseAccountsUpdateMongoDBCollectionThroughput_594476,
+    validator: validate_DatabaseAccountsUpdateMongoDBCollectionThroughput_568704,
+    base: "", url: url_DatabaseAccountsUpdateMongoDBCollectionThroughput_568705,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetMongoDBCollectionThroughput_594461 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetMongoDBCollectionThroughput_594463(protocol: Scheme;
+  Call_DatabaseAccountsGetMongoDBCollectionThroughput_568690 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetMongoDBCollectionThroughput_568692(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5523,7 +5523,7 @@ proc url_DatabaseAccountsGetMongoDBCollectionThroughput_594463(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetMongoDBCollectionThroughput_594462(
+proc validate_DatabaseAccountsGetMongoDBCollectionThroughput_568691(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets the RUs per second of the MongoDB collection under an existing Azure Cosmos DB database account with the provided name.
@@ -5544,31 +5544,31 @@ proc validate_DatabaseAccountsGetMongoDBCollectionThroughput_594462(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594464 = path.getOrDefault("resourceGroupName")
-  valid_594464 = validateParameter(valid_594464, JString, required = true,
+  var valid_568693 = path.getOrDefault("resourceGroupName")
+  valid_568693 = validateParameter(valid_568693, JString, required = true,
                                  default = nil)
-  if valid_594464 != nil:
-    section.add "resourceGroupName", valid_594464
-  var valid_594465 = path.getOrDefault("subscriptionId")
-  valid_594465 = validateParameter(valid_594465, JString, required = true,
+  if valid_568693 != nil:
+    section.add "resourceGroupName", valid_568693
+  var valid_568694 = path.getOrDefault("subscriptionId")
+  valid_568694 = validateParameter(valid_568694, JString, required = true,
                                  default = nil)
-  if valid_594465 != nil:
-    section.add "subscriptionId", valid_594465
-  var valid_594466 = path.getOrDefault("databaseName")
-  valid_594466 = validateParameter(valid_594466, JString, required = true,
+  if valid_568694 != nil:
+    section.add "subscriptionId", valid_568694
+  var valid_568695 = path.getOrDefault("databaseName")
+  valid_568695 = validateParameter(valid_568695, JString, required = true,
                                  default = nil)
-  if valid_594466 != nil:
-    section.add "databaseName", valid_594466
-  var valid_594467 = path.getOrDefault("collectionName")
-  valid_594467 = validateParameter(valid_594467, JString, required = true,
+  if valid_568695 != nil:
+    section.add "databaseName", valid_568695
+  var valid_568696 = path.getOrDefault("collectionName")
+  valid_568696 = validateParameter(valid_568696, JString, required = true,
                                  default = nil)
-  if valid_594467 != nil:
-    section.add "collectionName", valid_594467
-  var valid_594468 = path.getOrDefault("accountName")
-  valid_594468 = validateParameter(valid_594468, JString, required = true,
+  if valid_568696 != nil:
+    section.add "collectionName", valid_568696
+  var valid_568697 = path.getOrDefault("accountName")
+  valid_568697 = validateParameter(valid_568697, JString, required = true,
                                  default = nil)
-  if valid_594468 != nil:
-    section.add "accountName", valid_594468
+  if valid_568697 != nil:
+    section.add "accountName", valid_568697
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5576,11 +5576,11 @@ proc validate_DatabaseAccountsGetMongoDBCollectionThroughput_594462(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594469 = query.getOrDefault("api-version")
-  valid_594469 = validateParameter(valid_594469, JString, required = true,
+  var valid_568698 = query.getOrDefault("api-version")
+  valid_568698 = validateParameter(valid_568698, JString, required = true,
                                  default = nil)
-  if valid_594469 != nil:
-    section.add "api-version", valid_594469
+  if valid_568698 != nil:
+    section.add "api-version", valid_568698
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5589,21 +5589,21 @@ proc validate_DatabaseAccountsGetMongoDBCollectionThroughput_594462(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594470: Call_DatabaseAccountsGetMongoDBCollectionThroughput_594461;
+proc call*(call_568699: Call_DatabaseAccountsGetMongoDBCollectionThroughput_568690;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the RUs per second of the MongoDB collection under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594470.validator(path, query, header, formData, body)
-  let scheme = call_594470.pickScheme
+  let valid = call_568699.validator(path, query, header, formData, body)
+  let scheme = call_568699.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594470.url(scheme.get, call_594470.host, call_594470.base,
-                         call_594470.route, valid.getOrDefault("path"),
+  let url = call_568699.url(scheme.get, call_568699.host, call_568699.base,
+                         call_568699.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594470, url, valid)
+  result = hook(call_568699, url, valid)
 
-proc call*(call_594471: Call_DatabaseAccountsGetMongoDBCollectionThroughput_594461;
+proc call*(call_568700: Call_DatabaseAccountsGetMongoDBCollectionThroughput_568690;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; collectionName: string; accountName: string): Recallable =
   ## databaseAccountsGetMongoDBCollectionThroughput
@@ -5620,25 +5620,25 @@ proc call*(call_594471: Call_DatabaseAccountsGetMongoDBCollectionThroughput_5944
   ##                 : Cosmos DB collection name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594472 = newJObject()
-  var query_594473 = newJObject()
-  add(path_594472, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594473, "api-version", newJString(apiVersion))
-  add(path_594472, "subscriptionId", newJString(subscriptionId))
-  add(path_594472, "databaseName", newJString(databaseName))
-  add(path_594472, "collectionName", newJString(collectionName))
-  add(path_594472, "accountName", newJString(accountName))
-  result = call_594471.call(path_594472, query_594473, nil, nil, nil)
+  var path_568701 = newJObject()
+  var query_568702 = newJObject()
+  add(path_568701, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568702, "api-version", newJString(apiVersion))
+  add(path_568701, "subscriptionId", newJString(subscriptionId))
+  add(path_568701, "databaseName", newJString(databaseName))
+  add(path_568701, "collectionName", newJString(collectionName))
+  add(path_568701, "accountName", newJString(accountName))
+  result = call_568700.call(path_568701, query_568702, nil, nil, nil)
 
-var databaseAccountsGetMongoDBCollectionThroughput* = Call_DatabaseAccountsGetMongoDBCollectionThroughput_594461(
+var databaseAccountsGetMongoDBCollectionThroughput* = Call_DatabaseAccountsGetMongoDBCollectionThroughput_568690(
     name: "databaseAccountsGetMongoDBCollectionThroughput",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}/collections/{collectionName}/settings/throughput",
-    validator: validate_DatabaseAccountsGetMongoDBCollectionThroughput_594462,
-    base: "", url: url_DatabaseAccountsGetMongoDBCollectionThroughput_594463,
+    validator: validate_DatabaseAccountsGetMongoDBCollectionThroughput_568691,
+    base: "", url: url_DatabaseAccountsGetMongoDBCollectionThroughput_568692,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594501 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594503(protocol: Scheme;
+  Call_DatabaseAccountsUpdateMongoDBDatabaseThroughput_568730 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsUpdateMongoDBDatabaseThroughput_568732(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5665,7 +5665,7 @@ proc url_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594503(protocol: Scheme
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594502(
+proc validate_DatabaseAccountsUpdateMongoDBDatabaseThroughput_568731(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Update RUs per second of the an Azure Cosmos DB MongoDB database
@@ -5684,26 +5684,26 @@ proc validate_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594502(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594504 = path.getOrDefault("resourceGroupName")
-  valid_594504 = validateParameter(valid_594504, JString, required = true,
+  var valid_568733 = path.getOrDefault("resourceGroupName")
+  valid_568733 = validateParameter(valid_568733, JString, required = true,
                                  default = nil)
-  if valid_594504 != nil:
-    section.add "resourceGroupName", valid_594504
-  var valid_594505 = path.getOrDefault("subscriptionId")
-  valid_594505 = validateParameter(valid_594505, JString, required = true,
+  if valid_568733 != nil:
+    section.add "resourceGroupName", valid_568733
+  var valid_568734 = path.getOrDefault("subscriptionId")
+  valid_568734 = validateParameter(valid_568734, JString, required = true,
                                  default = nil)
-  if valid_594505 != nil:
-    section.add "subscriptionId", valid_594505
-  var valid_594506 = path.getOrDefault("databaseName")
-  valid_594506 = validateParameter(valid_594506, JString, required = true,
+  if valid_568734 != nil:
+    section.add "subscriptionId", valid_568734
+  var valid_568735 = path.getOrDefault("databaseName")
+  valid_568735 = validateParameter(valid_568735, JString, required = true,
                                  default = nil)
-  if valid_594506 != nil:
-    section.add "databaseName", valid_594506
-  var valid_594507 = path.getOrDefault("accountName")
-  valid_594507 = validateParameter(valid_594507, JString, required = true,
+  if valid_568735 != nil:
+    section.add "databaseName", valid_568735
+  var valid_568736 = path.getOrDefault("accountName")
+  valid_568736 = validateParameter(valid_568736, JString, required = true,
                                  default = nil)
-  if valid_594507 != nil:
-    section.add "accountName", valid_594507
+  if valid_568736 != nil:
+    section.add "accountName", valid_568736
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5711,11 +5711,11 @@ proc validate_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594502(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594508 = query.getOrDefault("api-version")
-  valid_594508 = validateParameter(valid_594508, JString, required = true,
+  var valid_568737 = query.getOrDefault("api-version")
+  valid_568737 = validateParameter(valid_568737, JString, required = true,
                                  default = nil)
-  if valid_594508 != nil:
-    section.add "api-version", valid_594508
+  if valid_568737 != nil:
+    section.add "api-version", valid_568737
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5729,21 +5729,21 @@ proc validate_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594502(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594510: Call_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594501;
+proc call*(call_568739: Call_DatabaseAccountsUpdateMongoDBDatabaseThroughput_568730;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update RUs per second of the an Azure Cosmos DB MongoDB database
   ## 
-  let valid = call_594510.validator(path, query, header, formData, body)
-  let scheme = call_594510.pickScheme
+  let valid = call_568739.validator(path, query, header, formData, body)
+  let scheme = call_568739.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594510.url(scheme.get, call_594510.host, call_594510.base,
-                         call_594510.route, valid.getOrDefault("path"),
+  let url = call_568739.url(scheme.get, call_568739.host, call_568739.base,
+                         call_568739.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594510, url, valid)
+  result = hook(call_568739, url, valid)
 
-proc call*(call_594511: Call_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594501;
+proc call*(call_568740: Call_DatabaseAccountsUpdateMongoDBDatabaseThroughput_568730;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; updateThroughputParameters: JsonNode;
           accountName: string): Recallable =
@@ -5761,27 +5761,27 @@ proc call*(call_594511: Call_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594
   ##                             : The RUs per second of the parameters to provide for the current MongoDB database.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594512 = newJObject()
-  var query_594513 = newJObject()
-  var body_594514 = newJObject()
-  add(path_594512, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594513, "api-version", newJString(apiVersion))
-  add(path_594512, "subscriptionId", newJString(subscriptionId))
-  add(path_594512, "databaseName", newJString(databaseName))
+  var path_568741 = newJObject()
+  var query_568742 = newJObject()
+  var body_568743 = newJObject()
+  add(path_568741, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568742, "api-version", newJString(apiVersion))
+  add(path_568741, "subscriptionId", newJString(subscriptionId))
+  add(path_568741, "databaseName", newJString(databaseName))
   if updateThroughputParameters != nil:
-    body_594514 = updateThroughputParameters
-  add(path_594512, "accountName", newJString(accountName))
-  result = call_594511.call(path_594512, query_594513, nil, nil, body_594514)
+    body_568743 = updateThroughputParameters
+  add(path_568741, "accountName", newJString(accountName))
+  result = call_568740.call(path_568741, query_568742, nil, nil, body_568743)
 
-var databaseAccountsUpdateMongoDBDatabaseThroughput* = Call_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594501(
+var databaseAccountsUpdateMongoDBDatabaseThroughput* = Call_DatabaseAccountsUpdateMongoDBDatabaseThroughput_568730(
     name: "databaseAccountsUpdateMongoDBDatabaseThroughput",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}/settings/throughput",
-    validator: validate_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594502,
-    base: "", url: url_DatabaseAccountsUpdateMongoDBDatabaseThroughput_594503,
+    validator: validate_DatabaseAccountsUpdateMongoDBDatabaseThroughput_568731,
+    base: "", url: url_DatabaseAccountsUpdateMongoDBDatabaseThroughput_568732,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetMongoDBDatabaseThroughput_594489 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetMongoDBDatabaseThroughput_594491(protocol: Scheme;
+  Call_DatabaseAccountsGetMongoDBDatabaseThroughput_568718 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetMongoDBDatabaseThroughput_568720(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5808,7 +5808,7 @@ proc url_DatabaseAccountsGetMongoDBDatabaseThroughput_594491(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetMongoDBDatabaseThroughput_594490(path: JsonNode;
+proc validate_DatabaseAccountsGetMongoDBDatabaseThroughput_568719(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the RUs per second of the MongoDB database under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -5826,26 +5826,26 @@ proc validate_DatabaseAccountsGetMongoDBDatabaseThroughput_594490(path: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594492 = path.getOrDefault("resourceGroupName")
-  valid_594492 = validateParameter(valid_594492, JString, required = true,
+  var valid_568721 = path.getOrDefault("resourceGroupName")
+  valid_568721 = validateParameter(valid_568721, JString, required = true,
                                  default = nil)
-  if valid_594492 != nil:
-    section.add "resourceGroupName", valid_594492
-  var valid_594493 = path.getOrDefault("subscriptionId")
-  valid_594493 = validateParameter(valid_594493, JString, required = true,
+  if valid_568721 != nil:
+    section.add "resourceGroupName", valid_568721
+  var valid_568722 = path.getOrDefault("subscriptionId")
+  valid_568722 = validateParameter(valid_568722, JString, required = true,
                                  default = nil)
-  if valid_594493 != nil:
-    section.add "subscriptionId", valid_594493
-  var valid_594494 = path.getOrDefault("databaseName")
-  valid_594494 = validateParameter(valid_594494, JString, required = true,
+  if valid_568722 != nil:
+    section.add "subscriptionId", valid_568722
+  var valid_568723 = path.getOrDefault("databaseName")
+  valid_568723 = validateParameter(valid_568723, JString, required = true,
                                  default = nil)
-  if valid_594494 != nil:
-    section.add "databaseName", valid_594494
-  var valid_594495 = path.getOrDefault("accountName")
-  valid_594495 = validateParameter(valid_594495, JString, required = true,
+  if valid_568723 != nil:
+    section.add "databaseName", valid_568723
+  var valid_568724 = path.getOrDefault("accountName")
+  valid_568724 = validateParameter(valid_568724, JString, required = true,
                                  default = nil)
-  if valid_594495 != nil:
-    section.add "accountName", valid_594495
+  if valid_568724 != nil:
+    section.add "accountName", valid_568724
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5853,11 +5853,11 @@ proc validate_DatabaseAccountsGetMongoDBDatabaseThroughput_594490(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594496 = query.getOrDefault("api-version")
-  valid_594496 = validateParameter(valid_594496, JString, required = true,
+  var valid_568725 = query.getOrDefault("api-version")
+  valid_568725 = validateParameter(valid_568725, JString, required = true,
                                  default = nil)
-  if valid_594496 != nil:
-    section.add "api-version", valid_594496
+  if valid_568725 != nil:
+    section.add "api-version", valid_568725
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5866,21 +5866,21 @@ proc validate_DatabaseAccountsGetMongoDBDatabaseThroughput_594490(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594497: Call_DatabaseAccountsGetMongoDBDatabaseThroughput_594489;
+proc call*(call_568726: Call_DatabaseAccountsGetMongoDBDatabaseThroughput_568718;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the RUs per second of the MongoDB database under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594497.validator(path, query, header, formData, body)
-  let scheme = call_594497.pickScheme
+  let valid = call_568726.validator(path, query, header, formData, body)
+  let scheme = call_568726.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594497.url(scheme.get, call_594497.host, call_594497.base,
-                         call_594497.route, valid.getOrDefault("path"),
+  let url = call_568726.url(scheme.get, call_568726.host, call_568726.base,
+                         call_568726.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594497, url, valid)
+  result = hook(call_568726, url, valid)
 
-proc call*(call_594498: Call_DatabaseAccountsGetMongoDBDatabaseThroughput_594489;
+proc call*(call_568727: Call_DatabaseAccountsGetMongoDBDatabaseThroughput_568718;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsGetMongoDBDatabaseThroughput
@@ -5895,24 +5895,24 @@ proc call*(call_594498: Call_DatabaseAccountsGetMongoDBDatabaseThroughput_594489
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594499 = newJObject()
-  var query_594500 = newJObject()
-  add(path_594499, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594500, "api-version", newJString(apiVersion))
-  add(path_594499, "subscriptionId", newJString(subscriptionId))
-  add(path_594499, "databaseName", newJString(databaseName))
-  add(path_594499, "accountName", newJString(accountName))
-  result = call_594498.call(path_594499, query_594500, nil, nil, nil)
+  var path_568728 = newJObject()
+  var query_568729 = newJObject()
+  add(path_568728, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568729, "api-version", newJString(apiVersion))
+  add(path_568728, "subscriptionId", newJString(subscriptionId))
+  add(path_568728, "databaseName", newJString(databaseName))
+  add(path_568728, "accountName", newJString(accountName))
+  result = call_568727.call(path_568728, query_568729, nil, nil, nil)
 
-var databaseAccountsGetMongoDBDatabaseThroughput* = Call_DatabaseAccountsGetMongoDBDatabaseThroughput_594489(
+var databaseAccountsGetMongoDBDatabaseThroughput* = Call_DatabaseAccountsGetMongoDBDatabaseThroughput_568718(
     name: "databaseAccountsGetMongoDBDatabaseThroughput",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/mongodb/databases/{databaseName}/settings/throughput",
-    validator: validate_DatabaseAccountsGetMongoDBDatabaseThroughput_594490,
-    base: "", url: url_DatabaseAccountsGetMongoDBDatabaseThroughput_594491,
+    validator: validate_DatabaseAccountsGetMongoDBDatabaseThroughput_568719,
+    base: "", url: url_DatabaseAccountsGetMongoDBDatabaseThroughput_568720,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListSqlDatabases_594515 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListSqlDatabases_594517(protocol: Scheme; host: string;
+  Call_DatabaseAccountsListSqlDatabases_568744 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListSqlDatabases_568746(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5936,7 +5936,7 @@ proc url_DatabaseAccountsListSqlDatabases_594517(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListSqlDatabases_594516(path: JsonNode;
+proc validate_DatabaseAccountsListSqlDatabases_568745(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the SQL databases under an existing Azure Cosmos DB database account.
   ## 
@@ -5952,21 +5952,21 @@ proc validate_DatabaseAccountsListSqlDatabases_594516(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594518 = path.getOrDefault("resourceGroupName")
-  valid_594518 = validateParameter(valid_594518, JString, required = true,
+  var valid_568747 = path.getOrDefault("resourceGroupName")
+  valid_568747 = validateParameter(valid_568747, JString, required = true,
                                  default = nil)
-  if valid_594518 != nil:
-    section.add "resourceGroupName", valid_594518
-  var valid_594519 = path.getOrDefault("subscriptionId")
-  valid_594519 = validateParameter(valid_594519, JString, required = true,
+  if valid_568747 != nil:
+    section.add "resourceGroupName", valid_568747
+  var valid_568748 = path.getOrDefault("subscriptionId")
+  valid_568748 = validateParameter(valid_568748, JString, required = true,
                                  default = nil)
-  if valid_594519 != nil:
-    section.add "subscriptionId", valid_594519
-  var valid_594520 = path.getOrDefault("accountName")
-  valid_594520 = validateParameter(valid_594520, JString, required = true,
+  if valid_568748 != nil:
+    section.add "subscriptionId", valid_568748
+  var valid_568749 = path.getOrDefault("accountName")
+  valid_568749 = validateParameter(valid_568749, JString, required = true,
                                  default = nil)
-  if valid_594520 != nil:
-    section.add "accountName", valid_594520
+  if valid_568749 != nil:
+    section.add "accountName", valid_568749
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5974,11 +5974,11 @@ proc validate_DatabaseAccountsListSqlDatabases_594516(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594521 = query.getOrDefault("api-version")
-  valid_594521 = validateParameter(valid_594521, JString, required = true,
+  var valid_568750 = query.getOrDefault("api-version")
+  valid_568750 = validateParameter(valid_568750, JString, required = true,
                                  default = nil)
-  if valid_594521 != nil:
-    section.add "api-version", valid_594521
+  if valid_568750 != nil:
+    section.add "api-version", valid_568750
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5987,21 +5987,21 @@ proc validate_DatabaseAccountsListSqlDatabases_594516(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594522: Call_DatabaseAccountsListSqlDatabases_594515;
+proc call*(call_568751: Call_DatabaseAccountsListSqlDatabases_568744;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the SQL databases under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594522.validator(path, query, header, formData, body)
-  let scheme = call_594522.pickScheme
+  let valid = call_568751.validator(path, query, header, formData, body)
+  let scheme = call_568751.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594522.url(scheme.get, call_594522.host, call_594522.base,
-                         call_594522.route, valid.getOrDefault("path"),
+  let url = call_568751.url(scheme.get, call_568751.host, call_568751.base,
+                         call_568751.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594522, url, valid)
+  result = hook(call_568751, url, valid)
 
-proc call*(call_594523: Call_DatabaseAccountsListSqlDatabases_594515;
+proc call*(call_568752: Call_DatabaseAccountsListSqlDatabases_568744;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsListSqlDatabases
@@ -6014,22 +6014,22 @@ proc call*(call_594523: Call_DatabaseAccountsListSqlDatabases_594515;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594524 = newJObject()
-  var query_594525 = newJObject()
-  add(path_594524, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594525, "api-version", newJString(apiVersion))
-  add(path_594524, "subscriptionId", newJString(subscriptionId))
-  add(path_594524, "accountName", newJString(accountName))
-  result = call_594523.call(path_594524, query_594525, nil, nil, nil)
+  var path_568753 = newJObject()
+  var query_568754 = newJObject()
+  add(path_568753, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568754, "api-version", newJString(apiVersion))
+  add(path_568753, "subscriptionId", newJString(subscriptionId))
+  add(path_568753, "accountName", newJString(accountName))
+  result = call_568752.call(path_568753, query_568754, nil, nil, nil)
 
-var databaseAccountsListSqlDatabases* = Call_DatabaseAccountsListSqlDatabases_594515(
+var databaseAccountsListSqlDatabases* = Call_DatabaseAccountsListSqlDatabases_568744(
     name: "databaseAccountsListSqlDatabases", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases",
-    validator: validate_DatabaseAccountsListSqlDatabases_594516, base: "",
-    url: url_DatabaseAccountsListSqlDatabases_594517, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListSqlDatabases_568745, base: "",
+    url: url_DatabaseAccountsListSqlDatabases_568746, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsCreateUpdateSqlDatabase_594538 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCreateUpdateSqlDatabase_594540(protocol: Scheme;
+  Call_DatabaseAccountsCreateUpdateSqlDatabase_568767 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCreateUpdateSqlDatabase_568769(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6055,7 +6055,7 @@ proc url_DatabaseAccountsCreateUpdateSqlDatabase_594540(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCreateUpdateSqlDatabase_594539(path: JsonNode;
+proc validate_DatabaseAccountsCreateUpdateSqlDatabase_568768(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an Azure Cosmos DB SQL database
   ## 
@@ -6073,26 +6073,26 @@ proc validate_DatabaseAccountsCreateUpdateSqlDatabase_594539(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594541 = path.getOrDefault("resourceGroupName")
-  valid_594541 = validateParameter(valid_594541, JString, required = true,
+  var valid_568770 = path.getOrDefault("resourceGroupName")
+  valid_568770 = validateParameter(valid_568770, JString, required = true,
                                  default = nil)
-  if valid_594541 != nil:
-    section.add "resourceGroupName", valid_594541
-  var valid_594542 = path.getOrDefault("subscriptionId")
-  valid_594542 = validateParameter(valid_594542, JString, required = true,
+  if valid_568770 != nil:
+    section.add "resourceGroupName", valid_568770
+  var valid_568771 = path.getOrDefault("subscriptionId")
+  valid_568771 = validateParameter(valid_568771, JString, required = true,
                                  default = nil)
-  if valid_594542 != nil:
-    section.add "subscriptionId", valid_594542
-  var valid_594543 = path.getOrDefault("databaseName")
-  valid_594543 = validateParameter(valid_594543, JString, required = true,
+  if valid_568771 != nil:
+    section.add "subscriptionId", valid_568771
+  var valid_568772 = path.getOrDefault("databaseName")
+  valid_568772 = validateParameter(valid_568772, JString, required = true,
                                  default = nil)
-  if valid_594543 != nil:
-    section.add "databaseName", valid_594543
-  var valid_594544 = path.getOrDefault("accountName")
-  valid_594544 = validateParameter(valid_594544, JString, required = true,
+  if valid_568772 != nil:
+    section.add "databaseName", valid_568772
+  var valid_568773 = path.getOrDefault("accountName")
+  valid_568773 = validateParameter(valid_568773, JString, required = true,
                                  default = nil)
-  if valid_594544 != nil:
-    section.add "accountName", valid_594544
+  if valid_568773 != nil:
+    section.add "accountName", valid_568773
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6100,11 +6100,11 @@ proc validate_DatabaseAccountsCreateUpdateSqlDatabase_594539(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594545 = query.getOrDefault("api-version")
-  valid_594545 = validateParameter(valid_594545, JString, required = true,
+  var valid_568774 = query.getOrDefault("api-version")
+  valid_568774 = validateParameter(valid_568774, JString, required = true,
                                  default = nil)
-  if valid_594545 != nil:
-    section.add "api-version", valid_594545
+  if valid_568774 != nil:
+    section.add "api-version", valid_568774
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6118,21 +6118,21 @@ proc validate_DatabaseAccountsCreateUpdateSqlDatabase_594539(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594547: Call_DatabaseAccountsCreateUpdateSqlDatabase_594538;
+proc call*(call_568776: Call_DatabaseAccountsCreateUpdateSqlDatabase_568767;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update an Azure Cosmos DB SQL database
   ## 
-  let valid = call_594547.validator(path, query, header, formData, body)
-  let scheme = call_594547.pickScheme
+  let valid = call_568776.validator(path, query, header, formData, body)
+  let scheme = call_568776.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594547.url(scheme.get, call_594547.host, call_594547.base,
-                         call_594547.route, valid.getOrDefault("path"),
+  let url = call_568776.url(scheme.get, call_568776.host, call_568776.base,
+                         call_568776.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594547, url, valid)
+  result = hook(call_568776, url, valid)
 
-proc call*(call_594548: Call_DatabaseAccountsCreateUpdateSqlDatabase_594538;
+proc call*(call_568777: Call_DatabaseAccountsCreateUpdateSqlDatabase_568767;
           createUpdateSqlDatabaseParameters: JsonNode; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; databaseName: string;
           accountName: string): Recallable =
@@ -6150,27 +6150,27 @@ proc call*(call_594548: Call_DatabaseAccountsCreateUpdateSqlDatabase_594538;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594549 = newJObject()
-  var query_594550 = newJObject()
-  var body_594551 = newJObject()
+  var path_568778 = newJObject()
+  var query_568779 = newJObject()
+  var body_568780 = newJObject()
   if createUpdateSqlDatabaseParameters != nil:
-    body_594551 = createUpdateSqlDatabaseParameters
-  add(path_594549, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594550, "api-version", newJString(apiVersion))
-  add(path_594549, "subscriptionId", newJString(subscriptionId))
-  add(path_594549, "databaseName", newJString(databaseName))
-  add(path_594549, "accountName", newJString(accountName))
-  result = call_594548.call(path_594549, query_594550, nil, nil, body_594551)
+    body_568780 = createUpdateSqlDatabaseParameters
+  add(path_568778, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568779, "api-version", newJString(apiVersion))
+  add(path_568778, "subscriptionId", newJString(subscriptionId))
+  add(path_568778, "databaseName", newJString(databaseName))
+  add(path_568778, "accountName", newJString(accountName))
+  result = call_568777.call(path_568778, query_568779, nil, nil, body_568780)
 
-var databaseAccountsCreateUpdateSqlDatabase* = Call_DatabaseAccountsCreateUpdateSqlDatabase_594538(
+var databaseAccountsCreateUpdateSqlDatabase* = Call_DatabaseAccountsCreateUpdateSqlDatabase_568767(
     name: "databaseAccountsCreateUpdateSqlDatabase", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}",
-    validator: validate_DatabaseAccountsCreateUpdateSqlDatabase_594539, base: "",
-    url: url_DatabaseAccountsCreateUpdateSqlDatabase_594540,
+    validator: validate_DatabaseAccountsCreateUpdateSqlDatabase_568768, base: "",
+    url: url_DatabaseAccountsCreateUpdateSqlDatabase_568769,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetSqlDatabase_594526 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetSqlDatabase_594528(protocol: Scheme; host: string;
+  Call_DatabaseAccountsGetSqlDatabase_568755 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetSqlDatabase_568757(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6196,7 +6196,7 @@ proc url_DatabaseAccountsGetSqlDatabase_594528(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetSqlDatabase_594527(path: JsonNode;
+proc validate_DatabaseAccountsGetSqlDatabase_568756(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the SQL database under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -6214,26 +6214,26 @@ proc validate_DatabaseAccountsGetSqlDatabase_594527(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594529 = path.getOrDefault("resourceGroupName")
-  valid_594529 = validateParameter(valid_594529, JString, required = true,
+  var valid_568758 = path.getOrDefault("resourceGroupName")
+  valid_568758 = validateParameter(valid_568758, JString, required = true,
                                  default = nil)
-  if valid_594529 != nil:
-    section.add "resourceGroupName", valid_594529
-  var valid_594530 = path.getOrDefault("subscriptionId")
-  valid_594530 = validateParameter(valid_594530, JString, required = true,
+  if valid_568758 != nil:
+    section.add "resourceGroupName", valid_568758
+  var valid_568759 = path.getOrDefault("subscriptionId")
+  valid_568759 = validateParameter(valid_568759, JString, required = true,
                                  default = nil)
-  if valid_594530 != nil:
-    section.add "subscriptionId", valid_594530
-  var valid_594531 = path.getOrDefault("databaseName")
-  valid_594531 = validateParameter(valid_594531, JString, required = true,
+  if valid_568759 != nil:
+    section.add "subscriptionId", valid_568759
+  var valid_568760 = path.getOrDefault("databaseName")
+  valid_568760 = validateParameter(valid_568760, JString, required = true,
                                  default = nil)
-  if valid_594531 != nil:
-    section.add "databaseName", valid_594531
-  var valid_594532 = path.getOrDefault("accountName")
-  valid_594532 = validateParameter(valid_594532, JString, required = true,
+  if valid_568760 != nil:
+    section.add "databaseName", valid_568760
+  var valid_568761 = path.getOrDefault("accountName")
+  valid_568761 = validateParameter(valid_568761, JString, required = true,
                                  default = nil)
-  if valid_594532 != nil:
-    section.add "accountName", valid_594532
+  if valid_568761 != nil:
+    section.add "accountName", valid_568761
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6241,11 +6241,11 @@ proc validate_DatabaseAccountsGetSqlDatabase_594527(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594533 = query.getOrDefault("api-version")
-  valid_594533 = validateParameter(valid_594533, JString, required = true,
+  var valid_568762 = query.getOrDefault("api-version")
+  valid_568762 = validateParameter(valid_568762, JString, required = true,
                                  default = nil)
-  if valid_594533 != nil:
-    section.add "api-version", valid_594533
+  if valid_568762 != nil:
+    section.add "api-version", valid_568762
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6254,20 +6254,20 @@ proc validate_DatabaseAccountsGetSqlDatabase_594527(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594534: Call_DatabaseAccountsGetSqlDatabase_594526; path: JsonNode;
+proc call*(call_568763: Call_DatabaseAccountsGetSqlDatabase_568755; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the SQL database under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594534.validator(path, query, header, formData, body)
-  let scheme = call_594534.pickScheme
+  let valid = call_568763.validator(path, query, header, formData, body)
+  let scheme = call_568763.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594534.url(scheme.get, call_594534.host, call_594534.base,
-                         call_594534.route, valid.getOrDefault("path"),
+  let url = call_568763.url(scheme.get, call_568763.host, call_568763.base,
+                         call_568763.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594534, url, valid)
+  result = hook(call_568763, url, valid)
 
-proc call*(call_594535: Call_DatabaseAccountsGetSqlDatabase_594526;
+proc call*(call_568764: Call_DatabaseAccountsGetSqlDatabase_568755;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsGetSqlDatabase
@@ -6282,23 +6282,23 @@ proc call*(call_594535: Call_DatabaseAccountsGetSqlDatabase_594526;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594536 = newJObject()
-  var query_594537 = newJObject()
-  add(path_594536, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594537, "api-version", newJString(apiVersion))
-  add(path_594536, "subscriptionId", newJString(subscriptionId))
-  add(path_594536, "databaseName", newJString(databaseName))
-  add(path_594536, "accountName", newJString(accountName))
-  result = call_594535.call(path_594536, query_594537, nil, nil, nil)
+  var path_568765 = newJObject()
+  var query_568766 = newJObject()
+  add(path_568765, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568766, "api-version", newJString(apiVersion))
+  add(path_568765, "subscriptionId", newJString(subscriptionId))
+  add(path_568765, "databaseName", newJString(databaseName))
+  add(path_568765, "accountName", newJString(accountName))
+  result = call_568764.call(path_568765, query_568766, nil, nil, nil)
 
-var databaseAccountsGetSqlDatabase* = Call_DatabaseAccountsGetSqlDatabase_594526(
+var databaseAccountsGetSqlDatabase* = Call_DatabaseAccountsGetSqlDatabase_568755(
     name: "databaseAccountsGetSqlDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}",
-    validator: validate_DatabaseAccountsGetSqlDatabase_594527, base: "",
-    url: url_DatabaseAccountsGetSqlDatabase_594528, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetSqlDatabase_568756, base: "",
+    url: url_DatabaseAccountsGetSqlDatabase_568757, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsDeleteSqlDatabase_594552 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsDeleteSqlDatabase_594554(protocol: Scheme; host: string;
+  Call_DatabaseAccountsDeleteSqlDatabase_568781 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsDeleteSqlDatabase_568783(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6324,7 +6324,7 @@ proc url_DatabaseAccountsDeleteSqlDatabase_594554(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsDeleteSqlDatabase_594553(path: JsonNode;
+proc validate_DatabaseAccountsDeleteSqlDatabase_568782(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Azure Cosmos DB SQL database.
   ## 
@@ -6342,26 +6342,26 @@ proc validate_DatabaseAccountsDeleteSqlDatabase_594553(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594555 = path.getOrDefault("resourceGroupName")
-  valid_594555 = validateParameter(valid_594555, JString, required = true,
+  var valid_568784 = path.getOrDefault("resourceGroupName")
+  valid_568784 = validateParameter(valid_568784, JString, required = true,
                                  default = nil)
-  if valid_594555 != nil:
-    section.add "resourceGroupName", valid_594555
-  var valid_594556 = path.getOrDefault("subscriptionId")
-  valid_594556 = validateParameter(valid_594556, JString, required = true,
+  if valid_568784 != nil:
+    section.add "resourceGroupName", valid_568784
+  var valid_568785 = path.getOrDefault("subscriptionId")
+  valid_568785 = validateParameter(valid_568785, JString, required = true,
                                  default = nil)
-  if valid_594556 != nil:
-    section.add "subscriptionId", valid_594556
-  var valid_594557 = path.getOrDefault("databaseName")
-  valid_594557 = validateParameter(valid_594557, JString, required = true,
+  if valid_568785 != nil:
+    section.add "subscriptionId", valid_568785
+  var valid_568786 = path.getOrDefault("databaseName")
+  valid_568786 = validateParameter(valid_568786, JString, required = true,
                                  default = nil)
-  if valid_594557 != nil:
-    section.add "databaseName", valid_594557
-  var valid_594558 = path.getOrDefault("accountName")
-  valid_594558 = validateParameter(valid_594558, JString, required = true,
+  if valid_568786 != nil:
+    section.add "databaseName", valid_568786
+  var valid_568787 = path.getOrDefault("accountName")
+  valid_568787 = validateParameter(valid_568787, JString, required = true,
                                  default = nil)
-  if valid_594558 != nil:
-    section.add "accountName", valid_594558
+  if valid_568787 != nil:
+    section.add "accountName", valid_568787
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6369,11 +6369,11 @@ proc validate_DatabaseAccountsDeleteSqlDatabase_594553(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594559 = query.getOrDefault("api-version")
-  valid_594559 = validateParameter(valid_594559, JString, required = true,
+  var valid_568788 = query.getOrDefault("api-version")
+  valid_568788 = validateParameter(valid_568788, JString, required = true,
                                  default = nil)
-  if valid_594559 != nil:
-    section.add "api-version", valid_594559
+  if valid_568788 != nil:
+    section.add "api-version", valid_568788
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6382,21 +6382,21 @@ proc validate_DatabaseAccountsDeleteSqlDatabase_594553(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594560: Call_DatabaseAccountsDeleteSqlDatabase_594552;
+proc call*(call_568789: Call_DatabaseAccountsDeleteSqlDatabase_568781;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing Azure Cosmos DB SQL database.
   ## 
-  let valid = call_594560.validator(path, query, header, formData, body)
-  let scheme = call_594560.pickScheme
+  let valid = call_568789.validator(path, query, header, formData, body)
+  let scheme = call_568789.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594560.url(scheme.get, call_594560.host, call_594560.base,
-                         call_594560.route, valid.getOrDefault("path"),
+  let url = call_568789.url(scheme.get, call_568789.host, call_568789.base,
+                         call_568789.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594560, url, valid)
+  result = hook(call_568789, url, valid)
 
-proc call*(call_594561: Call_DatabaseAccountsDeleteSqlDatabase_594552;
+proc call*(call_568790: Call_DatabaseAccountsDeleteSqlDatabase_568781;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsDeleteSqlDatabase
@@ -6411,23 +6411,23 @@ proc call*(call_594561: Call_DatabaseAccountsDeleteSqlDatabase_594552;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594562 = newJObject()
-  var query_594563 = newJObject()
-  add(path_594562, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594563, "api-version", newJString(apiVersion))
-  add(path_594562, "subscriptionId", newJString(subscriptionId))
-  add(path_594562, "databaseName", newJString(databaseName))
-  add(path_594562, "accountName", newJString(accountName))
-  result = call_594561.call(path_594562, query_594563, nil, nil, nil)
+  var path_568791 = newJObject()
+  var query_568792 = newJObject()
+  add(path_568791, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568792, "api-version", newJString(apiVersion))
+  add(path_568791, "subscriptionId", newJString(subscriptionId))
+  add(path_568791, "databaseName", newJString(databaseName))
+  add(path_568791, "accountName", newJString(accountName))
+  result = call_568790.call(path_568791, query_568792, nil, nil, nil)
 
-var databaseAccountsDeleteSqlDatabase* = Call_DatabaseAccountsDeleteSqlDatabase_594552(
+var databaseAccountsDeleteSqlDatabase* = Call_DatabaseAccountsDeleteSqlDatabase_568781(
     name: "databaseAccountsDeleteSqlDatabase", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}",
-    validator: validate_DatabaseAccountsDeleteSqlDatabase_594553, base: "",
-    url: url_DatabaseAccountsDeleteSqlDatabase_594554, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsDeleteSqlDatabase_568782, base: "",
+    url: url_DatabaseAccountsDeleteSqlDatabase_568783, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListSqlContainers_594564 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListSqlContainers_594566(protocol: Scheme; host: string;
+  Call_DatabaseAccountsListSqlContainers_568793 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListSqlContainers_568795(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6454,7 +6454,7 @@ proc url_DatabaseAccountsListSqlContainers_594566(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListSqlContainers_594565(path: JsonNode;
+proc validate_DatabaseAccountsListSqlContainers_568794(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the SQL container under an existing Azure Cosmos DB database account.
   ## 
@@ -6472,26 +6472,26 @@ proc validate_DatabaseAccountsListSqlContainers_594565(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594567 = path.getOrDefault("resourceGroupName")
-  valid_594567 = validateParameter(valid_594567, JString, required = true,
+  var valid_568796 = path.getOrDefault("resourceGroupName")
+  valid_568796 = validateParameter(valid_568796, JString, required = true,
                                  default = nil)
-  if valid_594567 != nil:
-    section.add "resourceGroupName", valid_594567
-  var valid_594568 = path.getOrDefault("subscriptionId")
-  valid_594568 = validateParameter(valid_594568, JString, required = true,
+  if valid_568796 != nil:
+    section.add "resourceGroupName", valid_568796
+  var valid_568797 = path.getOrDefault("subscriptionId")
+  valid_568797 = validateParameter(valid_568797, JString, required = true,
                                  default = nil)
-  if valid_594568 != nil:
-    section.add "subscriptionId", valid_594568
-  var valid_594569 = path.getOrDefault("databaseName")
-  valid_594569 = validateParameter(valid_594569, JString, required = true,
+  if valid_568797 != nil:
+    section.add "subscriptionId", valid_568797
+  var valid_568798 = path.getOrDefault("databaseName")
+  valid_568798 = validateParameter(valid_568798, JString, required = true,
                                  default = nil)
-  if valid_594569 != nil:
-    section.add "databaseName", valid_594569
-  var valid_594570 = path.getOrDefault("accountName")
-  valid_594570 = validateParameter(valid_594570, JString, required = true,
+  if valid_568798 != nil:
+    section.add "databaseName", valid_568798
+  var valid_568799 = path.getOrDefault("accountName")
+  valid_568799 = validateParameter(valid_568799, JString, required = true,
                                  default = nil)
-  if valid_594570 != nil:
-    section.add "accountName", valid_594570
+  if valid_568799 != nil:
+    section.add "accountName", valid_568799
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6499,11 +6499,11 @@ proc validate_DatabaseAccountsListSqlContainers_594565(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594571 = query.getOrDefault("api-version")
-  valid_594571 = validateParameter(valid_594571, JString, required = true,
+  var valid_568800 = query.getOrDefault("api-version")
+  valid_568800 = validateParameter(valid_568800, JString, required = true,
                                  default = nil)
-  if valid_594571 != nil:
-    section.add "api-version", valid_594571
+  if valid_568800 != nil:
+    section.add "api-version", valid_568800
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6512,21 +6512,21 @@ proc validate_DatabaseAccountsListSqlContainers_594565(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594572: Call_DatabaseAccountsListSqlContainers_594564;
+proc call*(call_568801: Call_DatabaseAccountsListSqlContainers_568793;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the SQL container under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594572.validator(path, query, header, formData, body)
-  let scheme = call_594572.pickScheme
+  let valid = call_568801.validator(path, query, header, formData, body)
+  let scheme = call_568801.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594572.url(scheme.get, call_594572.host, call_594572.base,
-                         call_594572.route, valid.getOrDefault("path"),
+  let url = call_568801.url(scheme.get, call_568801.host, call_568801.base,
+                         call_568801.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594572, url, valid)
+  result = hook(call_568801, url, valid)
 
-proc call*(call_594573: Call_DatabaseAccountsListSqlContainers_594564;
+proc call*(call_568802: Call_DatabaseAccountsListSqlContainers_568793;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsListSqlContainers
@@ -6541,23 +6541,23 @@ proc call*(call_594573: Call_DatabaseAccountsListSqlContainers_594564;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594574 = newJObject()
-  var query_594575 = newJObject()
-  add(path_594574, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594575, "api-version", newJString(apiVersion))
-  add(path_594574, "subscriptionId", newJString(subscriptionId))
-  add(path_594574, "databaseName", newJString(databaseName))
-  add(path_594574, "accountName", newJString(accountName))
-  result = call_594573.call(path_594574, query_594575, nil, nil, nil)
+  var path_568803 = newJObject()
+  var query_568804 = newJObject()
+  add(path_568803, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568804, "api-version", newJString(apiVersion))
+  add(path_568803, "subscriptionId", newJString(subscriptionId))
+  add(path_568803, "databaseName", newJString(databaseName))
+  add(path_568803, "accountName", newJString(accountName))
+  result = call_568802.call(path_568803, query_568804, nil, nil, nil)
 
-var databaseAccountsListSqlContainers* = Call_DatabaseAccountsListSqlContainers_594564(
+var databaseAccountsListSqlContainers* = Call_DatabaseAccountsListSqlContainers_568793(
     name: "databaseAccountsListSqlContainers", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}/containers",
-    validator: validate_DatabaseAccountsListSqlContainers_594565, base: "",
-    url: url_DatabaseAccountsListSqlContainers_594566, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListSqlContainers_568794, base: "",
+    url: url_DatabaseAccountsListSqlContainers_568795, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsCreateUpdateSqlContainer_594589 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCreateUpdateSqlContainer_594591(protocol: Scheme;
+  Call_DatabaseAccountsCreateUpdateSqlContainer_568818 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCreateUpdateSqlContainer_568820(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6586,7 +6586,7 @@ proc url_DatabaseAccountsCreateUpdateSqlContainer_594591(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCreateUpdateSqlContainer_594590(path: JsonNode;
+proc validate_DatabaseAccountsCreateUpdateSqlContainer_568819(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an Azure Cosmos DB SQL container
   ## 
@@ -6606,31 +6606,31 @@ proc validate_DatabaseAccountsCreateUpdateSqlContainer_594590(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594592 = path.getOrDefault("resourceGroupName")
-  valid_594592 = validateParameter(valid_594592, JString, required = true,
+  var valid_568821 = path.getOrDefault("resourceGroupName")
+  valid_568821 = validateParameter(valid_568821, JString, required = true,
                                  default = nil)
-  if valid_594592 != nil:
-    section.add "resourceGroupName", valid_594592
-  var valid_594593 = path.getOrDefault("containerName")
-  valid_594593 = validateParameter(valid_594593, JString, required = true,
+  if valid_568821 != nil:
+    section.add "resourceGroupName", valid_568821
+  var valid_568822 = path.getOrDefault("containerName")
+  valid_568822 = validateParameter(valid_568822, JString, required = true,
                                  default = nil)
-  if valid_594593 != nil:
-    section.add "containerName", valid_594593
-  var valid_594594 = path.getOrDefault("subscriptionId")
-  valid_594594 = validateParameter(valid_594594, JString, required = true,
+  if valid_568822 != nil:
+    section.add "containerName", valid_568822
+  var valid_568823 = path.getOrDefault("subscriptionId")
+  valid_568823 = validateParameter(valid_568823, JString, required = true,
                                  default = nil)
-  if valid_594594 != nil:
-    section.add "subscriptionId", valid_594594
-  var valid_594595 = path.getOrDefault("databaseName")
-  valid_594595 = validateParameter(valid_594595, JString, required = true,
+  if valid_568823 != nil:
+    section.add "subscriptionId", valid_568823
+  var valid_568824 = path.getOrDefault("databaseName")
+  valid_568824 = validateParameter(valid_568824, JString, required = true,
                                  default = nil)
-  if valid_594595 != nil:
-    section.add "databaseName", valid_594595
-  var valid_594596 = path.getOrDefault("accountName")
-  valid_594596 = validateParameter(valid_594596, JString, required = true,
+  if valid_568824 != nil:
+    section.add "databaseName", valid_568824
+  var valid_568825 = path.getOrDefault("accountName")
+  valid_568825 = validateParameter(valid_568825, JString, required = true,
                                  default = nil)
-  if valid_594596 != nil:
-    section.add "accountName", valid_594596
+  if valid_568825 != nil:
+    section.add "accountName", valid_568825
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6638,11 +6638,11 @@ proc validate_DatabaseAccountsCreateUpdateSqlContainer_594590(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594597 = query.getOrDefault("api-version")
-  valid_594597 = validateParameter(valid_594597, JString, required = true,
+  var valid_568826 = query.getOrDefault("api-version")
+  valid_568826 = validateParameter(valid_568826, JString, required = true,
                                  default = nil)
-  if valid_594597 != nil:
-    section.add "api-version", valid_594597
+  if valid_568826 != nil:
+    section.add "api-version", valid_568826
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6656,21 +6656,21 @@ proc validate_DatabaseAccountsCreateUpdateSqlContainer_594590(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594599: Call_DatabaseAccountsCreateUpdateSqlContainer_594589;
+proc call*(call_568828: Call_DatabaseAccountsCreateUpdateSqlContainer_568818;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update an Azure Cosmos DB SQL container
   ## 
-  let valid = call_594599.validator(path, query, header, formData, body)
-  let scheme = call_594599.pickScheme
+  let valid = call_568828.validator(path, query, header, formData, body)
+  let scheme = call_568828.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594599.url(scheme.get, call_594599.host, call_594599.base,
-                         call_594599.route, valid.getOrDefault("path"),
+  let url = call_568828.url(scheme.get, call_568828.host, call_568828.base,
+                         call_568828.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594599, url, valid)
+  result = hook(call_568828, url, valid)
 
-proc call*(call_594600: Call_DatabaseAccountsCreateUpdateSqlContainer_594589;
+proc call*(call_568829: Call_DatabaseAccountsCreateUpdateSqlContainer_568818;
           createUpdateSqlContainerParameters: JsonNode; resourceGroupName: string;
           apiVersion: string; containerName: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
@@ -6690,28 +6690,28 @@ proc call*(call_594600: Call_DatabaseAccountsCreateUpdateSqlContainer_594589;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594601 = newJObject()
-  var query_594602 = newJObject()
-  var body_594603 = newJObject()
+  var path_568830 = newJObject()
+  var query_568831 = newJObject()
+  var body_568832 = newJObject()
   if createUpdateSqlContainerParameters != nil:
-    body_594603 = createUpdateSqlContainerParameters
-  add(path_594601, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594602, "api-version", newJString(apiVersion))
-  add(path_594601, "containerName", newJString(containerName))
-  add(path_594601, "subscriptionId", newJString(subscriptionId))
-  add(path_594601, "databaseName", newJString(databaseName))
-  add(path_594601, "accountName", newJString(accountName))
-  result = call_594600.call(path_594601, query_594602, nil, nil, body_594603)
+    body_568832 = createUpdateSqlContainerParameters
+  add(path_568830, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568831, "api-version", newJString(apiVersion))
+  add(path_568830, "containerName", newJString(containerName))
+  add(path_568830, "subscriptionId", newJString(subscriptionId))
+  add(path_568830, "databaseName", newJString(databaseName))
+  add(path_568830, "accountName", newJString(accountName))
+  result = call_568829.call(path_568830, query_568831, nil, nil, body_568832)
 
-var databaseAccountsCreateUpdateSqlContainer* = Call_DatabaseAccountsCreateUpdateSqlContainer_594589(
+var databaseAccountsCreateUpdateSqlContainer* = Call_DatabaseAccountsCreateUpdateSqlContainer_568818(
     name: "databaseAccountsCreateUpdateSqlContainer", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}/containers/{containerName}",
-    validator: validate_DatabaseAccountsCreateUpdateSqlContainer_594590, base: "",
-    url: url_DatabaseAccountsCreateUpdateSqlContainer_594591,
+    validator: validate_DatabaseAccountsCreateUpdateSqlContainer_568819, base: "",
+    url: url_DatabaseAccountsCreateUpdateSqlContainer_568820,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetSqlContainer_594576 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetSqlContainer_594578(protocol: Scheme; host: string;
+  Call_DatabaseAccountsGetSqlContainer_568805 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetSqlContainer_568807(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6740,7 +6740,7 @@ proc url_DatabaseAccountsGetSqlContainer_594578(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetSqlContainer_594577(path: JsonNode;
+proc validate_DatabaseAccountsGetSqlContainer_568806(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the SQL container under an existing Azure Cosmos DB database account.
   ## 
@@ -6760,31 +6760,31 @@ proc validate_DatabaseAccountsGetSqlContainer_594577(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594579 = path.getOrDefault("resourceGroupName")
-  valid_594579 = validateParameter(valid_594579, JString, required = true,
+  var valid_568808 = path.getOrDefault("resourceGroupName")
+  valid_568808 = validateParameter(valid_568808, JString, required = true,
                                  default = nil)
-  if valid_594579 != nil:
-    section.add "resourceGroupName", valid_594579
-  var valid_594580 = path.getOrDefault("containerName")
-  valid_594580 = validateParameter(valid_594580, JString, required = true,
+  if valid_568808 != nil:
+    section.add "resourceGroupName", valid_568808
+  var valid_568809 = path.getOrDefault("containerName")
+  valid_568809 = validateParameter(valid_568809, JString, required = true,
                                  default = nil)
-  if valid_594580 != nil:
-    section.add "containerName", valid_594580
-  var valid_594581 = path.getOrDefault("subscriptionId")
-  valid_594581 = validateParameter(valid_594581, JString, required = true,
+  if valid_568809 != nil:
+    section.add "containerName", valid_568809
+  var valid_568810 = path.getOrDefault("subscriptionId")
+  valid_568810 = validateParameter(valid_568810, JString, required = true,
                                  default = nil)
-  if valid_594581 != nil:
-    section.add "subscriptionId", valid_594581
-  var valid_594582 = path.getOrDefault("databaseName")
-  valid_594582 = validateParameter(valid_594582, JString, required = true,
+  if valid_568810 != nil:
+    section.add "subscriptionId", valid_568810
+  var valid_568811 = path.getOrDefault("databaseName")
+  valid_568811 = validateParameter(valid_568811, JString, required = true,
                                  default = nil)
-  if valid_594582 != nil:
-    section.add "databaseName", valid_594582
-  var valid_594583 = path.getOrDefault("accountName")
-  valid_594583 = validateParameter(valid_594583, JString, required = true,
+  if valid_568811 != nil:
+    section.add "databaseName", valid_568811
+  var valid_568812 = path.getOrDefault("accountName")
+  valid_568812 = validateParameter(valid_568812, JString, required = true,
                                  default = nil)
-  if valid_594583 != nil:
-    section.add "accountName", valid_594583
+  if valid_568812 != nil:
+    section.add "accountName", valid_568812
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6792,11 +6792,11 @@ proc validate_DatabaseAccountsGetSqlContainer_594577(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594584 = query.getOrDefault("api-version")
-  valid_594584 = validateParameter(valid_594584, JString, required = true,
+  var valid_568813 = query.getOrDefault("api-version")
+  valid_568813 = validateParameter(valid_568813, JString, required = true,
                                  default = nil)
-  if valid_594584 != nil:
-    section.add "api-version", valid_594584
+  if valid_568813 != nil:
+    section.add "api-version", valid_568813
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6805,21 +6805,21 @@ proc validate_DatabaseAccountsGetSqlContainer_594577(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594585: Call_DatabaseAccountsGetSqlContainer_594576;
+proc call*(call_568814: Call_DatabaseAccountsGetSqlContainer_568805;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the SQL container under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594585.validator(path, query, header, formData, body)
-  let scheme = call_594585.pickScheme
+  let valid = call_568814.validator(path, query, header, formData, body)
+  let scheme = call_568814.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594585.url(scheme.get, call_594585.host, call_594585.base,
-                         call_594585.route, valid.getOrDefault("path"),
+  let url = call_568814.url(scheme.get, call_568814.host, call_568814.base,
+                         call_568814.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594585, url, valid)
+  result = hook(call_568814, url, valid)
 
-proc call*(call_594586: Call_DatabaseAccountsGetSqlContainer_594576;
+proc call*(call_568815: Call_DatabaseAccountsGetSqlContainer_568805;
           resourceGroupName: string; apiVersion: string; containerName: string;
           subscriptionId: string; databaseName: string; accountName: string): Recallable =
   ## databaseAccountsGetSqlContainer
@@ -6836,24 +6836,24 @@ proc call*(call_594586: Call_DatabaseAccountsGetSqlContainer_594576;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594587 = newJObject()
-  var query_594588 = newJObject()
-  add(path_594587, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594588, "api-version", newJString(apiVersion))
-  add(path_594587, "containerName", newJString(containerName))
-  add(path_594587, "subscriptionId", newJString(subscriptionId))
-  add(path_594587, "databaseName", newJString(databaseName))
-  add(path_594587, "accountName", newJString(accountName))
-  result = call_594586.call(path_594587, query_594588, nil, nil, nil)
+  var path_568816 = newJObject()
+  var query_568817 = newJObject()
+  add(path_568816, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568817, "api-version", newJString(apiVersion))
+  add(path_568816, "containerName", newJString(containerName))
+  add(path_568816, "subscriptionId", newJString(subscriptionId))
+  add(path_568816, "databaseName", newJString(databaseName))
+  add(path_568816, "accountName", newJString(accountName))
+  result = call_568815.call(path_568816, query_568817, nil, nil, nil)
 
-var databaseAccountsGetSqlContainer* = Call_DatabaseAccountsGetSqlContainer_594576(
+var databaseAccountsGetSqlContainer* = Call_DatabaseAccountsGetSqlContainer_568805(
     name: "databaseAccountsGetSqlContainer", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}/containers/{containerName}",
-    validator: validate_DatabaseAccountsGetSqlContainer_594577, base: "",
-    url: url_DatabaseAccountsGetSqlContainer_594578, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetSqlContainer_568806, base: "",
+    url: url_DatabaseAccountsGetSqlContainer_568807, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsDeleteSqlContainer_594604 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsDeleteSqlContainer_594606(protocol: Scheme; host: string;
+  Call_DatabaseAccountsDeleteSqlContainer_568833 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsDeleteSqlContainer_568835(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6882,7 +6882,7 @@ proc url_DatabaseAccountsDeleteSqlContainer_594606(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsDeleteSqlContainer_594605(path: JsonNode;
+proc validate_DatabaseAccountsDeleteSqlContainer_568834(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Azure Cosmos DB SQL container.
   ## 
@@ -6902,31 +6902,31 @@ proc validate_DatabaseAccountsDeleteSqlContainer_594605(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594607 = path.getOrDefault("resourceGroupName")
-  valid_594607 = validateParameter(valid_594607, JString, required = true,
+  var valid_568836 = path.getOrDefault("resourceGroupName")
+  valid_568836 = validateParameter(valid_568836, JString, required = true,
                                  default = nil)
-  if valid_594607 != nil:
-    section.add "resourceGroupName", valid_594607
-  var valid_594608 = path.getOrDefault("containerName")
-  valid_594608 = validateParameter(valid_594608, JString, required = true,
+  if valid_568836 != nil:
+    section.add "resourceGroupName", valid_568836
+  var valid_568837 = path.getOrDefault("containerName")
+  valid_568837 = validateParameter(valid_568837, JString, required = true,
                                  default = nil)
-  if valid_594608 != nil:
-    section.add "containerName", valid_594608
-  var valid_594609 = path.getOrDefault("subscriptionId")
-  valid_594609 = validateParameter(valid_594609, JString, required = true,
+  if valid_568837 != nil:
+    section.add "containerName", valid_568837
+  var valid_568838 = path.getOrDefault("subscriptionId")
+  valid_568838 = validateParameter(valid_568838, JString, required = true,
                                  default = nil)
-  if valid_594609 != nil:
-    section.add "subscriptionId", valid_594609
-  var valid_594610 = path.getOrDefault("databaseName")
-  valid_594610 = validateParameter(valid_594610, JString, required = true,
+  if valid_568838 != nil:
+    section.add "subscriptionId", valid_568838
+  var valid_568839 = path.getOrDefault("databaseName")
+  valid_568839 = validateParameter(valid_568839, JString, required = true,
                                  default = nil)
-  if valid_594610 != nil:
-    section.add "databaseName", valid_594610
-  var valid_594611 = path.getOrDefault("accountName")
-  valid_594611 = validateParameter(valid_594611, JString, required = true,
+  if valid_568839 != nil:
+    section.add "databaseName", valid_568839
+  var valid_568840 = path.getOrDefault("accountName")
+  valid_568840 = validateParameter(valid_568840, JString, required = true,
                                  default = nil)
-  if valid_594611 != nil:
-    section.add "accountName", valid_594611
+  if valid_568840 != nil:
+    section.add "accountName", valid_568840
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6934,11 +6934,11 @@ proc validate_DatabaseAccountsDeleteSqlContainer_594605(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594612 = query.getOrDefault("api-version")
-  valid_594612 = validateParameter(valid_594612, JString, required = true,
+  var valid_568841 = query.getOrDefault("api-version")
+  valid_568841 = validateParameter(valid_568841, JString, required = true,
                                  default = nil)
-  if valid_594612 != nil:
-    section.add "api-version", valid_594612
+  if valid_568841 != nil:
+    section.add "api-version", valid_568841
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6947,21 +6947,21 @@ proc validate_DatabaseAccountsDeleteSqlContainer_594605(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594613: Call_DatabaseAccountsDeleteSqlContainer_594604;
+proc call*(call_568842: Call_DatabaseAccountsDeleteSqlContainer_568833;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing Azure Cosmos DB SQL container.
   ## 
-  let valid = call_594613.validator(path, query, header, formData, body)
-  let scheme = call_594613.pickScheme
+  let valid = call_568842.validator(path, query, header, formData, body)
+  let scheme = call_568842.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594613.url(scheme.get, call_594613.host, call_594613.base,
-                         call_594613.route, valid.getOrDefault("path"),
+  let url = call_568842.url(scheme.get, call_568842.host, call_568842.base,
+                         call_568842.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594613, url, valid)
+  result = hook(call_568842, url, valid)
 
-proc call*(call_594614: Call_DatabaseAccountsDeleteSqlContainer_594604;
+proc call*(call_568843: Call_DatabaseAccountsDeleteSqlContainer_568833;
           resourceGroupName: string; apiVersion: string; containerName: string;
           subscriptionId: string; databaseName: string; accountName: string): Recallable =
   ## databaseAccountsDeleteSqlContainer
@@ -6978,24 +6978,24 @@ proc call*(call_594614: Call_DatabaseAccountsDeleteSqlContainer_594604;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594615 = newJObject()
-  var query_594616 = newJObject()
-  add(path_594615, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594616, "api-version", newJString(apiVersion))
-  add(path_594615, "containerName", newJString(containerName))
-  add(path_594615, "subscriptionId", newJString(subscriptionId))
-  add(path_594615, "databaseName", newJString(databaseName))
-  add(path_594615, "accountName", newJString(accountName))
-  result = call_594614.call(path_594615, query_594616, nil, nil, nil)
+  var path_568844 = newJObject()
+  var query_568845 = newJObject()
+  add(path_568844, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568845, "api-version", newJString(apiVersion))
+  add(path_568844, "containerName", newJString(containerName))
+  add(path_568844, "subscriptionId", newJString(subscriptionId))
+  add(path_568844, "databaseName", newJString(databaseName))
+  add(path_568844, "accountName", newJString(accountName))
+  result = call_568843.call(path_568844, query_568845, nil, nil, nil)
 
-var databaseAccountsDeleteSqlContainer* = Call_DatabaseAccountsDeleteSqlContainer_594604(
+var databaseAccountsDeleteSqlContainer* = Call_DatabaseAccountsDeleteSqlContainer_568833(
     name: "databaseAccountsDeleteSqlContainer", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}/containers/{containerName}",
-    validator: validate_DatabaseAccountsDeleteSqlContainer_594605, base: "",
-    url: url_DatabaseAccountsDeleteSqlContainer_594606, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsDeleteSqlContainer_568834, base: "",
+    url: url_DatabaseAccountsDeleteSqlContainer_568835, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsUpdateSqlContainerThroughput_594630 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsUpdateSqlContainerThroughput_594632(protocol: Scheme;
+  Call_DatabaseAccountsUpdateSqlContainerThroughput_568859 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsUpdateSqlContainerThroughput_568861(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7025,7 +7025,7 @@ proc url_DatabaseAccountsUpdateSqlContainerThroughput_594632(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsUpdateSqlContainerThroughput_594631(path: JsonNode;
+proc validate_DatabaseAccountsUpdateSqlContainerThroughput_568860(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update RUs per second of an Azure Cosmos DB SQL container
   ## 
@@ -7045,31 +7045,31 @@ proc validate_DatabaseAccountsUpdateSqlContainerThroughput_594631(path: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594633 = path.getOrDefault("resourceGroupName")
-  valid_594633 = validateParameter(valid_594633, JString, required = true,
+  var valid_568862 = path.getOrDefault("resourceGroupName")
+  valid_568862 = validateParameter(valid_568862, JString, required = true,
                                  default = nil)
-  if valid_594633 != nil:
-    section.add "resourceGroupName", valid_594633
-  var valid_594634 = path.getOrDefault("containerName")
-  valid_594634 = validateParameter(valid_594634, JString, required = true,
+  if valid_568862 != nil:
+    section.add "resourceGroupName", valid_568862
+  var valid_568863 = path.getOrDefault("containerName")
+  valid_568863 = validateParameter(valid_568863, JString, required = true,
                                  default = nil)
-  if valid_594634 != nil:
-    section.add "containerName", valid_594634
-  var valid_594635 = path.getOrDefault("subscriptionId")
-  valid_594635 = validateParameter(valid_594635, JString, required = true,
+  if valid_568863 != nil:
+    section.add "containerName", valid_568863
+  var valid_568864 = path.getOrDefault("subscriptionId")
+  valid_568864 = validateParameter(valid_568864, JString, required = true,
                                  default = nil)
-  if valid_594635 != nil:
-    section.add "subscriptionId", valid_594635
-  var valid_594636 = path.getOrDefault("databaseName")
-  valid_594636 = validateParameter(valid_594636, JString, required = true,
+  if valid_568864 != nil:
+    section.add "subscriptionId", valid_568864
+  var valid_568865 = path.getOrDefault("databaseName")
+  valid_568865 = validateParameter(valid_568865, JString, required = true,
                                  default = nil)
-  if valid_594636 != nil:
-    section.add "databaseName", valid_594636
-  var valid_594637 = path.getOrDefault("accountName")
-  valid_594637 = validateParameter(valid_594637, JString, required = true,
+  if valid_568865 != nil:
+    section.add "databaseName", valid_568865
+  var valid_568866 = path.getOrDefault("accountName")
+  valid_568866 = validateParameter(valid_568866, JString, required = true,
                                  default = nil)
-  if valid_594637 != nil:
-    section.add "accountName", valid_594637
+  if valid_568866 != nil:
+    section.add "accountName", valid_568866
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7077,11 +7077,11 @@ proc validate_DatabaseAccountsUpdateSqlContainerThroughput_594631(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594638 = query.getOrDefault("api-version")
-  valid_594638 = validateParameter(valid_594638, JString, required = true,
+  var valid_568867 = query.getOrDefault("api-version")
+  valid_568867 = validateParameter(valid_568867, JString, required = true,
                                  default = nil)
-  if valid_594638 != nil:
-    section.add "api-version", valid_594638
+  if valid_568867 != nil:
+    section.add "api-version", valid_568867
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7095,21 +7095,21 @@ proc validate_DatabaseAccountsUpdateSqlContainerThroughput_594631(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594640: Call_DatabaseAccountsUpdateSqlContainerThroughput_594630;
+proc call*(call_568869: Call_DatabaseAccountsUpdateSqlContainerThroughput_568859;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update RUs per second of an Azure Cosmos DB SQL container
   ## 
-  let valid = call_594640.validator(path, query, header, formData, body)
-  let scheme = call_594640.pickScheme
+  let valid = call_568869.validator(path, query, header, formData, body)
+  let scheme = call_568869.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594640.url(scheme.get, call_594640.host, call_594640.base,
-                         call_594640.route, valid.getOrDefault("path"),
+  let url = call_568869.url(scheme.get, call_568869.host, call_568869.base,
+                         call_568869.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594640, url, valid)
+  result = hook(call_568869, url, valid)
 
-proc call*(call_594641: Call_DatabaseAccountsUpdateSqlContainerThroughput_594630;
+proc call*(call_568870: Call_DatabaseAccountsUpdateSqlContainerThroughput_568859;
           resourceGroupName: string; apiVersion: string; containerName: string;
           subscriptionId: string; databaseName: string;
           updateThroughputParameters: JsonNode; accountName: string): Recallable =
@@ -7129,28 +7129,28 @@ proc call*(call_594641: Call_DatabaseAccountsUpdateSqlContainerThroughput_594630
   ##                             : The parameters to provide for the RUs per second of the current SQL container.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594642 = newJObject()
-  var query_594643 = newJObject()
-  var body_594644 = newJObject()
-  add(path_594642, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594643, "api-version", newJString(apiVersion))
-  add(path_594642, "containerName", newJString(containerName))
-  add(path_594642, "subscriptionId", newJString(subscriptionId))
-  add(path_594642, "databaseName", newJString(databaseName))
+  var path_568871 = newJObject()
+  var query_568872 = newJObject()
+  var body_568873 = newJObject()
+  add(path_568871, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568872, "api-version", newJString(apiVersion))
+  add(path_568871, "containerName", newJString(containerName))
+  add(path_568871, "subscriptionId", newJString(subscriptionId))
+  add(path_568871, "databaseName", newJString(databaseName))
   if updateThroughputParameters != nil:
-    body_594644 = updateThroughputParameters
-  add(path_594642, "accountName", newJString(accountName))
-  result = call_594641.call(path_594642, query_594643, nil, nil, body_594644)
+    body_568873 = updateThroughputParameters
+  add(path_568871, "accountName", newJString(accountName))
+  result = call_568870.call(path_568871, query_568872, nil, nil, body_568873)
 
-var databaseAccountsUpdateSqlContainerThroughput* = Call_DatabaseAccountsUpdateSqlContainerThroughput_594630(
+var databaseAccountsUpdateSqlContainerThroughput* = Call_DatabaseAccountsUpdateSqlContainerThroughput_568859(
     name: "databaseAccountsUpdateSqlContainerThroughput",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}/containers/{containerName}/settings/throughput",
-    validator: validate_DatabaseAccountsUpdateSqlContainerThroughput_594631,
-    base: "", url: url_DatabaseAccountsUpdateSqlContainerThroughput_594632,
+    validator: validate_DatabaseAccountsUpdateSqlContainerThroughput_568860,
+    base: "", url: url_DatabaseAccountsUpdateSqlContainerThroughput_568861,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetSqlContainerThroughput_594617 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetSqlContainerThroughput_594619(protocol: Scheme;
+  Call_DatabaseAccountsGetSqlContainerThroughput_568846 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetSqlContainerThroughput_568848(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7180,7 +7180,7 @@ proc url_DatabaseAccountsGetSqlContainerThroughput_594619(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetSqlContainerThroughput_594618(path: JsonNode;
+proc validate_DatabaseAccountsGetSqlContainerThroughput_568847(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the RUs per second of the SQL container under an existing Azure Cosmos DB database account.
   ## 
@@ -7200,31 +7200,31 @@ proc validate_DatabaseAccountsGetSqlContainerThroughput_594618(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594620 = path.getOrDefault("resourceGroupName")
-  valid_594620 = validateParameter(valid_594620, JString, required = true,
+  var valid_568849 = path.getOrDefault("resourceGroupName")
+  valid_568849 = validateParameter(valid_568849, JString, required = true,
                                  default = nil)
-  if valid_594620 != nil:
-    section.add "resourceGroupName", valid_594620
-  var valid_594621 = path.getOrDefault("containerName")
-  valid_594621 = validateParameter(valid_594621, JString, required = true,
+  if valid_568849 != nil:
+    section.add "resourceGroupName", valid_568849
+  var valid_568850 = path.getOrDefault("containerName")
+  valid_568850 = validateParameter(valid_568850, JString, required = true,
                                  default = nil)
-  if valid_594621 != nil:
-    section.add "containerName", valid_594621
-  var valid_594622 = path.getOrDefault("subscriptionId")
-  valid_594622 = validateParameter(valid_594622, JString, required = true,
+  if valid_568850 != nil:
+    section.add "containerName", valid_568850
+  var valid_568851 = path.getOrDefault("subscriptionId")
+  valid_568851 = validateParameter(valid_568851, JString, required = true,
                                  default = nil)
-  if valid_594622 != nil:
-    section.add "subscriptionId", valid_594622
-  var valid_594623 = path.getOrDefault("databaseName")
-  valid_594623 = validateParameter(valid_594623, JString, required = true,
+  if valid_568851 != nil:
+    section.add "subscriptionId", valid_568851
+  var valid_568852 = path.getOrDefault("databaseName")
+  valid_568852 = validateParameter(valid_568852, JString, required = true,
                                  default = nil)
-  if valid_594623 != nil:
-    section.add "databaseName", valid_594623
-  var valid_594624 = path.getOrDefault("accountName")
-  valid_594624 = validateParameter(valid_594624, JString, required = true,
+  if valid_568852 != nil:
+    section.add "databaseName", valid_568852
+  var valid_568853 = path.getOrDefault("accountName")
+  valid_568853 = validateParameter(valid_568853, JString, required = true,
                                  default = nil)
-  if valid_594624 != nil:
-    section.add "accountName", valid_594624
+  if valid_568853 != nil:
+    section.add "accountName", valid_568853
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7232,11 +7232,11 @@ proc validate_DatabaseAccountsGetSqlContainerThroughput_594618(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594625 = query.getOrDefault("api-version")
-  valid_594625 = validateParameter(valid_594625, JString, required = true,
+  var valid_568854 = query.getOrDefault("api-version")
+  valid_568854 = validateParameter(valid_568854, JString, required = true,
                                  default = nil)
-  if valid_594625 != nil:
-    section.add "api-version", valid_594625
+  if valid_568854 != nil:
+    section.add "api-version", valid_568854
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7245,21 +7245,21 @@ proc validate_DatabaseAccountsGetSqlContainerThroughput_594618(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594626: Call_DatabaseAccountsGetSqlContainerThroughput_594617;
+proc call*(call_568855: Call_DatabaseAccountsGetSqlContainerThroughput_568846;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the RUs per second of the SQL container under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594626.validator(path, query, header, formData, body)
-  let scheme = call_594626.pickScheme
+  let valid = call_568855.validator(path, query, header, formData, body)
+  let scheme = call_568855.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594626.url(scheme.get, call_594626.host, call_594626.base,
-                         call_594626.route, valid.getOrDefault("path"),
+  let url = call_568855.url(scheme.get, call_568855.host, call_568855.base,
+                         call_568855.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594626, url, valid)
+  result = hook(call_568855, url, valid)
 
-proc call*(call_594627: Call_DatabaseAccountsGetSqlContainerThroughput_594617;
+proc call*(call_568856: Call_DatabaseAccountsGetSqlContainerThroughput_568846;
           resourceGroupName: string; apiVersion: string; containerName: string;
           subscriptionId: string; databaseName: string; accountName: string): Recallable =
   ## databaseAccountsGetSqlContainerThroughput
@@ -7276,25 +7276,25 @@ proc call*(call_594627: Call_DatabaseAccountsGetSqlContainerThroughput_594617;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594628 = newJObject()
-  var query_594629 = newJObject()
-  add(path_594628, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594629, "api-version", newJString(apiVersion))
-  add(path_594628, "containerName", newJString(containerName))
-  add(path_594628, "subscriptionId", newJString(subscriptionId))
-  add(path_594628, "databaseName", newJString(databaseName))
-  add(path_594628, "accountName", newJString(accountName))
-  result = call_594627.call(path_594628, query_594629, nil, nil, nil)
+  var path_568857 = newJObject()
+  var query_568858 = newJObject()
+  add(path_568857, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568858, "api-version", newJString(apiVersion))
+  add(path_568857, "containerName", newJString(containerName))
+  add(path_568857, "subscriptionId", newJString(subscriptionId))
+  add(path_568857, "databaseName", newJString(databaseName))
+  add(path_568857, "accountName", newJString(accountName))
+  result = call_568856.call(path_568857, query_568858, nil, nil, nil)
 
-var databaseAccountsGetSqlContainerThroughput* = Call_DatabaseAccountsGetSqlContainerThroughput_594617(
+var databaseAccountsGetSqlContainerThroughput* = Call_DatabaseAccountsGetSqlContainerThroughput_568846(
     name: "databaseAccountsGetSqlContainerThroughput", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}/containers/{containerName}/settings/throughput",
-    validator: validate_DatabaseAccountsGetSqlContainerThroughput_594618,
-    base: "", url: url_DatabaseAccountsGetSqlContainerThroughput_594619,
+    validator: validate_DatabaseAccountsGetSqlContainerThroughput_568847,
+    base: "", url: url_DatabaseAccountsGetSqlContainerThroughput_568848,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsUpdateSqlDatabaseThroughput_594657 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsUpdateSqlDatabaseThroughput_594659(protocol: Scheme;
+  Call_DatabaseAccountsUpdateSqlDatabaseThroughput_568886 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsUpdateSqlDatabaseThroughput_568888(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7321,7 +7321,7 @@ proc url_DatabaseAccountsUpdateSqlDatabaseThroughput_594659(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsUpdateSqlDatabaseThroughput_594658(path: JsonNode;
+proc validate_DatabaseAccountsUpdateSqlDatabaseThroughput_568887(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update RUs per second of an Azure Cosmos DB SQL database
   ## 
@@ -7339,26 +7339,26 @@ proc validate_DatabaseAccountsUpdateSqlDatabaseThroughput_594658(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594660 = path.getOrDefault("resourceGroupName")
-  valid_594660 = validateParameter(valid_594660, JString, required = true,
+  var valid_568889 = path.getOrDefault("resourceGroupName")
+  valid_568889 = validateParameter(valid_568889, JString, required = true,
                                  default = nil)
-  if valid_594660 != nil:
-    section.add "resourceGroupName", valid_594660
-  var valid_594661 = path.getOrDefault("subscriptionId")
-  valid_594661 = validateParameter(valid_594661, JString, required = true,
+  if valid_568889 != nil:
+    section.add "resourceGroupName", valid_568889
+  var valid_568890 = path.getOrDefault("subscriptionId")
+  valid_568890 = validateParameter(valid_568890, JString, required = true,
                                  default = nil)
-  if valid_594661 != nil:
-    section.add "subscriptionId", valid_594661
-  var valid_594662 = path.getOrDefault("databaseName")
-  valid_594662 = validateParameter(valid_594662, JString, required = true,
+  if valid_568890 != nil:
+    section.add "subscriptionId", valid_568890
+  var valid_568891 = path.getOrDefault("databaseName")
+  valid_568891 = validateParameter(valid_568891, JString, required = true,
                                  default = nil)
-  if valid_594662 != nil:
-    section.add "databaseName", valid_594662
-  var valid_594663 = path.getOrDefault("accountName")
-  valid_594663 = validateParameter(valid_594663, JString, required = true,
+  if valid_568891 != nil:
+    section.add "databaseName", valid_568891
+  var valid_568892 = path.getOrDefault("accountName")
+  valid_568892 = validateParameter(valid_568892, JString, required = true,
                                  default = nil)
-  if valid_594663 != nil:
-    section.add "accountName", valid_594663
+  if valid_568892 != nil:
+    section.add "accountName", valid_568892
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7366,11 +7366,11 @@ proc validate_DatabaseAccountsUpdateSqlDatabaseThroughput_594658(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594664 = query.getOrDefault("api-version")
-  valid_594664 = validateParameter(valid_594664, JString, required = true,
+  var valid_568893 = query.getOrDefault("api-version")
+  valid_568893 = validateParameter(valid_568893, JString, required = true,
                                  default = nil)
-  if valid_594664 != nil:
-    section.add "api-version", valid_594664
+  if valid_568893 != nil:
+    section.add "api-version", valid_568893
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7384,21 +7384,21 @@ proc validate_DatabaseAccountsUpdateSqlDatabaseThroughput_594658(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594666: Call_DatabaseAccountsUpdateSqlDatabaseThroughput_594657;
+proc call*(call_568895: Call_DatabaseAccountsUpdateSqlDatabaseThroughput_568886;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update RUs per second of an Azure Cosmos DB SQL database
   ## 
-  let valid = call_594666.validator(path, query, header, formData, body)
-  let scheme = call_594666.pickScheme
+  let valid = call_568895.validator(path, query, header, formData, body)
+  let scheme = call_568895.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594666.url(scheme.get, call_594666.host, call_594666.base,
-                         call_594666.route, valid.getOrDefault("path"),
+  let url = call_568895.url(scheme.get, call_568895.host, call_568895.base,
+                         call_568895.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594666, url, valid)
+  result = hook(call_568895, url, valid)
 
-proc call*(call_594667: Call_DatabaseAccountsUpdateSqlDatabaseThroughput_594657;
+proc call*(call_568896: Call_DatabaseAccountsUpdateSqlDatabaseThroughput_568886;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; updateThroughputParameters: JsonNode;
           accountName: string): Recallable =
@@ -7416,27 +7416,27 @@ proc call*(call_594667: Call_DatabaseAccountsUpdateSqlDatabaseThroughput_594657;
   ##                             : The parameters to provide for the RUs per second of the current SQL database.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594668 = newJObject()
-  var query_594669 = newJObject()
-  var body_594670 = newJObject()
-  add(path_594668, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594669, "api-version", newJString(apiVersion))
-  add(path_594668, "subscriptionId", newJString(subscriptionId))
-  add(path_594668, "databaseName", newJString(databaseName))
+  var path_568897 = newJObject()
+  var query_568898 = newJObject()
+  var body_568899 = newJObject()
+  add(path_568897, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568898, "api-version", newJString(apiVersion))
+  add(path_568897, "subscriptionId", newJString(subscriptionId))
+  add(path_568897, "databaseName", newJString(databaseName))
   if updateThroughputParameters != nil:
-    body_594670 = updateThroughputParameters
-  add(path_594668, "accountName", newJString(accountName))
-  result = call_594667.call(path_594668, query_594669, nil, nil, body_594670)
+    body_568899 = updateThroughputParameters
+  add(path_568897, "accountName", newJString(accountName))
+  result = call_568896.call(path_568897, query_568898, nil, nil, body_568899)
 
-var databaseAccountsUpdateSqlDatabaseThroughput* = Call_DatabaseAccountsUpdateSqlDatabaseThroughput_594657(
+var databaseAccountsUpdateSqlDatabaseThroughput* = Call_DatabaseAccountsUpdateSqlDatabaseThroughput_568886(
     name: "databaseAccountsUpdateSqlDatabaseThroughput", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}/settings/throughput",
-    validator: validate_DatabaseAccountsUpdateSqlDatabaseThroughput_594658,
-    base: "", url: url_DatabaseAccountsUpdateSqlDatabaseThroughput_594659,
+    validator: validate_DatabaseAccountsUpdateSqlDatabaseThroughput_568887,
+    base: "", url: url_DatabaseAccountsUpdateSqlDatabaseThroughput_568888,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetSqlDatabaseThroughput_594645 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetSqlDatabaseThroughput_594647(protocol: Scheme;
+  Call_DatabaseAccountsGetSqlDatabaseThroughput_568874 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetSqlDatabaseThroughput_568876(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7463,7 +7463,7 @@ proc url_DatabaseAccountsGetSqlDatabaseThroughput_594647(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetSqlDatabaseThroughput_594646(path: JsonNode;
+proc validate_DatabaseAccountsGetSqlDatabaseThroughput_568875(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the RUs per second of the SQL database under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -7481,26 +7481,26 @@ proc validate_DatabaseAccountsGetSqlDatabaseThroughput_594646(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594648 = path.getOrDefault("resourceGroupName")
-  valid_594648 = validateParameter(valid_594648, JString, required = true,
+  var valid_568877 = path.getOrDefault("resourceGroupName")
+  valid_568877 = validateParameter(valid_568877, JString, required = true,
                                  default = nil)
-  if valid_594648 != nil:
-    section.add "resourceGroupName", valid_594648
-  var valid_594649 = path.getOrDefault("subscriptionId")
-  valid_594649 = validateParameter(valid_594649, JString, required = true,
+  if valid_568877 != nil:
+    section.add "resourceGroupName", valid_568877
+  var valid_568878 = path.getOrDefault("subscriptionId")
+  valid_568878 = validateParameter(valid_568878, JString, required = true,
                                  default = nil)
-  if valid_594649 != nil:
-    section.add "subscriptionId", valid_594649
-  var valid_594650 = path.getOrDefault("databaseName")
-  valid_594650 = validateParameter(valid_594650, JString, required = true,
+  if valid_568878 != nil:
+    section.add "subscriptionId", valid_568878
+  var valid_568879 = path.getOrDefault("databaseName")
+  valid_568879 = validateParameter(valid_568879, JString, required = true,
                                  default = nil)
-  if valid_594650 != nil:
-    section.add "databaseName", valid_594650
-  var valid_594651 = path.getOrDefault("accountName")
-  valid_594651 = validateParameter(valid_594651, JString, required = true,
+  if valid_568879 != nil:
+    section.add "databaseName", valid_568879
+  var valid_568880 = path.getOrDefault("accountName")
+  valid_568880 = validateParameter(valid_568880, JString, required = true,
                                  default = nil)
-  if valid_594651 != nil:
-    section.add "accountName", valid_594651
+  if valid_568880 != nil:
+    section.add "accountName", valid_568880
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7508,11 +7508,11 @@ proc validate_DatabaseAccountsGetSqlDatabaseThroughput_594646(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594652 = query.getOrDefault("api-version")
-  valid_594652 = validateParameter(valid_594652, JString, required = true,
+  var valid_568881 = query.getOrDefault("api-version")
+  valid_568881 = validateParameter(valid_568881, JString, required = true,
                                  default = nil)
-  if valid_594652 != nil:
-    section.add "api-version", valid_594652
+  if valid_568881 != nil:
+    section.add "api-version", valid_568881
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7521,21 +7521,21 @@ proc validate_DatabaseAccountsGetSqlDatabaseThroughput_594646(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594653: Call_DatabaseAccountsGetSqlDatabaseThroughput_594645;
+proc call*(call_568882: Call_DatabaseAccountsGetSqlDatabaseThroughput_568874;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the RUs per second of the SQL database under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594653.validator(path, query, header, formData, body)
-  let scheme = call_594653.pickScheme
+  let valid = call_568882.validator(path, query, header, formData, body)
+  let scheme = call_568882.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594653.url(scheme.get, call_594653.host, call_594653.base,
-                         call_594653.route, valid.getOrDefault("path"),
+  let url = call_568882.url(scheme.get, call_568882.host, call_568882.base,
+                         call_568882.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594653, url, valid)
+  result = hook(call_568882, url, valid)
 
-proc call*(call_594654: Call_DatabaseAccountsGetSqlDatabaseThroughput_594645;
+proc call*(call_568883: Call_DatabaseAccountsGetSqlDatabaseThroughput_568874;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseName: string; accountName: string): Recallable =
   ## databaseAccountsGetSqlDatabaseThroughput
@@ -7550,24 +7550,24 @@ proc call*(call_594654: Call_DatabaseAccountsGetSqlDatabaseThroughput_594645;
   ##               : Cosmos DB database name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594655 = newJObject()
-  var query_594656 = newJObject()
-  add(path_594655, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594656, "api-version", newJString(apiVersion))
-  add(path_594655, "subscriptionId", newJString(subscriptionId))
-  add(path_594655, "databaseName", newJString(databaseName))
-  add(path_594655, "accountName", newJString(accountName))
-  result = call_594654.call(path_594655, query_594656, nil, nil, nil)
+  var path_568884 = newJObject()
+  var query_568885 = newJObject()
+  add(path_568884, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568885, "api-version", newJString(apiVersion))
+  add(path_568884, "subscriptionId", newJString(subscriptionId))
+  add(path_568884, "databaseName", newJString(databaseName))
+  add(path_568884, "accountName", newJString(accountName))
+  result = call_568883.call(path_568884, query_568885, nil, nil, nil)
 
-var databaseAccountsGetSqlDatabaseThroughput* = Call_DatabaseAccountsGetSqlDatabaseThroughput_594645(
+var databaseAccountsGetSqlDatabaseThroughput* = Call_DatabaseAccountsGetSqlDatabaseThroughput_568874(
     name: "databaseAccountsGetSqlDatabaseThroughput", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/sql/databases/{databaseName}/settings/throughput",
-    validator: validate_DatabaseAccountsGetSqlDatabaseThroughput_594646, base: "",
-    url: url_DatabaseAccountsGetSqlDatabaseThroughput_594647,
+    validator: validate_DatabaseAccountsGetSqlDatabaseThroughput_568875, base: "",
+    url: url_DatabaseAccountsGetSqlDatabaseThroughput_568876,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListTables_594671 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListTables_594673(protocol: Scheme; host: string;
+  Call_DatabaseAccountsListTables_568900 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListTables_568902(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7591,7 +7591,7 @@ proc url_DatabaseAccountsListTables_594673(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListTables_594672(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsListTables_568901(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Tables under an existing Azure Cosmos DB database account.
   ## 
@@ -7607,21 +7607,21 @@ proc validate_DatabaseAccountsListTables_594672(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594674 = path.getOrDefault("resourceGroupName")
-  valid_594674 = validateParameter(valid_594674, JString, required = true,
+  var valid_568903 = path.getOrDefault("resourceGroupName")
+  valid_568903 = validateParameter(valid_568903, JString, required = true,
                                  default = nil)
-  if valid_594674 != nil:
-    section.add "resourceGroupName", valid_594674
-  var valid_594675 = path.getOrDefault("subscriptionId")
-  valid_594675 = validateParameter(valid_594675, JString, required = true,
+  if valid_568903 != nil:
+    section.add "resourceGroupName", valid_568903
+  var valid_568904 = path.getOrDefault("subscriptionId")
+  valid_568904 = validateParameter(valid_568904, JString, required = true,
                                  default = nil)
-  if valid_594675 != nil:
-    section.add "subscriptionId", valid_594675
-  var valid_594676 = path.getOrDefault("accountName")
-  valid_594676 = validateParameter(valid_594676, JString, required = true,
+  if valid_568904 != nil:
+    section.add "subscriptionId", valid_568904
+  var valid_568905 = path.getOrDefault("accountName")
+  valid_568905 = validateParameter(valid_568905, JString, required = true,
                                  default = nil)
-  if valid_594676 != nil:
-    section.add "accountName", valid_594676
+  if valid_568905 != nil:
+    section.add "accountName", valid_568905
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7629,11 +7629,11 @@ proc validate_DatabaseAccountsListTables_594672(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594677 = query.getOrDefault("api-version")
-  valid_594677 = validateParameter(valid_594677, JString, required = true,
+  var valid_568906 = query.getOrDefault("api-version")
+  valid_568906 = validateParameter(valid_568906, JString, required = true,
                                  default = nil)
-  if valid_594677 != nil:
-    section.add "api-version", valid_594677
+  if valid_568906 != nil:
+    section.add "api-version", valid_568906
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7642,20 +7642,20 @@ proc validate_DatabaseAccountsListTables_594672(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594678: Call_DatabaseAccountsListTables_594671; path: JsonNode;
+proc call*(call_568907: Call_DatabaseAccountsListTables_568900; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the Tables under an existing Azure Cosmos DB database account.
   ## 
-  let valid = call_594678.validator(path, query, header, formData, body)
-  let scheme = call_594678.pickScheme
+  let valid = call_568907.validator(path, query, header, formData, body)
+  let scheme = call_568907.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594678.url(scheme.get, call_594678.host, call_594678.base,
-                         call_594678.route, valid.getOrDefault("path"),
+  let url = call_568907.url(scheme.get, call_568907.host, call_568907.base,
+                         call_568907.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594678, url, valid)
+  result = hook(call_568907, url, valid)
 
-proc call*(call_594679: Call_DatabaseAccountsListTables_594671;
+proc call*(call_568908: Call_DatabaseAccountsListTables_568900;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsListTables
@@ -7668,22 +7668,22 @@ proc call*(call_594679: Call_DatabaseAccountsListTables_594671;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594680 = newJObject()
-  var query_594681 = newJObject()
-  add(path_594680, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594681, "api-version", newJString(apiVersion))
-  add(path_594680, "subscriptionId", newJString(subscriptionId))
-  add(path_594680, "accountName", newJString(accountName))
-  result = call_594679.call(path_594680, query_594681, nil, nil, nil)
+  var path_568909 = newJObject()
+  var query_568910 = newJObject()
+  add(path_568909, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568910, "api-version", newJString(apiVersion))
+  add(path_568909, "subscriptionId", newJString(subscriptionId))
+  add(path_568909, "accountName", newJString(accountName))
+  result = call_568908.call(path_568909, query_568910, nil, nil, nil)
 
-var databaseAccountsListTables* = Call_DatabaseAccountsListTables_594671(
+var databaseAccountsListTables* = Call_DatabaseAccountsListTables_568900(
     name: "databaseAccountsListTables", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/table/tables",
-    validator: validate_DatabaseAccountsListTables_594672, base: "",
-    url: url_DatabaseAccountsListTables_594673, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListTables_568901, base: "",
+    url: url_DatabaseAccountsListTables_568902, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsCreateUpdateTable_594694 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsCreateUpdateTable_594696(protocol: Scheme; host: string;
+  Call_DatabaseAccountsCreateUpdateTable_568923 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsCreateUpdateTable_568925(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7709,7 +7709,7 @@ proc url_DatabaseAccountsCreateUpdateTable_594696(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsCreateUpdateTable_594695(path: JsonNode;
+proc validate_DatabaseAccountsCreateUpdateTable_568924(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an Azure Cosmos DB Table
   ## 
@@ -7727,26 +7727,26 @@ proc validate_DatabaseAccountsCreateUpdateTable_594695(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594697 = path.getOrDefault("resourceGroupName")
-  valid_594697 = validateParameter(valid_594697, JString, required = true,
+  var valid_568926 = path.getOrDefault("resourceGroupName")
+  valid_568926 = validateParameter(valid_568926, JString, required = true,
                                  default = nil)
-  if valid_594697 != nil:
-    section.add "resourceGroupName", valid_594697
-  var valid_594698 = path.getOrDefault("subscriptionId")
-  valid_594698 = validateParameter(valid_594698, JString, required = true,
+  if valid_568926 != nil:
+    section.add "resourceGroupName", valid_568926
+  var valid_568927 = path.getOrDefault("subscriptionId")
+  valid_568927 = validateParameter(valid_568927, JString, required = true,
                                  default = nil)
-  if valid_594698 != nil:
-    section.add "subscriptionId", valid_594698
-  var valid_594699 = path.getOrDefault("tableName")
-  valid_594699 = validateParameter(valid_594699, JString, required = true,
+  if valid_568927 != nil:
+    section.add "subscriptionId", valid_568927
+  var valid_568928 = path.getOrDefault("tableName")
+  valid_568928 = validateParameter(valid_568928, JString, required = true,
                                  default = nil)
-  if valid_594699 != nil:
-    section.add "tableName", valid_594699
-  var valid_594700 = path.getOrDefault("accountName")
-  valid_594700 = validateParameter(valid_594700, JString, required = true,
+  if valid_568928 != nil:
+    section.add "tableName", valid_568928
+  var valid_568929 = path.getOrDefault("accountName")
+  valid_568929 = validateParameter(valid_568929, JString, required = true,
                                  default = nil)
-  if valid_594700 != nil:
-    section.add "accountName", valid_594700
+  if valid_568929 != nil:
+    section.add "accountName", valid_568929
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7754,11 +7754,11 @@ proc validate_DatabaseAccountsCreateUpdateTable_594695(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594701 = query.getOrDefault("api-version")
-  valid_594701 = validateParameter(valid_594701, JString, required = true,
+  var valid_568930 = query.getOrDefault("api-version")
+  valid_568930 = validateParameter(valid_568930, JString, required = true,
                                  default = nil)
-  if valid_594701 != nil:
-    section.add "api-version", valid_594701
+  if valid_568930 != nil:
+    section.add "api-version", valid_568930
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7772,21 +7772,21 @@ proc validate_DatabaseAccountsCreateUpdateTable_594695(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594703: Call_DatabaseAccountsCreateUpdateTable_594694;
+proc call*(call_568932: Call_DatabaseAccountsCreateUpdateTable_568923;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update an Azure Cosmos DB Table
   ## 
-  let valid = call_594703.validator(path, query, header, formData, body)
-  let scheme = call_594703.pickScheme
+  let valid = call_568932.validator(path, query, header, formData, body)
+  let scheme = call_568932.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594703.url(scheme.get, call_594703.host, call_594703.base,
-                         call_594703.route, valid.getOrDefault("path"),
+  let url = call_568932.url(scheme.get, call_568932.host, call_568932.base,
+                         call_568932.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594703, url, valid)
+  result = hook(call_568932, url, valid)
 
-proc call*(call_594704: Call_DatabaseAccountsCreateUpdateTable_594694;
+proc call*(call_568933: Call_DatabaseAccountsCreateUpdateTable_568923;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           tableName: string; createUpdateTableParameters: JsonNode;
           accountName: string): Recallable =
@@ -7804,26 +7804,26 @@ proc call*(call_594704: Call_DatabaseAccountsCreateUpdateTable_594694;
   ##                              : The parameters to provide for the current Table.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594705 = newJObject()
-  var query_594706 = newJObject()
-  var body_594707 = newJObject()
-  add(path_594705, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594706, "api-version", newJString(apiVersion))
-  add(path_594705, "subscriptionId", newJString(subscriptionId))
-  add(path_594705, "tableName", newJString(tableName))
+  var path_568934 = newJObject()
+  var query_568935 = newJObject()
+  var body_568936 = newJObject()
+  add(path_568934, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568935, "api-version", newJString(apiVersion))
+  add(path_568934, "subscriptionId", newJString(subscriptionId))
+  add(path_568934, "tableName", newJString(tableName))
   if createUpdateTableParameters != nil:
-    body_594707 = createUpdateTableParameters
-  add(path_594705, "accountName", newJString(accountName))
-  result = call_594704.call(path_594705, query_594706, nil, nil, body_594707)
+    body_568936 = createUpdateTableParameters
+  add(path_568934, "accountName", newJString(accountName))
+  result = call_568933.call(path_568934, query_568935, nil, nil, body_568936)
 
-var databaseAccountsCreateUpdateTable* = Call_DatabaseAccountsCreateUpdateTable_594694(
+var databaseAccountsCreateUpdateTable* = Call_DatabaseAccountsCreateUpdateTable_568923(
     name: "databaseAccountsCreateUpdateTable", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/table/tables/{tableName}",
-    validator: validate_DatabaseAccountsCreateUpdateTable_594695, base: "",
-    url: url_DatabaseAccountsCreateUpdateTable_594696, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsCreateUpdateTable_568924, base: "",
+    url: url_DatabaseAccountsCreateUpdateTable_568925, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetTable_594682 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetTable_594684(protocol: Scheme; host: string;
+  Call_DatabaseAccountsGetTable_568911 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetTable_568913(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -7850,7 +7850,7 @@ proc url_DatabaseAccountsGetTable_594684(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetTable_594683(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsGetTable_568912(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Tables under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -7868,26 +7868,26 @@ proc validate_DatabaseAccountsGetTable_594683(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594685 = path.getOrDefault("resourceGroupName")
-  valid_594685 = validateParameter(valid_594685, JString, required = true,
+  var valid_568914 = path.getOrDefault("resourceGroupName")
+  valid_568914 = validateParameter(valid_568914, JString, required = true,
                                  default = nil)
-  if valid_594685 != nil:
-    section.add "resourceGroupName", valid_594685
-  var valid_594686 = path.getOrDefault("subscriptionId")
-  valid_594686 = validateParameter(valid_594686, JString, required = true,
+  if valid_568914 != nil:
+    section.add "resourceGroupName", valid_568914
+  var valid_568915 = path.getOrDefault("subscriptionId")
+  valid_568915 = validateParameter(valid_568915, JString, required = true,
                                  default = nil)
-  if valid_594686 != nil:
-    section.add "subscriptionId", valid_594686
-  var valid_594687 = path.getOrDefault("tableName")
-  valid_594687 = validateParameter(valid_594687, JString, required = true,
+  if valid_568915 != nil:
+    section.add "subscriptionId", valid_568915
+  var valid_568916 = path.getOrDefault("tableName")
+  valid_568916 = validateParameter(valid_568916, JString, required = true,
                                  default = nil)
-  if valid_594687 != nil:
-    section.add "tableName", valid_594687
-  var valid_594688 = path.getOrDefault("accountName")
-  valid_594688 = validateParameter(valid_594688, JString, required = true,
+  if valid_568916 != nil:
+    section.add "tableName", valid_568916
+  var valid_568917 = path.getOrDefault("accountName")
+  valid_568917 = validateParameter(valid_568917, JString, required = true,
                                  default = nil)
-  if valid_594688 != nil:
-    section.add "accountName", valid_594688
+  if valid_568917 != nil:
+    section.add "accountName", valid_568917
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7895,11 +7895,11 @@ proc validate_DatabaseAccountsGetTable_594683(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594689 = query.getOrDefault("api-version")
-  valid_594689 = validateParameter(valid_594689, JString, required = true,
+  var valid_568918 = query.getOrDefault("api-version")
+  valid_568918 = validateParameter(valid_568918, JString, required = true,
                                  default = nil)
-  if valid_594689 != nil:
-    section.add "api-version", valid_594689
+  if valid_568918 != nil:
+    section.add "api-version", valid_568918
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7908,20 +7908,20 @@ proc validate_DatabaseAccountsGetTable_594683(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594690: Call_DatabaseAccountsGetTable_594682; path: JsonNode;
+proc call*(call_568919: Call_DatabaseAccountsGetTable_568911; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Tables under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594690.validator(path, query, header, formData, body)
-  let scheme = call_594690.pickScheme
+  let valid = call_568919.validator(path, query, header, formData, body)
+  let scheme = call_568919.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594690.url(scheme.get, call_594690.host, call_594690.base,
-                         call_594690.route, valid.getOrDefault("path"),
+  let url = call_568919.url(scheme.get, call_568919.host, call_568919.base,
+                         call_568919.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594690, url, valid)
+  result = hook(call_568919, url, valid)
 
-proc call*(call_594691: Call_DatabaseAccountsGetTable_594682;
+proc call*(call_568920: Call_DatabaseAccountsGetTable_568911;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           tableName: string; accountName: string): Recallable =
   ## databaseAccountsGetTable
@@ -7936,23 +7936,23 @@ proc call*(call_594691: Call_DatabaseAccountsGetTable_594682;
   ##            : Cosmos DB table name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594692 = newJObject()
-  var query_594693 = newJObject()
-  add(path_594692, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594693, "api-version", newJString(apiVersion))
-  add(path_594692, "subscriptionId", newJString(subscriptionId))
-  add(path_594692, "tableName", newJString(tableName))
-  add(path_594692, "accountName", newJString(accountName))
-  result = call_594691.call(path_594692, query_594693, nil, nil, nil)
+  var path_568921 = newJObject()
+  var query_568922 = newJObject()
+  add(path_568921, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568922, "api-version", newJString(apiVersion))
+  add(path_568921, "subscriptionId", newJString(subscriptionId))
+  add(path_568921, "tableName", newJString(tableName))
+  add(path_568921, "accountName", newJString(accountName))
+  result = call_568920.call(path_568921, query_568922, nil, nil, nil)
 
-var databaseAccountsGetTable* = Call_DatabaseAccountsGetTable_594682(
+var databaseAccountsGetTable* = Call_DatabaseAccountsGetTable_568911(
     name: "databaseAccountsGetTable", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/table/tables/{tableName}",
-    validator: validate_DatabaseAccountsGetTable_594683, base: "",
-    url: url_DatabaseAccountsGetTable_594684, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetTable_568912, base: "",
+    url: url_DatabaseAccountsGetTable_568913, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsDeleteTable_594708 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsDeleteTable_594710(protocol: Scheme; host: string;
+  Call_DatabaseAccountsDeleteTable_568937 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsDeleteTable_568939(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7978,7 +7978,7 @@ proc url_DatabaseAccountsDeleteTable_594710(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsDeleteTable_594709(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsDeleteTable_568938(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Azure Cosmos DB Table.
   ## 
@@ -7996,26 +7996,26 @@ proc validate_DatabaseAccountsDeleteTable_594709(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594711 = path.getOrDefault("resourceGroupName")
-  valid_594711 = validateParameter(valid_594711, JString, required = true,
+  var valid_568940 = path.getOrDefault("resourceGroupName")
+  valid_568940 = validateParameter(valid_568940, JString, required = true,
                                  default = nil)
-  if valid_594711 != nil:
-    section.add "resourceGroupName", valid_594711
-  var valid_594712 = path.getOrDefault("subscriptionId")
-  valid_594712 = validateParameter(valid_594712, JString, required = true,
+  if valid_568940 != nil:
+    section.add "resourceGroupName", valid_568940
+  var valid_568941 = path.getOrDefault("subscriptionId")
+  valid_568941 = validateParameter(valid_568941, JString, required = true,
                                  default = nil)
-  if valid_594712 != nil:
-    section.add "subscriptionId", valid_594712
-  var valid_594713 = path.getOrDefault("tableName")
-  valid_594713 = validateParameter(valid_594713, JString, required = true,
+  if valid_568941 != nil:
+    section.add "subscriptionId", valid_568941
+  var valid_568942 = path.getOrDefault("tableName")
+  valid_568942 = validateParameter(valid_568942, JString, required = true,
                                  default = nil)
-  if valid_594713 != nil:
-    section.add "tableName", valid_594713
-  var valid_594714 = path.getOrDefault("accountName")
-  valid_594714 = validateParameter(valid_594714, JString, required = true,
+  if valid_568942 != nil:
+    section.add "tableName", valid_568942
+  var valid_568943 = path.getOrDefault("accountName")
+  valid_568943 = validateParameter(valid_568943, JString, required = true,
                                  default = nil)
-  if valid_594714 != nil:
-    section.add "accountName", valid_594714
+  if valid_568943 != nil:
+    section.add "accountName", valid_568943
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8023,11 +8023,11 @@ proc validate_DatabaseAccountsDeleteTable_594709(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594715 = query.getOrDefault("api-version")
-  valid_594715 = validateParameter(valid_594715, JString, required = true,
+  var valid_568944 = query.getOrDefault("api-version")
+  valid_568944 = validateParameter(valid_568944, JString, required = true,
                                  default = nil)
-  if valid_594715 != nil:
-    section.add "api-version", valid_594715
+  if valid_568944 != nil:
+    section.add "api-version", valid_568944
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8036,20 +8036,20 @@ proc validate_DatabaseAccountsDeleteTable_594709(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594716: Call_DatabaseAccountsDeleteTable_594708; path: JsonNode;
+proc call*(call_568945: Call_DatabaseAccountsDeleteTable_568937; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing Azure Cosmos DB Table.
   ## 
-  let valid = call_594716.validator(path, query, header, formData, body)
-  let scheme = call_594716.pickScheme
+  let valid = call_568945.validator(path, query, header, formData, body)
+  let scheme = call_568945.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594716.url(scheme.get, call_594716.host, call_594716.base,
-                         call_594716.route, valid.getOrDefault("path"),
+  let url = call_568945.url(scheme.get, call_568945.host, call_568945.base,
+                         call_568945.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594716, url, valid)
+  result = hook(call_568945, url, valid)
 
-proc call*(call_594717: Call_DatabaseAccountsDeleteTable_594708;
+proc call*(call_568946: Call_DatabaseAccountsDeleteTable_568937;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           tableName: string; accountName: string): Recallable =
   ## databaseAccountsDeleteTable
@@ -8064,23 +8064,23 @@ proc call*(call_594717: Call_DatabaseAccountsDeleteTable_594708;
   ##            : Cosmos DB table name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594718 = newJObject()
-  var query_594719 = newJObject()
-  add(path_594718, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594719, "api-version", newJString(apiVersion))
-  add(path_594718, "subscriptionId", newJString(subscriptionId))
-  add(path_594718, "tableName", newJString(tableName))
-  add(path_594718, "accountName", newJString(accountName))
-  result = call_594717.call(path_594718, query_594719, nil, nil, nil)
+  var path_568947 = newJObject()
+  var query_568948 = newJObject()
+  add(path_568947, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568948, "api-version", newJString(apiVersion))
+  add(path_568947, "subscriptionId", newJString(subscriptionId))
+  add(path_568947, "tableName", newJString(tableName))
+  add(path_568947, "accountName", newJString(accountName))
+  result = call_568946.call(path_568947, query_568948, nil, nil, nil)
 
-var databaseAccountsDeleteTable* = Call_DatabaseAccountsDeleteTable_594708(
+var databaseAccountsDeleteTable* = Call_DatabaseAccountsDeleteTable_568937(
     name: "databaseAccountsDeleteTable", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/table/tables/{tableName}",
-    validator: validate_DatabaseAccountsDeleteTable_594709, base: "",
-    url: url_DatabaseAccountsDeleteTable_594710, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsDeleteTable_568938, base: "",
+    url: url_DatabaseAccountsDeleteTable_568939, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsUpdateTableThroughput_594732 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsUpdateTableThroughput_594734(protocol: Scheme;
+  Call_DatabaseAccountsUpdateTableThroughput_568961 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsUpdateTableThroughput_568963(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8107,7 +8107,7 @@ proc url_DatabaseAccountsUpdateTableThroughput_594734(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsUpdateTableThroughput_594733(path: JsonNode;
+proc validate_DatabaseAccountsUpdateTableThroughput_568962(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update RUs per second of an Azure Cosmos DB Table
   ## 
@@ -8125,26 +8125,26 @@ proc validate_DatabaseAccountsUpdateTableThroughput_594733(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594735 = path.getOrDefault("resourceGroupName")
-  valid_594735 = validateParameter(valid_594735, JString, required = true,
+  var valid_568964 = path.getOrDefault("resourceGroupName")
+  valid_568964 = validateParameter(valid_568964, JString, required = true,
                                  default = nil)
-  if valid_594735 != nil:
-    section.add "resourceGroupName", valid_594735
-  var valid_594736 = path.getOrDefault("subscriptionId")
-  valid_594736 = validateParameter(valid_594736, JString, required = true,
+  if valid_568964 != nil:
+    section.add "resourceGroupName", valid_568964
+  var valid_568965 = path.getOrDefault("subscriptionId")
+  valid_568965 = validateParameter(valid_568965, JString, required = true,
                                  default = nil)
-  if valid_594736 != nil:
-    section.add "subscriptionId", valid_594736
-  var valid_594737 = path.getOrDefault("tableName")
-  valid_594737 = validateParameter(valid_594737, JString, required = true,
+  if valid_568965 != nil:
+    section.add "subscriptionId", valid_568965
+  var valid_568966 = path.getOrDefault("tableName")
+  valid_568966 = validateParameter(valid_568966, JString, required = true,
                                  default = nil)
-  if valid_594737 != nil:
-    section.add "tableName", valid_594737
-  var valid_594738 = path.getOrDefault("accountName")
-  valid_594738 = validateParameter(valid_594738, JString, required = true,
+  if valid_568966 != nil:
+    section.add "tableName", valid_568966
+  var valid_568967 = path.getOrDefault("accountName")
+  valid_568967 = validateParameter(valid_568967, JString, required = true,
                                  default = nil)
-  if valid_594738 != nil:
-    section.add "accountName", valid_594738
+  if valid_568967 != nil:
+    section.add "accountName", valid_568967
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8152,11 +8152,11 @@ proc validate_DatabaseAccountsUpdateTableThroughput_594733(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594739 = query.getOrDefault("api-version")
-  valid_594739 = validateParameter(valid_594739, JString, required = true,
+  var valid_568968 = query.getOrDefault("api-version")
+  valid_568968 = validateParameter(valid_568968, JString, required = true,
                                  default = nil)
-  if valid_594739 != nil:
-    section.add "api-version", valid_594739
+  if valid_568968 != nil:
+    section.add "api-version", valid_568968
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8170,21 +8170,21 @@ proc validate_DatabaseAccountsUpdateTableThroughput_594733(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594741: Call_DatabaseAccountsUpdateTableThroughput_594732;
+proc call*(call_568970: Call_DatabaseAccountsUpdateTableThroughput_568961;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update RUs per second of an Azure Cosmos DB Table
   ## 
-  let valid = call_594741.validator(path, query, header, formData, body)
-  let scheme = call_594741.pickScheme
+  let valid = call_568970.validator(path, query, header, formData, body)
+  let scheme = call_568970.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594741.url(scheme.get, call_594741.host, call_594741.base,
-                         call_594741.route, valid.getOrDefault("path"),
+  let url = call_568970.url(scheme.get, call_568970.host, call_568970.base,
+                         call_568970.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594741, url, valid)
+  result = hook(call_568970, url, valid)
 
-proc call*(call_594742: Call_DatabaseAccountsUpdateTableThroughput_594732;
+proc call*(call_568971: Call_DatabaseAccountsUpdateTableThroughput_568961;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           tableName: string; updateThroughputParameters: JsonNode;
           accountName: string): Recallable =
@@ -8202,26 +8202,26 @@ proc call*(call_594742: Call_DatabaseAccountsUpdateTableThroughput_594732;
   ##                             : The parameters to provide for the RUs per second of the current Table.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594743 = newJObject()
-  var query_594744 = newJObject()
-  var body_594745 = newJObject()
-  add(path_594743, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594744, "api-version", newJString(apiVersion))
-  add(path_594743, "subscriptionId", newJString(subscriptionId))
-  add(path_594743, "tableName", newJString(tableName))
+  var path_568972 = newJObject()
+  var query_568973 = newJObject()
+  var body_568974 = newJObject()
+  add(path_568972, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568973, "api-version", newJString(apiVersion))
+  add(path_568972, "subscriptionId", newJString(subscriptionId))
+  add(path_568972, "tableName", newJString(tableName))
   if updateThroughputParameters != nil:
-    body_594745 = updateThroughputParameters
-  add(path_594743, "accountName", newJString(accountName))
-  result = call_594742.call(path_594743, query_594744, nil, nil, body_594745)
+    body_568974 = updateThroughputParameters
+  add(path_568972, "accountName", newJString(accountName))
+  result = call_568971.call(path_568972, query_568973, nil, nil, body_568974)
 
-var databaseAccountsUpdateTableThroughput* = Call_DatabaseAccountsUpdateTableThroughput_594732(
+var databaseAccountsUpdateTableThroughput* = Call_DatabaseAccountsUpdateTableThroughput_568961(
     name: "databaseAccountsUpdateTableThroughput", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/table/tables/{tableName}/settings/throughput",
-    validator: validate_DatabaseAccountsUpdateTableThroughput_594733, base: "",
-    url: url_DatabaseAccountsUpdateTableThroughput_594734, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsUpdateTableThroughput_568962, base: "",
+    url: url_DatabaseAccountsUpdateTableThroughput_568963, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetTableThroughput_594720 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetTableThroughput_594722(protocol: Scheme; host: string;
+  Call_DatabaseAccountsGetTableThroughput_568949 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetTableThroughput_568951(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8248,7 +8248,7 @@ proc url_DatabaseAccountsGetTableThroughput_594722(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetTableThroughput_594721(path: JsonNode;
+proc validate_DatabaseAccountsGetTableThroughput_568950(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the RUs per second of the Table under an existing Azure Cosmos DB database account with the provided name.
   ## 
@@ -8266,26 +8266,26 @@ proc validate_DatabaseAccountsGetTableThroughput_594721(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594723 = path.getOrDefault("resourceGroupName")
-  valid_594723 = validateParameter(valid_594723, JString, required = true,
+  var valid_568952 = path.getOrDefault("resourceGroupName")
+  valid_568952 = validateParameter(valid_568952, JString, required = true,
                                  default = nil)
-  if valid_594723 != nil:
-    section.add "resourceGroupName", valid_594723
-  var valid_594724 = path.getOrDefault("subscriptionId")
-  valid_594724 = validateParameter(valid_594724, JString, required = true,
+  if valid_568952 != nil:
+    section.add "resourceGroupName", valid_568952
+  var valid_568953 = path.getOrDefault("subscriptionId")
+  valid_568953 = validateParameter(valid_568953, JString, required = true,
                                  default = nil)
-  if valid_594724 != nil:
-    section.add "subscriptionId", valid_594724
-  var valid_594725 = path.getOrDefault("tableName")
-  valid_594725 = validateParameter(valid_594725, JString, required = true,
+  if valid_568953 != nil:
+    section.add "subscriptionId", valid_568953
+  var valid_568954 = path.getOrDefault("tableName")
+  valid_568954 = validateParameter(valid_568954, JString, required = true,
                                  default = nil)
-  if valid_594725 != nil:
-    section.add "tableName", valid_594725
-  var valid_594726 = path.getOrDefault("accountName")
-  valid_594726 = validateParameter(valid_594726, JString, required = true,
+  if valid_568954 != nil:
+    section.add "tableName", valid_568954
+  var valid_568955 = path.getOrDefault("accountName")
+  valid_568955 = validateParameter(valid_568955, JString, required = true,
                                  default = nil)
-  if valid_594726 != nil:
-    section.add "accountName", valid_594726
+  if valid_568955 != nil:
+    section.add "accountName", valid_568955
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8293,11 +8293,11 @@ proc validate_DatabaseAccountsGetTableThroughput_594721(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594727 = query.getOrDefault("api-version")
-  valid_594727 = validateParameter(valid_594727, JString, required = true,
+  var valid_568956 = query.getOrDefault("api-version")
+  valid_568956 = validateParameter(valid_568956, JString, required = true,
                                  default = nil)
-  if valid_594727 != nil:
-    section.add "api-version", valid_594727
+  if valid_568956 != nil:
+    section.add "api-version", valid_568956
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8306,21 +8306,21 @@ proc validate_DatabaseAccountsGetTableThroughput_594721(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594728: Call_DatabaseAccountsGetTableThroughput_594720;
+proc call*(call_568957: Call_DatabaseAccountsGetTableThroughput_568949;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the RUs per second of the Table under an existing Azure Cosmos DB database account with the provided name.
   ## 
-  let valid = call_594728.validator(path, query, header, formData, body)
-  let scheme = call_594728.pickScheme
+  let valid = call_568957.validator(path, query, header, formData, body)
+  let scheme = call_568957.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594728.url(scheme.get, call_594728.host, call_594728.base,
-                         call_594728.route, valid.getOrDefault("path"),
+  let url = call_568957.url(scheme.get, call_568957.host, call_568957.base,
+                         call_568957.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594728, url, valid)
+  result = hook(call_568957, url, valid)
 
-proc call*(call_594729: Call_DatabaseAccountsGetTableThroughput_594720;
+proc call*(call_568958: Call_DatabaseAccountsGetTableThroughput_568949;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           tableName: string; accountName: string): Recallable =
   ## databaseAccountsGetTableThroughput
@@ -8335,23 +8335,23 @@ proc call*(call_594729: Call_DatabaseAccountsGetTableThroughput_594720;
   ##            : Cosmos DB table name.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594730 = newJObject()
-  var query_594731 = newJObject()
-  add(path_594730, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594731, "api-version", newJString(apiVersion))
-  add(path_594730, "subscriptionId", newJString(subscriptionId))
-  add(path_594730, "tableName", newJString(tableName))
-  add(path_594730, "accountName", newJString(accountName))
-  result = call_594729.call(path_594730, query_594731, nil, nil, nil)
+  var path_568959 = newJObject()
+  var query_568960 = newJObject()
+  add(path_568959, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568960, "api-version", newJString(apiVersion))
+  add(path_568959, "subscriptionId", newJString(subscriptionId))
+  add(path_568959, "tableName", newJString(tableName))
+  add(path_568959, "accountName", newJString(accountName))
+  result = call_568958.call(path_568959, query_568960, nil, nil, nil)
 
-var databaseAccountsGetTableThroughput* = Call_DatabaseAccountsGetTableThroughput_594720(
+var databaseAccountsGetTableThroughput* = Call_DatabaseAccountsGetTableThroughput_568949(
     name: "databaseAccountsGetTableThroughput", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/apis/table/tables/{tableName}/settings/throughput",
-    validator: validate_DatabaseAccountsGetTableThroughput_594721, base: "",
-    url: url_DatabaseAccountsGetTableThroughput_594722, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetTableThroughput_568950, base: "",
+    url: url_DatabaseAccountsGetTableThroughput_568951, schemes: {Scheme.Https})
 type
-  Call_CollectionListMetricDefinitions_594746 = ref object of OpenApiRestCall_593439
-proc url_CollectionListMetricDefinitions_594748(protocol: Scheme; host: string;
+  Call_CollectionListMetricDefinitions_568975 = ref object of OpenApiRestCall_567668
+proc url_CollectionListMetricDefinitions_568977(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8381,7 +8381,7 @@ proc url_CollectionListMetricDefinitions_594748(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CollectionListMetricDefinitions_594747(path: JsonNode;
+proc validate_CollectionListMetricDefinitions_568976(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves metric definitions for the given collection.
   ## 
@@ -8401,31 +8401,31 @@ proc validate_CollectionListMetricDefinitions_594747(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594749 = path.getOrDefault("resourceGroupName")
-  valid_594749 = validateParameter(valid_594749, JString, required = true,
+  var valid_568978 = path.getOrDefault("resourceGroupName")
+  valid_568978 = validateParameter(valid_568978, JString, required = true,
                                  default = nil)
-  if valid_594749 != nil:
-    section.add "resourceGroupName", valid_594749
-  var valid_594750 = path.getOrDefault("collectionRid")
-  valid_594750 = validateParameter(valid_594750, JString, required = true,
+  if valid_568978 != nil:
+    section.add "resourceGroupName", valid_568978
+  var valid_568979 = path.getOrDefault("collectionRid")
+  valid_568979 = validateParameter(valid_568979, JString, required = true,
                                  default = nil)
-  if valid_594750 != nil:
-    section.add "collectionRid", valid_594750
-  var valid_594751 = path.getOrDefault("subscriptionId")
-  valid_594751 = validateParameter(valid_594751, JString, required = true,
+  if valid_568979 != nil:
+    section.add "collectionRid", valid_568979
+  var valid_568980 = path.getOrDefault("subscriptionId")
+  valid_568980 = validateParameter(valid_568980, JString, required = true,
                                  default = nil)
-  if valid_594751 != nil:
-    section.add "subscriptionId", valid_594751
-  var valid_594752 = path.getOrDefault("databaseRid")
-  valid_594752 = validateParameter(valid_594752, JString, required = true,
+  if valid_568980 != nil:
+    section.add "subscriptionId", valid_568980
+  var valid_568981 = path.getOrDefault("databaseRid")
+  valid_568981 = validateParameter(valid_568981, JString, required = true,
                                  default = nil)
-  if valid_594752 != nil:
-    section.add "databaseRid", valid_594752
-  var valid_594753 = path.getOrDefault("accountName")
-  valid_594753 = validateParameter(valid_594753, JString, required = true,
+  if valid_568981 != nil:
+    section.add "databaseRid", valid_568981
+  var valid_568982 = path.getOrDefault("accountName")
+  valid_568982 = validateParameter(valid_568982, JString, required = true,
                                  default = nil)
-  if valid_594753 != nil:
-    section.add "accountName", valid_594753
+  if valid_568982 != nil:
+    section.add "accountName", valid_568982
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8433,11 +8433,11 @@ proc validate_CollectionListMetricDefinitions_594747(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594754 = query.getOrDefault("api-version")
-  valid_594754 = validateParameter(valid_594754, JString, required = true,
+  var valid_568983 = query.getOrDefault("api-version")
+  valid_568983 = validateParameter(valid_568983, JString, required = true,
                                  default = nil)
-  if valid_594754 != nil:
-    section.add "api-version", valid_594754
+  if valid_568983 != nil:
+    section.add "api-version", valid_568983
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8446,21 +8446,21 @@ proc validate_CollectionListMetricDefinitions_594747(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594755: Call_CollectionListMetricDefinitions_594746;
+proc call*(call_568984: Call_CollectionListMetricDefinitions_568975;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves metric definitions for the given collection.
   ## 
-  let valid = call_594755.validator(path, query, header, formData, body)
-  let scheme = call_594755.pickScheme
+  let valid = call_568984.validator(path, query, header, formData, body)
+  let scheme = call_568984.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594755.url(scheme.get, call_594755.host, call_594755.base,
-                         call_594755.route, valid.getOrDefault("path"),
+  let url = call_568984.url(scheme.get, call_568984.host, call_568984.base,
+                         call_568984.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594755, url, valid)
+  result = hook(call_568984, url, valid)
 
-proc call*(call_594756: Call_CollectionListMetricDefinitions_594746;
+proc call*(call_568985: Call_CollectionListMetricDefinitions_568975;
           resourceGroupName: string; apiVersion: string; collectionRid: string;
           subscriptionId: string; databaseRid: string; accountName: string): Recallable =
   ## collectionListMetricDefinitions
@@ -8477,24 +8477,24 @@ proc call*(call_594756: Call_CollectionListMetricDefinitions_594746;
   ##              : Cosmos DB database rid.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594757 = newJObject()
-  var query_594758 = newJObject()
-  add(path_594757, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594758, "api-version", newJString(apiVersion))
-  add(path_594757, "collectionRid", newJString(collectionRid))
-  add(path_594757, "subscriptionId", newJString(subscriptionId))
-  add(path_594757, "databaseRid", newJString(databaseRid))
-  add(path_594757, "accountName", newJString(accountName))
-  result = call_594756.call(path_594757, query_594758, nil, nil, nil)
+  var path_568986 = newJObject()
+  var query_568987 = newJObject()
+  add(path_568986, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568987, "api-version", newJString(apiVersion))
+  add(path_568986, "collectionRid", newJString(collectionRid))
+  add(path_568986, "subscriptionId", newJString(subscriptionId))
+  add(path_568986, "databaseRid", newJString(databaseRid))
+  add(path_568986, "accountName", newJString(accountName))
+  result = call_568985.call(path_568986, query_568987, nil, nil, nil)
 
-var collectionListMetricDefinitions* = Call_CollectionListMetricDefinitions_594746(
+var collectionListMetricDefinitions* = Call_CollectionListMetricDefinitions_568975(
     name: "collectionListMetricDefinitions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/databases/{databaseRid}/collections/{collectionRid}/metricDefinitions",
-    validator: validate_CollectionListMetricDefinitions_594747, base: "",
-    url: url_CollectionListMetricDefinitions_594748, schemes: {Scheme.Https})
+    validator: validate_CollectionListMetricDefinitions_568976, base: "",
+    url: url_CollectionListMetricDefinitions_568977, schemes: {Scheme.Https})
 type
-  Call_CollectionListMetrics_594759 = ref object of OpenApiRestCall_593439
-proc url_CollectionListMetrics_594761(protocol: Scheme; host: string; base: string;
+  Call_CollectionListMetrics_568988 = ref object of OpenApiRestCall_567668
+proc url_CollectionListMetrics_568990(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8524,7 +8524,7 @@ proc url_CollectionListMetrics_594761(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CollectionListMetrics_594760(path: JsonNode; query: JsonNode;
+proc validate_CollectionListMetrics_568989(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given database account and collection.
   ## 
@@ -8544,31 +8544,31 @@ proc validate_CollectionListMetrics_594760(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594763 = path.getOrDefault("resourceGroupName")
-  valid_594763 = validateParameter(valid_594763, JString, required = true,
+  var valid_568992 = path.getOrDefault("resourceGroupName")
+  valid_568992 = validateParameter(valid_568992, JString, required = true,
                                  default = nil)
-  if valid_594763 != nil:
-    section.add "resourceGroupName", valid_594763
-  var valid_594764 = path.getOrDefault("collectionRid")
-  valid_594764 = validateParameter(valid_594764, JString, required = true,
+  if valid_568992 != nil:
+    section.add "resourceGroupName", valid_568992
+  var valid_568993 = path.getOrDefault("collectionRid")
+  valid_568993 = validateParameter(valid_568993, JString, required = true,
                                  default = nil)
-  if valid_594764 != nil:
-    section.add "collectionRid", valid_594764
-  var valid_594765 = path.getOrDefault("subscriptionId")
-  valid_594765 = validateParameter(valid_594765, JString, required = true,
+  if valid_568993 != nil:
+    section.add "collectionRid", valid_568993
+  var valid_568994 = path.getOrDefault("subscriptionId")
+  valid_568994 = validateParameter(valid_568994, JString, required = true,
                                  default = nil)
-  if valid_594765 != nil:
-    section.add "subscriptionId", valid_594765
-  var valid_594766 = path.getOrDefault("databaseRid")
-  valid_594766 = validateParameter(valid_594766, JString, required = true,
+  if valid_568994 != nil:
+    section.add "subscriptionId", valid_568994
+  var valid_568995 = path.getOrDefault("databaseRid")
+  valid_568995 = validateParameter(valid_568995, JString, required = true,
                                  default = nil)
-  if valid_594766 != nil:
-    section.add "databaseRid", valid_594766
-  var valid_594767 = path.getOrDefault("accountName")
-  valid_594767 = validateParameter(valid_594767, JString, required = true,
+  if valid_568995 != nil:
+    section.add "databaseRid", valid_568995
+  var valid_568996 = path.getOrDefault("accountName")
+  valid_568996 = validateParameter(valid_568996, JString, required = true,
                                  default = nil)
-  if valid_594767 != nil:
-    section.add "accountName", valid_594767
+  if valid_568996 != nil:
+    section.add "accountName", valid_568996
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8578,16 +8578,16 @@ proc validate_CollectionListMetrics_594760(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594768 = query.getOrDefault("api-version")
-  valid_594768 = validateParameter(valid_594768, JString, required = true,
+  var valid_568997 = query.getOrDefault("api-version")
+  valid_568997 = validateParameter(valid_568997, JString, required = true,
                                  default = nil)
-  if valid_594768 != nil:
-    section.add "api-version", valid_594768
-  var valid_594769 = query.getOrDefault("$filter")
-  valid_594769 = validateParameter(valid_594769, JString, required = true,
+  if valid_568997 != nil:
+    section.add "api-version", valid_568997
+  var valid_568998 = query.getOrDefault("$filter")
+  valid_568998 = validateParameter(valid_568998, JString, required = true,
                                  default = nil)
-  if valid_594769 != nil:
-    section.add "$filter", valid_594769
+  if valid_568998 != nil:
+    section.add "$filter", valid_568998
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8596,20 +8596,20 @@ proc validate_CollectionListMetrics_594760(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594770: Call_CollectionListMetrics_594759; path: JsonNode;
+proc call*(call_568999: Call_CollectionListMetrics_568988; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given database account and collection.
   ## 
-  let valid = call_594770.validator(path, query, header, formData, body)
-  let scheme = call_594770.pickScheme
+  let valid = call_568999.validator(path, query, header, formData, body)
+  let scheme = call_568999.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594770.url(scheme.get, call_594770.host, call_594770.base,
-                         call_594770.route, valid.getOrDefault("path"),
+  let url = call_568999.url(scheme.get, call_568999.host, call_568999.base,
+                         call_568999.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594770, url, valid)
+  result = hook(call_568999, url, valid)
 
-proc call*(call_594771: Call_CollectionListMetrics_594759;
+proc call*(call_569000: Call_CollectionListMetrics_568988;
           resourceGroupName: string; apiVersion: string; collectionRid: string;
           subscriptionId: string; databaseRid: string; accountName: string;
           Filter: string): Recallable =
@@ -8629,25 +8629,25 @@ proc call*(call_594771: Call_CollectionListMetrics_594759;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_594772 = newJObject()
-  var query_594773 = newJObject()
-  add(path_594772, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594773, "api-version", newJString(apiVersion))
-  add(path_594772, "collectionRid", newJString(collectionRid))
-  add(path_594772, "subscriptionId", newJString(subscriptionId))
-  add(path_594772, "databaseRid", newJString(databaseRid))
-  add(path_594772, "accountName", newJString(accountName))
-  add(query_594773, "$filter", newJString(Filter))
-  result = call_594771.call(path_594772, query_594773, nil, nil, nil)
+  var path_569001 = newJObject()
+  var query_569002 = newJObject()
+  add(path_569001, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569002, "api-version", newJString(apiVersion))
+  add(path_569001, "collectionRid", newJString(collectionRid))
+  add(path_569001, "subscriptionId", newJString(subscriptionId))
+  add(path_569001, "databaseRid", newJString(databaseRid))
+  add(path_569001, "accountName", newJString(accountName))
+  add(query_569002, "$filter", newJString(Filter))
+  result = call_569000.call(path_569001, query_569002, nil, nil, nil)
 
-var collectionListMetrics* = Call_CollectionListMetrics_594759(
+var collectionListMetrics* = Call_CollectionListMetrics_568988(
     name: "collectionListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/databases/{databaseRid}/collections/{collectionRid}/metrics",
-    validator: validate_CollectionListMetrics_594760, base: "",
-    url: url_CollectionListMetrics_594761, schemes: {Scheme.Https})
+    validator: validate_CollectionListMetrics_568989, base: "",
+    url: url_CollectionListMetrics_568990, schemes: {Scheme.Https})
 type
-  Call_PartitionKeyRangeIdListMetrics_594774 = ref object of OpenApiRestCall_593439
-proc url_PartitionKeyRangeIdListMetrics_594776(protocol: Scheme; host: string;
+  Call_PartitionKeyRangeIdListMetrics_569003 = ref object of OpenApiRestCall_567668
+proc url_PartitionKeyRangeIdListMetrics_569005(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8681,7 +8681,7 @@ proc url_PartitionKeyRangeIdListMetrics_594776(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PartitionKeyRangeIdListMetrics_594775(path: JsonNode;
+proc validate_PartitionKeyRangeIdListMetrics_569004(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given partition key range id.
   ## 
@@ -8703,36 +8703,36 @@ proc validate_PartitionKeyRangeIdListMetrics_594775(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594777 = path.getOrDefault("resourceGroupName")
-  valid_594777 = validateParameter(valid_594777, JString, required = true,
+  var valid_569006 = path.getOrDefault("resourceGroupName")
+  valid_569006 = validateParameter(valid_569006, JString, required = true,
                                  default = nil)
-  if valid_594777 != nil:
-    section.add "resourceGroupName", valid_594777
-  var valid_594778 = path.getOrDefault("collectionRid")
-  valid_594778 = validateParameter(valid_594778, JString, required = true,
+  if valid_569006 != nil:
+    section.add "resourceGroupName", valid_569006
+  var valid_569007 = path.getOrDefault("collectionRid")
+  valid_569007 = validateParameter(valid_569007, JString, required = true,
                                  default = nil)
-  if valid_594778 != nil:
-    section.add "collectionRid", valid_594778
-  var valid_594779 = path.getOrDefault("subscriptionId")
-  valid_594779 = validateParameter(valid_594779, JString, required = true,
+  if valid_569007 != nil:
+    section.add "collectionRid", valid_569007
+  var valid_569008 = path.getOrDefault("subscriptionId")
+  valid_569008 = validateParameter(valid_569008, JString, required = true,
                                  default = nil)
-  if valid_594779 != nil:
-    section.add "subscriptionId", valid_594779
-  var valid_594780 = path.getOrDefault("partitionKeyRangeId")
-  valid_594780 = validateParameter(valid_594780, JString, required = true,
+  if valid_569008 != nil:
+    section.add "subscriptionId", valid_569008
+  var valid_569009 = path.getOrDefault("partitionKeyRangeId")
+  valid_569009 = validateParameter(valid_569009, JString, required = true,
                                  default = nil)
-  if valid_594780 != nil:
-    section.add "partitionKeyRangeId", valid_594780
-  var valid_594781 = path.getOrDefault("databaseRid")
-  valid_594781 = validateParameter(valid_594781, JString, required = true,
+  if valid_569009 != nil:
+    section.add "partitionKeyRangeId", valid_569009
+  var valid_569010 = path.getOrDefault("databaseRid")
+  valid_569010 = validateParameter(valid_569010, JString, required = true,
                                  default = nil)
-  if valid_594781 != nil:
-    section.add "databaseRid", valid_594781
-  var valid_594782 = path.getOrDefault("accountName")
-  valid_594782 = validateParameter(valid_594782, JString, required = true,
+  if valid_569010 != nil:
+    section.add "databaseRid", valid_569010
+  var valid_569011 = path.getOrDefault("accountName")
+  valid_569011 = validateParameter(valid_569011, JString, required = true,
                                  default = nil)
-  if valid_594782 != nil:
-    section.add "accountName", valid_594782
+  if valid_569011 != nil:
+    section.add "accountName", valid_569011
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8742,16 +8742,16 @@ proc validate_PartitionKeyRangeIdListMetrics_594775(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594783 = query.getOrDefault("api-version")
-  valid_594783 = validateParameter(valid_594783, JString, required = true,
+  var valid_569012 = query.getOrDefault("api-version")
+  valid_569012 = validateParameter(valid_569012, JString, required = true,
                                  default = nil)
-  if valid_594783 != nil:
-    section.add "api-version", valid_594783
-  var valid_594784 = query.getOrDefault("$filter")
-  valid_594784 = validateParameter(valid_594784, JString, required = true,
+  if valid_569012 != nil:
+    section.add "api-version", valid_569012
+  var valid_569013 = query.getOrDefault("$filter")
+  valid_569013 = validateParameter(valid_569013, JString, required = true,
                                  default = nil)
-  if valid_594784 != nil:
-    section.add "$filter", valid_594784
+  if valid_569013 != nil:
+    section.add "$filter", valid_569013
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8760,20 +8760,20 @@ proc validate_PartitionKeyRangeIdListMetrics_594775(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594785: Call_PartitionKeyRangeIdListMetrics_594774; path: JsonNode;
+proc call*(call_569014: Call_PartitionKeyRangeIdListMetrics_569003; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given partition key range id.
   ## 
-  let valid = call_594785.validator(path, query, header, formData, body)
-  let scheme = call_594785.pickScheme
+  let valid = call_569014.validator(path, query, header, formData, body)
+  let scheme = call_569014.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594785.url(scheme.get, call_594785.host, call_594785.base,
-                         call_594785.route, valid.getOrDefault("path"),
+  let url = call_569014.url(scheme.get, call_569014.host, call_569014.base,
+                         call_569014.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594785, url, valid)
+  result = hook(call_569014, url, valid)
 
-proc call*(call_594786: Call_PartitionKeyRangeIdListMetrics_594774;
+proc call*(call_569015: Call_PartitionKeyRangeIdListMetrics_569003;
           resourceGroupName: string; apiVersion: string; collectionRid: string;
           subscriptionId: string; partitionKeyRangeId: string; databaseRid: string;
           accountName: string; Filter: string): Recallable =
@@ -8795,26 +8795,26 @@ proc call*(call_594786: Call_PartitionKeyRangeIdListMetrics_594774;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_594787 = newJObject()
-  var query_594788 = newJObject()
-  add(path_594787, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594788, "api-version", newJString(apiVersion))
-  add(path_594787, "collectionRid", newJString(collectionRid))
-  add(path_594787, "subscriptionId", newJString(subscriptionId))
-  add(path_594787, "partitionKeyRangeId", newJString(partitionKeyRangeId))
-  add(path_594787, "databaseRid", newJString(databaseRid))
-  add(path_594787, "accountName", newJString(accountName))
-  add(query_594788, "$filter", newJString(Filter))
-  result = call_594786.call(path_594787, query_594788, nil, nil, nil)
+  var path_569016 = newJObject()
+  var query_569017 = newJObject()
+  add(path_569016, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569017, "api-version", newJString(apiVersion))
+  add(path_569016, "collectionRid", newJString(collectionRid))
+  add(path_569016, "subscriptionId", newJString(subscriptionId))
+  add(path_569016, "partitionKeyRangeId", newJString(partitionKeyRangeId))
+  add(path_569016, "databaseRid", newJString(databaseRid))
+  add(path_569016, "accountName", newJString(accountName))
+  add(query_569017, "$filter", newJString(Filter))
+  result = call_569015.call(path_569016, query_569017, nil, nil, nil)
 
-var partitionKeyRangeIdListMetrics* = Call_PartitionKeyRangeIdListMetrics_594774(
+var partitionKeyRangeIdListMetrics* = Call_PartitionKeyRangeIdListMetrics_569003(
     name: "partitionKeyRangeIdListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/databases/{databaseRid}/collections/{collectionRid}/partitionKeyRangeId/{partitionKeyRangeId}/metrics",
-    validator: validate_PartitionKeyRangeIdListMetrics_594775, base: "",
-    url: url_PartitionKeyRangeIdListMetrics_594776, schemes: {Scheme.Https})
+    validator: validate_PartitionKeyRangeIdListMetrics_569004, base: "",
+    url: url_PartitionKeyRangeIdListMetrics_569005, schemes: {Scheme.Https})
 type
-  Call_CollectionPartitionListMetrics_594789 = ref object of OpenApiRestCall_593439
-proc url_CollectionPartitionListMetrics_594791(protocol: Scheme; host: string;
+  Call_CollectionPartitionListMetrics_569018 = ref object of OpenApiRestCall_567668
+proc url_CollectionPartitionListMetrics_569020(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8844,7 +8844,7 @@ proc url_CollectionPartitionListMetrics_594791(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CollectionPartitionListMetrics_594790(path: JsonNode;
+proc validate_CollectionPartitionListMetrics_569019(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given collection, split by partition.
   ## 
@@ -8864,31 +8864,31 @@ proc validate_CollectionPartitionListMetrics_594790(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594792 = path.getOrDefault("resourceGroupName")
-  valid_594792 = validateParameter(valid_594792, JString, required = true,
+  var valid_569021 = path.getOrDefault("resourceGroupName")
+  valid_569021 = validateParameter(valid_569021, JString, required = true,
                                  default = nil)
-  if valid_594792 != nil:
-    section.add "resourceGroupName", valid_594792
-  var valid_594793 = path.getOrDefault("collectionRid")
-  valid_594793 = validateParameter(valid_594793, JString, required = true,
+  if valid_569021 != nil:
+    section.add "resourceGroupName", valid_569021
+  var valid_569022 = path.getOrDefault("collectionRid")
+  valid_569022 = validateParameter(valid_569022, JString, required = true,
                                  default = nil)
-  if valid_594793 != nil:
-    section.add "collectionRid", valid_594793
-  var valid_594794 = path.getOrDefault("subscriptionId")
-  valid_594794 = validateParameter(valid_594794, JString, required = true,
+  if valid_569022 != nil:
+    section.add "collectionRid", valid_569022
+  var valid_569023 = path.getOrDefault("subscriptionId")
+  valid_569023 = validateParameter(valid_569023, JString, required = true,
                                  default = nil)
-  if valid_594794 != nil:
-    section.add "subscriptionId", valid_594794
-  var valid_594795 = path.getOrDefault("databaseRid")
-  valid_594795 = validateParameter(valid_594795, JString, required = true,
+  if valid_569023 != nil:
+    section.add "subscriptionId", valid_569023
+  var valid_569024 = path.getOrDefault("databaseRid")
+  valid_569024 = validateParameter(valid_569024, JString, required = true,
                                  default = nil)
-  if valid_594795 != nil:
-    section.add "databaseRid", valid_594795
-  var valid_594796 = path.getOrDefault("accountName")
-  valid_594796 = validateParameter(valid_594796, JString, required = true,
+  if valid_569024 != nil:
+    section.add "databaseRid", valid_569024
+  var valid_569025 = path.getOrDefault("accountName")
+  valid_569025 = validateParameter(valid_569025, JString, required = true,
                                  default = nil)
-  if valid_594796 != nil:
-    section.add "accountName", valid_594796
+  if valid_569025 != nil:
+    section.add "accountName", valid_569025
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8898,16 +8898,16 @@ proc validate_CollectionPartitionListMetrics_594790(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594797 = query.getOrDefault("api-version")
-  valid_594797 = validateParameter(valid_594797, JString, required = true,
+  var valid_569026 = query.getOrDefault("api-version")
+  valid_569026 = validateParameter(valid_569026, JString, required = true,
                                  default = nil)
-  if valid_594797 != nil:
-    section.add "api-version", valid_594797
-  var valid_594798 = query.getOrDefault("$filter")
-  valid_594798 = validateParameter(valid_594798, JString, required = true,
+  if valid_569026 != nil:
+    section.add "api-version", valid_569026
+  var valid_569027 = query.getOrDefault("$filter")
+  valid_569027 = validateParameter(valid_569027, JString, required = true,
                                  default = nil)
-  if valid_594798 != nil:
-    section.add "$filter", valid_594798
+  if valid_569027 != nil:
+    section.add "$filter", valid_569027
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8916,20 +8916,20 @@ proc validate_CollectionPartitionListMetrics_594790(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594799: Call_CollectionPartitionListMetrics_594789; path: JsonNode;
+proc call*(call_569028: Call_CollectionPartitionListMetrics_569018; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given collection, split by partition.
   ## 
-  let valid = call_594799.validator(path, query, header, formData, body)
-  let scheme = call_594799.pickScheme
+  let valid = call_569028.validator(path, query, header, formData, body)
+  let scheme = call_569028.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594799.url(scheme.get, call_594799.host, call_594799.base,
-                         call_594799.route, valid.getOrDefault("path"),
+  let url = call_569028.url(scheme.get, call_569028.host, call_569028.base,
+                         call_569028.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594799, url, valid)
+  result = hook(call_569028, url, valid)
 
-proc call*(call_594800: Call_CollectionPartitionListMetrics_594789;
+proc call*(call_569029: Call_CollectionPartitionListMetrics_569018;
           resourceGroupName: string; apiVersion: string; collectionRid: string;
           subscriptionId: string; databaseRid: string; accountName: string;
           Filter: string): Recallable =
@@ -8949,25 +8949,25 @@ proc call*(call_594800: Call_CollectionPartitionListMetrics_594789;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_594801 = newJObject()
-  var query_594802 = newJObject()
-  add(path_594801, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594802, "api-version", newJString(apiVersion))
-  add(path_594801, "collectionRid", newJString(collectionRid))
-  add(path_594801, "subscriptionId", newJString(subscriptionId))
-  add(path_594801, "databaseRid", newJString(databaseRid))
-  add(path_594801, "accountName", newJString(accountName))
-  add(query_594802, "$filter", newJString(Filter))
-  result = call_594800.call(path_594801, query_594802, nil, nil, nil)
+  var path_569030 = newJObject()
+  var query_569031 = newJObject()
+  add(path_569030, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569031, "api-version", newJString(apiVersion))
+  add(path_569030, "collectionRid", newJString(collectionRid))
+  add(path_569030, "subscriptionId", newJString(subscriptionId))
+  add(path_569030, "databaseRid", newJString(databaseRid))
+  add(path_569030, "accountName", newJString(accountName))
+  add(query_569031, "$filter", newJString(Filter))
+  result = call_569029.call(path_569030, query_569031, nil, nil, nil)
 
-var collectionPartitionListMetrics* = Call_CollectionPartitionListMetrics_594789(
+var collectionPartitionListMetrics* = Call_CollectionPartitionListMetrics_569018(
     name: "collectionPartitionListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/databases/{databaseRid}/collections/{collectionRid}/partitions/metrics",
-    validator: validate_CollectionPartitionListMetrics_594790, base: "",
-    url: url_CollectionPartitionListMetrics_594791, schemes: {Scheme.Https})
+    validator: validate_CollectionPartitionListMetrics_569019, base: "",
+    url: url_CollectionPartitionListMetrics_569020, schemes: {Scheme.Https})
 type
-  Call_CollectionPartitionListUsages_594803 = ref object of OpenApiRestCall_593439
-proc url_CollectionPartitionListUsages_594805(protocol: Scheme; host: string;
+  Call_CollectionPartitionListUsages_569032 = ref object of OpenApiRestCall_567668
+proc url_CollectionPartitionListUsages_569034(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8997,7 +8997,7 @@ proc url_CollectionPartitionListUsages_594805(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CollectionPartitionListUsages_594804(path: JsonNode; query: JsonNode;
+proc validate_CollectionPartitionListUsages_569033(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the usages (most recent storage data) for the given collection, split by partition.
   ## 
@@ -9017,31 +9017,31 @@ proc validate_CollectionPartitionListUsages_594804(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594806 = path.getOrDefault("resourceGroupName")
-  valid_594806 = validateParameter(valid_594806, JString, required = true,
+  var valid_569035 = path.getOrDefault("resourceGroupName")
+  valid_569035 = validateParameter(valid_569035, JString, required = true,
                                  default = nil)
-  if valid_594806 != nil:
-    section.add "resourceGroupName", valid_594806
-  var valid_594807 = path.getOrDefault("collectionRid")
-  valid_594807 = validateParameter(valid_594807, JString, required = true,
+  if valid_569035 != nil:
+    section.add "resourceGroupName", valid_569035
+  var valid_569036 = path.getOrDefault("collectionRid")
+  valid_569036 = validateParameter(valid_569036, JString, required = true,
                                  default = nil)
-  if valid_594807 != nil:
-    section.add "collectionRid", valid_594807
-  var valid_594808 = path.getOrDefault("subscriptionId")
-  valid_594808 = validateParameter(valid_594808, JString, required = true,
+  if valid_569036 != nil:
+    section.add "collectionRid", valid_569036
+  var valid_569037 = path.getOrDefault("subscriptionId")
+  valid_569037 = validateParameter(valid_569037, JString, required = true,
                                  default = nil)
-  if valid_594808 != nil:
-    section.add "subscriptionId", valid_594808
-  var valid_594809 = path.getOrDefault("databaseRid")
-  valid_594809 = validateParameter(valid_594809, JString, required = true,
+  if valid_569037 != nil:
+    section.add "subscriptionId", valid_569037
+  var valid_569038 = path.getOrDefault("databaseRid")
+  valid_569038 = validateParameter(valid_569038, JString, required = true,
                                  default = nil)
-  if valid_594809 != nil:
-    section.add "databaseRid", valid_594809
-  var valid_594810 = path.getOrDefault("accountName")
-  valid_594810 = validateParameter(valid_594810, JString, required = true,
+  if valid_569038 != nil:
+    section.add "databaseRid", valid_569038
+  var valid_569039 = path.getOrDefault("accountName")
+  valid_569039 = validateParameter(valid_569039, JString, required = true,
                                  default = nil)
-  if valid_594810 != nil:
-    section.add "accountName", valid_594810
+  if valid_569039 != nil:
+    section.add "accountName", valid_569039
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9051,16 +9051,16 @@ proc validate_CollectionPartitionListUsages_594804(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594811 = query.getOrDefault("api-version")
-  valid_594811 = validateParameter(valid_594811, JString, required = true,
+  var valid_569040 = query.getOrDefault("api-version")
+  valid_569040 = validateParameter(valid_569040, JString, required = true,
                                  default = nil)
-  if valid_594811 != nil:
-    section.add "api-version", valid_594811
-  var valid_594812 = query.getOrDefault("$filter")
-  valid_594812 = validateParameter(valid_594812, JString, required = false,
+  if valid_569040 != nil:
+    section.add "api-version", valid_569040
+  var valid_569041 = query.getOrDefault("$filter")
+  valid_569041 = validateParameter(valid_569041, JString, required = false,
                                  default = nil)
-  if valid_594812 != nil:
-    section.add "$filter", valid_594812
+  if valid_569041 != nil:
+    section.add "$filter", valid_569041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9069,20 +9069,20 @@ proc validate_CollectionPartitionListUsages_594804(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594813: Call_CollectionPartitionListUsages_594803; path: JsonNode;
+proc call*(call_569042: Call_CollectionPartitionListUsages_569032; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the usages (most recent storage data) for the given collection, split by partition.
   ## 
-  let valid = call_594813.validator(path, query, header, formData, body)
-  let scheme = call_594813.pickScheme
+  let valid = call_569042.validator(path, query, header, formData, body)
+  let scheme = call_569042.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594813.url(scheme.get, call_594813.host, call_594813.base,
-                         call_594813.route, valid.getOrDefault("path"),
+  let url = call_569042.url(scheme.get, call_569042.host, call_569042.base,
+                         call_569042.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594813, url, valid)
+  result = hook(call_569042, url, valid)
 
-proc call*(call_594814: Call_CollectionPartitionListUsages_594803;
+proc call*(call_569043: Call_CollectionPartitionListUsages_569032;
           resourceGroupName: string; apiVersion: string; collectionRid: string;
           subscriptionId: string; databaseRid: string; accountName: string;
           Filter: string = ""): Recallable =
@@ -9102,25 +9102,25 @@ proc call*(call_594814: Call_CollectionPartitionListUsages_594803;
   ##              : Cosmos DB database account name.
   ##   Filter: string
   ##         : An OData filter expression that describes a subset of usages to return. The supported parameter is name.value (name of the metric, can have an or of multiple names).
-  var path_594815 = newJObject()
-  var query_594816 = newJObject()
-  add(path_594815, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594816, "api-version", newJString(apiVersion))
-  add(path_594815, "collectionRid", newJString(collectionRid))
-  add(path_594815, "subscriptionId", newJString(subscriptionId))
-  add(path_594815, "databaseRid", newJString(databaseRid))
-  add(path_594815, "accountName", newJString(accountName))
-  add(query_594816, "$filter", newJString(Filter))
-  result = call_594814.call(path_594815, query_594816, nil, nil, nil)
+  var path_569044 = newJObject()
+  var query_569045 = newJObject()
+  add(path_569044, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569045, "api-version", newJString(apiVersion))
+  add(path_569044, "collectionRid", newJString(collectionRid))
+  add(path_569044, "subscriptionId", newJString(subscriptionId))
+  add(path_569044, "databaseRid", newJString(databaseRid))
+  add(path_569044, "accountName", newJString(accountName))
+  add(query_569045, "$filter", newJString(Filter))
+  result = call_569043.call(path_569044, query_569045, nil, nil, nil)
 
-var collectionPartitionListUsages* = Call_CollectionPartitionListUsages_594803(
+var collectionPartitionListUsages* = Call_CollectionPartitionListUsages_569032(
     name: "collectionPartitionListUsages", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/databases/{databaseRid}/collections/{collectionRid}/partitions/usages",
-    validator: validate_CollectionPartitionListUsages_594804, base: "",
-    url: url_CollectionPartitionListUsages_594805, schemes: {Scheme.Https})
+    validator: validate_CollectionPartitionListUsages_569033, base: "",
+    url: url_CollectionPartitionListUsages_569034, schemes: {Scheme.Https})
 type
-  Call_CollectionListUsages_594817 = ref object of OpenApiRestCall_593439
-proc url_CollectionListUsages_594819(protocol: Scheme; host: string; base: string;
+  Call_CollectionListUsages_569046 = ref object of OpenApiRestCall_567668
+proc url_CollectionListUsages_569048(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9150,7 +9150,7 @@ proc url_CollectionListUsages_594819(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CollectionListUsages_594818(path: JsonNode; query: JsonNode;
+proc validate_CollectionListUsages_569047(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the usages (most recent storage data) for the given collection.
   ## 
@@ -9170,31 +9170,31 @@ proc validate_CollectionListUsages_594818(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594820 = path.getOrDefault("resourceGroupName")
-  valid_594820 = validateParameter(valid_594820, JString, required = true,
+  var valid_569049 = path.getOrDefault("resourceGroupName")
+  valid_569049 = validateParameter(valid_569049, JString, required = true,
                                  default = nil)
-  if valid_594820 != nil:
-    section.add "resourceGroupName", valid_594820
-  var valid_594821 = path.getOrDefault("collectionRid")
-  valid_594821 = validateParameter(valid_594821, JString, required = true,
+  if valid_569049 != nil:
+    section.add "resourceGroupName", valid_569049
+  var valid_569050 = path.getOrDefault("collectionRid")
+  valid_569050 = validateParameter(valid_569050, JString, required = true,
                                  default = nil)
-  if valid_594821 != nil:
-    section.add "collectionRid", valid_594821
-  var valid_594822 = path.getOrDefault("subscriptionId")
-  valid_594822 = validateParameter(valid_594822, JString, required = true,
+  if valid_569050 != nil:
+    section.add "collectionRid", valid_569050
+  var valid_569051 = path.getOrDefault("subscriptionId")
+  valid_569051 = validateParameter(valid_569051, JString, required = true,
                                  default = nil)
-  if valid_594822 != nil:
-    section.add "subscriptionId", valid_594822
-  var valid_594823 = path.getOrDefault("databaseRid")
-  valid_594823 = validateParameter(valid_594823, JString, required = true,
+  if valid_569051 != nil:
+    section.add "subscriptionId", valid_569051
+  var valid_569052 = path.getOrDefault("databaseRid")
+  valid_569052 = validateParameter(valid_569052, JString, required = true,
                                  default = nil)
-  if valid_594823 != nil:
-    section.add "databaseRid", valid_594823
-  var valid_594824 = path.getOrDefault("accountName")
-  valid_594824 = validateParameter(valid_594824, JString, required = true,
+  if valid_569052 != nil:
+    section.add "databaseRid", valid_569052
+  var valid_569053 = path.getOrDefault("accountName")
+  valid_569053 = validateParameter(valid_569053, JString, required = true,
                                  default = nil)
-  if valid_594824 != nil:
-    section.add "accountName", valid_594824
+  if valid_569053 != nil:
+    section.add "accountName", valid_569053
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9204,16 +9204,16 @@ proc validate_CollectionListUsages_594818(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594825 = query.getOrDefault("api-version")
-  valid_594825 = validateParameter(valid_594825, JString, required = true,
+  var valid_569054 = query.getOrDefault("api-version")
+  valid_569054 = validateParameter(valid_569054, JString, required = true,
                                  default = nil)
-  if valid_594825 != nil:
-    section.add "api-version", valid_594825
-  var valid_594826 = query.getOrDefault("$filter")
-  valid_594826 = validateParameter(valid_594826, JString, required = false,
+  if valid_569054 != nil:
+    section.add "api-version", valid_569054
+  var valid_569055 = query.getOrDefault("$filter")
+  valid_569055 = validateParameter(valid_569055, JString, required = false,
                                  default = nil)
-  if valid_594826 != nil:
-    section.add "$filter", valid_594826
+  if valid_569055 != nil:
+    section.add "$filter", valid_569055
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9222,20 +9222,20 @@ proc validate_CollectionListUsages_594818(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594827: Call_CollectionListUsages_594817; path: JsonNode;
+proc call*(call_569056: Call_CollectionListUsages_569046; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the usages (most recent storage data) for the given collection.
   ## 
-  let valid = call_594827.validator(path, query, header, formData, body)
-  let scheme = call_594827.pickScheme
+  let valid = call_569056.validator(path, query, header, formData, body)
+  let scheme = call_569056.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594827.url(scheme.get, call_594827.host, call_594827.base,
-                         call_594827.route, valid.getOrDefault("path"),
+  let url = call_569056.url(scheme.get, call_569056.host, call_569056.base,
+                         call_569056.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594827, url, valid)
+  result = hook(call_569056, url, valid)
 
-proc call*(call_594828: Call_CollectionListUsages_594817;
+proc call*(call_569057: Call_CollectionListUsages_569046;
           resourceGroupName: string; apiVersion: string; collectionRid: string;
           subscriptionId: string; databaseRid: string; accountName: string;
           Filter: string = ""): Recallable =
@@ -9255,25 +9255,25 @@ proc call*(call_594828: Call_CollectionListUsages_594817;
   ##              : Cosmos DB database account name.
   ##   Filter: string
   ##         : An OData filter expression that describes a subset of usages to return. The supported parameter is name.value (name of the metric, can have an or of multiple names).
-  var path_594829 = newJObject()
-  var query_594830 = newJObject()
-  add(path_594829, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594830, "api-version", newJString(apiVersion))
-  add(path_594829, "collectionRid", newJString(collectionRid))
-  add(path_594829, "subscriptionId", newJString(subscriptionId))
-  add(path_594829, "databaseRid", newJString(databaseRid))
-  add(path_594829, "accountName", newJString(accountName))
-  add(query_594830, "$filter", newJString(Filter))
-  result = call_594828.call(path_594829, query_594830, nil, nil, nil)
+  var path_569058 = newJObject()
+  var query_569059 = newJObject()
+  add(path_569058, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569059, "api-version", newJString(apiVersion))
+  add(path_569058, "collectionRid", newJString(collectionRid))
+  add(path_569058, "subscriptionId", newJString(subscriptionId))
+  add(path_569058, "databaseRid", newJString(databaseRid))
+  add(path_569058, "accountName", newJString(accountName))
+  add(query_569059, "$filter", newJString(Filter))
+  result = call_569057.call(path_569058, query_569059, nil, nil, nil)
 
-var collectionListUsages* = Call_CollectionListUsages_594817(
+var collectionListUsages* = Call_CollectionListUsages_569046(
     name: "collectionListUsages", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/databases/{databaseRid}/collections/{collectionRid}/usages",
-    validator: validate_CollectionListUsages_594818, base: "",
-    url: url_CollectionListUsages_594819, schemes: {Scheme.Https})
+    validator: validate_CollectionListUsages_569047, base: "",
+    url: url_CollectionListUsages_569048, schemes: {Scheme.Https})
 type
-  Call_DatabaseListMetricDefinitions_594831 = ref object of OpenApiRestCall_593439
-proc url_DatabaseListMetricDefinitions_594833(protocol: Scheme; host: string;
+  Call_DatabaseListMetricDefinitions_569060 = ref object of OpenApiRestCall_567668
+proc url_DatabaseListMetricDefinitions_569062(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9300,7 +9300,7 @@ proc url_DatabaseListMetricDefinitions_594833(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseListMetricDefinitions_594832(path: JsonNode; query: JsonNode;
+proc validate_DatabaseListMetricDefinitions_569061(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves metric definitions for the given database.
   ## 
@@ -9318,26 +9318,26 @@ proc validate_DatabaseListMetricDefinitions_594832(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594834 = path.getOrDefault("resourceGroupName")
-  valid_594834 = validateParameter(valid_594834, JString, required = true,
+  var valid_569063 = path.getOrDefault("resourceGroupName")
+  valid_569063 = validateParameter(valid_569063, JString, required = true,
                                  default = nil)
-  if valid_594834 != nil:
-    section.add "resourceGroupName", valid_594834
-  var valid_594835 = path.getOrDefault("subscriptionId")
-  valid_594835 = validateParameter(valid_594835, JString, required = true,
+  if valid_569063 != nil:
+    section.add "resourceGroupName", valid_569063
+  var valid_569064 = path.getOrDefault("subscriptionId")
+  valid_569064 = validateParameter(valid_569064, JString, required = true,
                                  default = nil)
-  if valid_594835 != nil:
-    section.add "subscriptionId", valid_594835
-  var valid_594836 = path.getOrDefault("databaseRid")
-  valid_594836 = validateParameter(valid_594836, JString, required = true,
+  if valid_569064 != nil:
+    section.add "subscriptionId", valid_569064
+  var valid_569065 = path.getOrDefault("databaseRid")
+  valid_569065 = validateParameter(valid_569065, JString, required = true,
                                  default = nil)
-  if valid_594836 != nil:
-    section.add "databaseRid", valid_594836
-  var valid_594837 = path.getOrDefault("accountName")
-  valid_594837 = validateParameter(valid_594837, JString, required = true,
+  if valid_569065 != nil:
+    section.add "databaseRid", valid_569065
+  var valid_569066 = path.getOrDefault("accountName")
+  valid_569066 = validateParameter(valid_569066, JString, required = true,
                                  default = nil)
-  if valid_594837 != nil:
-    section.add "accountName", valid_594837
+  if valid_569066 != nil:
+    section.add "accountName", valid_569066
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9345,11 +9345,11 @@ proc validate_DatabaseListMetricDefinitions_594832(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594838 = query.getOrDefault("api-version")
-  valid_594838 = validateParameter(valid_594838, JString, required = true,
+  var valid_569067 = query.getOrDefault("api-version")
+  valid_569067 = validateParameter(valid_569067, JString, required = true,
                                  default = nil)
-  if valid_594838 != nil:
-    section.add "api-version", valid_594838
+  if valid_569067 != nil:
+    section.add "api-version", valid_569067
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9358,20 +9358,20 @@ proc validate_DatabaseListMetricDefinitions_594832(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594839: Call_DatabaseListMetricDefinitions_594831; path: JsonNode;
+proc call*(call_569068: Call_DatabaseListMetricDefinitions_569060; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves metric definitions for the given database.
   ## 
-  let valid = call_594839.validator(path, query, header, formData, body)
-  let scheme = call_594839.pickScheme
+  let valid = call_569068.validator(path, query, header, formData, body)
+  let scheme = call_569068.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594839.url(scheme.get, call_594839.host, call_594839.base,
-                         call_594839.route, valid.getOrDefault("path"),
+  let url = call_569068.url(scheme.get, call_569068.host, call_569068.base,
+                         call_569068.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594839, url, valid)
+  result = hook(call_569068, url, valid)
 
-proc call*(call_594840: Call_DatabaseListMetricDefinitions_594831;
+proc call*(call_569069: Call_DatabaseListMetricDefinitions_569060;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           databaseRid: string; accountName: string): Recallable =
   ## databaseListMetricDefinitions
@@ -9386,23 +9386,23 @@ proc call*(call_594840: Call_DatabaseListMetricDefinitions_594831;
   ##              : Cosmos DB database rid.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594841 = newJObject()
-  var query_594842 = newJObject()
-  add(path_594841, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594842, "api-version", newJString(apiVersion))
-  add(path_594841, "subscriptionId", newJString(subscriptionId))
-  add(path_594841, "databaseRid", newJString(databaseRid))
-  add(path_594841, "accountName", newJString(accountName))
-  result = call_594840.call(path_594841, query_594842, nil, nil, nil)
+  var path_569070 = newJObject()
+  var query_569071 = newJObject()
+  add(path_569070, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569071, "api-version", newJString(apiVersion))
+  add(path_569070, "subscriptionId", newJString(subscriptionId))
+  add(path_569070, "databaseRid", newJString(databaseRid))
+  add(path_569070, "accountName", newJString(accountName))
+  result = call_569069.call(path_569070, query_569071, nil, nil, nil)
 
-var databaseListMetricDefinitions* = Call_DatabaseListMetricDefinitions_594831(
+var databaseListMetricDefinitions* = Call_DatabaseListMetricDefinitions_569060(
     name: "databaseListMetricDefinitions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/databases/{databaseRid}/metricDefinitions",
-    validator: validate_DatabaseListMetricDefinitions_594832, base: "",
-    url: url_DatabaseListMetricDefinitions_594833, schemes: {Scheme.Https})
+    validator: validate_DatabaseListMetricDefinitions_569061, base: "",
+    url: url_DatabaseListMetricDefinitions_569062, schemes: {Scheme.Https})
 type
-  Call_DatabaseListMetrics_594843 = ref object of OpenApiRestCall_593439
-proc url_DatabaseListMetrics_594845(protocol: Scheme; host: string; base: string;
+  Call_DatabaseListMetrics_569072 = ref object of OpenApiRestCall_567668
+proc url_DatabaseListMetrics_569074(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9429,7 +9429,7 @@ proc url_DatabaseListMetrics_594845(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseListMetrics_594844(path: JsonNode; query: JsonNode;
+proc validate_DatabaseListMetrics_569073(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given database account and database.
@@ -9448,26 +9448,26 @@ proc validate_DatabaseListMetrics_594844(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594846 = path.getOrDefault("resourceGroupName")
-  valid_594846 = validateParameter(valid_594846, JString, required = true,
+  var valid_569075 = path.getOrDefault("resourceGroupName")
+  valid_569075 = validateParameter(valid_569075, JString, required = true,
                                  default = nil)
-  if valid_594846 != nil:
-    section.add "resourceGroupName", valid_594846
-  var valid_594847 = path.getOrDefault("subscriptionId")
-  valid_594847 = validateParameter(valid_594847, JString, required = true,
+  if valid_569075 != nil:
+    section.add "resourceGroupName", valid_569075
+  var valid_569076 = path.getOrDefault("subscriptionId")
+  valid_569076 = validateParameter(valid_569076, JString, required = true,
                                  default = nil)
-  if valid_594847 != nil:
-    section.add "subscriptionId", valid_594847
-  var valid_594848 = path.getOrDefault("databaseRid")
-  valid_594848 = validateParameter(valid_594848, JString, required = true,
+  if valid_569076 != nil:
+    section.add "subscriptionId", valid_569076
+  var valid_569077 = path.getOrDefault("databaseRid")
+  valid_569077 = validateParameter(valid_569077, JString, required = true,
                                  default = nil)
-  if valid_594848 != nil:
-    section.add "databaseRid", valid_594848
-  var valid_594849 = path.getOrDefault("accountName")
-  valid_594849 = validateParameter(valid_594849, JString, required = true,
+  if valid_569077 != nil:
+    section.add "databaseRid", valid_569077
+  var valid_569078 = path.getOrDefault("accountName")
+  valid_569078 = validateParameter(valid_569078, JString, required = true,
                                  default = nil)
-  if valid_594849 != nil:
-    section.add "accountName", valid_594849
+  if valid_569078 != nil:
+    section.add "accountName", valid_569078
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9477,16 +9477,16 @@ proc validate_DatabaseListMetrics_594844(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594850 = query.getOrDefault("api-version")
-  valid_594850 = validateParameter(valid_594850, JString, required = true,
+  var valid_569079 = query.getOrDefault("api-version")
+  valid_569079 = validateParameter(valid_569079, JString, required = true,
                                  default = nil)
-  if valid_594850 != nil:
-    section.add "api-version", valid_594850
-  var valid_594851 = query.getOrDefault("$filter")
-  valid_594851 = validateParameter(valid_594851, JString, required = true,
+  if valid_569079 != nil:
+    section.add "api-version", valid_569079
+  var valid_569080 = query.getOrDefault("$filter")
+  valid_569080 = validateParameter(valid_569080, JString, required = true,
                                  default = nil)
-  if valid_594851 != nil:
-    section.add "$filter", valid_594851
+  if valid_569080 != nil:
+    section.add "$filter", valid_569080
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9495,20 +9495,20 @@ proc validate_DatabaseListMetrics_594844(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594852: Call_DatabaseListMetrics_594843; path: JsonNode;
+proc call*(call_569081: Call_DatabaseListMetrics_569072; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given database account and database.
   ## 
-  let valid = call_594852.validator(path, query, header, formData, body)
-  let scheme = call_594852.pickScheme
+  let valid = call_569081.validator(path, query, header, formData, body)
+  let scheme = call_569081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594852.url(scheme.get, call_594852.host, call_594852.base,
-                         call_594852.route, valid.getOrDefault("path"),
+  let url = call_569081.url(scheme.get, call_569081.host, call_569081.base,
+                         call_569081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594852, url, valid)
+  result = hook(call_569081, url, valid)
 
-proc call*(call_594853: Call_DatabaseListMetrics_594843; resourceGroupName: string;
+proc call*(call_569082: Call_DatabaseListMetrics_569072; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; databaseRid: string;
           accountName: string; Filter: string): Recallable =
   ## databaseListMetrics
@@ -9525,24 +9525,24 @@ proc call*(call_594853: Call_DatabaseListMetrics_594843; resourceGroupName: stri
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_594854 = newJObject()
-  var query_594855 = newJObject()
-  add(path_594854, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594855, "api-version", newJString(apiVersion))
-  add(path_594854, "subscriptionId", newJString(subscriptionId))
-  add(path_594854, "databaseRid", newJString(databaseRid))
-  add(path_594854, "accountName", newJString(accountName))
-  add(query_594855, "$filter", newJString(Filter))
-  result = call_594853.call(path_594854, query_594855, nil, nil, nil)
+  var path_569083 = newJObject()
+  var query_569084 = newJObject()
+  add(path_569083, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569084, "api-version", newJString(apiVersion))
+  add(path_569083, "subscriptionId", newJString(subscriptionId))
+  add(path_569083, "databaseRid", newJString(databaseRid))
+  add(path_569083, "accountName", newJString(accountName))
+  add(query_569084, "$filter", newJString(Filter))
+  result = call_569082.call(path_569083, query_569084, nil, nil, nil)
 
-var databaseListMetrics* = Call_DatabaseListMetrics_594843(
+var databaseListMetrics* = Call_DatabaseListMetrics_569072(
     name: "databaseListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/databases/{databaseRid}/metrics",
-    validator: validate_DatabaseListMetrics_594844, base: "",
-    url: url_DatabaseListMetrics_594845, schemes: {Scheme.Https})
+    validator: validate_DatabaseListMetrics_569073, base: "",
+    url: url_DatabaseListMetrics_569074, schemes: {Scheme.Https})
 type
-  Call_DatabaseListUsages_594856 = ref object of OpenApiRestCall_593439
-proc url_DatabaseListUsages_594858(protocol: Scheme; host: string; base: string;
+  Call_DatabaseListUsages_569085 = ref object of OpenApiRestCall_567668
+proc url_DatabaseListUsages_569087(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9569,7 +9569,7 @@ proc url_DatabaseListUsages_594858(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseListUsages_594857(path: JsonNode; query: JsonNode;
+proc validate_DatabaseListUsages_569086(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Retrieves the usages (most recent data) for the given database.
@@ -9588,26 +9588,26 @@ proc validate_DatabaseListUsages_594857(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594859 = path.getOrDefault("resourceGroupName")
-  valid_594859 = validateParameter(valid_594859, JString, required = true,
+  var valid_569088 = path.getOrDefault("resourceGroupName")
+  valid_569088 = validateParameter(valid_569088, JString, required = true,
                                  default = nil)
-  if valid_594859 != nil:
-    section.add "resourceGroupName", valid_594859
-  var valid_594860 = path.getOrDefault("subscriptionId")
-  valid_594860 = validateParameter(valid_594860, JString, required = true,
+  if valid_569088 != nil:
+    section.add "resourceGroupName", valid_569088
+  var valid_569089 = path.getOrDefault("subscriptionId")
+  valid_569089 = validateParameter(valid_569089, JString, required = true,
                                  default = nil)
-  if valid_594860 != nil:
-    section.add "subscriptionId", valid_594860
-  var valid_594861 = path.getOrDefault("databaseRid")
-  valid_594861 = validateParameter(valid_594861, JString, required = true,
+  if valid_569089 != nil:
+    section.add "subscriptionId", valid_569089
+  var valid_569090 = path.getOrDefault("databaseRid")
+  valid_569090 = validateParameter(valid_569090, JString, required = true,
                                  default = nil)
-  if valid_594861 != nil:
-    section.add "databaseRid", valid_594861
-  var valid_594862 = path.getOrDefault("accountName")
-  valid_594862 = validateParameter(valid_594862, JString, required = true,
+  if valid_569090 != nil:
+    section.add "databaseRid", valid_569090
+  var valid_569091 = path.getOrDefault("accountName")
+  valid_569091 = validateParameter(valid_569091, JString, required = true,
                                  default = nil)
-  if valid_594862 != nil:
-    section.add "accountName", valid_594862
+  if valid_569091 != nil:
+    section.add "accountName", valid_569091
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9617,16 +9617,16 @@ proc validate_DatabaseListUsages_594857(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594863 = query.getOrDefault("api-version")
-  valid_594863 = validateParameter(valid_594863, JString, required = true,
+  var valid_569092 = query.getOrDefault("api-version")
+  valid_569092 = validateParameter(valid_569092, JString, required = true,
                                  default = nil)
-  if valid_594863 != nil:
-    section.add "api-version", valid_594863
-  var valid_594864 = query.getOrDefault("$filter")
-  valid_594864 = validateParameter(valid_594864, JString, required = false,
+  if valid_569092 != nil:
+    section.add "api-version", valid_569092
+  var valid_569093 = query.getOrDefault("$filter")
+  valid_569093 = validateParameter(valid_569093, JString, required = false,
                                  default = nil)
-  if valid_594864 != nil:
-    section.add "$filter", valid_594864
+  if valid_569093 != nil:
+    section.add "$filter", valid_569093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9635,20 +9635,20 @@ proc validate_DatabaseListUsages_594857(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594865: Call_DatabaseListUsages_594856; path: JsonNode;
+proc call*(call_569094: Call_DatabaseListUsages_569085; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the usages (most recent data) for the given database.
   ## 
-  let valid = call_594865.validator(path, query, header, formData, body)
-  let scheme = call_594865.pickScheme
+  let valid = call_569094.validator(path, query, header, formData, body)
+  let scheme = call_569094.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594865.url(scheme.get, call_594865.host, call_594865.base,
-                         call_594865.route, valid.getOrDefault("path"),
+  let url = call_569094.url(scheme.get, call_569094.host, call_569094.base,
+                         call_569094.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594865, url, valid)
+  result = hook(call_569094, url, valid)
 
-proc call*(call_594866: Call_DatabaseListUsages_594856; resourceGroupName: string;
+proc call*(call_569095: Call_DatabaseListUsages_569085; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; databaseRid: string;
           accountName: string; Filter: string = ""): Recallable =
   ## databaseListUsages
@@ -9665,24 +9665,24 @@ proc call*(call_594866: Call_DatabaseListUsages_594856; resourceGroupName: strin
   ##              : Cosmos DB database account name.
   ##   Filter: string
   ##         : An OData filter expression that describes a subset of usages to return. The supported parameter is name.value (name of the metric, can have an or of multiple names).
-  var path_594867 = newJObject()
-  var query_594868 = newJObject()
-  add(path_594867, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594868, "api-version", newJString(apiVersion))
-  add(path_594867, "subscriptionId", newJString(subscriptionId))
-  add(path_594867, "databaseRid", newJString(databaseRid))
-  add(path_594867, "accountName", newJString(accountName))
-  add(query_594868, "$filter", newJString(Filter))
-  result = call_594866.call(path_594867, query_594868, nil, nil, nil)
+  var path_569096 = newJObject()
+  var query_569097 = newJObject()
+  add(path_569096, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569097, "api-version", newJString(apiVersion))
+  add(path_569096, "subscriptionId", newJString(subscriptionId))
+  add(path_569096, "databaseRid", newJString(databaseRid))
+  add(path_569096, "accountName", newJString(accountName))
+  add(query_569097, "$filter", newJString(Filter))
+  result = call_569095.call(path_569096, query_569097, nil, nil, nil)
 
-var databaseListUsages* = Call_DatabaseListUsages_594856(
+var databaseListUsages* = Call_DatabaseListUsages_569085(
     name: "databaseListUsages", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/databases/{databaseRid}/usages",
-    validator: validate_DatabaseListUsages_594857, base: "",
-    url: url_DatabaseListUsages_594858, schemes: {Scheme.Https})
+    validator: validate_DatabaseListUsages_569086, base: "",
+    url: url_DatabaseListUsages_569087, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsFailoverPriorityChange_594869 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsFailoverPriorityChange_594871(protocol: Scheme;
+  Call_DatabaseAccountsFailoverPriorityChange_569098 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsFailoverPriorityChange_569100(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9706,7 +9706,7 @@ proc url_DatabaseAccountsFailoverPriorityChange_594871(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsFailoverPriorityChange_594870(path: JsonNode;
+proc validate_DatabaseAccountsFailoverPriorityChange_569099(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Changes the failover priority for the Azure Cosmos DB database account. A failover priority of 0 indicates a write region. The maximum value for a failover priority = (total number of regions - 1). Failover priority values must be unique for each of the regions in which the database account exists.
   ## 
@@ -9722,21 +9722,21 @@ proc validate_DatabaseAccountsFailoverPriorityChange_594870(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594889 = path.getOrDefault("resourceGroupName")
-  valid_594889 = validateParameter(valid_594889, JString, required = true,
+  var valid_569118 = path.getOrDefault("resourceGroupName")
+  valid_569118 = validateParameter(valid_569118, JString, required = true,
                                  default = nil)
-  if valid_594889 != nil:
-    section.add "resourceGroupName", valid_594889
-  var valid_594890 = path.getOrDefault("subscriptionId")
-  valid_594890 = validateParameter(valid_594890, JString, required = true,
+  if valid_569118 != nil:
+    section.add "resourceGroupName", valid_569118
+  var valid_569119 = path.getOrDefault("subscriptionId")
+  valid_569119 = validateParameter(valid_569119, JString, required = true,
                                  default = nil)
-  if valid_594890 != nil:
-    section.add "subscriptionId", valid_594890
-  var valid_594891 = path.getOrDefault("accountName")
-  valid_594891 = validateParameter(valid_594891, JString, required = true,
+  if valid_569119 != nil:
+    section.add "subscriptionId", valid_569119
+  var valid_569120 = path.getOrDefault("accountName")
+  valid_569120 = validateParameter(valid_569120, JString, required = true,
                                  default = nil)
-  if valid_594891 != nil:
-    section.add "accountName", valid_594891
+  if valid_569120 != nil:
+    section.add "accountName", valid_569120
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9744,11 +9744,11 @@ proc validate_DatabaseAccountsFailoverPriorityChange_594870(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594892 = query.getOrDefault("api-version")
-  valid_594892 = validateParameter(valid_594892, JString, required = true,
+  var valid_569121 = query.getOrDefault("api-version")
+  valid_569121 = validateParameter(valid_569121, JString, required = true,
                                  default = nil)
-  if valid_594892 != nil:
-    section.add "api-version", valid_594892
+  if valid_569121 != nil:
+    section.add "api-version", valid_569121
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9762,21 +9762,21 @@ proc validate_DatabaseAccountsFailoverPriorityChange_594870(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594894: Call_DatabaseAccountsFailoverPriorityChange_594869;
+proc call*(call_569123: Call_DatabaseAccountsFailoverPriorityChange_569098;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Changes the failover priority for the Azure Cosmos DB database account. A failover priority of 0 indicates a write region. The maximum value for a failover priority = (total number of regions - 1). Failover priority values must be unique for each of the regions in which the database account exists.
   ## 
-  let valid = call_594894.validator(path, query, header, formData, body)
-  let scheme = call_594894.pickScheme
+  let valid = call_569123.validator(path, query, header, formData, body)
+  let scheme = call_569123.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594894.url(scheme.get, call_594894.host, call_594894.base,
-                         call_594894.route, valid.getOrDefault("path"),
+  let url = call_569123.url(scheme.get, call_569123.host, call_569123.base,
+                         call_569123.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594894, url, valid)
+  result = hook(call_569123, url, valid)
 
-proc call*(call_594895: Call_DatabaseAccountsFailoverPriorityChange_594869;
+proc call*(call_569124: Call_DatabaseAccountsFailoverPriorityChange_569098;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           failoverParameters: JsonNode; accountName: string): Recallable =
   ## databaseAccountsFailoverPriorityChange
@@ -9791,26 +9791,26 @@ proc call*(call_594895: Call_DatabaseAccountsFailoverPriorityChange_594869;
   ##                     : The new failover policies for the database account.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594896 = newJObject()
-  var query_594897 = newJObject()
-  var body_594898 = newJObject()
-  add(path_594896, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594897, "api-version", newJString(apiVersion))
-  add(path_594896, "subscriptionId", newJString(subscriptionId))
+  var path_569125 = newJObject()
+  var query_569126 = newJObject()
+  var body_569127 = newJObject()
+  add(path_569125, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569126, "api-version", newJString(apiVersion))
+  add(path_569125, "subscriptionId", newJString(subscriptionId))
   if failoverParameters != nil:
-    body_594898 = failoverParameters
-  add(path_594896, "accountName", newJString(accountName))
-  result = call_594895.call(path_594896, query_594897, nil, nil, body_594898)
+    body_569127 = failoverParameters
+  add(path_569125, "accountName", newJString(accountName))
+  result = call_569124.call(path_569125, query_569126, nil, nil, body_569127)
 
-var databaseAccountsFailoverPriorityChange* = Call_DatabaseAccountsFailoverPriorityChange_594869(
+var databaseAccountsFailoverPriorityChange* = Call_DatabaseAccountsFailoverPriorityChange_569098(
     name: "databaseAccountsFailoverPriorityChange", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/failoverPriorityChange",
-    validator: validate_DatabaseAccountsFailoverPriorityChange_594870, base: "",
-    url: url_DatabaseAccountsFailoverPriorityChange_594871,
+    validator: validate_DatabaseAccountsFailoverPriorityChange_569099, base: "",
+    url: url_DatabaseAccountsFailoverPriorityChange_569100,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListConnectionStrings_594899 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListConnectionStrings_594901(protocol: Scheme;
+  Call_DatabaseAccountsListConnectionStrings_569128 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListConnectionStrings_569130(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9834,7 +9834,7 @@ proc url_DatabaseAccountsListConnectionStrings_594901(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListConnectionStrings_594900(path: JsonNode;
+proc validate_DatabaseAccountsListConnectionStrings_569129(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the connection strings for the specified Azure Cosmos DB database account.
   ## 
@@ -9850,21 +9850,21 @@ proc validate_DatabaseAccountsListConnectionStrings_594900(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594902 = path.getOrDefault("resourceGroupName")
-  valid_594902 = validateParameter(valid_594902, JString, required = true,
+  var valid_569131 = path.getOrDefault("resourceGroupName")
+  valid_569131 = validateParameter(valid_569131, JString, required = true,
                                  default = nil)
-  if valid_594902 != nil:
-    section.add "resourceGroupName", valid_594902
-  var valid_594903 = path.getOrDefault("subscriptionId")
-  valid_594903 = validateParameter(valid_594903, JString, required = true,
+  if valid_569131 != nil:
+    section.add "resourceGroupName", valid_569131
+  var valid_569132 = path.getOrDefault("subscriptionId")
+  valid_569132 = validateParameter(valid_569132, JString, required = true,
                                  default = nil)
-  if valid_594903 != nil:
-    section.add "subscriptionId", valid_594903
-  var valid_594904 = path.getOrDefault("accountName")
-  valid_594904 = validateParameter(valid_594904, JString, required = true,
+  if valid_569132 != nil:
+    section.add "subscriptionId", valid_569132
+  var valid_569133 = path.getOrDefault("accountName")
+  valid_569133 = validateParameter(valid_569133, JString, required = true,
                                  default = nil)
-  if valid_594904 != nil:
-    section.add "accountName", valid_594904
+  if valid_569133 != nil:
+    section.add "accountName", valid_569133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9872,11 +9872,11 @@ proc validate_DatabaseAccountsListConnectionStrings_594900(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594905 = query.getOrDefault("api-version")
-  valid_594905 = validateParameter(valid_594905, JString, required = true,
+  var valid_569134 = query.getOrDefault("api-version")
+  valid_569134 = validateParameter(valid_569134, JString, required = true,
                                  default = nil)
-  if valid_594905 != nil:
-    section.add "api-version", valid_594905
+  if valid_569134 != nil:
+    section.add "api-version", valid_569134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9885,21 +9885,21 @@ proc validate_DatabaseAccountsListConnectionStrings_594900(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594906: Call_DatabaseAccountsListConnectionStrings_594899;
+proc call*(call_569135: Call_DatabaseAccountsListConnectionStrings_569128;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the connection strings for the specified Azure Cosmos DB database account.
   ## 
-  let valid = call_594906.validator(path, query, header, formData, body)
-  let scheme = call_594906.pickScheme
+  let valid = call_569135.validator(path, query, header, formData, body)
+  let scheme = call_569135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594906.url(scheme.get, call_594906.host, call_594906.base,
-                         call_594906.route, valid.getOrDefault("path"),
+  let url = call_569135.url(scheme.get, call_569135.host, call_569135.base,
+                         call_569135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594906, url, valid)
+  result = hook(call_569135, url, valid)
 
-proc call*(call_594907: Call_DatabaseAccountsListConnectionStrings_594899;
+proc call*(call_569136: Call_DatabaseAccountsListConnectionStrings_569128;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsListConnectionStrings
@@ -9912,22 +9912,22 @@ proc call*(call_594907: Call_DatabaseAccountsListConnectionStrings_594899;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594908 = newJObject()
-  var query_594909 = newJObject()
-  add(path_594908, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594909, "api-version", newJString(apiVersion))
-  add(path_594908, "subscriptionId", newJString(subscriptionId))
-  add(path_594908, "accountName", newJString(accountName))
-  result = call_594907.call(path_594908, query_594909, nil, nil, nil)
+  var path_569137 = newJObject()
+  var query_569138 = newJObject()
+  add(path_569137, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569138, "api-version", newJString(apiVersion))
+  add(path_569137, "subscriptionId", newJString(subscriptionId))
+  add(path_569137, "accountName", newJString(accountName))
+  result = call_569136.call(path_569137, query_569138, nil, nil, nil)
 
-var databaseAccountsListConnectionStrings* = Call_DatabaseAccountsListConnectionStrings_594899(
+var databaseAccountsListConnectionStrings* = Call_DatabaseAccountsListConnectionStrings_569128(
     name: "databaseAccountsListConnectionStrings", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/listConnectionStrings",
-    validator: validate_DatabaseAccountsListConnectionStrings_594900, base: "",
-    url: url_DatabaseAccountsListConnectionStrings_594901, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListConnectionStrings_569129, base: "",
+    url: url_DatabaseAccountsListConnectionStrings_569130, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListKeys_594910 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListKeys_594912(protocol: Scheme; host: string;
+  Call_DatabaseAccountsListKeys_569139 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListKeys_569141(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -9952,7 +9952,7 @@ proc url_DatabaseAccountsListKeys_594912(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListKeys_594911(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsListKeys_569140(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the access keys for the specified Azure Cosmos DB database account.
   ## 
@@ -9968,21 +9968,21 @@ proc validate_DatabaseAccountsListKeys_594911(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594913 = path.getOrDefault("resourceGroupName")
-  valid_594913 = validateParameter(valid_594913, JString, required = true,
+  var valid_569142 = path.getOrDefault("resourceGroupName")
+  valid_569142 = validateParameter(valid_569142, JString, required = true,
                                  default = nil)
-  if valid_594913 != nil:
-    section.add "resourceGroupName", valid_594913
-  var valid_594914 = path.getOrDefault("subscriptionId")
-  valid_594914 = validateParameter(valid_594914, JString, required = true,
+  if valid_569142 != nil:
+    section.add "resourceGroupName", valid_569142
+  var valid_569143 = path.getOrDefault("subscriptionId")
+  valid_569143 = validateParameter(valid_569143, JString, required = true,
                                  default = nil)
-  if valid_594914 != nil:
-    section.add "subscriptionId", valid_594914
-  var valid_594915 = path.getOrDefault("accountName")
-  valid_594915 = validateParameter(valid_594915, JString, required = true,
+  if valid_569143 != nil:
+    section.add "subscriptionId", valid_569143
+  var valid_569144 = path.getOrDefault("accountName")
+  valid_569144 = validateParameter(valid_569144, JString, required = true,
                                  default = nil)
-  if valid_594915 != nil:
-    section.add "accountName", valid_594915
+  if valid_569144 != nil:
+    section.add "accountName", valid_569144
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9990,11 +9990,11 @@ proc validate_DatabaseAccountsListKeys_594911(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594916 = query.getOrDefault("api-version")
-  valid_594916 = validateParameter(valid_594916, JString, required = true,
+  var valid_569145 = query.getOrDefault("api-version")
+  valid_569145 = validateParameter(valid_569145, JString, required = true,
                                  default = nil)
-  if valid_594916 != nil:
-    section.add "api-version", valid_594916
+  if valid_569145 != nil:
+    section.add "api-version", valid_569145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10003,20 +10003,20 @@ proc validate_DatabaseAccountsListKeys_594911(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594917: Call_DatabaseAccountsListKeys_594910; path: JsonNode;
+proc call*(call_569146: Call_DatabaseAccountsListKeys_569139; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the access keys for the specified Azure Cosmos DB database account.
   ## 
-  let valid = call_594917.validator(path, query, header, formData, body)
-  let scheme = call_594917.pickScheme
+  let valid = call_569146.validator(path, query, header, formData, body)
+  let scheme = call_569146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594917.url(scheme.get, call_594917.host, call_594917.base,
-                         call_594917.route, valid.getOrDefault("path"),
+  let url = call_569146.url(scheme.get, call_569146.host, call_569146.base,
+                         call_569146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594917, url, valid)
+  result = hook(call_569146, url, valid)
 
-proc call*(call_594918: Call_DatabaseAccountsListKeys_594910;
+proc call*(call_569147: Call_DatabaseAccountsListKeys_569139;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsListKeys
@@ -10029,22 +10029,22 @@ proc call*(call_594918: Call_DatabaseAccountsListKeys_594910;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594919 = newJObject()
-  var query_594920 = newJObject()
-  add(path_594919, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594920, "api-version", newJString(apiVersion))
-  add(path_594919, "subscriptionId", newJString(subscriptionId))
-  add(path_594919, "accountName", newJString(accountName))
-  result = call_594918.call(path_594919, query_594920, nil, nil, nil)
+  var path_569148 = newJObject()
+  var query_569149 = newJObject()
+  add(path_569148, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569149, "api-version", newJString(apiVersion))
+  add(path_569148, "subscriptionId", newJString(subscriptionId))
+  add(path_569148, "accountName", newJString(accountName))
+  result = call_569147.call(path_569148, query_569149, nil, nil, nil)
 
-var databaseAccountsListKeys* = Call_DatabaseAccountsListKeys_594910(
+var databaseAccountsListKeys* = Call_DatabaseAccountsListKeys_569139(
     name: "databaseAccountsListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/listKeys",
-    validator: validate_DatabaseAccountsListKeys_594911, base: "",
-    url: url_DatabaseAccountsListKeys_594912, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListKeys_569140, base: "",
+    url: url_DatabaseAccountsListKeys_569141, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListMetricDefinitions_594921 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListMetricDefinitions_594923(protocol: Scheme;
+  Call_DatabaseAccountsListMetricDefinitions_569150 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListMetricDefinitions_569152(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10068,7 +10068,7 @@ proc url_DatabaseAccountsListMetricDefinitions_594923(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListMetricDefinitions_594922(path: JsonNode;
+proc validate_DatabaseAccountsListMetricDefinitions_569151(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves metric definitions for the given database account.
   ## 
@@ -10084,21 +10084,21 @@ proc validate_DatabaseAccountsListMetricDefinitions_594922(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594924 = path.getOrDefault("resourceGroupName")
-  valid_594924 = validateParameter(valid_594924, JString, required = true,
+  var valid_569153 = path.getOrDefault("resourceGroupName")
+  valid_569153 = validateParameter(valid_569153, JString, required = true,
                                  default = nil)
-  if valid_594924 != nil:
-    section.add "resourceGroupName", valid_594924
-  var valid_594925 = path.getOrDefault("subscriptionId")
-  valid_594925 = validateParameter(valid_594925, JString, required = true,
+  if valid_569153 != nil:
+    section.add "resourceGroupName", valid_569153
+  var valid_569154 = path.getOrDefault("subscriptionId")
+  valid_569154 = validateParameter(valid_569154, JString, required = true,
                                  default = nil)
-  if valid_594925 != nil:
-    section.add "subscriptionId", valid_594925
-  var valid_594926 = path.getOrDefault("accountName")
-  valid_594926 = validateParameter(valid_594926, JString, required = true,
+  if valid_569154 != nil:
+    section.add "subscriptionId", valid_569154
+  var valid_569155 = path.getOrDefault("accountName")
+  valid_569155 = validateParameter(valid_569155, JString, required = true,
                                  default = nil)
-  if valid_594926 != nil:
-    section.add "accountName", valid_594926
+  if valid_569155 != nil:
+    section.add "accountName", valid_569155
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10106,11 +10106,11 @@ proc validate_DatabaseAccountsListMetricDefinitions_594922(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594927 = query.getOrDefault("api-version")
-  valid_594927 = validateParameter(valid_594927, JString, required = true,
+  var valid_569156 = query.getOrDefault("api-version")
+  valid_569156 = validateParameter(valid_569156, JString, required = true,
                                  default = nil)
-  if valid_594927 != nil:
-    section.add "api-version", valid_594927
+  if valid_569156 != nil:
+    section.add "api-version", valid_569156
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10119,21 +10119,21 @@ proc validate_DatabaseAccountsListMetricDefinitions_594922(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594928: Call_DatabaseAccountsListMetricDefinitions_594921;
+proc call*(call_569157: Call_DatabaseAccountsListMetricDefinitions_569150;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves metric definitions for the given database account.
   ## 
-  let valid = call_594928.validator(path, query, header, formData, body)
-  let scheme = call_594928.pickScheme
+  let valid = call_569157.validator(path, query, header, formData, body)
+  let scheme = call_569157.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594928.url(scheme.get, call_594928.host, call_594928.base,
-                         call_594928.route, valid.getOrDefault("path"),
+  let url = call_569157.url(scheme.get, call_569157.host, call_569157.base,
+                         call_569157.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594928, url, valid)
+  result = hook(call_569157, url, valid)
 
-proc call*(call_594929: Call_DatabaseAccountsListMetricDefinitions_594921;
+proc call*(call_569158: Call_DatabaseAccountsListMetricDefinitions_569150;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsListMetricDefinitions
@@ -10146,22 +10146,22 @@ proc call*(call_594929: Call_DatabaseAccountsListMetricDefinitions_594921;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594930 = newJObject()
-  var query_594931 = newJObject()
-  add(path_594930, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594931, "api-version", newJString(apiVersion))
-  add(path_594930, "subscriptionId", newJString(subscriptionId))
-  add(path_594930, "accountName", newJString(accountName))
-  result = call_594929.call(path_594930, query_594931, nil, nil, nil)
+  var path_569159 = newJObject()
+  var query_569160 = newJObject()
+  add(path_569159, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569160, "api-version", newJString(apiVersion))
+  add(path_569159, "subscriptionId", newJString(subscriptionId))
+  add(path_569159, "accountName", newJString(accountName))
+  result = call_569158.call(path_569159, query_569160, nil, nil, nil)
 
-var databaseAccountsListMetricDefinitions* = Call_DatabaseAccountsListMetricDefinitions_594921(
+var databaseAccountsListMetricDefinitions* = Call_DatabaseAccountsListMetricDefinitions_569150(
     name: "databaseAccountsListMetricDefinitions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/metricDefinitions",
-    validator: validate_DatabaseAccountsListMetricDefinitions_594922, base: "",
-    url: url_DatabaseAccountsListMetricDefinitions_594923, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListMetricDefinitions_569151, base: "",
+    url: url_DatabaseAccountsListMetricDefinitions_569152, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListMetrics_594932 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListMetrics_594934(protocol: Scheme; host: string;
+  Call_DatabaseAccountsListMetrics_569161 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListMetrics_569163(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10185,7 +10185,7 @@ proc url_DatabaseAccountsListMetrics_594934(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListMetrics_594933(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsListMetrics_569162(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given database account.
   ## 
@@ -10201,21 +10201,21 @@ proc validate_DatabaseAccountsListMetrics_594933(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594935 = path.getOrDefault("resourceGroupName")
-  valid_594935 = validateParameter(valid_594935, JString, required = true,
+  var valid_569164 = path.getOrDefault("resourceGroupName")
+  valid_569164 = validateParameter(valid_569164, JString, required = true,
                                  default = nil)
-  if valid_594935 != nil:
-    section.add "resourceGroupName", valid_594935
-  var valid_594936 = path.getOrDefault("subscriptionId")
-  valid_594936 = validateParameter(valid_594936, JString, required = true,
+  if valid_569164 != nil:
+    section.add "resourceGroupName", valid_569164
+  var valid_569165 = path.getOrDefault("subscriptionId")
+  valid_569165 = validateParameter(valid_569165, JString, required = true,
                                  default = nil)
-  if valid_594936 != nil:
-    section.add "subscriptionId", valid_594936
-  var valid_594937 = path.getOrDefault("accountName")
-  valid_594937 = validateParameter(valid_594937, JString, required = true,
+  if valid_569165 != nil:
+    section.add "subscriptionId", valid_569165
+  var valid_569166 = path.getOrDefault("accountName")
+  valid_569166 = validateParameter(valid_569166, JString, required = true,
                                  default = nil)
-  if valid_594937 != nil:
-    section.add "accountName", valid_594937
+  if valid_569166 != nil:
+    section.add "accountName", valid_569166
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10225,16 +10225,16 @@ proc validate_DatabaseAccountsListMetrics_594933(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594938 = query.getOrDefault("api-version")
-  valid_594938 = validateParameter(valid_594938, JString, required = true,
+  var valid_569167 = query.getOrDefault("api-version")
+  valid_569167 = validateParameter(valid_569167, JString, required = true,
                                  default = nil)
-  if valid_594938 != nil:
-    section.add "api-version", valid_594938
-  var valid_594939 = query.getOrDefault("$filter")
-  valid_594939 = validateParameter(valid_594939, JString, required = true,
+  if valid_569167 != nil:
+    section.add "api-version", valid_569167
+  var valid_569168 = query.getOrDefault("$filter")
+  valid_569168 = validateParameter(valid_569168, JString, required = true,
                                  default = nil)
-  if valid_594939 != nil:
-    section.add "$filter", valid_594939
+  if valid_569168 != nil:
+    section.add "$filter", valid_569168
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10243,20 +10243,20 @@ proc validate_DatabaseAccountsListMetrics_594933(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594940: Call_DatabaseAccountsListMetrics_594932; path: JsonNode;
+proc call*(call_569169: Call_DatabaseAccountsListMetrics_569161; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given database account.
   ## 
-  let valid = call_594940.validator(path, query, header, formData, body)
-  let scheme = call_594940.pickScheme
+  let valid = call_569169.validator(path, query, header, formData, body)
+  let scheme = call_569169.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594940.url(scheme.get, call_594940.host, call_594940.base,
-                         call_594940.route, valid.getOrDefault("path"),
+  let url = call_569169.url(scheme.get, call_569169.host, call_569169.base,
+                         call_569169.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594940, url, valid)
+  result = hook(call_569169, url, valid)
 
-proc call*(call_594941: Call_DatabaseAccountsListMetrics_594932;
+proc call*(call_569170: Call_DatabaseAccountsListMetrics_569161;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string; Filter: string): Recallable =
   ## databaseAccountsListMetrics
@@ -10271,23 +10271,23 @@ proc call*(call_594941: Call_DatabaseAccountsListMetrics_594932;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_594942 = newJObject()
-  var query_594943 = newJObject()
-  add(path_594942, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594943, "api-version", newJString(apiVersion))
-  add(path_594942, "subscriptionId", newJString(subscriptionId))
-  add(path_594942, "accountName", newJString(accountName))
-  add(query_594943, "$filter", newJString(Filter))
-  result = call_594941.call(path_594942, query_594943, nil, nil, nil)
+  var path_569171 = newJObject()
+  var query_569172 = newJObject()
+  add(path_569171, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569172, "api-version", newJString(apiVersion))
+  add(path_569171, "subscriptionId", newJString(subscriptionId))
+  add(path_569171, "accountName", newJString(accountName))
+  add(query_569172, "$filter", newJString(Filter))
+  result = call_569170.call(path_569171, query_569172, nil, nil, nil)
 
-var databaseAccountsListMetrics* = Call_DatabaseAccountsListMetrics_594932(
+var databaseAccountsListMetrics* = Call_DatabaseAccountsListMetrics_569161(
     name: "databaseAccountsListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/metrics",
-    validator: validate_DatabaseAccountsListMetrics_594933, base: "",
-    url: url_DatabaseAccountsListMetrics_594934, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListMetrics_569162, base: "",
+    url: url_DatabaseAccountsListMetrics_569163, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsOfflineRegion_594944 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsOfflineRegion_594946(protocol: Scheme; host: string;
+  Call_DatabaseAccountsOfflineRegion_569173 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsOfflineRegion_569175(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10311,7 +10311,7 @@ proc url_DatabaseAccountsOfflineRegion_594946(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsOfflineRegion_594945(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsOfflineRegion_569174(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Offline the specified region for the specified Azure Cosmos DB database account.
   ## 
@@ -10327,21 +10327,21 @@ proc validate_DatabaseAccountsOfflineRegion_594945(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594947 = path.getOrDefault("resourceGroupName")
-  valid_594947 = validateParameter(valid_594947, JString, required = true,
+  var valid_569176 = path.getOrDefault("resourceGroupName")
+  valid_569176 = validateParameter(valid_569176, JString, required = true,
                                  default = nil)
-  if valid_594947 != nil:
-    section.add "resourceGroupName", valid_594947
-  var valid_594948 = path.getOrDefault("subscriptionId")
-  valid_594948 = validateParameter(valid_594948, JString, required = true,
+  if valid_569176 != nil:
+    section.add "resourceGroupName", valid_569176
+  var valid_569177 = path.getOrDefault("subscriptionId")
+  valid_569177 = validateParameter(valid_569177, JString, required = true,
                                  default = nil)
-  if valid_594948 != nil:
-    section.add "subscriptionId", valid_594948
-  var valid_594949 = path.getOrDefault("accountName")
-  valid_594949 = validateParameter(valid_594949, JString, required = true,
+  if valid_569177 != nil:
+    section.add "subscriptionId", valid_569177
+  var valid_569178 = path.getOrDefault("accountName")
+  valid_569178 = validateParameter(valid_569178, JString, required = true,
                                  default = nil)
-  if valid_594949 != nil:
-    section.add "accountName", valid_594949
+  if valid_569178 != nil:
+    section.add "accountName", valid_569178
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10349,11 +10349,11 @@ proc validate_DatabaseAccountsOfflineRegion_594945(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594950 = query.getOrDefault("api-version")
-  valid_594950 = validateParameter(valid_594950, JString, required = true,
+  var valid_569179 = query.getOrDefault("api-version")
+  valid_569179 = validateParameter(valid_569179, JString, required = true,
                                  default = nil)
-  if valid_594950 != nil:
-    section.add "api-version", valid_594950
+  if valid_569179 != nil:
+    section.add "api-version", valid_569179
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10367,20 +10367,20 @@ proc validate_DatabaseAccountsOfflineRegion_594945(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594952: Call_DatabaseAccountsOfflineRegion_594944; path: JsonNode;
+proc call*(call_569181: Call_DatabaseAccountsOfflineRegion_569173; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Offline the specified region for the specified Azure Cosmos DB database account.
   ## 
-  let valid = call_594952.validator(path, query, header, formData, body)
-  let scheme = call_594952.pickScheme
+  let valid = call_569181.validator(path, query, header, formData, body)
+  let scheme = call_569181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594952.url(scheme.get, call_594952.host, call_594952.base,
-                         call_594952.route, valid.getOrDefault("path"),
+  let url = call_569181.url(scheme.get, call_569181.host, call_569181.base,
+                         call_569181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594952, url, valid)
+  result = hook(call_569181, url, valid)
 
-proc call*(call_594953: Call_DatabaseAccountsOfflineRegion_594944;
+proc call*(call_569182: Call_DatabaseAccountsOfflineRegion_569173;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           regionParameterForOffline: JsonNode; accountName: string): Recallable =
   ## databaseAccountsOfflineRegion
@@ -10395,25 +10395,25 @@ proc call*(call_594953: Call_DatabaseAccountsOfflineRegion_594944;
   ##                            : Cosmos DB region to offline for the database account.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594954 = newJObject()
-  var query_594955 = newJObject()
-  var body_594956 = newJObject()
-  add(path_594954, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594955, "api-version", newJString(apiVersion))
-  add(path_594954, "subscriptionId", newJString(subscriptionId))
+  var path_569183 = newJObject()
+  var query_569184 = newJObject()
+  var body_569185 = newJObject()
+  add(path_569183, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569184, "api-version", newJString(apiVersion))
+  add(path_569183, "subscriptionId", newJString(subscriptionId))
   if regionParameterForOffline != nil:
-    body_594956 = regionParameterForOffline
-  add(path_594954, "accountName", newJString(accountName))
-  result = call_594953.call(path_594954, query_594955, nil, nil, body_594956)
+    body_569185 = regionParameterForOffline
+  add(path_569183, "accountName", newJString(accountName))
+  result = call_569182.call(path_569183, query_569184, nil, nil, body_569185)
 
-var databaseAccountsOfflineRegion* = Call_DatabaseAccountsOfflineRegion_594944(
+var databaseAccountsOfflineRegion* = Call_DatabaseAccountsOfflineRegion_569173(
     name: "databaseAccountsOfflineRegion", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/offlineRegion",
-    validator: validate_DatabaseAccountsOfflineRegion_594945, base: "",
-    url: url_DatabaseAccountsOfflineRegion_594946, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsOfflineRegion_569174, base: "",
+    url: url_DatabaseAccountsOfflineRegion_569175, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsOnlineRegion_594957 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsOnlineRegion_594959(protocol: Scheme; host: string;
+  Call_DatabaseAccountsOnlineRegion_569186 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsOnlineRegion_569188(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10437,7 +10437,7 @@ proc url_DatabaseAccountsOnlineRegion_594959(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsOnlineRegion_594958(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsOnlineRegion_569187(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Online the specified region for the specified Azure Cosmos DB database account.
   ## 
@@ -10453,21 +10453,21 @@ proc validate_DatabaseAccountsOnlineRegion_594958(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594960 = path.getOrDefault("resourceGroupName")
-  valid_594960 = validateParameter(valid_594960, JString, required = true,
+  var valid_569189 = path.getOrDefault("resourceGroupName")
+  valid_569189 = validateParameter(valid_569189, JString, required = true,
                                  default = nil)
-  if valid_594960 != nil:
-    section.add "resourceGroupName", valid_594960
-  var valid_594961 = path.getOrDefault("subscriptionId")
-  valid_594961 = validateParameter(valid_594961, JString, required = true,
+  if valid_569189 != nil:
+    section.add "resourceGroupName", valid_569189
+  var valid_569190 = path.getOrDefault("subscriptionId")
+  valid_569190 = validateParameter(valid_569190, JString, required = true,
                                  default = nil)
-  if valid_594961 != nil:
-    section.add "subscriptionId", valid_594961
-  var valid_594962 = path.getOrDefault("accountName")
-  valid_594962 = validateParameter(valid_594962, JString, required = true,
+  if valid_569190 != nil:
+    section.add "subscriptionId", valid_569190
+  var valid_569191 = path.getOrDefault("accountName")
+  valid_569191 = validateParameter(valid_569191, JString, required = true,
                                  default = nil)
-  if valid_594962 != nil:
-    section.add "accountName", valid_594962
+  if valid_569191 != nil:
+    section.add "accountName", valid_569191
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10475,11 +10475,11 @@ proc validate_DatabaseAccountsOnlineRegion_594958(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594963 = query.getOrDefault("api-version")
-  valid_594963 = validateParameter(valid_594963, JString, required = true,
+  var valid_569192 = query.getOrDefault("api-version")
+  valid_569192 = validateParameter(valid_569192, JString, required = true,
                                  default = nil)
-  if valid_594963 != nil:
-    section.add "api-version", valid_594963
+  if valid_569192 != nil:
+    section.add "api-version", valid_569192
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10493,20 +10493,20 @@ proc validate_DatabaseAccountsOnlineRegion_594958(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594965: Call_DatabaseAccountsOnlineRegion_594957; path: JsonNode;
+proc call*(call_569194: Call_DatabaseAccountsOnlineRegion_569186; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Online the specified region for the specified Azure Cosmos DB database account.
   ## 
-  let valid = call_594965.validator(path, query, header, formData, body)
-  let scheme = call_594965.pickScheme
+  let valid = call_569194.validator(path, query, header, formData, body)
+  let scheme = call_569194.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594965.url(scheme.get, call_594965.host, call_594965.base,
-                         call_594965.route, valid.getOrDefault("path"),
+  let url = call_569194.url(scheme.get, call_569194.host, call_569194.base,
+                         call_569194.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594965, url, valid)
+  result = hook(call_569194, url, valid)
 
-proc call*(call_594966: Call_DatabaseAccountsOnlineRegion_594957;
+proc call*(call_569195: Call_DatabaseAccountsOnlineRegion_569186;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           regionParameterForOnline: JsonNode; accountName: string): Recallable =
   ## databaseAccountsOnlineRegion
@@ -10521,25 +10521,25 @@ proc call*(call_594966: Call_DatabaseAccountsOnlineRegion_594957;
   ##                           : Cosmos DB region to online for the database account.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594967 = newJObject()
-  var query_594968 = newJObject()
-  var body_594969 = newJObject()
-  add(path_594967, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594968, "api-version", newJString(apiVersion))
-  add(path_594967, "subscriptionId", newJString(subscriptionId))
+  var path_569196 = newJObject()
+  var query_569197 = newJObject()
+  var body_569198 = newJObject()
+  add(path_569196, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569197, "api-version", newJString(apiVersion))
+  add(path_569196, "subscriptionId", newJString(subscriptionId))
   if regionParameterForOnline != nil:
-    body_594969 = regionParameterForOnline
-  add(path_594967, "accountName", newJString(accountName))
-  result = call_594966.call(path_594967, query_594968, nil, nil, body_594969)
+    body_569198 = regionParameterForOnline
+  add(path_569196, "accountName", newJString(accountName))
+  result = call_569195.call(path_569196, query_569197, nil, nil, body_569198)
 
-var databaseAccountsOnlineRegion* = Call_DatabaseAccountsOnlineRegion_594957(
+var databaseAccountsOnlineRegion* = Call_DatabaseAccountsOnlineRegion_569186(
     name: "databaseAccountsOnlineRegion", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/onlineRegion",
-    validator: validate_DatabaseAccountsOnlineRegion_594958, base: "",
-    url: url_DatabaseAccountsOnlineRegion_594959, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsOnlineRegion_569187, base: "",
+    url: url_DatabaseAccountsOnlineRegion_569188, schemes: {Scheme.Https})
 type
-  Call_PercentileListMetrics_594970 = ref object of OpenApiRestCall_593439
-proc url_PercentileListMetrics_594972(protocol: Scheme; host: string; base: string;
+  Call_PercentileListMetrics_569199 = ref object of OpenApiRestCall_567668
+proc url_PercentileListMetrics_569201(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10563,7 +10563,7 @@ proc url_PercentileListMetrics_594972(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PercentileListMetrics_594971(path: JsonNode; query: JsonNode;
+proc validate_PercentileListMetrics_569200(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given database account. This url is only for PBS and Replication Latency data
   ## 
@@ -10579,21 +10579,21 @@ proc validate_PercentileListMetrics_594971(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594973 = path.getOrDefault("resourceGroupName")
-  valid_594973 = validateParameter(valid_594973, JString, required = true,
+  var valid_569202 = path.getOrDefault("resourceGroupName")
+  valid_569202 = validateParameter(valid_569202, JString, required = true,
                                  default = nil)
-  if valid_594973 != nil:
-    section.add "resourceGroupName", valid_594973
-  var valid_594974 = path.getOrDefault("subscriptionId")
-  valid_594974 = validateParameter(valid_594974, JString, required = true,
+  if valid_569202 != nil:
+    section.add "resourceGroupName", valid_569202
+  var valid_569203 = path.getOrDefault("subscriptionId")
+  valid_569203 = validateParameter(valid_569203, JString, required = true,
                                  default = nil)
-  if valid_594974 != nil:
-    section.add "subscriptionId", valid_594974
-  var valid_594975 = path.getOrDefault("accountName")
-  valid_594975 = validateParameter(valid_594975, JString, required = true,
+  if valid_569203 != nil:
+    section.add "subscriptionId", valid_569203
+  var valid_569204 = path.getOrDefault("accountName")
+  valid_569204 = validateParameter(valid_569204, JString, required = true,
                                  default = nil)
-  if valid_594975 != nil:
-    section.add "accountName", valid_594975
+  if valid_569204 != nil:
+    section.add "accountName", valid_569204
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10603,16 +10603,16 @@ proc validate_PercentileListMetrics_594971(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594976 = query.getOrDefault("api-version")
-  valid_594976 = validateParameter(valid_594976, JString, required = true,
+  var valid_569205 = query.getOrDefault("api-version")
+  valid_569205 = validateParameter(valid_569205, JString, required = true,
                                  default = nil)
-  if valid_594976 != nil:
-    section.add "api-version", valid_594976
-  var valid_594977 = query.getOrDefault("$filter")
-  valid_594977 = validateParameter(valid_594977, JString, required = true,
+  if valid_569205 != nil:
+    section.add "api-version", valid_569205
+  var valid_569206 = query.getOrDefault("$filter")
+  valid_569206 = validateParameter(valid_569206, JString, required = true,
                                  default = nil)
-  if valid_594977 != nil:
-    section.add "$filter", valid_594977
+  if valid_569206 != nil:
+    section.add "$filter", valid_569206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10621,20 +10621,20 @@ proc validate_PercentileListMetrics_594971(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594978: Call_PercentileListMetrics_594970; path: JsonNode;
+proc call*(call_569207: Call_PercentileListMetrics_569199; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given database account. This url is only for PBS and Replication Latency data
   ## 
-  let valid = call_594978.validator(path, query, header, formData, body)
-  let scheme = call_594978.pickScheme
+  let valid = call_569207.validator(path, query, header, formData, body)
+  let scheme = call_569207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594978.url(scheme.get, call_594978.host, call_594978.base,
-                         call_594978.route, valid.getOrDefault("path"),
+  let url = call_569207.url(scheme.get, call_569207.host, call_569207.base,
+                         call_569207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594978, url, valid)
+  result = hook(call_569207, url, valid)
 
-proc call*(call_594979: Call_PercentileListMetrics_594970;
+proc call*(call_569208: Call_PercentileListMetrics_569199;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string; Filter: string): Recallable =
   ## percentileListMetrics
@@ -10649,23 +10649,23 @@ proc call*(call_594979: Call_PercentileListMetrics_594970;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_594980 = newJObject()
-  var query_594981 = newJObject()
-  add(path_594980, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594981, "api-version", newJString(apiVersion))
-  add(path_594980, "subscriptionId", newJString(subscriptionId))
-  add(path_594980, "accountName", newJString(accountName))
-  add(query_594981, "$filter", newJString(Filter))
-  result = call_594979.call(path_594980, query_594981, nil, nil, nil)
+  var path_569209 = newJObject()
+  var query_569210 = newJObject()
+  add(path_569209, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569210, "api-version", newJString(apiVersion))
+  add(path_569209, "subscriptionId", newJString(subscriptionId))
+  add(path_569209, "accountName", newJString(accountName))
+  add(query_569210, "$filter", newJString(Filter))
+  result = call_569208.call(path_569209, query_569210, nil, nil, nil)
 
-var percentileListMetrics* = Call_PercentileListMetrics_594970(
+var percentileListMetrics* = Call_PercentileListMetrics_569199(
     name: "percentileListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/percentile/metrics",
-    validator: validate_PercentileListMetrics_594971, base: "",
-    url: url_PercentileListMetrics_594972, schemes: {Scheme.Https})
+    validator: validate_PercentileListMetrics_569200, base: "",
+    url: url_PercentileListMetrics_569201, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListReadOnlyKeys_594993 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListReadOnlyKeys_594995(protocol: Scheme; host: string;
+  Call_DatabaseAccountsListReadOnlyKeys_569222 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListReadOnlyKeys_569224(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10689,7 +10689,7 @@ proc url_DatabaseAccountsListReadOnlyKeys_594995(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListReadOnlyKeys_594994(path: JsonNode;
+proc validate_DatabaseAccountsListReadOnlyKeys_569223(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the read-only access keys for the specified Azure Cosmos DB database account.
   ## 
@@ -10705,21 +10705,21 @@ proc validate_DatabaseAccountsListReadOnlyKeys_594994(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594996 = path.getOrDefault("resourceGroupName")
-  valid_594996 = validateParameter(valid_594996, JString, required = true,
+  var valid_569225 = path.getOrDefault("resourceGroupName")
+  valid_569225 = validateParameter(valid_569225, JString, required = true,
                                  default = nil)
-  if valid_594996 != nil:
-    section.add "resourceGroupName", valid_594996
-  var valid_594997 = path.getOrDefault("subscriptionId")
-  valid_594997 = validateParameter(valid_594997, JString, required = true,
+  if valid_569225 != nil:
+    section.add "resourceGroupName", valid_569225
+  var valid_569226 = path.getOrDefault("subscriptionId")
+  valid_569226 = validateParameter(valid_569226, JString, required = true,
                                  default = nil)
-  if valid_594997 != nil:
-    section.add "subscriptionId", valid_594997
-  var valid_594998 = path.getOrDefault("accountName")
-  valid_594998 = validateParameter(valid_594998, JString, required = true,
+  if valid_569226 != nil:
+    section.add "subscriptionId", valid_569226
+  var valid_569227 = path.getOrDefault("accountName")
+  valid_569227 = validateParameter(valid_569227, JString, required = true,
                                  default = nil)
-  if valid_594998 != nil:
-    section.add "accountName", valid_594998
+  if valid_569227 != nil:
+    section.add "accountName", valid_569227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10727,11 +10727,11 @@ proc validate_DatabaseAccountsListReadOnlyKeys_594994(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594999 = query.getOrDefault("api-version")
-  valid_594999 = validateParameter(valid_594999, JString, required = true,
+  var valid_569228 = query.getOrDefault("api-version")
+  valid_569228 = validateParameter(valid_569228, JString, required = true,
                                  default = nil)
-  if valid_594999 != nil:
-    section.add "api-version", valid_594999
+  if valid_569228 != nil:
+    section.add "api-version", valid_569228
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10740,21 +10740,21 @@ proc validate_DatabaseAccountsListReadOnlyKeys_594994(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595000: Call_DatabaseAccountsListReadOnlyKeys_594993;
+proc call*(call_569229: Call_DatabaseAccountsListReadOnlyKeys_569222;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the read-only access keys for the specified Azure Cosmos DB database account.
   ## 
-  let valid = call_595000.validator(path, query, header, formData, body)
-  let scheme = call_595000.pickScheme
+  let valid = call_569229.validator(path, query, header, formData, body)
+  let scheme = call_569229.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595000.url(scheme.get, call_595000.host, call_595000.base,
-                         call_595000.route, valid.getOrDefault("path"),
+  let url = call_569229.url(scheme.get, call_569229.host, call_569229.base,
+                         call_569229.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595000, url, valid)
+  result = hook(call_569229, url, valid)
 
-proc call*(call_595001: Call_DatabaseAccountsListReadOnlyKeys_594993;
+proc call*(call_569230: Call_DatabaseAccountsListReadOnlyKeys_569222;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsListReadOnlyKeys
@@ -10767,22 +10767,22 @@ proc call*(call_595001: Call_DatabaseAccountsListReadOnlyKeys_594993;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_595002 = newJObject()
-  var query_595003 = newJObject()
-  add(path_595002, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595003, "api-version", newJString(apiVersion))
-  add(path_595002, "subscriptionId", newJString(subscriptionId))
-  add(path_595002, "accountName", newJString(accountName))
-  result = call_595001.call(path_595002, query_595003, nil, nil, nil)
+  var path_569231 = newJObject()
+  var query_569232 = newJObject()
+  add(path_569231, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569232, "api-version", newJString(apiVersion))
+  add(path_569231, "subscriptionId", newJString(subscriptionId))
+  add(path_569231, "accountName", newJString(accountName))
+  result = call_569230.call(path_569231, query_569232, nil, nil, nil)
 
-var databaseAccountsListReadOnlyKeys* = Call_DatabaseAccountsListReadOnlyKeys_594993(
+var databaseAccountsListReadOnlyKeys* = Call_DatabaseAccountsListReadOnlyKeys_569222(
     name: "databaseAccountsListReadOnlyKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/readonlykeys",
-    validator: validate_DatabaseAccountsListReadOnlyKeys_594994, base: "",
-    url: url_DatabaseAccountsListReadOnlyKeys_594995, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListReadOnlyKeys_569223, base: "",
+    url: url_DatabaseAccountsListReadOnlyKeys_569224, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsGetReadOnlyKeys_594982 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsGetReadOnlyKeys_594984(protocol: Scheme; host: string;
+  Call_DatabaseAccountsGetReadOnlyKeys_569211 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsGetReadOnlyKeys_569213(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10806,7 +10806,7 @@ proc url_DatabaseAccountsGetReadOnlyKeys_594984(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsGetReadOnlyKeys_594983(path: JsonNode;
+proc validate_DatabaseAccountsGetReadOnlyKeys_569212(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the read-only access keys for the specified Azure Cosmos DB database account.
   ## 
@@ -10822,21 +10822,21 @@ proc validate_DatabaseAccountsGetReadOnlyKeys_594983(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594985 = path.getOrDefault("resourceGroupName")
-  valid_594985 = validateParameter(valid_594985, JString, required = true,
+  var valid_569214 = path.getOrDefault("resourceGroupName")
+  valid_569214 = validateParameter(valid_569214, JString, required = true,
                                  default = nil)
-  if valid_594985 != nil:
-    section.add "resourceGroupName", valid_594985
-  var valid_594986 = path.getOrDefault("subscriptionId")
-  valid_594986 = validateParameter(valid_594986, JString, required = true,
+  if valid_569214 != nil:
+    section.add "resourceGroupName", valid_569214
+  var valid_569215 = path.getOrDefault("subscriptionId")
+  valid_569215 = validateParameter(valid_569215, JString, required = true,
                                  default = nil)
-  if valid_594986 != nil:
-    section.add "subscriptionId", valid_594986
-  var valid_594987 = path.getOrDefault("accountName")
-  valid_594987 = validateParameter(valid_594987, JString, required = true,
+  if valid_569215 != nil:
+    section.add "subscriptionId", valid_569215
+  var valid_569216 = path.getOrDefault("accountName")
+  valid_569216 = validateParameter(valid_569216, JString, required = true,
                                  default = nil)
-  if valid_594987 != nil:
-    section.add "accountName", valid_594987
+  if valid_569216 != nil:
+    section.add "accountName", valid_569216
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10844,11 +10844,11 @@ proc validate_DatabaseAccountsGetReadOnlyKeys_594983(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594988 = query.getOrDefault("api-version")
-  valid_594988 = validateParameter(valid_594988, JString, required = true,
+  var valid_569217 = query.getOrDefault("api-version")
+  valid_569217 = validateParameter(valid_569217, JString, required = true,
                                  default = nil)
-  if valid_594988 != nil:
-    section.add "api-version", valid_594988
+  if valid_569217 != nil:
+    section.add "api-version", valid_569217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10857,21 +10857,21 @@ proc validate_DatabaseAccountsGetReadOnlyKeys_594983(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594989: Call_DatabaseAccountsGetReadOnlyKeys_594982;
+proc call*(call_569218: Call_DatabaseAccountsGetReadOnlyKeys_569211;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the read-only access keys for the specified Azure Cosmos DB database account.
   ## 
-  let valid = call_594989.validator(path, query, header, formData, body)
-  let scheme = call_594989.pickScheme
+  let valid = call_569218.validator(path, query, header, formData, body)
+  let scheme = call_569218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594989.url(scheme.get, call_594989.host, call_594989.base,
-                         call_594989.route, valid.getOrDefault("path"),
+  let url = call_569218.url(scheme.get, call_569218.host, call_569218.base,
+                         call_569218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594989, url, valid)
+  result = hook(call_569218, url, valid)
 
-proc call*(call_594990: Call_DatabaseAccountsGetReadOnlyKeys_594982;
+proc call*(call_569219: Call_DatabaseAccountsGetReadOnlyKeys_569211;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## databaseAccountsGetReadOnlyKeys
@@ -10884,22 +10884,22 @@ proc call*(call_594990: Call_DatabaseAccountsGetReadOnlyKeys_594982;
   ##                 : Azure subscription ID.
   ##   accountName: string (required)
   ##              : Cosmos DB database account name.
-  var path_594991 = newJObject()
-  var query_594992 = newJObject()
-  add(path_594991, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594992, "api-version", newJString(apiVersion))
-  add(path_594991, "subscriptionId", newJString(subscriptionId))
-  add(path_594991, "accountName", newJString(accountName))
-  result = call_594990.call(path_594991, query_594992, nil, nil, nil)
+  var path_569220 = newJObject()
+  var query_569221 = newJObject()
+  add(path_569220, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569221, "api-version", newJString(apiVersion))
+  add(path_569220, "subscriptionId", newJString(subscriptionId))
+  add(path_569220, "accountName", newJString(accountName))
+  result = call_569219.call(path_569220, query_569221, nil, nil, nil)
 
-var databaseAccountsGetReadOnlyKeys* = Call_DatabaseAccountsGetReadOnlyKeys_594982(
+var databaseAccountsGetReadOnlyKeys* = Call_DatabaseAccountsGetReadOnlyKeys_569211(
     name: "databaseAccountsGetReadOnlyKeys", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/readonlykeys",
-    validator: validate_DatabaseAccountsGetReadOnlyKeys_594983, base: "",
-    url: url_DatabaseAccountsGetReadOnlyKeys_594984, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsGetReadOnlyKeys_569212, base: "",
+    url: url_DatabaseAccountsGetReadOnlyKeys_569213, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsRegenerateKey_595004 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsRegenerateKey_595006(protocol: Scheme; host: string;
+  Call_DatabaseAccountsRegenerateKey_569233 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsRegenerateKey_569235(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10923,7 +10923,7 @@ proc url_DatabaseAccountsRegenerateKey_595006(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsRegenerateKey_595005(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsRegenerateKey_569234(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates an access key for the specified Azure Cosmos DB database account.
   ## 
@@ -10939,21 +10939,21 @@ proc validate_DatabaseAccountsRegenerateKey_595005(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_595007 = path.getOrDefault("resourceGroupName")
-  valid_595007 = validateParameter(valid_595007, JString, required = true,
+  var valid_569236 = path.getOrDefault("resourceGroupName")
+  valid_569236 = validateParameter(valid_569236, JString, required = true,
                                  default = nil)
-  if valid_595007 != nil:
-    section.add "resourceGroupName", valid_595007
-  var valid_595008 = path.getOrDefault("subscriptionId")
-  valid_595008 = validateParameter(valid_595008, JString, required = true,
+  if valid_569236 != nil:
+    section.add "resourceGroupName", valid_569236
+  var valid_569237 = path.getOrDefault("subscriptionId")
+  valid_569237 = validateParameter(valid_569237, JString, required = true,
                                  default = nil)
-  if valid_595008 != nil:
-    section.add "subscriptionId", valid_595008
-  var valid_595009 = path.getOrDefault("accountName")
-  valid_595009 = validateParameter(valid_595009, JString, required = true,
+  if valid_569237 != nil:
+    section.add "subscriptionId", valid_569237
+  var valid_569238 = path.getOrDefault("accountName")
+  valid_569238 = validateParameter(valid_569238, JString, required = true,
                                  default = nil)
-  if valid_595009 != nil:
-    section.add "accountName", valid_595009
+  if valid_569238 != nil:
+    section.add "accountName", valid_569238
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10961,11 +10961,11 @@ proc validate_DatabaseAccountsRegenerateKey_595005(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595010 = query.getOrDefault("api-version")
-  valid_595010 = validateParameter(valid_595010, JString, required = true,
+  var valid_569239 = query.getOrDefault("api-version")
+  valid_569239 = validateParameter(valid_569239, JString, required = true,
                                  default = nil)
-  if valid_595010 != nil:
-    section.add "api-version", valid_595010
+  if valid_569239 != nil:
+    section.add "api-version", valid_569239
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10979,20 +10979,20 @@ proc validate_DatabaseAccountsRegenerateKey_595005(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_595012: Call_DatabaseAccountsRegenerateKey_595004; path: JsonNode;
+proc call*(call_569241: Call_DatabaseAccountsRegenerateKey_569233; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerates an access key for the specified Azure Cosmos DB database account.
   ## 
-  let valid = call_595012.validator(path, query, header, formData, body)
-  let scheme = call_595012.pickScheme
+  let valid = call_569241.validator(path, query, header, formData, body)
+  let scheme = call_569241.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595012.url(scheme.get, call_595012.host, call_595012.base,
-                         call_595012.route, valid.getOrDefault("path"),
+  let url = call_569241.url(scheme.get, call_569241.host, call_569241.base,
+                         call_569241.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595012, url, valid)
+  result = hook(call_569241, url, valid)
 
-proc call*(call_595013: Call_DatabaseAccountsRegenerateKey_595004;
+proc call*(call_569242: Call_DatabaseAccountsRegenerateKey_569233;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string; keyToRegenerate: JsonNode): Recallable =
   ## databaseAccountsRegenerateKey
@@ -11007,25 +11007,25 @@ proc call*(call_595013: Call_DatabaseAccountsRegenerateKey_595004;
   ##              : Cosmos DB database account name.
   ##   keyToRegenerate: JObject (required)
   ##                  : The name of the key to regenerate.
-  var path_595014 = newJObject()
-  var query_595015 = newJObject()
-  var body_595016 = newJObject()
-  add(path_595014, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595015, "api-version", newJString(apiVersion))
-  add(path_595014, "subscriptionId", newJString(subscriptionId))
-  add(path_595014, "accountName", newJString(accountName))
+  var path_569243 = newJObject()
+  var query_569244 = newJObject()
+  var body_569245 = newJObject()
+  add(path_569243, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569244, "api-version", newJString(apiVersion))
+  add(path_569243, "subscriptionId", newJString(subscriptionId))
+  add(path_569243, "accountName", newJString(accountName))
   if keyToRegenerate != nil:
-    body_595016 = keyToRegenerate
-  result = call_595013.call(path_595014, query_595015, nil, nil, body_595016)
+    body_569245 = keyToRegenerate
+  result = call_569242.call(path_569243, query_569244, nil, nil, body_569245)
 
-var databaseAccountsRegenerateKey* = Call_DatabaseAccountsRegenerateKey_595004(
+var databaseAccountsRegenerateKey* = Call_DatabaseAccountsRegenerateKey_569233(
     name: "databaseAccountsRegenerateKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/regenerateKey",
-    validator: validate_DatabaseAccountsRegenerateKey_595005, base: "",
-    url: url_DatabaseAccountsRegenerateKey_595006, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsRegenerateKey_569234, base: "",
+    url: url_DatabaseAccountsRegenerateKey_569235, schemes: {Scheme.Https})
 type
-  Call_CollectionRegionListMetrics_595017 = ref object of OpenApiRestCall_593439
-proc url_CollectionRegionListMetrics_595019(protocol: Scheme; host: string;
+  Call_CollectionRegionListMetrics_569246 = ref object of OpenApiRestCall_567668
+proc url_CollectionRegionListMetrics_569248(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11058,7 +11058,7 @@ proc url_CollectionRegionListMetrics_595019(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CollectionRegionListMetrics_595018(path: JsonNode; query: JsonNode;
+proc validate_CollectionRegionListMetrics_569247(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given database account, collection and region.
   ## 
@@ -11080,36 +11080,36 @@ proc validate_CollectionRegionListMetrics_595018(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_595020 = path.getOrDefault("resourceGroupName")
-  valid_595020 = validateParameter(valid_595020, JString, required = true,
+  var valid_569249 = path.getOrDefault("resourceGroupName")
+  valid_569249 = validateParameter(valid_569249, JString, required = true,
                                  default = nil)
-  if valid_595020 != nil:
-    section.add "resourceGroupName", valid_595020
-  var valid_595021 = path.getOrDefault("collectionRid")
-  valid_595021 = validateParameter(valid_595021, JString, required = true,
+  if valid_569249 != nil:
+    section.add "resourceGroupName", valid_569249
+  var valid_569250 = path.getOrDefault("collectionRid")
+  valid_569250 = validateParameter(valid_569250, JString, required = true,
                                  default = nil)
-  if valid_595021 != nil:
-    section.add "collectionRid", valid_595021
-  var valid_595022 = path.getOrDefault("subscriptionId")
-  valid_595022 = validateParameter(valid_595022, JString, required = true,
+  if valid_569250 != nil:
+    section.add "collectionRid", valid_569250
+  var valid_569251 = path.getOrDefault("subscriptionId")
+  valid_569251 = validateParameter(valid_569251, JString, required = true,
                                  default = nil)
-  if valid_595022 != nil:
-    section.add "subscriptionId", valid_595022
-  var valid_595023 = path.getOrDefault("region")
-  valid_595023 = validateParameter(valid_595023, JString, required = true,
+  if valid_569251 != nil:
+    section.add "subscriptionId", valid_569251
+  var valid_569252 = path.getOrDefault("region")
+  valid_569252 = validateParameter(valid_569252, JString, required = true,
                                  default = nil)
-  if valid_595023 != nil:
-    section.add "region", valid_595023
-  var valid_595024 = path.getOrDefault("databaseRid")
-  valid_595024 = validateParameter(valid_595024, JString, required = true,
+  if valid_569252 != nil:
+    section.add "region", valid_569252
+  var valid_569253 = path.getOrDefault("databaseRid")
+  valid_569253 = validateParameter(valid_569253, JString, required = true,
                                  default = nil)
-  if valid_595024 != nil:
-    section.add "databaseRid", valid_595024
-  var valid_595025 = path.getOrDefault("accountName")
-  valid_595025 = validateParameter(valid_595025, JString, required = true,
+  if valid_569253 != nil:
+    section.add "databaseRid", valid_569253
+  var valid_569254 = path.getOrDefault("accountName")
+  valid_569254 = validateParameter(valid_569254, JString, required = true,
                                  default = nil)
-  if valid_595025 != nil:
-    section.add "accountName", valid_595025
+  if valid_569254 != nil:
+    section.add "accountName", valid_569254
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11119,16 +11119,16 @@ proc validate_CollectionRegionListMetrics_595018(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595026 = query.getOrDefault("api-version")
-  valid_595026 = validateParameter(valid_595026, JString, required = true,
+  var valid_569255 = query.getOrDefault("api-version")
+  valid_569255 = validateParameter(valid_569255, JString, required = true,
                                  default = nil)
-  if valid_595026 != nil:
-    section.add "api-version", valid_595026
-  var valid_595027 = query.getOrDefault("$filter")
-  valid_595027 = validateParameter(valid_595027, JString, required = true,
+  if valid_569255 != nil:
+    section.add "api-version", valid_569255
+  var valid_569256 = query.getOrDefault("$filter")
+  valid_569256 = validateParameter(valid_569256, JString, required = true,
                                  default = nil)
-  if valid_595027 != nil:
-    section.add "$filter", valid_595027
+  if valid_569256 != nil:
+    section.add "$filter", valid_569256
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11137,20 +11137,20 @@ proc validate_CollectionRegionListMetrics_595018(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_595028: Call_CollectionRegionListMetrics_595017; path: JsonNode;
+proc call*(call_569257: Call_CollectionRegionListMetrics_569246; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given database account, collection and region.
   ## 
-  let valid = call_595028.validator(path, query, header, formData, body)
-  let scheme = call_595028.pickScheme
+  let valid = call_569257.validator(path, query, header, formData, body)
+  let scheme = call_569257.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595028.url(scheme.get, call_595028.host, call_595028.base,
-                         call_595028.route, valid.getOrDefault("path"),
+  let url = call_569257.url(scheme.get, call_569257.host, call_569257.base,
+                         call_569257.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595028, url, valid)
+  result = hook(call_569257, url, valid)
 
-proc call*(call_595029: Call_CollectionRegionListMetrics_595017;
+proc call*(call_569258: Call_CollectionRegionListMetrics_569246;
           resourceGroupName: string; apiVersion: string; collectionRid: string;
           subscriptionId: string; region: string; databaseRid: string;
           accountName: string; Filter: string): Recallable =
@@ -11172,26 +11172,26 @@ proc call*(call_595029: Call_CollectionRegionListMetrics_595017;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_595030 = newJObject()
-  var query_595031 = newJObject()
-  add(path_595030, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595031, "api-version", newJString(apiVersion))
-  add(path_595030, "collectionRid", newJString(collectionRid))
-  add(path_595030, "subscriptionId", newJString(subscriptionId))
-  add(path_595030, "region", newJString(region))
-  add(path_595030, "databaseRid", newJString(databaseRid))
-  add(path_595030, "accountName", newJString(accountName))
-  add(query_595031, "$filter", newJString(Filter))
-  result = call_595029.call(path_595030, query_595031, nil, nil, nil)
+  var path_569259 = newJObject()
+  var query_569260 = newJObject()
+  add(path_569259, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569260, "api-version", newJString(apiVersion))
+  add(path_569259, "collectionRid", newJString(collectionRid))
+  add(path_569259, "subscriptionId", newJString(subscriptionId))
+  add(path_569259, "region", newJString(region))
+  add(path_569259, "databaseRid", newJString(databaseRid))
+  add(path_569259, "accountName", newJString(accountName))
+  add(query_569260, "$filter", newJString(Filter))
+  result = call_569258.call(path_569259, query_569260, nil, nil, nil)
 
-var collectionRegionListMetrics* = Call_CollectionRegionListMetrics_595017(
+var collectionRegionListMetrics* = Call_CollectionRegionListMetrics_569246(
     name: "collectionRegionListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/region/{region}/databases/{databaseRid}/collections/{collectionRid}/metrics",
-    validator: validate_CollectionRegionListMetrics_595018, base: "",
-    url: url_CollectionRegionListMetrics_595019, schemes: {Scheme.Https})
+    validator: validate_CollectionRegionListMetrics_569247, base: "",
+    url: url_CollectionRegionListMetrics_569248, schemes: {Scheme.Https})
 type
-  Call_PartitionKeyRangeIdRegionListMetrics_595032 = ref object of OpenApiRestCall_593439
-proc url_PartitionKeyRangeIdRegionListMetrics_595034(protocol: Scheme;
+  Call_PartitionKeyRangeIdRegionListMetrics_569261 = ref object of OpenApiRestCall_567668
+proc url_PartitionKeyRangeIdRegionListMetrics_569263(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11228,7 +11228,7 @@ proc url_PartitionKeyRangeIdRegionListMetrics_595034(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PartitionKeyRangeIdRegionListMetrics_595033(path: JsonNode;
+proc validate_PartitionKeyRangeIdRegionListMetrics_569262(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given partition key range id and region.
   ## 
@@ -11252,41 +11252,41 @@ proc validate_PartitionKeyRangeIdRegionListMetrics_595033(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_595035 = path.getOrDefault("resourceGroupName")
-  valid_595035 = validateParameter(valid_595035, JString, required = true,
+  var valid_569264 = path.getOrDefault("resourceGroupName")
+  valid_569264 = validateParameter(valid_569264, JString, required = true,
                                  default = nil)
-  if valid_595035 != nil:
-    section.add "resourceGroupName", valid_595035
-  var valid_595036 = path.getOrDefault("collectionRid")
-  valid_595036 = validateParameter(valid_595036, JString, required = true,
+  if valid_569264 != nil:
+    section.add "resourceGroupName", valid_569264
+  var valid_569265 = path.getOrDefault("collectionRid")
+  valid_569265 = validateParameter(valid_569265, JString, required = true,
                                  default = nil)
-  if valid_595036 != nil:
-    section.add "collectionRid", valid_595036
-  var valid_595037 = path.getOrDefault("subscriptionId")
-  valid_595037 = validateParameter(valid_595037, JString, required = true,
+  if valid_569265 != nil:
+    section.add "collectionRid", valid_569265
+  var valid_569266 = path.getOrDefault("subscriptionId")
+  valid_569266 = validateParameter(valid_569266, JString, required = true,
                                  default = nil)
-  if valid_595037 != nil:
-    section.add "subscriptionId", valid_595037
-  var valid_595038 = path.getOrDefault("partitionKeyRangeId")
-  valid_595038 = validateParameter(valid_595038, JString, required = true,
+  if valid_569266 != nil:
+    section.add "subscriptionId", valid_569266
+  var valid_569267 = path.getOrDefault("partitionKeyRangeId")
+  valid_569267 = validateParameter(valid_569267, JString, required = true,
                                  default = nil)
-  if valid_595038 != nil:
-    section.add "partitionKeyRangeId", valid_595038
-  var valid_595039 = path.getOrDefault("region")
-  valid_595039 = validateParameter(valid_595039, JString, required = true,
+  if valid_569267 != nil:
+    section.add "partitionKeyRangeId", valid_569267
+  var valid_569268 = path.getOrDefault("region")
+  valid_569268 = validateParameter(valid_569268, JString, required = true,
                                  default = nil)
-  if valid_595039 != nil:
-    section.add "region", valid_595039
-  var valid_595040 = path.getOrDefault("databaseRid")
-  valid_595040 = validateParameter(valid_595040, JString, required = true,
+  if valid_569268 != nil:
+    section.add "region", valid_569268
+  var valid_569269 = path.getOrDefault("databaseRid")
+  valid_569269 = validateParameter(valid_569269, JString, required = true,
                                  default = nil)
-  if valid_595040 != nil:
-    section.add "databaseRid", valid_595040
-  var valid_595041 = path.getOrDefault("accountName")
-  valid_595041 = validateParameter(valid_595041, JString, required = true,
+  if valid_569269 != nil:
+    section.add "databaseRid", valid_569269
+  var valid_569270 = path.getOrDefault("accountName")
+  valid_569270 = validateParameter(valid_569270, JString, required = true,
                                  default = nil)
-  if valid_595041 != nil:
-    section.add "accountName", valid_595041
+  if valid_569270 != nil:
+    section.add "accountName", valid_569270
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11296,16 +11296,16 @@ proc validate_PartitionKeyRangeIdRegionListMetrics_595033(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595042 = query.getOrDefault("api-version")
-  valid_595042 = validateParameter(valid_595042, JString, required = true,
+  var valid_569271 = query.getOrDefault("api-version")
+  valid_569271 = validateParameter(valid_569271, JString, required = true,
                                  default = nil)
-  if valid_595042 != nil:
-    section.add "api-version", valid_595042
-  var valid_595043 = query.getOrDefault("$filter")
-  valid_595043 = validateParameter(valid_595043, JString, required = true,
+  if valid_569271 != nil:
+    section.add "api-version", valid_569271
+  var valid_569272 = query.getOrDefault("$filter")
+  valid_569272 = validateParameter(valid_569272, JString, required = true,
                                  default = nil)
-  if valid_595043 != nil:
-    section.add "$filter", valid_595043
+  if valid_569272 != nil:
+    section.add "$filter", valid_569272
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11314,21 +11314,21 @@ proc validate_PartitionKeyRangeIdRegionListMetrics_595033(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595044: Call_PartitionKeyRangeIdRegionListMetrics_595032;
+proc call*(call_569273: Call_PartitionKeyRangeIdRegionListMetrics_569261;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given partition key range id and region.
   ## 
-  let valid = call_595044.validator(path, query, header, formData, body)
-  let scheme = call_595044.pickScheme
+  let valid = call_569273.validator(path, query, header, formData, body)
+  let scheme = call_569273.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595044.url(scheme.get, call_595044.host, call_595044.base,
-                         call_595044.route, valid.getOrDefault("path"),
+  let url = call_569273.url(scheme.get, call_569273.host, call_569273.base,
+                         call_569273.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595044, url, valid)
+  result = hook(call_569273, url, valid)
 
-proc call*(call_595045: Call_PartitionKeyRangeIdRegionListMetrics_595032;
+proc call*(call_569274: Call_PartitionKeyRangeIdRegionListMetrics_569261;
           resourceGroupName: string; apiVersion: string; collectionRid: string;
           subscriptionId: string; partitionKeyRangeId: string; region: string;
           databaseRid: string; accountName: string; Filter: string): Recallable =
@@ -11352,27 +11352,27 @@ proc call*(call_595045: Call_PartitionKeyRangeIdRegionListMetrics_595032;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_595046 = newJObject()
-  var query_595047 = newJObject()
-  add(path_595046, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595047, "api-version", newJString(apiVersion))
-  add(path_595046, "collectionRid", newJString(collectionRid))
-  add(path_595046, "subscriptionId", newJString(subscriptionId))
-  add(path_595046, "partitionKeyRangeId", newJString(partitionKeyRangeId))
-  add(path_595046, "region", newJString(region))
-  add(path_595046, "databaseRid", newJString(databaseRid))
-  add(path_595046, "accountName", newJString(accountName))
-  add(query_595047, "$filter", newJString(Filter))
-  result = call_595045.call(path_595046, query_595047, nil, nil, nil)
+  var path_569275 = newJObject()
+  var query_569276 = newJObject()
+  add(path_569275, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569276, "api-version", newJString(apiVersion))
+  add(path_569275, "collectionRid", newJString(collectionRid))
+  add(path_569275, "subscriptionId", newJString(subscriptionId))
+  add(path_569275, "partitionKeyRangeId", newJString(partitionKeyRangeId))
+  add(path_569275, "region", newJString(region))
+  add(path_569275, "databaseRid", newJString(databaseRid))
+  add(path_569275, "accountName", newJString(accountName))
+  add(query_569276, "$filter", newJString(Filter))
+  result = call_569274.call(path_569275, query_569276, nil, nil, nil)
 
-var partitionKeyRangeIdRegionListMetrics* = Call_PartitionKeyRangeIdRegionListMetrics_595032(
+var partitionKeyRangeIdRegionListMetrics* = Call_PartitionKeyRangeIdRegionListMetrics_569261(
     name: "partitionKeyRangeIdRegionListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/region/{region}/databases/{databaseRid}/collections/{collectionRid}/partitionKeyRangeId/{partitionKeyRangeId}/metrics",
-    validator: validate_PartitionKeyRangeIdRegionListMetrics_595033, base: "",
-    url: url_PartitionKeyRangeIdRegionListMetrics_595034, schemes: {Scheme.Https})
+    validator: validate_PartitionKeyRangeIdRegionListMetrics_569262, base: "",
+    url: url_PartitionKeyRangeIdRegionListMetrics_569263, schemes: {Scheme.Https})
 type
-  Call_CollectionPartitionRegionListMetrics_595048 = ref object of OpenApiRestCall_593439
-proc url_CollectionPartitionRegionListMetrics_595050(protocol: Scheme;
+  Call_CollectionPartitionRegionListMetrics_569277 = ref object of OpenApiRestCall_567668
+proc url_CollectionPartitionRegionListMetrics_569279(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11405,7 +11405,7 @@ proc url_CollectionPartitionRegionListMetrics_595050(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CollectionPartitionRegionListMetrics_595049(path: JsonNode;
+proc validate_CollectionPartitionRegionListMetrics_569278(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given collection and region, split by partition.
   ## 
@@ -11427,36 +11427,36 @@ proc validate_CollectionPartitionRegionListMetrics_595049(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_595051 = path.getOrDefault("resourceGroupName")
-  valid_595051 = validateParameter(valid_595051, JString, required = true,
+  var valid_569280 = path.getOrDefault("resourceGroupName")
+  valid_569280 = validateParameter(valid_569280, JString, required = true,
                                  default = nil)
-  if valid_595051 != nil:
-    section.add "resourceGroupName", valid_595051
-  var valid_595052 = path.getOrDefault("collectionRid")
-  valid_595052 = validateParameter(valid_595052, JString, required = true,
+  if valid_569280 != nil:
+    section.add "resourceGroupName", valid_569280
+  var valid_569281 = path.getOrDefault("collectionRid")
+  valid_569281 = validateParameter(valid_569281, JString, required = true,
                                  default = nil)
-  if valid_595052 != nil:
-    section.add "collectionRid", valid_595052
-  var valid_595053 = path.getOrDefault("subscriptionId")
-  valid_595053 = validateParameter(valid_595053, JString, required = true,
+  if valid_569281 != nil:
+    section.add "collectionRid", valid_569281
+  var valid_569282 = path.getOrDefault("subscriptionId")
+  valid_569282 = validateParameter(valid_569282, JString, required = true,
                                  default = nil)
-  if valid_595053 != nil:
-    section.add "subscriptionId", valid_595053
-  var valid_595054 = path.getOrDefault("region")
-  valid_595054 = validateParameter(valid_595054, JString, required = true,
+  if valid_569282 != nil:
+    section.add "subscriptionId", valid_569282
+  var valid_569283 = path.getOrDefault("region")
+  valid_569283 = validateParameter(valid_569283, JString, required = true,
                                  default = nil)
-  if valid_595054 != nil:
-    section.add "region", valid_595054
-  var valid_595055 = path.getOrDefault("databaseRid")
-  valid_595055 = validateParameter(valid_595055, JString, required = true,
+  if valid_569283 != nil:
+    section.add "region", valid_569283
+  var valid_569284 = path.getOrDefault("databaseRid")
+  valid_569284 = validateParameter(valid_569284, JString, required = true,
                                  default = nil)
-  if valid_595055 != nil:
-    section.add "databaseRid", valid_595055
-  var valid_595056 = path.getOrDefault("accountName")
-  valid_595056 = validateParameter(valid_595056, JString, required = true,
+  if valid_569284 != nil:
+    section.add "databaseRid", valid_569284
+  var valid_569285 = path.getOrDefault("accountName")
+  valid_569285 = validateParameter(valid_569285, JString, required = true,
                                  default = nil)
-  if valid_595056 != nil:
-    section.add "accountName", valid_595056
+  if valid_569285 != nil:
+    section.add "accountName", valid_569285
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11466,16 +11466,16 @@ proc validate_CollectionPartitionRegionListMetrics_595049(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595057 = query.getOrDefault("api-version")
-  valid_595057 = validateParameter(valid_595057, JString, required = true,
+  var valid_569286 = query.getOrDefault("api-version")
+  valid_569286 = validateParameter(valid_569286, JString, required = true,
                                  default = nil)
-  if valid_595057 != nil:
-    section.add "api-version", valid_595057
-  var valid_595058 = query.getOrDefault("$filter")
-  valid_595058 = validateParameter(valid_595058, JString, required = true,
+  if valid_569286 != nil:
+    section.add "api-version", valid_569286
+  var valid_569287 = query.getOrDefault("$filter")
+  valid_569287 = validateParameter(valid_569287, JString, required = true,
                                  default = nil)
-  if valid_595058 != nil:
-    section.add "$filter", valid_595058
+  if valid_569287 != nil:
+    section.add "$filter", valid_569287
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11484,21 +11484,21 @@ proc validate_CollectionPartitionRegionListMetrics_595049(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595059: Call_CollectionPartitionRegionListMetrics_595048;
+proc call*(call_569288: Call_CollectionPartitionRegionListMetrics_569277;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given collection and region, split by partition.
   ## 
-  let valid = call_595059.validator(path, query, header, formData, body)
-  let scheme = call_595059.pickScheme
+  let valid = call_569288.validator(path, query, header, formData, body)
+  let scheme = call_569288.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595059.url(scheme.get, call_595059.host, call_595059.base,
-                         call_595059.route, valid.getOrDefault("path"),
+  let url = call_569288.url(scheme.get, call_569288.host, call_569288.base,
+                         call_569288.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595059, url, valid)
+  result = hook(call_569288, url, valid)
 
-proc call*(call_595060: Call_CollectionPartitionRegionListMetrics_595048;
+proc call*(call_569289: Call_CollectionPartitionRegionListMetrics_569277;
           resourceGroupName: string; apiVersion: string; collectionRid: string;
           subscriptionId: string; region: string; databaseRid: string;
           accountName: string; Filter: string): Recallable =
@@ -11520,26 +11520,26 @@ proc call*(call_595060: Call_CollectionPartitionRegionListMetrics_595048;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_595061 = newJObject()
-  var query_595062 = newJObject()
-  add(path_595061, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595062, "api-version", newJString(apiVersion))
-  add(path_595061, "collectionRid", newJString(collectionRid))
-  add(path_595061, "subscriptionId", newJString(subscriptionId))
-  add(path_595061, "region", newJString(region))
-  add(path_595061, "databaseRid", newJString(databaseRid))
-  add(path_595061, "accountName", newJString(accountName))
-  add(query_595062, "$filter", newJString(Filter))
-  result = call_595060.call(path_595061, query_595062, nil, nil, nil)
+  var path_569290 = newJObject()
+  var query_569291 = newJObject()
+  add(path_569290, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569291, "api-version", newJString(apiVersion))
+  add(path_569290, "collectionRid", newJString(collectionRid))
+  add(path_569290, "subscriptionId", newJString(subscriptionId))
+  add(path_569290, "region", newJString(region))
+  add(path_569290, "databaseRid", newJString(databaseRid))
+  add(path_569290, "accountName", newJString(accountName))
+  add(query_569291, "$filter", newJString(Filter))
+  result = call_569289.call(path_569290, query_569291, nil, nil, nil)
 
-var collectionPartitionRegionListMetrics* = Call_CollectionPartitionRegionListMetrics_595048(
+var collectionPartitionRegionListMetrics* = Call_CollectionPartitionRegionListMetrics_569277(
     name: "collectionPartitionRegionListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/region/{region}/databases/{databaseRid}/collections/{collectionRid}/partitions/metrics",
-    validator: validate_CollectionPartitionRegionListMetrics_595049, base: "",
-    url: url_CollectionPartitionRegionListMetrics_595050, schemes: {Scheme.Https})
+    validator: validate_CollectionPartitionRegionListMetrics_569278, base: "",
+    url: url_CollectionPartitionRegionListMetrics_569279, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountRegionListMetrics_595063 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountRegionListMetrics_595065(protocol: Scheme; host: string;
+  Call_DatabaseAccountRegionListMetrics_569292 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountRegionListMetrics_569294(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11566,7 +11566,7 @@ proc url_DatabaseAccountRegionListMetrics_595065(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountRegionListMetrics_595064(path: JsonNode;
+proc validate_DatabaseAccountRegionListMetrics_569293(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given database account and region.
   ## 
@@ -11584,26 +11584,26 @@ proc validate_DatabaseAccountRegionListMetrics_595064(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_595066 = path.getOrDefault("resourceGroupName")
-  valid_595066 = validateParameter(valid_595066, JString, required = true,
+  var valid_569295 = path.getOrDefault("resourceGroupName")
+  valid_569295 = validateParameter(valid_569295, JString, required = true,
                                  default = nil)
-  if valid_595066 != nil:
-    section.add "resourceGroupName", valid_595066
-  var valid_595067 = path.getOrDefault("subscriptionId")
-  valid_595067 = validateParameter(valid_595067, JString, required = true,
+  if valid_569295 != nil:
+    section.add "resourceGroupName", valid_569295
+  var valid_569296 = path.getOrDefault("subscriptionId")
+  valid_569296 = validateParameter(valid_569296, JString, required = true,
                                  default = nil)
-  if valid_595067 != nil:
-    section.add "subscriptionId", valid_595067
-  var valid_595068 = path.getOrDefault("region")
-  valid_595068 = validateParameter(valid_595068, JString, required = true,
+  if valid_569296 != nil:
+    section.add "subscriptionId", valid_569296
+  var valid_569297 = path.getOrDefault("region")
+  valid_569297 = validateParameter(valid_569297, JString, required = true,
                                  default = nil)
-  if valid_595068 != nil:
-    section.add "region", valid_595068
-  var valid_595069 = path.getOrDefault("accountName")
-  valid_595069 = validateParameter(valid_595069, JString, required = true,
+  if valid_569297 != nil:
+    section.add "region", valid_569297
+  var valid_569298 = path.getOrDefault("accountName")
+  valid_569298 = validateParameter(valid_569298, JString, required = true,
                                  default = nil)
-  if valid_595069 != nil:
-    section.add "accountName", valid_595069
+  if valid_569298 != nil:
+    section.add "accountName", valid_569298
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11613,16 +11613,16 @@ proc validate_DatabaseAccountRegionListMetrics_595064(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595070 = query.getOrDefault("api-version")
-  valid_595070 = validateParameter(valid_595070, JString, required = true,
+  var valid_569299 = query.getOrDefault("api-version")
+  valid_569299 = validateParameter(valid_569299, JString, required = true,
                                  default = nil)
-  if valid_595070 != nil:
-    section.add "api-version", valid_595070
-  var valid_595071 = query.getOrDefault("$filter")
-  valid_595071 = validateParameter(valid_595071, JString, required = true,
+  if valid_569299 != nil:
+    section.add "api-version", valid_569299
+  var valid_569300 = query.getOrDefault("$filter")
+  valid_569300 = validateParameter(valid_569300, JString, required = true,
                                  default = nil)
-  if valid_595071 != nil:
-    section.add "$filter", valid_595071
+  if valid_569300 != nil:
+    section.add "$filter", valid_569300
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11631,21 +11631,21 @@ proc validate_DatabaseAccountRegionListMetrics_595064(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595072: Call_DatabaseAccountRegionListMetrics_595063;
+proc call*(call_569301: Call_DatabaseAccountRegionListMetrics_569292;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given database account and region.
   ## 
-  let valid = call_595072.validator(path, query, header, formData, body)
-  let scheme = call_595072.pickScheme
+  let valid = call_569301.validator(path, query, header, formData, body)
+  let scheme = call_569301.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595072.url(scheme.get, call_595072.host, call_595072.base,
-                         call_595072.route, valid.getOrDefault("path"),
+  let url = call_569301.url(scheme.get, call_569301.host, call_569301.base,
+                         call_569301.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595072, url, valid)
+  result = hook(call_569301, url, valid)
 
-proc call*(call_595073: Call_DatabaseAccountRegionListMetrics_595063;
+proc call*(call_569302: Call_DatabaseAccountRegionListMetrics_569292;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           region: string; accountName: string; Filter: string): Recallable =
   ## databaseAccountRegionListMetrics
@@ -11662,24 +11662,24 @@ proc call*(call_595073: Call_DatabaseAccountRegionListMetrics_595063;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_595074 = newJObject()
-  var query_595075 = newJObject()
-  add(path_595074, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595075, "api-version", newJString(apiVersion))
-  add(path_595074, "subscriptionId", newJString(subscriptionId))
-  add(path_595074, "region", newJString(region))
-  add(path_595074, "accountName", newJString(accountName))
-  add(query_595075, "$filter", newJString(Filter))
-  result = call_595073.call(path_595074, query_595075, nil, nil, nil)
+  var path_569303 = newJObject()
+  var query_569304 = newJObject()
+  add(path_569303, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569304, "api-version", newJString(apiVersion))
+  add(path_569303, "subscriptionId", newJString(subscriptionId))
+  add(path_569303, "region", newJString(region))
+  add(path_569303, "accountName", newJString(accountName))
+  add(query_569304, "$filter", newJString(Filter))
+  result = call_569302.call(path_569303, query_569304, nil, nil, nil)
 
-var databaseAccountRegionListMetrics* = Call_DatabaseAccountRegionListMetrics_595063(
+var databaseAccountRegionListMetrics* = Call_DatabaseAccountRegionListMetrics_569292(
     name: "databaseAccountRegionListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/region/{region}/metrics",
-    validator: validate_DatabaseAccountRegionListMetrics_595064, base: "",
-    url: url_DatabaseAccountRegionListMetrics_595065, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountRegionListMetrics_569293, base: "",
+    url: url_DatabaseAccountRegionListMetrics_569294, schemes: {Scheme.Https})
 type
-  Call_PercentileSourceTargetListMetrics_595076 = ref object of OpenApiRestCall_593439
-proc url_PercentileSourceTargetListMetrics_595078(protocol: Scheme; host: string;
+  Call_PercentileSourceTargetListMetrics_569305 = ref object of OpenApiRestCall_567668
+proc url_PercentileSourceTargetListMetrics_569307(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11709,7 +11709,7 @@ proc url_PercentileSourceTargetListMetrics_595078(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PercentileSourceTargetListMetrics_595077(path: JsonNode;
+proc validate_PercentileSourceTargetListMetrics_569306(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given account, source and target region. This url is only for PBS and Replication Latency data
   ## 
@@ -11729,31 +11729,31 @@ proc validate_PercentileSourceTargetListMetrics_595077(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_595079 = path.getOrDefault("resourceGroupName")
-  valid_595079 = validateParameter(valid_595079, JString, required = true,
+  var valid_569308 = path.getOrDefault("resourceGroupName")
+  valid_569308 = validateParameter(valid_569308, JString, required = true,
                                  default = nil)
-  if valid_595079 != nil:
-    section.add "resourceGroupName", valid_595079
-  var valid_595080 = path.getOrDefault("sourceRegion")
-  valid_595080 = validateParameter(valid_595080, JString, required = true,
+  if valid_569308 != nil:
+    section.add "resourceGroupName", valid_569308
+  var valid_569309 = path.getOrDefault("sourceRegion")
+  valid_569309 = validateParameter(valid_569309, JString, required = true,
                                  default = nil)
-  if valid_595080 != nil:
-    section.add "sourceRegion", valid_595080
-  var valid_595081 = path.getOrDefault("subscriptionId")
-  valid_595081 = validateParameter(valid_595081, JString, required = true,
+  if valid_569309 != nil:
+    section.add "sourceRegion", valid_569309
+  var valid_569310 = path.getOrDefault("subscriptionId")
+  valid_569310 = validateParameter(valid_569310, JString, required = true,
                                  default = nil)
-  if valid_595081 != nil:
-    section.add "subscriptionId", valid_595081
-  var valid_595082 = path.getOrDefault("targetRegion")
-  valid_595082 = validateParameter(valid_595082, JString, required = true,
+  if valid_569310 != nil:
+    section.add "subscriptionId", valid_569310
+  var valid_569311 = path.getOrDefault("targetRegion")
+  valid_569311 = validateParameter(valid_569311, JString, required = true,
                                  default = nil)
-  if valid_595082 != nil:
-    section.add "targetRegion", valid_595082
-  var valid_595083 = path.getOrDefault("accountName")
-  valid_595083 = validateParameter(valid_595083, JString, required = true,
+  if valid_569311 != nil:
+    section.add "targetRegion", valid_569311
+  var valid_569312 = path.getOrDefault("accountName")
+  valid_569312 = validateParameter(valid_569312, JString, required = true,
                                  default = nil)
-  if valid_595083 != nil:
-    section.add "accountName", valid_595083
+  if valid_569312 != nil:
+    section.add "accountName", valid_569312
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11763,16 +11763,16 @@ proc validate_PercentileSourceTargetListMetrics_595077(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595084 = query.getOrDefault("api-version")
-  valid_595084 = validateParameter(valid_595084, JString, required = true,
+  var valid_569313 = query.getOrDefault("api-version")
+  valid_569313 = validateParameter(valid_569313, JString, required = true,
                                  default = nil)
-  if valid_595084 != nil:
-    section.add "api-version", valid_595084
-  var valid_595085 = query.getOrDefault("$filter")
-  valid_595085 = validateParameter(valid_595085, JString, required = true,
+  if valid_569313 != nil:
+    section.add "api-version", valid_569313
+  var valid_569314 = query.getOrDefault("$filter")
+  valid_569314 = validateParameter(valid_569314, JString, required = true,
                                  default = nil)
-  if valid_595085 != nil:
-    section.add "$filter", valid_595085
+  if valid_569314 != nil:
+    section.add "$filter", valid_569314
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11781,21 +11781,21 @@ proc validate_PercentileSourceTargetListMetrics_595077(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595086: Call_PercentileSourceTargetListMetrics_595076;
+proc call*(call_569315: Call_PercentileSourceTargetListMetrics_569305;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given account, source and target region. This url is only for PBS and Replication Latency data
   ## 
-  let valid = call_595086.validator(path, query, header, formData, body)
-  let scheme = call_595086.pickScheme
+  let valid = call_569315.validator(path, query, header, formData, body)
+  let scheme = call_569315.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595086.url(scheme.get, call_595086.host, call_595086.base,
-                         call_595086.route, valid.getOrDefault("path"),
+  let url = call_569315.url(scheme.get, call_569315.host, call_569315.base,
+                         call_569315.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595086, url, valid)
+  result = hook(call_569315, url, valid)
 
-proc call*(call_595087: Call_PercentileSourceTargetListMetrics_595076;
+proc call*(call_569316: Call_PercentileSourceTargetListMetrics_569305;
           resourceGroupName: string; apiVersion: string; sourceRegion: string;
           subscriptionId: string; targetRegion: string; accountName: string;
           Filter: string): Recallable =
@@ -11815,25 +11815,25 @@ proc call*(call_595087: Call_PercentileSourceTargetListMetrics_595076;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_595088 = newJObject()
-  var query_595089 = newJObject()
-  add(path_595088, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595089, "api-version", newJString(apiVersion))
-  add(path_595088, "sourceRegion", newJString(sourceRegion))
-  add(path_595088, "subscriptionId", newJString(subscriptionId))
-  add(path_595088, "targetRegion", newJString(targetRegion))
-  add(path_595088, "accountName", newJString(accountName))
-  add(query_595089, "$filter", newJString(Filter))
-  result = call_595087.call(path_595088, query_595089, nil, nil, nil)
+  var path_569317 = newJObject()
+  var query_569318 = newJObject()
+  add(path_569317, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569318, "api-version", newJString(apiVersion))
+  add(path_569317, "sourceRegion", newJString(sourceRegion))
+  add(path_569317, "subscriptionId", newJString(subscriptionId))
+  add(path_569317, "targetRegion", newJString(targetRegion))
+  add(path_569317, "accountName", newJString(accountName))
+  add(query_569318, "$filter", newJString(Filter))
+  result = call_569316.call(path_569317, query_569318, nil, nil, nil)
 
-var percentileSourceTargetListMetrics* = Call_PercentileSourceTargetListMetrics_595076(
+var percentileSourceTargetListMetrics* = Call_PercentileSourceTargetListMetrics_569305(
     name: "percentileSourceTargetListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/sourceRegion/{sourceRegion}/targetRegion/{targetRegion}/percentile/metrics",
-    validator: validate_PercentileSourceTargetListMetrics_595077, base: "",
-    url: url_PercentileSourceTargetListMetrics_595078, schemes: {Scheme.Https})
+    validator: validate_PercentileSourceTargetListMetrics_569306, base: "",
+    url: url_PercentileSourceTargetListMetrics_569307, schemes: {Scheme.Https})
 type
-  Call_PercentileTargetListMetrics_595090 = ref object of OpenApiRestCall_593439
-proc url_PercentileTargetListMetrics_595092(protocol: Scheme; host: string;
+  Call_PercentileTargetListMetrics_569319 = ref object of OpenApiRestCall_567668
+proc url_PercentileTargetListMetrics_569321(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11860,7 +11860,7 @@ proc url_PercentileTargetListMetrics_595092(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PercentileTargetListMetrics_595091(path: JsonNode; query: JsonNode;
+proc validate_PercentileTargetListMetrics_569320(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the metrics determined by the given filter for the given account target region. This url is only for PBS and Replication Latency data
   ## 
@@ -11878,26 +11878,26 @@ proc validate_PercentileTargetListMetrics_595091(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_595093 = path.getOrDefault("resourceGroupName")
-  valid_595093 = validateParameter(valid_595093, JString, required = true,
+  var valid_569322 = path.getOrDefault("resourceGroupName")
+  valid_569322 = validateParameter(valid_569322, JString, required = true,
                                  default = nil)
-  if valid_595093 != nil:
-    section.add "resourceGroupName", valid_595093
-  var valid_595094 = path.getOrDefault("subscriptionId")
-  valid_595094 = validateParameter(valid_595094, JString, required = true,
+  if valid_569322 != nil:
+    section.add "resourceGroupName", valid_569322
+  var valid_569323 = path.getOrDefault("subscriptionId")
+  valid_569323 = validateParameter(valid_569323, JString, required = true,
                                  default = nil)
-  if valid_595094 != nil:
-    section.add "subscriptionId", valid_595094
-  var valid_595095 = path.getOrDefault("targetRegion")
-  valid_595095 = validateParameter(valid_595095, JString, required = true,
+  if valid_569323 != nil:
+    section.add "subscriptionId", valid_569323
+  var valid_569324 = path.getOrDefault("targetRegion")
+  valid_569324 = validateParameter(valid_569324, JString, required = true,
                                  default = nil)
-  if valid_595095 != nil:
-    section.add "targetRegion", valid_595095
-  var valid_595096 = path.getOrDefault("accountName")
-  valid_595096 = validateParameter(valid_595096, JString, required = true,
+  if valid_569324 != nil:
+    section.add "targetRegion", valid_569324
+  var valid_569325 = path.getOrDefault("accountName")
+  valid_569325 = validateParameter(valid_569325, JString, required = true,
                                  default = nil)
-  if valid_595096 != nil:
-    section.add "accountName", valid_595096
+  if valid_569325 != nil:
+    section.add "accountName", valid_569325
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11907,16 +11907,16 @@ proc validate_PercentileTargetListMetrics_595091(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595097 = query.getOrDefault("api-version")
-  valid_595097 = validateParameter(valid_595097, JString, required = true,
+  var valid_569326 = query.getOrDefault("api-version")
+  valid_569326 = validateParameter(valid_569326, JString, required = true,
                                  default = nil)
-  if valid_595097 != nil:
-    section.add "api-version", valid_595097
-  var valid_595098 = query.getOrDefault("$filter")
-  valid_595098 = validateParameter(valid_595098, JString, required = true,
+  if valid_569326 != nil:
+    section.add "api-version", valid_569326
+  var valid_569327 = query.getOrDefault("$filter")
+  valid_569327 = validateParameter(valid_569327, JString, required = true,
                                  default = nil)
-  if valid_595098 != nil:
-    section.add "$filter", valid_595098
+  if valid_569327 != nil:
+    section.add "$filter", valid_569327
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11925,20 +11925,20 @@ proc validate_PercentileTargetListMetrics_595091(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_595099: Call_PercentileTargetListMetrics_595090; path: JsonNode;
+proc call*(call_569328: Call_PercentileTargetListMetrics_569319; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the metrics determined by the given filter for the given account target region. This url is only for PBS and Replication Latency data
   ## 
-  let valid = call_595099.validator(path, query, header, formData, body)
-  let scheme = call_595099.pickScheme
+  let valid = call_569328.validator(path, query, header, formData, body)
+  let scheme = call_569328.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595099.url(scheme.get, call_595099.host, call_595099.base,
-                         call_595099.route, valid.getOrDefault("path"),
+  let url = call_569328.url(scheme.get, call_569328.host, call_569328.base,
+                         call_569328.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595099, url, valid)
+  result = hook(call_569328, url, valid)
 
-proc call*(call_595100: Call_PercentileTargetListMetrics_595090;
+proc call*(call_569329: Call_PercentileTargetListMetrics_569319;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           targetRegion: string; accountName: string; Filter: string): Recallable =
   ## percentileTargetListMetrics
@@ -11955,24 +11955,24 @@ proc call*(call_595100: Call_PercentileTargetListMetrics_595090;
   ##              : Cosmos DB database account name.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return. The parameters that can be filtered are name.value (name of the metric, can have an or of multiple names), startTime, endTime, and timeGrain. The supported operator is eq.
-  var path_595101 = newJObject()
-  var query_595102 = newJObject()
-  add(path_595101, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595102, "api-version", newJString(apiVersion))
-  add(path_595101, "subscriptionId", newJString(subscriptionId))
-  add(path_595101, "targetRegion", newJString(targetRegion))
-  add(path_595101, "accountName", newJString(accountName))
-  add(query_595102, "$filter", newJString(Filter))
-  result = call_595100.call(path_595101, query_595102, nil, nil, nil)
+  var path_569330 = newJObject()
+  var query_569331 = newJObject()
+  add(path_569330, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569331, "api-version", newJString(apiVersion))
+  add(path_569330, "subscriptionId", newJString(subscriptionId))
+  add(path_569330, "targetRegion", newJString(targetRegion))
+  add(path_569330, "accountName", newJString(accountName))
+  add(query_569331, "$filter", newJString(Filter))
+  result = call_569329.call(path_569330, query_569331, nil, nil, nil)
 
-var percentileTargetListMetrics* = Call_PercentileTargetListMetrics_595090(
+var percentileTargetListMetrics* = Call_PercentileTargetListMetrics_569319(
     name: "percentileTargetListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/targetRegion/{targetRegion}/percentile/metrics",
-    validator: validate_PercentileTargetListMetrics_595091, base: "",
-    url: url_PercentileTargetListMetrics_595092, schemes: {Scheme.Https})
+    validator: validate_PercentileTargetListMetrics_569320, base: "",
+    url: url_PercentileTargetListMetrics_569321, schemes: {Scheme.Https})
 type
-  Call_DatabaseAccountsListUsages_595103 = ref object of OpenApiRestCall_593439
-proc url_DatabaseAccountsListUsages_595105(protocol: Scheme; host: string;
+  Call_DatabaseAccountsListUsages_569332 = ref object of OpenApiRestCall_567668
+proc url_DatabaseAccountsListUsages_569334(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11996,7 +11996,7 @@ proc url_DatabaseAccountsListUsages_595105(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseAccountsListUsages_595104(path: JsonNode; query: JsonNode;
+proc validate_DatabaseAccountsListUsages_569333(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the usages (most recent data) for the given database account.
   ## 
@@ -12012,21 +12012,21 @@ proc validate_DatabaseAccountsListUsages_595104(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_595106 = path.getOrDefault("resourceGroupName")
-  valid_595106 = validateParameter(valid_595106, JString, required = true,
+  var valid_569335 = path.getOrDefault("resourceGroupName")
+  valid_569335 = validateParameter(valid_569335, JString, required = true,
                                  default = nil)
-  if valid_595106 != nil:
-    section.add "resourceGroupName", valid_595106
-  var valid_595107 = path.getOrDefault("subscriptionId")
-  valid_595107 = validateParameter(valid_595107, JString, required = true,
+  if valid_569335 != nil:
+    section.add "resourceGroupName", valid_569335
+  var valid_569336 = path.getOrDefault("subscriptionId")
+  valid_569336 = validateParameter(valid_569336, JString, required = true,
                                  default = nil)
-  if valid_595107 != nil:
-    section.add "subscriptionId", valid_595107
-  var valid_595108 = path.getOrDefault("accountName")
-  valid_595108 = validateParameter(valid_595108, JString, required = true,
+  if valid_569336 != nil:
+    section.add "subscriptionId", valid_569336
+  var valid_569337 = path.getOrDefault("accountName")
+  valid_569337 = validateParameter(valid_569337, JString, required = true,
                                  default = nil)
-  if valid_595108 != nil:
-    section.add "accountName", valid_595108
+  if valid_569337 != nil:
+    section.add "accountName", valid_569337
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -12036,16 +12036,16 @@ proc validate_DatabaseAccountsListUsages_595104(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595109 = query.getOrDefault("api-version")
-  valid_595109 = validateParameter(valid_595109, JString, required = true,
+  var valid_569338 = query.getOrDefault("api-version")
+  valid_569338 = validateParameter(valid_569338, JString, required = true,
                                  default = nil)
-  if valid_595109 != nil:
-    section.add "api-version", valid_595109
-  var valid_595110 = query.getOrDefault("$filter")
-  valid_595110 = validateParameter(valid_595110, JString, required = false,
+  if valid_569338 != nil:
+    section.add "api-version", valid_569338
+  var valid_569339 = query.getOrDefault("$filter")
+  valid_569339 = validateParameter(valid_569339, JString, required = false,
                                  default = nil)
-  if valid_595110 != nil:
-    section.add "$filter", valid_595110
+  if valid_569339 != nil:
+    section.add "$filter", valid_569339
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12054,20 +12054,20 @@ proc validate_DatabaseAccountsListUsages_595104(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595111: Call_DatabaseAccountsListUsages_595103; path: JsonNode;
+proc call*(call_569340: Call_DatabaseAccountsListUsages_569332; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the usages (most recent data) for the given database account.
   ## 
-  let valid = call_595111.validator(path, query, header, formData, body)
-  let scheme = call_595111.pickScheme
+  let valid = call_569340.validator(path, query, header, formData, body)
+  let scheme = call_569340.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595111.url(scheme.get, call_595111.host, call_595111.base,
-                         call_595111.route, valid.getOrDefault("path"),
+  let url = call_569340.url(scheme.get, call_569340.host, call_569340.base,
+                         call_569340.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595111, url, valid)
+  result = hook(call_569340, url, valid)
 
-proc call*(call_595112: Call_DatabaseAccountsListUsages_595103;
+proc call*(call_569341: Call_DatabaseAccountsListUsages_569332;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string; Filter: string = ""): Recallable =
   ## databaseAccountsListUsages
@@ -12082,20 +12082,20 @@ proc call*(call_595112: Call_DatabaseAccountsListUsages_595103;
   ##              : Cosmos DB database account name.
   ##   Filter: string
   ##         : An OData filter expression that describes a subset of usages to return. The supported parameter is name.value (name of the metric, can have an or of multiple names).
-  var path_595113 = newJObject()
-  var query_595114 = newJObject()
-  add(path_595113, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595114, "api-version", newJString(apiVersion))
-  add(path_595113, "subscriptionId", newJString(subscriptionId))
-  add(path_595113, "accountName", newJString(accountName))
-  add(query_595114, "$filter", newJString(Filter))
-  result = call_595112.call(path_595113, query_595114, nil, nil, nil)
+  var path_569342 = newJObject()
+  var query_569343 = newJObject()
+  add(path_569342, "resourceGroupName", newJString(resourceGroupName))
+  add(query_569343, "api-version", newJString(apiVersion))
+  add(path_569342, "subscriptionId", newJString(subscriptionId))
+  add(path_569342, "accountName", newJString(accountName))
+  add(query_569343, "$filter", newJString(Filter))
+  result = call_569341.call(path_569342, query_569343, nil, nil, nil)
 
-var databaseAccountsListUsages* = Call_DatabaseAccountsListUsages_595103(
+var databaseAccountsListUsages* = Call_DatabaseAccountsListUsages_569332(
     name: "databaseAccountsListUsages", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/usages",
-    validator: validate_DatabaseAccountsListUsages_595104, base: "",
-    url: url_DatabaseAccountsListUsages_595105, schemes: {Scheme.Https})
+    validator: validate_DatabaseAccountsListUsages_569333, base: "",
+    url: url_DatabaseAccountsListUsages_569334, schemes: {Scheme.Https})
 export
   rest
 

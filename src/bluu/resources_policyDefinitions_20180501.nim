@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: PolicyClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "resources-policyDefinitions"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_PolicyDefinitionsListBuiltIn_593630 = ref object of OpenApiRestCall_593408
-proc url_PolicyDefinitionsListBuiltIn_593632(protocol: Scheme; host: string;
+  Call_PolicyDefinitionsListBuiltIn_567863 = ref object of OpenApiRestCall_567641
+proc url_PolicyDefinitionsListBuiltIn_567865(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_PolicyDefinitionsListBuiltIn_593631(path: JsonNode; query: JsonNode;
+proc validate_PolicyDefinitionsListBuiltIn_567864(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation retrieves a list of all the built-in policy definitions.
   ## 
@@ -125,11 +125,11 @@ proc validate_PolicyDefinitionsListBuiltIn_593631(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593791 = query.getOrDefault("api-version")
-  valid_593791 = validateParameter(valid_593791, JString, required = true,
+  var valid_568024 = query.getOrDefault("api-version")
+  valid_568024 = validateParameter(valid_568024, JString, required = true,
                                  default = nil)
-  if valid_593791 != nil:
-    section.add "api-version", valid_593791
+  if valid_568024 != nil:
+    section.add "api-version", valid_568024
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -138,38 +138,38 @@ proc validate_PolicyDefinitionsListBuiltIn_593631(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593814: Call_PolicyDefinitionsListBuiltIn_593630; path: JsonNode;
+proc call*(call_568047: Call_PolicyDefinitionsListBuiltIn_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation retrieves a list of all the built-in policy definitions.
   ## 
-  let valid = call_593814.validator(path, query, header, formData, body)
-  let scheme = call_593814.pickScheme
+  let valid = call_568047.validator(path, query, header, formData, body)
+  let scheme = call_568047.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593814.url(scheme.get, call_593814.host, call_593814.base,
-                         call_593814.route, valid.getOrDefault("path"),
+  let url = call_568047.url(scheme.get, call_568047.host, call_568047.base,
+                         call_568047.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593814, url, valid)
+  result = hook(call_568047, url, valid)
 
-proc call*(call_593885: Call_PolicyDefinitionsListBuiltIn_593630;
+proc call*(call_568118: Call_PolicyDefinitionsListBuiltIn_567863;
           apiVersion: string): Recallable =
   ## policyDefinitionsListBuiltIn
   ## This operation retrieves a list of all the built-in policy definitions.
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
-  var query_593886 = newJObject()
-  add(query_593886, "api-version", newJString(apiVersion))
-  result = call_593885.call(nil, query_593886, nil, nil, nil)
+  var query_568119 = newJObject()
+  add(query_568119, "api-version", newJString(apiVersion))
+  result = call_568118.call(nil, query_568119, nil, nil, nil)
 
-var policyDefinitionsListBuiltIn* = Call_PolicyDefinitionsListBuiltIn_593630(
+var policyDefinitionsListBuiltIn* = Call_PolicyDefinitionsListBuiltIn_567863(
     name: "policyDefinitionsListBuiltIn", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Authorization/policyDefinitions",
-    validator: validate_PolicyDefinitionsListBuiltIn_593631, base: "",
-    url: url_PolicyDefinitionsListBuiltIn_593632, schemes: {Scheme.Https})
+    validator: validate_PolicyDefinitionsListBuiltIn_567864, base: "",
+    url: url_PolicyDefinitionsListBuiltIn_567865, schemes: {Scheme.Https})
 type
-  Call_PolicyDefinitionsGetBuiltIn_593926 = ref object of OpenApiRestCall_593408
-proc url_PolicyDefinitionsGetBuiltIn_593928(protocol: Scheme; host: string;
+  Call_PolicyDefinitionsGetBuiltIn_568159 = ref object of OpenApiRestCall_567641
+proc url_PolicyDefinitionsGetBuiltIn_568161(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -186,7 +186,7 @@ proc url_PolicyDefinitionsGetBuiltIn_593928(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyDefinitionsGetBuiltIn_593927(path: JsonNode; query: JsonNode;
+proc validate_PolicyDefinitionsGetBuiltIn_568160(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation retrieves the built-in policy definition with the given name.
   ## 
@@ -197,11 +197,11 @@ proc validate_PolicyDefinitionsGetBuiltIn_593927(path: JsonNode; query: JsonNode
   ##                       : The name of the built-in policy definition to get.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `policyDefinitionName` field"
-  var valid_593943 = path.getOrDefault("policyDefinitionName")
-  valid_593943 = validateParameter(valid_593943, JString, required = true,
+  var valid_568176 = path.getOrDefault("policyDefinitionName")
+  valid_568176 = validateParameter(valid_568176, JString, required = true,
                                  default = nil)
-  if valid_593943 != nil:
-    section.add "policyDefinitionName", valid_593943
+  if valid_568176 != nil:
+    section.add "policyDefinitionName", valid_568176
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +209,11 @@ proc validate_PolicyDefinitionsGetBuiltIn_593927(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593944 = query.getOrDefault("api-version")
-  valid_593944 = validateParameter(valid_593944, JString, required = true,
+  var valid_568177 = query.getOrDefault("api-version")
+  valid_568177 = validateParameter(valid_568177, JString, required = true,
                                  default = nil)
-  if valid_593944 != nil:
-    section.add "api-version", valid_593944
+  if valid_568177 != nil:
+    section.add "api-version", valid_568177
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -222,20 +222,20 @@ proc validate_PolicyDefinitionsGetBuiltIn_593927(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593945: Call_PolicyDefinitionsGetBuiltIn_593926; path: JsonNode;
+proc call*(call_568178: Call_PolicyDefinitionsGetBuiltIn_568159; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation retrieves the built-in policy definition with the given name.
   ## 
-  let valid = call_593945.validator(path, query, header, formData, body)
-  let scheme = call_593945.pickScheme
+  let valid = call_568178.validator(path, query, header, formData, body)
+  let scheme = call_568178.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593945.url(scheme.get, call_593945.host, call_593945.base,
-                         call_593945.route, valid.getOrDefault("path"),
+  let url = call_568178.url(scheme.get, call_568178.host, call_568178.base,
+                         call_568178.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593945, url, valid)
+  result = hook(call_568178, url, valid)
 
-proc call*(call_593946: Call_PolicyDefinitionsGetBuiltIn_593926;
+proc call*(call_568179: Call_PolicyDefinitionsGetBuiltIn_568159;
           apiVersion: string; policyDefinitionName: string): Recallable =
   ## policyDefinitionsGetBuiltIn
   ## This operation retrieves the built-in policy definition with the given name.
@@ -243,20 +243,20 @@ proc call*(call_593946: Call_PolicyDefinitionsGetBuiltIn_593926;
   ##             : The API version to use for the operation.
   ##   policyDefinitionName: string (required)
   ##                       : The name of the built-in policy definition to get.
-  var path_593947 = newJObject()
-  var query_593948 = newJObject()
-  add(query_593948, "api-version", newJString(apiVersion))
-  add(path_593947, "policyDefinitionName", newJString(policyDefinitionName))
-  result = call_593946.call(path_593947, query_593948, nil, nil, nil)
+  var path_568180 = newJObject()
+  var query_568181 = newJObject()
+  add(query_568181, "api-version", newJString(apiVersion))
+  add(path_568180, "policyDefinitionName", newJString(policyDefinitionName))
+  result = call_568179.call(path_568180, query_568181, nil, nil, nil)
 
-var policyDefinitionsGetBuiltIn* = Call_PolicyDefinitionsGetBuiltIn_593926(
+var policyDefinitionsGetBuiltIn* = Call_PolicyDefinitionsGetBuiltIn_568159(
     name: "policyDefinitionsGetBuiltIn", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}",
-    validator: validate_PolicyDefinitionsGetBuiltIn_593927, base: "",
-    url: url_PolicyDefinitionsGetBuiltIn_593928, schemes: {Scheme.Https})
+    validator: validate_PolicyDefinitionsGetBuiltIn_568160, base: "",
+    url: url_PolicyDefinitionsGetBuiltIn_568161, schemes: {Scheme.Https})
 type
-  Call_PolicyDefinitionsListByManagementGroup_593949 = ref object of OpenApiRestCall_593408
-proc url_PolicyDefinitionsListByManagementGroup_593951(protocol: Scheme;
+  Call_PolicyDefinitionsListByManagementGroup_568182 = ref object of OpenApiRestCall_567641
+proc url_PolicyDefinitionsListByManagementGroup_568184(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -275,7 +275,7 @@ proc url_PolicyDefinitionsListByManagementGroup_593951(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyDefinitionsListByManagementGroup_593950(path: JsonNode;
+proc validate_PolicyDefinitionsListByManagementGroup_568183(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation retrieves a list of all the policy definitions in a given management group.
   ## 
@@ -287,11 +287,11 @@ proc validate_PolicyDefinitionsListByManagementGroup_593950(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `managementGroupId` field"
-  var valid_593952 = path.getOrDefault("managementGroupId")
-  valid_593952 = validateParameter(valid_593952, JString, required = true,
+  var valid_568185 = path.getOrDefault("managementGroupId")
+  valid_568185 = validateParameter(valid_568185, JString, required = true,
                                  default = nil)
-  if valid_593952 != nil:
-    section.add "managementGroupId", valid_593952
+  if valid_568185 != nil:
+    section.add "managementGroupId", valid_568185
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -299,11 +299,11 @@ proc validate_PolicyDefinitionsListByManagementGroup_593950(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593953 = query.getOrDefault("api-version")
-  valid_593953 = validateParameter(valid_593953, JString, required = true,
+  var valid_568186 = query.getOrDefault("api-version")
+  valid_568186 = validateParameter(valid_568186, JString, required = true,
                                  default = nil)
-  if valid_593953 != nil:
-    section.add "api-version", valid_593953
+  if valid_568186 != nil:
+    section.add "api-version", valid_568186
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -312,21 +312,21 @@ proc validate_PolicyDefinitionsListByManagementGroup_593950(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593954: Call_PolicyDefinitionsListByManagementGroup_593949;
+proc call*(call_568187: Call_PolicyDefinitionsListByManagementGroup_568182;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## This operation retrieves a list of all the policy definitions in a given management group.
   ## 
-  let valid = call_593954.validator(path, query, header, formData, body)
-  let scheme = call_593954.pickScheme
+  let valid = call_568187.validator(path, query, header, formData, body)
+  let scheme = call_568187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593954.url(scheme.get, call_593954.host, call_593954.base,
-                         call_593954.route, valid.getOrDefault("path"),
+  let url = call_568187.url(scheme.get, call_568187.host, call_568187.base,
+                         call_568187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593954, url, valid)
+  result = hook(call_568187, url, valid)
 
-proc call*(call_593955: Call_PolicyDefinitionsListByManagementGroup_593949;
+proc call*(call_568188: Call_PolicyDefinitionsListByManagementGroup_568182;
           apiVersion: string; managementGroupId: string): Recallable =
   ## policyDefinitionsListByManagementGroup
   ## This operation retrieves a list of all the policy definitions in a given management group.
@@ -334,21 +334,21 @@ proc call*(call_593955: Call_PolicyDefinitionsListByManagementGroup_593949;
   ##             : The API version to use for the operation.
   ##   managementGroupId: string (required)
   ##                    : The ID of the management group.
-  var path_593956 = newJObject()
-  var query_593957 = newJObject()
-  add(query_593957, "api-version", newJString(apiVersion))
-  add(path_593956, "managementGroupId", newJString(managementGroupId))
-  result = call_593955.call(path_593956, query_593957, nil, nil, nil)
+  var path_568189 = newJObject()
+  var query_568190 = newJObject()
+  add(query_568190, "api-version", newJString(apiVersion))
+  add(path_568189, "managementGroupId", newJString(managementGroupId))
+  result = call_568188.call(path_568189, query_568190, nil, nil, nil)
 
-var policyDefinitionsListByManagementGroup* = Call_PolicyDefinitionsListByManagementGroup_593949(
+var policyDefinitionsListByManagementGroup* = Call_PolicyDefinitionsListByManagementGroup_568182(
     name: "policyDefinitionsListByManagementGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Management/managementgroups/{managementGroupId}/providers/Microsoft.Authorization/policyDefinitions",
-    validator: validate_PolicyDefinitionsListByManagementGroup_593950, base: "",
-    url: url_PolicyDefinitionsListByManagementGroup_593951,
+    validator: validate_PolicyDefinitionsListByManagementGroup_568183, base: "",
+    url: url_PolicyDefinitionsListByManagementGroup_568184,
     schemes: {Scheme.Https})
 type
-  Call_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593968 = ref object of OpenApiRestCall_593408
-proc url_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593970(
+  Call_PolicyDefinitionsCreateOrUpdateAtManagementGroup_568201 = ref object of OpenApiRestCall_567641
+proc url_PolicyDefinitionsCreateOrUpdateAtManagementGroup_568203(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -371,7 +371,7 @@ proc url_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593970(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593969(
+proc validate_PolicyDefinitionsCreateOrUpdateAtManagementGroup_568202(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## This operation creates or updates a policy definition in the given management group with the given name.
@@ -386,16 +386,16 @@ proc validate_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593969(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `managementGroupId` field"
-  var valid_593988 = path.getOrDefault("managementGroupId")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_568221 = path.getOrDefault("managementGroupId")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "managementGroupId", valid_593988
-  var valid_593989 = path.getOrDefault("policyDefinitionName")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_568221 != nil:
+    section.add "managementGroupId", valid_568221
+  var valid_568222 = path.getOrDefault("policyDefinitionName")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "policyDefinitionName", valid_593989
+  if valid_568222 != nil:
+    section.add "policyDefinitionName", valid_568222
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -403,11 +403,11 @@ proc validate_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593969(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593990 = query.getOrDefault("api-version")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568223 = query.getOrDefault("api-version")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "api-version", valid_593990
+  if valid_568223 != nil:
+    section.add "api-version", valid_568223
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -421,21 +421,21 @@ proc validate_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593969(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593992: Call_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593968;
+proc call*(call_568225: Call_PolicyDefinitionsCreateOrUpdateAtManagementGroup_568201;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## This operation creates or updates a policy definition in the given management group with the given name.
   ## 
-  let valid = call_593992.validator(path, query, header, formData, body)
-  let scheme = call_593992.pickScheme
+  let valid = call_568225.validator(path, query, header, formData, body)
+  let scheme = call_568225.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593992.url(scheme.get, call_593992.host, call_593992.base,
-                         call_593992.route, valid.getOrDefault("path"),
+  let url = call_568225.url(scheme.get, call_568225.host, call_568225.base,
+                         call_568225.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593992, url, valid)
+  result = hook(call_568225, url, valid)
 
-proc call*(call_593993: Call_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593968;
+proc call*(call_568226: Call_PolicyDefinitionsCreateOrUpdateAtManagementGroup_568201;
           apiVersion: string; managementGroupId: string; parameters: JsonNode;
           policyDefinitionName: string): Recallable =
   ## policyDefinitionsCreateOrUpdateAtManagementGroup
@@ -448,25 +448,25 @@ proc call*(call_593993: Call_PolicyDefinitionsCreateOrUpdateAtManagementGroup_59
   ##             : The policy definition properties.
   ##   policyDefinitionName: string (required)
   ##                       : The name of the policy definition to create.
-  var path_593994 = newJObject()
-  var query_593995 = newJObject()
-  var body_593996 = newJObject()
-  add(query_593995, "api-version", newJString(apiVersion))
-  add(path_593994, "managementGroupId", newJString(managementGroupId))
+  var path_568227 = newJObject()
+  var query_568228 = newJObject()
+  var body_568229 = newJObject()
+  add(query_568228, "api-version", newJString(apiVersion))
+  add(path_568227, "managementGroupId", newJString(managementGroupId))
   if parameters != nil:
-    body_593996 = parameters
-  add(path_593994, "policyDefinitionName", newJString(policyDefinitionName))
-  result = call_593993.call(path_593994, query_593995, nil, nil, body_593996)
+    body_568229 = parameters
+  add(path_568227, "policyDefinitionName", newJString(policyDefinitionName))
+  result = call_568226.call(path_568227, query_568228, nil, nil, body_568229)
 
-var policyDefinitionsCreateOrUpdateAtManagementGroup* = Call_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593968(
+var policyDefinitionsCreateOrUpdateAtManagementGroup* = Call_PolicyDefinitionsCreateOrUpdateAtManagementGroup_568201(
     name: "policyDefinitionsCreateOrUpdateAtManagementGroup",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/providers/Microsoft.Management/managementgroups/{managementGroupId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}",
-    validator: validate_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593969,
-    base: "", url: url_PolicyDefinitionsCreateOrUpdateAtManagementGroup_593970,
+    validator: validate_PolicyDefinitionsCreateOrUpdateAtManagementGroup_568202,
+    base: "", url: url_PolicyDefinitionsCreateOrUpdateAtManagementGroup_568203,
     schemes: {Scheme.Https})
 type
-  Call_PolicyDefinitionsGetAtManagementGroup_593958 = ref object of OpenApiRestCall_593408
-proc url_PolicyDefinitionsGetAtManagementGroup_593960(protocol: Scheme;
+  Call_PolicyDefinitionsGetAtManagementGroup_568191 = ref object of OpenApiRestCall_567641
+proc url_PolicyDefinitionsGetAtManagementGroup_568193(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -488,7 +488,7 @@ proc url_PolicyDefinitionsGetAtManagementGroup_593960(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyDefinitionsGetAtManagementGroup_593959(path: JsonNode;
+proc validate_PolicyDefinitionsGetAtManagementGroup_568192(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation retrieves the policy definition in the given management group with the given name.
   ## 
@@ -502,16 +502,16 @@ proc validate_PolicyDefinitionsGetAtManagementGroup_593959(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `managementGroupId` field"
-  var valid_593961 = path.getOrDefault("managementGroupId")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = path.getOrDefault("managementGroupId")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "managementGroupId", valid_593961
-  var valid_593962 = path.getOrDefault("policyDefinitionName")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_568194 != nil:
+    section.add "managementGroupId", valid_568194
+  var valid_568195 = path.getOrDefault("policyDefinitionName")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "policyDefinitionName", valid_593962
+  if valid_568195 != nil:
+    section.add "policyDefinitionName", valid_568195
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -519,11 +519,11 @@ proc validate_PolicyDefinitionsGetAtManagementGroup_593959(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593963 = query.getOrDefault("api-version")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = query.getOrDefault("api-version")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "api-version", valid_593963
+  if valid_568196 != nil:
+    section.add "api-version", valid_568196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -532,21 +532,21 @@ proc validate_PolicyDefinitionsGetAtManagementGroup_593959(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593964: Call_PolicyDefinitionsGetAtManagementGroup_593958;
+proc call*(call_568197: Call_PolicyDefinitionsGetAtManagementGroup_568191;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## This operation retrieves the policy definition in the given management group with the given name.
   ## 
-  let valid = call_593964.validator(path, query, header, formData, body)
-  let scheme = call_593964.pickScheme
+  let valid = call_568197.validator(path, query, header, formData, body)
+  let scheme = call_568197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593964.url(scheme.get, call_593964.host, call_593964.base,
-                         call_593964.route, valid.getOrDefault("path"),
+  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
+                         call_568197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593964, url, valid)
+  result = hook(call_568197, url, valid)
 
-proc call*(call_593965: Call_PolicyDefinitionsGetAtManagementGroup_593958;
+proc call*(call_568198: Call_PolicyDefinitionsGetAtManagementGroup_568191;
           apiVersion: string; managementGroupId: string;
           policyDefinitionName: string): Recallable =
   ## policyDefinitionsGetAtManagementGroup
@@ -557,21 +557,21 @@ proc call*(call_593965: Call_PolicyDefinitionsGetAtManagementGroup_593958;
   ##                    : The ID of the management group.
   ##   policyDefinitionName: string (required)
   ##                       : The name of the policy definition to get.
-  var path_593966 = newJObject()
-  var query_593967 = newJObject()
-  add(query_593967, "api-version", newJString(apiVersion))
-  add(path_593966, "managementGroupId", newJString(managementGroupId))
-  add(path_593966, "policyDefinitionName", newJString(policyDefinitionName))
-  result = call_593965.call(path_593966, query_593967, nil, nil, nil)
+  var path_568199 = newJObject()
+  var query_568200 = newJObject()
+  add(query_568200, "api-version", newJString(apiVersion))
+  add(path_568199, "managementGroupId", newJString(managementGroupId))
+  add(path_568199, "policyDefinitionName", newJString(policyDefinitionName))
+  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
 
-var policyDefinitionsGetAtManagementGroup* = Call_PolicyDefinitionsGetAtManagementGroup_593958(
+var policyDefinitionsGetAtManagementGroup* = Call_PolicyDefinitionsGetAtManagementGroup_568191(
     name: "policyDefinitionsGetAtManagementGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Management/managementgroups/{managementGroupId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}",
-    validator: validate_PolicyDefinitionsGetAtManagementGroup_593959, base: "",
-    url: url_PolicyDefinitionsGetAtManagementGroup_593960, schemes: {Scheme.Https})
+    validator: validate_PolicyDefinitionsGetAtManagementGroup_568192, base: "",
+    url: url_PolicyDefinitionsGetAtManagementGroup_568193, schemes: {Scheme.Https})
 type
-  Call_PolicyDefinitionsDeleteAtManagementGroup_593997 = ref object of OpenApiRestCall_593408
-proc url_PolicyDefinitionsDeleteAtManagementGroup_593999(protocol: Scheme;
+  Call_PolicyDefinitionsDeleteAtManagementGroup_568230 = ref object of OpenApiRestCall_567641
+proc url_PolicyDefinitionsDeleteAtManagementGroup_568232(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -593,7 +593,7 @@ proc url_PolicyDefinitionsDeleteAtManagementGroup_593999(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyDefinitionsDeleteAtManagementGroup_593998(path: JsonNode;
+proc validate_PolicyDefinitionsDeleteAtManagementGroup_568231(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation deletes the policy definition in the given management group with the given name.
   ## 
@@ -607,16 +607,16 @@ proc validate_PolicyDefinitionsDeleteAtManagementGroup_593998(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `managementGroupId` field"
-  var valid_594000 = path.getOrDefault("managementGroupId")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_568233 = path.getOrDefault("managementGroupId")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "managementGroupId", valid_594000
-  var valid_594001 = path.getOrDefault("policyDefinitionName")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_568233 != nil:
+    section.add "managementGroupId", valid_568233
+  var valid_568234 = path.getOrDefault("policyDefinitionName")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "policyDefinitionName", valid_594001
+  if valid_568234 != nil:
+    section.add "policyDefinitionName", valid_568234
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -624,11 +624,11 @@ proc validate_PolicyDefinitionsDeleteAtManagementGroup_593998(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594002 = query.getOrDefault("api-version")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_568235 = query.getOrDefault("api-version")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "api-version", valid_594002
+  if valid_568235 != nil:
+    section.add "api-version", valid_568235
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -637,21 +637,21 @@ proc validate_PolicyDefinitionsDeleteAtManagementGroup_593998(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594003: Call_PolicyDefinitionsDeleteAtManagementGroup_593997;
+proc call*(call_568236: Call_PolicyDefinitionsDeleteAtManagementGroup_568230;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## This operation deletes the policy definition in the given management group with the given name.
   ## 
-  let valid = call_594003.validator(path, query, header, formData, body)
-  let scheme = call_594003.pickScheme
+  let valid = call_568236.validator(path, query, header, formData, body)
+  let scheme = call_568236.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594003.url(scheme.get, call_594003.host, call_594003.base,
-                         call_594003.route, valid.getOrDefault("path"),
+  let url = call_568236.url(scheme.get, call_568236.host, call_568236.base,
+                         call_568236.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594003, url, valid)
+  result = hook(call_568236, url, valid)
 
-proc call*(call_594004: Call_PolicyDefinitionsDeleteAtManagementGroup_593997;
+proc call*(call_568237: Call_PolicyDefinitionsDeleteAtManagementGroup_568230;
           apiVersion: string; managementGroupId: string;
           policyDefinitionName: string): Recallable =
   ## policyDefinitionsDeleteAtManagementGroup
@@ -662,22 +662,22 @@ proc call*(call_594004: Call_PolicyDefinitionsDeleteAtManagementGroup_593997;
   ##                    : The ID of the management group.
   ##   policyDefinitionName: string (required)
   ##                       : The name of the policy definition to delete.
-  var path_594005 = newJObject()
-  var query_594006 = newJObject()
-  add(query_594006, "api-version", newJString(apiVersion))
-  add(path_594005, "managementGroupId", newJString(managementGroupId))
-  add(path_594005, "policyDefinitionName", newJString(policyDefinitionName))
-  result = call_594004.call(path_594005, query_594006, nil, nil, nil)
+  var path_568238 = newJObject()
+  var query_568239 = newJObject()
+  add(query_568239, "api-version", newJString(apiVersion))
+  add(path_568238, "managementGroupId", newJString(managementGroupId))
+  add(path_568238, "policyDefinitionName", newJString(policyDefinitionName))
+  result = call_568237.call(path_568238, query_568239, nil, nil, nil)
 
-var policyDefinitionsDeleteAtManagementGroup* = Call_PolicyDefinitionsDeleteAtManagementGroup_593997(
+var policyDefinitionsDeleteAtManagementGroup* = Call_PolicyDefinitionsDeleteAtManagementGroup_568230(
     name: "policyDefinitionsDeleteAtManagementGroup", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/providers/Microsoft.Management/managementgroups/{managementGroupId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}",
-    validator: validate_PolicyDefinitionsDeleteAtManagementGroup_593998, base: "",
-    url: url_PolicyDefinitionsDeleteAtManagementGroup_593999,
+    validator: validate_PolicyDefinitionsDeleteAtManagementGroup_568231, base: "",
+    url: url_PolicyDefinitionsDeleteAtManagementGroup_568232,
     schemes: {Scheme.Https})
 type
-  Call_PolicyDefinitionsList_594007 = ref object of OpenApiRestCall_593408
-proc url_PolicyDefinitionsList_594009(protocol: Scheme; host: string; base: string;
+  Call_PolicyDefinitionsList_568240 = ref object of OpenApiRestCall_567641
+proc url_PolicyDefinitionsList_568242(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -694,7 +694,7 @@ proc url_PolicyDefinitionsList_594009(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyDefinitionsList_594008(path: JsonNode; query: JsonNode;
+proc validate_PolicyDefinitionsList_568241(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation retrieves a list of all the policy definitions in a given subscription.
   ## 
@@ -706,11 +706,11 @@ proc validate_PolicyDefinitionsList_594008(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594010 = path.getOrDefault("subscriptionId")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  var valid_568243 = path.getOrDefault("subscriptionId")
+  valid_568243 = validateParameter(valid_568243, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "subscriptionId", valid_594010
+  if valid_568243 != nil:
+    section.add "subscriptionId", valid_568243
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -718,11 +718,11 @@ proc validate_PolicyDefinitionsList_594008(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594011 = query.getOrDefault("api-version")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_568244 = query.getOrDefault("api-version")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "api-version", valid_594011
+  if valid_568244 != nil:
+    section.add "api-version", valid_568244
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -731,20 +731,20 @@ proc validate_PolicyDefinitionsList_594008(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594012: Call_PolicyDefinitionsList_594007; path: JsonNode;
+proc call*(call_568245: Call_PolicyDefinitionsList_568240; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation retrieves a list of all the policy definitions in a given subscription.
   ## 
-  let valid = call_594012.validator(path, query, header, formData, body)
-  let scheme = call_594012.pickScheme
+  let valid = call_568245.validator(path, query, header, formData, body)
+  let scheme = call_568245.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594012.url(scheme.get, call_594012.host, call_594012.base,
-                         call_594012.route, valid.getOrDefault("path"),
+  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
+                         call_568245.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594012, url, valid)
+  result = hook(call_568245, url, valid)
 
-proc call*(call_594013: Call_PolicyDefinitionsList_594007; apiVersion: string;
+proc call*(call_568246: Call_PolicyDefinitionsList_568240; apiVersion: string;
           subscriptionId: string): Recallable =
   ## policyDefinitionsList
   ## This operation retrieves a list of all the policy definitions in a given subscription.
@@ -752,20 +752,20 @@ proc call*(call_594013: Call_PolicyDefinitionsList_594007; apiVersion: string;
   ##             : The API version to use for the operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_594014 = newJObject()
-  var query_594015 = newJObject()
-  add(query_594015, "api-version", newJString(apiVersion))
-  add(path_594014, "subscriptionId", newJString(subscriptionId))
-  result = call_594013.call(path_594014, query_594015, nil, nil, nil)
+  var path_568247 = newJObject()
+  var query_568248 = newJObject()
+  add(query_568248, "api-version", newJString(apiVersion))
+  add(path_568247, "subscriptionId", newJString(subscriptionId))
+  result = call_568246.call(path_568247, query_568248, nil, nil, nil)
 
-var policyDefinitionsList* = Call_PolicyDefinitionsList_594007(
+var policyDefinitionsList* = Call_PolicyDefinitionsList_568240(
     name: "policyDefinitionsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions",
-    validator: validate_PolicyDefinitionsList_594008, base: "",
-    url: url_PolicyDefinitionsList_594009, schemes: {Scheme.Https})
+    validator: validate_PolicyDefinitionsList_568241, base: "",
+    url: url_PolicyDefinitionsList_568242, schemes: {Scheme.Https})
 type
-  Call_PolicyDefinitionsCreateOrUpdate_594026 = ref object of OpenApiRestCall_593408
-proc url_PolicyDefinitionsCreateOrUpdate_594028(protocol: Scheme; host: string;
+  Call_PolicyDefinitionsCreateOrUpdate_568259 = ref object of OpenApiRestCall_567641
+proc url_PolicyDefinitionsCreateOrUpdate_568261(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -785,7 +785,7 @@ proc url_PolicyDefinitionsCreateOrUpdate_594028(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyDefinitionsCreateOrUpdate_594027(path: JsonNode;
+proc validate_PolicyDefinitionsCreateOrUpdate_568260(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation creates or updates a policy definition in the given subscription with the given name.
   ## 
@@ -799,16 +799,16 @@ proc validate_PolicyDefinitionsCreateOrUpdate_594027(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594029 = path.getOrDefault("subscriptionId")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_568262 = path.getOrDefault("subscriptionId")
+  valid_568262 = validateParameter(valid_568262, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "subscriptionId", valid_594029
-  var valid_594030 = path.getOrDefault("policyDefinitionName")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  if valid_568262 != nil:
+    section.add "subscriptionId", valid_568262
+  var valid_568263 = path.getOrDefault("policyDefinitionName")
+  valid_568263 = validateParameter(valid_568263, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "policyDefinitionName", valid_594030
+  if valid_568263 != nil:
+    section.add "policyDefinitionName", valid_568263
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -816,11 +816,11 @@ proc validate_PolicyDefinitionsCreateOrUpdate_594027(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594031 = query.getOrDefault("api-version")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  var valid_568264 = query.getOrDefault("api-version")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "api-version", valid_594031
+  if valid_568264 != nil:
+    section.add "api-version", valid_568264
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -834,21 +834,21 @@ proc validate_PolicyDefinitionsCreateOrUpdate_594027(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594033: Call_PolicyDefinitionsCreateOrUpdate_594026;
+proc call*(call_568266: Call_PolicyDefinitionsCreateOrUpdate_568259;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## This operation creates or updates a policy definition in the given subscription with the given name.
   ## 
-  let valid = call_594033.validator(path, query, header, formData, body)
-  let scheme = call_594033.pickScheme
+  let valid = call_568266.validator(path, query, header, formData, body)
+  let scheme = call_568266.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594033.url(scheme.get, call_594033.host, call_594033.base,
-                         call_594033.route, valid.getOrDefault("path"),
+  let url = call_568266.url(scheme.get, call_568266.host, call_568266.base,
+                         call_568266.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594033, url, valid)
+  result = hook(call_568266, url, valid)
 
-proc call*(call_594034: Call_PolicyDefinitionsCreateOrUpdate_594026;
+proc call*(call_568267: Call_PolicyDefinitionsCreateOrUpdate_568259;
           apiVersion: string; subscriptionId: string; parameters: JsonNode;
           policyDefinitionName: string): Recallable =
   ## policyDefinitionsCreateOrUpdate
@@ -861,24 +861,24 @@ proc call*(call_594034: Call_PolicyDefinitionsCreateOrUpdate_594026;
   ##             : The policy definition properties.
   ##   policyDefinitionName: string (required)
   ##                       : The name of the policy definition to create.
-  var path_594035 = newJObject()
-  var query_594036 = newJObject()
-  var body_594037 = newJObject()
-  add(query_594036, "api-version", newJString(apiVersion))
-  add(path_594035, "subscriptionId", newJString(subscriptionId))
+  var path_568268 = newJObject()
+  var query_568269 = newJObject()
+  var body_568270 = newJObject()
+  add(query_568269, "api-version", newJString(apiVersion))
+  add(path_568268, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594037 = parameters
-  add(path_594035, "policyDefinitionName", newJString(policyDefinitionName))
-  result = call_594034.call(path_594035, query_594036, nil, nil, body_594037)
+    body_568270 = parameters
+  add(path_568268, "policyDefinitionName", newJString(policyDefinitionName))
+  result = call_568267.call(path_568268, query_568269, nil, nil, body_568270)
 
-var policyDefinitionsCreateOrUpdate* = Call_PolicyDefinitionsCreateOrUpdate_594026(
+var policyDefinitionsCreateOrUpdate* = Call_PolicyDefinitionsCreateOrUpdate_568259(
     name: "policyDefinitionsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}",
-    validator: validate_PolicyDefinitionsCreateOrUpdate_594027, base: "",
-    url: url_PolicyDefinitionsCreateOrUpdate_594028, schemes: {Scheme.Https})
+    validator: validate_PolicyDefinitionsCreateOrUpdate_568260, base: "",
+    url: url_PolicyDefinitionsCreateOrUpdate_568261, schemes: {Scheme.Https})
 type
-  Call_PolicyDefinitionsGet_594016 = ref object of OpenApiRestCall_593408
-proc url_PolicyDefinitionsGet_594018(protocol: Scheme; host: string; base: string;
+  Call_PolicyDefinitionsGet_568249 = ref object of OpenApiRestCall_567641
+proc url_PolicyDefinitionsGet_568251(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -898,7 +898,7 @@ proc url_PolicyDefinitionsGet_594018(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyDefinitionsGet_594017(path: JsonNode; query: JsonNode;
+proc validate_PolicyDefinitionsGet_568250(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation retrieves the policy definition in the given subscription with the given name.
   ## 
@@ -912,16 +912,16 @@ proc validate_PolicyDefinitionsGet_594017(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594019 = path.getOrDefault("subscriptionId")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_568252 = path.getOrDefault("subscriptionId")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "subscriptionId", valid_594019
-  var valid_594020 = path.getOrDefault("policyDefinitionName")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  if valid_568252 != nil:
+    section.add "subscriptionId", valid_568252
+  var valid_568253 = path.getOrDefault("policyDefinitionName")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "policyDefinitionName", valid_594020
+  if valid_568253 != nil:
+    section.add "policyDefinitionName", valid_568253
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -929,11 +929,11 @@ proc validate_PolicyDefinitionsGet_594017(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594021 = query.getOrDefault("api-version")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  var valid_568254 = query.getOrDefault("api-version")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "api-version", valid_594021
+  if valid_568254 != nil:
+    section.add "api-version", valid_568254
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -942,20 +942,20 @@ proc validate_PolicyDefinitionsGet_594017(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594022: Call_PolicyDefinitionsGet_594016; path: JsonNode;
+proc call*(call_568255: Call_PolicyDefinitionsGet_568249; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation retrieves the policy definition in the given subscription with the given name.
   ## 
-  let valid = call_594022.validator(path, query, header, formData, body)
-  let scheme = call_594022.pickScheme
+  let valid = call_568255.validator(path, query, header, formData, body)
+  let scheme = call_568255.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594022.url(scheme.get, call_594022.host, call_594022.base,
-                         call_594022.route, valid.getOrDefault("path"),
+  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
+                         call_568255.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594022, url, valid)
+  result = hook(call_568255, url, valid)
 
-proc call*(call_594023: Call_PolicyDefinitionsGet_594016; apiVersion: string;
+proc call*(call_568256: Call_PolicyDefinitionsGet_568249; apiVersion: string;
           subscriptionId: string; policyDefinitionName: string): Recallable =
   ## policyDefinitionsGet
   ## This operation retrieves the policy definition in the given subscription with the given name.
@@ -965,21 +965,21 @@ proc call*(call_594023: Call_PolicyDefinitionsGet_594016; apiVersion: string;
   ##                 : The ID of the target subscription.
   ##   policyDefinitionName: string (required)
   ##                       : The name of the policy definition to get.
-  var path_594024 = newJObject()
-  var query_594025 = newJObject()
-  add(query_594025, "api-version", newJString(apiVersion))
-  add(path_594024, "subscriptionId", newJString(subscriptionId))
-  add(path_594024, "policyDefinitionName", newJString(policyDefinitionName))
-  result = call_594023.call(path_594024, query_594025, nil, nil, nil)
+  var path_568257 = newJObject()
+  var query_568258 = newJObject()
+  add(query_568258, "api-version", newJString(apiVersion))
+  add(path_568257, "subscriptionId", newJString(subscriptionId))
+  add(path_568257, "policyDefinitionName", newJString(policyDefinitionName))
+  result = call_568256.call(path_568257, query_568258, nil, nil, nil)
 
-var policyDefinitionsGet* = Call_PolicyDefinitionsGet_594016(
+var policyDefinitionsGet* = Call_PolicyDefinitionsGet_568249(
     name: "policyDefinitionsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}",
-    validator: validate_PolicyDefinitionsGet_594017, base: "",
-    url: url_PolicyDefinitionsGet_594018, schemes: {Scheme.Https})
+    validator: validate_PolicyDefinitionsGet_568250, base: "",
+    url: url_PolicyDefinitionsGet_568251, schemes: {Scheme.Https})
 type
-  Call_PolicyDefinitionsDelete_594038 = ref object of OpenApiRestCall_593408
-proc url_PolicyDefinitionsDelete_594040(protocol: Scheme; host: string; base: string;
+  Call_PolicyDefinitionsDelete_568271 = ref object of OpenApiRestCall_567641
+proc url_PolicyDefinitionsDelete_568273(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1000,7 +1000,7 @@ proc url_PolicyDefinitionsDelete_594040(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyDefinitionsDelete_594039(path: JsonNode; query: JsonNode;
+proc validate_PolicyDefinitionsDelete_568272(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation deletes the policy definition in the given subscription with the given name.
   ## 
@@ -1014,16 +1014,16 @@ proc validate_PolicyDefinitionsDelete_594039(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594041 = path.getOrDefault("subscriptionId")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_568274 = path.getOrDefault("subscriptionId")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "subscriptionId", valid_594041
-  var valid_594042 = path.getOrDefault("policyDefinitionName")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  if valid_568274 != nil:
+    section.add "subscriptionId", valid_568274
+  var valid_568275 = path.getOrDefault("policyDefinitionName")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "policyDefinitionName", valid_594042
+  if valid_568275 != nil:
+    section.add "policyDefinitionName", valid_568275
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1031,11 +1031,11 @@ proc validate_PolicyDefinitionsDelete_594039(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594043 = query.getOrDefault("api-version")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  var valid_568276 = query.getOrDefault("api-version")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "api-version", valid_594043
+  if valid_568276 != nil:
+    section.add "api-version", valid_568276
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1044,20 +1044,20 @@ proc validate_PolicyDefinitionsDelete_594039(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594044: Call_PolicyDefinitionsDelete_594038; path: JsonNode;
+proc call*(call_568277: Call_PolicyDefinitionsDelete_568271; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation deletes the policy definition in the given subscription with the given name.
   ## 
-  let valid = call_594044.validator(path, query, header, formData, body)
-  let scheme = call_594044.pickScheme
+  let valid = call_568277.validator(path, query, header, formData, body)
+  let scheme = call_568277.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594044.url(scheme.get, call_594044.host, call_594044.base,
-                         call_594044.route, valid.getOrDefault("path"),
+  let url = call_568277.url(scheme.get, call_568277.host, call_568277.base,
+                         call_568277.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594044, url, valid)
+  result = hook(call_568277, url, valid)
 
-proc call*(call_594045: Call_PolicyDefinitionsDelete_594038; apiVersion: string;
+proc call*(call_568278: Call_PolicyDefinitionsDelete_568271; apiVersion: string;
           subscriptionId: string; policyDefinitionName: string): Recallable =
   ## policyDefinitionsDelete
   ## This operation deletes the policy definition in the given subscription with the given name.
@@ -1067,18 +1067,18 @@ proc call*(call_594045: Call_PolicyDefinitionsDelete_594038; apiVersion: string;
   ##                 : The ID of the target subscription.
   ##   policyDefinitionName: string (required)
   ##                       : The name of the policy definition to delete.
-  var path_594046 = newJObject()
-  var query_594047 = newJObject()
-  add(query_594047, "api-version", newJString(apiVersion))
-  add(path_594046, "subscriptionId", newJString(subscriptionId))
-  add(path_594046, "policyDefinitionName", newJString(policyDefinitionName))
-  result = call_594045.call(path_594046, query_594047, nil, nil, nil)
+  var path_568279 = newJObject()
+  var query_568280 = newJObject()
+  add(query_568280, "api-version", newJString(apiVersion))
+  add(path_568279, "subscriptionId", newJString(subscriptionId))
+  add(path_568279, "policyDefinitionName", newJString(policyDefinitionName))
+  result = call_568278.call(path_568279, query_568280, nil, nil, nil)
 
-var policyDefinitionsDelete* = Call_PolicyDefinitionsDelete_594038(
+var policyDefinitionsDelete* = Call_PolicyDefinitionsDelete_568271(
     name: "policyDefinitionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}",
-    validator: validate_PolicyDefinitionsDelete_594039, base: "",
-    url: url_PolicyDefinitionsDelete_594040, schemes: {Scheme.Https})
+    validator: validate_PolicyDefinitionsDelete_568272, base: "",
+    url: url_PolicyDefinitionsDelete_568273, schemes: {Scheme.Https})
 export
   rest
 

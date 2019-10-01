@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "security-advancedThreatProtectionSettings"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AdvancedThreatProtectionCreate_593956 = ref object of OpenApiRestCall_593408
-proc url_AdvancedThreatProtectionCreate_593958(protocol: Scheme; host: string;
+  Call_AdvancedThreatProtectionCreate_568189 = ref object of OpenApiRestCall_567641
+proc url_AdvancedThreatProtectionCreate_568191(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_AdvancedThreatProtectionCreate_593958(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AdvancedThreatProtectionCreate_593957(path: JsonNode;
+proc validate_AdvancedThreatProtectionCreate_568190(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the Advanced Threat Protection settings on a specified resource.
   ## 
@@ -135,16 +135,16 @@ proc validate_AdvancedThreatProtectionCreate_593957(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `settingName` field"
-  var valid_593959 = path.getOrDefault("settingName")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  var valid_568192 = path.getOrDefault("settingName")
+  valid_568192 = validateParameter(valid_568192, JString, required = true,
                                  default = newJString("current"))
-  if valid_593959 != nil:
-    section.add "settingName", valid_593959
-  var valid_593960 = path.getOrDefault("resourceId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  if valid_568192 != nil:
+    section.add "settingName", valid_568192
+  var valid_568193 = path.getOrDefault("resourceId")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "resourceId", valid_593960
+  if valid_568193 != nil:
+    section.add "resourceId", valid_568193
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -152,11 +152,11 @@ proc validate_AdvancedThreatProtectionCreate_593957(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593961 = query.getOrDefault("api-version")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = query.getOrDefault("api-version")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "api-version", valid_593961
+  if valid_568194 != nil:
+    section.add "api-version", valid_568194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -170,20 +170,20 @@ proc validate_AdvancedThreatProtectionCreate_593957(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593963: Call_AdvancedThreatProtectionCreate_593956; path: JsonNode;
+proc call*(call_568196: Call_AdvancedThreatProtectionCreate_568189; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the Advanced Threat Protection settings on a specified resource.
   ## 
-  let valid = call_593963.validator(path, query, header, formData, body)
-  let scheme = call_593963.pickScheme
+  let valid = call_568196.validator(path, query, header, formData, body)
+  let scheme = call_568196.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593963.url(scheme.get, call_593963.host, call_593963.base,
-                         call_593963.route, valid.getOrDefault("path"),
+  let url = call_568196.url(scheme.get, call_568196.host, call_568196.base,
+                         call_568196.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593963, url, valid)
+  result = hook(call_568196, url, valid)
 
-proc call*(call_593964: Call_AdvancedThreatProtectionCreate_593956;
+proc call*(call_568197: Call_AdvancedThreatProtectionCreate_568189;
           apiVersion: string; resourceId: string;
           advancedThreatProtectionSetting: JsonNode;
           settingName: string = "current"): Recallable =
@@ -197,24 +197,24 @@ proc call*(call_593964: Call_AdvancedThreatProtectionCreate_593956;
   ##             : The identifier of the resource.
   ##   advancedThreatProtectionSetting: JObject (required)
   ##                                  : Advanced Threat Protection Settings
-  var path_593965 = newJObject()
-  var query_593966 = newJObject()
-  var body_593967 = newJObject()
-  add(query_593966, "api-version", newJString(apiVersion))
-  add(path_593965, "settingName", newJString(settingName))
-  add(path_593965, "resourceId", newJString(resourceId))
+  var path_568198 = newJObject()
+  var query_568199 = newJObject()
+  var body_568200 = newJObject()
+  add(query_568199, "api-version", newJString(apiVersion))
+  add(path_568198, "settingName", newJString(settingName))
+  add(path_568198, "resourceId", newJString(resourceId))
   if advancedThreatProtectionSetting != nil:
-    body_593967 = advancedThreatProtectionSetting
-  result = call_593964.call(path_593965, query_593966, nil, nil, body_593967)
+    body_568200 = advancedThreatProtectionSetting
+  result = call_568197.call(path_568198, query_568199, nil, nil, body_568200)
 
-var advancedThreatProtectionCreate* = Call_AdvancedThreatProtectionCreate_593956(
+var advancedThreatProtectionCreate* = Call_AdvancedThreatProtectionCreate_568189(
     name: "advancedThreatProtectionCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.Security/advancedThreatProtectionSettings/{settingName}",
-    validator: validate_AdvancedThreatProtectionCreate_593957, base: "",
-    url: url_AdvancedThreatProtectionCreate_593958, schemes: {Scheme.Https})
+    validator: validate_AdvancedThreatProtectionCreate_568190, base: "",
+    url: url_AdvancedThreatProtectionCreate_568191, schemes: {Scheme.Https})
 type
-  Call_AdvancedThreatProtectionGet_593630 = ref object of OpenApiRestCall_593408
-proc url_AdvancedThreatProtectionGet_593632(protocol: Scheme; host: string;
+  Call_AdvancedThreatProtectionGet_567863 = ref object of OpenApiRestCall_567641
+proc url_AdvancedThreatProtectionGet_567865(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -231,7 +231,7 @@ proc url_AdvancedThreatProtectionGet_593632(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AdvancedThreatProtectionGet_593631(path: JsonNode; query: JsonNode;
+proc validate_AdvancedThreatProtectionGet_567864(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Advanced Threat Protection settings for the specified resource.
   ## 
@@ -245,16 +245,16 @@ proc validate_AdvancedThreatProtectionGet_593631(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `settingName` field"
-  var valid_593818 = path.getOrDefault("settingName")
-  valid_593818 = validateParameter(valid_593818, JString, required = true,
+  var valid_568051 = path.getOrDefault("settingName")
+  valid_568051 = validateParameter(valid_568051, JString, required = true,
                                  default = newJString("current"))
-  if valid_593818 != nil:
-    section.add "settingName", valid_593818
-  var valid_593819 = path.getOrDefault("resourceId")
-  valid_593819 = validateParameter(valid_593819, JString, required = true,
+  if valid_568051 != nil:
+    section.add "settingName", valid_568051
+  var valid_568052 = path.getOrDefault("resourceId")
+  valid_568052 = validateParameter(valid_568052, JString, required = true,
                                  default = nil)
-  if valid_593819 != nil:
-    section.add "resourceId", valid_593819
+  if valid_568052 != nil:
+    section.add "resourceId", valid_568052
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -262,11 +262,11 @@ proc validate_AdvancedThreatProtectionGet_593631(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593820 = query.getOrDefault("api-version")
-  valid_593820 = validateParameter(valid_593820, JString, required = true,
+  var valid_568053 = query.getOrDefault("api-version")
+  valid_568053 = validateParameter(valid_568053, JString, required = true,
                                  default = nil)
-  if valid_593820 != nil:
-    section.add "api-version", valid_593820
+  if valid_568053 != nil:
+    section.add "api-version", valid_568053
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -275,20 +275,20 @@ proc validate_AdvancedThreatProtectionGet_593631(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593843: Call_AdvancedThreatProtectionGet_593630; path: JsonNode;
+proc call*(call_568076: Call_AdvancedThreatProtectionGet_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Advanced Threat Protection settings for the specified resource.
   ## 
-  let valid = call_593843.validator(path, query, header, formData, body)
-  let scheme = call_593843.pickScheme
+  let valid = call_568076.validator(path, query, header, formData, body)
+  let scheme = call_568076.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593843.url(scheme.get, call_593843.host, call_593843.base,
-                         call_593843.route, valid.getOrDefault("path"),
+  let url = call_568076.url(scheme.get, call_568076.host, call_568076.base,
+                         call_568076.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593843, url, valid)
+  result = hook(call_568076, url, valid)
 
-proc call*(call_593914: Call_AdvancedThreatProtectionGet_593630;
+proc call*(call_568147: Call_AdvancedThreatProtectionGet_567863;
           apiVersion: string; resourceId: string; settingName: string = "current"): Recallable =
   ## advancedThreatProtectionGet
   ## Gets the Advanced Threat Protection settings for the specified resource.
@@ -298,18 +298,18 @@ proc call*(call_593914: Call_AdvancedThreatProtectionGet_593630;
   ##              : Advanced Threat Protection setting name.
   ##   resourceId: string (required)
   ##             : The identifier of the resource.
-  var path_593915 = newJObject()
-  var query_593917 = newJObject()
-  add(query_593917, "api-version", newJString(apiVersion))
-  add(path_593915, "settingName", newJString(settingName))
-  add(path_593915, "resourceId", newJString(resourceId))
-  result = call_593914.call(path_593915, query_593917, nil, nil, nil)
+  var path_568148 = newJObject()
+  var query_568150 = newJObject()
+  add(query_568150, "api-version", newJString(apiVersion))
+  add(path_568148, "settingName", newJString(settingName))
+  add(path_568148, "resourceId", newJString(resourceId))
+  result = call_568147.call(path_568148, query_568150, nil, nil, nil)
 
-var advancedThreatProtectionGet* = Call_AdvancedThreatProtectionGet_593630(
+var advancedThreatProtectionGet* = Call_AdvancedThreatProtectionGet_567863(
     name: "advancedThreatProtectionGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.Security/advancedThreatProtectionSettings/{settingName}",
-    validator: validate_AdvancedThreatProtectionGet_593631, base: "",
-    url: url_AdvancedThreatProtectionGet_593632, schemes: {Scheme.Https})
+    validator: validate_AdvancedThreatProtectionGet_567864, base: "",
+    url: url_AdvancedThreatProtectionGet_567865, schemes: {Scheme.Https})
 export
   rest
 

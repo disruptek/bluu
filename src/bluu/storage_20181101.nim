@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: StorageManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593438 = ref object of OpenApiRestCall
+  OpenApiRestCall_567667 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593438](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567667](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593438): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567667): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "storage"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593660 = ref object of OpenApiRestCall_593438
-proc url_OperationsList_593662(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567889 = ref object of OpenApiRestCall_567667
+proc url_OperationsList_567891(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567890(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Storage Rest API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568037 = query.getOrDefault("api-version")
+  valid_568037 = validateParameter(valid_568037, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_568037 != nil:
+    section.add "api-version", valid_568037
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593835: Call_OperationsList_593660; path: JsonNode; query: JsonNode;
+proc call*(call_568064: Call_OperationsList_567889; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Storage Rest API operations.
   ## 
-  let valid = call_593835.validator(path, query, header, formData, body)
-  let scheme = call_593835.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593835.url(scheme.get, call_593835.host, call_593835.base,
-                         call_593835.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593835, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593906: Call_OperationsList_593660; apiVersion: string): Recallable =
+proc call*(call_568135: Call_OperationsList_567889; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Storage Rest API operations.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  var query_593907 = newJObject()
-  add(query_593907, "api-version", newJString(apiVersion))
-  result = call_593906.call(nil, query_593907, nil, nil, nil)
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  result = call_568135.call(nil, query_568136, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593660(name: "operationsList",
+var operationsList* = Call_OperationsList_567889(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Storage/operations",
-    validator: validate_OperationsList_593661, base: "", url: url_OperationsList_593662,
+    validator: validate_OperationsList_567890, base: "", url: url_OperationsList_567891,
     schemes: {Scheme.Https})
 type
-  Call_StorageAccountsCheckNameAvailability_593947 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsCheckNameAvailability_593949(protocol: Scheme;
+  Call_StorageAccountsCheckNameAvailability_568176 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsCheckNameAvailability_568178(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +185,7 @@ proc url_StorageAccountsCheckNameAvailability_593949(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsCheckNameAvailability_593948(path: JsonNode;
+proc validate_StorageAccountsCheckNameAvailability_568177(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks that the storage account name is valid and is not already in use.
   ## 
@@ -197,11 +197,11 @@ proc validate_StorageAccountsCheckNameAvailability_593948(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593990 = path.getOrDefault("subscriptionId")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568219 = path.getOrDefault("subscriptionId")
+  valid_568219 = validateParameter(valid_568219, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "subscriptionId", valid_593990
+  if valid_568219 != nil:
+    section.add "subscriptionId", valid_568219
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +209,11 @@ proc validate_StorageAccountsCheckNameAvailability_593948(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593991 = query.getOrDefault("api-version")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_568220 = query.getOrDefault("api-version")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "api-version", valid_593991
+  if valid_568220 != nil:
+    section.add "api-version", valid_568220
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -227,21 +227,21 @@ proc validate_StorageAccountsCheckNameAvailability_593948(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593993: Call_StorageAccountsCheckNameAvailability_593947;
+proc call*(call_568222: Call_StorageAccountsCheckNameAvailability_568176;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Checks that the storage account name is valid and is not already in use.
   ## 
-  let valid = call_593993.validator(path, query, header, formData, body)
-  let scheme = call_593993.pickScheme
+  let valid = call_568222.validator(path, query, header, formData, body)
+  let scheme = call_568222.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593993.url(scheme.get, call_593993.host, call_593993.base,
-                         call_593993.route, valid.getOrDefault("path"),
+  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
+                         call_568222.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593993, url, valid)
+  result = hook(call_568222, url, valid)
 
-proc call*(call_593994: Call_StorageAccountsCheckNameAvailability_593947;
+proc call*(call_568223: Call_StorageAccountsCheckNameAvailability_568176;
           apiVersion: string; accountName: JsonNode; subscriptionId: string): Recallable =
   ## storageAccountsCheckNameAvailability
   ## Checks that the storage account name is valid and is not already in use.
@@ -251,23 +251,23 @@ proc call*(call_593994: Call_StorageAccountsCheckNameAvailability_593947;
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_593995 = newJObject()
-  var query_593996 = newJObject()
-  var body_593997 = newJObject()
-  add(query_593996, "api-version", newJString(apiVersion))
+  var path_568224 = newJObject()
+  var query_568225 = newJObject()
+  var body_568226 = newJObject()
+  add(query_568225, "api-version", newJString(apiVersion))
   if accountName != nil:
-    body_593997 = accountName
-  add(path_593995, "subscriptionId", newJString(subscriptionId))
-  result = call_593994.call(path_593995, query_593996, nil, nil, body_593997)
+    body_568226 = accountName
+  add(path_568224, "subscriptionId", newJString(subscriptionId))
+  result = call_568223.call(path_568224, query_568225, nil, nil, body_568226)
 
-var storageAccountsCheckNameAvailability* = Call_StorageAccountsCheckNameAvailability_593947(
+var storageAccountsCheckNameAvailability* = Call_StorageAccountsCheckNameAvailability_568176(
     name: "storageAccountsCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Storage/checkNameAvailability",
-    validator: validate_StorageAccountsCheckNameAvailability_593948, base: "",
-    url: url_StorageAccountsCheckNameAvailability_593949, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsCheckNameAvailability_568177, base: "",
+    url: url_StorageAccountsCheckNameAvailability_568178, schemes: {Scheme.Https})
 type
-  Call_UsagesListByLocation_593998 = ref object of OpenApiRestCall_593438
-proc url_UsagesListByLocation_594000(protocol: Scheme; host: string; base: string;
+  Call_UsagesListByLocation_568227 = ref object of OpenApiRestCall_567667
+proc url_UsagesListByLocation_568229(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -286,7 +286,7 @@ proc url_UsagesListByLocation_594000(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsagesListByLocation_593999(path: JsonNode; query: JsonNode;
+proc validate_UsagesListByLocation_568228(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the current usage count and the limit for the resources of the location under the subscription.
   ## 
@@ -300,16 +300,16 @@ proc validate_UsagesListByLocation_593999(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594001 = path.getOrDefault("subscriptionId")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568230 = path.getOrDefault("subscriptionId")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "subscriptionId", valid_594001
-  var valid_594002 = path.getOrDefault("location")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_568230 != nil:
+    section.add "subscriptionId", valid_568230
+  var valid_568231 = path.getOrDefault("location")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "location", valid_594002
+  if valid_568231 != nil:
+    section.add "location", valid_568231
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -317,11 +317,11 @@ proc validate_UsagesListByLocation_593999(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594003 = query.getOrDefault("api-version")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  var valid_568232 = query.getOrDefault("api-version")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "api-version", valid_594003
+  if valid_568232 != nil:
+    section.add "api-version", valid_568232
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -330,20 +330,20 @@ proc validate_UsagesListByLocation_593999(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594004: Call_UsagesListByLocation_593998; path: JsonNode;
+proc call*(call_568233: Call_UsagesListByLocation_568227; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the current usage count and the limit for the resources of the location under the subscription.
   ## 
-  let valid = call_594004.validator(path, query, header, formData, body)
-  let scheme = call_594004.pickScheme
+  let valid = call_568233.validator(path, query, header, formData, body)
+  let scheme = call_568233.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594004.url(scheme.get, call_594004.host, call_594004.base,
-                         call_594004.route, valid.getOrDefault("path"),
+  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
+                         call_568233.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594004, url, valid)
+  result = hook(call_568233, url, valid)
 
-proc call*(call_594005: Call_UsagesListByLocation_593998; apiVersion: string;
+proc call*(call_568234: Call_UsagesListByLocation_568227; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## usagesListByLocation
   ## Gets the current usage count and the limit for the resources of the location under the subscription.
@@ -353,21 +353,21 @@ proc call*(call_594005: Call_UsagesListByLocation_593998; apiVersion: string;
   ##                 : The ID of the target subscription.
   ##   location: string (required)
   ##           : The location of the Azure Storage resource.
-  var path_594006 = newJObject()
-  var query_594007 = newJObject()
-  add(query_594007, "api-version", newJString(apiVersion))
-  add(path_594006, "subscriptionId", newJString(subscriptionId))
-  add(path_594006, "location", newJString(location))
-  result = call_594005.call(path_594006, query_594007, nil, nil, nil)
+  var path_568235 = newJObject()
+  var query_568236 = newJObject()
+  add(query_568236, "api-version", newJString(apiVersion))
+  add(path_568235, "subscriptionId", newJString(subscriptionId))
+  add(path_568235, "location", newJString(location))
+  result = call_568234.call(path_568235, query_568236, nil, nil, nil)
 
-var usagesListByLocation* = Call_UsagesListByLocation_593998(
+var usagesListByLocation* = Call_UsagesListByLocation_568227(
     name: "usagesListByLocation", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Storage/locations/{location}/usages",
-    validator: validate_UsagesListByLocation_593999, base: "",
-    url: url_UsagesListByLocation_594000, schemes: {Scheme.Https})
+    validator: validate_UsagesListByLocation_568228, base: "",
+    url: url_UsagesListByLocation_568229, schemes: {Scheme.Https})
 type
-  Call_SkusList_594008 = ref object of OpenApiRestCall_593438
-proc url_SkusList_594010(protocol: Scheme; host: string; base: string; route: string;
+  Call_SkusList_568237 = ref object of OpenApiRestCall_567667
+proc url_SkusList_568239(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -383,7 +383,7 @@ proc url_SkusList_594010(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SkusList_594009(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SkusList_568238(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the available SKUs supported by Microsoft.Storage for given subscription.
   ## 
@@ -395,11 +395,11 @@ proc validate_SkusList_594009(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594011 = path.getOrDefault("subscriptionId")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_568240 = path.getOrDefault("subscriptionId")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "subscriptionId", valid_594011
+  if valid_568240 != nil:
+    section.add "subscriptionId", valid_568240
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -407,11 +407,11 @@ proc validate_SkusList_594009(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594012 = query.getOrDefault("api-version")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  var valid_568241 = query.getOrDefault("api-version")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "api-version", valid_594012
+  if valid_568241 != nil:
+    section.add "api-version", valid_568241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -420,20 +420,20 @@ proc validate_SkusList_594009(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594013: Call_SkusList_594008; path: JsonNode; query: JsonNode;
+proc call*(call_568242: Call_SkusList_568237; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the available SKUs supported by Microsoft.Storage for given subscription.
   ## 
-  let valid = call_594013.validator(path, query, header, formData, body)
-  let scheme = call_594013.pickScheme
+  let valid = call_568242.validator(path, query, header, formData, body)
+  let scheme = call_568242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594013.url(scheme.get, call_594013.host, call_594013.base,
-                         call_594013.route, valid.getOrDefault("path"),
+  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
+                         call_568242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594013, url, valid)
+  result = hook(call_568242, url, valid)
 
-proc call*(call_594014: Call_SkusList_594008; apiVersion: string;
+proc call*(call_568243: Call_SkusList_568237; apiVersion: string;
           subscriptionId: string): Recallable =
   ## skusList
   ## Lists the available SKUs supported by Microsoft.Storage for given subscription.
@@ -441,20 +441,20 @@ proc call*(call_594014: Call_SkusList_594008; apiVersion: string;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_594015 = newJObject()
-  var query_594016 = newJObject()
-  add(query_594016, "api-version", newJString(apiVersion))
-  add(path_594015, "subscriptionId", newJString(subscriptionId))
-  result = call_594014.call(path_594015, query_594016, nil, nil, nil)
+  var path_568244 = newJObject()
+  var query_568245 = newJObject()
+  add(query_568245, "api-version", newJString(apiVersion))
+  add(path_568244, "subscriptionId", newJString(subscriptionId))
+  result = call_568243.call(path_568244, query_568245, nil, nil, nil)
 
-var skusList* = Call_SkusList_594008(name: "skusList", meth: HttpMethod.HttpGet,
+var skusList* = Call_SkusList_568237(name: "skusList", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Storage/skus",
-                                  validator: validate_SkusList_594009, base: "",
-                                  url: url_SkusList_594010,
+                                  validator: validate_SkusList_568238, base: "",
+                                  url: url_SkusList_568239,
                                   schemes: {Scheme.Https})
 type
-  Call_StorageAccountsList_594017 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsList_594019(protocol: Scheme; host: string; base: string;
+  Call_StorageAccountsList_568246 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsList_568248(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -471,7 +471,7 @@ proc url_StorageAccountsList_594019(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsList_594018(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountsList_568247(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Lists all the storage accounts available under the subscription. Note that storage keys are not returned; use the ListKeys operation for this.
@@ -484,11 +484,11 @@ proc validate_StorageAccountsList_594018(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594020 = path.getOrDefault("subscriptionId")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  var valid_568249 = path.getOrDefault("subscriptionId")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "subscriptionId", valid_594020
+  if valid_568249 != nil:
+    section.add "subscriptionId", valid_568249
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -496,11 +496,11 @@ proc validate_StorageAccountsList_594018(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594021 = query.getOrDefault("api-version")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  var valid_568250 = query.getOrDefault("api-version")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "api-version", valid_594021
+  if valid_568250 != nil:
+    section.add "api-version", valid_568250
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -509,20 +509,20 @@ proc validate_StorageAccountsList_594018(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594022: Call_StorageAccountsList_594017; path: JsonNode;
+proc call*(call_568251: Call_StorageAccountsList_568246; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the storage accounts available under the subscription. Note that storage keys are not returned; use the ListKeys operation for this.
   ## 
-  let valid = call_594022.validator(path, query, header, formData, body)
-  let scheme = call_594022.pickScheme
+  let valid = call_568251.validator(path, query, header, formData, body)
+  let scheme = call_568251.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594022.url(scheme.get, call_594022.host, call_594022.base,
-                         call_594022.route, valid.getOrDefault("path"),
+  let url = call_568251.url(scheme.get, call_568251.host, call_568251.base,
+                         call_568251.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594022, url, valid)
+  result = hook(call_568251, url, valid)
 
-proc call*(call_594023: Call_StorageAccountsList_594017; apiVersion: string;
+proc call*(call_568252: Call_StorageAccountsList_568246; apiVersion: string;
           subscriptionId: string): Recallable =
   ## storageAccountsList
   ## Lists all the storage accounts available under the subscription. Note that storage keys are not returned; use the ListKeys operation for this.
@@ -530,20 +530,20 @@ proc call*(call_594023: Call_StorageAccountsList_594017; apiVersion: string;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_594024 = newJObject()
-  var query_594025 = newJObject()
-  add(query_594025, "api-version", newJString(apiVersion))
-  add(path_594024, "subscriptionId", newJString(subscriptionId))
-  result = call_594023.call(path_594024, query_594025, nil, nil, nil)
+  var path_568253 = newJObject()
+  var query_568254 = newJObject()
+  add(query_568254, "api-version", newJString(apiVersion))
+  add(path_568253, "subscriptionId", newJString(subscriptionId))
+  result = call_568252.call(path_568253, query_568254, nil, nil, nil)
 
-var storageAccountsList* = Call_StorageAccountsList_594017(
+var storageAccountsList* = Call_StorageAccountsList_568246(
     name: "storageAccountsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Storage/storageAccounts",
-    validator: validate_StorageAccountsList_594018, base: "",
-    url: url_StorageAccountsList_594019, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsList_568247, base: "",
+    url: url_StorageAccountsList_568248, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsListByResourceGroup_594026 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsListByResourceGroup_594028(protocol: Scheme; host: string;
+  Call_StorageAccountsListByResourceGroup_568255 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsListByResourceGroup_568257(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -564,7 +564,7 @@ proc url_StorageAccountsListByResourceGroup_594028(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsListByResourceGroup_594027(path: JsonNode;
+proc validate_StorageAccountsListByResourceGroup_568256(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the storage accounts available under the given resource group. Note that storage keys are not returned; use the ListKeys operation for this.
   ## 
@@ -578,16 +578,16 @@ proc validate_StorageAccountsListByResourceGroup_594027(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594029 = path.getOrDefault("resourceGroupName")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_568258 = path.getOrDefault("resourceGroupName")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "resourceGroupName", valid_594029
-  var valid_594030 = path.getOrDefault("subscriptionId")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  if valid_568258 != nil:
+    section.add "resourceGroupName", valid_568258
+  var valid_568259 = path.getOrDefault("subscriptionId")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "subscriptionId", valid_594030
+  if valid_568259 != nil:
+    section.add "subscriptionId", valid_568259
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -595,11 +595,11 @@ proc validate_StorageAccountsListByResourceGroup_594027(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594031 = query.getOrDefault("api-version")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  var valid_568260 = query.getOrDefault("api-version")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "api-version", valid_594031
+  if valid_568260 != nil:
+    section.add "api-version", valid_568260
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -608,21 +608,21 @@ proc validate_StorageAccountsListByResourceGroup_594027(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594032: Call_StorageAccountsListByResourceGroup_594026;
+proc call*(call_568261: Call_StorageAccountsListByResourceGroup_568255;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all the storage accounts available under the given resource group. Note that storage keys are not returned; use the ListKeys operation for this.
   ## 
-  let valid = call_594032.validator(path, query, header, formData, body)
-  let scheme = call_594032.pickScheme
+  let valid = call_568261.validator(path, query, header, formData, body)
+  let scheme = call_568261.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594032.url(scheme.get, call_594032.host, call_594032.base,
-                         call_594032.route, valid.getOrDefault("path"),
+  let url = call_568261.url(scheme.get, call_568261.host, call_568261.base,
+                         call_568261.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594032, url, valid)
+  result = hook(call_568261, url, valid)
 
-proc call*(call_594033: Call_StorageAccountsListByResourceGroup_594026;
+proc call*(call_568262: Call_StorageAccountsListByResourceGroup_568255;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## storageAccountsListByResourceGroup
   ## Lists all the storage accounts available under the given resource group. Note that storage keys are not returned; use the ListKeys operation for this.
@@ -632,21 +632,21 @@ proc call*(call_594033: Call_StorageAccountsListByResourceGroup_594026;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_594034 = newJObject()
-  var query_594035 = newJObject()
-  add(path_594034, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594035, "api-version", newJString(apiVersion))
-  add(path_594034, "subscriptionId", newJString(subscriptionId))
-  result = call_594033.call(path_594034, query_594035, nil, nil, nil)
+  var path_568263 = newJObject()
+  var query_568264 = newJObject()
+  add(path_568263, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568264, "api-version", newJString(apiVersion))
+  add(path_568263, "subscriptionId", newJString(subscriptionId))
+  result = call_568262.call(path_568263, query_568264, nil, nil, nil)
 
-var storageAccountsListByResourceGroup* = Call_StorageAccountsListByResourceGroup_594026(
+var storageAccountsListByResourceGroup* = Call_StorageAccountsListByResourceGroup_568255(
     name: "storageAccountsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts",
-    validator: validate_StorageAccountsListByResourceGroup_594027, base: "",
-    url: url_StorageAccountsListByResourceGroup_594028, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsListByResourceGroup_568256, base: "",
+    url: url_StorageAccountsListByResourceGroup_568257, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsCreate_594062 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsCreate_594064(protocol: Scheme; host: string; base: string;
+  Call_StorageAccountsCreate_568291 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsCreate_568293(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -669,7 +669,7 @@ proc url_StorageAccountsCreate_594064(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsCreate_594063(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountsCreate_568292(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Asynchronously creates a new storage account with the specified parameters. If an account is already created and a subsequent create request is issued with different properties, the account properties will be updated. If an account is already created and a subsequent create or update request is issued with the exact same set of properties, the request will succeed.
   ## 
@@ -685,21 +685,21 @@ proc validate_StorageAccountsCreate_594063(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594065 = path.getOrDefault("resourceGroupName")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  var valid_568294 = path.getOrDefault("resourceGroupName")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "resourceGroupName", valid_594065
-  var valid_594066 = path.getOrDefault("subscriptionId")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  if valid_568294 != nil:
+    section.add "resourceGroupName", valid_568294
+  var valid_568295 = path.getOrDefault("subscriptionId")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "subscriptionId", valid_594066
-  var valid_594067 = path.getOrDefault("accountName")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  if valid_568295 != nil:
+    section.add "subscriptionId", valid_568295
+  var valid_568296 = path.getOrDefault("accountName")
+  valid_568296 = validateParameter(valid_568296, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "accountName", valid_594067
+  if valid_568296 != nil:
+    section.add "accountName", valid_568296
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -707,11 +707,11 @@ proc validate_StorageAccountsCreate_594063(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594068 = query.getOrDefault("api-version")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  var valid_568297 = query.getOrDefault("api-version")
+  valid_568297 = validateParameter(valid_568297, JString, required = true,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "api-version", valid_594068
+  if valid_568297 != nil:
+    section.add "api-version", valid_568297
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -725,20 +725,20 @@ proc validate_StorageAccountsCreate_594063(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594070: Call_StorageAccountsCreate_594062; path: JsonNode;
+proc call*(call_568299: Call_StorageAccountsCreate_568291; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Asynchronously creates a new storage account with the specified parameters. If an account is already created and a subsequent create request is issued with different properties, the account properties will be updated. If an account is already created and a subsequent create or update request is issued with the exact same set of properties, the request will succeed.
   ## 
-  let valid = call_594070.validator(path, query, header, formData, body)
-  let scheme = call_594070.pickScheme
+  let valid = call_568299.validator(path, query, header, formData, body)
+  let scheme = call_568299.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594070.url(scheme.get, call_594070.host, call_594070.base,
-                         call_594070.route, valid.getOrDefault("path"),
+  let url = call_568299.url(scheme.get, call_568299.host, call_568299.base,
+                         call_568299.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594070, url, valid)
+  result = hook(call_568299, url, valid)
 
-proc call*(call_594071: Call_StorageAccountsCreate_594062;
+proc call*(call_568300: Call_StorageAccountsCreate_568291;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; accountName: string): Recallable =
   ## storageAccountsCreate
@@ -753,25 +753,25 @@ proc call*(call_594071: Call_StorageAccountsCreate_594062;
   ##             : The parameters to provide for the created account.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594072 = newJObject()
-  var query_594073 = newJObject()
-  var body_594074 = newJObject()
-  add(path_594072, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594073, "api-version", newJString(apiVersion))
-  add(path_594072, "subscriptionId", newJString(subscriptionId))
+  var path_568301 = newJObject()
+  var query_568302 = newJObject()
+  var body_568303 = newJObject()
+  add(path_568301, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568302, "api-version", newJString(apiVersion))
+  add(path_568301, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594074 = parameters
-  add(path_594072, "accountName", newJString(accountName))
-  result = call_594071.call(path_594072, query_594073, nil, nil, body_594074)
+    body_568303 = parameters
+  add(path_568301, "accountName", newJString(accountName))
+  result = call_568300.call(path_568301, query_568302, nil, nil, body_568303)
 
-var storageAccountsCreate* = Call_StorageAccountsCreate_594062(
+var storageAccountsCreate* = Call_StorageAccountsCreate_568291(
     name: "storageAccountsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}",
-    validator: validate_StorageAccountsCreate_594063, base: "",
-    url: url_StorageAccountsCreate_594064, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsCreate_568292, base: "",
+    url: url_StorageAccountsCreate_568293, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsGetProperties_594036 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsGetProperties_594038(protocol: Scheme; host: string;
+  Call_StorageAccountsGetProperties_568265 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsGetProperties_568267(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -794,7 +794,7 @@ proc url_StorageAccountsGetProperties_594038(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsGetProperties_594037(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountsGetProperties_568266(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the properties for the specified storage account including but not limited to name, SKU name, location, and account status. The ListKeys operation should be used to retrieve storage keys.
   ## 
@@ -810,21 +810,21 @@ proc validate_StorageAccountsGetProperties_594037(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594040 = path.getOrDefault("resourceGroupName")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  var valid_568269 = path.getOrDefault("resourceGroupName")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "resourceGroupName", valid_594040
-  var valid_594041 = path.getOrDefault("subscriptionId")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  if valid_568269 != nil:
+    section.add "resourceGroupName", valid_568269
+  var valid_568270 = path.getOrDefault("subscriptionId")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "subscriptionId", valid_594041
-  var valid_594042 = path.getOrDefault("accountName")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  if valid_568270 != nil:
+    section.add "subscriptionId", valid_568270
+  var valid_568271 = path.getOrDefault("accountName")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "accountName", valid_594042
+  if valid_568271 != nil:
+    section.add "accountName", valid_568271
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -834,16 +834,16 @@ proc validate_StorageAccountsGetProperties_594037(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594043 = query.getOrDefault("api-version")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  var valid_568272 = query.getOrDefault("api-version")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "api-version", valid_594043
-  var valid_594057 = query.getOrDefault("$expand")
-  valid_594057 = validateParameter(valid_594057, JString, required = false,
+  if valid_568272 != nil:
+    section.add "api-version", valid_568272
+  var valid_568286 = query.getOrDefault("$expand")
+  valid_568286 = validateParameter(valid_568286, JString, required = false,
                                  default = newJString("geoReplicationStats"))
-  if valid_594057 != nil:
-    section.add "$expand", valid_594057
+  if valid_568286 != nil:
+    section.add "$expand", valid_568286
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -852,20 +852,20 @@ proc validate_StorageAccountsGetProperties_594037(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594058: Call_StorageAccountsGetProperties_594036; path: JsonNode;
+proc call*(call_568287: Call_StorageAccountsGetProperties_568265; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the properties for the specified storage account including but not limited to name, SKU name, location, and account status. The ListKeys operation should be used to retrieve storage keys.
   ## 
-  let valid = call_594058.validator(path, query, header, formData, body)
-  let scheme = call_594058.pickScheme
+  let valid = call_568287.validator(path, query, header, formData, body)
+  let scheme = call_568287.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594058.url(scheme.get, call_594058.host, call_594058.base,
-                         call_594058.route, valid.getOrDefault("path"),
+  let url = call_568287.url(scheme.get, call_568287.host, call_568287.base,
+                         call_568287.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594058, url, valid)
+  result = hook(call_568287, url, valid)
 
-proc call*(call_594059: Call_StorageAccountsGetProperties_594036;
+proc call*(call_568288: Call_StorageAccountsGetProperties_568265;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string; Expand: string = "geoReplicationStats"): Recallable =
   ## storageAccountsGetProperties
@@ -880,23 +880,23 @@ proc call*(call_594059: Call_StorageAccountsGetProperties_594036;
   ##                 : The ID of the target subscription.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594060 = newJObject()
-  var query_594061 = newJObject()
-  add(path_594060, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594061, "api-version", newJString(apiVersion))
-  add(query_594061, "$expand", newJString(Expand))
-  add(path_594060, "subscriptionId", newJString(subscriptionId))
-  add(path_594060, "accountName", newJString(accountName))
-  result = call_594059.call(path_594060, query_594061, nil, nil, nil)
+  var path_568289 = newJObject()
+  var query_568290 = newJObject()
+  add(path_568289, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568290, "api-version", newJString(apiVersion))
+  add(query_568290, "$expand", newJString(Expand))
+  add(path_568289, "subscriptionId", newJString(subscriptionId))
+  add(path_568289, "accountName", newJString(accountName))
+  result = call_568288.call(path_568289, query_568290, nil, nil, nil)
 
-var storageAccountsGetProperties* = Call_StorageAccountsGetProperties_594036(
+var storageAccountsGetProperties* = Call_StorageAccountsGetProperties_568265(
     name: "storageAccountsGetProperties", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}",
-    validator: validate_StorageAccountsGetProperties_594037, base: "",
-    url: url_StorageAccountsGetProperties_594038, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsGetProperties_568266, base: "",
+    url: url_StorageAccountsGetProperties_568267, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsUpdate_594086 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsUpdate_594088(protocol: Scheme; host: string; base: string;
+  Call_StorageAccountsUpdate_568315 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsUpdate_568317(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -919,7 +919,7 @@ proc url_StorageAccountsUpdate_594088(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsUpdate_594087(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountsUpdate_568316(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The update operation can be used to update the SKU, encryption, access tier, or tags for a storage account. It can also be used to map the account to a custom domain. Only one custom domain is supported per storage account; the replacement/change of custom domain is not supported. In order to replace an old custom domain, the old value must be cleared/unregistered before a new value can be set. The update of multiple properties is supported. This call does not change the storage keys for the account. If you want to change the storage account keys, use the regenerate keys operation. The location and name of the storage account cannot be changed after creation.
   ## 
@@ -935,21 +935,21 @@ proc validate_StorageAccountsUpdate_594087(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594089 = path.getOrDefault("resourceGroupName")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_568318 = path.getOrDefault("resourceGroupName")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "resourceGroupName", valid_594089
-  var valid_594090 = path.getOrDefault("subscriptionId")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  if valid_568318 != nil:
+    section.add "resourceGroupName", valid_568318
+  var valid_568319 = path.getOrDefault("subscriptionId")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "subscriptionId", valid_594090
-  var valid_594091 = path.getOrDefault("accountName")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  if valid_568319 != nil:
+    section.add "subscriptionId", valid_568319
+  var valid_568320 = path.getOrDefault("accountName")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "accountName", valid_594091
+  if valid_568320 != nil:
+    section.add "accountName", valid_568320
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -957,11 +957,11 @@ proc validate_StorageAccountsUpdate_594087(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594092 = query.getOrDefault("api-version")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  var valid_568321 = query.getOrDefault("api-version")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "api-version", valid_594092
+  if valid_568321 != nil:
+    section.add "api-version", valid_568321
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -975,20 +975,20 @@ proc validate_StorageAccountsUpdate_594087(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594094: Call_StorageAccountsUpdate_594086; path: JsonNode;
+proc call*(call_568323: Call_StorageAccountsUpdate_568315; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The update operation can be used to update the SKU, encryption, access tier, or tags for a storage account. It can also be used to map the account to a custom domain. Only one custom domain is supported per storage account; the replacement/change of custom domain is not supported. In order to replace an old custom domain, the old value must be cleared/unregistered before a new value can be set. The update of multiple properties is supported. This call does not change the storage keys for the account. If you want to change the storage account keys, use the regenerate keys operation. The location and name of the storage account cannot be changed after creation.
   ## 
-  let valid = call_594094.validator(path, query, header, formData, body)
-  let scheme = call_594094.pickScheme
+  let valid = call_568323.validator(path, query, header, formData, body)
+  let scheme = call_568323.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594094.url(scheme.get, call_594094.host, call_594094.base,
-                         call_594094.route, valid.getOrDefault("path"),
+  let url = call_568323.url(scheme.get, call_568323.host, call_568323.base,
+                         call_568323.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594094, url, valid)
+  result = hook(call_568323, url, valid)
 
-proc call*(call_594095: Call_StorageAccountsUpdate_594086;
+proc call*(call_568324: Call_StorageAccountsUpdate_568315;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; accountName: string): Recallable =
   ## storageAccountsUpdate
@@ -1003,25 +1003,25 @@ proc call*(call_594095: Call_StorageAccountsUpdate_594086;
   ##             : The parameters to provide for the updated account.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594096 = newJObject()
-  var query_594097 = newJObject()
-  var body_594098 = newJObject()
-  add(path_594096, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594097, "api-version", newJString(apiVersion))
-  add(path_594096, "subscriptionId", newJString(subscriptionId))
+  var path_568325 = newJObject()
+  var query_568326 = newJObject()
+  var body_568327 = newJObject()
+  add(path_568325, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568326, "api-version", newJString(apiVersion))
+  add(path_568325, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594098 = parameters
-  add(path_594096, "accountName", newJString(accountName))
-  result = call_594095.call(path_594096, query_594097, nil, nil, body_594098)
+    body_568327 = parameters
+  add(path_568325, "accountName", newJString(accountName))
+  result = call_568324.call(path_568325, query_568326, nil, nil, body_568327)
 
-var storageAccountsUpdate* = Call_StorageAccountsUpdate_594086(
+var storageAccountsUpdate* = Call_StorageAccountsUpdate_568315(
     name: "storageAccountsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}",
-    validator: validate_StorageAccountsUpdate_594087, base: "",
-    url: url_StorageAccountsUpdate_594088, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsUpdate_568316, base: "",
+    url: url_StorageAccountsUpdate_568317, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsDelete_594075 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsDelete_594077(protocol: Scheme; host: string; base: string;
+  Call_StorageAccountsDelete_568304 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsDelete_568306(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1044,7 +1044,7 @@ proc url_StorageAccountsDelete_594077(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsDelete_594076(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountsDelete_568305(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a storage account in Microsoft Azure.
   ## 
@@ -1060,21 +1060,21 @@ proc validate_StorageAccountsDelete_594076(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594078 = path.getOrDefault("resourceGroupName")
-  valid_594078 = validateParameter(valid_594078, JString, required = true,
+  var valid_568307 = path.getOrDefault("resourceGroupName")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "resourceGroupName", valid_594078
-  var valid_594079 = path.getOrDefault("subscriptionId")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+  if valid_568307 != nil:
+    section.add "resourceGroupName", valid_568307
+  var valid_568308 = path.getOrDefault("subscriptionId")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "subscriptionId", valid_594079
-  var valid_594080 = path.getOrDefault("accountName")
-  valid_594080 = validateParameter(valid_594080, JString, required = true,
+  if valid_568308 != nil:
+    section.add "subscriptionId", valid_568308
+  var valid_568309 = path.getOrDefault("accountName")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "accountName", valid_594080
+  if valid_568309 != nil:
+    section.add "accountName", valid_568309
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1082,11 +1082,11 @@ proc validate_StorageAccountsDelete_594076(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594081 = query.getOrDefault("api-version")
-  valid_594081 = validateParameter(valid_594081, JString, required = true,
+  var valid_568310 = query.getOrDefault("api-version")
+  valid_568310 = validateParameter(valid_568310, JString, required = true,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "api-version", valid_594081
+  if valid_568310 != nil:
+    section.add "api-version", valid_568310
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1095,20 +1095,20 @@ proc validate_StorageAccountsDelete_594076(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594082: Call_StorageAccountsDelete_594075; path: JsonNode;
+proc call*(call_568311: Call_StorageAccountsDelete_568304; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a storage account in Microsoft Azure.
   ## 
-  let valid = call_594082.validator(path, query, header, formData, body)
-  let scheme = call_594082.pickScheme
+  let valid = call_568311.validator(path, query, header, formData, body)
+  let scheme = call_568311.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594082.url(scheme.get, call_594082.host, call_594082.base,
-                         call_594082.route, valid.getOrDefault("path"),
+  let url = call_568311.url(scheme.get, call_568311.host, call_568311.base,
+                         call_568311.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594082, url, valid)
+  result = hook(call_568311, url, valid)
 
-proc call*(call_594083: Call_StorageAccountsDelete_594075;
+proc call*(call_568312: Call_StorageAccountsDelete_568304;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## storageAccountsDelete
@@ -1121,22 +1121,22 @@ proc call*(call_594083: Call_StorageAccountsDelete_594075;
   ##                 : The ID of the target subscription.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594084 = newJObject()
-  var query_594085 = newJObject()
-  add(path_594084, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594085, "api-version", newJString(apiVersion))
-  add(path_594084, "subscriptionId", newJString(subscriptionId))
-  add(path_594084, "accountName", newJString(accountName))
-  result = call_594083.call(path_594084, query_594085, nil, nil, nil)
+  var path_568313 = newJObject()
+  var query_568314 = newJObject()
+  add(path_568313, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568314, "api-version", newJString(apiVersion))
+  add(path_568313, "subscriptionId", newJString(subscriptionId))
+  add(path_568313, "accountName", newJString(accountName))
+  result = call_568312.call(path_568313, query_568314, nil, nil, nil)
 
-var storageAccountsDelete* = Call_StorageAccountsDelete_594075(
+var storageAccountsDelete* = Call_StorageAccountsDelete_568304(
     name: "storageAccountsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}",
-    validator: validate_StorageAccountsDelete_594076, base: "",
-    url: url_StorageAccountsDelete_594077, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsDelete_568305, base: "",
+    url: url_StorageAccountsDelete_568306, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsListAccountSAS_594099 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsListAccountSAS_594101(protocol: Scheme; host: string;
+  Call_StorageAccountsListAccountSAS_568328 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsListAccountSAS_568330(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1160,7 +1160,7 @@ proc url_StorageAccountsListAccountSAS_594101(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsListAccountSAS_594100(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountsListAccountSAS_568329(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List SAS credentials of a storage account.
   ## 
@@ -1176,21 +1176,21 @@ proc validate_StorageAccountsListAccountSAS_594100(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594102 = path.getOrDefault("resourceGroupName")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  var valid_568331 = path.getOrDefault("resourceGroupName")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "resourceGroupName", valid_594102
-  var valid_594103 = path.getOrDefault("subscriptionId")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  if valid_568331 != nil:
+    section.add "resourceGroupName", valid_568331
+  var valid_568332 = path.getOrDefault("subscriptionId")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "subscriptionId", valid_594103
-  var valid_594104 = path.getOrDefault("accountName")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  if valid_568332 != nil:
+    section.add "subscriptionId", valid_568332
+  var valid_568333 = path.getOrDefault("accountName")
+  valid_568333 = validateParameter(valid_568333, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "accountName", valid_594104
+  if valid_568333 != nil:
+    section.add "accountName", valid_568333
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1198,11 +1198,11 @@ proc validate_StorageAccountsListAccountSAS_594100(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594105 = query.getOrDefault("api-version")
-  valid_594105 = validateParameter(valid_594105, JString, required = true,
+  var valid_568334 = query.getOrDefault("api-version")
+  valid_568334 = validateParameter(valid_568334, JString, required = true,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "api-version", valid_594105
+  if valid_568334 != nil:
+    section.add "api-version", valid_568334
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1216,20 +1216,20 @@ proc validate_StorageAccountsListAccountSAS_594100(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594107: Call_StorageAccountsListAccountSAS_594099; path: JsonNode;
+proc call*(call_568336: Call_StorageAccountsListAccountSAS_568328; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List SAS credentials of a storage account.
   ## 
-  let valid = call_594107.validator(path, query, header, formData, body)
-  let scheme = call_594107.pickScheme
+  let valid = call_568336.validator(path, query, header, formData, body)
+  let scheme = call_568336.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594107.url(scheme.get, call_594107.host, call_594107.base,
-                         call_594107.route, valid.getOrDefault("path"),
+  let url = call_568336.url(scheme.get, call_568336.host, call_568336.base,
+                         call_568336.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594107, url, valid)
+  result = hook(call_568336, url, valid)
 
-proc call*(call_594108: Call_StorageAccountsListAccountSAS_594099;
+proc call*(call_568337: Call_StorageAccountsListAccountSAS_568328;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; accountName: string): Recallable =
   ## storageAccountsListAccountSAS
@@ -1244,25 +1244,25 @@ proc call*(call_594108: Call_StorageAccountsListAccountSAS_594099;
   ##             : The parameters to provide to list SAS credentials for the storage account.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594109 = newJObject()
-  var query_594110 = newJObject()
-  var body_594111 = newJObject()
-  add(path_594109, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594110, "api-version", newJString(apiVersion))
-  add(path_594109, "subscriptionId", newJString(subscriptionId))
+  var path_568338 = newJObject()
+  var query_568339 = newJObject()
+  var body_568340 = newJObject()
+  add(path_568338, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568339, "api-version", newJString(apiVersion))
+  add(path_568338, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594111 = parameters
-  add(path_594109, "accountName", newJString(accountName))
-  result = call_594108.call(path_594109, query_594110, nil, nil, body_594111)
+    body_568340 = parameters
+  add(path_568338, "accountName", newJString(accountName))
+  result = call_568337.call(path_568338, query_568339, nil, nil, body_568340)
 
-var storageAccountsListAccountSAS* = Call_StorageAccountsListAccountSAS_594099(
+var storageAccountsListAccountSAS* = Call_StorageAccountsListAccountSAS_568328(
     name: "storageAccountsListAccountSAS", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/ListAccountSas",
-    validator: validate_StorageAccountsListAccountSAS_594100, base: "",
-    url: url_StorageAccountsListAccountSAS_594101, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsListAccountSAS_568329, base: "",
+    url: url_StorageAccountsListAccountSAS_568330, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsListServiceSAS_594112 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsListServiceSAS_594114(protocol: Scheme; host: string;
+  Call_StorageAccountsListServiceSAS_568341 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsListServiceSAS_568343(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1286,7 +1286,7 @@ proc url_StorageAccountsListServiceSAS_594114(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsListServiceSAS_594113(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountsListServiceSAS_568342(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List service SAS credentials of a specific resource.
   ## 
@@ -1302,21 +1302,21 @@ proc validate_StorageAccountsListServiceSAS_594113(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594125 = path.getOrDefault("resourceGroupName")
-  valid_594125 = validateParameter(valid_594125, JString, required = true,
+  var valid_568354 = path.getOrDefault("resourceGroupName")
+  valid_568354 = validateParameter(valid_568354, JString, required = true,
                                  default = nil)
-  if valid_594125 != nil:
-    section.add "resourceGroupName", valid_594125
-  var valid_594126 = path.getOrDefault("subscriptionId")
-  valid_594126 = validateParameter(valid_594126, JString, required = true,
+  if valid_568354 != nil:
+    section.add "resourceGroupName", valid_568354
+  var valid_568355 = path.getOrDefault("subscriptionId")
+  valid_568355 = validateParameter(valid_568355, JString, required = true,
                                  default = nil)
-  if valid_594126 != nil:
-    section.add "subscriptionId", valid_594126
-  var valid_594127 = path.getOrDefault("accountName")
-  valid_594127 = validateParameter(valid_594127, JString, required = true,
+  if valid_568355 != nil:
+    section.add "subscriptionId", valid_568355
+  var valid_568356 = path.getOrDefault("accountName")
+  valid_568356 = validateParameter(valid_568356, JString, required = true,
                                  default = nil)
-  if valid_594127 != nil:
-    section.add "accountName", valid_594127
+  if valid_568356 != nil:
+    section.add "accountName", valid_568356
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1324,11 +1324,11 @@ proc validate_StorageAccountsListServiceSAS_594113(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594128 = query.getOrDefault("api-version")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  var valid_568357 = query.getOrDefault("api-version")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "api-version", valid_594128
+  if valid_568357 != nil:
+    section.add "api-version", valid_568357
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1342,20 +1342,20 @@ proc validate_StorageAccountsListServiceSAS_594113(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594130: Call_StorageAccountsListServiceSAS_594112; path: JsonNode;
+proc call*(call_568359: Call_StorageAccountsListServiceSAS_568341; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List service SAS credentials of a specific resource.
   ## 
-  let valid = call_594130.validator(path, query, header, formData, body)
-  let scheme = call_594130.pickScheme
+  let valid = call_568359.validator(path, query, header, formData, body)
+  let scheme = call_568359.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594130.url(scheme.get, call_594130.host, call_594130.base,
-                         call_594130.route, valid.getOrDefault("path"),
+  let url = call_568359.url(scheme.get, call_568359.host, call_568359.base,
+                         call_568359.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594130, url, valid)
+  result = hook(call_568359, url, valid)
 
-proc call*(call_594131: Call_StorageAccountsListServiceSAS_594112;
+proc call*(call_568360: Call_StorageAccountsListServiceSAS_568341;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; accountName: string): Recallable =
   ## storageAccountsListServiceSAS
@@ -1370,25 +1370,25 @@ proc call*(call_594131: Call_StorageAccountsListServiceSAS_594112;
   ##             : The parameters to provide to list service SAS credentials.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594132 = newJObject()
-  var query_594133 = newJObject()
-  var body_594134 = newJObject()
-  add(path_594132, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594133, "api-version", newJString(apiVersion))
-  add(path_594132, "subscriptionId", newJString(subscriptionId))
+  var path_568361 = newJObject()
+  var query_568362 = newJObject()
+  var body_568363 = newJObject()
+  add(path_568361, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568362, "api-version", newJString(apiVersion))
+  add(path_568361, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594134 = parameters
-  add(path_594132, "accountName", newJString(accountName))
-  result = call_594131.call(path_594132, query_594133, nil, nil, body_594134)
+    body_568363 = parameters
+  add(path_568361, "accountName", newJString(accountName))
+  result = call_568360.call(path_568361, query_568362, nil, nil, body_568363)
 
-var storageAccountsListServiceSAS* = Call_StorageAccountsListServiceSAS_594112(
+var storageAccountsListServiceSAS* = Call_StorageAccountsListServiceSAS_568341(
     name: "storageAccountsListServiceSAS", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/ListServiceSas",
-    validator: validate_StorageAccountsListServiceSAS_594113, base: "",
-    url: url_StorageAccountsListServiceSAS_594114, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsListServiceSAS_568342, base: "",
+    url: url_StorageAccountsListServiceSAS_568343, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsFailover_594135 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsFailover_594137(protocol: Scheme; host: string; base: string;
+  Call_StorageAccountsFailover_568364 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsFailover_568366(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1413,7 +1413,7 @@ proc url_StorageAccountsFailover_594137(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsFailover_594136(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountsFailover_568365(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Failover request can be triggered for a storage account in case of availability issues. The failover occurs from the storage account's primary cluster to secondary cluster for RA-GRS accounts. The secondary cluster will become primary after failover.
   ## 
@@ -1429,21 +1429,21 @@ proc validate_StorageAccountsFailover_594136(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594138 = path.getOrDefault("resourceGroupName")
-  valid_594138 = validateParameter(valid_594138, JString, required = true,
+  var valid_568367 = path.getOrDefault("resourceGroupName")
+  valid_568367 = validateParameter(valid_568367, JString, required = true,
                                  default = nil)
-  if valid_594138 != nil:
-    section.add "resourceGroupName", valid_594138
-  var valid_594139 = path.getOrDefault("subscriptionId")
-  valid_594139 = validateParameter(valid_594139, JString, required = true,
+  if valid_568367 != nil:
+    section.add "resourceGroupName", valid_568367
+  var valid_568368 = path.getOrDefault("subscriptionId")
+  valid_568368 = validateParameter(valid_568368, JString, required = true,
                                  default = nil)
-  if valid_594139 != nil:
-    section.add "subscriptionId", valid_594139
-  var valid_594140 = path.getOrDefault("accountName")
-  valid_594140 = validateParameter(valid_594140, JString, required = true,
+  if valid_568368 != nil:
+    section.add "subscriptionId", valid_568368
+  var valid_568369 = path.getOrDefault("accountName")
+  valid_568369 = validateParameter(valid_568369, JString, required = true,
                                  default = nil)
-  if valid_594140 != nil:
-    section.add "accountName", valid_594140
+  if valid_568369 != nil:
+    section.add "accountName", valid_568369
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1451,11 +1451,11 @@ proc validate_StorageAccountsFailover_594136(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594141 = query.getOrDefault("api-version")
-  valid_594141 = validateParameter(valid_594141, JString, required = true,
+  var valid_568370 = query.getOrDefault("api-version")
+  valid_568370 = validateParameter(valid_568370, JString, required = true,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "api-version", valid_594141
+  if valid_568370 != nil:
+    section.add "api-version", valid_568370
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1464,20 +1464,20 @@ proc validate_StorageAccountsFailover_594136(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594142: Call_StorageAccountsFailover_594135; path: JsonNode;
+proc call*(call_568371: Call_StorageAccountsFailover_568364; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Failover request can be triggered for a storage account in case of availability issues. The failover occurs from the storage account's primary cluster to secondary cluster for RA-GRS accounts. The secondary cluster will become primary after failover.
   ## 
-  let valid = call_594142.validator(path, query, header, formData, body)
-  let scheme = call_594142.pickScheme
+  let valid = call_568371.validator(path, query, header, formData, body)
+  let scheme = call_568371.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594142.url(scheme.get, call_594142.host, call_594142.base,
-                         call_594142.route, valid.getOrDefault("path"),
+  let url = call_568371.url(scheme.get, call_568371.host, call_568371.base,
+                         call_568371.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594142, url, valid)
+  result = hook(call_568371, url, valid)
 
-proc call*(call_594143: Call_StorageAccountsFailover_594135;
+proc call*(call_568372: Call_StorageAccountsFailover_568364;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## storageAccountsFailover
@@ -1490,22 +1490,22 @@ proc call*(call_594143: Call_StorageAccountsFailover_594135;
   ##                 : The ID of the target subscription.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594144 = newJObject()
-  var query_594145 = newJObject()
-  add(path_594144, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594145, "api-version", newJString(apiVersion))
-  add(path_594144, "subscriptionId", newJString(subscriptionId))
-  add(path_594144, "accountName", newJString(accountName))
-  result = call_594143.call(path_594144, query_594145, nil, nil, nil)
+  var path_568373 = newJObject()
+  var query_568374 = newJObject()
+  add(path_568373, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568374, "api-version", newJString(apiVersion))
+  add(path_568373, "subscriptionId", newJString(subscriptionId))
+  add(path_568373, "accountName", newJString(accountName))
+  result = call_568372.call(path_568373, query_568374, nil, nil, nil)
 
-var storageAccountsFailover* = Call_StorageAccountsFailover_594135(
+var storageAccountsFailover* = Call_StorageAccountsFailover_568364(
     name: "storageAccountsFailover", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/failover",
-    validator: validate_StorageAccountsFailover_594136, base: "",
-    url: url_StorageAccountsFailover_594137, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsFailover_568365, base: "",
+    url: url_StorageAccountsFailover_568366, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsListKeys_594146 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsListKeys_594148(protocol: Scheme; host: string; base: string;
+  Call_StorageAccountsListKeys_568375 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsListKeys_568377(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1530,7 +1530,7 @@ proc url_StorageAccountsListKeys_594148(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsListKeys_594147(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountsListKeys_568376(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the access keys for the specified storage account.
   ## 
@@ -1546,21 +1546,21 @@ proc validate_StorageAccountsListKeys_594147(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594149 = path.getOrDefault("resourceGroupName")
-  valid_594149 = validateParameter(valid_594149, JString, required = true,
+  var valid_568378 = path.getOrDefault("resourceGroupName")
+  valid_568378 = validateParameter(valid_568378, JString, required = true,
                                  default = nil)
-  if valid_594149 != nil:
-    section.add "resourceGroupName", valid_594149
-  var valid_594150 = path.getOrDefault("subscriptionId")
-  valid_594150 = validateParameter(valid_594150, JString, required = true,
+  if valid_568378 != nil:
+    section.add "resourceGroupName", valid_568378
+  var valid_568379 = path.getOrDefault("subscriptionId")
+  valid_568379 = validateParameter(valid_568379, JString, required = true,
                                  default = nil)
-  if valid_594150 != nil:
-    section.add "subscriptionId", valid_594150
-  var valid_594151 = path.getOrDefault("accountName")
-  valid_594151 = validateParameter(valid_594151, JString, required = true,
+  if valid_568379 != nil:
+    section.add "subscriptionId", valid_568379
+  var valid_568380 = path.getOrDefault("accountName")
+  valid_568380 = validateParameter(valid_568380, JString, required = true,
                                  default = nil)
-  if valid_594151 != nil:
-    section.add "accountName", valid_594151
+  if valid_568380 != nil:
+    section.add "accountName", valid_568380
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1568,11 +1568,11 @@ proc validate_StorageAccountsListKeys_594147(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594152 = query.getOrDefault("api-version")
-  valid_594152 = validateParameter(valid_594152, JString, required = true,
+  var valid_568381 = query.getOrDefault("api-version")
+  valid_568381 = validateParameter(valid_568381, JString, required = true,
                                  default = nil)
-  if valid_594152 != nil:
-    section.add "api-version", valid_594152
+  if valid_568381 != nil:
+    section.add "api-version", valid_568381
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1581,20 +1581,20 @@ proc validate_StorageAccountsListKeys_594147(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594153: Call_StorageAccountsListKeys_594146; path: JsonNode;
+proc call*(call_568382: Call_StorageAccountsListKeys_568375; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the access keys for the specified storage account.
   ## 
-  let valid = call_594153.validator(path, query, header, formData, body)
-  let scheme = call_594153.pickScheme
+  let valid = call_568382.validator(path, query, header, formData, body)
+  let scheme = call_568382.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594153.url(scheme.get, call_594153.host, call_594153.base,
-                         call_594153.route, valid.getOrDefault("path"),
+  let url = call_568382.url(scheme.get, call_568382.host, call_568382.base,
+                         call_568382.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594153, url, valid)
+  result = hook(call_568382, url, valid)
 
-proc call*(call_594154: Call_StorageAccountsListKeys_594146;
+proc call*(call_568383: Call_StorageAccountsListKeys_568375;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## storageAccountsListKeys
@@ -1607,22 +1607,22 @@ proc call*(call_594154: Call_StorageAccountsListKeys_594146;
   ##                 : The ID of the target subscription.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594155 = newJObject()
-  var query_594156 = newJObject()
-  add(path_594155, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594156, "api-version", newJString(apiVersion))
-  add(path_594155, "subscriptionId", newJString(subscriptionId))
-  add(path_594155, "accountName", newJString(accountName))
-  result = call_594154.call(path_594155, query_594156, nil, nil, nil)
+  var path_568384 = newJObject()
+  var query_568385 = newJObject()
+  add(path_568384, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568385, "api-version", newJString(apiVersion))
+  add(path_568384, "subscriptionId", newJString(subscriptionId))
+  add(path_568384, "accountName", newJString(accountName))
+  result = call_568383.call(path_568384, query_568385, nil, nil, nil)
 
-var storageAccountsListKeys* = Call_StorageAccountsListKeys_594146(
+var storageAccountsListKeys* = Call_StorageAccountsListKeys_568375(
     name: "storageAccountsListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/listKeys",
-    validator: validate_StorageAccountsListKeys_594147, base: "",
-    url: url_StorageAccountsListKeys_594148, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsListKeys_568376, base: "",
+    url: url_StorageAccountsListKeys_568377, schemes: {Scheme.Https})
 type
-  Call_ManagementPoliciesCreateOrUpdate_594169 = ref object of OpenApiRestCall_593438
-proc url_ManagementPoliciesCreateOrUpdate_594171(protocol: Scheme; host: string;
+  Call_ManagementPoliciesCreateOrUpdate_568398 = ref object of OpenApiRestCall_567667
+proc url_ManagementPoliciesCreateOrUpdate_568400(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1649,7 +1649,7 @@ proc url_ManagementPoliciesCreateOrUpdate_594171(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementPoliciesCreateOrUpdate_594170(path: JsonNode;
+proc validate_ManagementPoliciesCreateOrUpdate_568399(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sets the managementpolicy to the specified storage account.
   ## 
@@ -1667,26 +1667,26 @@ proc validate_ManagementPoliciesCreateOrUpdate_594170(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594172 = path.getOrDefault("resourceGroupName")
-  valid_594172 = validateParameter(valid_594172, JString, required = true,
+  var valid_568401 = path.getOrDefault("resourceGroupName")
+  valid_568401 = validateParameter(valid_568401, JString, required = true,
                                  default = nil)
-  if valid_594172 != nil:
-    section.add "resourceGroupName", valid_594172
-  var valid_594173 = path.getOrDefault("subscriptionId")
-  valid_594173 = validateParameter(valid_594173, JString, required = true,
+  if valid_568401 != nil:
+    section.add "resourceGroupName", valid_568401
+  var valid_568402 = path.getOrDefault("subscriptionId")
+  valid_568402 = validateParameter(valid_568402, JString, required = true,
                                  default = nil)
-  if valid_594173 != nil:
-    section.add "subscriptionId", valid_594173
-  var valid_594174 = path.getOrDefault("managementPolicyName")
-  valid_594174 = validateParameter(valid_594174, JString, required = true,
+  if valid_568402 != nil:
+    section.add "subscriptionId", valid_568402
+  var valid_568403 = path.getOrDefault("managementPolicyName")
+  valid_568403 = validateParameter(valid_568403, JString, required = true,
                                  default = newJString("default"))
-  if valid_594174 != nil:
-    section.add "managementPolicyName", valid_594174
-  var valid_594175 = path.getOrDefault("accountName")
-  valid_594175 = validateParameter(valid_594175, JString, required = true,
+  if valid_568403 != nil:
+    section.add "managementPolicyName", valid_568403
+  var valid_568404 = path.getOrDefault("accountName")
+  valid_568404 = validateParameter(valid_568404, JString, required = true,
                                  default = nil)
-  if valid_594175 != nil:
-    section.add "accountName", valid_594175
+  if valid_568404 != nil:
+    section.add "accountName", valid_568404
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1694,11 +1694,11 @@ proc validate_ManagementPoliciesCreateOrUpdate_594170(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594176 = query.getOrDefault("api-version")
-  valid_594176 = validateParameter(valid_594176, JString, required = true,
+  var valid_568405 = query.getOrDefault("api-version")
+  valid_568405 = validateParameter(valid_568405, JString, required = true,
                                  default = nil)
-  if valid_594176 != nil:
-    section.add "api-version", valid_594176
+  if valid_568405 != nil:
+    section.add "api-version", valid_568405
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1712,21 +1712,21 @@ proc validate_ManagementPoliciesCreateOrUpdate_594170(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594178: Call_ManagementPoliciesCreateOrUpdate_594169;
+proc call*(call_568407: Call_ManagementPoliciesCreateOrUpdate_568398;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Sets the managementpolicy to the specified storage account.
   ## 
-  let valid = call_594178.validator(path, query, header, formData, body)
-  let scheme = call_594178.pickScheme
+  let valid = call_568407.validator(path, query, header, formData, body)
+  let scheme = call_568407.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594178.url(scheme.get, call_594178.host, call_594178.base,
-                         call_594178.route, valid.getOrDefault("path"),
+  let url = call_568407.url(scheme.get, call_568407.host, call_568407.base,
+                         call_568407.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594178, url, valid)
+  result = hook(call_568407, url, valid)
 
-proc call*(call_594179: Call_ManagementPoliciesCreateOrUpdate_594169;
+proc call*(call_568408: Call_ManagementPoliciesCreateOrUpdate_568398;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           properties: JsonNode; accountName: string;
           managementPolicyName: string = "default"): Recallable =
@@ -1744,26 +1744,26 @@ proc call*(call_594179: Call_ManagementPoliciesCreateOrUpdate_594169;
   ##             : The ManagementPolicy set to a storage account.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594180 = newJObject()
-  var query_594181 = newJObject()
-  var body_594182 = newJObject()
-  add(path_594180, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594181, "api-version", newJString(apiVersion))
-  add(path_594180, "subscriptionId", newJString(subscriptionId))
-  add(path_594180, "managementPolicyName", newJString(managementPolicyName))
+  var path_568409 = newJObject()
+  var query_568410 = newJObject()
+  var body_568411 = newJObject()
+  add(path_568409, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568410, "api-version", newJString(apiVersion))
+  add(path_568409, "subscriptionId", newJString(subscriptionId))
+  add(path_568409, "managementPolicyName", newJString(managementPolicyName))
   if properties != nil:
-    body_594182 = properties
-  add(path_594180, "accountName", newJString(accountName))
-  result = call_594179.call(path_594180, query_594181, nil, nil, body_594182)
+    body_568411 = properties
+  add(path_568409, "accountName", newJString(accountName))
+  result = call_568408.call(path_568409, query_568410, nil, nil, body_568411)
 
-var managementPoliciesCreateOrUpdate* = Call_ManagementPoliciesCreateOrUpdate_594169(
+var managementPoliciesCreateOrUpdate* = Call_ManagementPoliciesCreateOrUpdate_568398(
     name: "managementPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/managementPolicies/{managementPolicyName}",
-    validator: validate_ManagementPoliciesCreateOrUpdate_594170, base: "",
-    url: url_ManagementPoliciesCreateOrUpdate_594171, schemes: {Scheme.Https})
+    validator: validate_ManagementPoliciesCreateOrUpdate_568399, base: "",
+    url: url_ManagementPoliciesCreateOrUpdate_568400, schemes: {Scheme.Https})
 type
-  Call_ManagementPoliciesGet_594157 = ref object of OpenApiRestCall_593438
-proc url_ManagementPoliciesGet_594159(protocol: Scheme; host: string; base: string;
+  Call_ManagementPoliciesGet_568386 = ref object of OpenApiRestCall_567667
+proc url_ManagementPoliciesGet_568388(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1790,7 +1790,7 @@ proc url_ManagementPoliciesGet_594159(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementPoliciesGet_594158(path: JsonNode; query: JsonNode;
+proc validate_ManagementPoliciesGet_568387(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the managementpolicy associated with the specified storage account.
   ## 
@@ -1808,26 +1808,26 @@ proc validate_ManagementPoliciesGet_594158(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594160 = path.getOrDefault("resourceGroupName")
-  valid_594160 = validateParameter(valid_594160, JString, required = true,
+  var valid_568389 = path.getOrDefault("resourceGroupName")
+  valid_568389 = validateParameter(valid_568389, JString, required = true,
                                  default = nil)
-  if valid_594160 != nil:
-    section.add "resourceGroupName", valid_594160
-  var valid_594161 = path.getOrDefault("subscriptionId")
-  valid_594161 = validateParameter(valid_594161, JString, required = true,
+  if valid_568389 != nil:
+    section.add "resourceGroupName", valid_568389
+  var valid_568390 = path.getOrDefault("subscriptionId")
+  valid_568390 = validateParameter(valid_568390, JString, required = true,
                                  default = nil)
-  if valid_594161 != nil:
-    section.add "subscriptionId", valid_594161
-  var valid_594162 = path.getOrDefault("managementPolicyName")
-  valid_594162 = validateParameter(valid_594162, JString, required = true,
+  if valid_568390 != nil:
+    section.add "subscriptionId", valid_568390
+  var valid_568391 = path.getOrDefault("managementPolicyName")
+  valid_568391 = validateParameter(valid_568391, JString, required = true,
                                  default = newJString("default"))
-  if valid_594162 != nil:
-    section.add "managementPolicyName", valid_594162
-  var valid_594163 = path.getOrDefault("accountName")
-  valid_594163 = validateParameter(valid_594163, JString, required = true,
+  if valid_568391 != nil:
+    section.add "managementPolicyName", valid_568391
+  var valid_568392 = path.getOrDefault("accountName")
+  valid_568392 = validateParameter(valid_568392, JString, required = true,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "accountName", valid_594163
+  if valid_568392 != nil:
+    section.add "accountName", valid_568392
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1835,11 +1835,11 @@ proc validate_ManagementPoliciesGet_594158(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594164 = query.getOrDefault("api-version")
-  valid_594164 = validateParameter(valid_594164, JString, required = true,
+  var valid_568393 = query.getOrDefault("api-version")
+  valid_568393 = validateParameter(valid_568393, JString, required = true,
                                  default = nil)
-  if valid_594164 != nil:
-    section.add "api-version", valid_594164
+  if valid_568393 != nil:
+    section.add "api-version", valid_568393
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1848,20 +1848,20 @@ proc validate_ManagementPoliciesGet_594158(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594165: Call_ManagementPoliciesGet_594157; path: JsonNode;
+proc call*(call_568394: Call_ManagementPoliciesGet_568386; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the managementpolicy associated with the specified storage account.
   ## 
-  let valid = call_594165.validator(path, query, header, formData, body)
-  let scheme = call_594165.pickScheme
+  let valid = call_568394.validator(path, query, header, formData, body)
+  let scheme = call_568394.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594165.url(scheme.get, call_594165.host, call_594165.base,
-                         call_594165.route, valid.getOrDefault("path"),
+  let url = call_568394.url(scheme.get, call_568394.host, call_568394.base,
+                         call_568394.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594165, url, valid)
+  result = hook(call_568394, url, valid)
 
-proc call*(call_594166: Call_ManagementPoliciesGet_594157;
+proc call*(call_568395: Call_ManagementPoliciesGet_568386;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string; managementPolicyName: string = "default"): Recallable =
   ## managementPoliciesGet
@@ -1876,23 +1876,23 @@ proc call*(call_594166: Call_ManagementPoliciesGet_594157;
   ##                       : The name of the Storage Account Management Policy. It should always be 'default'
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594167 = newJObject()
-  var query_594168 = newJObject()
-  add(path_594167, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594168, "api-version", newJString(apiVersion))
-  add(path_594167, "subscriptionId", newJString(subscriptionId))
-  add(path_594167, "managementPolicyName", newJString(managementPolicyName))
-  add(path_594167, "accountName", newJString(accountName))
-  result = call_594166.call(path_594167, query_594168, nil, nil, nil)
+  var path_568396 = newJObject()
+  var query_568397 = newJObject()
+  add(path_568396, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568397, "api-version", newJString(apiVersion))
+  add(path_568396, "subscriptionId", newJString(subscriptionId))
+  add(path_568396, "managementPolicyName", newJString(managementPolicyName))
+  add(path_568396, "accountName", newJString(accountName))
+  result = call_568395.call(path_568396, query_568397, nil, nil, nil)
 
-var managementPoliciesGet* = Call_ManagementPoliciesGet_594157(
+var managementPoliciesGet* = Call_ManagementPoliciesGet_568386(
     name: "managementPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/managementPolicies/{managementPolicyName}",
-    validator: validate_ManagementPoliciesGet_594158, base: "",
-    url: url_ManagementPoliciesGet_594159, schemes: {Scheme.Https})
+    validator: validate_ManagementPoliciesGet_568387, base: "",
+    url: url_ManagementPoliciesGet_568388, schemes: {Scheme.Https})
 type
-  Call_ManagementPoliciesDelete_594183 = ref object of OpenApiRestCall_593438
-proc url_ManagementPoliciesDelete_594185(protocol: Scheme; host: string;
+  Call_ManagementPoliciesDelete_568412 = ref object of OpenApiRestCall_567667
+proc url_ManagementPoliciesDelete_568414(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1920,7 +1920,7 @@ proc url_ManagementPoliciesDelete_594185(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementPoliciesDelete_594184(path: JsonNode; query: JsonNode;
+proc validate_ManagementPoliciesDelete_568413(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the managementpolicy associated with the specified storage account.
   ## 
@@ -1938,26 +1938,26 @@ proc validate_ManagementPoliciesDelete_594184(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594186 = path.getOrDefault("resourceGroupName")
-  valid_594186 = validateParameter(valid_594186, JString, required = true,
+  var valid_568415 = path.getOrDefault("resourceGroupName")
+  valid_568415 = validateParameter(valid_568415, JString, required = true,
                                  default = nil)
-  if valid_594186 != nil:
-    section.add "resourceGroupName", valid_594186
-  var valid_594187 = path.getOrDefault("subscriptionId")
-  valid_594187 = validateParameter(valid_594187, JString, required = true,
+  if valid_568415 != nil:
+    section.add "resourceGroupName", valid_568415
+  var valid_568416 = path.getOrDefault("subscriptionId")
+  valid_568416 = validateParameter(valid_568416, JString, required = true,
                                  default = nil)
-  if valid_594187 != nil:
-    section.add "subscriptionId", valid_594187
-  var valid_594188 = path.getOrDefault("managementPolicyName")
-  valid_594188 = validateParameter(valid_594188, JString, required = true,
+  if valid_568416 != nil:
+    section.add "subscriptionId", valid_568416
+  var valid_568417 = path.getOrDefault("managementPolicyName")
+  valid_568417 = validateParameter(valid_568417, JString, required = true,
                                  default = newJString("default"))
-  if valid_594188 != nil:
-    section.add "managementPolicyName", valid_594188
-  var valid_594189 = path.getOrDefault("accountName")
-  valid_594189 = validateParameter(valid_594189, JString, required = true,
+  if valid_568417 != nil:
+    section.add "managementPolicyName", valid_568417
+  var valid_568418 = path.getOrDefault("accountName")
+  valid_568418 = validateParameter(valid_568418, JString, required = true,
                                  default = nil)
-  if valid_594189 != nil:
-    section.add "accountName", valid_594189
+  if valid_568418 != nil:
+    section.add "accountName", valid_568418
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1965,11 +1965,11 @@ proc validate_ManagementPoliciesDelete_594184(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594190 = query.getOrDefault("api-version")
-  valid_594190 = validateParameter(valid_594190, JString, required = true,
+  var valid_568419 = query.getOrDefault("api-version")
+  valid_568419 = validateParameter(valid_568419, JString, required = true,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "api-version", valid_594190
+  if valid_568419 != nil:
+    section.add "api-version", valid_568419
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1978,20 +1978,20 @@ proc validate_ManagementPoliciesDelete_594184(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594191: Call_ManagementPoliciesDelete_594183; path: JsonNode;
+proc call*(call_568420: Call_ManagementPoliciesDelete_568412; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the managementpolicy associated with the specified storage account.
   ## 
-  let valid = call_594191.validator(path, query, header, formData, body)
-  let scheme = call_594191.pickScheme
+  let valid = call_568420.validator(path, query, header, formData, body)
+  let scheme = call_568420.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594191.url(scheme.get, call_594191.host, call_594191.base,
-                         call_594191.route, valid.getOrDefault("path"),
+  let url = call_568420.url(scheme.get, call_568420.host, call_568420.base,
+                         call_568420.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594191, url, valid)
+  result = hook(call_568420, url, valid)
 
-proc call*(call_594192: Call_ManagementPoliciesDelete_594183;
+proc call*(call_568421: Call_ManagementPoliciesDelete_568412;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string; managementPolicyName: string = "default"): Recallable =
   ## managementPoliciesDelete
@@ -2006,23 +2006,23 @@ proc call*(call_594192: Call_ManagementPoliciesDelete_594183;
   ##                       : The name of the Storage Account Management Policy. It should always be 'default'
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594193 = newJObject()
-  var query_594194 = newJObject()
-  add(path_594193, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594194, "api-version", newJString(apiVersion))
-  add(path_594193, "subscriptionId", newJString(subscriptionId))
-  add(path_594193, "managementPolicyName", newJString(managementPolicyName))
-  add(path_594193, "accountName", newJString(accountName))
-  result = call_594192.call(path_594193, query_594194, nil, nil, nil)
+  var path_568422 = newJObject()
+  var query_568423 = newJObject()
+  add(path_568422, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568423, "api-version", newJString(apiVersion))
+  add(path_568422, "subscriptionId", newJString(subscriptionId))
+  add(path_568422, "managementPolicyName", newJString(managementPolicyName))
+  add(path_568422, "accountName", newJString(accountName))
+  result = call_568421.call(path_568422, query_568423, nil, nil, nil)
 
-var managementPoliciesDelete* = Call_ManagementPoliciesDelete_594183(
+var managementPoliciesDelete* = Call_ManagementPoliciesDelete_568412(
     name: "managementPoliciesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/managementPolicies/{managementPolicyName}",
-    validator: validate_ManagementPoliciesDelete_594184, base: "",
-    url: url_ManagementPoliciesDelete_594185, schemes: {Scheme.Https})
+    validator: validate_ManagementPoliciesDelete_568413, base: "",
+    url: url_ManagementPoliciesDelete_568414, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsRegenerateKey_594195 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsRegenerateKey_594197(protocol: Scheme; host: string;
+  Call_StorageAccountsRegenerateKey_568424 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsRegenerateKey_568426(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2046,7 +2046,7 @@ proc url_StorageAccountsRegenerateKey_594197(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsRegenerateKey_594196(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountsRegenerateKey_568425(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates one of the access keys for the specified storage account.
   ## 
@@ -2062,21 +2062,21 @@ proc validate_StorageAccountsRegenerateKey_594196(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594198 = path.getOrDefault("resourceGroupName")
-  valid_594198 = validateParameter(valid_594198, JString, required = true,
+  var valid_568427 = path.getOrDefault("resourceGroupName")
+  valid_568427 = validateParameter(valid_568427, JString, required = true,
                                  default = nil)
-  if valid_594198 != nil:
-    section.add "resourceGroupName", valid_594198
-  var valid_594199 = path.getOrDefault("subscriptionId")
-  valid_594199 = validateParameter(valid_594199, JString, required = true,
+  if valid_568427 != nil:
+    section.add "resourceGroupName", valid_568427
+  var valid_568428 = path.getOrDefault("subscriptionId")
+  valid_568428 = validateParameter(valid_568428, JString, required = true,
                                  default = nil)
-  if valid_594199 != nil:
-    section.add "subscriptionId", valid_594199
-  var valid_594200 = path.getOrDefault("accountName")
-  valid_594200 = validateParameter(valid_594200, JString, required = true,
+  if valid_568428 != nil:
+    section.add "subscriptionId", valid_568428
+  var valid_568429 = path.getOrDefault("accountName")
+  valid_568429 = validateParameter(valid_568429, JString, required = true,
                                  default = nil)
-  if valid_594200 != nil:
-    section.add "accountName", valid_594200
+  if valid_568429 != nil:
+    section.add "accountName", valid_568429
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2084,11 +2084,11 @@ proc validate_StorageAccountsRegenerateKey_594196(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594201 = query.getOrDefault("api-version")
-  valid_594201 = validateParameter(valid_594201, JString, required = true,
+  var valid_568430 = query.getOrDefault("api-version")
+  valid_568430 = validateParameter(valid_568430, JString, required = true,
                                  default = nil)
-  if valid_594201 != nil:
-    section.add "api-version", valid_594201
+  if valid_568430 != nil:
+    section.add "api-version", valid_568430
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2102,20 +2102,20 @@ proc validate_StorageAccountsRegenerateKey_594196(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594203: Call_StorageAccountsRegenerateKey_594195; path: JsonNode;
+proc call*(call_568432: Call_StorageAccountsRegenerateKey_568424; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerates one of the access keys for the specified storage account.
   ## 
-  let valid = call_594203.validator(path, query, header, formData, body)
-  let scheme = call_594203.pickScheme
+  let valid = call_568432.validator(path, query, header, formData, body)
+  let scheme = call_568432.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594203.url(scheme.get, call_594203.host, call_594203.base,
-                         call_594203.route, valid.getOrDefault("path"),
+  let url = call_568432.url(scheme.get, call_568432.host, call_568432.base,
+                         call_568432.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594203, url, valid)
+  result = hook(call_568432, url, valid)
 
-proc call*(call_594204: Call_StorageAccountsRegenerateKey_594195;
+proc call*(call_568433: Call_StorageAccountsRegenerateKey_568424;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           regenerateKey: JsonNode; accountName: string): Recallable =
   ## storageAccountsRegenerateKey
@@ -2130,25 +2130,25 @@ proc call*(call_594204: Call_StorageAccountsRegenerateKey_594195;
   ##                : Specifies name of the key which should be regenerated -- key1 or key2.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594205 = newJObject()
-  var query_594206 = newJObject()
-  var body_594207 = newJObject()
-  add(path_594205, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594206, "api-version", newJString(apiVersion))
-  add(path_594205, "subscriptionId", newJString(subscriptionId))
+  var path_568434 = newJObject()
+  var query_568435 = newJObject()
+  var body_568436 = newJObject()
+  add(path_568434, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568435, "api-version", newJString(apiVersion))
+  add(path_568434, "subscriptionId", newJString(subscriptionId))
   if regenerateKey != nil:
-    body_594207 = regenerateKey
-  add(path_594205, "accountName", newJString(accountName))
-  result = call_594204.call(path_594205, query_594206, nil, nil, body_594207)
+    body_568436 = regenerateKey
+  add(path_568434, "accountName", newJString(accountName))
+  result = call_568433.call(path_568434, query_568435, nil, nil, body_568436)
 
-var storageAccountsRegenerateKey* = Call_StorageAccountsRegenerateKey_594195(
+var storageAccountsRegenerateKey* = Call_StorageAccountsRegenerateKey_568424(
     name: "storageAccountsRegenerateKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/regenerateKey",
-    validator: validate_StorageAccountsRegenerateKey_594196, base: "",
-    url: url_StorageAccountsRegenerateKey_594197, schemes: {Scheme.Https})
+    validator: validate_StorageAccountsRegenerateKey_568425, base: "",
+    url: url_StorageAccountsRegenerateKey_568426, schemes: {Scheme.Https})
 type
-  Call_StorageAccountsRevokeUserDelegationKeys_594208 = ref object of OpenApiRestCall_593438
-proc url_StorageAccountsRevokeUserDelegationKeys_594210(protocol: Scheme;
+  Call_StorageAccountsRevokeUserDelegationKeys_568437 = ref object of OpenApiRestCall_567667
+proc url_StorageAccountsRevokeUserDelegationKeys_568439(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2172,7 +2172,7 @@ proc url_StorageAccountsRevokeUserDelegationKeys_594210(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountsRevokeUserDelegationKeys_594209(path: JsonNode;
+proc validate_StorageAccountsRevokeUserDelegationKeys_568438(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Revoke user delegation keys.
   ## 
@@ -2188,21 +2188,21 @@ proc validate_StorageAccountsRevokeUserDelegationKeys_594209(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594211 = path.getOrDefault("resourceGroupName")
-  valid_594211 = validateParameter(valid_594211, JString, required = true,
+  var valid_568440 = path.getOrDefault("resourceGroupName")
+  valid_568440 = validateParameter(valid_568440, JString, required = true,
                                  default = nil)
-  if valid_594211 != nil:
-    section.add "resourceGroupName", valid_594211
-  var valid_594212 = path.getOrDefault("subscriptionId")
-  valid_594212 = validateParameter(valid_594212, JString, required = true,
+  if valid_568440 != nil:
+    section.add "resourceGroupName", valid_568440
+  var valid_568441 = path.getOrDefault("subscriptionId")
+  valid_568441 = validateParameter(valid_568441, JString, required = true,
                                  default = nil)
-  if valid_594212 != nil:
-    section.add "subscriptionId", valid_594212
-  var valid_594213 = path.getOrDefault("accountName")
-  valid_594213 = validateParameter(valid_594213, JString, required = true,
+  if valid_568441 != nil:
+    section.add "subscriptionId", valid_568441
+  var valid_568442 = path.getOrDefault("accountName")
+  valid_568442 = validateParameter(valid_568442, JString, required = true,
                                  default = nil)
-  if valid_594213 != nil:
-    section.add "accountName", valid_594213
+  if valid_568442 != nil:
+    section.add "accountName", valid_568442
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2210,11 +2210,11 @@ proc validate_StorageAccountsRevokeUserDelegationKeys_594209(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594214 = query.getOrDefault("api-version")
-  valid_594214 = validateParameter(valid_594214, JString, required = true,
+  var valid_568443 = query.getOrDefault("api-version")
+  valid_568443 = validateParameter(valid_568443, JString, required = true,
                                  default = nil)
-  if valid_594214 != nil:
-    section.add "api-version", valid_594214
+  if valid_568443 != nil:
+    section.add "api-version", valid_568443
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2223,21 +2223,21 @@ proc validate_StorageAccountsRevokeUserDelegationKeys_594209(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594215: Call_StorageAccountsRevokeUserDelegationKeys_594208;
+proc call*(call_568444: Call_StorageAccountsRevokeUserDelegationKeys_568437;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Revoke user delegation keys.
   ## 
-  let valid = call_594215.validator(path, query, header, formData, body)
-  let scheme = call_594215.pickScheme
+  let valid = call_568444.validator(path, query, header, formData, body)
+  let scheme = call_568444.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594215.url(scheme.get, call_594215.host, call_594215.base,
-                         call_594215.route, valid.getOrDefault("path"),
+  let url = call_568444.url(scheme.get, call_568444.host, call_568444.base,
+                         call_568444.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594215, url, valid)
+  result = hook(call_568444, url, valid)
 
-proc call*(call_594216: Call_StorageAccountsRevokeUserDelegationKeys_594208;
+proc call*(call_568445: Call_StorageAccountsRevokeUserDelegationKeys_568437;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           accountName: string): Recallable =
   ## storageAccountsRevokeUserDelegationKeys
@@ -2250,19 +2250,19 @@ proc call*(call_594216: Call_StorageAccountsRevokeUserDelegationKeys_594208;
   ##                 : The ID of the target subscription.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_594217 = newJObject()
-  var query_594218 = newJObject()
-  add(path_594217, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594218, "api-version", newJString(apiVersion))
-  add(path_594217, "subscriptionId", newJString(subscriptionId))
-  add(path_594217, "accountName", newJString(accountName))
-  result = call_594216.call(path_594217, query_594218, nil, nil, nil)
+  var path_568446 = newJObject()
+  var query_568447 = newJObject()
+  add(path_568446, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568447, "api-version", newJString(apiVersion))
+  add(path_568446, "subscriptionId", newJString(subscriptionId))
+  add(path_568446, "accountName", newJString(accountName))
+  result = call_568445.call(path_568446, query_568447, nil, nil, nil)
 
-var storageAccountsRevokeUserDelegationKeys* = Call_StorageAccountsRevokeUserDelegationKeys_594208(
+var storageAccountsRevokeUserDelegationKeys* = Call_StorageAccountsRevokeUserDelegationKeys_568437(
     name: "storageAccountsRevokeUserDelegationKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/revokeUserDelegationKeys",
-    validator: validate_StorageAccountsRevokeUserDelegationKeys_594209, base: "",
-    url: url_StorageAccountsRevokeUserDelegationKeys_594210,
+    validator: validate_StorageAccountsRevokeUserDelegationKeys_568438, base: "",
+    url: url_StorageAccountsRevokeUserDelegationKeys_568439,
     schemes: {Scheme.Https})
 export
   rest

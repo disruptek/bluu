@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_596458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "apimanagement-apimtenant"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_TenantAccessGetEntityTag_593966 = ref object of OpenApiRestCall_593425
-proc url_TenantAccessGetEntityTag_593968(protocol: Scheme; host: string;
+  Call_TenantAccessGetEntityTag_596999 = ref object of OpenApiRestCall_596458
+proc url_TenantAccessGetEntityTag_597001(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -131,7 +131,7 @@ proc url_TenantAccessGetEntityTag_593968(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantAccessGetEntityTag_593967(path: JsonNode; query: JsonNode;
+proc validate_TenantAccessGetEntityTag_597000(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Tenant access metadata
   ## 
@@ -149,26 +149,26 @@ proc validate_TenantAccessGetEntityTag_593967(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593969 = path.getOrDefault("resourceGroupName")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_597002 = path.getOrDefault("resourceGroupName")
+  valid_597002 = validateParameter(valid_597002, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "resourceGroupName", valid_593969
-  var valid_593970 = path.getOrDefault("accessName")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_597002 != nil:
+    section.add "resourceGroupName", valid_597002
+  var valid_597003 = path.getOrDefault("accessName")
+  valid_597003 = validateParameter(valid_597003, JString, required = true,
                                  default = newJString("access"))
-  if valid_593970 != nil:
-    section.add "accessName", valid_593970
-  var valid_593971 = path.getOrDefault("subscriptionId")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  if valid_597003 != nil:
+    section.add "accessName", valid_597003
+  var valid_597004 = path.getOrDefault("subscriptionId")
+  valid_597004 = validateParameter(valid_597004, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "subscriptionId", valid_593971
-  var valid_593972 = path.getOrDefault("serviceName")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  if valid_597004 != nil:
+    section.add "subscriptionId", valid_597004
+  var valid_597005 = path.getOrDefault("serviceName")
+  valid_597005 = validateParameter(valid_597005, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "serviceName", valid_593972
+  if valid_597005 != nil:
+    section.add "serviceName", valid_597005
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,11 +176,11 @@ proc validate_TenantAccessGetEntityTag_593967(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593973 = query.getOrDefault("api-version")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_597006 = query.getOrDefault("api-version")
+  valid_597006 = validateParameter(valid_597006, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "api-version", valid_593973
+  if valid_597006 != nil:
+    section.add "api-version", valid_597006
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -189,20 +189,20 @@ proc validate_TenantAccessGetEntityTag_593967(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593974: Call_TenantAccessGetEntityTag_593966; path: JsonNode;
+proc call*(call_597007: Call_TenantAccessGetEntityTag_596999; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Tenant access metadata
   ## 
-  let valid = call_593974.validator(path, query, header, formData, body)
-  let scheme = call_593974.pickScheme
+  let valid = call_597007.validator(path, query, header, formData, body)
+  let scheme = call_597007.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593974.url(scheme.get, call_593974.host, call_593974.base,
-                         call_593974.route, valid.getOrDefault("path"),
+  let url = call_597007.url(scheme.get, call_597007.host, call_597007.base,
+                         call_597007.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593974, url, valid)
+  result = hook(call_597007, url, valid)
 
-proc call*(call_593975: Call_TenantAccessGetEntityTag_593966;
+proc call*(call_597008: Call_TenantAccessGetEntityTag_596999;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serviceName: string; accessName: string = "access"): Recallable =
   ## tenantAccessGetEntityTag
@@ -217,23 +217,23 @@ proc call*(call_593975: Call_TenantAccessGetEntityTag_593966;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_593976 = newJObject()
-  var query_593977 = newJObject()
-  add(path_593976, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593977, "api-version", newJString(apiVersion))
-  add(path_593976, "accessName", newJString(accessName))
-  add(path_593976, "subscriptionId", newJString(subscriptionId))
-  add(path_593976, "serviceName", newJString(serviceName))
-  result = call_593975.call(path_593976, query_593977, nil, nil, nil)
+  var path_597009 = newJObject()
+  var query_597010 = newJObject()
+  add(path_597009, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597010, "api-version", newJString(apiVersion))
+  add(path_597009, "accessName", newJString(accessName))
+  add(path_597009, "subscriptionId", newJString(subscriptionId))
+  add(path_597009, "serviceName", newJString(serviceName))
+  result = call_597008.call(path_597009, query_597010, nil, nil, nil)
 
-var tenantAccessGetEntityTag* = Call_TenantAccessGetEntityTag_593966(
+var tenantAccessGetEntityTag* = Call_TenantAccessGetEntityTag_596999(
     name: "tenantAccessGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{accessName}",
-    validator: validate_TenantAccessGetEntityTag_593967, base: "",
-    url: url_TenantAccessGetEntityTag_593968, schemes: {Scheme.Https})
+    validator: validate_TenantAccessGetEntityTag_597000, base: "",
+    url: url_TenantAccessGetEntityTag_597001, schemes: {Scheme.Https})
 type
-  Call_TenantAccessGet_593647 = ref object of OpenApiRestCall_593425
-proc url_TenantAccessGet_593649(protocol: Scheme; host: string; base: string;
+  Call_TenantAccessGet_596680 = ref object of OpenApiRestCall_596458
+proc url_TenantAccessGet_596682(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -259,7 +259,7 @@ proc url_TenantAccessGet_593649(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantAccessGet_593648(path: JsonNode; query: JsonNode;
+proc validate_TenantAccessGet_596681(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Get tenant access information details
@@ -278,26 +278,26 @@ proc validate_TenantAccessGet_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_596842 = path.getOrDefault("resourceGroupName")
+  valid_596842 = validateParameter(valid_596842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593823 = path.getOrDefault("accessName")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_596842 != nil:
+    section.add "resourceGroupName", valid_596842
+  var valid_596856 = path.getOrDefault("accessName")
+  valid_596856 = validateParameter(valid_596856, JString, required = true,
                                  default = newJString("access"))
-  if valid_593823 != nil:
-    section.add "accessName", valid_593823
-  var valid_593824 = path.getOrDefault("subscriptionId")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_596856 != nil:
+    section.add "accessName", valid_596856
+  var valid_596857 = path.getOrDefault("subscriptionId")
+  valid_596857 = validateParameter(valid_596857, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "subscriptionId", valid_593824
-  var valid_593825 = path.getOrDefault("serviceName")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_596857 != nil:
+    section.add "subscriptionId", valid_596857
+  var valid_596858 = path.getOrDefault("serviceName")
+  valid_596858 = validateParameter(valid_596858, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "serviceName", valid_593825
+  if valid_596858 != nil:
+    section.add "serviceName", valid_596858
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -305,11 +305,11 @@ proc validate_TenantAccessGet_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593826 = query.getOrDefault("api-version")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  var valid_596859 = query.getOrDefault("api-version")
+  valid_596859 = validateParameter(valid_596859, JString, required = true,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "api-version", valid_593826
+  if valid_596859 != nil:
+    section.add "api-version", valid_596859
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -318,20 +318,20 @@ proc validate_TenantAccessGet_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593853: Call_TenantAccessGet_593647; path: JsonNode; query: JsonNode;
+proc call*(call_596886: Call_TenantAccessGet_596680; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get tenant access information details
   ## 
-  let valid = call_593853.validator(path, query, header, formData, body)
-  let scheme = call_593853.pickScheme
+  let valid = call_596886.validator(path, query, header, formData, body)
+  let scheme = call_596886.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593853.url(scheme.get, call_593853.host, call_593853.base,
-                         call_593853.route, valid.getOrDefault("path"),
+  let url = call_596886.url(scheme.get, call_596886.host, call_596886.base,
+                         call_596886.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593853, url, valid)
+  result = hook(call_596886, url, valid)
 
-proc call*(call_593924: Call_TenantAccessGet_593647; resourceGroupName: string;
+proc call*(call_596957: Call_TenantAccessGet_596680; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; serviceName: string;
           accessName: string = "access"): Recallable =
   ## tenantAccessGet
@@ -346,22 +346,22 @@ proc call*(call_593924: Call_TenantAccessGet_593647; resourceGroupName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_593925 = newJObject()
-  var query_593927 = newJObject()
-  add(path_593925, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593927, "api-version", newJString(apiVersion))
-  add(path_593925, "accessName", newJString(accessName))
-  add(path_593925, "subscriptionId", newJString(subscriptionId))
-  add(path_593925, "serviceName", newJString(serviceName))
-  result = call_593924.call(path_593925, query_593927, nil, nil, nil)
+  var path_596958 = newJObject()
+  var query_596960 = newJObject()
+  add(path_596958, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596960, "api-version", newJString(apiVersion))
+  add(path_596958, "accessName", newJString(accessName))
+  add(path_596958, "subscriptionId", newJString(subscriptionId))
+  add(path_596958, "serviceName", newJString(serviceName))
+  result = call_596957.call(path_596958, query_596960, nil, nil, nil)
 
-var tenantAccessGet* = Call_TenantAccessGet_593647(name: "tenantAccessGet",
+var tenantAccessGet* = Call_TenantAccessGet_596680(name: "tenantAccessGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{accessName}",
-    validator: validate_TenantAccessGet_593648, base: "", url: url_TenantAccessGet_593649,
+    validator: validate_TenantAccessGet_596681, base: "", url: url_TenantAccessGet_596682,
     schemes: {Scheme.Https})
 type
-  Call_TenantAccessUpdate_593978 = ref object of OpenApiRestCall_593425
-proc url_TenantAccessUpdate_593980(protocol: Scheme; host: string; base: string;
+  Call_TenantAccessUpdate_597011 = ref object of OpenApiRestCall_596458
+proc url_TenantAccessUpdate_597013(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -387,7 +387,7 @@ proc url_TenantAccessUpdate_593980(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantAccessUpdate_593979(path: JsonNode; query: JsonNode;
+proc validate_TenantAccessUpdate_597012(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Update tenant access information details.
@@ -406,26 +406,26 @@ proc validate_TenantAccessUpdate_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593998 = path.getOrDefault("resourceGroupName")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  var valid_597031 = path.getOrDefault("resourceGroupName")
+  valid_597031 = validateParameter(valid_597031, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "resourceGroupName", valid_593998
-  var valid_593999 = path.getOrDefault("accessName")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  if valid_597031 != nil:
+    section.add "resourceGroupName", valid_597031
+  var valid_597032 = path.getOrDefault("accessName")
+  valid_597032 = validateParameter(valid_597032, JString, required = true,
                                  default = newJString("access"))
-  if valid_593999 != nil:
-    section.add "accessName", valid_593999
-  var valid_594000 = path.getOrDefault("subscriptionId")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  if valid_597032 != nil:
+    section.add "accessName", valid_597032
+  var valid_597033 = path.getOrDefault("subscriptionId")
+  valid_597033 = validateParameter(valid_597033, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "subscriptionId", valid_594000
-  var valid_594001 = path.getOrDefault("serviceName")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_597033 != nil:
+    section.add "subscriptionId", valid_597033
+  var valid_597034 = path.getOrDefault("serviceName")
+  valid_597034 = validateParameter(valid_597034, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "serviceName", valid_594001
+  if valid_597034 != nil:
+    section.add "serviceName", valid_597034
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -433,11 +433,11 @@ proc validate_TenantAccessUpdate_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594002 = query.getOrDefault("api-version")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_597035 = query.getOrDefault("api-version")
+  valid_597035 = validateParameter(valid_597035, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "api-version", valid_594002
+  if valid_597035 != nil:
+    section.add "api-version", valid_597035
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -445,11 +445,11 @@ proc validate_TenantAccessUpdate_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594003 = header.getOrDefault("If-Match")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  var valid_597036 = header.getOrDefault("If-Match")
+  valid_597036 = validateParameter(valid_597036, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "If-Match", valid_594003
+  if valid_597036 != nil:
+    section.add "If-Match", valid_597036
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -461,20 +461,20 @@ proc validate_TenantAccessUpdate_593979(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594005: Call_TenantAccessUpdate_593978; path: JsonNode;
+proc call*(call_597038: Call_TenantAccessUpdate_597011; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update tenant access information details.
   ## 
-  let valid = call_594005.validator(path, query, header, formData, body)
-  let scheme = call_594005.pickScheme
+  let valid = call_597038.validator(path, query, header, formData, body)
+  let scheme = call_597038.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594005.url(scheme.get, call_594005.host, call_594005.base,
-                         call_594005.route, valid.getOrDefault("path"),
+  let url = call_597038.url(scheme.get, call_597038.host, call_597038.base,
+                         call_597038.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594005, url, valid)
+  result = hook(call_597038, url, valid)
 
-proc call*(call_594006: Call_TenantAccessUpdate_593978; resourceGroupName: string;
+proc call*(call_597039: Call_TenantAccessUpdate_597011; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; parameters: JsonNode;
           serviceName: string; accessName: string = "access"): Recallable =
   ## tenantAccessUpdate
@@ -491,26 +491,26 @@ proc call*(call_594006: Call_TenantAccessUpdate_593978; resourceGroupName: strin
   ##             : Parameters supplied to retrieve the Tenant Access Information.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594007 = newJObject()
-  var query_594008 = newJObject()
-  var body_594009 = newJObject()
-  add(path_594007, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594008, "api-version", newJString(apiVersion))
-  add(path_594007, "accessName", newJString(accessName))
-  add(path_594007, "subscriptionId", newJString(subscriptionId))
+  var path_597040 = newJObject()
+  var query_597041 = newJObject()
+  var body_597042 = newJObject()
+  add(path_597040, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597041, "api-version", newJString(apiVersion))
+  add(path_597040, "accessName", newJString(accessName))
+  add(path_597040, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594009 = parameters
-  add(path_594007, "serviceName", newJString(serviceName))
-  result = call_594006.call(path_594007, query_594008, nil, nil, body_594009)
+    body_597042 = parameters
+  add(path_597040, "serviceName", newJString(serviceName))
+  result = call_597039.call(path_597040, query_597041, nil, nil, body_597042)
 
-var tenantAccessUpdate* = Call_TenantAccessUpdate_593978(
+var tenantAccessUpdate* = Call_TenantAccessUpdate_597011(
     name: "tenantAccessUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{accessName}",
-    validator: validate_TenantAccessUpdate_593979, base: "",
-    url: url_TenantAccessUpdate_593980, schemes: {Scheme.Https})
+    validator: validate_TenantAccessUpdate_597012, base: "",
+    url: url_TenantAccessUpdate_597013, schemes: {Scheme.Https})
 type
-  Call_TenantAccessGitGet_594010 = ref object of OpenApiRestCall_593425
-proc url_TenantAccessGitGet_594012(protocol: Scheme; host: string; base: string;
+  Call_TenantAccessGitGet_597043 = ref object of OpenApiRestCall_596458
+proc url_TenantAccessGitGet_597045(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -537,7 +537,7 @@ proc url_TenantAccessGitGet_594012(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantAccessGitGet_594011(path: JsonNode; query: JsonNode;
+proc validate_TenantAccessGitGet_597044(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the Git access configuration for the tenant.
@@ -556,26 +556,26 @@ proc validate_TenantAccessGitGet_594011(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594013 = path.getOrDefault("resourceGroupName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  var valid_597046 = path.getOrDefault("resourceGroupName")
+  valid_597046 = validateParameter(valid_597046, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "resourceGroupName", valid_594013
-  var valid_594014 = path.getOrDefault("accessName")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_597046 != nil:
+    section.add "resourceGroupName", valid_597046
+  var valid_597047 = path.getOrDefault("accessName")
+  valid_597047 = validateParameter(valid_597047, JString, required = true,
                                  default = newJString("access"))
-  if valid_594014 != nil:
-    section.add "accessName", valid_594014
-  var valid_594015 = path.getOrDefault("subscriptionId")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_597047 != nil:
+    section.add "accessName", valid_597047
+  var valid_597048 = path.getOrDefault("subscriptionId")
+  valid_597048 = validateParameter(valid_597048, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "subscriptionId", valid_594015
-  var valid_594016 = path.getOrDefault("serviceName")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_597048 != nil:
+    section.add "subscriptionId", valid_597048
+  var valid_597049 = path.getOrDefault("serviceName")
+  valid_597049 = validateParameter(valid_597049, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "serviceName", valid_594016
+  if valid_597049 != nil:
+    section.add "serviceName", valid_597049
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -583,11 +583,11 @@ proc validate_TenantAccessGitGet_594011(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594017 = query.getOrDefault("api-version")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  var valid_597050 = query.getOrDefault("api-version")
+  valid_597050 = validateParameter(valid_597050, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "api-version", valid_594017
+  if valid_597050 != nil:
+    section.add "api-version", valid_597050
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -596,20 +596,20 @@ proc validate_TenantAccessGitGet_594011(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_TenantAccessGitGet_594010; path: JsonNode;
+proc call*(call_597051: Call_TenantAccessGitGet_597043; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Git access configuration for the tenant.
   ## 
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_597051.validator(path, query, header, formData, body)
+  let scheme = call_597051.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_597051.url(scheme.get, call_597051.host, call_597051.base,
+                         call_597051.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_597051, url, valid)
 
-proc call*(call_594019: Call_TenantAccessGitGet_594010; resourceGroupName: string;
+proc call*(call_597052: Call_TenantAccessGitGet_597043; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; serviceName: string;
           accessName: string = "access"): Recallable =
   ## tenantAccessGitGet
@@ -624,23 +624,23 @@ proc call*(call_594019: Call_TenantAccessGitGet_594010; resourceGroupName: strin
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594020 = newJObject()
-  var query_594021 = newJObject()
-  add(path_594020, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594021, "api-version", newJString(apiVersion))
-  add(path_594020, "accessName", newJString(accessName))
-  add(path_594020, "subscriptionId", newJString(subscriptionId))
-  add(path_594020, "serviceName", newJString(serviceName))
-  result = call_594019.call(path_594020, query_594021, nil, nil, nil)
+  var path_597053 = newJObject()
+  var query_597054 = newJObject()
+  add(path_597053, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597054, "api-version", newJString(apiVersion))
+  add(path_597053, "accessName", newJString(accessName))
+  add(path_597053, "subscriptionId", newJString(subscriptionId))
+  add(path_597053, "serviceName", newJString(serviceName))
+  result = call_597052.call(path_597053, query_597054, nil, nil, nil)
 
-var tenantAccessGitGet* = Call_TenantAccessGitGet_594010(
+var tenantAccessGitGet* = Call_TenantAccessGitGet_597043(
     name: "tenantAccessGitGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{accessName}/git",
-    validator: validate_TenantAccessGitGet_594011, base: "",
-    url: url_TenantAccessGitGet_594012, schemes: {Scheme.Https})
+    validator: validate_TenantAccessGitGet_597044, base: "",
+    url: url_TenantAccessGitGet_597045, schemes: {Scheme.Https})
 type
-  Call_TenantAccessGitRegeneratePrimaryKey_594022 = ref object of OpenApiRestCall_593425
-proc url_TenantAccessGitRegeneratePrimaryKey_594024(protocol: Scheme; host: string;
+  Call_TenantAccessGitRegeneratePrimaryKey_597055 = ref object of OpenApiRestCall_596458
+proc url_TenantAccessGitRegeneratePrimaryKey_597057(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -667,7 +667,7 @@ proc url_TenantAccessGitRegeneratePrimaryKey_594024(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantAccessGitRegeneratePrimaryKey_594023(path: JsonNode;
+proc validate_TenantAccessGitRegeneratePrimaryKey_597056(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerate primary access key for GIT.
   ## 
@@ -685,26 +685,26 @@ proc validate_TenantAccessGitRegeneratePrimaryKey_594023(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594025 = path.getOrDefault("resourceGroupName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_597058 = path.getOrDefault("resourceGroupName")
+  valid_597058 = validateParameter(valid_597058, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "resourceGroupName", valid_594025
-  var valid_594026 = path.getOrDefault("accessName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_597058 != nil:
+    section.add "resourceGroupName", valid_597058
+  var valid_597059 = path.getOrDefault("accessName")
+  valid_597059 = validateParameter(valid_597059, JString, required = true,
                                  default = newJString("access"))
-  if valid_594026 != nil:
-    section.add "accessName", valid_594026
-  var valid_594027 = path.getOrDefault("subscriptionId")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_597059 != nil:
+    section.add "accessName", valid_597059
+  var valid_597060 = path.getOrDefault("subscriptionId")
+  valid_597060 = validateParameter(valid_597060, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "subscriptionId", valid_594027
-  var valid_594028 = path.getOrDefault("serviceName")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  if valid_597060 != nil:
+    section.add "subscriptionId", valid_597060
+  var valid_597061 = path.getOrDefault("serviceName")
+  valid_597061 = validateParameter(valid_597061, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "serviceName", valid_594028
+  if valid_597061 != nil:
+    section.add "serviceName", valid_597061
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -712,11 +712,11 @@ proc validate_TenantAccessGitRegeneratePrimaryKey_594023(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594029 = query.getOrDefault("api-version")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_597062 = query.getOrDefault("api-version")
+  valid_597062 = validateParameter(valid_597062, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "api-version", valid_594029
+  if valid_597062 != nil:
+    section.add "api-version", valid_597062
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -725,21 +725,21 @@ proc validate_TenantAccessGitRegeneratePrimaryKey_594023(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594030: Call_TenantAccessGitRegeneratePrimaryKey_594022;
+proc call*(call_597063: Call_TenantAccessGitRegeneratePrimaryKey_597055;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerate primary access key for GIT.
   ## 
-  let valid = call_594030.validator(path, query, header, formData, body)
-  let scheme = call_594030.pickScheme
+  let valid = call_597063.validator(path, query, header, formData, body)
+  let scheme = call_597063.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594030.url(scheme.get, call_594030.host, call_594030.base,
-                         call_594030.route, valid.getOrDefault("path"),
+  let url = call_597063.url(scheme.get, call_597063.host, call_597063.base,
+                         call_597063.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594030, url, valid)
+  result = hook(call_597063, url, valid)
 
-proc call*(call_594031: Call_TenantAccessGitRegeneratePrimaryKey_594022;
+proc call*(call_597064: Call_TenantAccessGitRegeneratePrimaryKey_597055;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serviceName: string; accessName: string = "access"): Recallable =
   ## tenantAccessGitRegeneratePrimaryKey
@@ -754,23 +754,23 @@ proc call*(call_594031: Call_TenantAccessGitRegeneratePrimaryKey_594022;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594032 = newJObject()
-  var query_594033 = newJObject()
-  add(path_594032, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594033, "api-version", newJString(apiVersion))
-  add(path_594032, "accessName", newJString(accessName))
-  add(path_594032, "subscriptionId", newJString(subscriptionId))
-  add(path_594032, "serviceName", newJString(serviceName))
-  result = call_594031.call(path_594032, query_594033, nil, nil, nil)
+  var path_597065 = newJObject()
+  var query_597066 = newJObject()
+  add(path_597065, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597066, "api-version", newJString(apiVersion))
+  add(path_597065, "accessName", newJString(accessName))
+  add(path_597065, "subscriptionId", newJString(subscriptionId))
+  add(path_597065, "serviceName", newJString(serviceName))
+  result = call_597064.call(path_597065, query_597066, nil, nil, nil)
 
-var tenantAccessGitRegeneratePrimaryKey* = Call_TenantAccessGitRegeneratePrimaryKey_594022(
+var tenantAccessGitRegeneratePrimaryKey* = Call_TenantAccessGitRegeneratePrimaryKey_597055(
     name: "tenantAccessGitRegeneratePrimaryKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{accessName}/git/regeneratePrimaryKey",
-    validator: validate_TenantAccessGitRegeneratePrimaryKey_594023, base: "",
-    url: url_TenantAccessGitRegeneratePrimaryKey_594024, schemes: {Scheme.Https})
+    validator: validate_TenantAccessGitRegeneratePrimaryKey_597056, base: "",
+    url: url_TenantAccessGitRegeneratePrimaryKey_597057, schemes: {Scheme.Https})
 type
-  Call_TenantAccessGitRegenerateSecondaryKey_594034 = ref object of OpenApiRestCall_593425
-proc url_TenantAccessGitRegenerateSecondaryKey_594036(protocol: Scheme;
+  Call_TenantAccessGitRegenerateSecondaryKey_597067 = ref object of OpenApiRestCall_596458
+proc url_TenantAccessGitRegenerateSecondaryKey_597069(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -797,7 +797,7 @@ proc url_TenantAccessGitRegenerateSecondaryKey_594036(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantAccessGitRegenerateSecondaryKey_594035(path: JsonNode;
+proc validate_TenantAccessGitRegenerateSecondaryKey_597068(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerate secondary access key for GIT.
   ## 
@@ -815,26 +815,26 @@ proc validate_TenantAccessGitRegenerateSecondaryKey_594035(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594037 = path.getOrDefault("resourceGroupName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  var valid_597070 = path.getOrDefault("resourceGroupName")
+  valid_597070 = validateParameter(valid_597070, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "resourceGroupName", valid_594037
-  var valid_594038 = path.getOrDefault("accessName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_597070 != nil:
+    section.add "resourceGroupName", valid_597070
+  var valid_597071 = path.getOrDefault("accessName")
+  valid_597071 = validateParameter(valid_597071, JString, required = true,
                                  default = newJString("access"))
-  if valid_594038 != nil:
-    section.add "accessName", valid_594038
-  var valid_594039 = path.getOrDefault("subscriptionId")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_597071 != nil:
+    section.add "accessName", valid_597071
+  var valid_597072 = path.getOrDefault("subscriptionId")
+  valid_597072 = validateParameter(valid_597072, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "subscriptionId", valid_594039
-  var valid_594040 = path.getOrDefault("serviceName")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_597072 != nil:
+    section.add "subscriptionId", valid_597072
+  var valid_597073 = path.getOrDefault("serviceName")
+  valid_597073 = validateParameter(valid_597073, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "serviceName", valid_594040
+  if valid_597073 != nil:
+    section.add "serviceName", valid_597073
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -842,11 +842,11 @@ proc validate_TenantAccessGitRegenerateSecondaryKey_594035(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594041 = query.getOrDefault("api-version")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_597074 = query.getOrDefault("api-version")
+  valid_597074 = validateParameter(valid_597074, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "api-version", valid_594041
+  if valid_597074 != nil:
+    section.add "api-version", valid_597074
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -855,21 +855,21 @@ proc validate_TenantAccessGitRegenerateSecondaryKey_594035(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594042: Call_TenantAccessGitRegenerateSecondaryKey_594034;
+proc call*(call_597075: Call_TenantAccessGitRegenerateSecondaryKey_597067;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerate secondary access key for GIT.
   ## 
-  let valid = call_594042.validator(path, query, header, formData, body)
-  let scheme = call_594042.pickScheme
+  let valid = call_597075.validator(path, query, header, formData, body)
+  let scheme = call_597075.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594042.url(scheme.get, call_594042.host, call_594042.base,
-                         call_594042.route, valid.getOrDefault("path"),
+  let url = call_597075.url(scheme.get, call_597075.host, call_597075.base,
+                         call_597075.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594042, url, valid)
+  result = hook(call_597075, url, valid)
 
-proc call*(call_594043: Call_TenantAccessGitRegenerateSecondaryKey_594034;
+proc call*(call_597076: Call_TenantAccessGitRegenerateSecondaryKey_597067;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serviceName: string; accessName: string = "access"): Recallable =
   ## tenantAccessGitRegenerateSecondaryKey
@@ -884,23 +884,23 @@ proc call*(call_594043: Call_TenantAccessGitRegenerateSecondaryKey_594034;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594044 = newJObject()
-  var query_594045 = newJObject()
-  add(path_594044, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594045, "api-version", newJString(apiVersion))
-  add(path_594044, "accessName", newJString(accessName))
-  add(path_594044, "subscriptionId", newJString(subscriptionId))
-  add(path_594044, "serviceName", newJString(serviceName))
-  result = call_594043.call(path_594044, query_594045, nil, nil, nil)
+  var path_597077 = newJObject()
+  var query_597078 = newJObject()
+  add(path_597077, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597078, "api-version", newJString(apiVersion))
+  add(path_597077, "accessName", newJString(accessName))
+  add(path_597077, "subscriptionId", newJString(subscriptionId))
+  add(path_597077, "serviceName", newJString(serviceName))
+  result = call_597076.call(path_597077, query_597078, nil, nil, nil)
 
-var tenantAccessGitRegenerateSecondaryKey* = Call_TenantAccessGitRegenerateSecondaryKey_594034(
+var tenantAccessGitRegenerateSecondaryKey* = Call_TenantAccessGitRegenerateSecondaryKey_597067(
     name: "tenantAccessGitRegenerateSecondaryKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{accessName}/git/regenerateSecondaryKey",
-    validator: validate_TenantAccessGitRegenerateSecondaryKey_594035, base: "",
-    url: url_TenantAccessGitRegenerateSecondaryKey_594036, schemes: {Scheme.Https})
+    validator: validate_TenantAccessGitRegenerateSecondaryKey_597068, base: "",
+    url: url_TenantAccessGitRegenerateSecondaryKey_597069, schemes: {Scheme.Https})
 type
-  Call_TenantAccessRegeneratePrimaryKey_594046 = ref object of OpenApiRestCall_593425
-proc url_TenantAccessRegeneratePrimaryKey_594048(protocol: Scheme; host: string;
+  Call_TenantAccessRegeneratePrimaryKey_597079 = ref object of OpenApiRestCall_596458
+proc url_TenantAccessRegeneratePrimaryKey_597081(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -927,7 +927,7 @@ proc url_TenantAccessRegeneratePrimaryKey_594048(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantAccessRegeneratePrimaryKey_594047(path: JsonNode;
+proc validate_TenantAccessRegeneratePrimaryKey_597080(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerate primary access key
   ## 
@@ -945,26 +945,26 @@ proc validate_TenantAccessRegeneratePrimaryKey_594047(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594049 = path.getOrDefault("resourceGroupName")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  var valid_597082 = path.getOrDefault("resourceGroupName")
+  valid_597082 = validateParameter(valid_597082, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "resourceGroupName", valid_594049
-  var valid_594050 = path.getOrDefault("accessName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  if valid_597082 != nil:
+    section.add "resourceGroupName", valid_597082
+  var valid_597083 = path.getOrDefault("accessName")
+  valid_597083 = validateParameter(valid_597083, JString, required = true,
                                  default = newJString("access"))
-  if valid_594050 != nil:
-    section.add "accessName", valid_594050
-  var valid_594051 = path.getOrDefault("subscriptionId")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_597083 != nil:
+    section.add "accessName", valid_597083
+  var valid_597084 = path.getOrDefault("subscriptionId")
+  valid_597084 = validateParameter(valid_597084, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "subscriptionId", valid_594051
-  var valid_594052 = path.getOrDefault("serviceName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_597084 != nil:
+    section.add "subscriptionId", valid_597084
+  var valid_597085 = path.getOrDefault("serviceName")
+  valid_597085 = validateParameter(valid_597085, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "serviceName", valid_594052
+  if valid_597085 != nil:
+    section.add "serviceName", valid_597085
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -972,11 +972,11 @@ proc validate_TenantAccessRegeneratePrimaryKey_594047(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594053 = query.getOrDefault("api-version")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_597086 = query.getOrDefault("api-version")
+  valid_597086 = validateParameter(valid_597086, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "api-version", valid_594053
+  if valid_597086 != nil:
+    section.add "api-version", valid_597086
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -985,21 +985,21 @@ proc validate_TenantAccessRegeneratePrimaryKey_594047(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594054: Call_TenantAccessRegeneratePrimaryKey_594046;
+proc call*(call_597087: Call_TenantAccessRegeneratePrimaryKey_597079;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerate primary access key
   ## 
-  let valid = call_594054.validator(path, query, header, formData, body)
-  let scheme = call_594054.pickScheme
+  let valid = call_597087.validator(path, query, header, formData, body)
+  let scheme = call_597087.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594054.url(scheme.get, call_594054.host, call_594054.base,
-                         call_594054.route, valid.getOrDefault("path"),
+  let url = call_597087.url(scheme.get, call_597087.host, call_597087.base,
+                         call_597087.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594054, url, valid)
+  result = hook(call_597087, url, valid)
 
-proc call*(call_594055: Call_TenantAccessRegeneratePrimaryKey_594046;
+proc call*(call_597088: Call_TenantAccessRegeneratePrimaryKey_597079;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serviceName: string; accessName: string = "access"): Recallable =
   ## tenantAccessRegeneratePrimaryKey
@@ -1014,23 +1014,23 @@ proc call*(call_594055: Call_TenantAccessRegeneratePrimaryKey_594046;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594056 = newJObject()
-  var query_594057 = newJObject()
-  add(path_594056, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594057, "api-version", newJString(apiVersion))
-  add(path_594056, "accessName", newJString(accessName))
-  add(path_594056, "subscriptionId", newJString(subscriptionId))
-  add(path_594056, "serviceName", newJString(serviceName))
-  result = call_594055.call(path_594056, query_594057, nil, nil, nil)
+  var path_597089 = newJObject()
+  var query_597090 = newJObject()
+  add(path_597089, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597090, "api-version", newJString(apiVersion))
+  add(path_597089, "accessName", newJString(accessName))
+  add(path_597089, "subscriptionId", newJString(subscriptionId))
+  add(path_597089, "serviceName", newJString(serviceName))
+  result = call_597088.call(path_597089, query_597090, nil, nil, nil)
 
-var tenantAccessRegeneratePrimaryKey* = Call_TenantAccessRegeneratePrimaryKey_594046(
+var tenantAccessRegeneratePrimaryKey* = Call_TenantAccessRegeneratePrimaryKey_597079(
     name: "tenantAccessRegeneratePrimaryKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{accessName}/regeneratePrimaryKey",
-    validator: validate_TenantAccessRegeneratePrimaryKey_594047, base: "",
-    url: url_TenantAccessRegeneratePrimaryKey_594048, schemes: {Scheme.Https})
+    validator: validate_TenantAccessRegeneratePrimaryKey_597080, base: "",
+    url: url_TenantAccessRegeneratePrimaryKey_597081, schemes: {Scheme.Https})
 type
-  Call_TenantAccessRegenerateSecondaryKey_594058 = ref object of OpenApiRestCall_593425
-proc url_TenantAccessRegenerateSecondaryKey_594060(protocol: Scheme; host: string;
+  Call_TenantAccessRegenerateSecondaryKey_597091 = ref object of OpenApiRestCall_596458
+proc url_TenantAccessRegenerateSecondaryKey_597093(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1057,7 +1057,7 @@ proc url_TenantAccessRegenerateSecondaryKey_594060(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantAccessRegenerateSecondaryKey_594059(path: JsonNode;
+proc validate_TenantAccessRegenerateSecondaryKey_597092(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerate secondary access key
   ## 
@@ -1075,26 +1075,26 @@ proc validate_TenantAccessRegenerateSecondaryKey_594059(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594061 = path.getOrDefault("resourceGroupName")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  var valid_597094 = path.getOrDefault("resourceGroupName")
+  valid_597094 = validateParameter(valid_597094, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "resourceGroupName", valid_594061
-  var valid_594062 = path.getOrDefault("accessName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  if valid_597094 != nil:
+    section.add "resourceGroupName", valid_597094
+  var valid_597095 = path.getOrDefault("accessName")
+  valid_597095 = validateParameter(valid_597095, JString, required = true,
                                  default = newJString("access"))
-  if valid_594062 != nil:
-    section.add "accessName", valid_594062
-  var valid_594063 = path.getOrDefault("subscriptionId")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  if valid_597095 != nil:
+    section.add "accessName", valid_597095
+  var valid_597096 = path.getOrDefault("subscriptionId")
+  valid_597096 = validateParameter(valid_597096, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "subscriptionId", valid_594063
-  var valid_594064 = path.getOrDefault("serviceName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_597096 != nil:
+    section.add "subscriptionId", valid_597096
+  var valid_597097 = path.getOrDefault("serviceName")
+  valid_597097 = validateParameter(valid_597097, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "serviceName", valid_594064
+  if valid_597097 != nil:
+    section.add "serviceName", valid_597097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1102,11 +1102,11 @@ proc validate_TenantAccessRegenerateSecondaryKey_594059(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594065 = query.getOrDefault("api-version")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  var valid_597098 = query.getOrDefault("api-version")
+  valid_597098 = validateParameter(valid_597098, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "api-version", valid_594065
+  if valid_597098 != nil:
+    section.add "api-version", valid_597098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1115,21 +1115,21 @@ proc validate_TenantAccessRegenerateSecondaryKey_594059(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594066: Call_TenantAccessRegenerateSecondaryKey_594058;
+proc call*(call_597099: Call_TenantAccessRegenerateSecondaryKey_597091;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerate secondary access key
   ## 
-  let valid = call_594066.validator(path, query, header, formData, body)
-  let scheme = call_594066.pickScheme
+  let valid = call_597099.validator(path, query, header, formData, body)
+  let scheme = call_597099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594066.url(scheme.get, call_594066.host, call_594066.base,
-                         call_594066.route, valid.getOrDefault("path"),
+  let url = call_597099.url(scheme.get, call_597099.host, call_597099.base,
+                         call_597099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594066, url, valid)
+  result = hook(call_597099, url, valid)
 
-proc call*(call_594067: Call_TenantAccessRegenerateSecondaryKey_594058;
+proc call*(call_597100: Call_TenantAccessRegenerateSecondaryKey_597091;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serviceName: string; accessName: string = "access"): Recallable =
   ## tenantAccessRegenerateSecondaryKey
@@ -1144,23 +1144,23 @@ proc call*(call_594067: Call_TenantAccessRegenerateSecondaryKey_594058;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594068 = newJObject()
-  var query_594069 = newJObject()
-  add(path_594068, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594069, "api-version", newJString(apiVersion))
-  add(path_594068, "accessName", newJString(accessName))
-  add(path_594068, "subscriptionId", newJString(subscriptionId))
-  add(path_594068, "serviceName", newJString(serviceName))
-  result = call_594067.call(path_594068, query_594069, nil, nil, nil)
+  var path_597101 = newJObject()
+  var query_597102 = newJObject()
+  add(path_597101, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597102, "api-version", newJString(apiVersion))
+  add(path_597101, "accessName", newJString(accessName))
+  add(path_597101, "subscriptionId", newJString(subscriptionId))
+  add(path_597101, "serviceName", newJString(serviceName))
+  result = call_597100.call(path_597101, query_597102, nil, nil, nil)
 
-var tenantAccessRegenerateSecondaryKey* = Call_TenantAccessRegenerateSecondaryKey_594058(
+var tenantAccessRegenerateSecondaryKey* = Call_TenantAccessRegenerateSecondaryKey_597091(
     name: "tenantAccessRegenerateSecondaryKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{accessName}/regenerateSecondaryKey",
-    validator: validate_TenantAccessRegenerateSecondaryKey_594059, base: "",
-    url: url_TenantAccessRegenerateSecondaryKey_594060, schemes: {Scheme.Https})
+    validator: validate_TenantAccessRegenerateSecondaryKey_597092, base: "",
+    url: url_TenantAccessRegenerateSecondaryKey_597093, schemes: {Scheme.Https})
 type
-  Call_TenantConfigurationDeploy_594070 = ref object of OpenApiRestCall_593425
-proc url_TenantConfigurationDeploy_594072(protocol: Scheme; host: string;
+  Call_TenantConfigurationDeploy_597103 = ref object of OpenApiRestCall_596458
+proc url_TenantConfigurationDeploy_597105(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1188,7 +1188,7 @@ proc url_TenantConfigurationDeploy_594072(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantConfigurationDeploy_594071(path: JsonNode; query: JsonNode;
+proc validate_TenantConfigurationDeploy_597104(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation applies changes from the specified Git branch to the configuration database. This is a long running operation and could take several minutes to complete.
   ## 
@@ -1208,26 +1208,26 @@ proc validate_TenantConfigurationDeploy_594071(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594073 = path.getOrDefault("resourceGroupName")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  var valid_597106 = path.getOrDefault("resourceGroupName")
+  valid_597106 = validateParameter(valid_597106, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "resourceGroupName", valid_594073
-  var valid_594074 = path.getOrDefault("subscriptionId")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_597106 != nil:
+    section.add "resourceGroupName", valid_597106
+  var valid_597107 = path.getOrDefault("subscriptionId")
+  valid_597107 = validateParameter(valid_597107, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "subscriptionId", valid_594074
-  var valid_594075 = path.getOrDefault("configurationName")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  if valid_597107 != nil:
+    section.add "subscriptionId", valid_597107
+  var valid_597108 = path.getOrDefault("configurationName")
+  valid_597108 = validateParameter(valid_597108, JString, required = true,
                                  default = newJString("configuration"))
-  if valid_594075 != nil:
-    section.add "configurationName", valid_594075
-  var valid_594076 = path.getOrDefault("serviceName")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  if valid_597108 != nil:
+    section.add "configurationName", valid_597108
+  var valid_597109 = path.getOrDefault("serviceName")
+  valid_597109 = validateParameter(valid_597109, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "serviceName", valid_594076
+  if valid_597109 != nil:
+    section.add "serviceName", valid_597109
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1235,11 +1235,11 @@ proc validate_TenantConfigurationDeploy_594071(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594077 = query.getOrDefault("api-version")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  var valid_597110 = query.getOrDefault("api-version")
+  valid_597110 = validateParameter(valid_597110, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "api-version", valid_594077
+  if valid_597110 != nil:
+    section.add "api-version", valid_597110
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1253,22 +1253,22 @@ proc validate_TenantConfigurationDeploy_594071(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594079: Call_TenantConfigurationDeploy_594070; path: JsonNode;
+proc call*(call_597112: Call_TenantConfigurationDeploy_597103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation applies changes from the specified Git branch to the configuration database. This is a long running operation and could take several minutes to complete.
   ## 
   ## To deploy any service configuration changes to the API Management service instance
   ## https://azure.microsoft.com/en-us/documentation/articles/api-management-configuration-repository-git/#to-deploy-any-service-configuration-changes-to-the-api-management-service-instance
-  let valid = call_594079.validator(path, query, header, formData, body)
-  let scheme = call_594079.pickScheme
+  let valid = call_597112.validator(path, query, header, formData, body)
+  let scheme = call_597112.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594079.url(scheme.get, call_594079.host, call_594079.base,
-                         call_594079.route, valid.getOrDefault("path"),
+  let url = call_597112.url(scheme.get, call_597112.host, call_597112.base,
+                         call_597112.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594079, url, valid)
+  result = hook(call_597112, url, valid)
 
-proc call*(call_594080: Call_TenantConfigurationDeploy_594070;
+proc call*(call_597113: Call_TenantConfigurationDeploy_597103;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; serviceName: string;
           configurationName: string = "configuration"): Recallable =
@@ -1288,26 +1288,26 @@ proc call*(call_594080: Call_TenantConfigurationDeploy_594070;
   ##             : Deploy Configuration parameters.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594081 = newJObject()
-  var query_594082 = newJObject()
-  var body_594083 = newJObject()
-  add(path_594081, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594082, "api-version", newJString(apiVersion))
-  add(path_594081, "subscriptionId", newJString(subscriptionId))
-  add(path_594081, "configurationName", newJString(configurationName))
+  var path_597114 = newJObject()
+  var query_597115 = newJObject()
+  var body_597116 = newJObject()
+  add(path_597114, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597115, "api-version", newJString(apiVersion))
+  add(path_597114, "subscriptionId", newJString(subscriptionId))
+  add(path_597114, "configurationName", newJString(configurationName))
   if parameters != nil:
-    body_594083 = parameters
-  add(path_594081, "serviceName", newJString(serviceName))
-  result = call_594080.call(path_594081, query_594082, nil, nil, body_594083)
+    body_597116 = parameters
+  add(path_597114, "serviceName", newJString(serviceName))
+  result = call_597113.call(path_597114, query_597115, nil, nil, body_597116)
 
-var tenantConfigurationDeploy* = Call_TenantConfigurationDeploy_594070(
+var tenantConfigurationDeploy* = Call_TenantConfigurationDeploy_597103(
     name: "tenantConfigurationDeploy", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{configurationName}/deploy",
-    validator: validate_TenantConfigurationDeploy_594071, base: "",
-    url: url_TenantConfigurationDeploy_594072, schemes: {Scheme.Https})
+    validator: validate_TenantConfigurationDeploy_597104, base: "",
+    url: url_TenantConfigurationDeploy_597105, schemes: {Scheme.Https})
 type
-  Call_TenantConfigurationSave_594084 = ref object of OpenApiRestCall_593425
-proc url_TenantConfigurationSave_594086(protocol: Scheme; host: string; base: string;
+  Call_TenantConfigurationSave_597117 = ref object of OpenApiRestCall_596458
+proc url_TenantConfigurationSave_597119(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1336,7 +1336,7 @@ proc url_TenantConfigurationSave_594086(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantConfigurationSave_594085(path: JsonNode; query: JsonNode;
+proc validate_TenantConfigurationSave_597118(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation creates a commit with the current configuration snapshot to the specified branch in the repository. This is a long running operation and could take several minutes to complete.
   ## 
@@ -1356,26 +1356,26 @@ proc validate_TenantConfigurationSave_594085(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594087 = path.getOrDefault("resourceGroupName")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  var valid_597120 = path.getOrDefault("resourceGroupName")
+  valid_597120 = validateParameter(valid_597120, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "resourceGroupName", valid_594087
-  var valid_594088 = path.getOrDefault("subscriptionId")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  if valid_597120 != nil:
+    section.add "resourceGroupName", valid_597120
+  var valid_597121 = path.getOrDefault("subscriptionId")
+  valid_597121 = validateParameter(valid_597121, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "subscriptionId", valid_594088
-  var valid_594089 = path.getOrDefault("configurationName")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  if valid_597121 != nil:
+    section.add "subscriptionId", valid_597121
+  var valid_597122 = path.getOrDefault("configurationName")
+  valid_597122 = validateParameter(valid_597122, JString, required = true,
                                  default = newJString("configuration"))
-  if valid_594089 != nil:
-    section.add "configurationName", valid_594089
-  var valid_594090 = path.getOrDefault("serviceName")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  if valid_597122 != nil:
+    section.add "configurationName", valid_597122
+  var valid_597123 = path.getOrDefault("serviceName")
+  valid_597123 = validateParameter(valid_597123, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "serviceName", valid_594090
+  if valid_597123 != nil:
+    section.add "serviceName", valid_597123
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1383,11 +1383,11 @@ proc validate_TenantConfigurationSave_594085(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594091 = query.getOrDefault("api-version")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  var valid_597124 = query.getOrDefault("api-version")
+  valid_597124 = validateParameter(valid_597124, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "api-version", valid_594091
+  if valid_597124 != nil:
+    section.add "api-version", valid_597124
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1401,22 +1401,22 @@ proc validate_TenantConfigurationSave_594085(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594093: Call_TenantConfigurationSave_594084; path: JsonNode;
+proc call*(call_597126: Call_TenantConfigurationSave_597117; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation creates a commit with the current configuration snapshot to the specified branch in the repository. This is a long running operation and could take several minutes to complete.
   ## 
   ## To save the service configuration to the Git repository
   ## https://azure.microsoft.com/en-us/documentation/articles/api-management-configuration-repository-git/#to-save-the-service-configuration-to-the-git-repository
-  let valid = call_594093.validator(path, query, header, formData, body)
-  let scheme = call_594093.pickScheme
+  let valid = call_597126.validator(path, query, header, formData, body)
+  let scheme = call_597126.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594093.url(scheme.get, call_594093.host, call_594093.base,
-                         call_594093.route, valid.getOrDefault("path"),
+  let url = call_597126.url(scheme.get, call_597126.host, call_597126.base,
+                         call_597126.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594093, url, valid)
+  result = hook(call_597126, url, valid)
 
-proc call*(call_594094: Call_TenantConfigurationSave_594084;
+proc call*(call_597127: Call_TenantConfigurationSave_597117;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; serviceName: string;
           configurationName: string = "configuration"): Recallable =
@@ -1436,26 +1436,26 @@ proc call*(call_594094: Call_TenantConfigurationSave_594084;
   ##             : Save Configuration parameters.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594095 = newJObject()
-  var query_594096 = newJObject()
-  var body_594097 = newJObject()
-  add(path_594095, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594096, "api-version", newJString(apiVersion))
-  add(path_594095, "subscriptionId", newJString(subscriptionId))
-  add(path_594095, "configurationName", newJString(configurationName))
+  var path_597128 = newJObject()
+  var query_597129 = newJObject()
+  var body_597130 = newJObject()
+  add(path_597128, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597129, "api-version", newJString(apiVersion))
+  add(path_597128, "subscriptionId", newJString(subscriptionId))
+  add(path_597128, "configurationName", newJString(configurationName))
   if parameters != nil:
-    body_594097 = parameters
-  add(path_594095, "serviceName", newJString(serviceName))
-  result = call_594094.call(path_594095, query_594096, nil, nil, body_594097)
+    body_597130 = parameters
+  add(path_597128, "serviceName", newJString(serviceName))
+  result = call_597127.call(path_597128, query_597129, nil, nil, body_597130)
 
-var tenantConfigurationSave* = Call_TenantConfigurationSave_594084(
+var tenantConfigurationSave* = Call_TenantConfigurationSave_597117(
     name: "tenantConfigurationSave", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{configurationName}/save",
-    validator: validate_TenantConfigurationSave_594085, base: "",
-    url: url_TenantConfigurationSave_594086, schemes: {Scheme.Https})
+    validator: validate_TenantConfigurationSave_597118, base: "",
+    url: url_TenantConfigurationSave_597119, schemes: {Scheme.Https})
 type
-  Call_TenantConfigurationGetSyncState_594098 = ref object of OpenApiRestCall_593425
-proc url_TenantConfigurationGetSyncState_594100(protocol: Scheme; host: string;
+  Call_TenantConfigurationGetSyncState_597131 = ref object of OpenApiRestCall_596458
+proc url_TenantConfigurationGetSyncState_597133(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1483,7 +1483,7 @@ proc url_TenantConfigurationGetSyncState_594100(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantConfigurationGetSyncState_594099(path: JsonNode;
+proc validate_TenantConfigurationGetSyncState_597132(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the status of the most recent synchronization between the configuration database and the Git repository.
   ## 
@@ -1501,26 +1501,26 @@ proc validate_TenantConfigurationGetSyncState_594099(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594101 = path.getOrDefault("resourceGroupName")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  var valid_597134 = path.getOrDefault("resourceGroupName")
+  valid_597134 = validateParameter(valid_597134, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "resourceGroupName", valid_594101
-  var valid_594102 = path.getOrDefault("subscriptionId")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  if valid_597134 != nil:
+    section.add "resourceGroupName", valid_597134
+  var valid_597135 = path.getOrDefault("subscriptionId")
+  valid_597135 = validateParameter(valid_597135, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "subscriptionId", valid_594102
-  var valid_594103 = path.getOrDefault("configurationName")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  if valid_597135 != nil:
+    section.add "subscriptionId", valid_597135
+  var valid_597136 = path.getOrDefault("configurationName")
+  valid_597136 = validateParameter(valid_597136, JString, required = true,
                                  default = newJString("configuration"))
-  if valid_594103 != nil:
-    section.add "configurationName", valid_594103
-  var valid_594104 = path.getOrDefault("serviceName")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  if valid_597136 != nil:
+    section.add "configurationName", valid_597136
+  var valid_597137 = path.getOrDefault("serviceName")
+  valid_597137 = validateParameter(valid_597137, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "serviceName", valid_594104
+  if valid_597137 != nil:
+    section.add "serviceName", valid_597137
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1528,11 +1528,11 @@ proc validate_TenantConfigurationGetSyncState_594099(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594105 = query.getOrDefault("api-version")
-  valid_594105 = validateParameter(valid_594105, JString, required = true,
+  var valid_597138 = query.getOrDefault("api-version")
+  valid_597138 = validateParameter(valid_597138, JString, required = true,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "api-version", valid_594105
+  if valid_597138 != nil:
+    section.add "api-version", valid_597138
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1541,21 +1541,21 @@ proc validate_TenantConfigurationGetSyncState_594099(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594106: Call_TenantConfigurationGetSyncState_594098;
+proc call*(call_597139: Call_TenantConfigurationGetSyncState_597131;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the status of the most recent synchronization between the configuration database and the Git repository.
   ## 
-  let valid = call_594106.validator(path, query, header, formData, body)
-  let scheme = call_594106.pickScheme
+  let valid = call_597139.validator(path, query, header, formData, body)
+  let scheme = call_597139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594106.url(scheme.get, call_594106.host, call_594106.base,
-                         call_594106.route, valid.getOrDefault("path"),
+  let url = call_597139.url(scheme.get, call_597139.host, call_597139.base,
+                         call_597139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594106, url, valid)
+  result = hook(call_597139, url, valid)
 
-proc call*(call_594107: Call_TenantConfigurationGetSyncState_594098;
+proc call*(call_597140: Call_TenantConfigurationGetSyncState_597131;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serviceName: string; configurationName: string = "configuration"): Recallable =
   ## tenantConfigurationGetSyncState
@@ -1570,23 +1570,23 @@ proc call*(call_594107: Call_TenantConfigurationGetSyncState_594098;
   ##                    : The identifier of the Git Configuration Operation.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594108 = newJObject()
-  var query_594109 = newJObject()
-  add(path_594108, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594109, "api-version", newJString(apiVersion))
-  add(path_594108, "subscriptionId", newJString(subscriptionId))
-  add(path_594108, "configurationName", newJString(configurationName))
-  add(path_594108, "serviceName", newJString(serviceName))
-  result = call_594107.call(path_594108, query_594109, nil, nil, nil)
+  var path_597141 = newJObject()
+  var query_597142 = newJObject()
+  add(path_597141, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597142, "api-version", newJString(apiVersion))
+  add(path_597141, "subscriptionId", newJString(subscriptionId))
+  add(path_597141, "configurationName", newJString(configurationName))
+  add(path_597141, "serviceName", newJString(serviceName))
+  result = call_597140.call(path_597141, query_597142, nil, nil, nil)
 
-var tenantConfigurationGetSyncState* = Call_TenantConfigurationGetSyncState_594098(
+var tenantConfigurationGetSyncState* = Call_TenantConfigurationGetSyncState_597131(
     name: "tenantConfigurationGetSyncState", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{configurationName}/syncState",
-    validator: validate_TenantConfigurationGetSyncState_594099, base: "",
-    url: url_TenantConfigurationGetSyncState_594100, schemes: {Scheme.Https})
+    validator: validate_TenantConfigurationGetSyncState_597132, base: "",
+    url: url_TenantConfigurationGetSyncState_597133, schemes: {Scheme.Https})
 type
-  Call_TenantConfigurationValidate_594110 = ref object of OpenApiRestCall_593425
-proc url_TenantConfigurationValidate_594112(protocol: Scheme; host: string;
+  Call_TenantConfigurationValidate_597143 = ref object of OpenApiRestCall_596458
+proc url_TenantConfigurationValidate_597145(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1614,7 +1614,7 @@ proc url_TenantConfigurationValidate_594112(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TenantConfigurationValidate_594111(path: JsonNode; query: JsonNode;
+proc validate_TenantConfigurationValidate_597144(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation validates the changes in the specified Git branch. This is a long running operation and could take several minutes to complete.
   ## 
@@ -1632,26 +1632,26 @@ proc validate_TenantConfigurationValidate_594111(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594113 = path.getOrDefault("resourceGroupName")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  var valid_597146 = path.getOrDefault("resourceGroupName")
+  valid_597146 = validateParameter(valid_597146, JString, required = true,
                                  default = nil)
-  if valid_594113 != nil:
-    section.add "resourceGroupName", valid_594113
-  var valid_594114 = path.getOrDefault("subscriptionId")
-  valid_594114 = validateParameter(valid_594114, JString, required = true,
+  if valid_597146 != nil:
+    section.add "resourceGroupName", valid_597146
+  var valid_597147 = path.getOrDefault("subscriptionId")
+  valid_597147 = validateParameter(valid_597147, JString, required = true,
                                  default = nil)
-  if valid_594114 != nil:
-    section.add "subscriptionId", valid_594114
-  var valid_594115 = path.getOrDefault("configurationName")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  if valid_597147 != nil:
+    section.add "subscriptionId", valid_597147
+  var valid_597148 = path.getOrDefault("configurationName")
+  valid_597148 = validateParameter(valid_597148, JString, required = true,
                                  default = newJString("configuration"))
-  if valid_594115 != nil:
-    section.add "configurationName", valid_594115
-  var valid_594116 = path.getOrDefault("serviceName")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_597148 != nil:
+    section.add "configurationName", valid_597148
+  var valid_597149 = path.getOrDefault("serviceName")
+  valid_597149 = validateParameter(valid_597149, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "serviceName", valid_594116
+  if valid_597149 != nil:
+    section.add "serviceName", valid_597149
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1659,11 +1659,11 @@ proc validate_TenantConfigurationValidate_594111(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594117 = query.getOrDefault("api-version")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  var valid_597150 = query.getOrDefault("api-version")
+  valid_597150 = validateParameter(valid_597150, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "api-version", valid_594117
+  if valid_597150 != nil:
+    section.add "api-version", valid_597150
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1677,20 +1677,20 @@ proc validate_TenantConfigurationValidate_594111(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594119: Call_TenantConfigurationValidate_594110; path: JsonNode;
+proc call*(call_597152: Call_TenantConfigurationValidate_597143; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation validates the changes in the specified Git branch. This is a long running operation and could take several minutes to complete.
   ## 
-  let valid = call_594119.validator(path, query, header, formData, body)
-  let scheme = call_594119.pickScheme
+  let valid = call_597152.validator(path, query, header, formData, body)
+  let scheme = call_597152.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594119.url(scheme.get, call_594119.host, call_594119.base,
-                         call_594119.route, valid.getOrDefault("path"),
+  let url = call_597152.url(scheme.get, call_597152.host, call_597152.base,
+                         call_597152.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594119, url, valid)
+  result = hook(call_597152, url, valid)
 
-proc call*(call_594120: Call_TenantConfigurationValidate_594110;
+proc call*(call_597153: Call_TenantConfigurationValidate_597143;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; serviceName: string;
           configurationName: string = "configuration"): Recallable =
@@ -1708,23 +1708,23 @@ proc call*(call_594120: Call_TenantConfigurationValidate_594110;
   ##             : Validate Configuration parameters.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594121 = newJObject()
-  var query_594122 = newJObject()
-  var body_594123 = newJObject()
-  add(path_594121, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594122, "api-version", newJString(apiVersion))
-  add(path_594121, "subscriptionId", newJString(subscriptionId))
-  add(path_594121, "configurationName", newJString(configurationName))
+  var path_597154 = newJObject()
+  var query_597155 = newJObject()
+  var body_597156 = newJObject()
+  add(path_597154, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597155, "api-version", newJString(apiVersion))
+  add(path_597154, "subscriptionId", newJString(subscriptionId))
+  add(path_597154, "configurationName", newJString(configurationName))
   if parameters != nil:
-    body_594123 = parameters
-  add(path_594121, "serviceName", newJString(serviceName))
-  result = call_594120.call(path_594121, query_594122, nil, nil, body_594123)
+    body_597156 = parameters
+  add(path_597154, "serviceName", newJString(serviceName))
+  result = call_597153.call(path_597154, query_597155, nil, nil, body_597156)
 
-var tenantConfigurationValidate* = Call_TenantConfigurationValidate_594110(
+var tenantConfigurationValidate* = Call_TenantConfigurationValidate_597143(
     name: "tenantConfigurationValidate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/tenant/{configurationName}/validate",
-    validator: validate_TenantConfigurationValidate_594111, base: "",
-    url: url_TenantConfigurationValidate_594112, schemes: {Scheme.Https})
+    validator: validate_TenantConfigurationValidate_597144, base: "",
+    url: url_TenantConfigurationValidate_597145, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Log Analytics
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "operationalinsights-OperationalInsights"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_OperationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
+proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available OperationalInsights Rest API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = query.getOrDefault("api-version")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_568041 != nil:
+    section.add "api-version", valid_568041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593831: Call_OperationsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568064: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available OperationalInsights Rest API operations.
   ## 
-  let valid = call_593831.validator(path, query, header, formData, body)
-  let scheme = call_593831.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593831.url(scheme.get, call_593831.host, call_593831.base,
-                         call_593831.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593831, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593902: Call_OperationsList_593647; apiVersion: string): Recallable =
+proc call*(call_568135: Call_OperationsList_567880; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available OperationalInsights Rest API operations.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  var query_593903 = newJObject()
-  add(query_593903, "api-version", newJString(apiVersion))
-  result = call_593902.call(nil, query_593903, nil, nil, nil)
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  result = call_568135.call(nil, query_568136, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593647(name: "operationsList",
+var operationsList* = Call_OperationsList_567880(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.OperationalInsights/operations",
-    validator: validate_OperationsList_593648, base: "", url: url_OperationsList_593649,
+    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
     schemes: {Scheme.Https})
 type
-  Call_WorkspacesListLinkTargets_593943 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesListLinkTargets_593945(protocol: Scheme; host: string;
+  Call_WorkspacesListLinkTargets_568176 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesListLinkTargets_568178(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +185,7 @@ proc url_WorkspacesListLinkTargets_593945(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesListLinkTargets_593944(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesListLinkTargets_568177(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a list of workspaces which the current user has administrator privileges and are not associated with an Azure Subscription. The subscriptionId parameter in the Url is ignored.
   ## 
@@ -197,11 +197,11 @@ proc validate_WorkspacesListLinkTargets_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_568193 = path.getOrDefault("subscriptionId")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
+  if valid_568193 != nil:
+    section.add "subscriptionId", valid_568193
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +209,11 @@ proc validate_WorkspacesListLinkTargets_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593961 = query.getOrDefault("api-version")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = query.getOrDefault("api-version")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "api-version", valid_593961
+  if valid_568194 != nil:
+    section.add "api-version", valid_568194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -222,20 +222,20 @@ proc validate_WorkspacesListLinkTargets_593944(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593962: Call_WorkspacesListLinkTargets_593943; path: JsonNode;
+proc call*(call_568195: Call_WorkspacesListLinkTargets_568176; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a list of workspaces which the current user has administrator privileges and are not associated with an Azure Subscription. The subscriptionId parameter in the Url is ignored.
   ## 
-  let valid = call_593962.validator(path, query, header, formData, body)
-  let scheme = call_593962.pickScheme
+  let valid = call_568195.validator(path, query, header, formData, body)
+  let scheme = call_568195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593962.url(scheme.get, call_593962.host, call_593962.base,
-                         call_593962.route, valid.getOrDefault("path"),
+  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
+                         call_568195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593962, url, valid)
+  result = hook(call_568195, url, valid)
 
-proc call*(call_593963: Call_WorkspacesListLinkTargets_593943; apiVersion: string;
+proc call*(call_568196: Call_WorkspacesListLinkTargets_568176; apiVersion: string;
           subscriptionId: string): Recallable =
   ## workspacesListLinkTargets
   ## Get a list of workspaces which the current user has administrator privileges and are not associated with an Azure Subscription. The subscriptionId parameter in the Url is ignored.
@@ -243,20 +243,20 @@ proc call*(call_593963: Call_WorkspacesListLinkTargets_593943; apiVersion: strin
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Subscription ID.
-  var path_593964 = newJObject()
-  var query_593965 = newJObject()
-  add(query_593965, "api-version", newJString(apiVersion))
-  add(path_593964, "subscriptionId", newJString(subscriptionId))
-  result = call_593963.call(path_593964, query_593965, nil, nil, nil)
+  var path_568197 = newJObject()
+  var query_568198 = newJObject()
+  add(query_568198, "api-version", newJString(apiVersion))
+  add(path_568197, "subscriptionId", newJString(subscriptionId))
+  result = call_568196.call(path_568197, query_568198, nil, nil, nil)
 
-var workspacesListLinkTargets* = Call_WorkspacesListLinkTargets_593943(
+var workspacesListLinkTargets* = Call_WorkspacesListLinkTargets_568176(
     name: "workspacesListLinkTargets", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.OperationalInsights/linkTargets",
-    validator: validate_WorkspacesListLinkTargets_593944, base: "",
-    url: url_WorkspacesListLinkTargets_593945, schemes: {Scheme.Https})
+    validator: validate_WorkspacesListLinkTargets_568177, base: "",
+    url: url_WorkspacesListLinkTargets_568178, schemes: {Scheme.Https})
 type
-  Call_WorkspacesGetPurgeStatus_593966 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesGetPurgeStatus_593968(protocol: Scheme; host: string;
+  Call_WorkspacesGetPurgeStatus_568199 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesGetPurgeStatus_568201(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -283,7 +283,7 @@ proc url_WorkspacesGetPurgeStatus_593968(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesGetPurgeStatus_593967(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesGetPurgeStatus_568200(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets status of an ongoing purge operation.
   ## 
@@ -301,26 +301,26 @@ proc validate_WorkspacesGetPurgeStatus_593967(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593969 = path.getOrDefault("resourceGroupName")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_568202 = path.getOrDefault("resourceGroupName")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "resourceGroupName", valid_593969
-  var valid_593970 = path.getOrDefault("subscriptionId")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_568202 != nil:
+    section.add "resourceGroupName", valid_568202
+  var valid_568203 = path.getOrDefault("subscriptionId")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "subscriptionId", valid_593970
-  var valid_593971 = path.getOrDefault("purgeId")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  if valid_568203 != nil:
+    section.add "subscriptionId", valid_568203
+  var valid_568204 = path.getOrDefault("purgeId")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "purgeId", valid_593971
-  var valid_593972 = path.getOrDefault("workspaceName")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  if valid_568204 != nil:
+    section.add "purgeId", valid_568204
+  var valid_568205 = path.getOrDefault("workspaceName")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "workspaceName", valid_593972
+  if valid_568205 != nil:
+    section.add "workspaceName", valid_568205
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -328,11 +328,11 @@ proc validate_WorkspacesGetPurgeStatus_593967(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593973 = query.getOrDefault("api-version")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568206 = query.getOrDefault("api-version")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "api-version", valid_593973
+  if valid_568206 != nil:
+    section.add "api-version", valid_568206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -341,20 +341,20 @@ proc validate_WorkspacesGetPurgeStatus_593967(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593974: Call_WorkspacesGetPurgeStatus_593966; path: JsonNode;
+proc call*(call_568207: Call_WorkspacesGetPurgeStatus_568199; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets status of an ongoing purge operation.
   ## 
-  let valid = call_593974.validator(path, query, header, formData, body)
-  let scheme = call_593974.pickScheme
+  let valid = call_568207.validator(path, query, header, formData, body)
+  let scheme = call_568207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593974.url(scheme.get, call_593974.host, call_593974.base,
-                         call_593974.route, valid.getOrDefault("path"),
+  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
+                         call_568207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593974, url, valid)
+  result = hook(call_568207, url, valid)
 
-proc call*(call_593975: Call_WorkspacesGetPurgeStatus_593966;
+proc call*(call_568208: Call_WorkspacesGetPurgeStatus_568199;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           purgeId: string; workspaceName: string): Recallable =
   ## workspacesGetPurgeStatus
@@ -369,23 +369,23 @@ proc call*(call_593975: Call_WorkspacesGetPurgeStatus_593966;
   ##          : In a purge status request, this is the Id of the operation the status of which is returned.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_593976 = newJObject()
-  var query_593977 = newJObject()
-  add(path_593976, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593977, "api-version", newJString(apiVersion))
-  add(path_593976, "subscriptionId", newJString(subscriptionId))
-  add(path_593976, "purgeId", newJString(purgeId))
-  add(path_593976, "workspaceName", newJString(workspaceName))
-  result = call_593975.call(path_593976, query_593977, nil, nil, nil)
+  var path_568209 = newJObject()
+  var query_568210 = newJObject()
+  add(path_568209, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568210, "api-version", newJString(apiVersion))
+  add(path_568209, "subscriptionId", newJString(subscriptionId))
+  add(path_568209, "purgeId", newJString(purgeId))
+  add(path_568209, "workspaceName", newJString(workspaceName))
+  result = call_568208.call(path_568209, query_568210, nil, nil, nil)
 
-var workspacesGetPurgeStatus* = Call_WorkspacesGetPurgeStatus_593966(
+var workspacesGetPurgeStatus* = Call_WorkspacesGetPurgeStatus_568199(
     name: "workspacesGetPurgeStatus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/operations/{purgeId}",
-    validator: validate_WorkspacesGetPurgeStatus_593967, base: "",
-    url: url_WorkspacesGetPurgeStatus_593968, schemes: {Scheme.Https})
+    validator: validate_WorkspacesGetPurgeStatus_568200, base: "",
+    url: url_WorkspacesGetPurgeStatus_568201, schemes: {Scheme.Https})
 type
-  Call_WorkspacesPurge_593978 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesPurge_593980(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesPurge_568211 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesPurge_568213(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -409,7 +409,7 @@ proc url_WorkspacesPurge_593980(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesPurge_593979(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesPurge_568212(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Purges data in an Log Analytics workspace by a set of user-defined filters.
@@ -426,21 +426,21 @@ proc validate_WorkspacesPurge_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593998 = path.getOrDefault("resourceGroupName")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  var valid_568231 = path.getOrDefault("resourceGroupName")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "resourceGroupName", valid_593998
-  var valid_593999 = path.getOrDefault("subscriptionId")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  if valid_568231 != nil:
+    section.add "resourceGroupName", valid_568231
+  var valid_568232 = path.getOrDefault("subscriptionId")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "subscriptionId", valid_593999
-  var valid_594000 = path.getOrDefault("workspaceName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  if valid_568232 != nil:
+    section.add "subscriptionId", valid_568232
+  var valid_568233 = path.getOrDefault("workspaceName")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "workspaceName", valid_594000
+  if valid_568233 != nil:
+    section.add "workspaceName", valid_568233
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -448,11 +448,11 @@ proc validate_WorkspacesPurge_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594001 = query.getOrDefault("api-version")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568234 = query.getOrDefault("api-version")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "api-version", valid_594001
+  if valid_568234 != nil:
+    section.add "api-version", valid_568234
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -466,20 +466,20 @@ proc validate_WorkspacesPurge_593979(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594003: Call_WorkspacesPurge_593978; path: JsonNode; query: JsonNode;
+proc call*(call_568236: Call_WorkspacesPurge_568211; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Purges data in an Log Analytics workspace by a set of user-defined filters.
   ## 
-  let valid = call_594003.validator(path, query, header, formData, body)
-  let scheme = call_594003.pickScheme
+  let valid = call_568236.validator(path, query, header, formData, body)
+  let scheme = call_568236.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594003.url(scheme.get, call_594003.host, call_594003.base,
-                         call_594003.route, valid.getOrDefault("path"),
+  let url = call_568236.url(scheme.get, call_568236.host, call_568236.base,
+                         call_568236.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594003, url, valid)
+  result = hook(call_568236, url, valid)
 
-proc call*(call_594004: Call_WorkspacesPurge_593978; resourceGroupName: string;
+proc call*(call_568237: Call_WorkspacesPurge_568211; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; body: JsonNode;
           workspaceName: string): Recallable =
   ## workspacesPurge
@@ -494,24 +494,24 @@ proc call*(call_594004: Call_WorkspacesPurge_593978; resourceGroupName: string;
   ##       : Describes the body of a request to purge data in a single table of an Log Analytics Workspace
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594005 = newJObject()
-  var query_594006 = newJObject()
-  var body_594007 = newJObject()
-  add(path_594005, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594006, "api-version", newJString(apiVersion))
-  add(path_594005, "subscriptionId", newJString(subscriptionId))
+  var path_568238 = newJObject()
+  var query_568239 = newJObject()
+  var body_568240 = newJObject()
+  add(path_568238, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568239, "api-version", newJString(apiVersion))
+  add(path_568238, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_594007 = body
-  add(path_594005, "workspaceName", newJString(workspaceName))
-  result = call_594004.call(path_594005, query_594006, nil, nil, body_594007)
+    body_568240 = body
+  add(path_568238, "workspaceName", newJString(workspaceName))
+  result = call_568237.call(path_568238, query_568239, nil, nil, body_568240)
 
-var workspacesPurge* = Call_WorkspacesPurge_593978(name: "workspacesPurge",
+var workspacesPurge* = Call_WorkspacesPurge_568211(name: "workspacesPurge",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/purge",
-    validator: validate_WorkspacesPurge_593979, base: "", url: url_WorkspacesPurge_593980,
+    validator: validate_WorkspacesPurge_568212, base: "", url: url_WorkspacesPurge_568213,
     schemes: {Scheme.Https})
 type
-  Call_WorkspacesDeleteGateways_594008 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesDeleteGateways_594010(protocol: Scheme; host: string;
+  Call_WorkspacesDeleteGateways_568241 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesDeleteGateways_568243(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -538,7 +538,7 @@ proc url_WorkspacesDeleteGateways_594010(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesDeleteGateways_594009(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesDeleteGateways_568242(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a Log Analytics gateway.
   ## 
@@ -556,26 +556,26 @@ proc validate_WorkspacesDeleteGateways_594009(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594011 = path.getOrDefault("resourceGroupName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_568244 = path.getOrDefault("resourceGroupName")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "resourceGroupName", valid_594011
-  var valid_594012 = path.getOrDefault("subscriptionId")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_568244 != nil:
+    section.add "resourceGroupName", valid_568244
+  var valid_568245 = path.getOrDefault("subscriptionId")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "subscriptionId", valid_594012
-  var valid_594013 = path.getOrDefault("gatewayId")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  if valid_568245 != nil:
+    section.add "subscriptionId", valid_568245
+  var valid_568246 = path.getOrDefault("gatewayId")
+  valid_568246 = validateParameter(valid_568246, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "gatewayId", valid_594013
-  var valid_594014 = path.getOrDefault("workspaceName")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_568246 != nil:
+    section.add "gatewayId", valid_568246
+  var valid_568247 = path.getOrDefault("workspaceName")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "workspaceName", valid_594014
+  if valid_568247 != nil:
+    section.add "workspaceName", valid_568247
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -583,11 +583,11 @@ proc validate_WorkspacesDeleteGateways_594009(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594015 = query.getOrDefault("api-version")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_568248 = query.getOrDefault("api-version")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "api-version", valid_594015
+  if valid_568248 != nil:
+    section.add "api-version", valid_568248
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -596,20 +596,20 @@ proc validate_WorkspacesDeleteGateways_594009(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594016: Call_WorkspacesDeleteGateways_594008; path: JsonNode;
+proc call*(call_568249: Call_WorkspacesDeleteGateways_568241; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Log Analytics gateway.
   ## 
-  let valid = call_594016.validator(path, query, header, formData, body)
-  let scheme = call_594016.pickScheme
+  let valid = call_568249.validator(path, query, header, formData, body)
+  let scheme = call_568249.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594016.url(scheme.get, call_594016.host, call_594016.base,
-                         call_594016.route, valid.getOrDefault("path"),
+  let url = call_568249.url(scheme.get, call_568249.host, call_568249.base,
+                         call_568249.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594016, url, valid)
+  result = hook(call_568249, url, valid)
 
-proc call*(call_594017: Call_WorkspacesDeleteGateways_594008;
+proc call*(call_568250: Call_WorkspacesDeleteGateways_568241;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           gatewayId: string; workspaceName: string): Recallable =
   ## workspacesDeleteGateways
@@ -624,23 +624,23 @@ proc call*(call_594017: Call_WorkspacesDeleteGateways_594008;
   ##            : The Log Analytics gateway Id.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594018 = newJObject()
-  var query_594019 = newJObject()
-  add(path_594018, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594019, "api-version", newJString(apiVersion))
-  add(path_594018, "subscriptionId", newJString(subscriptionId))
-  add(path_594018, "gatewayId", newJString(gatewayId))
-  add(path_594018, "workspaceName", newJString(workspaceName))
-  result = call_594017.call(path_594018, query_594019, nil, nil, nil)
+  var path_568251 = newJObject()
+  var query_568252 = newJObject()
+  add(path_568251, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568252, "api-version", newJString(apiVersion))
+  add(path_568251, "subscriptionId", newJString(subscriptionId))
+  add(path_568251, "gatewayId", newJString(gatewayId))
+  add(path_568251, "workspaceName", newJString(workspaceName))
+  result = call_568250.call(path_568251, query_568252, nil, nil, nil)
 
-var workspacesDeleteGateways* = Call_WorkspacesDeleteGateways_594008(
+var workspacesDeleteGateways* = Call_WorkspacesDeleteGateways_568241(
     name: "workspacesDeleteGateways", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/gateways/{gatewayId}",
-    validator: validate_WorkspacesDeleteGateways_594009, base: "",
-    url: url_WorkspacesDeleteGateways_594010, schemes: {Scheme.Https})
+    validator: validate_WorkspacesDeleteGateways_568242, base: "",
+    url: url_WorkspacesDeleteGateways_568243, schemes: {Scheme.Https})
 type
-  Call_WorkspacesListKeys_594020 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesListKeys_594022(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesListKeys_568253 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesListKeys_568255(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -664,7 +664,7 @@ proc url_WorkspacesListKeys_594022(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesListKeys_594021(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesListKeys_568254(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the shared keys for a Log Analytics Workspace. These keys are used to connect Microsoft Operational Insights agents to the workspace.
@@ -681,21 +681,21 @@ proc validate_WorkspacesListKeys_594021(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594023 = path.getOrDefault("resourceGroupName")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  var valid_568256 = path.getOrDefault("resourceGroupName")
+  valid_568256 = validateParameter(valid_568256, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "resourceGroupName", valid_594023
-  var valid_594024 = path.getOrDefault("subscriptionId")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  if valid_568256 != nil:
+    section.add "resourceGroupName", valid_568256
+  var valid_568257 = path.getOrDefault("subscriptionId")
+  valid_568257 = validateParameter(valid_568257, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "subscriptionId", valid_594024
-  var valid_594025 = path.getOrDefault("workspaceName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  if valid_568257 != nil:
+    section.add "subscriptionId", valid_568257
+  var valid_568258 = path.getOrDefault("workspaceName")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "workspaceName", valid_594025
+  if valid_568258 != nil:
+    section.add "workspaceName", valid_568258
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -703,11 +703,11 @@ proc validate_WorkspacesListKeys_594021(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594026 = query.getOrDefault("api-version")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_568259 = query.getOrDefault("api-version")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "api-version", valid_594026
+  if valid_568259 != nil:
+    section.add "api-version", valid_568259
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -716,20 +716,20 @@ proc validate_WorkspacesListKeys_594021(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594027: Call_WorkspacesListKeys_594020; path: JsonNode;
+proc call*(call_568260: Call_WorkspacesListKeys_568253; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the shared keys for a Log Analytics Workspace. These keys are used to connect Microsoft Operational Insights agents to the workspace.
   ## 
-  let valid = call_594027.validator(path, query, header, formData, body)
-  let scheme = call_594027.pickScheme
+  let valid = call_568260.validator(path, query, header, formData, body)
+  let scheme = call_568260.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594027.url(scheme.get, call_594027.host, call_594027.base,
-                         call_594027.route, valid.getOrDefault("path"),
+  let url = call_568260.url(scheme.get, call_568260.host, call_568260.base,
+                         call_568260.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594027, url, valid)
+  result = hook(call_568260, url, valid)
 
-proc call*(call_594028: Call_WorkspacesListKeys_594020; resourceGroupName: string;
+proc call*(call_568261: Call_WorkspacesListKeys_568253; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; workspaceName: string): Recallable =
   ## workspacesListKeys
   ## Gets the shared keys for a Log Analytics Workspace. These keys are used to connect Microsoft Operational Insights agents to the workspace.
@@ -741,22 +741,22 @@ proc call*(call_594028: Call_WorkspacesListKeys_594020; resourceGroupName: strin
   ##                 : The Subscription ID.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594029 = newJObject()
-  var query_594030 = newJObject()
-  add(path_594029, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594030, "api-version", newJString(apiVersion))
-  add(path_594029, "subscriptionId", newJString(subscriptionId))
-  add(path_594029, "workspaceName", newJString(workspaceName))
-  result = call_594028.call(path_594029, query_594030, nil, nil, nil)
+  var path_568262 = newJObject()
+  var query_568263 = newJObject()
+  add(path_568262, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568263, "api-version", newJString(apiVersion))
+  add(path_568262, "subscriptionId", newJString(subscriptionId))
+  add(path_568262, "workspaceName", newJString(workspaceName))
+  result = call_568261.call(path_568262, query_568263, nil, nil, nil)
 
-var workspacesListKeys* = Call_WorkspacesListKeys_594020(
+var workspacesListKeys* = Call_WorkspacesListKeys_568253(
     name: "workspacesListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/listKeys",
-    validator: validate_WorkspacesListKeys_594021, base: "",
-    url: url_WorkspacesListKeys_594022, schemes: {Scheme.Https})
+    validator: validate_WorkspacesListKeys_568254, base: "",
+    url: url_WorkspacesListKeys_568255, schemes: {Scheme.Https})
 type
-  Call_WorkspacesRegenerateSharedKeys_594031 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesRegenerateSharedKeys_594033(protocol: Scheme; host: string;
+  Call_WorkspacesRegenerateSharedKeys_568264 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesRegenerateSharedKeys_568266(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -780,7 +780,7 @@ proc url_WorkspacesRegenerateSharedKeys_594033(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesRegenerateSharedKeys_594032(path: JsonNode;
+proc validate_WorkspacesRegenerateSharedKeys_568265(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates the shared keys for a Log Analytics Workspace. These keys are used to connect Microsoft Operational Insights agents to the workspace.
   ## 
@@ -796,21 +796,21 @@ proc validate_WorkspacesRegenerateSharedKeys_594032(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594034 = path.getOrDefault("resourceGroupName")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  var valid_568267 = path.getOrDefault("resourceGroupName")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "resourceGroupName", valid_594034
-  var valid_594035 = path.getOrDefault("subscriptionId")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  if valid_568267 != nil:
+    section.add "resourceGroupName", valid_568267
+  var valid_568268 = path.getOrDefault("subscriptionId")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "subscriptionId", valid_594035
-  var valid_594036 = path.getOrDefault("workspaceName")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  if valid_568268 != nil:
+    section.add "subscriptionId", valid_568268
+  var valid_568269 = path.getOrDefault("workspaceName")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "workspaceName", valid_594036
+  if valid_568269 != nil:
+    section.add "workspaceName", valid_568269
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -818,11 +818,11 @@ proc validate_WorkspacesRegenerateSharedKeys_594032(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594037 = query.getOrDefault("api-version")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  var valid_568270 = query.getOrDefault("api-version")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "api-version", valid_594037
+  if valid_568270 != nil:
+    section.add "api-version", valid_568270
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -831,20 +831,20 @@ proc validate_WorkspacesRegenerateSharedKeys_594032(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594038: Call_WorkspacesRegenerateSharedKeys_594031; path: JsonNode;
+proc call*(call_568271: Call_WorkspacesRegenerateSharedKeys_568264; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerates the shared keys for a Log Analytics Workspace. These keys are used to connect Microsoft Operational Insights agents to the workspace.
   ## 
-  let valid = call_594038.validator(path, query, header, formData, body)
-  let scheme = call_594038.pickScheme
+  let valid = call_568271.validator(path, query, header, formData, body)
+  let scheme = call_568271.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594038.url(scheme.get, call_594038.host, call_594038.base,
-                         call_594038.route, valid.getOrDefault("path"),
+  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
+                         call_568271.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594038, url, valid)
+  result = hook(call_568271, url, valid)
 
-proc call*(call_594039: Call_WorkspacesRegenerateSharedKeys_594031;
+proc call*(call_568272: Call_WorkspacesRegenerateSharedKeys_568264;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           workspaceName: string): Recallable =
   ## workspacesRegenerateSharedKeys
@@ -857,22 +857,22 @@ proc call*(call_594039: Call_WorkspacesRegenerateSharedKeys_594031;
   ##                 : The Subscription ID.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594040 = newJObject()
-  var query_594041 = newJObject()
-  add(path_594040, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594041, "api-version", newJString(apiVersion))
-  add(path_594040, "subscriptionId", newJString(subscriptionId))
-  add(path_594040, "workspaceName", newJString(workspaceName))
-  result = call_594039.call(path_594040, query_594041, nil, nil, nil)
+  var path_568273 = newJObject()
+  var query_568274 = newJObject()
+  add(path_568273, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568274, "api-version", newJString(apiVersion))
+  add(path_568273, "subscriptionId", newJString(subscriptionId))
+  add(path_568273, "workspaceName", newJString(workspaceName))
+  result = call_568272.call(path_568273, query_568274, nil, nil, nil)
 
-var workspacesRegenerateSharedKeys* = Call_WorkspacesRegenerateSharedKeys_594031(
+var workspacesRegenerateSharedKeys* = Call_WorkspacesRegenerateSharedKeys_568264(
     name: "workspacesRegenerateSharedKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/regenerateSharedKey",
-    validator: validate_WorkspacesRegenerateSharedKeys_594032, base: "",
-    url: url_WorkspacesRegenerateSharedKeys_594033, schemes: {Scheme.Https})
+    validator: validate_WorkspacesRegenerateSharedKeys_568265, base: "",
+    url: url_WorkspacesRegenerateSharedKeys_568266, schemes: {Scheme.Https})
 type
-  Call_SavedSearchesListByWorkspace_594042 = ref object of OpenApiRestCall_593425
-proc url_SavedSearchesListByWorkspace_594044(protocol: Scheme; host: string;
+  Call_SavedSearchesListByWorkspace_568275 = ref object of OpenApiRestCall_567658
+proc url_SavedSearchesListByWorkspace_568277(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -896,7 +896,7 @@ proc url_SavedSearchesListByWorkspace_594044(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SavedSearchesListByWorkspace_594043(path: JsonNode; query: JsonNode;
+proc validate_SavedSearchesListByWorkspace_568276(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the saved searches for a given Log Analytics Workspace
   ## 
@@ -912,21 +912,21 @@ proc validate_SavedSearchesListByWorkspace_594043(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594045 = path.getOrDefault("resourceGroupName")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  var valid_568278 = path.getOrDefault("resourceGroupName")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "resourceGroupName", valid_594045
-  var valid_594046 = path.getOrDefault("subscriptionId")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  if valid_568278 != nil:
+    section.add "resourceGroupName", valid_568278
+  var valid_568279 = path.getOrDefault("subscriptionId")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "subscriptionId", valid_594046
-  var valid_594047 = path.getOrDefault("workspaceName")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  if valid_568279 != nil:
+    section.add "subscriptionId", valid_568279
+  var valid_568280 = path.getOrDefault("workspaceName")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "workspaceName", valid_594047
+  if valid_568280 != nil:
+    section.add "workspaceName", valid_568280
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -934,11 +934,11 @@ proc validate_SavedSearchesListByWorkspace_594043(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594048 = query.getOrDefault("api-version")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  var valid_568281 = query.getOrDefault("api-version")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "api-version", valid_594048
+  if valid_568281 != nil:
+    section.add "api-version", valid_568281
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -947,20 +947,20 @@ proc validate_SavedSearchesListByWorkspace_594043(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594049: Call_SavedSearchesListByWorkspace_594042; path: JsonNode;
+proc call*(call_568282: Call_SavedSearchesListByWorkspace_568275; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the saved searches for a given Log Analytics Workspace
   ## 
-  let valid = call_594049.validator(path, query, header, formData, body)
-  let scheme = call_594049.pickScheme
+  let valid = call_568282.validator(path, query, header, formData, body)
+  let scheme = call_568282.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594049.url(scheme.get, call_594049.host, call_594049.base,
-                         call_594049.route, valid.getOrDefault("path"),
+  let url = call_568282.url(scheme.get, call_568282.host, call_568282.base,
+                         call_568282.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594049, url, valid)
+  result = hook(call_568282, url, valid)
 
-proc call*(call_594050: Call_SavedSearchesListByWorkspace_594042;
+proc call*(call_568283: Call_SavedSearchesListByWorkspace_568275;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           workspaceName: string): Recallable =
   ## savedSearchesListByWorkspace
@@ -973,22 +973,22 @@ proc call*(call_594050: Call_SavedSearchesListByWorkspace_594042;
   ##                 : The Subscription ID.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594051 = newJObject()
-  var query_594052 = newJObject()
-  add(path_594051, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594052, "api-version", newJString(apiVersion))
-  add(path_594051, "subscriptionId", newJString(subscriptionId))
-  add(path_594051, "workspaceName", newJString(workspaceName))
-  result = call_594050.call(path_594051, query_594052, nil, nil, nil)
+  var path_568284 = newJObject()
+  var query_568285 = newJObject()
+  add(path_568284, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568285, "api-version", newJString(apiVersion))
+  add(path_568284, "subscriptionId", newJString(subscriptionId))
+  add(path_568284, "workspaceName", newJString(workspaceName))
+  result = call_568283.call(path_568284, query_568285, nil, nil, nil)
 
-var savedSearchesListByWorkspace* = Call_SavedSearchesListByWorkspace_594042(
+var savedSearchesListByWorkspace* = Call_SavedSearchesListByWorkspace_568275(
     name: "savedSearchesListByWorkspace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/savedSearches",
-    validator: validate_SavedSearchesListByWorkspace_594043, base: "",
-    url: url_SavedSearchesListByWorkspace_594044, schemes: {Scheme.Https})
+    validator: validate_SavedSearchesListByWorkspace_568276, base: "",
+    url: url_SavedSearchesListByWorkspace_568277, schemes: {Scheme.Https})
 type
-  Call_SavedSearchesCreateOrUpdate_594065 = ref object of OpenApiRestCall_593425
-proc url_SavedSearchesCreateOrUpdate_594067(protocol: Scheme; host: string;
+  Call_SavedSearchesCreateOrUpdate_568298 = ref object of OpenApiRestCall_567658
+proc url_SavedSearchesCreateOrUpdate_568300(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1014,7 +1014,7 @@ proc url_SavedSearchesCreateOrUpdate_594067(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SavedSearchesCreateOrUpdate_594066(path: JsonNode; query: JsonNode;
+proc validate_SavedSearchesCreateOrUpdate_568299(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a saved search for a given workspace.
   ## 
@@ -1032,26 +1032,26 @@ proc validate_SavedSearchesCreateOrUpdate_594066(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594068 = path.getOrDefault("resourceGroupName")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  var valid_568301 = path.getOrDefault("resourceGroupName")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "resourceGroupName", valid_594068
-  var valid_594069 = path.getOrDefault("subscriptionId")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  if valid_568301 != nil:
+    section.add "resourceGroupName", valid_568301
+  var valid_568302 = path.getOrDefault("subscriptionId")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "subscriptionId", valid_594069
-  var valid_594070 = path.getOrDefault("savedSearchId")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  if valid_568302 != nil:
+    section.add "subscriptionId", valid_568302
+  var valid_568303 = path.getOrDefault("savedSearchId")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "savedSearchId", valid_594070
-  var valid_594071 = path.getOrDefault("workspaceName")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  if valid_568303 != nil:
+    section.add "savedSearchId", valid_568303
+  var valid_568304 = path.getOrDefault("workspaceName")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "workspaceName", valid_594071
+  if valid_568304 != nil:
+    section.add "workspaceName", valid_568304
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1059,11 +1059,11 @@ proc validate_SavedSearchesCreateOrUpdate_594066(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594072 = query.getOrDefault("api-version")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  var valid_568305 = query.getOrDefault("api-version")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "api-version", valid_594072
+  if valid_568305 != nil:
+    section.add "api-version", valid_568305
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1077,20 +1077,20 @@ proc validate_SavedSearchesCreateOrUpdate_594066(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594074: Call_SavedSearchesCreateOrUpdate_594065; path: JsonNode;
+proc call*(call_568307: Call_SavedSearchesCreateOrUpdate_568298; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a saved search for a given workspace.
   ## 
-  let valid = call_594074.validator(path, query, header, formData, body)
-  let scheme = call_594074.pickScheme
+  let valid = call_568307.validator(path, query, header, formData, body)
+  let scheme = call_568307.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594074.url(scheme.get, call_594074.host, call_594074.base,
-                         call_594074.route, valid.getOrDefault("path"),
+  let url = call_568307.url(scheme.get, call_568307.host, call_568307.base,
+                         call_568307.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594074, url, valid)
+  result = hook(call_568307, url, valid)
 
-proc call*(call_594075: Call_SavedSearchesCreateOrUpdate_594065;
+proc call*(call_568308: Call_SavedSearchesCreateOrUpdate_568298;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           savedSearchId: string; parameters: JsonNode; workspaceName: string): Recallable =
   ## savedSearchesCreateOrUpdate
@@ -1107,26 +1107,26 @@ proc call*(call_594075: Call_SavedSearchesCreateOrUpdate_594065;
   ##             : The parameters required to save a search.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594076 = newJObject()
-  var query_594077 = newJObject()
-  var body_594078 = newJObject()
-  add(path_594076, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594077, "api-version", newJString(apiVersion))
-  add(path_594076, "subscriptionId", newJString(subscriptionId))
-  add(path_594076, "savedSearchId", newJString(savedSearchId))
+  var path_568309 = newJObject()
+  var query_568310 = newJObject()
+  var body_568311 = newJObject()
+  add(path_568309, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568310, "api-version", newJString(apiVersion))
+  add(path_568309, "subscriptionId", newJString(subscriptionId))
+  add(path_568309, "savedSearchId", newJString(savedSearchId))
   if parameters != nil:
-    body_594078 = parameters
-  add(path_594076, "workspaceName", newJString(workspaceName))
-  result = call_594075.call(path_594076, query_594077, nil, nil, body_594078)
+    body_568311 = parameters
+  add(path_568309, "workspaceName", newJString(workspaceName))
+  result = call_568308.call(path_568309, query_568310, nil, nil, body_568311)
 
-var savedSearchesCreateOrUpdate* = Call_SavedSearchesCreateOrUpdate_594065(
+var savedSearchesCreateOrUpdate* = Call_SavedSearchesCreateOrUpdate_568298(
     name: "savedSearchesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/savedSearches/{savedSearchId}",
-    validator: validate_SavedSearchesCreateOrUpdate_594066, base: "",
-    url: url_SavedSearchesCreateOrUpdate_594067, schemes: {Scheme.Https})
+    validator: validate_SavedSearchesCreateOrUpdate_568299, base: "",
+    url: url_SavedSearchesCreateOrUpdate_568300, schemes: {Scheme.Https})
 type
-  Call_SavedSearchesGet_594053 = ref object of OpenApiRestCall_593425
-proc url_SavedSearchesGet_594055(protocol: Scheme; host: string; base: string;
+  Call_SavedSearchesGet_568286 = ref object of OpenApiRestCall_567658
+proc url_SavedSearchesGet_568288(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1152,7 +1152,7 @@ proc url_SavedSearchesGet_594055(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SavedSearchesGet_594054(path: JsonNode; query: JsonNode;
+proc validate_SavedSearchesGet_568287(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets the specified saved search for a given workspace.
@@ -1171,26 +1171,26 @@ proc validate_SavedSearchesGet_594054(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594056 = path.getOrDefault("resourceGroupName")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  var valid_568289 = path.getOrDefault("resourceGroupName")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "resourceGroupName", valid_594056
-  var valid_594057 = path.getOrDefault("subscriptionId")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  if valid_568289 != nil:
+    section.add "resourceGroupName", valid_568289
+  var valid_568290 = path.getOrDefault("subscriptionId")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "subscriptionId", valid_594057
-  var valid_594058 = path.getOrDefault("savedSearchId")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  if valid_568290 != nil:
+    section.add "subscriptionId", valid_568290
+  var valid_568291 = path.getOrDefault("savedSearchId")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "savedSearchId", valid_594058
-  var valid_594059 = path.getOrDefault("workspaceName")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  if valid_568291 != nil:
+    section.add "savedSearchId", valid_568291
+  var valid_568292 = path.getOrDefault("workspaceName")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "workspaceName", valid_594059
+  if valid_568292 != nil:
+    section.add "workspaceName", valid_568292
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1198,11 +1198,11 @@ proc validate_SavedSearchesGet_594054(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594060 = query.getOrDefault("api-version")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  var valid_568293 = query.getOrDefault("api-version")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "api-version", valid_594060
+  if valid_568293 != nil:
+    section.add "api-version", valid_568293
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1211,20 +1211,20 @@ proc validate_SavedSearchesGet_594054(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594061: Call_SavedSearchesGet_594053; path: JsonNode;
+proc call*(call_568294: Call_SavedSearchesGet_568286; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified saved search for a given workspace.
   ## 
-  let valid = call_594061.validator(path, query, header, formData, body)
-  let scheme = call_594061.pickScheme
+  let valid = call_568294.validator(path, query, header, formData, body)
+  let scheme = call_568294.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594061.url(scheme.get, call_594061.host, call_594061.base,
-                         call_594061.route, valid.getOrDefault("path"),
+  let url = call_568294.url(scheme.get, call_568294.host, call_568294.base,
+                         call_568294.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594061, url, valid)
+  result = hook(call_568294, url, valid)
 
-proc call*(call_594062: Call_SavedSearchesGet_594053; resourceGroupName: string;
+proc call*(call_568295: Call_SavedSearchesGet_568286; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; savedSearchId: string;
           workspaceName: string): Recallable =
   ## savedSearchesGet
@@ -1239,22 +1239,22 @@ proc call*(call_594062: Call_SavedSearchesGet_594053; resourceGroupName: string;
   ##                : The id of the saved search.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594063 = newJObject()
-  var query_594064 = newJObject()
-  add(path_594063, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594064, "api-version", newJString(apiVersion))
-  add(path_594063, "subscriptionId", newJString(subscriptionId))
-  add(path_594063, "savedSearchId", newJString(savedSearchId))
-  add(path_594063, "workspaceName", newJString(workspaceName))
-  result = call_594062.call(path_594063, query_594064, nil, nil, nil)
+  var path_568296 = newJObject()
+  var query_568297 = newJObject()
+  add(path_568296, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568297, "api-version", newJString(apiVersion))
+  add(path_568296, "subscriptionId", newJString(subscriptionId))
+  add(path_568296, "savedSearchId", newJString(savedSearchId))
+  add(path_568296, "workspaceName", newJString(workspaceName))
+  result = call_568295.call(path_568296, query_568297, nil, nil, nil)
 
-var savedSearchesGet* = Call_SavedSearchesGet_594053(name: "savedSearchesGet",
+var savedSearchesGet* = Call_SavedSearchesGet_568286(name: "savedSearchesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/savedSearches/{savedSearchId}",
-    validator: validate_SavedSearchesGet_594054, base: "",
-    url: url_SavedSearchesGet_594055, schemes: {Scheme.Https})
+    validator: validate_SavedSearchesGet_568287, base: "",
+    url: url_SavedSearchesGet_568288, schemes: {Scheme.Https})
 type
-  Call_SavedSearchesDelete_594079 = ref object of OpenApiRestCall_593425
-proc url_SavedSearchesDelete_594081(protocol: Scheme; host: string; base: string;
+  Call_SavedSearchesDelete_568312 = ref object of OpenApiRestCall_567658
+proc url_SavedSearchesDelete_568314(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1280,7 +1280,7 @@ proc url_SavedSearchesDelete_594081(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SavedSearchesDelete_594080(path: JsonNode; query: JsonNode;
+proc validate_SavedSearchesDelete_568313(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes the specified saved search in a given workspace.
@@ -1299,26 +1299,26 @@ proc validate_SavedSearchesDelete_594080(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594082 = path.getOrDefault("resourceGroupName")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  var valid_568315 = path.getOrDefault("resourceGroupName")
+  valid_568315 = validateParameter(valid_568315, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "resourceGroupName", valid_594082
-  var valid_594083 = path.getOrDefault("subscriptionId")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
+  if valid_568315 != nil:
+    section.add "resourceGroupName", valid_568315
+  var valid_568316 = path.getOrDefault("subscriptionId")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = nil)
-  if valid_594083 != nil:
-    section.add "subscriptionId", valid_594083
-  var valid_594084 = path.getOrDefault("savedSearchId")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  if valid_568316 != nil:
+    section.add "subscriptionId", valid_568316
+  var valid_568317 = path.getOrDefault("savedSearchId")
+  valid_568317 = validateParameter(valid_568317, JString, required = true,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "savedSearchId", valid_594084
-  var valid_594085 = path.getOrDefault("workspaceName")
-  valid_594085 = validateParameter(valid_594085, JString, required = true,
+  if valid_568317 != nil:
+    section.add "savedSearchId", valid_568317
+  var valid_568318 = path.getOrDefault("workspaceName")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594085 != nil:
-    section.add "workspaceName", valid_594085
+  if valid_568318 != nil:
+    section.add "workspaceName", valid_568318
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1326,11 +1326,11 @@ proc validate_SavedSearchesDelete_594080(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594086 = query.getOrDefault("api-version")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  var valid_568319 = query.getOrDefault("api-version")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "api-version", valid_594086
+  if valid_568319 != nil:
+    section.add "api-version", valid_568319
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1339,20 +1339,20 @@ proc validate_SavedSearchesDelete_594080(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594087: Call_SavedSearchesDelete_594079; path: JsonNode;
+proc call*(call_568320: Call_SavedSearchesDelete_568312; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified saved search in a given workspace.
   ## 
-  let valid = call_594087.validator(path, query, header, formData, body)
-  let scheme = call_594087.pickScheme
+  let valid = call_568320.validator(path, query, header, formData, body)
+  let scheme = call_568320.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594087.url(scheme.get, call_594087.host, call_594087.base,
-                         call_594087.route, valid.getOrDefault("path"),
+  let url = call_568320.url(scheme.get, call_568320.host, call_568320.base,
+                         call_568320.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594087, url, valid)
+  result = hook(call_568320, url, valid)
 
-proc call*(call_594088: Call_SavedSearchesDelete_594079; resourceGroupName: string;
+proc call*(call_568321: Call_SavedSearchesDelete_568312; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; savedSearchId: string;
           workspaceName: string): Recallable =
   ## savedSearchesDelete
@@ -1367,23 +1367,23 @@ proc call*(call_594088: Call_SavedSearchesDelete_594079; resourceGroupName: stri
   ##                : The id of the saved search.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594089 = newJObject()
-  var query_594090 = newJObject()
-  add(path_594089, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594090, "api-version", newJString(apiVersion))
-  add(path_594089, "subscriptionId", newJString(subscriptionId))
-  add(path_594089, "savedSearchId", newJString(savedSearchId))
-  add(path_594089, "workspaceName", newJString(workspaceName))
-  result = call_594088.call(path_594089, query_594090, nil, nil, nil)
+  var path_568322 = newJObject()
+  var query_568323 = newJObject()
+  add(path_568322, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568323, "api-version", newJString(apiVersion))
+  add(path_568322, "subscriptionId", newJString(subscriptionId))
+  add(path_568322, "savedSearchId", newJString(savedSearchId))
+  add(path_568322, "workspaceName", newJString(workspaceName))
+  result = call_568321.call(path_568322, query_568323, nil, nil, nil)
 
-var savedSearchesDelete* = Call_SavedSearchesDelete_594079(
+var savedSearchesDelete* = Call_SavedSearchesDelete_568312(
     name: "savedSearchesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/savedSearches/{savedSearchId}",
-    validator: validate_SavedSearchesDelete_594080, base: "",
-    url: url_SavedSearchesDelete_594081, schemes: {Scheme.Https})
+    validator: validate_SavedSearchesDelete_568313, base: "",
+    url: url_SavedSearchesDelete_568314, schemes: {Scheme.Https})
 type
-  Call_SavedSearchesGetResults_594091 = ref object of OpenApiRestCall_593425
-proc url_SavedSearchesGetResults_594093(protocol: Scheme; host: string; base: string;
+  Call_SavedSearchesGetResults_568324 = ref object of OpenApiRestCall_567658
+proc url_SavedSearchesGetResults_568326(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1411,7 +1411,7 @@ proc url_SavedSearchesGetResults_594093(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SavedSearchesGetResults_594092(path: JsonNode; query: JsonNode;
+proc validate_SavedSearchesGetResults_568325(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the results from a saved search for a given workspace.
   ## 
@@ -1429,26 +1429,26 @@ proc validate_SavedSearchesGetResults_594092(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594094 = path.getOrDefault("resourceGroupName")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  var valid_568327 = path.getOrDefault("resourceGroupName")
+  valid_568327 = validateParameter(valid_568327, JString, required = true,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "resourceGroupName", valid_594094
-  var valid_594095 = path.getOrDefault("savedSearchId")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  if valid_568327 != nil:
+    section.add "resourceGroupName", valid_568327
+  var valid_568328 = path.getOrDefault("savedSearchId")
+  valid_568328 = validateParameter(valid_568328, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "savedSearchId", valid_594095
-  var valid_594096 = path.getOrDefault("subscriptionId")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
+  if valid_568328 != nil:
+    section.add "savedSearchId", valid_568328
+  var valid_568329 = path.getOrDefault("subscriptionId")
+  valid_568329 = validateParameter(valid_568329, JString, required = true,
                                  default = nil)
-  if valid_594096 != nil:
-    section.add "subscriptionId", valid_594096
-  var valid_594097 = path.getOrDefault("workspaceName")
-  valid_594097 = validateParameter(valid_594097, JString, required = true,
+  if valid_568329 != nil:
+    section.add "subscriptionId", valid_568329
+  var valid_568330 = path.getOrDefault("workspaceName")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "workspaceName", valid_594097
+  if valid_568330 != nil:
+    section.add "workspaceName", valid_568330
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1456,11 +1456,11 @@ proc validate_SavedSearchesGetResults_594092(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594098 = query.getOrDefault("api-version")
-  valid_594098 = validateParameter(valid_594098, JString, required = true,
+  var valid_568331 = query.getOrDefault("api-version")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = nil)
-  if valid_594098 != nil:
-    section.add "api-version", valid_594098
+  if valid_568331 != nil:
+    section.add "api-version", valid_568331
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1469,20 +1469,20 @@ proc validate_SavedSearchesGetResults_594092(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594099: Call_SavedSearchesGetResults_594091; path: JsonNode;
+proc call*(call_568332: Call_SavedSearchesGetResults_568324; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the results from a saved search for a given workspace.
   ## 
-  let valid = call_594099.validator(path, query, header, formData, body)
-  let scheme = call_594099.pickScheme
+  let valid = call_568332.validator(path, query, header, formData, body)
+  let scheme = call_568332.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594099.url(scheme.get, call_594099.host, call_594099.base,
-                         call_594099.route, valid.getOrDefault("path"),
+  let url = call_568332.url(scheme.get, call_568332.host, call_568332.base,
+                         call_568332.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594099, url, valid)
+  result = hook(call_568332, url, valid)
 
-proc call*(call_594100: Call_SavedSearchesGetResults_594091;
+proc call*(call_568333: Call_SavedSearchesGetResults_568324;
           resourceGroupName: string; apiVersion: string; savedSearchId: string;
           subscriptionId: string; workspaceName: string): Recallable =
   ## savedSearchesGetResults
@@ -1497,23 +1497,23 @@ proc call*(call_594100: Call_SavedSearchesGetResults_594091;
   ##                 : The Subscription ID.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594101 = newJObject()
-  var query_594102 = newJObject()
-  add(path_594101, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594102, "api-version", newJString(apiVersion))
-  add(path_594101, "savedSearchId", newJString(savedSearchId))
-  add(path_594101, "subscriptionId", newJString(subscriptionId))
-  add(path_594101, "workspaceName", newJString(workspaceName))
-  result = call_594100.call(path_594101, query_594102, nil, nil, nil)
+  var path_568334 = newJObject()
+  var query_568335 = newJObject()
+  add(path_568334, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568335, "api-version", newJString(apiVersion))
+  add(path_568334, "savedSearchId", newJString(savedSearchId))
+  add(path_568334, "subscriptionId", newJString(subscriptionId))
+  add(path_568334, "workspaceName", newJString(workspaceName))
+  result = call_568333.call(path_568334, query_568335, nil, nil, nil)
 
-var savedSearchesGetResults* = Call_SavedSearchesGetResults_594091(
+var savedSearchesGetResults* = Call_SavedSearchesGetResults_568324(
     name: "savedSearchesGetResults", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/savedSearches/{savedSearchId}/results",
-    validator: validate_SavedSearchesGetResults_594092, base: "",
-    url: url_SavedSearchesGetResults_594093, schemes: {Scheme.Https})
+    validator: validate_SavedSearchesGetResults_568325, base: "",
+    url: url_SavedSearchesGetResults_568326, schemes: {Scheme.Https})
 type
-  Call_WorkspacesGetSchema_594103 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesGetSchema_594105(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesGetSchema_568336 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesGetSchema_568338(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1537,7 +1537,7 @@ proc url_WorkspacesGetSchema_594105(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesGetSchema_594104(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesGetSchema_568337(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets the schema for a given workspace.
@@ -1554,21 +1554,21 @@ proc validate_WorkspacesGetSchema_594104(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594106 = path.getOrDefault("resourceGroupName")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  var valid_568339 = path.getOrDefault("resourceGroupName")
+  valid_568339 = validateParameter(valid_568339, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "resourceGroupName", valid_594106
-  var valid_594107 = path.getOrDefault("subscriptionId")
-  valid_594107 = validateParameter(valid_594107, JString, required = true,
+  if valid_568339 != nil:
+    section.add "resourceGroupName", valid_568339
+  var valid_568340 = path.getOrDefault("subscriptionId")
+  valid_568340 = validateParameter(valid_568340, JString, required = true,
                                  default = nil)
-  if valid_594107 != nil:
-    section.add "subscriptionId", valid_594107
-  var valid_594108 = path.getOrDefault("workspaceName")
-  valid_594108 = validateParameter(valid_594108, JString, required = true,
+  if valid_568340 != nil:
+    section.add "subscriptionId", valid_568340
+  var valid_568341 = path.getOrDefault("workspaceName")
+  valid_568341 = validateParameter(valid_568341, JString, required = true,
                                  default = nil)
-  if valid_594108 != nil:
-    section.add "workspaceName", valid_594108
+  if valid_568341 != nil:
+    section.add "workspaceName", valid_568341
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1576,11 +1576,11 @@ proc validate_WorkspacesGetSchema_594104(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594109 = query.getOrDefault("api-version")
-  valid_594109 = validateParameter(valid_594109, JString, required = true,
+  var valid_568342 = query.getOrDefault("api-version")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = nil)
-  if valid_594109 != nil:
-    section.add "api-version", valid_594109
+  if valid_568342 != nil:
+    section.add "api-version", valid_568342
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1589,20 +1589,20 @@ proc validate_WorkspacesGetSchema_594104(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594110: Call_WorkspacesGetSchema_594103; path: JsonNode;
+proc call*(call_568343: Call_WorkspacesGetSchema_568336; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the schema for a given workspace.
   ## 
-  let valid = call_594110.validator(path, query, header, formData, body)
-  let scheme = call_594110.pickScheme
+  let valid = call_568343.validator(path, query, header, formData, body)
+  let scheme = call_568343.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594110.url(scheme.get, call_594110.host, call_594110.base,
-                         call_594110.route, valid.getOrDefault("path"),
+  let url = call_568343.url(scheme.get, call_568343.host, call_568343.base,
+                         call_568343.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594110, url, valid)
+  result = hook(call_568343, url, valid)
 
-proc call*(call_594111: Call_WorkspacesGetSchema_594103; resourceGroupName: string;
+proc call*(call_568344: Call_WorkspacesGetSchema_568336; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; workspaceName: string): Recallable =
   ## workspacesGetSchema
   ## Gets the schema for a given workspace.
@@ -1614,22 +1614,22 @@ proc call*(call_594111: Call_WorkspacesGetSchema_594103; resourceGroupName: stri
   ##                 : The Subscription ID.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594112 = newJObject()
-  var query_594113 = newJObject()
-  add(path_594112, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594113, "api-version", newJString(apiVersion))
-  add(path_594112, "subscriptionId", newJString(subscriptionId))
-  add(path_594112, "workspaceName", newJString(workspaceName))
-  result = call_594111.call(path_594112, query_594113, nil, nil, nil)
+  var path_568345 = newJObject()
+  var query_568346 = newJObject()
+  add(path_568345, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568346, "api-version", newJString(apiVersion))
+  add(path_568345, "subscriptionId", newJString(subscriptionId))
+  add(path_568345, "workspaceName", newJString(workspaceName))
+  result = call_568344.call(path_568345, query_568346, nil, nil, nil)
 
-var workspacesGetSchema* = Call_WorkspacesGetSchema_594103(
+var workspacesGetSchema* = Call_WorkspacesGetSchema_568336(
     name: "workspacesGetSchema", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/schema",
-    validator: validate_WorkspacesGetSchema_594104, base: "",
-    url: url_WorkspacesGetSchema_594105, schemes: {Scheme.Https})
+    validator: validate_WorkspacesGetSchema_568337, base: "",
+    url: url_WorkspacesGetSchema_568338, schemes: {Scheme.Https})
 type
-  Call_WorkspacesGetSearchResults_594114 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesGetSearchResults_594116(protocol: Scheme; host: string;
+  Call_WorkspacesGetSearchResults_568347 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesGetSearchResults_568349(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1653,7 +1653,7 @@ proc url_WorkspacesGetSearchResults_594116(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesGetSearchResults_594115(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesGetSearchResults_568348(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Submit a search for a given workspace. The response will contain an id to track the search. User can use the id to poll the search status and get the full search result later if the search takes long time to finish. 
   ## 
@@ -1669,21 +1669,21 @@ proc validate_WorkspacesGetSearchResults_594115(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594117 = path.getOrDefault("resourceGroupName")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  var valid_568350 = path.getOrDefault("resourceGroupName")
+  valid_568350 = validateParameter(valid_568350, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "resourceGroupName", valid_594117
-  var valid_594118 = path.getOrDefault("subscriptionId")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  if valid_568350 != nil:
+    section.add "resourceGroupName", valid_568350
+  var valid_568351 = path.getOrDefault("subscriptionId")
+  valid_568351 = validateParameter(valid_568351, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "subscriptionId", valid_594118
-  var valid_594119 = path.getOrDefault("workspaceName")
-  valid_594119 = validateParameter(valid_594119, JString, required = true,
+  if valid_568351 != nil:
+    section.add "subscriptionId", valid_568351
+  var valid_568352 = path.getOrDefault("workspaceName")
+  valid_568352 = validateParameter(valid_568352, JString, required = true,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "workspaceName", valid_594119
+  if valid_568352 != nil:
+    section.add "workspaceName", valid_568352
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1691,11 +1691,11 @@ proc validate_WorkspacesGetSearchResults_594115(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594120 = query.getOrDefault("api-version")
-  valid_594120 = validateParameter(valid_594120, JString, required = true,
+  var valid_568353 = query.getOrDefault("api-version")
+  valid_568353 = validateParameter(valid_568353, JString, required = true,
                                  default = nil)
-  if valid_594120 != nil:
-    section.add "api-version", valid_594120
+  if valid_568353 != nil:
+    section.add "api-version", valid_568353
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1709,20 +1709,20 @@ proc validate_WorkspacesGetSearchResults_594115(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594122: Call_WorkspacesGetSearchResults_594114; path: JsonNode;
+proc call*(call_568355: Call_WorkspacesGetSearchResults_568347; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Submit a search for a given workspace. The response will contain an id to track the search. User can use the id to poll the search status and get the full search result later if the search takes long time to finish. 
   ## 
-  let valid = call_594122.validator(path, query, header, formData, body)
-  let scheme = call_594122.pickScheme
+  let valid = call_568355.validator(path, query, header, formData, body)
+  let scheme = call_568355.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594122.url(scheme.get, call_594122.host, call_594122.base,
-                         call_594122.route, valid.getOrDefault("path"),
+  let url = call_568355.url(scheme.get, call_568355.host, call_568355.base,
+                         call_568355.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594122, url, valid)
+  result = hook(call_568355, url, valid)
 
-proc call*(call_594123: Call_WorkspacesGetSearchResults_594114;
+proc call*(call_568356: Call_WorkspacesGetSearchResults_568347;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; workspaceName: string): Recallable =
   ## workspacesGetSearchResults
@@ -1737,25 +1737,25 @@ proc call*(call_594123: Call_WorkspacesGetSearchResults_594114;
   ##             : The parameters required to execute a search query.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594124 = newJObject()
-  var query_594125 = newJObject()
-  var body_594126 = newJObject()
-  add(path_594124, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594125, "api-version", newJString(apiVersion))
-  add(path_594124, "subscriptionId", newJString(subscriptionId))
+  var path_568357 = newJObject()
+  var query_568358 = newJObject()
+  var body_568359 = newJObject()
+  add(path_568357, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568358, "api-version", newJString(apiVersion))
+  add(path_568357, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594126 = parameters
-  add(path_594124, "workspaceName", newJString(workspaceName))
-  result = call_594123.call(path_594124, query_594125, nil, nil, body_594126)
+    body_568359 = parameters
+  add(path_568357, "workspaceName", newJString(workspaceName))
+  result = call_568356.call(path_568357, query_568358, nil, nil, body_568359)
 
-var workspacesGetSearchResults* = Call_WorkspacesGetSearchResults_594114(
+var workspacesGetSearchResults* = Call_WorkspacesGetSearchResults_568347(
     name: "workspacesGetSearchResults", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/search",
-    validator: validate_WorkspacesGetSearchResults_594115, base: "",
-    url: url_WorkspacesGetSearchResults_594116, schemes: {Scheme.Https})
+    validator: validate_WorkspacesGetSearchResults_568348, base: "",
+    url: url_WorkspacesGetSearchResults_568349, schemes: {Scheme.Https})
 type
-  Call_WorkspacesUpdateSearchResults_594127 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesUpdateSearchResults_594129(protocol: Scheme; host: string;
+  Call_WorkspacesUpdateSearchResults_568360 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesUpdateSearchResults_568362(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1781,7 +1781,7 @@ proc url_WorkspacesUpdateSearchResults_594129(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesUpdateSearchResults_594128(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesUpdateSearchResults_568361(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets updated search results for a given search query.
   ## 
@@ -1799,26 +1799,26 @@ proc validate_WorkspacesUpdateSearchResults_594128(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594130 = path.getOrDefault("resourceGroupName")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  var valid_568363 = path.getOrDefault("resourceGroupName")
+  valid_568363 = validateParameter(valid_568363, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "resourceGroupName", valid_594130
-  var valid_594131 = path.getOrDefault("subscriptionId")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  if valid_568363 != nil:
+    section.add "resourceGroupName", valid_568363
+  var valid_568364 = path.getOrDefault("subscriptionId")
+  valid_568364 = validateParameter(valid_568364, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "subscriptionId", valid_594131
-  var valid_594132 = path.getOrDefault("id")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  if valid_568364 != nil:
+    section.add "subscriptionId", valid_568364
+  var valid_568365 = path.getOrDefault("id")
+  valid_568365 = validateParameter(valid_568365, JString, required = true,
                                  default = nil)
-  if valid_594132 != nil:
-    section.add "id", valid_594132
-  var valid_594133 = path.getOrDefault("workspaceName")
-  valid_594133 = validateParameter(valid_594133, JString, required = true,
+  if valid_568365 != nil:
+    section.add "id", valid_568365
+  var valid_568366 = path.getOrDefault("workspaceName")
+  valid_568366 = validateParameter(valid_568366, JString, required = true,
                                  default = nil)
-  if valid_594133 != nil:
-    section.add "workspaceName", valid_594133
+  if valid_568366 != nil:
+    section.add "workspaceName", valid_568366
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1826,11 +1826,11 @@ proc validate_WorkspacesUpdateSearchResults_594128(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594134 = query.getOrDefault("api-version")
-  valid_594134 = validateParameter(valid_594134, JString, required = true,
+  var valid_568367 = query.getOrDefault("api-version")
+  valid_568367 = validateParameter(valid_568367, JString, required = true,
                                  default = nil)
-  if valid_594134 != nil:
-    section.add "api-version", valid_594134
+  if valid_568367 != nil:
+    section.add "api-version", valid_568367
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1839,20 +1839,20 @@ proc validate_WorkspacesUpdateSearchResults_594128(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594135: Call_WorkspacesUpdateSearchResults_594127; path: JsonNode;
+proc call*(call_568368: Call_WorkspacesUpdateSearchResults_568360; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets updated search results for a given search query.
   ## 
-  let valid = call_594135.validator(path, query, header, formData, body)
-  let scheme = call_594135.pickScheme
+  let valid = call_568368.validator(path, query, header, formData, body)
+  let scheme = call_568368.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594135.url(scheme.get, call_594135.host, call_594135.base,
-                         call_594135.route, valid.getOrDefault("path"),
+  let url = call_568368.url(scheme.get, call_568368.host, call_568368.base,
+                         call_568368.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594135, url, valid)
+  result = hook(call_568368, url, valid)
 
-proc call*(call_594136: Call_WorkspacesUpdateSearchResults_594127;
+proc call*(call_568369: Call_WorkspacesUpdateSearchResults_568360;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           id: string; workspaceName: string): Recallable =
   ## workspacesUpdateSearchResults
@@ -1867,23 +1867,23 @@ proc call*(call_594136: Call_WorkspacesUpdateSearchResults_594127;
   ##     : The id of the search that will have results updated. You can get the id from the response of the GetResults call.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594137 = newJObject()
-  var query_594138 = newJObject()
-  add(path_594137, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594138, "api-version", newJString(apiVersion))
-  add(path_594137, "subscriptionId", newJString(subscriptionId))
-  add(path_594137, "id", newJString(id))
-  add(path_594137, "workspaceName", newJString(workspaceName))
-  result = call_594136.call(path_594137, query_594138, nil, nil, nil)
+  var path_568370 = newJObject()
+  var query_568371 = newJObject()
+  add(path_568370, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568371, "api-version", newJString(apiVersion))
+  add(path_568370, "subscriptionId", newJString(subscriptionId))
+  add(path_568370, "id", newJString(id))
+  add(path_568370, "workspaceName", newJString(workspaceName))
+  result = call_568369.call(path_568370, query_568371, nil, nil, nil)
 
-var workspacesUpdateSearchResults* = Call_WorkspacesUpdateSearchResults_594127(
+var workspacesUpdateSearchResults* = Call_WorkspacesUpdateSearchResults_568360(
     name: "workspacesUpdateSearchResults", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/search/{id}",
-    validator: validate_WorkspacesUpdateSearchResults_594128, base: "",
-    url: url_WorkspacesUpdateSearchResults_594129, schemes: {Scheme.Https})
+    validator: validate_WorkspacesUpdateSearchResults_568361, base: "",
+    url: url_WorkspacesUpdateSearchResults_568362, schemes: {Scheme.Https})
 type
-  Call_StorageInsightsListByWorkspace_594139 = ref object of OpenApiRestCall_593425
-proc url_StorageInsightsListByWorkspace_594141(protocol: Scheme; host: string;
+  Call_StorageInsightsListByWorkspace_568372 = ref object of OpenApiRestCall_567658
+proc url_StorageInsightsListByWorkspace_568374(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1907,7 +1907,7 @@ proc url_StorageInsightsListByWorkspace_594141(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageInsightsListByWorkspace_594140(path: JsonNode;
+proc validate_StorageInsightsListByWorkspace_568373(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the storage insight instances within a workspace
   ## 
@@ -1923,21 +1923,21 @@ proc validate_StorageInsightsListByWorkspace_594140(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594142 = path.getOrDefault("resourceGroupName")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  var valid_568375 = path.getOrDefault("resourceGroupName")
+  valid_568375 = validateParameter(valid_568375, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "resourceGroupName", valid_594142
-  var valid_594143 = path.getOrDefault("subscriptionId")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+  if valid_568375 != nil:
+    section.add "resourceGroupName", valid_568375
+  var valid_568376 = path.getOrDefault("subscriptionId")
+  valid_568376 = validateParameter(valid_568376, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "subscriptionId", valid_594143
-  var valid_594144 = path.getOrDefault("workspaceName")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  if valid_568376 != nil:
+    section.add "subscriptionId", valid_568376
+  var valid_568377 = path.getOrDefault("workspaceName")
+  valid_568377 = validateParameter(valid_568377, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "workspaceName", valid_594144
+  if valid_568377 != nil:
+    section.add "workspaceName", valid_568377
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1945,11 +1945,11 @@ proc validate_StorageInsightsListByWorkspace_594140(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594145 = query.getOrDefault("api-version")
-  valid_594145 = validateParameter(valid_594145, JString, required = true,
+  var valid_568378 = query.getOrDefault("api-version")
+  valid_568378 = validateParameter(valid_568378, JString, required = true,
                                  default = nil)
-  if valid_594145 != nil:
-    section.add "api-version", valid_594145
+  if valid_568378 != nil:
+    section.add "api-version", valid_568378
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1958,20 +1958,20 @@ proc validate_StorageInsightsListByWorkspace_594140(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594146: Call_StorageInsightsListByWorkspace_594139; path: JsonNode;
+proc call*(call_568379: Call_StorageInsightsListByWorkspace_568372; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the storage insight instances within a workspace
   ## 
-  let valid = call_594146.validator(path, query, header, formData, body)
-  let scheme = call_594146.pickScheme
+  let valid = call_568379.validator(path, query, header, formData, body)
+  let scheme = call_568379.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594146.url(scheme.get, call_594146.host, call_594146.base,
-                         call_594146.route, valid.getOrDefault("path"),
+  let url = call_568379.url(scheme.get, call_568379.host, call_568379.base,
+                         call_568379.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594146, url, valid)
+  result = hook(call_568379, url, valid)
 
-proc call*(call_594147: Call_StorageInsightsListByWorkspace_594139;
+proc call*(call_568380: Call_StorageInsightsListByWorkspace_568372;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           workspaceName: string): Recallable =
   ## storageInsightsListByWorkspace
@@ -1984,22 +1984,22 @@ proc call*(call_594147: Call_StorageInsightsListByWorkspace_594139;
   ##                 : The Subscription ID.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594148 = newJObject()
-  var query_594149 = newJObject()
-  add(path_594148, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594149, "api-version", newJString(apiVersion))
-  add(path_594148, "subscriptionId", newJString(subscriptionId))
-  add(path_594148, "workspaceName", newJString(workspaceName))
-  result = call_594147.call(path_594148, query_594149, nil, nil, nil)
+  var path_568381 = newJObject()
+  var query_568382 = newJObject()
+  add(path_568381, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568382, "api-version", newJString(apiVersion))
+  add(path_568381, "subscriptionId", newJString(subscriptionId))
+  add(path_568381, "workspaceName", newJString(workspaceName))
+  result = call_568380.call(path_568381, query_568382, nil, nil, nil)
 
-var storageInsightsListByWorkspace* = Call_StorageInsightsListByWorkspace_594139(
+var storageInsightsListByWorkspace* = Call_StorageInsightsListByWorkspace_568372(
     name: "storageInsightsListByWorkspace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/storageInsightConfigs",
-    validator: validate_StorageInsightsListByWorkspace_594140, base: "",
-    url: url_StorageInsightsListByWorkspace_594141, schemes: {Scheme.Https})
+    validator: validate_StorageInsightsListByWorkspace_568373, base: "",
+    url: url_StorageInsightsListByWorkspace_568374, schemes: {Scheme.Https})
 type
-  Call_StorageInsightsCreateOrUpdate_594162 = ref object of OpenApiRestCall_593425
-proc url_StorageInsightsCreateOrUpdate_594164(protocol: Scheme; host: string;
+  Call_StorageInsightsCreateOrUpdate_568395 = ref object of OpenApiRestCall_567658
+proc url_StorageInsightsCreateOrUpdate_568397(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2026,7 +2026,7 @@ proc url_StorageInsightsCreateOrUpdate_594164(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageInsightsCreateOrUpdate_594163(path: JsonNode; query: JsonNode;
+proc validate_StorageInsightsCreateOrUpdate_568396(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a storage insight.
   ## 
@@ -2044,26 +2044,26 @@ proc validate_StorageInsightsCreateOrUpdate_594163(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594165 = path.getOrDefault("resourceGroupName")
-  valid_594165 = validateParameter(valid_594165, JString, required = true,
+  var valid_568398 = path.getOrDefault("resourceGroupName")
+  valid_568398 = validateParameter(valid_568398, JString, required = true,
                                  default = nil)
-  if valid_594165 != nil:
-    section.add "resourceGroupName", valid_594165
-  var valid_594166 = path.getOrDefault("storageInsightName")
-  valid_594166 = validateParameter(valid_594166, JString, required = true,
+  if valid_568398 != nil:
+    section.add "resourceGroupName", valid_568398
+  var valid_568399 = path.getOrDefault("storageInsightName")
+  valid_568399 = validateParameter(valid_568399, JString, required = true,
                                  default = nil)
-  if valid_594166 != nil:
-    section.add "storageInsightName", valid_594166
-  var valid_594167 = path.getOrDefault("subscriptionId")
-  valid_594167 = validateParameter(valid_594167, JString, required = true,
+  if valid_568399 != nil:
+    section.add "storageInsightName", valid_568399
+  var valid_568400 = path.getOrDefault("subscriptionId")
+  valid_568400 = validateParameter(valid_568400, JString, required = true,
                                  default = nil)
-  if valid_594167 != nil:
-    section.add "subscriptionId", valid_594167
-  var valid_594168 = path.getOrDefault("workspaceName")
-  valid_594168 = validateParameter(valid_594168, JString, required = true,
+  if valid_568400 != nil:
+    section.add "subscriptionId", valid_568400
+  var valid_568401 = path.getOrDefault("workspaceName")
+  valid_568401 = validateParameter(valid_568401, JString, required = true,
                                  default = nil)
-  if valid_594168 != nil:
-    section.add "workspaceName", valid_594168
+  if valid_568401 != nil:
+    section.add "workspaceName", valid_568401
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2071,11 +2071,11 @@ proc validate_StorageInsightsCreateOrUpdate_594163(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594169 = query.getOrDefault("api-version")
-  valid_594169 = validateParameter(valid_594169, JString, required = true,
+  var valid_568402 = query.getOrDefault("api-version")
+  valid_568402 = validateParameter(valid_568402, JString, required = true,
                                  default = nil)
-  if valid_594169 != nil:
-    section.add "api-version", valid_594169
+  if valid_568402 != nil:
+    section.add "api-version", valid_568402
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2089,20 +2089,20 @@ proc validate_StorageInsightsCreateOrUpdate_594163(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594171: Call_StorageInsightsCreateOrUpdate_594162; path: JsonNode;
+proc call*(call_568404: Call_StorageInsightsCreateOrUpdate_568395; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a storage insight.
   ## 
-  let valid = call_594171.validator(path, query, header, formData, body)
-  let scheme = call_594171.pickScheme
+  let valid = call_568404.validator(path, query, header, formData, body)
+  let scheme = call_568404.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594171.url(scheme.get, call_594171.host, call_594171.base,
-                         call_594171.route, valid.getOrDefault("path"),
+  let url = call_568404.url(scheme.get, call_568404.host, call_568404.base,
+                         call_568404.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594171, url, valid)
+  result = hook(call_568404, url, valid)
 
-proc call*(call_594172: Call_StorageInsightsCreateOrUpdate_594162;
+proc call*(call_568405: Call_StorageInsightsCreateOrUpdate_568395;
           resourceGroupName: string; apiVersion: string; storageInsightName: string;
           subscriptionId: string; parameters: JsonNode; workspaceName: string): Recallable =
   ## storageInsightsCreateOrUpdate
@@ -2119,26 +2119,26 @@ proc call*(call_594172: Call_StorageInsightsCreateOrUpdate_594162;
   ##             : The parameters required to create or update a storage insight.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594173 = newJObject()
-  var query_594174 = newJObject()
-  var body_594175 = newJObject()
-  add(path_594173, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594174, "api-version", newJString(apiVersion))
-  add(path_594173, "storageInsightName", newJString(storageInsightName))
-  add(path_594173, "subscriptionId", newJString(subscriptionId))
+  var path_568406 = newJObject()
+  var query_568407 = newJObject()
+  var body_568408 = newJObject()
+  add(path_568406, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568407, "api-version", newJString(apiVersion))
+  add(path_568406, "storageInsightName", newJString(storageInsightName))
+  add(path_568406, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594175 = parameters
-  add(path_594173, "workspaceName", newJString(workspaceName))
-  result = call_594172.call(path_594173, query_594174, nil, nil, body_594175)
+    body_568408 = parameters
+  add(path_568406, "workspaceName", newJString(workspaceName))
+  result = call_568405.call(path_568406, query_568407, nil, nil, body_568408)
 
-var storageInsightsCreateOrUpdate* = Call_StorageInsightsCreateOrUpdate_594162(
+var storageInsightsCreateOrUpdate* = Call_StorageInsightsCreateOrUpdate_568395(
     name: "storageInsightsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/storageInsightConfigs/{storageInsightName}",
-    validator: validate_StorageInsightsCreateOrUpdate_594163, base: "",
-    url: url_StorageInsightsCreateOrUpdate_594164, schemes: {Scheme.Https})
+    validator: validate_StorageInsightsCreateOrUpdate_568396, base: "",
+    url: url_StorageInsightsCreateOrUpdate_568397, schemes: {Scheme.Https})
 type
-  Call_StorageInsightsGet_594150 = ref object of OpenApiRestCall_593425
-proc url_StorageInsightsGet_594152(protocol: Scheme; host: string; base: string;
+  Call_StorageInsightsGet_568383 = ref object of OpenApiRestCall_567658
+proc url_StorageInsightsGet_568385(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2165,7 +2165,7 @@ proc url_StorageInsightsGet_594152(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageInsightsGet_594151(path: JsonNode; query: JsonNode;
+proc validate_StorageInsightsGet_568384(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets a storage insight instance.
@@ -2184,26 +2184,26 @@ proc validate_StorageInsightsGet_594151(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594153 = path.getOrDefault("resourceGroupName")
-  valid_594153 = validateParameter(valid_594153, JString, required = true,
+  var valid_568386 = path.getOrDefault("resourceGroupName")
+  valid_568386 = validateParameter(valid_568386, JString, required = true,
                                  default = nil)
-  if valid_594153 != nil:
-    section.add "resourceGroupName", valid_594153
-  var valid_594154 = path.getOrDefault("storageInsightName")
-  valid_594154 = validateParameter(valid_594154, JString, required = true,
+  if valid_568386 != nil:
+    section.add "resourceGroupName", valid_568386
+  var valid_568387 = path.getOrDefault("storageInsightName")
+  valid_568387 = validateParameter(valid_568387, JString, required = true,
                                  default = nil)
-  if valid_594154 != nil:
-    section.add "storageInsightName", valid_594154
-  var valid_594155 = path.getOrDefault("subscriptionId")
-  valid_594155 = validateParameter(valid_594155, JString, required = true,
+  if valid_568387 != nil:
+    section.add "storageInsightName", valid_568387
+  var valid_568388 = path.getOrDefault("subscriptionId")
+  valid_568388 = validateParameter(valid_568388, JString, required = true,
                                  default = nil)
-  if valid_594155 != nil:
-    section.add "subscriptionId", valid_594155
-  var valid_594156 = path.getOrDefault("workspaceName")
-  valid_594156 = validateParameter(valid_594156, JString, required = true,
+  if valid_568388 != nil:
+    section.add "subscriptionId", valid_568388
+  var valid_568389 = path.getOrDefault("workspaceName")
+  valid_568389 = validateParameter(valid_568389, JString, required = true,
                                  default = nil)
-  if valid_594156 != nil:
-    section.add "workspaceName", valid_594156
+  if valid_568389 != nil:
+    section.add "workspaceName", valid_568389
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2211,11 +2211,11 @@ proc validate_StorageInsightsGet_594151(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594157 = query.getOrDefault("api-version")
-  valid_594157 = validateParameter(valid_594157, JString, required = true,
+  var valid_568390 = query.getOrDefault("api-version")
+  valid_568390 = validateParameter(valid_568390, JString, required = true,
                                  default = nil)
-  if valid_594157 != nil:
-    section.add "api-version", valid_594157
+  if valid_568390 != nil:
+    section.add "api-version", valid_568390
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2224,20 +2224,20 @@ proc validate_StorageInsightsGet_594151(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594158: Call_StorageInsightsGet_594150; path: JsonNode;
+proc call*(call_568391: Call_StorageInsightsGet_568383; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a storage insight instance.
   ## 
-  let valid = call_594158.validator(path, query, header, formData, body)
-  let scheme = call_594158.pickScheme
+  let valid = call_568391.validator(path, query, header, formData, body)
+  let scheme = call_568391.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594158.url(scheme.get, call_594158.host, call_594158.base,
-                         call_594158.route, valid.getOrDefault("path"),
+  let url = call_568391.url(scheme.get, call_568391.host, call_568391.base,
+                         call_568391.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594158, url, valid)
+  result = hook(call_568391, url, valid)
 
-proc call*(call_594159: Call_StorageInsightsGet_594150; resourceGroupName: string;
+proc call*(call_568392: Call_StorageInsightsGet_568383; resourceGroupName: string;
           apiVersion: string; storageInsightName: string; subscriptionId: string;
           workspaceName: string): Recallable =
   ## storageInsightsGet
@@ -2252,23 +2252,23 @@ proc call*(call_594159: Call_StorageInsightsGet_594150; resourceGroupName: strin
   ##                 : The Subscription ID.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594160 = newJObject()
-  var query_594161 = newJObject()
-  add(path_594160, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594161, "api-version", newJString(apiVersion))
-  add(path_594160, "storageInsightName", newJString(storageInsightName))
-  add(path_594160, "subscriptionId", newJString(subscriptionId))
-  add(path_594160, "workspaceName", newJString(workspaceName))
-  result = call_594159.call(path_594160, query_594161, nil, nil, nil)
+  var path_568393 = newJObject()
+  var query_568394 = newJObject()
+  add(path_568393, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568394, "api-version", newJString(apiVersion))
+  add(path_568393, "storageInsightName", newJString(storageInsightName))
+  add(path_568393, "subscriptionId", newJString(subscriptionId))
+  add(path_568393, "workspaceName", newJString(workspaceName))
+  result = call_568392.call(path_568393, query_568394, nil, nil, nil)
 
-var storageInsightsGet* = Call_StorageInsightsGet_594150(
+var storageInsightsGet* = Call_StorageInsightsGet_568383(
     name: "storageInsightsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/storageInsightConfigs/{storageInsightName}",
-    validator: validate_StorageInsightsGet_594151, base: "",
-    url: url_StorageInsightsGet_594152, schemes: {Scheme.Https})
+    validator: validate_StorageInsightsGet_568384, base: "",
+    url: url_StorageInsightsGet_568385, schemes: {Scheme.Https})
 type
-  Call_StorageInsightsDelete_594176 = ref object of OpenApiRestCall_593425
-proc url_StorageInsightsDelete_594178(protocol: Scheme; host: string; base: string;
+  Call_StorageInsightsDelete_568409 = ref object of OpenApiRestCall_567658
+proc url_StorageInsightsDelete_568411(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2295,7 +2295,7 @@ proc url_StorageInsightsDelete_594178(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageInsightsDelete_594177(path: JsonNode; query: JsonNode;
+proc validate_StorageInsightsDelete_568410(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a storageInsightsConfigs resource
   ## 
@@ -2313,26 +2313,26 @@ proc validate_StorageInsightsDelete_594177(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594179 = path.getOrDefault("resourceGroupName")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  var valid_568412 = path.getOrDefault("resourceGroupName")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "resourceGroupName", valid_594179
-  var valid_594180 = path.getOrDefault("storageInsightName")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  if valid_568412 != nil:
+    section.add "resourceGroupName", valid_568412
+  var valid_568413 = path.getOrDefault("storageInsightName")
+  valid_568413 = validateParameter(valid_568413, JString, required = true,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "storageInsightName", valid_594180
-  var valid_594181 = path.getOrDefault("subscriptionId")
-  valid_594181 = validateParameter(valid_594181, JString, required = true,
+  if valid_568413 != nil:
+    section.add "storageInsightName", valid_568413
+  var valid_568414 = path.getOrDefault("subscriptionId")
+  valid_568414 = validateParameter(valid_568414, JString, required = true,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "subscriptionId", valid_594181
-  var valid_594182 = path.getOrDefault("workspaceName")
-  valid_594182 = validateParameter(valid_594182, JString, required = true,
+  if valid_568414 != nil:
+    section.add "subscriptionId", valid_568414
+  var valid_568415 = path.getOrDefault("workspaceName")
+  valid_568415 = validateParameter(valid_568415, JString, required = true,
                                  default = nil)
-  if valid_594182 != nil:
-    section.add "workspaceName", valid_594182
+  if valid_568415 != nil:
+    section.add "workspaceName", valid_568415
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2340,11 +2340,11 @@ proc validate_StorageInsightsDelete_594177(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594183 = query.getOrDefault("api-version")
-  valid_594183 = validateParameter(valid_594183, JString, required = true,
+  var valid_568416 = query.getOrDefault("api-version")
+  valid_568416 = validateParameter(valid_568416, JString, required = true,
                                  default = nil)
-  if valid_594183 != nil:
-    section.add "api-version", valid_594183
+  if valid_568416 != nil:
+    section.add "api-version", valid_568416
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2353,20 +2353,20 @@ proc validate_StorageInsightsDelete_594177(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594184: Call_StorageInsightsDelete_594176; path: JsonNode;
+proc call*(call_568417: Call_StorageInsightsDelete_568409; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a storageInsightsConfigs resource
   ## 
-  let valid = call_594184.validator(path, query, header, formData, body)
-  let scheme = call_594184.pickScheme
+  let valid = call_568417.validator(path, query, header, formData, body)
+  let scheme = call_568417.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594184.url(scheme.get, call_594184.host, call_594184.base,
-                         call_594184.route, valid.getOrDefault("path"),
+  let url = call_568417.url(scheme.get, call_568417.host, call_568417.base,
+                         call_568417.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594184, url, valid)
+  result = hook(call_568417, url, valid)
 
-proc call*(call_594185: Call_StorageInsightsDelete_594176;
+proc call*(call_568418: Call_StorageInsightsDelete_568409;
           resourceGroupName: string; apiVersion: string; storageInsightName: string;
           subscriptionId: string; workspaceName: string): Recallable =
   ## storageInsightsDelete
@@ -2381,20 +2381,20 @@ proc call*(call_594185: Call_StorageInsightsDelete_594176;
   ##                 : The Subscription ID.
   ##   workspaceName: string (required)
   ##                : The Log Analytics Workspace name.
-  var path_594186 = newJObject()
-  var query_594187 = newJObject()
-  add(path_594186, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594187, "api-version", newJString(apiVersion))
-  add(path_594186, "storageInsightName", newJString(storageInsightName))
-  add(path_594186, "subscriptionId", newJString(subscriptionId))
-  add(path_594186, "workspaceName", newJString(workspaceName))
-  result = call_594185.call(path_594186, query_594187, nil, nil, nil)
+  var path_568419 = newJObject()
+  var query_568420 = newJObject()
+  add(path_568419, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568420, "api-version", newJString(apiVersion))
+  add(path_568419, "storageInsightName", newJString(storageInsightName))
+  add(path_568419, "subscriptionId", newJString(subscriptionId))
+  add(path_568419, "workspaceName", newJString(workspaceName))
+  result = call_568418.call(path_568419, query_568420, nil, nil, nil)
 
-var storageInsightsDelete* = Call_StorageInsightsDelete_594176(
+var storageInsightsDelete* = Call_StorageInsightsDelete_568409(
     name: "storageInsightsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/storageInsightConfigs/{storageInsightName}",
-    validator: validate_StorageInsightsDelete_594177, base: "",
-    url: url_StorageInsightsDelete_594178, schemes: {Scheme.Https})
+    validator: validate_StorageInsightsDelete_568410, base: "",
+    url: url_StorageInsightsDelete_568411, schemes: {Scheme.Https})
 export
   rest
 

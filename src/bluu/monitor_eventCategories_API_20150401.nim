@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: MonitorManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_567642 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "monitor-eventCategories_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_EventCategoriesList_593631 = ref object of OpenApiRestCall_593409
-proc url_EventCategoriesList_593633(protocol: Scheme; host: string; base: string;
+  Call_EventCategoriesList_567864 = ref object of OpenApiRestCall_567642
+proc url_EventCategoriesList_567866(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_EventCategoriesList_593632(path: JsonNode; query: JsonNode;
+proc validate_EventCategoriesList_567865(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get the list of available event categories supported in the Activity Logs Service.<br>The current list includes the following: Administrative, Security, ServiceHealth, Alert, Recommendation, Policy.
@@ -126,11 +126,11 @@ proc validate_EventCategoriesList_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593792 = query.getOrDefault("api-version")
-  valid_593792 = validateParameter(valid_593792, JString, required = true,
+  var valid_568025 = query.getOrDefault("api-version")
+  valid_568025 = validateParameter(valid_568025, JString, required = true,
                                  default = nil)
-  if valid_593792 != nil:
-    section.add "api-version", valid_593792
+  if valid_568025 != nil:
+    section.add "api-version", valid_568025
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,34 +139,34 @@ proc validate_EventCategoriesList_593632(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593815: Call_EventCategoriesList_593631; path: JsonNode;
+proc call*(call_568048: Call_EventCategoriesList_567864; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the list of available event categories supported in the Activity Logs Service.<br>The current list includes the following: Administrative, Security, ServiceHealth, Alert, Recommendation, Policy.
   ## 
-  let valid = call_593815.validator(path, query, header, formData, body)
-  let scheme = call_593815.pickScheme
+  let valid = call_568048.validator(path, query, header, formData, body)
+  let scheme = call_568048.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593815.url(scheme.get, call_593815.host, call_593815.base,
-                         call_593815.route, valid.getOrDefault("path"),
+  let url = call_568048.url(scheme.get, call_568048.host, call_568048.base,
+                         call_568048.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593815, url, valid)
+  result = hook(call_568048, url, valid)
 
-proc call*(call_593886: Call_EventCategoriesList_593631; apiVersion: string): Recallable =
+proc call*(call_568119: Call_EventCategoriesList_567864; apiVersion: string): Recallable =
   ## eventCategoriesList
   ## Get the list of available event categories supported in the Activity Logs Service.<br>The current list includes the following: Administrative, Security, ServiceHealth, Alert, Recommendation, Policy.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_593887 = newJObject()
-  add(query_593887, "api-version", newJString(apiVersion))
-  result = call_593886.call(nil, query_593887, nil, nil, nil)
+  var query_568120 = newJObject()
+  add(query_568120, "api-version", newJString(apiVersion))
+  result = call_568119.call(nil, query_568120, nil, nil, nil)
 
-var eventCategoriesList* = Call_EventCategoriesList_593631(
+var eventCategoriesList* = Call_EventCategoriesList_567864(
     name: "eventCategoriesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/microsoft.insights/eventcategories",
-    validator: validate_EventCategoriesList_593632, base: "",
-    url: url_EventCategoriesList_593633, schemes: {Scheme.Https})
+    validator: validate_EventCategoriesList_567865, base: "",
+    url: url_EventCategoriesList_567866, schemes: {Scheme.Https})
 export
   rest
 

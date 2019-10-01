@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-blobAuditingPolicies"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DatabaseBlobAuditingPoliciesCreateOrUpdate_593975 = ref object of OpenApiRestCall_593424
-proc url_DatabaseBlobAuditingPoliciesCreateOrUpdate_593977(protocol: Scheme;
+  Call_DatabaseBlobAuditingPoliciesCreateOrUpdate_568208 = ref object of OpenApiRestCall_567657
+proc url_DatabaseBlobAuditingPoliciesCreateOrUpdate_568210(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -133,7 +133,7 @@ proc url_DatabaseBlobAuditingPoliciesCreateOrUpdate_593977(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseBlobAuditingPoliciesCreateOrUpdate_593976(path: JsonNode;
+proc validate_DatabaseBlobAuditingPoliciesCreateOrUpdate_568209(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a database's blob auditing policy.
   ## 
@@ -153,31 +153,31 @@ proc validate_DatabaseBlobAuditingPoliciesCreateOrUpdate_593976(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593978 = path.getOrDefault("resourceGroupName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_568211 = path.getOrDefault("resourceGroupName")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "resourceGroupName", valid_593978
-  var valid_593979 = path.getOrDefault("serverName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_568211 != nil:
+    section.add "resourceGroupName", valid_568211
+  var valid_568212 = path.getOrDefault("serverName")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "serverName", valid_593979
-  var valid_593980 = path.getOrDefault("subscriptionId")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_568212 != nil:
+    section.add "serverName", valid_568212
+  var valid_568213 = path.getOrDefault("subscriptionId")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "subscriptionId", valid_593980
-  var valid_593981 = path.getOrDefault("databaseName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_568213 != nil:
+    section.add "subscriptionId", valid_568213
+  var valid_568214 = path.getOrDefault("databaseName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "databaseName", valid_593981
-  var valid_593982 = path.getOrDefault("blobAuditingPolicyName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568214 != nil:
+    section.add "databaseName", valid_568214
+  var valid_568215 = path.getOrDefault("blobAuditingPolicyName")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = newJString("default"))
-  if valid_593982 != nil:
-    section.add "blobAuditingPolicyName", valid_593982
+  if valid_568215 != nil:
+    section.add "blobAuditingPolicyName", valid_568215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -185,11 +185,11 @@ proc validate_DatabaseBlobAuditingPoliciesCreateOrUpdate_593976(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = query.getOrDefault("api-version")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_568216 != nil:
+    section.add "api-version", valid_568216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -203,21 +203,21 @@ proc validate_DatabaseBlobAuditingPoliciesCreateOrUpdate_593976(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_DatabaseBlobAuditingPoliciesCreateOrUpdate_593975;
+proc call*(call_568218: Call_DatabaseBlobAuditingPoliciesCreateOrUpdate_568208;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a database's blob auditing policy.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_568218.validator(path, query, header, formData, body)
+  let scheme = call_568218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_568218.url(scheme.get, call_568218.host, call_568218.base,
+                         call_568218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_568218, url, valid)
 
-proc call*(call_593986: Call_DatabaseBlobAuditingPoliciesCreateOrUpdate_593975;
+proc call*(call_568219: Call_DatabaseBlobAuditingPoliciesCreateOrUpdate_568208;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string; parameters: JsonNode;
           blobAuditingPolicyName: string = "default"): Recallable =
@@ -237,28 +237,28 @@ proc call*(call_593986: Call_DatabaseBlobAuditingPoliciesCreateOrUpdate_593975;
   ##             : The database blob auditing policy.
   ##   blobAuditingPolicyName: string (required)
   ##                         : The name of the blob auditing policy.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  var body_593989 = newJObject()
-  add(path_593987, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "serverName", newJString(serverName))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
-  add(path_593987, "databaseName", newJString(databaseName))
+  var path_568220 = newJObject()
+  var query_568221 = newJObject()
+  var body_568222 = newJObject()
+  add(path_568220, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568221, "api-version", newJString(apiVersion))
+  add(path_568220, "serverName", newJString(serverName))
+  add(path_568220, "subscriptionId", newJString(subscriptionId))
+  add(path_568220, "databaseName", newJString(databaseName))
   if parameters != nil:
-    body_593989 = parameters
-  add(path_593987, "blobAuditingPolicyName", newJString(blobAuditingPolicyName))
-  result = call_593986.call(path_593987, query_593988, nil, nil, body_593989)
+    body_568222 = parameters
+  add(path_568220, "blobAuditingPolicyName", newJString(blobAuditingPolicyName))
+  result = call_568219.call(path_568220, query_568221, nil, nil, body_568222)
 
-var databaseBlobAuditingPoliciesCreateOrUpdate* = Call_DatabaseBlobAuditingPoliciesCreateOrUpdate_593975(
+var databaseBlobAuditingPoliciesCreateOrUpdate* = Call_DatabaseBlobAuditingPoliciesCreateOrUpdate_568208(
     name: "databaseBlobAuditingPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/auditingSettings/{blobAuditingPolicyName}",
-    validator: validate_DatabaseBlobAuditingPoliciesCreateOrUpdate_593976,
-    base: "", url: url_DatabaseBlobAuditingPoliciesCreateOrUpdate_593977,
+    validator: validate_DatabaseBlobAuditingPoliciesCreateOrUpdate_568209,
+    base: "", url: url_DatabaseBlobAuditingPoliciesCreateOrUpdate_568210,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseBlobAuditingPoliciesGet_593646 = ref object of OpenApiRestCall_593424
-proc url_DatabaseBlobAuditingPoliciesGet_593648(protocol: Scheme; host: string;
+  Call_DatabaseBlobAuditingPoliciesGet_567879 = ref object of OpenApiRestCall_567657
+proc url_DatabaseBlobAuditingPoliciesGet_567881(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -287,7 +287,7 @@ proc url_DatabaseBlobAuditingPoliciesGet_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseBlobAuditingPoliciesGet_593647(path: JsonNode;
+proc validate_DatabaseBlobAuditingPoliciesGet_567880(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a database's blob auditing policy.
   ## 
@@ -307,31 +307,31 @@ proc validate_DatabaseBlobAuditingPoliciesGet_593647(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593821 = path.getOrDefault("resourceGroupName")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("resourceGroupName")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "resourceGroupName", valid_593821
-  var valid_593822 = path.getOrDefault("serverName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_568054 != nil:
+    section.add "resourceGroupName", valid_568054
+  var valid_568055 = path.getOrDefault("serverName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "serverName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "serverName", valid_568055
+  var valid_568056 = path.getOrDefault("subscriptionId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
-  var valid_593824 = path.getOrDefault("databaseName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_568056 != nil:
+    section.add "subscriptionId", valid_568056
+  var valid_568057 = path.getOrDefault("databaseName")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "databaseName", valid_593824
-  var valid_593838 = path.getOrDefault("blobAuditingPolicyName")
-  valid_593838 = validateParameter(valid_593838, JString, required = true,
+  if valid_568057 != nil:
+    section.add "databaseName", valid_568057
+  var valid_568071 = path.getOrDefault("blobAuditingPolicyName")
+  valid_568071 = validateParameter(valid_568071, JString, required = true,
                                  default = newJString("default"))
-  if valid_593838 != nil:
-    section.add "blobAuditingPolicyName", valid_593838
+  if valid_568071 != nil:
+    section.add "blobAuditingPolicyName", valid_568071
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -339,11 +339,11 @@ proc validate_DatabaseBlobAuditingPoliciesGet_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593839 = query.getOrDefault("api-version")
-  valid_593839 = validateParameter(valid_593839, JString, required = true,
+  var valid_568072 = query.getOrDefault("api-version")
+  valid_568072 = validateParameter(valid_568072, JString, required = true,
                                  default = nil)
-  if valid_593839 != nil:
-    section.add "api-version", valid_593839
+  if valid_568072 != nil:
+    section.add "api-version", valid_568072
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -352,21 +352,21 @@ proc validate_DatabaseBlobAuditingPoliciesGet_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593862: Call_DatabaseBlobAuditingPoliciesGet_593646;
+proc call*(call_568095: Call_DatabaseBlobAuditingPoliciesGet_567879;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a database's blob auditing policy.
   ## 
-  let valid = call_593862.validator(path, query, header, formData, body)
-  let scheme = call_593862.pickScheme
+  let valid = call_568095.validator(path, query, header, formData, body)
+  let scheme = call_568095.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593862.url(scheme.get, call_593862.host, call_593862.base,
-                         call_593862.route, valid.getOrDefault("path"),
+  let url = call_568095.url(scheme.get, call_568095.host, call_568095.base,
+                         call_568095.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593862, url, valid)
+  result = hook(call_568095, url, valid)
 
-proc call*(call_593933: Call_DatabaseBlobAuditingPoliciesGet_593646;
+proc call*(call_568166: Call_DatabaseBlobAuditingPoliciesGet_567879;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string;
           blobAuditingPolicyName: string = "default"): Recallable =
@@ -384,21 +384,21 @@ proc call*(call_593933: Call_DatabaseBlobAuditingPoliciesGet_593646;
   ##               : The name of the database for which the blob audit policy is defined.
   ##   blobAuditingPolicyName: string (required)
   ##                         : The name of the blob auditing policy.
-  var path_593934 = newJObject()
-  var query_593936 = newJObject()
-  add(path_593934, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593936, "api-version", newJString(apiVersion))
-  add(path_593934, "serverName", newJString(serverName))
-  add(path_593934, "subscriptionId", newJString(subscriptionId))
-  add(path_593934, "databaseName", newJString(databaseName))
-  add(path_593934, "blobAuditingPolicyName", newJString(blobAuditingPolicyName))
-  result = call_593933.call(path_593934, query_593936, nil, nil, nil)
+  var path_568167 = newJObject()
+  var query_568169 = newJObject()
+  add(path_568167, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568169, "api-version", newJString(apiVersion))
+  add(path_568167, "serverName", newJString(serverName))
+  add(path_568167, "subscriptionId", newJString(subscriptionId))
+  add(path_568167, "databaseName", newJString(databaseName))
+  add(path_568167, "blobAuditingPolicyName", newJString(blobAuditingPolicyName))
+  result = call_568166.call(path_568167, query_568169, nil, nil, nil)
 
-var databaseBlobAuditingPoliciesGet* = Call_DatabaseBlobAuditingPoliciesGet_593646(
+var databaseBlobAuditingPoliciesGet* = Call_DatabaseBlobAuditingPoliciesGet_567879(
     name: "databaseBlobAuditingPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/auditingSettings/{blobAuditingPolicyName}",
-    validator: validate_DatabaseBlobAuditingPoliciesGet_593647, base: "",
-    url: url_DatabaseBlobAuditingPoliciesGet_593648, schemes: {Scheme.Https})
+    validator: validate_DatabaseBlobAuditingPoliciesGet_567880, base: "",
+    url: url_DatabaseBlobAuditingPoliciesGet_567881, schemes: {Scheme.Https})
 export
   rest
 

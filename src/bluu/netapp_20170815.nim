@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Microsoft NetApp
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "netapp"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_OperationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
+proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Microsoft.NetApp Rest API operations
@@ -126,11 +126,11 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593821 = query.getOrDefault("api-version")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = query.getOrDefault("api-version")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_593821 != nil:
-    section.add "api-version", valid_593821
+  if valid_568054 != nil:
+    section.add "api-version", valid_568054
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,37 +139,37 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593844: Call_OperationsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568077: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Microsoft.NetApp Rest API operations
   ## 
-  let valid = call_593844.validator(path, query, header, formData, body)
-  let scheme = call_593844.pickScheme
+  let valid = call_568077.validator(path, query, header, formData, body)
+  let scheme = call_568077.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593844.url(scheme.get, call_593844.host, call_593844.base,
-                         call_593844.route, valid.getOrDefault("path"),
+  let url = call_568077.url(scheme.get, call_568077.host, call_568077.base,
+                         call_568077.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593844, url, valid)
+  result = hook(call_568077, url, valid)
 
-proc call*(call_593915: Call_OperationsList_593647;
+proc call*(call_568148: Call_OperationsList_567880;
           apiVersion: string = "2017-08-15"): Recallable =
   ## operationsList
   ## Lists all of the available Microsoft.NetApp Rest API operations
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  var query_593916 = newJObject()
-  add(query_593916, "api-version", newJString(apiVersion))
-  result = call_593915.call(nil, query_593916, nil, nil, nil)
+  var query_568149 = newJObject()
+  add(query_568149, "api-version", newJString(apiVersion))
+  result = call_568148.call(nil, query_568149, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593647(name: "operationsList",
+var operationsList* = Call_OperationsList_567880(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.NetApp/operations",
-    validator: validate_OperationsList_593648, base: "", url: url_OperationsList_593649,
+    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
     schemes: {Scheme.Https})
 type
-  Call_AccountsList_593956 = ref object of OpenApiRestCall_593425
-proc url_AccountsList_593958(protocol: Scheme; host: string; base: string;
+  Call_AccountsList_568189 = ref object of OpenApiRestCall_567658
+proc url_AccountsList_568191(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -189,7 +189,7 @@ proc url_AccountsList_593958(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsList_593957(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AccountsList_568190(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all NetApp accounts in the resource group
   ## 
@@ -203,16 +203,16 @@ proc validate_AccountsList_593957(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593973 = path.getOrDefault("resourceGroupName")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568206 = path.getOrDefault("resourceGroupName")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "resourceGroupName", valid_593973
-  var valid_593974 = path.getOrDefault("subscriptionId")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  if valid_568206 != nil:
+    section.add "resourceGroupName", valid_568206
+  var valid_568207 = path.getOrDefault("subscriptionId")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "subscriptionId", valid_593974
+  if valid_568207 != nil:
+    section.add "subscriptionId", valid_568207
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -220,11 +220,11 @@ proc validate_AccountsList_593957(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593975 = query.getOrDefault("api-version")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_568208 = query.getOrDefault("api-version")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_593975 != nil:
-    section.add "api-version", valid_593975
+  if valid_568208 != nil:
+    section.add "api-version", valid_568208
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -233,20 +233,20 @@ proc validate_AccountsList_593957(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593976: Call_AccountsList_593956; path: JsonNode; query: JsonNode;
+proc call*(call_568209: Call_AccountsList_568189; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all NetApp accounts in the resource group
   ## 
-  let valid = call_593976.validator(path, query, header, formData, body)
-  let scheme = call_593976.pickScheme
+  let valid = call_568209.validator(path, query, header, formData, body)
+  let scheme = call_568209.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593976.url(scheme.get, call_593976.host, call_593976.base,
-                         call_593976.route, valid.getOrDefault("path"),
+  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
+                         call_568209.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593976, url, valid)
+  result = hook(call_568209, url, valid)
 
-proc call*(call_593977: Call_AccountsList_593956; resourceGroupName: string;
+proc call*(call_568210: Call_AccountsList_568189; resourceGroupName: string;
           subscriptionId: string; apiVersion: string = "2017-08-15"): Recallable =
   ## accountsList
   ## Lists all NetApp accounts in the resource group
@@ -256,20 +256,20 @@ proc call*(call_593977: Call_AccountsList_593956; resourceGroupName: string;
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593978 = newJObject()
-  var query_593979 = newJObject()
-  add(path_593978, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593979, "api-version", newJString(apiVersion))
-  add(path_593978, "subscriptionId", newJString(subscriptionId))
-  result = call_593977.call(path_593978, query_593979, nil, nil, nil)
+  var path_568211 = newJObject()
+  var query_568212 = newJObject()
+  add(path_568211, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568212, "api-version", newJString(apiVersion))
+  add(path_568211, "subscriptionId", newJString(subscriptionId))
+  result = call_568210.call(path_568211, query_568212, nil, nil, nil)
 
-var accountsList* = Call_AccountsList_593956(name: "accountsList",
+var accountsList* = Call_AccountsList_568189(name: "accountsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts",
-    validator: validate_AccountsList_593957, base: "", url: url_AccountsList_593958,
+    validator: validate_AccountsList_568190, base: "", url: url_AccountsList_568191,
     schemes: {Scheme.Https})
 type
-  Call_AccountsCreateOrUpdate_593991 = ref object of OpenApiRestCall_593425
-proc url_AccountsCreateOrUpdate_593993(protocol: Scheme; host: string; base: string;
+  Call_AccountsCreateOrUpdate_568224 = ref object of OpenApiRestCall_567658
+proc url_AccountsCreateOrUpdate_568226(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -292,7 +292,7 @@ proc url_AccountsCreateOrUpdate_593993(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsCreateOrUpdate_593992(path: JsonNode; query: JsonNode;
+proc validate_AccountsCreateOrUpdate_568225(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a NetApp account
   ## 
@@ -308,21 +308,21 @@ proc validate_AccountsCreateOrUpdate_593992(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593994 = path.getOrDefault("resourceGroupName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568227 = path.getOrDefault("resourceGroupName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "resourceGroupName", valid_593994
-  var valid_593995 = path.getOrDefault("subscriptionId")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_568227 != nil:
+    section.add "resourceGroupName", valid_568227
+  var valid_568228 = path.getOrDefault("subscriptionId")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "subscriptionId", valid_593995
-  var valid_593996 = path.getOrDefault("accountName")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_568228 != nil:
+    section.add "subscriptionId", valid_568228
+  var valid_568229 = path.getOrDefault("accountName")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "accountName", valid_593996
+  if valid_568229 != nil:
+    section.add "accountName", valid_568229
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -330,11 +330,11 @@ proc validate_AccountsCreateOrUpdate_593992(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593997 = query.getOrDefault("api-version")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  var valid_568230 = query.getOrDefault("api-version")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_593997 != nil:
-    section.add "api-version", valid_593997
+  if valid_568230 != nil:
+    section.add "api-version", valid_568230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -348,20 +348,20 @@ proc validate_AccountsCreateOrUpdate_593992(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593999: Call_AccountsCreateOrUpdate_593991; path: JsonNode;
+proc call*(call_568232: Call_AccountsCreateOrUpdate_568224; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a NetApp account
   ## 
-  let valid = call_593999.validator(path, query, header, formData, body)
-  let scheme = call_593999.pickScheme
+  let valid = call_568232.validator(path, query, header, formData, body)
+  let scheme = call_568232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593999.url(scheme.get, call_593999.host, call_593999.base,
-                         call_593999.route, valid.getOrDefault("path"),
+  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
+                         call_568232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593999, url, valid)
+  result = hook(call_568232, url, valid)
 
-proc call*(call_594000: Call_AccountsCreateOrUpdate_593991;
+proc call*(call_568233: Call_AccountsCreateOrUpdate_568224;
           resourceGroupName: string; subscriptionId: string; body: JsonNode;
           accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## accountsCreateOrUpdate
@@ -376,25 +376,25 @@ proc call*(call_594000: Call_AccountsCreateOrUpdate_593991;
   ##       : NetApp Account object supplied in the body of the operation.
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594001 = newJObject()
-  var query_594002 = newJObject()
-  var body_594003 = newJObject()
-  add(path_594001, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594002, "api-version", newJString(apiVersion))
-  add(path_594001, "subscriptionId", newJString(subscriptionId))
+  var path_568234 = newJObject()
+  var query_568235 = newJObject()
+  var body_568236 = newJObject()
+  add(path_568234, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568235, "api-version", newJString(apiVersion))
+  add(path_568234, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_594003 = body
-  add(path_594001, "accountName", newJString(accountName))
-  result = call_594000.call(path_594001, query_594002, nil, nil, body_594003)
+    body_568236 = body
+  add(path_568234, "accountName", newJString(accountName))
+  result = call_568233.call(path_568234, query_568235, nil, nil, body_568236)
 
-var accountsCreateOrUpdate* = Call_AccountsCreateOrUpdate_593991(
+var accountsCreateOrUpdate* = Call_AccountsCreateOrUpdate_568224(
     name: "accountsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}",
-    validator: validate_AccountsCreateOrUpdate_593992, base: "",
-    url: url_AccountsCreateOrUpdate_593993, schemes: {Scheme.Https})
+    validator: validate_AccountsCreateOrUpdate_568225, base: "",
+    url: url_AccountsCreateOrUpdate_568226, schemes: {Scheme.Https})
 type
-  Call_AccountsGet_593980 = ref object of OpenApiRestCall_593425
-proc url_AccountsGet_593982(protocol: Scheme; host: string; base: string;
+  Call_AccountsGet_568213 = ref object of OpenApiRestCall_567658
+proc url_AccountsGet_568215(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -417,7 +417,7 @@ proc url_AccountsGet_593982(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsGet_593981(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AccountsGet_568214(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the NetApp account
   ## 
@@ -433,21 +433,21 @@ proc validate_AccountsGet_593981(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593983 = path.getOrDefault("resourceGroupName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = path.getOrDefault("resourceGroupName")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "resourceGroupName", valid_593983
-  var valid_593984 = path.getOrDefault("subscriptionId")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_568216 != nil:
+    section.add "resourceGroupName", valid_568216
+  var valid_568217 = path.getOrDefault("subscriptionId")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "subscriptionId", valid_593984
-  var valid_593985 = path.getOrDefault("accountName")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  if valid_568217 != nil:
+    section.add "subscriptionId", valid_568217
+  var valid_568218 = path.getOrDefault("accountName")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "accountName", valid_593985
+  if valid_568218 != nil:
+    section.add "accountName", valid_568218
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -455,11 +455,11 @@ proc validate_AccountsGet_593981(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593986 = query.getOrDefault("api-version")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  var valid_568219 = query.getOrDefault("api-version")
+  valid_568219 = validateParameter(valid_568219, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_593986 != nil:
-    section.add "api-version", valid_593986
+  if valid_568219 != nil:
+    section.add "api-version", valid_568219
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -468,20 +468,20 @@ proc validate_AccountsGet_593981(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593987: Call_AccountsGet_593980; path: JsonNode; query: JsonNode;
+proc call*(call_568220: Call_AccountsGet_568213; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the NetApp account
   ## 
-  let valid = call_593987.validator(path, query, header, formData, body)
-  let scheme = call_593987.pickScheme
+  let valid = call_568220.validator(path, query, header, formData, body)
+  let scheme = call_568220.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593987.url(scheme.get, call_593987.host, call_593987.base,
-                         call_593987.route, valid.getOrDefault("path"),
+  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
+                         call_568220.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593987, url, valid)
+  result = hook(call_568220, url, valid)
 
-proc call*(call_593988: Call_AccountsGet_593980; resourceGroupName: string;
+proc call*(call_568221: Call_AccountsGet_568213; resourceGroupName: string;
           subscriptionId: string; accountName: string;
           apiVersion: string = "2017-08-15"): Recallable =
   ## accountsGet
@@ -494,23 +494,23 @@ proc call*(call_593988: Call_AccountsGet_593980; resourceGroupName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_593989 = newJObject()
-  var query_593990 = newJObject()
-  add(path_593989, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593990, "api-version", newJString(apiVersion))
-  add(path_593989, "subscriptionId", newJString(subscriptionId))
-  add(path_593989, "accountName", newJString(accountName))
-  result = call_593988.call(path_593989, query_593990, nil, nil, nil)
+  var path_568222 = newJObject()
+  var query_568223 = newJObject()
+  add(path_568222, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568223, "api-version", newJString(apiVersion))
+  add(path_568222, "subscriptionId", newJString(subscriptionId))
+  add(path_568222, "accountName", newJString(accountName))
+  result = call_568221.call(path_568222, query_568223, nil, nil, nil)
 
-var accountsGet* = Call_AccountsGet_593980(name: "accountsGet",
+var accountsGet* = Call_AccountsGet_568213(name: "accountsGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}",
-                                        validator: validate_AccountsGet_593981,
-                                        base: "", url: url_AccountsGet_593982,
+                                        validator: validate_AccountsGet_568214,
+                                        base: "", url: url_AccountsGet_568215,
                                         schemes: {Scheme.Https})
 type
-  Call_AccountsUpdate_594015 = ref object of OpenApiRestCall_593425
-proc url_AccountsUpdate_594017(protocol: Scheme; host: string; base: string;
+  Call_AccountsUpdate_568248 = ref object of OpenApiRestCall_567658
+proc url_AccountsUpdate_568250(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -533,7 +533,7 @@ proc url_AccountsUpdate_594017(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsUpdate_594016(path: JsonNode; query: JsonNode;
+proc validate_AccountsUpdate_568249(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Patch a NetApp account
@@ -550,21 +550,21 @@ proc validate_AccountsUpdate_594016(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594018 = path.getOrDefault("resourceGroupName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  var valid_568251 = path.getOrDefault("resourceGroupName")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "resourceGroupName", valid_594018
-  var valid_594019 = path.getOrDefault("subscriptionId")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  if valid_568251 != nil:
+    section.add "resourceGroupName", valid_568251
+  var valid_568252 = path.getOrDefault("subscriptionId")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "subscriptionId", valid_594019
-  var valid_594020 = path.getOrDefault("accountName")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  if valid_568252 != nil:
+    section.add "subscriptionId", valid_568252
+  var valid_568253 = path.getOrDefault("accountName")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "accountName", valid_594020
+  if valid_568253 != nil:
+    section.add "accountName", valid_568253
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -572,11 +572,11 @@ proc validate_AccountsUpdate_594016(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594021 = query.getOrDefault("api-version")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  var valid_568254 = query.getOrDefault("api-version")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594021 != nil:
-    section.add "api-version", valid_594021
+  if valid_568254 != nil:
+    section.add "api-version", valid_568254
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -590,20 +590,20 @@ proc validate_AccountsUpdate_594016(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594023: Call_AccountsUpdate_594015; path: JsonNode; query: JsonNode;
+proc call*(call_568256: Call_AccountsUpdate_568248; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patch a NetApp account
   ## 
-  let valid = call_594023.validator(path, query, header, formData, body)
-  let scheme = call_594023.pickScheme
+  let valid = call_568256.validator(path, query, header, formData, body)
+  let scheme = call_568256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594023.url(scheme.get, call_594023.host, call_594023.base,
-                         call_594023.route, valid.getOrDefault("path"),
+  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
+                         call_568256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594023, url, valid)
+  result = hook(call_568256, url, valid)
 
-proc call*(call_594024: Call_AccountsUpdate_594015; resourceGroupName: string;
+proc call*(call_568257: Call_AccountsUpdate_568248; resourceGroupName: string;
           subscriptionId: string; body: JsonNode; accountName: string;
           apiVersion: string = "2017-08-15"): Recallable =
   ## accountsUpdate
@@ -618,24 +618,24 @@ proc call*(call_594024: Call_AccountsUpdate_594015; resourceGroupName: string;
   ##       : NetApp Account object supplied in the body of the operation.
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594025 = newJObject()
-  var query_594026 = newJObject()
-  var body_594027 = newJObject()
-  add(path_594025, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594026, "api-version", newJString(apiVersion))
-  add(path_594025, "subscriptionId", newJString(subscriptionId))
+  var path_568258 = newJObject()
+  var query_568259 = newJObject()
+  var body_568260 = newJObject()
+  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568259, "api-version", newJString(apiVersion))
+  add(path_568258, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_594027 = body
-  add(path_594025, "accountName", newJString(accountName))
-  result = call_594024.call(path_594025, query_594026, nil, nil, body_594027)
+    body_568260 = body
+  add(path_568258, "accountName", newJString(accountName))
+  result = call_568257.call(path_568258, query_568259, nil, nil, body_568260)
 
-var accountsUpdate* = Call_AccountsUpdate_594015(name: "accountsUpdate",
+var accountsUpdate* = Call_AccountsUpdate_568248(name: "accountsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}",
-    validator: validate_AccountsUpdate_594016, base: "", url: url_AccountsUpdate_594017,
+    validator: validate_AccountsUpdate_568249, base: "", url: url_AccountsUpdate_568250,
     schemes: {Scheme.Https})
 type
-  Call_AccountsDelete_594004 = ref object of OpenApiRestCall_593425
-proc url_AccountsDelete_594006(protocol: Scheme; host: string; base: string;
+  Call_AccountsDelete_568237 = ref object of OpenApiRestCall_567658
+proc url_AccountsDelete_568239(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -658,7 +658,7 @@ proc url_AccountsDelete_594006(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsDelete_594005(path: JsonNode; query: JsonNode;
+proc validate_AccountsDelete_568238(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Delete a NetApp account
@@ -675,21 +675,21 @@ proc validate_AccountsDelete_594005(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594007 = path.getOrDefault("resourceGroupName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  var valid_568240 = path.getOrDefault("resourceGroupName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "resourceGroupName", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568240 != nil:
+    section.add "resourceGroupName", valid_568240
+  var valid_568241 = path.getOrDefault("subscriptionId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
-  var valid_594009 = path.getOrDefault("accountName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_568241 != nil:
+    section.add "subscriptionId", valid_568241
+  var valid_568242 = path.getOrDefault("accountName")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "accountName", valid_594009
+  if valid_568242 != nil:
+    section.add "accountName", valid_568242
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -697,11 +697,11 @@ proc validate_AccountsDelete_594005(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594010 = query.getOrDefault("api-version")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  var valid_568243 = query.getOrDefault("api-version")
+  valid_568243 = validateParameter(valid_568243, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594010 != nil:
-    section.add "api-version", valid_594010
+  if valid_568243 != nil:
+    section.add "api-version", valid_568243
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -710,20 +710,20 @@ proc validate_AccountsDelete_594005(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594011: Call_AccountsDelete_594004; path: JsonNode; query: JsonNode;
+proc call*(call_568244: Call_AccountsDelete_568237; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a NetApp account
   ## 
-  let valid = call_594011.validator(path, query, header, formData, body)
-  let scheme = call_594011.pickScheme
+  let valid = call_568244.validator(path, query, header, formData, body)
+  let scheme = call_568244.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594011.url(scheme.get, call_594011.host, call_594011.base,
-                         call_594011.route, valid.getOrDefault("path"),
+  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
+                         call_568244.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594011, url, valid)
+  result = hook(call_568244, url, valid)
 
-proc call*(call_594012: Call_AccountsDelete_594004; resourceGroupName: string;
+proc call*(call_568245: Call_AccountsDelete_568237; resourceGroupName: string;
           subscriptionId: string; accountName: string;
           apiVersion: string = "2017-08-15"): Recallable =
   ## accountsDelete
@@ -736,21 +736,21 @@ proc call*(call_594012: Call_AccountsDelete_594004; resourceGroupName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594013 = newJObject()
-  var query_594014 = newJObject()
-  add(path_594013, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594014, "api-version", newJString(apiVersion))
-  add(path_594013, "subscriptionId", newJString(subscriptionId))
-  add(path_594013, "accountName", newJString(accountName))
-  result = call_594012.call(path_594013, query_594014, nil, nil, nil)
+  var path_568246 = newJObject()
+  var query_568247 = newJObject()
+  add(path_568246, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568247, "api-version", newJString(apiVersion))
+  add(path_568246, "subscriptionId", newJString(subscriptionId))
+  add(path_568246, "accountName", newJString(accountName))
+  result = call_568245.call(path_568246, query_568247, nil, nil, nil)
 
-var accountsDelete* = Call_AccountsDelete_594004(name: "accountsDelete",
+var accountsDelete* = Call_AccountsDelete_568237(name: "accountsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}",
-    validator: validate_AccountsDelete_594005, base: "", url: url_AccountsDelete_594006,
+    validator: validate_AccountsDelete_568238, base: "", url: url_AccountsDelete_568239,
     schemes: {Scheme.Https})
 type
-  Call_PoolsList_594028 = ref object of OpenApiRestCall_593425
-proc url_PoolsList_594030(protocol: Scheme; host: string; base: string; route: string;
+  Call_PoolsList_568261 = ref object of OpenApiRestCall_567658
+proc url_PoolsList_568263(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -774,7 +774,7 @@ proc url_PoolsList_594030(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolsList_594029(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolsList_568262(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all capacity pools in the NetApp Account
   ## 
@@ -790,21 +790,21 @@ proc validate_PoolsList_594029(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594031 = path.getOrDefault("resourceGroupName")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  var valid_568264 = path.getOrDefault("resourceGroupName")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "resourceGroupName", valid_594031
-  var valid_594032 = path.getOrDefault("subscriptionId")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  if valid_568264 != nil:
+    section.add "resourceGroupName", valid_568264
+  var valid_568265 = path.getOrDefault("subscriptionId")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "subscriptionId", valid_594032
-  var valid_594033 = path.getOrDefault("accountName")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  if valid_568265 != nil:
+    section.add "subscriptionId", valid_568265
+  var valid_568266 = path.getOrDefault("accountName")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "accountName", valid_594033
+  if valid_568266 != nil:
+    section.add "accountName", valid_568266
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -812,11 +812,11 @@ proc validate_PoolsList_594029(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594034 = query.getOrDefault("api-version")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  var valid_568267 = query.getOrDefault("api-version")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594034 != nil:
-    section.add "api-version", valid_594034
+  if valid_568267 != nil:
+    section.add "api-version", valid_568267
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -825,20 +825,20 @@ proc validate_PoolsList_594029(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594035: Call_PoolsList_594028; path: JsonNode; query: JsonNode;
+proc call*(call_568268: Call_PoolsList_568261; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all capacity pools in the NetApp Account
   ## 
-  let valid = call_594035.validator(path, query, header, formData, body)
-  let scheme = call_594035.pickScheme
+  let valid = call_568268.validator(path, query, header, formData, body)
+  let scheme = call_568268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594035.url(scheme.get, call_594035.host, call_594035.base,
-                         call_594035.route, valid.getOrDefault("path"),
+  let url = call_568268.url(scheme.get, call_568268.host, call_568268.base,
+                         call_568268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594035, url, valid)
+  result = hook(call_568268, url, valid)
 
-proc call*(call_594036: Call_PoolsList_594028; resourceGroupName: string;
+proc call*(call_568269: Call_PoolsList_568261; resourceGroupName: string;
           subscriptionId: string; accountName: string;
           apiVersion: string = "2017-08-15"): Recallable =
   ## poolsList
@@ -851,22 +851,22 @@ proc call*(call_594036: Call_PoolsList_594028; resourceGroupName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594037 = newJObject()
-  var query_594038 = newJObject()
-  add(path_594037, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594038, "api-version", newJString(apiVersion))
-  add(path_594037, "subscriptionId", newJString(subscriptionId))
-  add(path_594037, "accountName", newJString(accountName))
-  result = call_594036.call(path_594037, query_594038, nil, nil, nil)
+  var path_568270 = newJObject()
+  var query_568271 = newJObject()
+  add(path_568270, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568271, "api-version", newJString(apiVersion))
+  add(path_568270, "subscriptionId", newJString(subscriptionId))
+  add(path_568270, "accountName", newJString(accountName))
+  result = call_568269.call(path_568270, query_568271, nil, nil, nil)
 
-var poolsList* = Call_PoolsList_594028(name: "poolsList", meth: HttpMethod.HttpGet,
+var poolsList* = Call_PoolsList_568261(name: "poolsList", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools",
-                                    validator: validate_PoolsList_594029,
-                                    base: "", url: url_PoolsList_594030,
+                                    validator: validate_PoolsList_568262,
+                                    base: "", url: url_PoolsList_568263,
                                     schemes: {Scheme.Https})
 type
-  Call_PoolsCreateOrUpdate_594051 = ref object of OpenApiRestCall_593425
-proc url_PoolsCreateOrUpdate_594053(protocol: Scheme; host: string; base: string;
+  Call_PoolsCreateOrUpdate_568284 = ref object of OpenApiRestCall_567658
+proc url_PoolsCreateOrUpdate_568286(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -892,7 +892,7 @@ proc url_PoolsCreateOrUpdate_594053(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolsCreateOrUpdate_594052(path: JsonNode; query: JsonNode;
+proc validate_PoolsCreateOrUpdate_568285(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Create or Update a capacity pool
@@ -910,26 +910,26 @@ proc validate_PoolsCreateOrUpdate_594052(path: JsonNode; query: JsonNode;
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594054 = path.getOrDefault("poolName")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  var valid_568287 = path.getOrDefault("poolName")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "poolName", valid_594054
-  var valid_594055 = path.getOrDefault("resourceGroupName")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  if valid_568287 != nil:
+    section.add "poolName", valid_568287
+  var valid_568288 = path.getOrDefault("resourceGroupName")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "resourceGroupName", valid_594055
-  var valid_594056 = path.getOrDefault("subscriptionId")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  if valid_568288 != nil:
+    section.add "resourceGroupName", valid_568288
+  var valid_568289 = path.getOrDefault("subscriptionId")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "subscriptionId", valid_594056
-  var valid_594057 = path.getOrDefault("accountName")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  if valid_568289 != nil:
+    section.add "subscriptionId", valid_568289
+  var valid_568290 = path.getOrDefault("accountName")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "accountName", valid_594057
+  if valid_568290 != nil:
+    section.add "accountName", valid_568290
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -937,11 +937,11 @@ proc validate_PoolsCreateOrUpdate_594052(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594058 = query.getOrDefault("api-version")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  var valid_568291 = query.getOrDefault("api-version")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594058 != nil:
-    section.add "api-version", valid_594058
+  if valid_568291 != nil:
+    section.add "api-version", valid_568291
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -955,20 +955,20 @@ proc validate_PoolsCreateOrUpdate_594052(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594060: Call_PoolsCreateOrUpdate_594051; path: JsonNode;
+proc call*(call_568293: Call_PoolsCreateOrUpdate_568284; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or Update a capacity pool
   ## 
-  let valid = call_594060.validator(path, query, header, formData, body)
-  let scheme = call_594060.pickScheme
+  let valid = call_568293.validator(path, query, header, formData, body)
+  let scheme = call_568293.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594060.url(scheme.get, call_594060.host, call_594060.base,
-                         call_594060.route, valid.getOrDefault("path"),
+  let url = call_568293.url(scheme.get, call_568293.host, call_568293.base,
+                         call_568293.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594060, url, valid)
+  result = hook(call_568293, url, valid)
 
-proc call*(call_594061: Call_PoolsCreateOrUpdate_594051; poolName: string;
+proc call*(call_568294: Call_PoolsCreateOrUpdate_568284; poolName: string;
           resourceGroupName: string; subscriptionId: string; body: JsonNode;
           accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## poolsCreateOrUpdate
@@ -985,26 +985,26 @@ proc call*(call_594061: Call_PoolsCreateOrUpdate_594051; poolName: string;
   ##       : Capacity pool object supplied in the body of the operation.
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594062 = newJObject()
-  var query_594063 = newJObject()
-  var body_594064 = newJObject()
-  add(path_594062, "poolName", newJString(poolName))
-  add(path_594062, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594063, "api-version", newJString(apiVersion))
-  add(path_594062, "subscriptionId", newJString(subscriptionId))
+  var path_568295 = newJObject()
+  var query_568296 = newJObject()
+  var body_568297 = newJObject()
+  add(path_568295, "poolName", newJString(poolName))
+  add(path_568295, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568296, "api-version", newJString(apiVersion))
+  add(path_568295, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_594064 = body
-  add(path_594062, "accountName", newJString(accountName))
-  result = call_594061.call(path_594062, query_594063, nil, nil, body_594064)
+    body_568297 = body
+  add(path_568295, "accountName", newJString(accountName))
+  result = call_568294.call(path_568295, query_568296, nil, nil, body_568297)
 
-var poolsCreateOrUpdate* = Call_PoolsCreateOrUpdate_594051(
+var poolsCreateOrUpdate* = Call_PoolsCreateOrUpdate_568284(
     name: "poolsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}",
-    validator: validate_PoolsCreateOrUpdate_594052, base: "",
-    url: url_PoolsCreateOrUpdate_594053, schemes: {Scheme.Https})
+    validator: validate_PoolsCreateOrUpdate_568285, base: "",
+    url: url_PoolsCreateOrUpdate_568286, schemes: {Scheme.Https})
 type
-  Call_PoolsGet_594039 = ref object of OpenApiRestCall_593425
-proc url_PoolsGet_594041(protocol: Scheme; host: string; base: string; route: string;
+  Call_PoolsGet_568272 = ref object of OpenApiRestCall_567658
+proc url_PoolsGet_568274(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1030,7 +1030,7 @@ proc url_PoolsGet_594041(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolsGet_594040(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolsGet_568273(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a capacity pool
   ## 
@@ -1047,26 +1047,26 @@ proc validate_PoolsGet_594040(path: JsonNode; query: JsonNode; header: JsonNode;
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594042 = path.getOrDefault("poolName")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  var valid_568275 = path.getOrDefault("poolName")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "poolName", valid_594042
-  var valid_594043 = path.getOrDefault("resourceGroupName")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  if valid_568275 != nil:
+    section.add "poolName", valid_568275
+  var valid_568276 = path.getOrDefault("resourceGroupName")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "resourceGroupName", valid_594043
-  var valid_594044 = path.getOrDefault("subscriptionId")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  if valid_568276 != nil:
+    section.add "resourceGroupName", valid_568276
+  var valid_568277 = path.getOrDefault("subscriptionId")
+  valid_568277 = validateParameter(valid_568277, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "subscriptionId", valid_594044
-  var valid_594045 = path.getOrDefault("accountName")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  if valid_568277 != nil:
+    section.add "subscriptionId", valid_568277
+  var valid_568278 = path.getOrDefault("accountName")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "accountName", valid_594045
+  if valid_568278 != nil:
+    section.add "accountName", valid_568278
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1074,11 +1074,11 @@ proc validate_PoolsGet_594040(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594046 = query.getOrDefault("api-version")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  var valid_568279 = query.getOrDefault("api-version")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594046 != nil:
-    section.add "api-version", valid_594046
+  if valid_568279 != nil:
+    section.add "api-version", valid_568279
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1087,20 +1087,20 @@ proc validate_PoolsGet_594040(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594047: Call_PoolsGet_594039; path: JsonNode; query: JsonNode;
+proc call*(call_568280: Call_PoolsGet_568272; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a capacity pool
   ## 
-  let valid = call_594047.validator(path, query, header, formData, body)
-  let scheme = call_594047.pickScheme
+  let valid = call_568280.validator(path, query, header, formData, body)
+  let scheme = call_568280.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594047.url(scheme.get, call_594047.host, call_594047.base,
-                         call_594047.route, valid.getOrDefault("path"),
+  let url = call_568280.url(scheme.get, call_568280.host, call_568280.base,
+                         call_568280.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594047, url, valid)
+  result = hook(call_568280, url, valid)
 
-proc call*(call_594048: Call_PoolsGet_594039; poolName: string;
+proc call*(call_568281: Call_PoolsGet_568272; poolName: string;
           resourceGroupName: string; subscriptionId: string; accountName: string;
           apiVersion: string = "2017-08-15"): Recallable =
   ## poolsGet
@@ -1115,23 +1115,23 @@ proc call*(call_594048: Call_PoolsGet_594039; poolName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594049 = newJObject()
-  var query_594050 = newJObject()
-  add(path_594049, "poolName", newJString(poolName))
-  add(path_594049, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594050, "api-version", newJString(apiVersion))
-  add(path_594049, "subscriptionId", newJString(subscriptionId))
-  add(path_594049, "accountName", newJString(accountName))
-  result = call_594048.call(path_594049, query_594050, nil, nil, nil)
+  var path_568282 = newJObject()
+  var query_568283 = newJObject()
+  add(path_568282, "poolName", newJString(poolName))
+  add(path_568282, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568283, "api-version", newJString(apiVersion))
+  add(path_568282, "subscriptionId", newJString(subscriptionId))
+  add(path_568282, "accountName", newJString(accountName))
+  result = call_568281.call(path_568282, query_568283, nil, nil, nil)
 
-var poolsGet* = Call_PoolsGet_594039(name: "poolsGet", meth: HttpMethod.HttpGet,
+var poolsGet* = Call_PoolsGet_568272(name: "poolsGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}",
-                                  validator: validate_PoolsGet_594040, base: "",
-                                  url: url_PoolsGet_594041,
+                                  validator: validate_PoolsGet_568273, base: "",
+                                  url: url_PoolsGet_568274,
                                   schemes: {Scheme.Https})
 type
-  Call_PoolsUpdate_594077 = ref object of OpenApiRestCall_593425
-proc url_PoolsUpdate_594079(protocol: Scheme; host: string; base: string;
+  Call_PoolsUpdate_568310 = ref object of OpenApiRestCall_567658
+proc url_PoolsUpdate_568312(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1157,7 +1157,7 @@ proc url_PoolsUpdate_594079(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolsUpdate_594078(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolsUpdate_568311(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Patch a capacity pool
   ## 
@@ -1174,26 +1174,26 @@ proc validate_PoolsUpdate_594078(path: JsonNode; query: JsonNode; header: JsonNo
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594080 = path.getOrDefault("poolName")
-  valid_594080 = validateParameter(valid_594080, JString, required = true,
+  var valid_568313 = path.getOrDefault("poolName")
+  valid_568313 = validateParameter(valid_568313, JString, required = true,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "poolName", valid_594080
-  var valid_594081 = path.getOrDefault("resourceGroupName")
-  valid_594081 = validateParameter(valid_594081, JString, required = true,
+  if valid_568313 != nil:
+    section.add "poolName", valid_568313
+  var valid_568314 = path.getOrDefault("resourceGroupName")
+  valid_568314 = validateParameter(valid_568314, JString, required = true,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "resourceGroupName", valid_594081
-  var valid_594082 = path.getOrDefault("subscriptionId")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  if valid_568314 != nil:
+    section.add "resourceGroupName", valid_568314
+  var valid_568315 = path.getOrDefault("subscriptionId")
+  valid_568315 = validateParameter(valid_568315, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "subscriptionId", valid_594082
-  var valid_594083 = path.getOrDefault("accountName")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
+  if valid_568315 != nil:
+    section.add "subscriptionId", valid_568315
+  var valid_568316 = path.getOrDefault("accountName")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = nil)
-  if valid_594083 != nil:
-    section.add "accountName", valid_594083
+  if valid_568316 != nil:
+    section.add "accountName", valid_568316
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1201,11 +1201,11 @@ proc validate_PoolsUpdate_594078(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594084 = query.getOrDefault("api-version")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  var valid_568317 = query.getOrDefault("api-version")
+  valid_568317 = validateParameter(valid_568317, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594084 != nil:
-    section.add "api-version", valid_594084
+  if valid_568317 != nil:
+    section.add "api-version", valid_568317
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1219,20 +1219,20 @@ proc validate_PoolsUpdate_594078(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594086: Call_PoolsUpdate_594077; path: JsonNode; query: JsonNode;
+proc call*(call_568319: Call_PoolsUpdate_568310; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patch a capacity pool
   ## 
-  let valid = call_594086.validator(path, query, header, formData, body)
-  let scheme = call_594086.pickScheme
+  let valid = call_568319.validator(path, query, header, formData, body)
+  let scheme = call_568319.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594086.url(scheme.get, call_594086.host, call_594086.base,
-                         call_594086.route, valid.getOrDefault("path"),
+  let url = call_568319.url(scheme.get, call_568319.host, call_568319.base,
+                         call_568319.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594086, url, valid)
+  result = hook(call_568319, url, valid)
 
-proc call*(call_594087: Call_PoolsUpdate_594077; poolName: string;
+proc call*(call_568320: Call_PoolsUpdate_568310; poolName: string;
           resourceGroupName: string; subscriptionId: string; body: JsonNode;
           accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## poolsUpdate
@@ -1249,27 +1249,27 @@ proc call*(call_594087: Call_PoolsUpdate_594077; poolName: string;
   ##       : Capacity pool object supplied in the body of the operation.
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594088 = newJObject()
-  var query_594089 = newJObject()
-  var body_594090 = newJObject()
-  add(path_594088, "poolName", newJString(poolName))
-  add(path_594088, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594089, "api-version", newJString(apiVersion))
-  add(path_594088, "subscriptionId", newJString(subscriptionId))
+  var path_568321 = newJObject()
+  var query_568322 = newJObject()
+  var body_568323 = newJObject()
+  add(path_568321, "poolName", newJString(poolName))
+  add(path_568321, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568322, "api-version", newJString(apiVersion))
+  add(path_568321, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_594090 = body
-  add(path_594088, "accountName", newJString(accountName))
-  result = call_594087.call(path_594088, query_594089, nil, nil, body_594090)
+    body_568323 = body
+  add(path_568321, "accountName", newJString(accountName))
+  result = call_568320.call(path_568321, query_568322, nil, nil, body_568323)
 
-var poolsUpdate* = Call_PoolsUpdate_594077(name: "poolsUpdate",
+var poolsUpdate* = Call_PoolsUpdate_568310(name: "poolsUpdate",
                                         meth: HttpMethod.HttpPatch,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}",
-                                        validator: validate_PoolsUpdate_594078,
-                                        base: "", url: url_PoolsUpdate_594079,
+                                        validator: validate_PoolsUpdate_568311,
+                                        base: "", url: url_PoolsUpdate_568312,
                                         schemes: {Scheme.Https})
 type
-  Call_PoolsDelete_594065 = ref object of OpenApiRestCall_593425
-proc url_PoolsDelete_594067(protocol: Scheme; host: string; base: string;
+  Call_PoolsDelete_568298 = ref object of OpenApiRestCall_567658
+proc url_PoolsDelete_568300(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1295,7 +1295,7 @@ proc url_PoolsDelete_594067(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolsDelete_594066(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolsDelete_568299(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a capacity pool
   ## 
@@ -1312,26 +1312,26 @@ proc validate_PoolsDelete_594066(path: JsonNode; query: JsonNode; header: JsonNo
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594068 = path.getOrDefault("poolName")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  var valid_568301 = path.getOrDefault("poolName")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "poolName", valid_594068
-  var valid_594069 = path.getOrDefault("resourceGroupName")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  if valid_568301 != nil:
+    section.add "poolName", valid_568301
+  var valid_568302 = path.getOrDefault("resourceGroupName")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "resourceGroupName", valid_594069
-  var valid_594070 = path.getOrDefault("subscriptionId")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  if valid_568302 != nil:
+    section.add "resourceGroupName", valid_568302
+  var valid_568303 = path.getOrDefault("subscriptionId")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "subscriptionId", valid_594070
-  var valid_594071 = path.getOrDefault("accountName")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  if valid_568303 != nil:
+    section.add "subscriptionId", valid_568303
+  var valid_568304 = path.getOrDefault("accountName")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "accountName", valid_594071
+  if valid_568304 != nil:
+    section.add "accountName", valid_568304
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1339,11 +1339,11 @@ proc validate_PoolsDelete_594066(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594072 = query.getOrDefault("api-version")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  var valid_568305 = query.getOrDefault("api-version")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594072 != nil:
-    section.add "api-version", valid_594072
+  if valid_568305 != nil:
+    section.add "api-version", valid_568305
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1352,20 +1352,20 @@ proc validate_PoolsDelete_594066(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594073: Call_PoolsDelete_594065; path: JsonNode; query: JsonNode;
+proc call*(call_568306: Call_PoolsDelete_568298; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a capacity pool
   ## 
-  let valid = call_594073.validator(path, query, header, formData, body)
-  let scheme = call_594073.pickScheme
+  let valid = call_568306.validator(path, query, header, formData, body)
+  let scheme = call_568306.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594073.url(scheme.get, call_594073.host, call_594073.base,
-                         call_594073.route, valid.getOrDefault("path"),
+  let url = call_568306.url(scheme.get, call_568306.host, call_568306.base,
+                         call_568306.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594073, url, valid)
+  result = hook(call_568306, url, valid)
 
-proc call*(call_594074: Call_PoolsDelete_594065; poolName: string;
+proc call*(call_568307: Call_PoolsDelete_568298; poolName: string;
           resourceGroupName: string; subscriptionId: string; accountName: string;
           apiVersion: string = "2017-08-15"): Recallable =
   ## poolsDelete
@@ -1380,24 +1380,24 @@ proc call*(call_594074: Call_PoolsDelete_594065; poolName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594075 = newJObject()
-  var query_594076 = newJObject()
-  add(path_594075, "poolName", newJString(poolName))
-  add(path_594075, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594076, "api-version", newJString(apiVersion))
-  add(path_594075, "subscriptionId", newJString(subscriptionId))
-  add(path_594075, "accountName", newJString(accountName))
-  result = call_594074.call(path_594075, query_594076, nil, nil, nil)
+  var path_568308 = newJObject()
+  var query_568309 = newJObject()
+  add(path_568308, "poolName", newJString(poolName))
+  add(path_568308, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568309, "api-version", newJString(apiVersion))
+  add(path_568308, "subscriptionId", newJString(subscriptionId))
+  add(path_568308, "accountName", newJString(accountName))
+  result = call_568307.call(path_568308, query_568309, nil, nil, nil)
 
-var poolsDelete* = Call_PoolsDelete_594065(name: "poolsDelete",
+var poolsDelete* = Call_PoolsDelete_568298(name: "poolsDelete",
                                         meth: HttpMethod.HttpDelete,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}",
-                                        validator: validate_PoolsDelete_594066,
-                                        base: "", url: url_PoolsDelete_594067,
+                                        validator: validate_PoolsDelete_568299,
+                                        base: "", url: url_PoolsDelete_568300,
                                         schemes: {Scheme.Https})
 type
-  Call_VolumesList_594091 = ref object of OpenApiRestCall_593425
-proc url_VolumesList_594093(protocol: Scheme; host: string; base: string;
+  Call_VolumesList_568324 = ref object of OpenApiRestCall_567658
+proc url_VolumesList_568326(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1424,7 +1424,7 @@ proc url_VolumesList_594093(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VolumesList_594092(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_VolumesList_568325(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## List volumes
   ## 
@@ -1441,26 +1441,26 @@ proc validate_VolumesList_594092(path: JsonNode; query: JsonNode; header: JsonNo
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594094 = path.getOrDefault("poolName")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  var valid_568327 = path.getOrDefault("poolName")
+  valid_568327 = validateParameter(valid_568327, JString, required = true,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "poolName", valid_594094
-  var valid_594095 = path.getOrDefault("resourceGroupName")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  if valid_568327 != nil:
+    section.add "poolName", valid_568327
+  var valid_568328 = path.getOrDefault("resourceGroupName")
+  valid_568328 = validateParameter(valid_568328, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "resourceGroupName", valid_594095
-  var valid_594096 = path.getOrDefault("subscriptionId")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
+  if valid_568328 != nil:
+    section.add "resourceGroupName", valid_568328
+  var valid_568329 = path.getOrDefault("subscriptionId")
+  valid_568329 = validateParameter(valid_568329, JString, required = true,
                                  default = nil)
-  if valid_594096 != nil:
-    section.add "subscriptionId", valid_594096
-  var valid_594097 = path.getOrDefault("accountName")
-  valid_594097 = validateParameter(valid_594097, JString, required = true,
+  if valid_568329 != nil:
+    section.add "subscriptionId", valid_568329
+  var valid_568330 = path.getOrDefault("accountName")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "accountName", valid_594097
+  if valid_568330 != nil:
+    section.add "accountName", valid_568330
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1468,11 +1468,11 @@ proc validate_VolumesList_594092(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594098 = query.getOrDefault("api-version")
-  valid_594098 = validateParameter(valid_594098, JString, required = true,
+  var valid_568331 = query.getOrDefault("api-version")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594098 != nil:
-    section.add "api-version", valid_594098
+  if valid_568331 != nil:
+    section.add "api-version", valid_568331
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1481,20 +1481,20 @@ proc validate_VolumesList_594092(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594099: Call_VolumesList_594091; path: JsonNode; query: JsonNode;
+proc call*(call_568332: Call_VolumesList_568324; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List volumes
   ## 
-  let valid = call_594099.validator(path, query, header, formData, body)
-  let scheme = call_594099.pickScheme
+  let valid = call_568332.validator(path, query, header, formData, body)
+  let scheme = call_568332.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594099.url(scheme.get, call_594099.host, call_594099.base,
-                         call_594099.route, valid.getOrDefault("path"),
+  let url = call_568332.url(scheme.get, call_568332.host, call_568332.base,
+                         call_568332.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594099, url, valid)
+  result = hook(call_568332, url, valid)
 
-proc call*(call_594100: Call_VolumesList_594091; poolName: string;
+proc call*(call_568333: Call_VolumesList_568324; poolName: string;
           resourceGroupName: string; subscriptionId: string; accountName: string;
           apiVersion: string = "2017-08-15"): Recallable =
   ## volumesList
@@ -1509,24 +1509,24 @@ proc call*(call_594100: Call_VolumesList_594091; poolName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594101 = newJObject()
-  var query_594102 = newJObject()
-  add(path_594101, "poolName", newJString(poolName))
-  add(path_594101, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594102, "api-version", newJString(apiVersion))
-  add(path_594101, "subscriptionId", newJString(subscriptionId))
-  add(path_594101, "accountName", newJString(accountName))
-  result = call_594100.call(path_594101, query_594102, nil, nil, nil)
+  var path_568334 = newJObject()
+  var query_568335 = newJObject()
+  add(path_568334, "poolName", newJString(poolName))
+  add(path_568334, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568335, "api-version", newJString(apiVersion))
+  add(path_568334, "subscriptionId", newJString(subscriptionId))
+  add(path_568334, "accountName", newJString(accountName))
+  result = call_568333.call(path_568334, query_568335, nil, nil, nil)
 
-var volumesList* = Call_VolumesList_594091(name: "volumesList",
+var volumesList* = Call_VolumesList_568324(name: "volumesList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes",
-                                        validator: validate_VolumesList_594092,
-                                        base: "", url: url_VolumesList_594093,
+                                        validator: validate_VolumesList_568325,
+                                        base: "", url: url_VolumesList_568326,
                                         schemes: {Scheme.Https})
 type
-  Call_VolumesCreateOrUpdate_594116 = ref object of OpenApiRestCall_593425
-proc url_VolumesCreateOrUpdate_594118(protocol: Scheme; host: string; base: string;
+  Call_VolumesCreateOrUpdate_568349 = ref object of OpenApiRestCall_567658
+proc url_VolumesCreateOrUpdate_568351(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1555,7 +1555,7 @@ proc url_VolumesCreateOrUpdate_594118(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VolumesCreateOrUpdate_594117(path: JsonNode; query: JsonNode;
+proc validate_VolumesCreateOrUpdate_568350(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a volume
   ## 
@@ -1574,31 +1574,31 @@ proc validate_VolumesCreateOrUpdate_594117(path: JsonNode; query: JsonNode;
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594119 = path.getOrDefault("poolName")
-  valid_594119 = validateParameter(valid_594119, JString, required = true,
+  var valid_568352 = path.getOrDefault("poolName")
+  valid_568352 = validateParameter(valid_568352, JString, required = true,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "poolName", valid_594119
-  var valid_594120 = path.getOrDefault("resourceGroupName")
-  valid_594120 = validateParameter(valid_594120, JString, required = true,
+  if valid_568352 != nil:
+    section.add "poolName", valid_568352
+  var valid_568353 = path.getOrDefault("resourceGroupName")
+  valid_568353 = validateParameter(valid_568353, JString, required = true,
                                  default = nil)
-  if valid_594120 != nil:
-    section.add "resourceGroupName", valid_594120
-  var valid_594121 = path.getOrDefault("subscriptionId")
-  valid_594121 = validateParameter(valid_594121, JString, required = true,
+  if valid_568353 != nil:
+    section.add "resourceGroupName", valid_568353
+  var valid_568354 = path.getOrDefault("subscriptionId")
+  valid_568354 = validateParameter(valid_568354, JString, required = true,
                                  default = nil)
-  if valid_594121 != nil:
-    section.add "subscriptionId", valid_594121
-  var valid_594122 = path.getOrDefault("volumeName")
-  valid_594122 = validateParameter(valid_594122, JString, required = true,
+  if valid_568354 != nil:
+    section.add "subscriptionId", valid_568354
+  var valid_568355 = path.getOrDefault("volumeName")
+  valid_568355 = validateParameter(valid_568355, JString, required = true,
                                  default = nil)
-  if valid_594122 != nil:
-    section.add "volumeName", valid_594122
-  var valid_594123 = path.getOrDefault("accountName")
-  valid_594123 = validateParameter(valid_594123, JString, required = true,
+  if valid_568355 != nil:
+    section.add "volumeName", valid_568355
+  var valid_568356 = path.getOrDefault("accountName")
+  valid_568356 = validateParameter(valid_568356, JString, required = true,
                                  default = nil)
-  if valid_594123 != nil:
-    section.add "accountName", valid_594123
+  if valid_568356 != nil:
+    section.add "accountName", valid_568356
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1606,11 +1606,11 @@ proc validate_VolumesCreateOrUpdate_594117(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594124 = query.getOrDefault("api-version")
-  valid_594124 = validateParameter(valid_594124, JString, required = true,
+  var valid_568357 = query.getOrDefault("api-version")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594124 != nil:
-    section.add "api-version", valid_594124
+  if valid_568357 != nil:
+    section.add "api-version", valid_568357
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1624,20 +1624,20 @@ proc validate_VolumesCreateOrUpdate_594117(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594126: Call_VolumesCreateOrUpdate_594116; path: JsonNode;
+proc call*(call_568359: Call_VolumesCreateOrUpdate_568349; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a volume
   ## 
-  let valid = call_594126.validator(path, query, header, formData, body)
-  let scheme = call_594126.pickScheme
+  let valid = call_568359.validator(path, query, header, formData, body)
+  let scheme = call_568359.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594126.url(scheme.get, call_594126.host, call_594126.base,
-                         call_594126.route, valid.getOrDefault("path"),
+  let url = call_568359.url(scheme.get, call_568359.host, call_568359.base,
+                         call_568359.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594126, url, valid)
+  result = hook(call_568359, url, valid)
 
-proc call*(call_594127: Call_VolumesCreateOrUpdate_594116; poolName: string;
+proc call*(call_568360: Call_VolumesCreateOrUpdate_568349; poolName: string;
           resourceGroupName: string; subscriptionId: string; body: JsonNode;
           volumeName: string; accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## volumesCreateOrUpdate
@@ -1656,27 +1656,27 @@ proc call*(call_594127: Call_VolumesCreateOrUpdate_594116; poolName: string;
   ##             : The name of the volume
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594128 = newJObject()
-  var query_594129 = newJObject()
-  var body_594130 = newJObject()
-  add(path_594128, "poolName", newJString(poolName))
-  add(path_594128, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594129, "api-version", newJString(apiVersion))
-  add(path_594128, "subscriptionId", newJString(subscriptionId))
+  var path_568361 = newJObject()
+  var query_568362 = newJObject()
+  var body_568363 = newJObject()
+  add(path_568361, "poolName", newJString(poolName))
+  add(path_568361, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568362, "api-version", newJString(apiVersion))
+  add(path_568361, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_594130 = body
-  add(path_594128, "volumeName", newJString(volumeName))
-  add(path_594128, "accountName", newJString(accountName))
-  result = call_594127.call(path_594128, query_594129, nil, nil, body_594130)
+    body_568363 = body
+  add(path_568361, "volumeName", newJString(volumeName))
+  add(path_568361, "accountName", newJString(accountName))
+  result = call_568360.call(path_568361, query_568362, nil, nil, body_568363)
 
-var volumesCreateOrUpdate* = Call_VolumesCreateOrUpdate_594116(
+var volumesCreateOrUpdate* = Call_VolumesCreateOrUpdate_568349(
     name: "volumesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
-    validator: validate_VolumesCreateOrUpdate_594117, base: "",
-    url: url_VolumesCreateOrUpdate_594118, schemes: {Scheme.Https})
+    validator: validate_VolumesCreateOrUpdate_568350, base: "",
+    url: url_VolumesCreateOrUpdate_568351, schemes: {Scheme.Https})
 type
-  Call_VolumesGet_594103 = ref object of OpenApiRestCall_593425
-proc url_VolumesGet_594105(protocol: Scheme; host: string; base: string; route: string;
+  Call_VolumesGet_568336 = ref object of OpenApiRestCall_567658
+proc url_VolumesGet_568338(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1705,7 +1705,7 @@ proc url_VolumesGet_594105(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VolumesGet_594104(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_VolumesGet_568337(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a volume
   ## 
@@ -1724,31 +1724,31 @@ proc validate_VolumesGet_594104(path: JsonNode; query: JsonNode; header: JsonNod
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594106 = path.getOrDefault("poolName")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  var valid_568339 = path.getOrDefault("poolName")
+  valid_568339 = validateParameter(valid_568339, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "poolName", valid_594106
-  var valid_594107 = path.getOrDefault("resourceGroupName")
-  valid_594107 = validateParameter(valid_594107, JString, required = true,
+  if valid_568339 != nil:
+    section.add "poolName", valid_568339
+  var valid_568340 = path.getOrDefault("resourceGroupName")
+  valid_568340 = validateParameter(valid_568340, JString, required = true,
                                  default = nil)
-  if valid_594107 != nil:
-    section.add "resourceGroupName", valid_594107
-  var valid_594108 = path.getOrDefault("subscriptionId")
-  valid_594108 = validateParameter(valid_594108, JString, required = true,
+  if valid_568340 != nil:
+    section.add "resourceGroupName", valid_568340
+  var valid_568341 = path.getOrDefault("subscriptionId")
+  valid_568341 = validateParameter(valid_568341, JString, required = true,
                                  default = nil)
-  if valid_594108 != nil:
-    section.add "subscriptionId", valid_594108
-  var valid_594109 = path.getOrDefault("volumeName")
-  valid_594109 = validateParameter(valid_594109, JString, required = true,
+  if valid_568341 != nil:
+    section.add "subscriptionId", valid_568341
+  var valid_568342 = path.getOrDefault("volumeName")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = nil)
-  if valid_594109 != nil:
-    section.add "volumeName", valid_594109
-  var valid_594110 = path.getOrDefault("accountName")
-  valid_594110 = validateParameter(valid_594110, JString, required = true,
+  if valid_568342 != nil:
+    section.add "volumeName", valid_568342
+  var valid_568343 = path.getOrDefault("accountName")
+  valid_568343 = validateParameter(valid_568343, JString, required = true,
                                  default = nil)
-  if valid_594110 != nil:
-    section.add "accountName", valid_594110
+  if valid_568343 != nil:
+    section.add "accountName", valid_568343
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1756,11 +1756,11 @@ proc validate_VolumesGet_594104(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594111 = query.getOrDefault("api-version")
-  valid_594111 = validateParameter(valid_594111, JString, required = true,
+  var valid_568344 = query.getOrDefault("api-version")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594111 != nil:
-    section.add "api-version", valid_594111
+  if valid_568344 != nil:
+    section.add "api-version", valid_568344
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1769,20 +1769,20 @@ proc validate_VolumesGet_594104(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594112: Call_VolumesGet_594103; path: JsonNode; query: JsonNode;
+proc call*(call_568345: Call_VolumesGet_568336; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a volume
   ## 
-  let valid = call_594112.validator(path, query, header, formData, body)
-  let scheme = call_594112.pickScheme
+  let valid = call_568345.validator(path, query, header, formData, body)
+  let scheme = call_568345.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594112.url(scheme.get, call_594112.host, call_594112.base,
-                         call_594112.route, valid.getOrDefault("path"),
+  let url = call_568345.url(scheme.get, call_568345.host, call_568345.base,
+                         call_568345.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594112, url, valid)
+  result = hook(call_568345, url, valid)
 
-proc call*(call_594113: Call_VolumesGet_594103; poolName: string;
+proc call*(call_568346: Call_VolumesGet_568336; poolName: string;
           resourceGroupName: string; subscriptionId: string; volumeName: string;
           accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## volumesGet
@@ -1799,25 +1799,25 @@ proc call*(call_594113: Call_VolumesGet_594103; poolName: string;
   ##             : The name of the volume
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594114 = newJObject()
-  var query_594115 = newJObject()
-  add(path_594114, "poolName", newJString(poolName))
-  add(path_594114, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594115, "api-version", newJString(apiVersion))
-  add(path_594114, "subscriptionId", newJString(subscriptionId))
-  add(path_594114, "volumeName", newJString(volumeName))
-  add(path_594114, "accountName", newJString(accountName))
-  result = call_594113.call(path_594114, query_594115, nil, nil, nil)
+  var path_568347 = newJObject()
+  var query_568348 = newJObject()
+  add(path_568347, "poolName", newJString(poolName))
+  add(path_568347, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568348, "api-version", newJString(apiVersion))
+  add(path_568347, "subscriptionId", newJString(subscriptionId))
+  add(path_568347, "volumeName", newJString(volumeName))
+  add(path_568347, "accountName", newJString(accountName))
+  result = call_568346.call(path_568347, query_568348, nil, nil, nil)
 
-var volumesGet* = Call_VolumesGet_594103(name: "volumesGet",
+var volumesGet* = Call_VolumesGet_568336(name: "volumesGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
-                                      validator: validate_VolumesGet_594104,
-                                      base: "", url: url_VolumesGet_594105,
+                                      validator: validate_VolumesGet_568337,
+                                      base: "", url: url_VolumesGet_568338,
                                       schemes: {Scheme.Https})
 type
-  Call_VolumesUpdate_594144 = ref object of OpenApiRestCall_593425
-proc url_VolumesUpdate_594146(protocol: Scheme; host: string; base: string;
+  Call_VolumesUpdate_568377 = ref object of OpenApiRestCall_567658
+proc url_VolumesUpdate_568379(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1846,7 +1846,7 @@ proc url_VolumesUpdate_594146(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VolumesUpdate_594145(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_VolumesUpdate_568378(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Patch a volume
   ## 
@@ -1865,31 +1865,31 @@ proc validate_VolumesUpdate_594145(path: JsonNode; query: JsonNode; header: Json
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594147 = path.getOrDefault("poolName")
-  valid_594147 = validateParameter(valid_594147, JString, required = true,
+  var valid_568380 = path.getOrDefault("poolName")
+  valid_568380 = validateParameter(valid_568380, JString, required = true,
                                  default = nil)
-  if valid_594147 != nil:
-    section.add "poolName", valid_594147
-  var valid_594148 = path.getOrDefault("resourceGroupName")
-  valid_594148 = validateParameter(valid_594148, JString, required = true,
+  if valid_568380 != nil:
+    section.add "poolName", valid_568380
+  var valid_568381 = path.getOrDefault("resourceGroupName")
+  valid_568381 = validateParameter(valid_568381, JString, required = true,
                                  default = nil)
-  if valid_594148 != nil:
-    section.add "resourceGroupName", valid_594148
-  var valid_594149 = path.getOrDefault("subscriptionId")
-  valid_594149 = validateParameter(valid_594149, JString, required = true,
+  if valid_568381 != nil:
+    section.add "resourceGroupName", valid_568381
+  var valid_568382 = path.getOrDefault("subscriptionId")
+  valid_568382 = validateParameter(valid_568382, JString, required = true,
                                  default = nil)
-  if valid_594149 != nil:
-    section.add "subscriptionId", valid_594149
-  var valid_594150 = path.getOrDefault("volumeName")
-  valid_594150 = validateParameter(valid_594150, JString, required = true,
+  if valid_568382 != nil:
+    section.add "subscriptionId", valid_568382
+  var valid_568383 = path.getOrDefault("volumeName")
+  valid_568383 = validateParameter(valid_568383, JString, required = true,
                                  default = nil)
-  if valid_594150 != nil:
-    section.add "volumeName", valid_594150
-  var valid_594151 = path.getOrDefault("accountName")
-  valid_594151 = validateParameter(valid_594151, JString, required = true,
+  if valid_568383 != nil:
+    section.add "volumeName", valid_568383
+  var valid_568384 = path.getOrDefault("accountName")
+  valid_568384 = validateParameter(valid_568384, JString, required = true,
                                  default = nil)
-  if valid_594151 != nil:
-    section.add "accountName", valid_594151
+  if valid_568384 != nil:
+    section.add "accountName", valid_568384
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1897,11 +1897,11 @@ proc validate_VolumesUpdate_594145(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594152 = query.getOrDefault("api-version")
-  valid_594152 = validateParameter(valid_594152, JString, required = true,
+  var valid_568385 = query.getOrDefault("api-version")
+  valid_568385 = validateParameter(valid_568385, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594152 != nil:
-    section.add "api-version", valid_594152
+  if valid_568385 != nil:
+    section.add "api-version", valid_568385
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1915,20 +1915,20 @@ proc validate_VolumesUpdate_594145(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594154: Call_VolumesUpdate_594144; path: JsonNode; query: JsonNode;
+proc call*(call_568387: Call_VolumesUpdate_568377; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patch a volume
   ## 
-  let valid = call_594154.validator(path, query, header, formData, body)
-  let scheme = call_594154.pickScheme
+  let valid = call_568387.validator(path, query, header, formData, body)
+  let scheme = call_568387.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594154.url(scheme.get, call_594154.host, call_594154.base,
-                         call_594154.route, valid.getOrDefault("path"),
+  let url = call_568387.url(scheme.get, call_568387.host, call_568387.base,
+                         call_568387.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594154, url, valid)
+  result = hook(call_568387, url, valid)
 
-proc call*(call_594155: Call_VolumesUpdate_594144; poolName: string;
+proc call*(call_568388: Call_VolumesUpdate_568377; poolName: string;
           resourceGroupName: string; subscriptionId: string; body: JsonNode;
           volumeName: string; accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## volumesUpdate
@@ -1947,26 +1947,26 @@ proc call*(call_594155: Call_VolumesUpdate_594144; poolName: string;
   ##             : The name of the volume
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594156 = newJObject()
-  var query_594157 = newJObject()
-  var body_594158 = newJObject()
-  add(path_594156, "poolName", newJString(poolName))
-  add(path_594156, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594157, "api-version", newJString(apiVersion))
-  add(path_594156, "subscriptionId", newJString(subscriptionId))
+  var path_568389 = newJObject()
+  var query_568390 = newJObject()
+  var body_568391 = newJObject()
+  add(path_568389, "poolName", newJString(poolName))
+  add(path_568389, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568390, "api-version", newJString(apiVersion))
+  add(path_568389, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_594158 = body
-  add(path_594156, "volumeName", newJString(volumeName))
-  add(path_594156, "accountName", newJString(accountName))
-  result = call_594155.call(path_594156, query_594157, nil, nil, body_594158)
+    body_568391 = body
+  add(path_568389, "volumeName", newJString(volumeName))
+  add(path_568389, "accountName", newJString(accountName))
+  result = call_568388.call(path_568389, query_568390, nil, nil, body_568391)
 
-var volumesUpdate* = Call_VolumesUpdate_594144(name: "volumesUpdate",
+var volumesUpdate* = Call_VolumesUpdate_568377(name: "volumesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
-    validator: validate_VolumesUpdate_594145, base: "", url: url_VolumesUpdate_594146,
+    validator: validate_VolumesUpdate_568378, base: "", url: url_VolumesUpdate_568379,
     schemes: {Scheme.Https})
 type
-  Call_VolumesDelete_594131 = ref object of OpenApiRestCall_593425
-proc url_VolumesDelete_594133(protocol: Scheme; host: string; base: string;
+  Call_VolumesDelete_568364 = ref object of OpenApiRestCall_567658
+proc url_VolumesDelete_568366(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1995,7 +1995,7 @@ proc url_VolumesDelete_594133(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VolumesDelete_594132(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_VolumesDelete_568365(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a volume
   ## 
@@ -2014,31 +2014,31 @@ proc validate_VolumesDelete_594132(path: JsonNode; query: JsonNode; header: Json
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594134 = path.getOrDefault("poolName")
-  valid_594134 = validateParameter(valid_594134, JString, required = true,
+  var valid_568367 = path.getOrDefault("poolName")
+  valid_568367 = validateParameter(valid_568367, JString, required = true,
                                  default = nil)
-  if valid_594134 != nil:
-    section.add "poolName", valid_594134
-  var valid_594135 = path.getOrDefault("resourceGroupName")
-  valid_594135 = validateParameter(valid_594135, JString, required = true,
+  if valid_568367 != nil:
+    section.add "poolName", valid_568367
+  var valid_568368 = path.getOrDefault("resourceGroupName")
+  valid_568368 = validateParameter(valid_568368, JString, required = true,
                                  default = nil)
-  if valid_594135 != nil:
-    section.add "resourceGroupName", valid_594135
-  var valid_594136 = path.getOrDefault("subscriptionId")
-  valid_594136 = validateParameter(valid_594136, JString, required = true,
+  if valid_568368 != nil:
+    section.add "resourceGroupName", valid_568368
+  var valid_568369 = path.getOrDefault("subscriptionId")
+  valid_568369 = validateParameter(valid_568369, JString, required = true,
                                  default = nil)
-  if valid_594136 != nil:
-    section.add "subscriptionId", valid_594136
-  var valid_594137 = path.getOrDefault("volumeName")
-  valid_594137 = validateParameter(valid_594137, JString, required = true,
+  if valid_568369 != nil:
+    section.add "subscriptionId", valid_568369
+  var valid_568370 = path.getOrDefault("volumeName")
+  valid_568370 = validateParameter(valid_568370, JString, required = true,
                                  default = nil)
-  if valid_594137 != nil:
-    section.add "volumeName", valid_594137
-  var valid_594138 = path.getOrDefault("accountName")
-  valid_594138 = validateParameter(valid_594138, JString, required = true,
+  if valid_568370 != nil:
+    section.add "volumeName", valid_568370
+  var valid_568371 = path.getOrDefault("accountName")
+  valid_568371 = validateParameter(valid_568371, JString, required = true,
                                  default = nil)
-  if valid_594138 != nil:
-    section.add "accountName", valid_594138
+  if valid_568371 != nil:
+    section.add "accountName", valid_568371
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2046,11 +2046,11 @@ proc validate_VolumesDelete_594132(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594139 = query.getOrDefault("api-version")
-  valid_594139 = validateParameter(valid_594139, JString, required = true,
+  var valid_568372 = query.getOrDefault("api-version")
+  valid_568372 = validateParameter(valid_568372, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594139 != nil:
-    section.add "api-version", valid_594139
+  if valid_568372 != nil:
+    section.add "api-version", valid_568372
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2059,20 +2059,20 @@ proc validate_VolumesDelete_594132(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594140: Call_VolumesDelete_594131; path: JsonNode; query: JsonNode;
+proc call*(call_568373: Call_VolumesDelete_568364; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a volume
   ## 
-  let valid = call_594140.validator(path, query, header, formData, body)
-  let scheme = call_594140.pickScheme
+  let valid = call_568373.validator(path, query, header, formData, body)
+  let scheme = call_568373.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594140.url(scheme.get, call_594140.host, call_594140.base,
-                         call_594140.route, valid.getOrDefault("path"),
+  let url = call_568373.url(scheme.get, call_568373.host, call_568373.base,
+                         call_568373.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594140, url, valid)
+  result = hook(call_568373, url, valid)
 
-proc call*(call_594141: Call_VolumesDelete_594131; poolName: string;
+proc call*(call_568374: Call_VolumesDelete_568364; poolName: string;
           resourceGroupName: string; subscriptionId: string; volumeName: string;
           accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## volumesDelete
@@ -2089,23 +2089,23 @@ proc call*(call_594141: Call_VolumesDelete_594131; poolName: string;
   ##             : The name of the volume
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594142 = newJObject()
-  var query_594143 = newJObject()
-  add(path_594142, "poolName", newJString(poolName))
-  add(path_594142, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594143, "api-version", newJString(apiVersion))
-  add(path_594142, "subscriptionId", newJString(subscriptionId))
-  add(path_594142, "volumeName", newJString(volumeName))
-  add(path_594142, "accountName", newJString(accountName))
-  result = call_594141.call(path_594142, query_594143, nil, nil, nil)
+  var path_568375 = newJObject()
+  var query_568376 = newJObject()
+  add(path_568375, "poolName", newJString(poolName))
+  add(path_568375, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568376, "api-version", newJString(apiVersion))
+  add(path_568375, "subscriptionId", newJString(subscriptionId))
+  add(path_568375, "volumeName", newJString(volumeName))
+  add(path_568375, "accountName", newJString(accountName))
+  result = call_568374.call(path_568375, query_568376, nil, nil, nil)
 
-var volumesDelete* = Call_VolumesDelete_594131(name: "volumesDelete",
+var volumesDelete* = Call_VolumesDelete_568364(name: "volumesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}",
-    validator: validate_VolumesDelete_594132, base: "", url: url_VolumesDelete_594133,
+    validator: validate_VolumesDelete_568365, base: "", url: url_VolumesDelete_568366,
     schemes: {Scheme.Https})
 type
-  Call_MountTargetsList_594159 = ref object of OpenApiRestCall_593425
-proc url_MountTargetsList_594161(protocol: Scheme; host: string; base: string;
+  Call_MountTargetsList_568392 = ref object of OpenApiRestCall_567658
+proc url_MountTargetsList_568394(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2135,7 +2135,7 @@ proc url_MountTargetsList_594161(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MountTargetsList_594160(path: JsonNode; query: JsonNode;
+proc validate_MountTargetsList_568393(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## List mount targets
@@ -2155,31 +2155,31 @@ proc validate_MountTargetsList_594160(path: JsonNode; query: JsonNode;
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594162 = path.getOrDefault("poolName")
-  valid_594162 = validateParameter(valid_594162, JString, required = true,
+  var valid_568395 = path.getOrDefault("poolName")
+  valid_568395 = validateParameter(valid_568395, JString, required = true,
                                  default = nil)
-  if valid_594162 != nil:
-    section.add "poolName", valid_594162
-  var valid_594163 = path.getOrDefault("resourceGroupName")
-  valid_594163 = validateParameter(valid_594163, JString, required = true,
+  if valid_568395 != nil:
+    section.add "poolName", valid_568395
+  var valid_568396 = path.getOrDefault("resourceGroupName")
+  valid_568396 = validateParameter(valid_568396, JString, required = true,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "resourceGroupName", valid_594163
-  var valid_594164 = path.getOrDefault("subscriptionId")
-  valid_594164 = validateParameter(valid_594164, JString, required = true,
+  if valid_568396 != nil:
+    section.add "resourceGroupName", valid_568396
+  var valid_568397 = path.getOrDefault("subscriptionId")
+  valid_568397 = validateParameter(valid_568397, JString, required = true,
                                  default = nil)
-  if valid_594164 != nil:
-    section.add "subscriptionId", valid_594164
-  var valid_594165 = path.getOrDefault("volumeName")
-  valid_594165 = validateParameter(valid_594165, JString, required = true,
+  if valid_568397 != nil:
+    section.add "subscriptionId", valid_568397
+  var valid_568398 = path.getOrDefault("volumeName")
+  valid_568398 = validateParameter(valid_568398, JString, required = true,
                                  default = nil)
-  if valid_594165 != nil:
-    section.add "volumeName", valid_594165
-  var valid_594166 = path.getOrDefault("accountName")
-  valid_594166 = validateParameter(valid_594166, JString, required = true,
+  if valid_568398 != nil:
+    section.add "volumeName", valid_568398
+  var valid_568399 = path.getOrDefault("accountName")
+  valid_568399 = validateParameter(valid_568399, JString, required = true,
                                  default = nil)
-  if valid_594166 != nil:
-    section.add "accountName", valid_594166
+  if valid_568399 != nil:
+    section.add "accountName", valid_568399
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2187,11 +2187,11 @@ proc validate_MountTargetsList_594160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594167 = query.getOrDefault("api-version")
-  valid_594167 = validateParameter(valid_594167, JString, required = true,
+  var valid_568400 = query.getOrDefault("api-version")
+  valid_568400 = validateParameter(valid_568400, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594167 != nil:
-    section.add "api-version", valid_594167
+  if valid_568400 != nil:
+    section.add "api-version", valid_568400
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2200,20 +2200,20 @@ proc validate_MountTargetsList_594160(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594168: Call_MountTargetsList_594159; path: JsonNode;
+proc call*(call_568401: Call_MountTargetsList_568392; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List mount targets
   ## 
-  let valid = call_594168.validator(path, query, header, formData, body)
-  let scheme = call_594168.pickScheme
+  let valid = call_568401.validator(path, query, header, formData, body)
+  let scheme = call_568401.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594168.url(scheme.get, call_594168.host, call_594168.base,
-                         call_594168.route, valid.getOrDefault("path"),
+  let url = call_568401.url(scheme.get, call_568401.host, call_568401.base,
+                         call_568401.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594168, url, valid)
+  result = hook(call_568401, url, valid)
 
-proc call*(call_594169: Call_MountTargetsList_594159; poolName: string;
+proc call*(call_568402: Call_MountTargetsList_568392; poolName: string;
           resourceGroupName: string; subscriptionId: string; volumeName: string;
           accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## mountTargetsList
@@ -2230,23 +2230,23 @@ proc call*(call_594169: Call_MountTargetsList_594159; poolName: string;
   ##             : The name of the volume
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594170 = newJObject()
-  var query_594171 = newJObject()
-  add(path_594170, "poolName", newJString(poolName))
-  add(path_594170, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594171, "api-version", newJString(apiVersion))
-  add(path_594170, "subscriptionId", newJString(subscriptionId))
-  add(path_594170, "volumeName", newJString(volumeName))
-  add(path_594170, "accountName", newJString(accountName))
-  result = call_594169.call(path_594170, query_594171, nil, nil, nil)
+  var path_568403 = newJObject()
+  var query_568404 = newJObject()
+  add(path_568403, "poolName", newJString(poolName))
+  add(path_568403, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568404, "api-version", newJString(apiVersion))
+  add(path_568403, "subscriptionId", newJString(subscriptionId))
+  add(path_568403, "volumeName", newJString(volumeName))
+  add(path_568403, "accountName", newJString(accountName))
+  result = call_568402.call(path_568403, query_568404, nil, nil, nil)
 
-var mountTargetsList* = Call_MountTargetsList_594159(name: "mountTargetsList",
+var mountTargetsList* = Call_MountTargetsList_568392(name: "mountTargetsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/mountTargets",
-    validator: validate_MountTargetsList_594160, base: "",
-    url: url_MountTargetsList_594161, schemes: {Scheme.Https})
+    validator: validate_MountTargetsList_568393, base: "",
+    url: url_MountTargetsList_568394, schemes: {Scheme.Https})
 type
-  Call_SnapshotsList_594172 = ref object of OpenApiRestCall_593425
-proc url_SnapshotsList_594174(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsList_568405 = ref object of OpenApiRestCall_567658
+proc url_SnapshotsList_568407(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2276,7 +2276,7 @@ proc url_SnapshotsList_594174(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsList_594173(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SnapshotsList_568406(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## List snapshots
   ## 
@@ -2295,31 +2295,31 @@ proc validate_SnapshotsList_594173(path: JsonNode; query: JsonNode; header: Json
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594175 = path.getOrDefault("poolName")
-  valid_594175 = validateParameter(valid_594175, JString, required = true,
+  var valid_568408 = path.getOrDefault("poolName")
+  valid_568408 = validateParameter(valid_568408, JString, required = true,
                                  default = nil)
-  if valid_594175 != nil:
-    section.add "poolName", valid_594175
-  var valid_594176 = path.getOrDefault("resourceGroupName")
-  valid_594176 = validateParameter(valid_594176, JString, required = true,
+  if valid_568408 != nil:
+    section.add "poolName", valid_568408
+  var valid_568409 = path.getOrDefault("resourceGroupName")
+  valid_568409 = validateParameter(valid_568409, JString, required = true,
                                  default = nil)
-  if valid_594176 != nil:
-    section.add "resourceGroupName", valid_594176
-  var valid_594177 = path.getOrDefault("subscriptionId")
-  valid_594177 = validateParameter(valid_594177, JString, required = true,
+  if valid_568409 != nil:
+    section.add "resourceGroupName", valid_568409
+  var valid_568410 = path.getOrDefault("subscriptionId")
+  valid_568410 = validateParameter(valid_568410, JString, required = true,
                                  default = nil)
-  if valid_594177 != nil:
-    section.add "subscriptionId", valid_594177
-  var valid_594178 = path.getOrDefault("volumeName")
-  valid_594178 = validateParameter(valid_594178, JString, required = true,
+  if valid_568410 != nil:
+    section.add "subscriptionId", valid_568410
+  var valid_568411 = path.getOrDefault("volumeName")
+  valid_568411 = validateParameter(valid_568411, JString, required = true,
                                  default = nil)
-  if valid_594178 != nil:
-    section.add "volumeName", valid_594178
-  var valid_594179 = path.getOrDefault("accountName")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  if valid_568411 != nil:
+    section.add "volumeName", valid_568411
+  var valid_568412 = path.getOrDefault("accountName")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "accountName", valid_594179
+  if valid_568412 != nil:
+    section.add "accountName", valid_568412
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2327,11 +2327,11 @@ proc validate_SnapshotsList_594173(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594180 = query.getOrDefault("api-version")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  var valid_568413 = query.getOrDefault("api-version")
+  valid_568413 = validateParameter(valid_568413, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594180 != nil:
-    section.add "api-version", valid_594180
+  if valid_568413 != nil:
+    section.add "api-version", valid_568413
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2340,20 +2340,20 @@ proc validate_SnapshotsList_594173(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594181: Call_SnapshotsList_594172; path: JsonNode; query: JsonNode;
+proc call*(call_568414: Call_SnapshotsList_568405; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List snapshots
   ## 
-  let valid = call_594181.validator(path, query, header, formData, body)
-  let scheme = call_594181.pickScheme
+  let valid = call_568414.validator(path, query, header, formData, body)
+  let scheme = call_568414.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594181.url(scheme.get, call_594181.host, call_594181.base,
-                         call_594181.route, valid.getOrDefault("path"),
+  let url = call_568414.url(scheme.get, call_568414.host, call_568414.base,
+                         call_568414.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594181, url, valid)
+  result = hook(call_568414, url, valid)
 
-proc call*(call_594182: Call_SnapshotsList_594172; poolName: string;
+proc call*(call_568415: Call_SnapshotsList_568405; poolName: string;
           resourceGroupName: string; subscriptionId: string; volumeName: string;
           accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## snapshotsList
@@ -2370,23 +2370,23 @@ proc call*(call_594182: Call_SnapshotsList_594172; poolName: string;
   ##             : The name of the volume
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594183 = newJObject()
-  var query_594184 = newJObject()
-  add(path_594183, "poolName", newJString(poolName))
-  add(path_594183, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594184, "api-version", newJString(apiVersion))
-  add(path_594183, "subscriptionId", newJString(subscriptionId))
-  add(path_594183, "volumeName", newJString(volumeName))
-  add(path_594183, "accountName", newJString(accountName))
-  result = call_594182.call(path_594183, query_594184, nil, nil, nil)
+  var path_568416 = newJObject()
+  var query_568417 = newJObject()
+  add(path_568416, "poolName", newJString(poolName))
+  add(path_568416, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568417, "api-version", newJString(apiVersion))
+  add(path_568416, "subscriptionId", newJString(subscriptionId))
+  add(path_568416, "volumeName", newJString(volumeName))
+  add(path_568416, "accountName", newJString(accountName))
+  result = call_568415.call(path_568416, query_568417, nil, nil, nil)
 
-var snapshotsList* = Call_SnapshotsList_594172(name: "snapshotsList",
+var snapshotsList* = Call_SnapshotsList_568405(name: "snapshotsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/snapshots",
-    validator: validate_SnapshotsList_594173, base: "", url: url_SnapshotsList_594174,
+    validator: validate_SnapshotsList_568406, base: "", url: url_SnapshotsList_568407,
     schemes: {Scheme.Https})
 type
-  Call_SnapshotsCreate_594199 = ref object of OpenApiRestCall_593425
-proc url_SnapshotsCreate_594201(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsCreate_568432 = ref object of OpenApiRestCall_567658
+proc url_SnapshotsCreate_568434(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2418,7 +2418,7 @@ proc url_SnapshotsCreate_594201(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsCreate_594200(path: JsonNode; query: JsonNode;
+proc validate_SnapshotsCreate_568433(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Create a snapshot
@@ -2440,36 +2440,36 @@ proc validate_SnapshotsCreate_594200(path: JsonNode; query: JsonNode;
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594202 = path.getOrDefault("poolName")
-  valid_594202 = validateParameter(valid_594202, JString, required = true,
+  var valid_568435 = path.getOrDefault("poolName")
+  valid_568435 = validateParameter(valid_568435, JString, required = true,
                                  default = nil)
-  if valid_594202 != nil:
-    section.add "poolName", valid_594202
-  var valid_594203 = path.getOrDefault("resourceGroupName")
-  valid_594203 = validateParameter(valid_594203, JString, required = true,
+  if valid_568435 != nil:
+    section.add "poolName", valid_568435
+  var valid_568436 = path.getOrDefault("resourceGroupName")
+  valid_568436 = validateParameter(valid_568436, JString, required = true,
                                  default = nil)
-  if valid_594203 != nil:
-    section.add "resourceGroupName", valid_594203
-  var valid_594204 = path.getOrDefault("subscriptionId")
-  valid_594204 = validateParameter(valid_594204, JString, required = true,
+  if valid_568436 != nil:
+    section.add "resourceGroupName", valid_568436
+  var valid_568437 = path.getOrDefault("subscriptionId")
+  valid_568437 = validateParameter(valid_568437, JString, required = true,
                                  default = nil)
-  if valid_594204 != nil:
-    section.add "subscriptionId", valid_594204
-  var valid_594205 = path.getOrDefault("snapshotName")
-  valid_594205 = validateParameter(valid_594205, JString, required = true,
+  if valid_568437 != nil:
+    section.add "subscriptionId", valid_568437
+  var valid_568438 = path.getOrDefault("snapshotName")
+  valid_568438 = validateParameter(valid_568438, JString, required = true,
                                  default = nil)
-  if valid_594205 != nil:
-    section.add "snapshotName", valid_594205
-  var valid_594206 = path.getOrDefault("volumeName")
-  valid_594206 = validateParameter(valid_594206, JString, required = true,
+  if valid_568438 != nil:
+    section.add "snapshotName", valid_568438
+  var valid_568439 = path.getOrDefault("volumeName")
+  valid_568439 = validateParameter(valid_568439, JString, required = true,
                                  default = nil)
-  if valid_594206 != nil:
-    section.add "volumeName", valid_594206
-  var valid_594207 = path.getOrDefault("accountName")
-  valid_594207 = validateParameter(valid_594207, JString, required = true,
+  if valid_568439 != nil:
+    section.add "volumeName", valid_568439
+  var valid_568440 = path.getOrDefault("accountName")
+  valid_568440 = validateParameter(valid_568440, JString, required = true,
                                  default = nil)
-  if valid_594207 != nil:
-    section.add "accountName", valid_594207
+  if valid_568440 != nil:
+    section.add "accountName", valid_568440
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2477,11 +2477,11 @@ proc validate_SnapshotsCreate_594200(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594208 = query.getOrDefault("api-version")
-  valid_594208 = validateParameter(valid_594208, JString, required = true,
+  var valid_568441 = query.getOrDefault("api-version")
+  valid_568441 = validateParameter(valid_568441, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594208 != nil:
-    section.add "api-version", valid_594208
+  if valid_568441 != nil:
+    section.add "api-version", valid_568441
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2495,20 +2495,20 @@ proc validate_SnapshotsCreate_594200(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594210: Call_SnapshotsCreate_594199; path: JsonNode; query: JsonNode;
+proc call*(call_568443: Call_SnapshotsCreate_568432; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a snapshot
   ## 
-  let valid = call_594210.validator(path, query, header, formData, body)
-  let scheme = call_594210.pickScheme
+  let valid = call_568443.validator(path, query, header, formData, body)
+  let scheme = call_568443.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594210.url(scheme.get, call_594210.host, call_594210.base,
-                         call_594210.route, valid.getOrDefault("path"),
+  let url = call_568443.url(scheme.get, call_568443.host, call_568443.base,
+                         call_568443.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594210, url, valid)
+  result = hook(call_568443, url, valid)
 
-proc call*(call_594211: Call_SnapshotsCreate_594199; poolName: string;
+proc call*(call_568444: Call_SnapshotsCreate_568432; poolName: string;
           resourceGroupName: string; subscriptionId: string; snapshotName: string;
           body: JsonNode; volumeName: string; accountName: string;
           apiVersion: string = "2017-08-15"): Recallable =
@@ -2530,27 +2530,27 @@ proc call*(call_594211: Call_SnapshotsCreate_594199; poolName: string;
   ##             : The name of the volume
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594212 = newJObject()
-  var query_594213 = newJObject()
-  var body_594214 = newJObject()
-  add(path_594212, "poolName", newJString(poolName))
-  add(path_594212, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594213, "api-version", newJString(apiVersion))
-  add(path_594212, "subscriptionId", newJString(subscriptionId))
-  add(path_594212, "snapshotName", newJString(snapshotName))
+  var path_568445 = newJObject()
+  var query_568446 = newJObject()
+  var body_568447 = newJObject()
+  add(path_568445, "poolName", newJString(poolName))
+  add(path_568445, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568446, "api-version", newJString(apiVersion))
+  add(path_568445, "subscriptionId", newJString(subscriptionId))
+  add(path_568445, "snapshotName", newJString(snapshotName))
   if body != nil:
-    body_594214 = body
-  add(path_594212, "volumeName", newJString(volumeName))
-  add(path_594212, "accountName", newJString(accountName))
-  result = call_594211.call(path_594212, query_594213, nil, nil, body_594214)
+    body_568447 = body
+  add(path_568445, "volumeName", newJString(volumeName))
+  add(path_568445, "accountName", newJString(accountName))
+  result = call_568444.call(path_568445, query_568446, nil, nil, body_568447)
 
-var snapshotsCreate* = Call_SnapshotsCreate_594199(name: "snapshotsCreate",
+var snapshotsCreate* = Call_SnapshotsCreate_568432(name: "snapshotsCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/snapshots/{snapshotName}",
-    validator: validate_SnapshotsCreate_594200, base: "", url: url_SnapshotsCreate_594201,
+    validator: validate_SnapshotsCreate_568433, base: "", url: url_SnapshotsCreate_568434,
     schemes: {Scheme.Https})
 type
-  Call_SnapshotsGet_594185 = ref object of OpenApiRestCall_593425
-proc url_SnapshotsGet_594187(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsGet_568418 = ref object of OpenApiRestCall_567658
+proc url_SnapshotsGet_568420(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2582,7 +2582,7 @@ proc url_SnapshotsGet_594187(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsGet_594186(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SnapshotsGet_568419(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a snapshot
   ## 
@@ -2603,36 +2603,36 @@ proc validate_SnapshotsGet_594186(path: JsonNode; query: JsonNode; header: JsonN
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594188 = path.getOrDefault("poolName")
-  valid_594188 = validateParameter(valid_594188, JString, required = true,
+  var valid_568421 = path.getOrDefault("poolName")
+  valid_568421 = validateParameter(valid_568421, JString, required = true,
                                  default = nil)
-  if valid_594188 != nil:
-    section.add "poolName", valid_594188
-  var valid_594189 = path.getOrDefault("resourceGroupName")
-  valid_594189 = validateParameter(valid_594189, JString, required = true,
+  if valid_568421 != nil:
+    section.add "poolName", valid_568421
+  var valid_568422 = path.getOrDefault("resourceGroupName")
+  valid_568422 = validateParameter(valid_568422, JString, required = true,
                                  default = nil)
-  if valid_594189 != nil:
-    section.add "resourceGroupName", valid_594189
-  var valid_594190 = path.getOrDefault("subscriptionId")
-  valid_594190 = validateParameter(valid_594190, JString, required = true,
+  if valid_568422 != nil:
+    section.add "resourceGroupName", valid_568422
+  var valid_568423 = path.getOrDefault("subscriptionId")
+  valid_568423 = validateParameter(valid_568423, JString, required = true,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "subscriptionId", valid_594190
-  var valid_594191 = path.getOrDefault("snapshotName")
-  valid_594191 = validateParameter(valid_594191, JString, required = true,
+  if valid_568423 != nil:
+    section.add "subscriptionId", valid_568423
+  var valid_568424 = path.getOrDefault("snapshotName")
+  valid_568424 = validateParameter(valid_568424, JString, required = true,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "snapshotName", valid_594191
-  var valid_594192 = path.getOrDefault("volumeName")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  if valid_568424 != nil:
+    section.add "snapshotName", valid_568424
+  var valid_568425 = path.getOrDefault("volumeName")
+  valid_568425 = validateParameter(valid_568425, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "volumeName", valid_594192
-  var valid_594193 = path.getOrDefault("accountName")
-  valid_594193 = validateParameter(valid_594193, JString, required = true,
+  if valid_568425 != nil:
+    section.add "volumeName", valid_568425
+  var valid_568426 = path.getOrDefault("accountName")
+  valid_568426 = validateParameter(valid_568426, JString, required = true,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "accountName", valid_594193
+  if valid_568426 != nil:
+    section.add "accountName", valid_568426
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2640,11 +2640,11 @@ proc validate_SnapshotsGet_594186(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594194 = query.getOrDefault("api-version")
-  valid_594194 = validateParameter(valid_594194, JString, required = true,
+  var valid_568427 = query.getOrDefault("api-version")
+  valid_568427 = validateParameter(valid_568427, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594194 != nil:
-    section.add "api-version", valid_594194
+  if valid_568427 != nil:
+    section.add "api-version", valid_568427
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2653,20 +2653,20 @@ proc validate_SnapshotsGet_594186(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594195: Call_SnapshotsGet_594185; path: JsonNode; query: JsonNode;
+proc call*(call_568428: Call_SnapshotsGet_568418; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a snapshot
   ## 
-  let valid = call_594195.validator(path, query, header, formData, body)
-  let scheme = call_594195.pickScheme
+  let valid = call_568428.validator(path, query, header, formData, body)
+  let scheme = call_568428.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594195.url(scheme.get, call_594195.host, call_594195.base,
-                         call_594195.route, valid.getOrDefault("path"),
+  let url = call_568428.url(scheme.get, call_568428.host, call_568428.base,
+                         call_568428.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594195, url, valid)
+  result = hook(call_568428, url, valid)
 
-proc call*(call_594196: Call_SnapshotsGet_594185; poolName: string;
+proc call*(call_568429: Call_SnapshotsGet_568418; poolName: string;
           resourceGroupName: string; subscriptionId: string; snapshotName: string;
           volumeName: string; accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## snapshotsGet
@@ -2685,24 +2685,24 @@ proc call*(call_594196: Call_SnapshotsGet_594185; poolName: string;
   ##             : The name of the volume
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594197 = newJObject()
-  var query_594198 = newJObject()
-  add(path_594197, "poolName", newJString(poolName))
-  add(path_594197, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594198, "api-version", newJString(apiVersion))
-  add(path_594197, "subscriptionId", newJString(subscriptionId))
-  add(path_594197, "snapshotName", newJString(snapshotName))
-  add(path_594197, "volumeName", newJString(volumeName))
-  add(path_594197, "accountName", newJString(accountName))
-  result = call_594196.call(path_594197, query_594198, nil, nil, nil)
+  var path_568430 = newJObject()
+  var query_568431 = newJObject()
+  add(path_568430, "poolName", newJString(poolName))
+  add(path_568430, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568431, "api-version", newJString(apiVersion))
+  add(path_568430, "subscriptionId", newJString(subscriptionId))
+  add(path_568430, "snapshotName", newJString(snapshotName))
+  add(path_568430, "volumeName", newJString(volumeName))
+  add(path_568430, "accountName", newJString(accountName))
+  result = call_568429.call(path_568430, query_568431, nil, nil, nil)
 
-var snapshotsGet* = Call_SnapshotsGet_594185(name: "snapshotsGet",
+var snapshotsGet* = Call_SnapshotsGet_568418(name: "snapshotsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/snapshots/{snapshotName}",
-    validator: validate_SnapshotsGet_594186, base: "", url: url_SnapshotsGet_594187,
+    validator: validate_SnapshotsGet_568419, base: "", url: url_SnapshotsGet_568420,
     schemes: {Scheme.Https})
 type
-  Call_SnapshotsUpdate_594229 = ref object of OpenApiRestCall_593425
-proc url_SnapshotsUpdate_594231(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsUpdate_568462 = ref object of OpenApiRestCall_567658
+proc url_SnapshotsUpdate_568464(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2734,7 +2734,7 @@ proc url_SnapshotsUpdate_594231(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsUpdate_594230(path: JsonNode; query: JsonNode;
+proc validate_SnapshotsUpdate_568463(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Patch a snapshot
@@ -2756,36 +2756,36 @@ proc validate_SnapshotsUpdate_594230(path: JsonNode; query: JsonNode;
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594232 = path.getOrDefault("poolName")
-  valid_594232 = validateParameter(valid_594232, JString, required = true,
+  var valid_568465 = path.getOrDefault("poolName")
+  valid_568465 = validateParameter(valid_568465, JString, required = true,
                                  default = nil)
-  if valid_594232 != nil:
-    section.add "poolName", valid_594232
-  var valid_594233 = path.getOrDefault("resourceGroupName")
-  valid_594233 = validateParameter(valid_594233, JString, required = true,
+  if valid_568465 != nil:
+    section.add "poolName", valid_568465
+  var valid_568466 = path.getOrDefault("resourceGroupName")
+  valid_568466 = validateParameter(valid_568466, JString, required = true,
                                  default = nil)
-  if valid_594233 != nil:
-    section.add "resourceGroupName", valid_594233
-  var valid_594234 = path.getOrDefault("subscriptionId")
-  valid_594234 = validateParameter(valid_594234, JString, required = true,
+  if valid_568466 != nil:
+    section.add "resourceGroupName", valid_568466
+  var valid_568467 = path.getOrDefault("subscriptionId")
+  valid_568467 = validateParameter(valid_568467, JString, required = true,
                                  default = nil)
-  if valid_594234 != nil:
-    section.add "subscriptionId", valid_594234
-  var valid_594235 = path.getOrDefault("snapshotName")
-  valid_594235 = validateParameter(valid_594235, JString, required = true,
+  if valid_568467 != nil:
+    section.add "subscriptionId", valid_568467
+  var valid_568468 = path.getOrDefault("snapshotName")
+  valid_568468 = validateParameter(valid_568468, JString, required = true,
                                  default = nil)
-  if valid_594235 != nil:
-    section.add "snapshotName", valid_594235
-  var valid_594236 = path.getOrDefault("volumeName")
-  valid_594236 = validateParameter(valid_594236, JString, required = true,
+  if valid_568468 != nil:
+    section.add "snapshotName", valid_568468
+  var valid_568469 = path.getOrDefault("volumeName")
+  valid_568469 = validateParameter(valid_568469, JString, required = true,
                                  default = nil)
-  if valid_594236 != nil:
-    section.add "volumeName", valid_594236
-  var valid_594237 = path.getOrDefault("accountName")
-  valid_594237 = validateParameter(valid_594237, JString, required = true,
+  if valid_568469 != nil:
+    section.add "volumeName", valid_568469
+  var valid_568470 = path.getOrDefault("accountName")
+  valid_568470 = validateParameter(valid_568470, JString, required = true,
                                  default = nil)
-  if valid_594237 != nil:
-    section.add "accountName", valid_594237
+  if valid_568470 != nil:
+    section.add "accountName", valid_568470
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2793,11 +2793,11 @@ proc validate_SnapshotsUpdate_594230(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594238 = query.getOrDefault("api-version")
-  valid_594238 = validateParameter(valid_594238, JString, required = true,
+  var valid_568471 = query.getOrDefault("api-version")
+  valid_568471 = validateParameter(valid_568471, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594238 != nil:
-    section.add "api-version", valid_594238
+  if valid_568471 != nil:
+    section.add "api-version", valid_568471
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2811,20 +2811,20 @@ proc validate_SnapshotsUpdate_594230(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594240: Call_SnapshotsUpdate_594229; path: JsonNode; query: JsonNode;
+proc call*(call_568473: Call_SnapshotsUpdate_568462; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patch a snapshot
   ## 
-  let valid = call_594240.validator(path, query, header, formData, body)
-  let scheme = call_594240.pickScheme
+  let valid = call_568473.validator(path, query, header, formData, body)
+  let scheme = call_568473.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594240.url(scheme.get, call_594240.host, call_594240.base,
-                         call_594240.route, valid.getOrDefault("path"),
+  let url = call_568473.url(scheme.get, call_568473.host, call_568473.base,
+                         call_568473.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594240, url, valid)
+  result = hook(call_568473, url, valid)
 
-proc call*(call_594241: Call_SnapshotsUpdate_594229; poolName: string;
+proc call*(call_568474: Call_SnapshotsUpdate_568462; poolName: string;
           resourceGroupName: string; subscriptionId: string; snapshotName: string;
           body: JsonNode; volumeName: string; accountName: string;
           apiVersion: string = "2017-08-15"): Recallable =
@@ -2846,27 +2846,27 @@ proc call*(call_594241: Call_SnapshotsUpdate_594229; poolName: string;
   ##             : The name of the volume
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594242 = newJObject()
-  var query_594243 = newJObject()
-  var body_594244 = newJObject()
-  add(path_594242, "poolName", newJString(poolName))
-  add(path_594242, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594243, "api-version", newJString(apiVersion))
-  add(path_594242, "subscriptionId", newJString(subscriptionId))
-  add(path_594242, "snapshotName", newJString(snapshotName))
+  var path_568475 = newJObject()
+  var query_568476 = newJObject()
+  var body_568477 = newJObject()
+  add(path_568475, "poolName", newJString(poolName))
+  add(path_568475, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568476, "api-version", newJString(apiVersion))
+  add(path_568475, "subscriptionId", newJString(subscriptionId))
+  add(path_568475, "snapshotName", newJString(snapshotName))
   if body != nil:
-    body_594244 = body
-  add(path_594242, "volumeName", newJString(volumeName))
-  add(path_594242, "accountName", newJString(accountName))
-  result = call_594241.call(path_594242, query_594243, nil, nil, body_594244)
+    body_568477 = body
+  add(path_568475, "volumeName", newJString(volumeName))
+  add(path_568475, "accountName", newJString(accountName))
+  result = call_568474.call(path_568475, query_568476, nil, nil, body_568477)
 
-var snapshotsUpdate* = Call_SnapshotsUpdate_594229(name: "snapshotsUpdate",
+var snapshotsUpdate* = Call_SnapshotsUpdate_568462(name: "snapshotsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/snapshots/{snapshotName}",
-    validator: validate_SnapshotsUpdate_594230, base: "", url: url_SnapshotsUpdate_594231,
+    validator: validate_SnapshotsUpdate_568463, base: "", url: url_SnapshotsUpdate_568464,
     schemes: {Scheme.Https})
 type
-  Call_SnapshotsDelete_594215 = ref object of OpenApiRestCall_593425
-proc url_SnapshotsDelete_594217(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsDelete_568448 = ref object of OpenApiRestCall_567658
+proc url_SnapshotsDelete_568450(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2898,7 +2898,7 @@ proc url_SnapshotsDelete_594217(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsDelete_594216(path: JsonNode; query: JsonNode;
+proc validate_SnapshotsDelete_568449(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Delete snapshot
@@ -2920,36 +2920,36 @@ proc validate_SnapshotsDelete_594216(path: JsonNode; query: JsonNode;
   ##              : The name of the NetApp account
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolName` field"
-  var valid_594218 = path.getOrDefault("poolName")
-  valid_594218 = validateParameter(valid_594218, JString, required = true,
+  var valid_568451 = path.getOrDefault("poolName")
+  valid_568451 = validateParameter(valid_568451, JString, required = true,
                                  default = nil)
-  if valid_594218 != nil:
-    section.add "poolName", valid_594218
-  var valid_594219 = path.getOrDefault("resourceGroupName")
-  valid_594219 = validateParameter(valid_594219, JString, required = true,
+  if valid_568451 != nil:
+    section.add "poolName", valid_568451
+  var valid_568452 = path.getOrDefault("resourceGroupName")
+  valid_568452 = validateParameter(valid_568452, JString, required = true,
                                  default = nil)
-  if valid_594219 != nil:
-    section.add "resourceGroupName", valid_594219
-  var valid_594220 = path.getOrDefault("subscriptionId")
-  valid_594220 = validateParameter(valid_594220, JString, required = true,
+  if valid_568452 != nil:
+    section.add "resourceGroupName", valid_568452
+  var valid_568453 = path.getOrDefault("subscriptionId")
+  valid_568453 = validateParameter(valid_568453, JString, required = true,
                                  default = nil)
-  if valid_594220 != nil:
-    section.add "subscriptionId", valid_594220
-  var valid_594221 = path.getOrDefault("snapshotName")
-  valid_594221 = validateParameter(valid_594221, JString, required = true,
+  if valid_568453 != nil:
+    section.add "subscriptionId", valid_568453
+  var valid_568454 = path.getOrDefault("snapshotName")
+  valid_568454 = validateParameter(valid_568454, JString, required = true,
                                  default = nil)
-  if valid_594221 != nil:
-    section.add "snapshotName", valid_594221
-  var valid_594222 = path.getOrDefault("volumeName")
-  valid_594222 = validateParameter(valid_594222, JString, required = true,
+  if valid_568454 != nil:
+    section.add "snapshotName", valid_568454
+  var valid_568455 = path.getOrDefault("volumeName")
+  valid_568455 = validateParameter(valid_568455, JString, required = true,
                                  default = nil)
-  if valid_594222 != nil:
-    section.add "volumeName", valid_594222
-  var valid_594223 = path.getOrDefault("accountName")
-  valid_594223 = validateParameter(valid_594223, JString, required = true,
+  if valid_568455 != nil:
+    section.add "volumeName", valid_568455
+  var valid_568456 = path.getOrDefault("accountName")
+  valid_568456 = validateParameter(valid_568456, JString, required = true,
                                  default = nil)
-  if valid_594223 != nil:
-    section.add "accountName", valid_594223
+  if valid_568456 != nil:
+    section.add "accountName", valid_568456
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2957,11 +2957,11 @@ proc validate_SnapshotsDelete_594216(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594224 = query.getOrDefault("api-version")
-  valid_594224 = validateParameter(valid_594224, JString, required = true,
+  var valid_568457 = query.getOrDefault("api-version")
+  valid_568457 = validateParameter(valid_568457, JString, required = true,
                                  default = newJString("2017-08-15"))
-  if valid_594224 != nil:
-    section.add "api-version", valid_594224
+  if valid_568457 != nil:
+    section.add "api-version", valid_568457
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2970,20 +2970,20 @@ proc validate_SnapshotsDelete_594216(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594225: Call_SnapshotsDelete_594215; path: JsonNode; query: JsonNode;
+proc call*(call_568458: Call_SnapshotsDelete_568448; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete snapshot
   ## 
-  let valid = call_594225.validator(path, query, header, formData, body)
-  let scheme = call_594225.pickScheme
+  let valid = call_568458.validator(path, query, header, formData, body)
+  let scheme = call_568458.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594225.url(scheme.get, call_594225.host, call_594225.base,
-                         call_594225.route, valid.getOrDefault("path"),
+  let url = call_568458.url(scheme.get, call_568458.host, call_568458.base,
+                         call_568458.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594225, url, valid)
+  result = hook(call_568458, url, valid)
 
-proc call*(call_594226: Call_SnapshotsDelete_594215; poolName: string;
+proc call*(call_568459: Call_SnapshotsDelete_568448; poolName: string;
           resourceGroupName: string; subscriptionId: string; snapshotName: string;
           volumeName: string; accountName: string; apiVersion: string = "2017-08-15"): Recallable =
   ## snapshotsDelete
@@ -3002,20 +3002,20 @@ proc call*(call_594226: Call_SnapshotsDelete_594215; poolName: string;
   ##             : The name of the volume
   ##   accountName: string (required)
   ##              : The name of the NetApp account
-  var path_594227 = newJObject()
-  var query_594228 = newJObject()
-  add(path_594227, "poolName", newJString(poolName))
-  add(path_594227, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594228, "api-version", newJString(apiVersion))
-  add(path_594227, "subscriptionId", newJString(subscriptionId))
-  add(path_594227, "snapshotName", newJString(snapshotName))
-  add(path_594227, "volumeName", newJString(volumeName))
-  add(path_594227, "accountName", newJString(accountName))
-  result = call_594226.call(path_594227, query_594228, nil, nil, nil)
+  var path_568460 = newJObject()
+  var query_568461 = newJObject()
+  add(path_568460, "poolName", newJString(poolName))
+  add(path_568460, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568461, "api-version", newJString(apiVersion))
+  add(path_568460, "subscriptionId", newJString(subscriptionId))
+  add(path_568460, "snapshotName", newJString(snapshotName))
+  add(path_568460, "volumeName", newJString(volumeName))
+  add(path_568460, "accountName", newJString(accountName))
+  result = call_568459.call(path_568460, query_568461, nil, nil, nil)
 
-var snapshotsDelete* = Call_SnapshotsDelete_594215(name: "snapshotsDelete",
+var snapshotsDelete* = Call_SnapshotsDelete_568448(name: "snapshotsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/snapshots/{snapshotName}",
-    validator: validate_SnapshotsDelete_594216, base: "", url: url_SnapshotsDelete_594217,
+    validator: validate_SnapshotsDelete_568449, base: "", url: url_SnapshotsDelete_568450,
     schemes: {Scheme.Https})
 export
   rest

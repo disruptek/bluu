@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_596458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "applicationinsights-workbooks_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_WorkbooksListByResourceGroup_593647 = ref object of OpenApiRestCall_593425
-proc url_WorkbooksListByResourceGroup_593649(protocol: Scheme; host: string;
+  Call_WorkbooksListByResourceGroup_596680 = ref object of OpenApiRestCall_596458
+proc url_WorkbooksListByResourceGroup_596682(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +124,7 @@ proc url_WorkbooksListByResourceGroup_593649(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkbooksListByResourceGroup_593648(path: JsonNode; query: JsonNode;
+proc validate_WorkbooksListByResourceGroup_596681(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all Workbooks defined within a specified resource group and category.
   ## 
@@ -138,16 +138,16 @@ proc validate_WorkbooksListByResourceGroup_593648(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_596855 = path.getOrDefault("resourceGroupName")
+  valid_596855 = validateParameter(valid_596855, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_596855 != nil:
+    section.add "resourceGroupName", valid_596855
+  var valid_596856 = path.getOrDefault("subscriptionId")
+  valid_596856 = validateParameter(valid_596856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
+  if valid_596856 != nil:
+    section.add "subscriptionId", valid_596856
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -163,30 +163,30 @@ proc validate_WorkbooksListByResourceGroup_593648(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593824 = query.getOrDefault("api-version")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  var valid_596857 = query.getOrDefault("api-version")
+  valid_596857 = validateParameter(valid_596857, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "api-version", valid_593824
-  var valid_593825 = query.getOrDefault("sourceId")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_596857 != nil:
+    section.add "api-version", valid_596857
+  var valid_596858 = query.getOrDefault("sourceId")
+  valid_596858 = validateParameter(valid_596858, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "sourceId", valid_593825
-  var valid_593826 = query.getOrDefault("tags")
-  valid_593826 = validateParameter(valid_593826, JArray, required = false,
+  if valid_596858 != nil:
+    section.add "sourceId", valid_596858
+  var valid_596859 = query.getOrDefault("tags")
+  valid_596859 = validateParameter(valid_596859, JArray, required = false,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "tags", valid_593826
-  var valid_593840 = query.getOrDefault("category")
-  valid_593840 = validateParameter(valid_593840, JString, required = true,
+  if valid_596859 != nil:
+    section.add "tags", valid_596859
+  var valid_596873 = query.getOrDefault("category")
+  valid_596873 = validateParameter(valid_596873, JString, required = true,
                                  default = newJString("workbook"))
-  if valid_593840 != nil:
-    section.add "category", valid_593840
-  var valid_593841 = query.getOrDefault("canFetchContent")
-  valid_593841 = validateParameter(valid_593841, JBool, required = false, default = nil)
-  if valid_593841 != nil:
-    section.add "canFetchContent", valid_593841
+  if valid_596873 != nil:
+    section.add "category", valid_596873
+  var valid_596874 = query.getOrDefault("canFetchContent")
+  valid_596874 = validateParameter(valid_596874, JBool, required = false, default = nil)
+  if valid_596874 != nil:
+    section.add "canFetchContent", valid_596874
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -195,20 +195,20 @@ proc validate_WorkbooksListByResourceGroup_593648(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593864: Call_WorkbooksListByResourceGroup_593647; path: JsonNode;
+proc call*(call_596897: Call_WorkbooksListByResourceGroup_596680; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all Workbooks defined within a specified resource group and category.
   ## 
-  let valid = call_593864.validator(path, query, header, formData, body)
-  let scheme = call_593864.pickScheme
+  let valid = call_596897.validator(path, query, header, formData, body)
+  let scheme = call_596897.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593864.url(scheme.get, call_593864.host, call_593864.base,
-                         call_593864.route, valid.getOrDefault("path"),
+  let url = call_596897.url(scheme.get, call_596897.host, call_596897.base,
+                         call_596897.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593864, url, valid)
+  result = hook(call_596897, url, valid)
 
-proc call*(call_593935: Call_WorkbooksListByResourceGroup_593647;
+proc call*(call_596968: Call_WorkbooksListByResourceGroup_596680;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           sourceId: string; tags: JsonNode = nil; category: string = "workbook";
           canFetchContent: bool = false): Recallable =
@@ -228,26 +228,26 @@ proc call*(call_593935: Call_WorkbooksListByResourceGroup_593647;
   ##           : Category of workbook to return.
   ##   canFetchContent: bool
   ##                  : Flag indicating whether or not to return the full content for each applicable workbook. If false, only return summary content for workbooks.
-  var path_593936 = newJObject()
-  var query_593938 = newJObject()
-  add(path_593936, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593938, "api-version", newJString(apiVersion))
-  add(path_593936, "subscriptionId", newJString(subscriptionId))
-  add(query_593938, "sourceId", newJString(sourceId))
+  var path_596969 = newJObject()
+  var query_596971 = newJObject()
+  add(path_596969, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596971, "api-version", newJString(apiVersion))
+  add(path_596969, "subscriptionId", newJString(subscriptionId))
+  add(query_596971, "sourceId", newJString(sourceId))
   if tags != nil:
-    query_593938.add "tags", tags
-  add(query_593938, "category", newJString(category))
-  add(query_593938, "canFetchContent", newJBool(canFetchContent))
-  result = call_593935.call(path_593936, query_593938, nil, nil, nil)
+    query_596971.add "tags", tags
+  add(query_596971, "category", newJString(category))
+  add(query_596971, "canFetchContent", newJBool(canFetchContent))
+  result = call_596968.call(path_596969, query_596971, nil, nil, nil)
 
-var workbooksListByResourceGroup* = Call_WorkbooksListByResourceGroup_593647(
+var workbooksListByResourceGroup* = Call_WorkbooksListByResourceGroup_596680(
     name: "workbooksListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroup/{resourceGroupName}/providers/microsoft.insights/workbooks",
-    validator: validate_WorkbooksListByResourceGroup_593648, base: "",
-    url: url_WorkbooksListByResourceGroup_593649, schemes: {Scheme.Https})
+    validator: validate_WorkbooksListByResourceGroup_596681, base: "",
+    url: url_WorkbooksListByResourceGroup_596682, schemes: {Scheme.Https})
 type
-  Call_WorkbooksCreateOrUpdate_593988 = ref object of OpenApiRestCall_593425
-proc url_WorkbooksCreateOrUpdate_593990(protocol: Scheme; host: string; base: string;
+  Call_WorkbooksCreateOrUpdate_597021 = ref object of OpenApiRestCall_596458
+proc url_WorkbooksCreateOrUpdate_597023(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -270,7 +270,7 @@ proc url_WorkbooksCreateOrUpdate_593990(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkbooksCreateOrUpdate_593989(path: JsonNode; query: JsonNode;
+proc validate_WorkbooksCreateOrUpdate_597022(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new workbook.
   ## 
@@ -286,21 +286,21 @@ proc validate_WorkbooksCreateOrUpdate_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594008 = path.getOrDefault("resourceGroupName")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  var valid_597041 = path.getOrDefault("resourceGroupName")
+  valid_597041 = validateParameter(valid_597041, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "resourceGroupName", valid_594008
-  var valid_594009 = path.getOrDefault("subscriptionId")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_597041 != nil:
+    section.add "resourceGroupName", valid_597041
+  var valid_597042 = path.getOrDefault("subscriptionId")
+  valid_597042 = validateParameter(valid_597042, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "subscriptionId", valid_594009
-  var valid_594010 = path.getOrDefault("resourceName")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  if valid_597042 != nil:
+    section.add "subscriptionId", valid_597042
+  var valid_597043 = path.getOrDefault("resourceName")
+  valid_597043 = validateParameter(valid_597043, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "resourceName", valid_594010
+  if valid_597043 != nil:
+    section.add "resourceName", valid_597043
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -310,16 +310,16 @@ proc validate_WorkbooksCreateOrUpdate_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594011 = query.getOrDefault("api-version")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_597044 = query.getOrDefault("api-version")
+  valid_597044 = validateParameter(valid_597044, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "api-version", valid_594011
-  var valid_594012 = query.getOrDefault("sourceId")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_597044 != nil:
+    section.add "api-version", valid_597044
+  var valid_597045 = query.getOrDefault("sourceId")
+  valid_597045 = validateParameter(valid_597045, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "sourceId", valid_594012
+  if valid_597045 != nil:
+    section.add "sourceId", valid_597045
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -333,20 +333,20 @@ proc validate_WorkbooksCreateOrUpdate_593989(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594014: Call_WorkbooksCreateOrUpdate_593988; path: JsonNode;
+proc call*(call_597047: Call_WorkbooksCreateOrUpdate_597021; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new workbook.
   ## 
-  let valid = call_594014.validator(path, query, header, formData, body)
-  let scheme = call_594014.pickScheme
+  let valid = call_597047.validator(path, query, header, formData, body)
+  let scheme = call_597047.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594014.url(scheme.get, call_594014.host, call_594014.base,
-                         call_594014.route, valid.getOrDefault("path"),
+  let url = call_597047.url(scheme.get, call_597047.host, call_597047.base,
+                         call_597047.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594014, url, valid)
+  result = hook(call_597047, url, valid)
 
-proc call*(call_594015: Call_WorkbooksCreateOrUpdate_593988;
+proc call*(call_597048: Call_WorkbooksCreateOrUpdate_597021;
           resourceGroupName: string; workbookProperties: JsonNode;
           apiVersion: string; subscriptionId: string; resourceName: string;
           sourceId: string): Recallable =
@@ -364,26 +364,26 @@ proc call*(call_594015: Call_WorkbooksCreateOrUpdate_593988;
   ##               : The name of the Application Insights component resource.
   ##   sourceId: string (required)
   ##           : Azure Resource Id that will fetch all related workbooks.
-  var path_594016 = newJObject()
-  var query_594017 = newJObject()
-  var body_594018 = newJObject()
-  add(path_594016, "resourceGroupName", newJString(resourceGroupName))
+  var path_597049 = newJObject()
+  var query_597050 = newJObject()
+  var body_597051 = newJObject()
+  add(path_597049, "resourceGroupName", newJString(resourceGroupName))
   if workbookProperties != nil:
-    body_594018 = workbookProperties
-  add(query_594017, "api-version", newJString(apiVersion))
-  add(path_594016, "subscriptionId", newJString(subscriptionId))
-  add(path_594016, "resourceName", newJString(resourceName))
-  add(query_594017, "sourceId", newJString(sourceId))
-  result = call_594015.call(path_594016, query_594017, nil, nil, body_594018)
+    body_597051 = workbookProperties
+  add(query_597050, "api-version", newJString(apiVersion))
+  add(path_597049, "subscriptionId", newJString(subscriptionId))
+  add(path_597049, "resourceName", newJString(resourceName))
+  add(query_597050, "sourceId", newJString(sourceId))
+  result = call_597048.call(path_597049, query_597050, nil, nil, body_597051)
 
-var workbooksCreateOrUpdate* = Call_WorkbooksCreateOrUpdate_593988(
+var workbooksCreateOrUpdate* = Call_WorkbooksCreateOrUpdate_597021(
     name: "workbooksCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroup/{resourceGroupName}/providers/microsoft.insights/workbooks/{resourceName}",
-    validator: validate_WorkbooksCreateOrUpdate_593989, base: "",
-    url: url_WorkbooksCreateOrUpdate_593990, schemes: {Scheme.Https})
+    validator: validate_WorkbooksCreateOrUpdate_597022, base: "",
+    url: url_WorkbooksCreateOrUpdate_597023, schemes: {Scheme.Https})
 type
-  Call_WorkbooksGet_593977 = ref object of OpenApiRestCall_593425
-proc url_WorkbooksGet_593979(protocol: Scheme; host: string; base: string;
+  Call_WorkbooksGet_597010 = ref object of OpenApiRestCall_596458
+proc url_WorkbooksGet_597012(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -405,7 +405,7 @@ proc url_WorkbooksGet_593979(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkbooksGet_593978(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WorkbooksGet_597011(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a single workbook by its resourceName.
   ## 
@@ -421,21 +421,21 @@ proc validate_WorkbooksGet_593978(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593980 = path.getOrDefault("resourceGroupName")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_597013 = path.getOrDefault("resourceGroupName")
+  valid_597013 = validateParameter(valid_597013, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "resourceGroupName", valid_593980
-  var valid_593981 = path.getOrDefault("subscriptionId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_597013 != nil:
+    section.add "resourceGroupName", valid_597013
+  var valid_597014 = path.getOrDefault("subscriptionId")
+  valid_597014 = validateParameter(valid_597014, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "subscriptionId", valid_593981
-  var valid_593982 = path.getOrDefault("resourceName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_597014 != nil:
+    section.add "subscriptionId", valid_597014
+  var valid_597015 = path.getOrDefault("resourceName")
+  valid_597015 = validateParameter(valid_597015, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "resourceName", valid_593982
+  if valid_597015 != nil:
+    section.add "resourceName", valid_597015
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -443,11 +443,11 @@ proc validate_WorkbooksGet_593978(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_597016 = query.getOrDefault("api-version")
+  valid_597016 = validateParameter(valid_597016, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_597016 != nil:
+    section.add "api-version", valid_597016
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -456,20 +456,20 @@ proc validate_WorkbooksGet_593978(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_WorkbooksGet_593977; path: JsonNode; query: JsonNode;
+proc call*(call_597017: Call_WorkbooksGet_597010; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a single workbook by its resourceName.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_597017.validator(path, query, header, formData, body)
+  let scheme = call_597017.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_597017.url(scheme.get, call_597017.host, call_597017.base,
+                         call_597017.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_597017, url, valid)
 
-proc call*(call_593985: Call_WorkbooksGet_593977; resourceGroupName: string;
+proc call*(call_597018: Call_WorkbooksGet_597010; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
   ## workbooksGet
   ## Get a single workbook by its resourceName.
@@ -481,21 +481,21 @@ proc call*(call_593985: Call_WorkbooksGet_593977; resourceGroupName: string;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  add(path_593986, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
-  add(path_593986, "resourceName", newJString(resourceName))
-  result = call_593985.call(path_593986, query_593987, nil, nil, nil)
+  var path_597019 = newJObject()
+  var query_597020 = newJObject()
+  add(path_597019, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597020, "api-version", newJString(apiVersion))
+  add(path_597019, "subscriptionId", newJString(subscriptionId))
+  add(path_597019, "resourceName", newJString(resourceName))
+  result = call_597018.call(path_597019, query_597020, nil, nil, nil)
 
-var workbooksGet* = Call_WorkbooksGet_593977(name: "workbooksGet",
+var workbooksGet* = Call_WorkbooksGet_597010(name: "workbooksGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroup/{resourceGroupName}/providers/microsoft.insights/workbooks/{resourceName}",
-    validator: validate_WorkbooksGet_593978, base: "", url: url_WorkbooksGet_593979,
+    validator: validate_WorkbooksGet_597011, base: "", url: url_WorkbooksGet_597012,
     schemes: {Scheme.Https})
 type
-  Call_WorkbooksUpdate_594030 = ref object of OpenApiRestCall_593425
-proc url_WorkbooksUpdate_594032(protocol: Scheme; host: string; base: string;
+  Call_WorkbooksUpdate_597063 = ref object of OpenApiRestCall_596458
+proc url_WorkbooksUpdate_597065(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -517,7 +517,7 @@ proc url_WorkbooksUpdate_594032(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkbooksUpdate_594031(path: JsonNode; query: JsonNode;
+proc validate_WorkbooksUpdate_597064(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Updates a workbook that has already been added.
@@ -534,21 +534,21 @@ proc validate_WorkbooksUpdate_594031(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594033 = path.getOrDefault("resourceGroupName")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  var valid_597066 = path.getOrDefault("resourceGroupName")
+  valid_597066 = validateParameter(valid_597066, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "resourceGroupName", valid_594033
-  var valid_594034 = path.getOrDefault("subscriptionId")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  if valid_597066 != nil:
+    section.add "resourceGroupName", valid_597066
+  var valid_597067 = path.getOrDefault("subscriptionId")
+  valid_597067 = validateParameter(valid_597067, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "subscriptionId", valid_594034
-  var valid_594035 = path.getOrDefault("resourceName")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  if valid_597067 != nil:
+    section.add "subscriptionId", valid_597067
+  var valid_597068 = path.getOrDefault("resourceName")
+  valid_597068 = validateParameter(valid_597068, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "resourceName", valid_594035
+  if valid_597068 != nil:
+    section.add "resourceName", valid_597068
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -558,16 +558,16 @@ proc validate_WorkbooksUpdate_594031(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594036 = query.getOrDefault("api-version")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  var valid_597069 = query.getOrDefault("api-version")
+  valid_597069 = validateParameter(valid_597069, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "api-version", valid_594036
-  var valid_594037 = query.getOrDefault("sourceId")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_597069 != nil:
+    section.add "api-version", valid_597069
+  var valid_597070 = query.getOrDefault("sourceId")
+  valid_597070 = validateParameter(valid_597070, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "sourceId", valid_594037
+  if valid_597070 != nil:
+    section.add "sourceId", valid_597070
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -580,20 +580,20 @@ proc validate_WorkbooksUpdate_594031(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594039: Call_WorkbooksUpdate_594030; path: JsonNode; query: JsonNode;
+proc call*(call_597072: Call_WorkbooksUpdate_597063; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a workbook that has already been added.
   ## 
-  let valid = call_594039.validator(path, query, header, formData, body)
-  let scheme = call_594039.pickScheme
+  let valid = call_597072.validator(path, query, header, formData, body)
+  let scheme = call_597072.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594039.url(scheme.get, call_594039.host, call_594039.base,
-                         call_594039.route, valid.getOrDefault("path"),
+  let url = call_597072.url(scheme.get, call_597072.host, call_597072.base,
+                         call_597072.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594039, url, valid)
+  result = hook(call_597072, url, valid)
 
-proc call*(call_594040: Call_WorkbooksUpdate_594030; resourceGroupName: string;
+proc call*(call_597073: Call_WorkbooksUpdate_597063; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string;
           sourceId: string; WorkbookUpdateParameters: JsonNode = nil): Recallable =
   ## workbooksUpdate
@@ -610,25 +610,25 @@ proc call*(call_594040: Call_WorkbooksUpdate_594030; resourceGroupName: string;
   ##               : The name of the Application Insights component resource.
   ##   sourceId: string (required)
   ##           : Azure Resource Id that will fetch all related workbooks.
-  var path_594041 = newJObject()
-  var query_594042 = newJObject()
-  var body_594043 = newJObject()
-  add(path_594041, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594042, "api-version", newJString(apiVersion))
-  add(path_594041, "subscriptionId", newJString(subscriptionId))
+  var path_597074 = newJObject()
+  var query_597075 = newJObject()
+  var body_597076 = newJObject()
+  add(path_597074, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597075, "api-version", newJString(apiVersion))
+  add(path_597074, "subscriptionId", newJString(subscriptionId))
   if WorkbookUpdateParameters != nil:
-    body_594043 = WorkbookUpdateParameters
-  add(path_594041, "resourceName", newJString(resourceName))
-  add(query_594042, "sourceId", newJString(sourceId))
-  result = call_594040.call(path_594041, query_594042, nil, nil, body_594043)
+    body_597076 = WorkbookUpdateParameters
+  add(path_597074, "resourceName", newJString(resourceName))
+  add(query_597075, "sourceId", newJString(sourceId))
+  result = call_597073.call(path_597074, query_597075, nil, nil, body_597076)
 
-var workbooksUpdate* = Call_WorkbooksUpdate_594030(name: "workbooksUpdate",
+var workbooksUpdate* = Call_WorkbooksUpdate_597063(name: "workbooksUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroup/{resourceGroupName}/providers/microsoft.insights/workbooks/{resourceName}",
-    validator: validate_WorkbooksUpdate_594031, base: "", url: url_WorkbooksUpdate_594032,
+    validator: validate_WorkbooksUpdate_597064, base: "", url: url_WorkbooksUpdate_597065,
     schemes: {Scheme.Https})
 type
-  Call_WorkbooksDelete_594019 = ref object of OpenApiRestCall_593425
-proc url_WorkbooksDelete_594021(protocol: Scheme; host: string; base: string;
+  Call_WorkbooksDelete_597052 = ref object of OpenApiRestCall_596458
+proc url_WorkbooksDelete_597054(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -650,7 +650,7 @@ proc url_WorkbooksDelete_594021(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkbooksDelete_594020(path: JsonNode; query: JsonNode;
+proc validate_WorkbooksDelete_597053(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Delete a workbook.
@@ -667,21 +667,21 @@ proc validate_WorkbooksDelete_594020(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594022 = path.getOrDefault("resourceGroupName")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  var valid_597055 = path.getOrDefault("resourceGroupName")
+  valid_597055 = validateParameter(valid_597055, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "resourceGroupName", valid_594022
-  var valid_594023 = path.getOrDefault("subscriptionId")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  if valid_597055 != nil:
+    section.add "resourceGroupName", valid_597055
+  var valid_597056 = path.getOrDefault("subscriptionId")
+  valid_597056 = validateParameter(valid_597056, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "subscriptionId", valid_594023
-  var valid_594024 = path.getOrDefault("resourceName")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  if valid_597056 != nil:
+    section.add "subscriptionId", valid_597056
+  var valid_597057 = path.getOrDefault("resourceName")
+  valid_597057 = validateParameter(valid_597057, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "resourceName", valid_594024
+  if valid_597057 != nil:
+    section.add "resourceName", valid_597057
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -689,11 +689,11 @@ proc validate_WorkbooksDelete_594020(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594025 = query.getOrDefault("api-version")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_597058 = query.getOrDefault("api-version")
+  valid_597058 = validateParameter(valid_597058, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "api-version", valid_594025
+  if valid_597058 != nil:
+    section.add "api-version", valid_597058
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -702,20 +702,20 @@ proc validate_WorkbooksDelete_594020(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594026: Call_WorkbooksDelete_594019; path: JsonNode; query: JsonNode;
+proc call*(call_597059: Call_WorkbooksDelete_597052; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a workbook.
   ## 
-  let valid = call_594026.validator(path, query, header, formData, body)
-  let scheme = call_594026.pickScheme
+  let valid = call_597059.validator(path, query, header, formData, body)
+  let scheme = call_597059.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594026.url(scheme.get, call_594026.host, call_594026.base,
-                         call_594026.route, valid.getOrDefault("path"),
+  let url = call_597059.url(scheme.get, call_597059.host, call_597059.base,
+                         call_597059.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594026, url, valid)
+  result = hook(call_597059, url, valid)
 
-proc call*(call_594027: Call_WorkbooksDelete_594019; resourceGroupName: string;
+proc call*(call_597060: Call_WorkbooksDelete_597052; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
   ## workbooksDelete
   ## Delete a workbook.
@@ -727,17 +727,17 @@ proc call*(call_594027: Call_WorkbooksDelete_594019; resourceGroupName: string;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_594028 = newJObject()
-  var query_594029 = newJObject()
-  add(path_594028, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594029, "api-version", newJString(apiVersion))
-  add(path_594028, "subscriptionId", newJString(subscriptionId))
-  add(path_594028, "resourceName", newJString(resourceName))
-  result = call_594027.call(path_594028, query_594029, nil, nil, nil)
+  var path_597061 = newJObject()
+  var query_597062 = newJObject()
+  add(path_597061, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597062, "api-version", newJString(apiVersion))
+  add(path_597061, "subscriptionId", newJString(subscriptionId))
+  add(path_597061, "resourceName", newJString(resourceName))
+  result = call_597060.call(path_597061, query_597062, nil, nil, nil)
 
-var workbooksDelete* = Call_WorkbooksDelete_594019(name: "workbooksDelete",
+var workbooksDelete* = Call_WorkbooksDelete_597052(name: "workbooksDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroup/{resourceGroupName}/providers/microsoft.insights/workbooks/{resourceName}",
-    validator: validate_WorkbooksDelete_594020, base: "", url: url_WorkbooksDelete_594021,
+    validator: validate_WorkbooksDelete_597053, base: "", url: url_WorkbooksDelete_597054,
     schemes: {Scheme.Https})
 export
   rest

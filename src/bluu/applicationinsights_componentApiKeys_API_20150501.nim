@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_596458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "applicationinsights-componentApiKeys_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ApikeysGet_593647 = ref object of OpenApiRestCall_593425
-proc url_ApikeysGet_593649(protocol: Scheme; host: string; base: string; route: string;
+  Call_ApikeysGet_596680 = ref object of OpenApiRestCall_596458
+proc url_ApikeysGet_596682(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +129,7 @@ proc url_ApikeysGet_593649(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApikeysGet_593648(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApikeysGet_596681(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the API Key for this key id.
   ## 
@@ -146,26 +146,26 @@ proc validate_ApikeysGet_593648(path: JsonNode; query: JsonNode; header: JsonNod
   ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `keyId` field"
-  var valid_593822 = path.getOrDefault("keyId")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_596855 = path.getOrDefault("keyId")
+  valid_596855 = validateParameter(valid_596855, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "keyId", valid_593822
-  var valid_593823 = path.getOrDefault("resourceGroupName")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_596855 != nil:
+    section.add "keyId", valid_596855
+  var valid_596856 = path.getOrDefault("resourceGroupName")
+  valid_596856 = validateParameter(valid_596856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "resourceGroupName", valid_593823
-  var valid_593824 = path.getOrDefault("subscriptionId")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_596856 != nil:
+    section.add "resourceGroupName", valid_596856
+  var valid_596857 = path.getOrDefault("subscriptionId")
+  valid_596857 = validateParameter(valid_596857, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "subscriptionId", valid_593824
-  var valid_593825 = path.getOrDefault("resourceName")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_596857 != nil:
+    section.add "subscriptionId", valid_596857
+  var valid_596858 = path.getOrDefault("resourceName")
+  valid_596858 = validateParameter(valid_596858, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "resourceName", valid_593825
+  if valid_596858 != nil:
+    section.add "resourceName", valid_596858
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -173,11 +173,11 @@ proc validate_ApikeysGet_593648(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593826 = query.getOrDefault("api-version")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  var valid_596859 = query.getOrDefault("api-version")
+  valid_596859 = validateParameter(valid_596859, JString, required = true,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "api-version", valid_593826
+  if valid_596859 != nil:
+    section.add "api-version", valid_596859
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -186,20 +186,20 @@ proc validate_ApikeysGet_593648(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593849: Call_ApikeysGet_593647; path: JsonNode; query: JsonNode;
+proc call*(call_596882: Call_ApikeysGet_596680; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the API Key for this key id.
   ## 
-  let valid = call_593849.validator(path, query, header, formData, body)
-  let scheme = call_593849.pickScheme
+  let valid = call_596882.validator(path, query, header, formData, body)
+  let scheme = call_596882.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593849.url(scheme.get, call_593849.host, call_593849.base,
-                         call_593849.route, valid.getOrDefault("path"),
+  let url = call_596882.url(scheme.get, call_596882.host, call_596882.base,
+                         call_596882.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593849, url, valid)
+  result = hook(call_596882, url, valid)
 
-proc call*(call_593920: Call_ApikeysGet_593647; keyId: string;
+proc call*(call_596953: Call_ApikeysGet_596680; keyId: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## apikeysGet
@@ -214,24 +214,24 @@ proc call*(call_593920: Call_ApikeysGet_593647; keyId: string;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593921 = newJObject()
-  var query_593923 = newJObject()
-  add(path_593921, "keyId", newJString(keyId))
-  add(path_593921, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593923, "api-version", newJString(apiVersion))
-  add(path_593921, "subscriptionId", newJString(subscriptionId))
-  add(path_593921, "resourceName", newJString(resourceName))
-  result = call_593920.call(path_593921, query_593923, nil, nil, nil)
+  var path_596954 = newJObject()
+  var query_596956 = newJObject()
+  add(path_596954, "keyId", newJString(keyId))
+  add(path_596954, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596956, "api-version", newJString(apiVersion))
+  add(path_596954, "subscriptionId", newJString(subscriptionId))
+  add(path_596954, "resourceName", newJString(resourceName))
+  result = call_596953.call(path_596954, query_596956, nil, nil, nil)
 
-var apikeysGet* = Call_ApikeysGet_593647(name: "apikeysGet",
+var apikeysGet* = Call_ApikeysGet_596680(name: "apikeysGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/APIKeys/{keyId}",
-                                      validator: validate_ApikeysGet_593648,
-                                      base: "", url: url_ApikeysGet_593649,
+                                      validator: validate_ApikeysGet_596681,
+                                      base: "", url: url_ApikeysGet_596682,
                                       schemes: {Scheme.Https})
 type
-  Call_ApikeysDelete_593962 = ref object of OpenApiRestCall_593425
-proc url_ApikeysDelete_593964(protocol: Scheme; host: string; base: string;
+  Call_ApikeysDelete_596995 = ref object of OpenApiRestCall_596458
+proc url_ApikeysDelete_596997(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -256,7 +256,7 @@ proc url_ApikeysDelete_593964(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApikeysDelete_593963(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApikeysDelete_596996(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an API Key of an Application Insights component.
   ## 
@@ -273,26 +273,26 @@ proc validate_ApikeysDelete_593963(path: JsonNode; query: JsonNode; header: Json
   ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `keyId` field"
-  var valid_593965 = path.getOrDefault("keyId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_596998 = path.getOrDefault("keyId")
+  valid_596998 = validateParameter(valid_596998, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "keyId", valid_593965
-  var valid_593966 = path.getOrDefault("resourceGroupName")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_596998 != nil:
+    section.add "keyId", valid_596998
+  var valid_596999 = path.getOrDefault("resourceGroupName")
+  valid_596999 = validateParameter(valid_596999, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "resourceGroupName", valid_593966
-  var valid_593967 = path.getOrDefault("subscriptionId")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_596999 != nil:
+    section.add "resourceGroupName", valid_596999
+  var valid_597000 = path.getOrDefault("subscriptionId")
+  valid_597000 = validateParameter(valid_597000, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "subscriptionId", valid_593967
-  var valid_593968 = path.getOrDefault("resourceName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  if valid_597000 != nil:
+    section.add "subscriptionId", valid_597000
+  var valid_597001 = path.getOrDefault("resourceName")
+  valid_597001 = validateParameter(valid_597001, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "resourceName", valid_593968
+  if valid_597001 != nil:
+    section.add "resourceName", valid_597001
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -300,11 +300,11 @@ proc validate_ApikeysDelete_593963(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593969 = query.getOrDefault("api-version")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_597002 = query.getOrDefault("api-version")
+  valid_597002 = validateParameter(valid_597002, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "api-version", valid_593969
+  if valid_597002 != nil:
+    section.add "api-version", valid_597002
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -313,20 +313,20 @@ proc validate_ApikeysDelete_593963(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593970: Call_ApikeysDelete_593962; path: JsonNode; query: JsonNode;
+proc call*(call_597003: Call_ApikeysDelete_596995; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an API Key of an Application Insights component.
   ## 
-  let valid = call_593970.validator(path, query, header, formData, body)
-  let scheme = call_593970.pickScheme
+  let valid = call_597003.validator(path, query, header, formData, body)
+  let scheme = call_597003.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593970.url(scheme.get, call_593970.host, call_593970.base,
-                         call_593970.route, valid.getOrDefault("path"),
+  let url = call_597003.url(scheme.get, call_597003.host, call_597003.base,
+                         call_597003.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593970, url, valid)
+  result = hook(call_597003, url, valid)
 
-proc call*(call_593971: Call_ApikeysDelete_593962; keyId: string;
+proc call*(call_597004: Call_ApikeysDelete_596995; keyId: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## apikeysDelete
@@ -341,22 +341,22 @@ proc call*(call_593971: Call_ApikeysDelete_593962; keyId: string;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593972 = newJObject()
-  var query_593973 = newJObject()
-  add(path_593972, "keyId", newJString(keyId))
-  add(path_593972, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593973, "api-version", newJString(apiVersion))
-  add(path_593972, "subscriptionId", newJString(subscriptionId))
-  add(path_593972, "resourceName", newJString(resourceName))
-  result = call_593971.call(path_593972, query_593973, nil, nil, nil)
+  var path_597005 = newJObject()
+  var query_597006 = newJObject()
+  add(path_597005, "keyId", newJString(keyId))
+  add(path_597005, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597006, "api-version", newJString(apiVersion))
+  add(path_597005, "subscriptionId", newJString(subscriptionId))
+  add(path_597005, "resourceName", newJString(resourceName))
+  result = call_597004.call(path_597005, query_597006, nil, nil, nil)
 
-var apikeysDelete* = Call_ApikeysDelete_593962(name: "apikeysDelete",
+var apikeysDelete* = Call_ApikeysDelete_596995(name: "apikeysDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/APIKeys/{keyId}",
-    validator: validate_ApikeysDelete_593963, base: "", url: url_ApikeysDelete_593964,
+    validator: validate_ApikeysDelete_596996, base: "", url: url_ApikeysDelete_596997,
     schemes: {Scheme.Https})
 type
-  Call_ApikeysCreate_593985 = ref object of OpenApiRestCall_593425
-proc url_ApikeysCreate_593987(protocol: Scheme; host: string; base: string;
+  Call_ApikeysCreate_597018 = ref object of OpenApiRestCall_596458
+proc url_ApikeysCreate_597020(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -379,7 +379,7 @@ proc url_ApikeysCreate_593987(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApikeysCreate_593986(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApikeysCreate_597019(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Create an API Key of an Application Insights component.
   ## 
@@ -395,21 +395,21 @@ proc validate_ApikeysCreate_593986(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593988 = path.getOrDefault("resourceGroupName")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_597021 = path.getOrDefault("resourceGroupName")
+  valid_597021 = validateParameter(valid_597021, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "resourceGroupName", valid_593988
-  var valid_593989 = path.getOrDefault("subscriptionId")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_597021 != nil:
+    section.add "resourceGroupName", valid_597021
+  var valid_597022 = path.getOrDefault("subscriptionId")
+  valid_597022 = validateParameter(valid_597022, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "subscriptionId", valid_593989
-  var valid_593990 = path.getOrDefault("resourceName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  if valid_597022 != nil:
+    section.add "subscriptionId", valid_597022
+  var valid_597023 = path.getOrDefault("resourceName")
+  valid_597023 = validateParameter(valid_597023, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "resourceName", valid_593990
+  if valid_597023 != nil:
+    section.add "resourceName", valid_597023
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -417,11 +417,11 @@ proc validate_ApikeysCreate_593986(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593991 = query.getOrDefault("api-version")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_597024 = query.getOrDefault("api-version")
+  valid_597024 = validateParameter(valid_597024, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "api-version", valid_593991
+  if valid_597024 != nil:
+    section.add "api-version", valid_597024
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -435,20 +435,20 @@ proc validate_ApikeysCreate_593986(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593993: Call_ApikeysCreate_593985; path: JsonNode; query: JsonNode;
+proc call*(call_597026: Call_ApikeysCreate_597018; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create an API Key of an Application Insights component.
   ## 
-  let valid = call_593993.validator(path, query, header, formData, body)
-  let scheme = call_593993.pickScheme
+  let valid = call_597026.validator(path, query, header, formData, body)
+  let scheme = call_597026.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593993.url(scheme.get, call_593993.host, call_593993.base,
-                         call_593993.route, valid.getOrDefault("path"),
+  let url = call_597026.url(scheme.get, call_597026.host, call_597026.base,
+                         call_597026.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593993, url, valid)
+  result = hook(call_597026, url, valid)
 
-proc call*(call_593994: Call_ApikeysCreate_593985; resourceGroupName: string;
+proc call*(call_597027: Call_ApikeysCreate_597018; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string;
           APIKeyProperties: JsonNode): Recallable =
   ## apikeysCreate
@@ -463,24 +463,24 @@ proc call*(call_593994: Call_ApikeysCreate_593985; resourceGroupName: string;
   ##               : The name of the Application Insights component resource.
   ##   APIKeyProperties: JObject (required)
   ##                   : Properties that need to be specified to create an API key of a Application Insights component.
-  var path_593995 = newJObject()
-  var query_593996 = newJObject()
-  var body_593997 = newJObject()
-  add(path_593995, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593996, "api-version", newJString(apiVersion))
-  add(path_593995, "subscriptionId", newJString(subscriptionId))
-  add(path_593995, "resourceName", newJString(resourceName))
+  var path_597028 = newJObject()
+  var query_597029 = newJObject()
+  var body_597030 = newJObject()
+  add(path_597028, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597029, "api-version", newJString(apiVersion))
+  add(path_597028, "subscriptionId", newJString(subscriptionId))
+  add(path_597028, "resourceName", newJString(resourceName))
   if APIKeyProperties != nil:
-    body_593997 = APIKeyProperties
-  result = call_593994.call(path_593995, query_593996, nil, nil, body_593997)
+    body_597030 = APIKeyProperties
+  result = call_597027.call(path_597028, query_597029, nil, nil, body_597030)
 
-var apikeysCreate* = Call_ApikeysCreate_593985(name: "apikeysCreate",
+var apikeysCreate* = Call_ApikeysCreate_597018(name: "apikeysCreate",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/ApiKeys",
-    validator: validate_ApikeysCreate_593986, base: "", url: url_ApikeysCreate_593987,
+    validator: validate_ApikeysCreate_597019, base: "", url: url_ApikeysCreate_597020,
     schemes: {Scheme.Https})
 type
-  Call_ApikeysList_593974 = ref object of OpenApiRestCall_593425
-proc url_ApikeysList_593976(protocol: Scheme; host: string; base: string;
+  Call_ApikeysList_597007 = ref object of OpenApiRestCall_596458
+proc url_ApikeysList_597009(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -503,7 +503,7 @@ proc url_ApikeysList_593976(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApikeysList_593975(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApikeysList_597008(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of API keys of an Application Insights component.
   ## 
@@ -519,21 +519,21 @@ proc validate_ApikeysList_593975(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593977 = path.getOrDefault("resourceGroupName")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  var valid_597010 = path.getOrDefault("resourceGroupName")
+  valid_597010 = validateParameter(valid_597010, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "resourceGroupName", valid_593977
-  var valid_593978 = path.getOrDefault("subscriptionId")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  if valid_597010 != nil:
+    section.add "resourceGroupName", valid_597010
+  var valid_597011 = path.getOrDefault("subscriptionId")
+  valid_597011 = validateParameter(valid_597011, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "subscriptionId", valid_593978
-  var valid_593979 = path.getOrDefault("resourceName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_597011 != nil:
+    section.add "subscriptionId", valid_597011
+  var valid_597012 = path.getOrDefault("resourceName")
+  valid_597012 = validateParameter(valid_597012, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "resourceName", valid_593979
+  if valid_597012 != nil:
+    section.add "resourceName", valid_597012
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -541,11 +541,11 @@ proc validate_ApikeysList_593975(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593980 = query.getOrDefault("api-version")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_597013 = query.getOrDefault("api-version")
+  valid_597013 = validateParameter(valid_597013, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "api-version", valid_593980
+  if valid_597013 != nil:
+    section.add "api-version", valid_597013
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -554,20 +554,20 @@ proc validate_ApikeysList_593975(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593981: Call_ApikeysList_593974; path: JsonNode; query: JsonNode;
+proc call*(call_597014: Call_ApikeysList_597007; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of API keys of an Application Insights component.
   ## 
-  let valid = call_593981.validator(path, query, header, formData, body)
-  let scheme = call_593981.pickScheme
+  let valid = call_597014.validator(path, query, header, formData, body)
+  let scheme = call_597014.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593981.url(scheme.get, call_593981.host, call_593981.base,
-                         call_593981.route, valid.getOrDefault("path"),
+  let url = call_597014.url(scheme.get, call_597014.host, call_597014.base,
+                         call_597014.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593981, url, valid)
+  result = hook(call_597014, url, valid)
 
-proc call*(call_593982: Call_ApikeysList_593974; resourceGroupName: string;
+proc call*(call_597015: Call_ApikeysList_597007; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
   ## apikeysList
   ## Gets a list of API keys of an Application Insights component.
@@ -579,19 +579,19 @@ proc call*(call_593982: Call_ApikeysList_593974; resourceGroupName: string;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593983 = newJObject()
-  var query_593984 = newJObject()
-  add(path_593983, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593984, "api-version", newJString(apiVersion))
-  add(path_593983, "subscriptionId", newJString(subscriptionId))
-  add(path_593983, "resourceName", newJString(resourceName))
-  result = call_593982.call(path_593983, query_593984, nil, nil, nil)
+  var path_597016 = newJObject()
+  var query_597017 = newJObject()
+  add(path_597016, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597017, "api-version", newJString(apiVersion))
+  add(path_597016, "subscriptionId", newJString(subscriptionId))
+  add(path_597016, "resourceName", newJString(resourceName))
+  result = call_597015.call(path_597016, query_597017, nil, nil, nil)
 
-var apikeysList* = Call_ApikeysList_593974(name: "apikeysList",
+var apikeysList* = Call_ApikeysList_597007(name: "apikeysList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/ApiKeys",
-                                        validator: validate_ApikeysList_593975,
-                                        base: "", url: url_ApikeysList_593976,
+                                        validator: validate_ApikeysList_597008,
+                                        base: "", url: url_ApikeysList_597009,
                                         schemes: {Scheme.Https})
 export
   rest

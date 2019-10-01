@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Service Map
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593437 = ref object of OpenApiRestCall
+  OpenApiRestCall_567666 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593437](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567666](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593437): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567666): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "service-map-arm-service-map"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ClientGroupsGet_593659 = ref object of OpenApiRestCall_593437
-proc url_ClientGroupsGet_593661(protocol: Scheme; host: string; base: string;
+  Call_ClientGroupsGet_567888 = ref object of OpenApiRestCall_567666
+proc url_ClientGroupsGet_567890(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,7 +130,7 @@ proc url_ClientGroupsGet_593661(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClientGroupsGet_593660(path: JsonNode; query: JsonNode;
+proc validate_ClientGroupsGet_567889(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Retrieves the specified client group
@@ -149,26 +149,26 @@ proc validate_ClientGroupsGet_593660(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593834 = path.getOrDefault("resourceGroupName")
-  valid_593834 = validateParameter(valid_593834, JString, required = true,
+  var valid_568063 = path.getOrDefault("resourceGroupName")
+  valid_568063 = validateParameter(valid_568063, JString, required = true,
                                  default = nil)
-  if valid_593834 != nil:
-    section.add "resourceGroupName", valid_593834
-  var valid_593835 = path.getOrDefault("subscriptionId")
-  valid_593835 = validateParameter(valid_593835, JString, required = true,
+  if valid_568063 != nil:
+    section.add "resourceGroupName", valid_568063
+  var valid_568064 = path.getOrDefault("subscriptionId")
+  valid_568064 = validateParameter(valid_568064, JString, required = true,
                                  default = nil)
-  if valid_593835 != nil:
-    section.add "subscriptionId", valid_593835
-  var valid_593836 = path.getOrDefault("workspaceName")
-  valid_593836 = validateParameter(valid_593836, JString, required = true,
+  if valid_568064 != nil:
+    section.add "subscriptionId", valid_568064
+  var valid_568065 = path.getOrDefault("workspaceName")
+  valid_568065 = validateParameter(valid_568065, JString, required = true,
                                  default = nil)
-  if valid_593836 != nil:
-    section.add "workspaceName", valid_593836
-  var valid_593837 = path.getOrDefault("clientGroupName")
-  valid_593837 = validateParameter(valid_593837, JString, required = true,
+  if valid_568065 != nil:
+    section.add "workspaceName", valid_568065
+  var valid_568066 = path.getOrDefault("clientGroupName")
+  valid_568066 = validateParameter(valid_568066, JString, required = true,
                                  default = nil)
-  if valid_593837 != nil:
-    section.add "clientGroupName", valid_593837
+  if valid_568066 != nil:
+    section.add "clientGroupName", valid_568066
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -180,21 +180,21 @@ proc validate_ClientGroupsGet_593660(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593838 = query.getOrDefault("api-version")
-  valid_593838 = validateParameter(valid_593838, JString, required = true,
+  var valid_568067 = query.getOrDefault("api-version")
+  valid_568067 = validateParameter(valid_568067, JString, required = true,
                                  default = nil)
-  if valid_593838 != nil:
-    section.add "api-version", valid_593838
-  var valid_593839 = query.getOrDefault("endTime")
-  valid_593839 = validateParameter(valid_593839, JString, required = false,
+  if valid_568067 != nil:
+    section.add "api-version", valid_568067
+  var valid_568068 = query.getOrDefault("endTime")
+  valid_568068 = validateParameter(valid_568068, JString, required = false,
                                  default = nil)
-  if valid_593839 != nil:
-    section.add "endTime", valid_593839
-  var valid_593840 = query.getOrDefault("startTime")
-  valid_593840 = validateParameter(valid_593840, JString, required = false,
+  if valid_568068 != nil:
+    section.add "endTime", valid_568068
+  var valid_568069 = query.getOrDefault("startTime")
+  valid_568069 = validateParameter(valid_568069, JString, required = false,
                                  default = nil)
-  if valid_593840 != nil:
-    section.add "startTime", valid_593840
+  if valid_568069 != nil:
+    section.add "startTime", valid_568069
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -203,20 +203,20 @@ proc validate_ClientGroupsGet_593660(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593863: Call_ClientGroupsGet_593659; path: JsonNode; query: JsonNode;
+proc call*(call_568092: Call_ClientGroupsGet_567888; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified client group
   ## 
-  let valid = call_593863.validator(path, query, header, formData, body)
-  let scheme = call_593863.pickScheme
+  let valid = call_568092.validator(path, query, header, formData, body)
+  let scheme = call_568092.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593863.url(scheme.get, call_593863.host, call_593863.base,
-                         call_593863.route, valid.getOrDefault("path"),
+  let url = call_568092.url(scheme.get, call_568092.host, call_568092.base,
+                         call_568092.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593863, url, valid)
+  result = hook(call_568092, url, valid)
 
-proc call*(call_593934: Call_ClientGroupsGet_593659; resourceGroupName: string;
+proc call*(call_568163: Call_ClientGroupsGet_567888; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; workspaceName: string;
           clientGroupName: string; endTime: string = ""; startTime: string = ""): Recallable =
   ## clientGroupsGet
@@ -235,24 +235,24 @@ proc call*(call_593934: Call_ClientGroupsGet_593659; resourceGroupName: string;
   ##                : OMS workspace containing the resources of interest.
   ##   clientGroupName: string (required)
   ##                  : Client Group resource name.
-  var path_593935 = newJObject()
-  var query_593937 = newJObject()
-  add(path_593935, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593937, "api-version", newJString(apiVersion))
-  add(path_593935, "subscriptionId", newJString(subscriptionId))
-  add(query_593937, "endTime", newJString(endTime))
-  add(query_593937, "startTime", newJString(startTime))
-  add(path_593935, "workspaceName", newJString(workspaceName))
-  add(path_593935, "clientGroupName", newJString(clientGroupName))
-  result = call_593934.call(path_593935, query_593937, nil, nil, nil)
+  var path_568164 = newJObject()
+  var query_568166 = newJObject()
+  add(path_568164, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568166, "api-version", newJString(apiVersion))
+  add(path_568164, "subscriptionId", newJString(subscriptionId))
+  add(query_568166, "endTime", newJString(endTime))
+  add(query_568166, "startTime", newJString(startTime))
+  add(path_568164, "workspaceName", newJString(workspaceName))
+  add(path_568164, "clientGroupName", newJString(clientGroupName))
+  result = call_568163.call(path_568164, query_568166, nil, nil, nil)
 
-var clientGroupsGet* = Call_ClientGroupsGet_593659(name: "clientGroupsGet",
+var clientGroupsGet* = Call_ClientGroupsGet_567888(name: "clientGroupsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/clientGroups/{clientGroupName}",
-    validator: validate_ClientGroupsGet_593660, base: "", url: url_ClientGroupsGet_593661,
+    validator: validate_ClientGroupsGet_567889, base: "", url: url_ClientGroupsGet_567890,
     schemes: {Scheme.Https})
 type
-  Call_ClientGroupsListMembers_593976 = ref object of OpenApiRestCall_593437
-proc url_ClientGroupsListMembers_593978(protocol: Scheme; host: string; base: string;
+  Call_ClientGroupsListMembers_568205 = ref object of OpenApiRestCall_567666
+proc url_ClientGroupsListMembers_568207(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -280,7 +280,7 @@ proc url_ClientGroupsListMembers_593978(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClientGroupsListMembers_593977(path: JsonNode; query: JsonNode;
+proc validate_ClientGroupsListMembers_568206(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the members of the client group during the specified time interval.
   ## 
@@ -298,26 +298,26 @@ proc validate_ClientGroupsListMembers_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593980 = path.getOrDefault("resourceGroupName")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_568209 = path.getOrDefault("resourceGroupName")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "resourceGroupName", valid_593980
-  var valid_593981 = path.getOrDefault("subscriptionId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_568209 != nil:
+    section.add "resourceGroupName", valid_568209
+  var valid_568210 = path.getOrDefault("subscriptionId")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "subscriptionId", valid_593981
-  var valid_593982 = path.getOrDefault("workspaceName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568210 != nil:
+    section.add "subscriptionId", valid_568210
+  var valid_568211 = path.getOrDefault("workspaceName")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "workspaceName", valid_593982
-  var valid_593983 = path.getOrDefault("clientGroupName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_568211 != nil:
+    section.add "workspaceName", valid_568211
+  var valid_568212 = path.getOrDefault("clientGroupName")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "clientGroupName", valid_593983
+  if valid_568212 != nil:
+    section.add "clientGroupName", valid_568212
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -331,25 +331,25 @@ proc validate_ClientGroupsListMembers_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593984 = query.getOrDefault("api-version")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568213 = query.getOrDefault("api-version")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "api-version", valid_593984
-  var valid_593985 = query.getOrDefault("endTime")
-  valid_593985 = validateParameter(valid_593985, JString, required = false,
+  if valid_568213 != nil:
+    section.add "api-version", valid_568213
+  var valid_568214 = query.getOrDefault("endTime")
+  valid_568214 = validateParameter(valid_568214, JString, required = false,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "endTime", valid_593985
-  var valid_593986 = query.getOrDefault("$top")
-  valid_593986 = validateParameter(valid_593986, JInt, required = false, default = nil)
-  if valid_593986 != nil:
-    section.add "$top", valid_593986
-  var valid_593987 = query.getOrDefault("startTime")
-  valid_593987 = validateParameter(valid_593987, JString, required = false,
+  if valid_568214 != nil:
+    section.add "endTime", valid_568214
+  var valid_568215 = query.getOrDefault("$top")
+  valid_568215 = validateParameter(valid_568215, JInt, required = false, default = nil)
+  if valid_568215 != nil:
+    section.add "$top", valid_568215
+  var valid_568216 = query.getOrDefault("startTime")
+  valid_568216 = validateParameter(valid_568216, JString, required = false,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "startTime", valid_593987
+  if valid_568216 != nil:
+    section.add "startTime", valid_568216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -358,20 +358,20 @@ proc validate_ClientGroupsListMembers_593977(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593988: Call_ClientGroupsListMembers_593976; path: JsonNode;
+proc call*(call_568217: Call_ClientGroupsListMembers_568205; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the members of the client group during the specified time interval.
   ## 
-  let valid = call_593988.validator(path, query, header, formData, body)
-  let scheme = call_593988.pickScheme
+  let valid = call_568217.validator(path, query, header, formData, body)
+  let scheme = call_568217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593988.url(scheme.get, call_593988.host, call_593988.base,
-                         call_593988.route, valid.getOrDefault("path"),
+  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
+                         call_568217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593988, url, valid)
+  result = hook(call_568217, url, valid)
 
-proc call*(call_593989: Call_ClientGroupsListMembers_593976;
+proc call*(call_568218: Call_ClientGroupsListMembers_568205;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           workspaceName: string; clientGroupName: string; endTime: string = "";
           Top: int = 0; startTime: string = ""): Recallable =
@@ -393,26 +393,26 @@ proc call*(call_593989: Call_ClientGroupsListMembers_593976;
   ##                : OMS workspace containing the resources of interest.
   ##   clientGroupName: string (required)
   ##                  : Client Group resource name.
-  var path_593990 = newJObject()
-  var query_593991 = newJObject()
-  add(path_593990, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593991, "api-version", newJString(apiVersion))
-  add(path_593990, "subscriptionId", newJString(subscriptionId))
-  add(query_593991, "endTime", newJString(endTime))
-  add(query_593991, "$top", newJInt(Top))
-  add(query_593991, "startTime", newJString(startTime))
-  add(path_593990, "workspaceName", newJString(workspaceName))
-  add(path_593990, "clientGroupName", newJString(clientGroupName))
-  result = call_593989.call(path_593990, query_593991, nil, nil, nil)
+  var path_568219 = newJObject()
+  var query_568220 = newJObject()
+  add(path_568219, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568220, "api-version", newJString(apiVersion))
+  add(path_568219, "subscriptionId", newJString(subscriptionId))
+  add(query_568220, "endTime", newJString(endTime))
+  add(query_568220, "$top", newJInt(Top))
+  add(query_568220, "startTime", newJString(startTime))
+  add(path_568219, "workspaceName", newJString(workspaceName))
+  add(path_568219, "clientGroupName", newJString(clientGroupName))
+  result = call_568218.call(path_568219, query_568220, nil, nil, nil)
 
-var clientGroupsListMembers* = Call_ClientGroupsListMembers_593976(
+var clientGroupsListMembers* = Call_ClientGroupsListMembers_568205(
     name: "clientGroupsListMembers", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/clientGroups/{clientGroupName}/members",
-    validator: validate_ClientGroupsListMembers_593977, base: "",
-    url: url_ClientGroupsListMembers_593978, schemes: {Scheme.Https})
+    validator: validate_ClientGroupsListMembers_568206, base: "",
+    url: url_ClientGroupsListMembers_568207, schemes: {Scheme.Https})
 type
-  Call_ClientGroupsGetMembersCount_593992 = ref object of OpenApiRestCall_593437
-proc url_ClientGroupsGetMembersCount_593994(protocol: Scheme; host: string;
+  Call_ClientGroupsGetMembersCount_568221 = ref object of OpenApiRestCall_567666
+proc url_ClientGroupsGetMembersCount_568223(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -439,7 +439,7 @@ proc url_ClientGroupsGetMembersCount_593994(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClientGroupsGetMembersCount_593993(path: JsonNode; query: JsonNode;
+proc validate_ClientGroupsGetMembersCount_568222(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the approximate number of members in the client group.
   ## 
@@ -457,26 +457,26 @@ proc validate_ClientGroupsGetMembersCount_593993(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593995 = path.getOrDefault("resourceGroupName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_568224 = path.getOrDefault("resourceGroupName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "resourceGroupName", valid_593995
-  var valid_593996 = path.getOrDefault("subscriptionId")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_568224 != nil:
+    section.add "resourceGroupName", valid_568224
+  var valid_568225 = path.getOrDefault("subscriptionId")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "subscriptionId", valid_593996
-  var valid_593997 = path.getOrDefault("workspaceName")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  if valid_568225 != nil:
+    section.add "subscriptionId", valid_568225
+  var valid_568226 = path.getOrDefault("workspaceName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "workspaceName", valid_593997
-  var valid_593998 = path.getOrDefault("clientGroupName")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  if valid_568226 != nil:
+    section.add "workspaceName", valid_568226
+  var valid_568227 = path.getOrDefault("clientGroupName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "clientGroupName", valid_593998
+  if valid_568227 != nil:
+    section.add "clientGroupName", valid_568227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -488,21 +488,21 @@ proc validate_ClientGroupsGetMembersCount_593993(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593999 = query.getOrDefault("api-version")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  var valid_568228 = query.getOrDefault("api-version")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "api-version", valid_593999
-  var valid_594000 = query.getOrDefault("endTime")
-  valid_594000 = validateParameter(valid_594000, JString, required = false,
+  if valid_568228 != nil:
+    section.add "api-version", valid_568228
+  var valid_568229 = query.getOrDefault("endTime")
+  valid_568229 = validateParameter(valid_568229, JString, required = false,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "endTime", valid_594000
-  var valid_594001 = query.getOrDefault("startTime")
-  valid_594001 = validateParameter(valid_594001, JString, required = false,
+  if valid_568229 != nil:
+    section.add "endTime", valid_568229
+  var valid_568230 = query.getOrDefault("startTime")
+  valid_568230 = validateParameter(valid_568230, JString, required = false,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "startTime", valid_594001
+  if valid_568230 != nil:
+    section.add "startTime", valid_568230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -511,20 +511,20 @@ proc validate_ClientGroupsGetMembersCount_593993(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594002: Call_ClientGroupsGetMembersCount_593992; path: JsonNode;
+proc call*(call_568231: Call_ClientGroupsGetMembersCount_568221; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the approximate number of members in the client group.
   ## 
-  let valid = call_594002.validator(path, query, header, formData, body)
-  let scheme = call_594002.pickScheme
+  let valid = call_568231.validator(path, query, header, formData, body)
+  let scheme = call_568231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594002.url(scheme.get, call_594002.host, call_594002.base,
-                         call_594002.route, valid.getOrDefault("path"),
+  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
+                         call_568231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594002, url, valid)
+  result = hook(call_568231, url, valid)
 
-proc call*(call_594003: Call_ClientGroupsGetMembersCount_593992;
+proc call*(call_568232: Call_ClientGroupsGetMembersCount_568221;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           workspaceName: string; clientGroupName: string; endTime: string = "";
           startTime: string = ""): Recallable =
@@ -544,25 +544,25 @@ proc call*(call_594003: Call_ClientGroupsGetMembersCount_593992;
   ##                : OMS workspace containing the resources of interest.
   ##   clientGroupName: string (required)
   ##                  : Client Group resource name.
-  var path_594004 = newJObject()
-  var query_594005 = newJObject()
-  add(path_594004, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594005, "api-version", newJString(apiVersion))
-  add(path_594004, "subscriptionId", newJString(subscriptionId))
-  add(query_594005, "endTime", newJString(endTime))
-  add(query_594005, "startTime", newJString(startTime))
-  add(path_594004, "workspaceName", newJString(workspaceName))
-  add(path_594004, "clientGroupName", newJString(clientGroupName))
-  result = call_594003.call(path_594004, query_594005, nil, nil, nil)
+  var path_568233 = newJObject()
+  var query_568234 = newJObject()
+  add(path_568233, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568234, "api-version", newJString(apiVersion))
+  add(path_568233, "subscriptionId", newJString(subscriptionId))
+  add(query_568234, "endTime", newJString(endTime))
+  add(query_568234, "startTime", newJString(startTime))
+  add(path_568233, "workspaceName", newJString(workspaceName))
+  add(path_568233, "clientGroupName", newJString(clientGroupName))
+  result = call_568232.call(path_568233, query_568234, nil, nil, nil)
 
-var clientGroupsGetMembersCount* = Call_ClientGroupsGetMembersCount_593992(
+var clientGroupsGetMembersCount* = Call_ClientGroupsGetMembersCount_568221(
     name: "clientGroupsGetMembersCount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/clientGroups/{clientGroupName}/membersCount",
-    validator: validate_ClientGroupsGetMembersCount_593993, base: "",
-    url: url_ClientGroupsGetMembersCount_593994, schemes: {Scheme.Https})
+    validator: validate_ClientGroupsGetMembersCount_568222, base: "",
+    url: url_ClientGroupsGetMembersCount_568223, schemes: {Scheme.Https})
 type
-  Call_MapsGenerate_594006 = ref object of OpenApiRestCall_593437
-proc url_MapsGenerate_594008(protocol: Scheme; host: string; base: string;
+  Call_MapsGenerate_568235 = ref object of OpenApiRestCall_567666
+proc url_MapsGenerate_568237(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -586,7 +586,7 @@ proc url_MapsGenerate_594008(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MapsGenerate_594007(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_MapsGenerate_568236(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Generates the specified map.
   ## 
@@ -602,21 +602,21 @@ proc validate_MapsGenerate_594007(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594009 = path.getOrDefault("resourceGroupName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_568238 = path.getOrDefault("resourceGroupName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "resourceGroupName", valid_594009
-  var valid_594010 = path.getOrDefault("subscriptionId")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  if valid_568238 != nil:
+    section.add "resourceGroupName", valid_568238
+  var valid_568239 = path.getOrDefault("subscriptionId")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "subscriptionId", valid_594010
-  var valid_594011 = path.getOrDefault("workspaceName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  if valid_568239 != nil:
+    section.add "subscriptionId", valid_568239
+  var valid_568240 = path.getOrDefault("workspaceName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "workspaceName", valid_594011
+  if valid_568240 != nil:
+    section.add "workspaceName", valid_568240
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -624,11 +624,11 @@ proc validate_MapsGenerate_594007(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594012 = query.getOrDefault("api-version")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  var valid_568241 = query.getOrDefault("api-version")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "api-version", valid_594012
+  if valid_568241 != nil:
+    section.add "api-version", valid_568241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -642,20 +642,20 @@ proc validate_MapsGenerate_594007(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594014: Call_MapsGenerate_594006; path: JsonNode; query: JsonNode;
+proc call*(call_568243: Call_MapsGenerate_568235; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Generates the specified map.
   ## 
-  let valid = call_594014.validator(path, query, header, formData, body)
-  let scheme = call_594014.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594014.url(scheme.get, call_594014.host, call_594014.base,
-                         call_594014.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594014, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594015: Call_MapsGenerate_594006; resourceGroupName: string;
+proc call*(call_568244: Call_MapsGenerate_568235; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; request: JsonNode;
           workspaceName: string): Recallable =
   ## mapsGenerate
@@ -670,24 +670,24 @@ proc call*(call_594015: Call_MapsGenerate_594006; resourceGroupName: string;
   ##          : Request options.
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594016 = newJObject()
-  var query_594017 = newJObject()
-  var body_594018 = newJObject()
-  add(path_594016, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594017, "api-version", newJString(apiVersion))
-  add(path_594016, "subscriptionId", newJString(subscriptionId))
+  var path_568245 = newJObject()
+  var query_568246 = newJObject()
+  var body_568247 = newJObject()
+  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568246, "api-version", newJString(apiVersion))
+  add(path_568245, "subscriptionId", newJString(subscriptionId))
   if request != nil:
-    body_594018 = request
-  add(path_594016, "workspaceName", newJString(workspaceName))
-  result = call_594015.call(path_594016, query_594017, nil, nil, body_594018)
+    body_568247 = request
+  add(path_568245, "workspaceName", newJString(workspaceName))
+  result = call_568244.call(path_568245, query_568246, nil, nil, body_568247)
 
-var mapsGenerate* = Call_MapsGenerate_594006(name: "mapsGenerate",
+var mapsGenerate* = Call_MapsGenerate_568235(name: "mapsGenerate",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/generateMap",
-    validator: validate_MapsGenerate_594007, base: "", url: url_MapsGenerate_594008,
+    validator: validate_MapsGenerate_568236, base: "", url: url_MapsGenerate_568237,
     schemes: {Scheme.Https})
 type
-  Call_MachineGroupsCreate_594032 = ref object of OpenApiRestCall_593437
-proc url_MachineGroupsCreate_594034(protocol: Scheme; host: string; base: string;
+  Call_MachineGroupsCreate_568261 = ref object of OpenApiRestCall_567666
+proc url_MachineGroupsCreate_568263(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -711,7 +711,7 @@ proc url_MachineGroupsCreate_594034(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineGroupsCreate_594033(path: JsonNode; query: JsonNode;
+proc validate_MachineGroupsCreate_568262(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Creates a new machine group.
@@ -728,21 +728,21 @@ proc validate_MachineGroupsCreate_594033(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594062 = path.getOrDefault("resourceGroupName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  var valid_568291 = path.getOrDefault("resourceGroupName")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "resourceGroupName", valid_594062
-  var valid_594063 = path.getOrDefault("subscriptionId")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  if valid_568291 != nil:
+    section.add "resourceGroupName", valid_568291
+  var valid_568292 = path.getOrDefault("subscriptionId")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "subscriptionId", valid_594063
-  var valid_594064 = path.getOrDefault("workspaceName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_568292 != nil:
+    section.add "subscriptionId", valid_568292
+  var valid_568293 = path.getOrDefault("workspaceName")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "workspaceName", valid_594064
+  if valid_568293 != nil:
+    section.add "workspaceName", valid_568293
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -750,11 +750,11 @@ proc validate_MachineGroupsCreate_594033(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594065 = query.getOrDefault("api-version")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  var valid_568294 = query.getOrDefault("api-version")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "api-version", valid_594065
+  if valid_568294 != nil:
+    section.add "api-version", valid_568294
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -768,20 +768,20 @@ proc validate_MachineGroupsCreate_594033(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594067: Call_MachineGroupsCreate_594032; path: JsonNode;
+proc call*(call_568296: Call_MachineGroupsCreate_568261; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new machine group.
   ## 
-  let valid = call_594067.validator(path, query, header, formData, body)
-  let scheme = call_594067.pickScheme
+  let valid = call_568296.validator(path, query, header, formData, body)
+  let scheme = call_568296.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594067.url(scheme.get, call_594067.host, call_594067.base,
-                         call_594067.route, valid.getOrDefault("path"),
+  let url = call_568296.url(scheme.get, call_568296.host, call_568296.base,
+                         call_568296.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594067, url, valid)
+  result = hook(call_568296, url, valid)
 
-proc call*(call_594068: Call_MachineGroupsCreate_594032; resourceGroupName: string;
+proc call*(call_568297: Call_MachineGroupsCreate_568261; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; workspaceName: string;
           machineGroup: JsonNode): Recallable =
   ## machineGroupsCreate
@@ -796,25 +796,25 @@ proc call*(call_594068: Call_MachineGroupsCreate_594032; resourceGroupName: stri
   ##                : OMS workspace containing the resources of interest.
   ##   machineGroup: JObject (required)
   ##               : Machine Group resource to create.
-  var path_594069 = newJObject()
-  var query_594070 = newJObject()
-  var body_594071 = newJObject()
-  add(path_594069, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594070, "api-version", newJString(apiVersion))
-  add(path_594069, "subscriptionId", newJString(subscriptionId))
-  add(path_594069, "workspaceName", newJString(workspaceName))
+  var path_568298 = newJObject()
+  var query_568299 = newJObject()
+  var body_568300 = newJObject()
+  add(path_568298, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568299, "api-version", newJString(apiVersion))
+  add(path_568298, "subscriptionId", newJString(subscriptionId))
+  add(path_568298, "workspaceName", newJString(workspaceName))
   if machineGroup != nil:
-    body_594071 = machineGroup
-  result = call_594068.call(path_594069, query_594070, nil, nil, body_594071)
+    body_568300 = machineGroup
+  result = call_568297.call(path_568298, query_568299, nil, nil, body_568300)
 
-var machineGroupsCreate* = Call_MachineGroupsCreate_594032(
+var machineGroupsCreate* = Call_MachineGroupsCreate_568261(
     name: "machineGroupsCreate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machineGroups",
-    validator: validate_MachineGroupsCreate_594033, base: "",
-    url: url_MachineGroupsCreate_594034, schemes: {Scheme.Https})
+    validator: validate_MachineGroupsCreate_568262, base: "",
+    url: url_MachineGroupsCreate_568263, schemes: {Scheme.Https})
 type
-  Call_MachineGroupsListByWorkspace_594019 = ref object of OpenApiRestCall_593437
-proc url_MachineGroupsListByWorkspace_594021(protocol: Scheme; host: string;
+  Call_MachineGroupsListByWorkspace_568248 = ref object of OpenApiRestCall_567666
+proc url_MachineGroupsListByWorkspace_568250(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -838,7 +838,7 @@ proc url_MachineGroupsListByWorkspace_594021(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineGroupsListByWorkspace_594020(path: JsonNode; query: JsonNode;
+proc validate_MachineGroupsListByWorkspace_568249(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all machine groups during the specified time interval.
   ## 
@@ -854,21 +854,21 @@ proc validate_MachineGroupsListByWorkspace_594020(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594022 = path.getOrDefault("resourceGroupName")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  var valid_568251 = path.getOrDefault("resourceGroupName")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "resourceGroupName", valid_594022
-  var valid_594023 = path.getOrDefault("subscriptionId")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  if valid_568251 != nil:
+    section.add "resourceGroupName", valid_568251
+  var valid_568252 = path.getOrDefault("subscriptionId")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "subscriptionId", valid_594023
-  var valid_594024 = path.getOrDefault("workspaceName")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  if valid_568252 != nil:
+    section.add "subscriptionId", valid_568252
+  var valid_568253 = path.getOrDefault("workspaceName")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "workspaceName", valid_594024
+  if valid_568253 != nil:
+    section.add "workspaceName", valid_568253
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -880,21 +880,21 @@ proc validate_MachineGroupsListByWorkspace_594020(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594025 = query.getOrDefault("api-version")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_568254 = query.getOrDefault("api-version")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "api-version", valid_594025
-  var valid_594026 = query.getOrDefault("endTime")
-  valid_594026 = validateParameter(valid_594026, JString, required = false,
+  if valid_568254 != nil:
+    section.add "api-version", valid_568254
+  var valid_568255 = query.getOrDefault("endTime")
+  valid_568255 = validateParameter(valid_568255, JString, required = false,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "endTime", valid_594026
-  var valid_594027 = query.getOrDefault("startTime")
-  valid_594027 = validateParameter(valid_594027, JString, required = false,
+  if valid_568255 != nil:
+    section.add "endTime", valid_568255
+  var valid_568256 = query.getOrDefault("startTime")
+  valid_568256 = validateParameter(valid_568256, JString, required = false,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "startTime", valid_594027
+  if valid_568256 != nil:
+    section.add "startTime", valid_568256
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -903,20 +903,20 @@ proc validate_MachineGroupsListByWorkspace_594020(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594028: Call_MachineGroupsListByWorkspace_594019; path: JsonNode;
+proc call*(call_568257: Call_MachineGroupsListByWorkspace_568248; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns all machine groups during the specified time interval.
   ## 
-  let valid = call_594028.validator(path, query, header, formData, body)
-  let scheme = call_594028.pickScheme
+  let valid = call_568257.validator(path, query, header, formData, body)
+  let scheme = call_568257.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594028.url(scheme.get, call_594028.host, call_594028.base,
-                         call_594028.route, valid.getOrDefault("path"),
+  let url = call_568257.url(scheme.get, call_568257.host, call_568257.base,
+                         call_568257.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594028, url, valid)
+  result = hook(call_568257, url, valid)
 
-proc call*(call_594029: Call_MachineGroupsListByWorkspace_594019;
+proc call*(call_568258: Call_MachineGroupsListByWorkspace_568248;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           workspaceName: string; endTime: string = ""; startTime: string = ""): Recallable =
   ## machineGroupsListByWorkspace
@@ -933,24 +933,24 @@ proc call*(call_594029: Call_MachineGroupsListByWorkspace_594019;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594030 = newJObject()
-  var query_594031 = newJObject()
-  add(path_594030, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594031, "api-version", newJString(apiVersion))
-  add(path_594030, "subscriptionId", newJString(subscriptionId))
-  add(query_594031, "endTime", newJString(endTime))
-  add(query_594031, "startTime", newJString(startTime))
-  add(path_594030, "workspaceName", newJString(workspaceName))
-  result = call_594029.call(path_594030, query_594031, nil, nil, nil)
+  var path_568259 = newJObject()
+  var query_568260 = newJObject()
+  add(path_568259, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568260, "api-version", newJString(apiVersion))
+  add(path_568259, "subscriptionId", newJString(subscriptionId))
+  add(query_568260, "endTime", newJString(endTime))
+  add(query_568260, "startTime", newJString(startTime))
+  add(path_568259, "workspaceName", newJString(workspaceName))
+  result = call_568258.call(path_568259, query_568260, nil, nil, nil)
 
-var machineGroupsListByWorkspace* = Call_MachineGroupsListByWorkspace_594019(
+var machineGroupsListByWorkspace* = Call_MachineGroupsListByWorkspace_568248(
     name: "machineGroupsListByWorkspace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machineGroups",
-    validator: validate_MachineGroupsListByWorkspace_594020, base: "",
-    url: url_MachineGroupsListByWorkspace_594021, schemes: {Scheme.Https})
+    validator: validate_MachineGroupsListByWorkspace_568249, base: "",
+    url: url_MachineGroupsListByWorkspace_568250, schemes: {Scheme.Https})
 type
-  Call_MachineGroupsUpdate_594086 = ref object of OpenApiRestCall_593437
-proc url_MachineGroupsUpdate_594088(protocol: Scheme; host: string; base: string;
+  Call_MachineGroupsUpdate_568315 = ref object of OpenApiRestCall_567666
+proc url_MachineGroupsUpdate_568317(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -977,7 +977,7 @@ proc url_MachineGroupsUpdate_594088(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineGroupsUpdate_594087(path: JsonNode; query: JsonNode;
+proc validate_MachineGroupsUpdate_568316(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Updates a machine group.
@@ -996,26 +996,26 @@ proc validate_MachineGroupsUpdate_594087(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594089 = path.getOrDefault("resourceGroupName")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_568318 = path.getOrDefault("resourceGroupName")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "resourceGroupName", valid_594089
-  var valid_594090 = path.getOrDefault("subscriptionId")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  if valid_568318 != nil:
+    section.add "resourceGroupName", valid_568318
+  var valid_568319 = path.getOrDefault("subscriptionId")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "subscriptionId", valid_594090
-  var valid_594091 = path.getOrDefault("machineGroupName")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  if valid_568319 != nil:
+    section.add "subscriptionId", valid_568319
+  var valid_568320 = path.getOrDefault("machineGroupName")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "machineGroupName", valid_594091
-  var valid_594092 = path.getOrDefault("workspaceName")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  if valid_568320 != nil:
+    section.add "machineGroupName", valid_568320
+  var valid_568321 = path.getOrDefault("workspaceName")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "workspaceName", valid_594092
+  if valid_568321 != nil:
+    section.add "workspaceName", valid_568321
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1023,11 +1023,11 @@ proc validate_MachineGroupsUpdate_594087(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594093 = query.getOrDefault("api-version")
-  valid_594093 = validateParameter(valid_594093, JString, required = true,
+  var valid_568322 = query.getOrDefault("api-version")
+  valid_568322 = validateParameter(valid_568322, JString, required = true,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "api-version", valid_594093
+  if valid_568322 != nil:
+    section.add "api-version", valid_568322
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1041,20 +1041,20 @@ proc validate_MachineGroupsUpdate_594087(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594095: Call_MachineGroupsUpdate_594086; path: JsonNode;
+proc call*(call_568324: Call_MachineGroupsUpdate_568315; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a machine group.
   ## 
-  let valid = call_594095.validator(path, query, header, formData, body)
-  let scheme = call_594095.pickScheme
+  let valid = call_568324.validator(path, query, header, formData, body)
+  let scheme = call_568324.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594095.url(scheme.get, call_594095.host, call_594095.base,
-                         call_594095.route, valid.getOrDefault("path"),
+  let url = call_568324.url(scheme.get, call_568324.host, call_568324.base,
+                         call_568324.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594095, url, valid)
+  result = hook(call_568324, url, valid)
 
-proc call*(call_594096: Call_MachineGroupsUpdate_594086; resourceGroupName: string;
+proc call*(call_568325: Call_MachineGroupsUpdate_568315; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; machineGroupName: string;
           workspaceName: string; machineGroup: JsonNode): Recallable =
   ## machineGroupsUpdate
@@ -1071,26 +1071,26 @@ proc call*(call_594096: Call_MachineGroupsUpdate_594086; resourceGroupName: stri
   ##                : OMS workspace containing the resources of interest.
   ##   machineGroup: JObject (required)
   ##               : Machine Group resource to update.
-  var path_594097 = newJObject()
-  var query_594098 = newJObject()
-  var body_594099 = newJObject()
-  add(path_594097, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594098, "api-version", newJString(apiVersion))
-  add(path_594097, "subscriptionId", newJString(subscriptionId))
-  add(path_594097, "machineGroupName", newJString(machineGroupName))
-  add(path_594097, "workspaceName", newJString(workspaceName))
+  var path_568326 = newJObject()
+  var query_568327 = newJObject()
+  var body_568328 = newJObject()
+  add(path_568326, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568327, "api-version", newJString(apiVersion))
+  add(path_568326, "subscriptionId", newJString(subscriptionId))
+  add(path_568326, "machineGroupName", newJString(machineGroupName))
+  add(path_568326, "workspaceName", newJString(workspaceName))
   if machineGroup != nil:
-    body_594099 = machineGroup
-  result = call_594096.call(path_594097, query_594098, nil, nil, body_594099)
+    body_568328 = machineGroup
+  result = call_568325.call(path_568326, query_568327, nil, nil, body_568328)
 
-var machineGroupsUpdate* = Call_MachineGroupsUpdate_594086(
+var machineGroupsUpdate* = Call_MachineGroupsUpdate_568315(
     name: "machineGroupsUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machineGroups/{machineGroupName}",
-    validator: validate_MachineGroupsUpdate_594087, base: "",
-    url: url_MachineGroupsUpdate_594088, schemes: {Scheme.Https})
+    validator: validate_MachineGroupsUpdate_568316, base: "",
+    url: url_MachineGroupsUpdate_568317, schemes: {Scheme.Https})
 type
-  Call_MachineGroupsGet_594072 = ref object of OpenApiRestCall_593437
-proc url_MachineGroupsGet_594074(protocol: Scheme; host: string; base: string;
+  Call_MachineGroupsGet_568301 = ref object of OpenApiRestCall_567666
+proc url_MachineGroupsGet_568303(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1117,7 +1117,7 @@ proc url_MachineGroupsGet_594074(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineGroupsGet_594073(path: JsonNode; query: JsonNode;
+proc validate_MachineGroupsGet_568302(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Returns the specified machine group as it existed during the specified time interval.
@@ -1136,26 +1136,26 @@ proc validate_MachineGroupsGet_594073(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594075 = path.getOrDefault("resourceGroupName")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  var valid_568304 = path.getOrDefault("resourceGroupName")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "resourceGroupName", valid_594075
-  var valid_594076 = path.getOrDefault("subscriptionId")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  if valid_568304 != nil:
+    section.add "resourceGroupName", valid_568304
+  var valid_568305 = path.getOrDefault("subscriptionId")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "subscriptionId", valid_594076
-  var valid_594077 = path.getOrDefault("machineGroupName")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  if valid_568305 != nil:
+    section.add "subscriptionId", valid_568305
+  var valid_568306 = path.getOrDefault("machineGroupName")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "machineGroupName", valid_594077
-  var valid_594078 = path.getOrDefault("workspaceName")
-  valid_594078 = validateParameter(valid_594078, JString, required = true,
+  if valid_568306 != nil:
+    section.add "machineGroupName", valid_568306
+  var valid_568307 = path.getOrDefault("workspaceName")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "workspaceName", valid_594078
+  if valid_568307 != nil:
+    section.add "workspaceName", valid_568307
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1167,21 +1167,21 @@ proc validate_MachineGroupsGet_594073(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594079 = query.getOrDefault("api-version")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+  var valid_568308 = query.getOrDefault("api-version")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "api-version", valid_594079
-  var valid_594080 = query.getOrDefault("endTime")
-  valid_594080 = validateParameter(valid_594080, JString, required = false,
+  if valid_568308 != nil:
+    section.add "api-version", valid_568308
+  var valid_568309 = query.getOrDefault("endTime")
+  valid_568309 = validateParameter(valid_568309, JString, required = false,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "endTime", valid_594080
-  var valid_594081 = query.getOrDefault("startTime")
-  valid_594081 = validateParameter(valid_594081, JString, required = false,
+  if valid_568309 != nil:
+    section.add "endTime", valid_568309
+  var valid_568310 = query.getOrDefault("startTime")
+  valid_568310 = validateParameter(valid_568310, JString, required = false,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "startTime", valid_594081
+  if valid_568310 != nil:
+    section.add "startTime", valid_568310
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1190,20 +1190,20 @@ proc validate_MachineGroupsGet_594073(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594082: Call_MachineGroupsGet_594072; path: JsonNode;
+proc call*(call_568311: Call_MachineGroupsGet_568301; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the specified machine group as it existed during the specified time interval.
   ## 
-  let valid = call_594082.validator(path, query, header, formData, body)
-  let scheme = call_594082.pickScheme
+  let valid = call_568311.validator(path, query, header, formData, body)
+  let scheme = call_568311.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594082.url(scheme.get, call_594082.host, call_594082.base,
-                         call_594082.route, valid.getOrDefault("path"),
+  let url = call_568311.url(scheme.get, call_568311.host, call_568311.base,
+                         call_568311.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594082, url, valid)
+  result = hook(call_568311, url, valid)
 
-proc call*(call_594083: Call_MachineGroupsGet_594072; resourceGroupName: string;
+proc call*(call_568312: Call_MachineGroupsGet_568301; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; machineGroupName: string;
           workspaceName: string; endTime: string = ""; startTime: string = ""): Recallable =
   ## machineGroupsGet
@@ -1222,24 +1222,24 @@ proc call*(call_594083: Call_MachineGroupsGet_594072; resourceGroupName: string;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594084 = newJObject()
-  var query_594085 = newJObject()
-  add(path_594084, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594085, "api-version", newJString(apiVersion))
-  add(path_594084, "subscriptionId", newJString(subscriptionId))
-  add(query_594085, "endTime", newJString(endTime))
-  add(path_594084, "machineGroupName", newJString(machineGroupName))
-  add(query_594085, "startTime", newJString(startTime))
-  add(path_594084, "workspaceName", newJString(workspaceName))
-  result = call_594083.call(path_594084, query_594085, nil, nil, nil)
+  var path_568313 = newJObject()
+  var query_568314 = newJObject()
+  add(path_568313, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568314, "api-version", newJString(apiVersion))
+  add(path_568313, "subscriptionId", newJString(subscriptionId))
+  add(query_568314, "endTime", newJString(endTime))
+  add(path_568313, "machineGroupName", newJString(machineGroupName))
+  add(query_568314, "startTime", newJString(startTime))
+  add(path_568313, "workspaceName", newJString(workspaceName))
+  result = call_568312.call(path_568313, query_568314, nil, nil, nil)
 
-var machineGroupsGet* = Call_MachineGroupsGet_594072(name: "machineGroupsGet",
+var machineGroupsGet* = Call_MachineGroupsGet_568301(name: "machineGroupsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machineGroups/{machineGroupName}",
-    validator: validate_MachineGroupsGet_594073, base: "",
-    url: url_MachineGroupsGet_594074, schemes: {Scheme.Https})
+    validator: validate_MachineGroupsGet_568302, base: "",
+    url: url_MachineGroupsGet_568303, schemes: {Scheme.Https})
 type
-  Call_MachineGroupsDelete_594100 = ref object of OpenApiRestCall_593437
-proc url_MachineGroupsDelete_594102(protocol: Scheme; host: string; base: string;
+  Call_MachineGroupsDelete_568329 = ref object of OpenApiRestCall_567666
+proc url_MachineGroupsDelete_568331(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1266,7 +1266,7 @@ proc url_MachineGroupsDelete_594102(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineGroupsDelete_594101(path: JsonNode; query: JsonNode;
+proc validate_MachineGroupsDelete_568330(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes the specified Machine Group.
@@ -1285,26 +1285,26 @@ proc validate_MachineGroupsDelete_594101(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594103 = path.getOrDefault("resourceGroupName")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  var valid_568332 = path.getOrDefault("resourceGroupName")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "resourceGroupName", valid_594103
-  var valid_594104 = path.getOrDefault("subscriptionId")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  if valid_568332 != nil:
+    section.add "resourceGroupName", valid_568332
+  var valid_568333 = path.getOrDefault("subscriptionId")
+  valid_568333 = validateParameter(valid_568333, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "subscriptionId", valid_594104
-  var valid_594105 = path.getOrDefault("machineGroupName")
-  valid_594105 = validateParameter(valid_594105, JString, required = true,
+  if valid_568333 != nil:
+    section.add "subscriptionId", valid_568333
+  var valid_568334 = path.getOrDefault("machineGroupName")
+  valid_568334 = validateParameter(valid_568334, JString, required = true,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "machineGroupName", valid_594105
-  var valid_594106 = path.getOrDefault("workspaceName")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  if valid_568334 != nil:
+    section.add "machineGroupName", valid_568334
+  var valid_568335 = path.getOrDefault("workspaceName")
+  valid_568335 = validateParameter(valid_568335, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "workspaceName", valid_594106
+  if valid_568335 != nil:
+    section.add "workspaceName", valid_568335
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1312,11 +1312,11 @@ proc validate_MachineGroupsDelete_594101(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594107 = query.getOrDefault("api-version")
-  valid_594107 = validateParameter(valid_594107, JString, required = true,
+  var valid_568336 = query.getOrDefault("api-version")
+  valid_568336 = validateParameter(valid_568336, JString, required = true,
                                  default = nil)
-  if valid_594107 != nil:
-    section.add "api-version", valid_594107
+  if valid_568336 != nil:
+    section.add "api-version", valid_568336
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1325,20 +1325,20 @@ proc validate_MachineGroupsDelete_594101(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594108: Call_MachineGroupsDelete_594100; path: JsonNode;
+proc call*(call_568337: Call_MachineGroupsDelete_568329; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Machine Group.
   ## 
-  let valid = call_594108.validator(path, query, header, formData, body)
-  let scheme = call_594108.pickScheme
+  let valid = call_568337.validator(path, query, header, formData, body)
+  let scheme = call_568337.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594108.url(scheme.get, call_594108.host, call_594108.base,
-                         call_594108.route, valid.getOrDefault("path"),
+  let url = call_568337.url(scheme.get, call_568337.host, call_568337.base,
+                         call_568337.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594108, url, valid)
+  result = hook(call_568337, url, valid)
 
-proc call*(call_594109: Call_MachineGroupsDelete_594100; resourceGroupName: string;
+proc call*(call_568338: Call_MachineGroupsDelete_568329; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; machineGroupName: string;
           workspaceName: string): Recallable =
   ## machineGroupsDelete
@@ -1353,23 +1353,23 @@ proc call*(call_594109: Call_MachineGroupsDelete_594100; resourceGroupName: stri
   ##                   : Machine Group resource name.
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594110 = newJObject()
-  var query_594111 = newJObject()
-  add(path_594110, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594111, "api-version", newJString(apiVersion))
-  add(path_594110, "subscriptionId", newJString(subscriptionId))
-  add(path_594110, "machineGroupName", newJString(machineGroupName))
-  add(path_594110, "workspaceName", newJString(workspaceName))
-  result = call_594109.call(path_594110, query_594111, nil, nil, nil)
+  var path_568339 = newJObject()
+  var query_568340 = newJObject()
+  add(path_568339, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568340, "api-version", newJString(apiVersion))
+  add(path_568339, "subscriptionId", newJString(subscriptionId))
+  add(path_568339, "machineGroupName", newJString(machineGroupName))
+  add(path_568339, "workspaceName", newJString(workspaceName))
+  result = call_568338.call(path_568339, query_568340, nil, nil, nil)
 
-var machineGroupsDelete* = Call_MachineGroupsDelete_594100(
+var machineGroupsDelete* = Call_MachineGroupsDelete_568329(
     name: "machineGroupsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machineGroups/{machineGroupName}",
-    validator: validate_MachineGroupsDelete_594101, base: "",
-    url: url_MachineGroupsDelete_594102, schemes: {Scheme.Https})
+    validator: validate_MachineGroupsDelete_568330, base: "",
+    url: url_MachineGroupsDelete_568331, schemes: {Scheme.Https})
 type
-  Call_MachinesListByWorkspace_594112 = ref object of OpenApiRestCall_593437
-proc url_MachinesListByWorkspace_594114(protocol: Scheme; host: string; base: string;
+  Call_MachinesListByWorkspace_568341 = ref object of OpenApiRestCall_567666
+proc url_MachinesListByWorkspace_568343(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1394,7 +1394,7 @@ proc url_MachinesListByWorkspace_594114(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachinesListByWorkspace_594113(path: JsonNode; query: JsonNode;
+proc validate_MachinesListByWorkspace_568342(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a collection of machines matching the specified conditions.  The returned collection represents either machines that are active/live during the specified interval  of time (`live=true` and `startTime`/`endTime` are specified) or that are known to have existed at or  some time prior to the specified point in time (`live=false` and `timestamp` is specified).
   ## 
@@ -1410,21 +1410,21 @@ proc validate_MachinesListByWorkspace_594113(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594115 = path.getOrDefault("resourceGroupName")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  var valid_568344 = path.getOrDefault("resourceGroupName")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "resourceGroupName", valid_594115
-  var valid_594116 = path.getOrDefault("subscriptionId")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_568344 != nil:
+    section.add "resourceGroupName", valid_568344
+  var valid_568345 = path.getOrDefault("subscriptionId")
+  valid_568345 = validateParameter(valid_568345, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "subscriptionId", valid_594116
-  var valid_594117 = path.getOrDefault("workspaceName")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  if valid_568345 != nil:
+    section.add "subscriptionId", valid_568345
+  var valid_568346 = path.getOrDefault("workspaceName")
+  valid_568346 = validateParameter(valid_568346, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "workspaceName", valid_594117
+  if valid_568346 != nil:
+    section.add "workspaceName", valid_568346
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1442,35 +1442,35 @@ proc validate_MachinesListByWorkspace_594113(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594118 = query.getOrDefault("api-version")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  var valid_568347 = query.getOrDefault("api-version")
+  valid_568347 = validateParameter(valid_568347, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "api-version", valid_594118
-  var valid_594132 = query.getOrDefault("live")
-  valid_594132 = validateParameter(valid_594132, JBool, required = false,
+  if valid_568347 != nil:
+    section.add "api-version", valid_568347
+  var valid_568361 = query.getOrDefault("live")
+  valid_568361 = validateParameter(valid_568361, JBool, required = false,
                                  default = newJBool(true))
-  if valid_594132 != nil:
-    section.add "live", valid_594132
-  var valid_594133 = query.getOrDefault("endTime")
-  valid_594133 = validateParameter(valid_594133, JString, required = false,
+  if valid_568361 != nil:
+    section.add "live", valid_568361
+  var valid_568362 = query.getOrDefault("endTime")
+  valid_568362 = validateParameter(valid_568362, JString, required = false,
                                  default = nil)
-  if valid_594133 != nil:
-    section.add "endTime", valid_594133
-  var valid_594134 = query.getOrDefault("$top")
-  valid_594134 = validateParameter(valid_594134, JInt, required = false, default = nil)
-  if valid_594134 != nil:
-    section.add "$top", valid_594134
-  var valid_594135 = query.getOrDefault("timestamp")
-  valid_594135 = validateParameter(valid_594135, JString, required = false,
+  if valid_568362 != nil:
+    section.add "endTime", valid_568362
+  var valid_568363 = query.getOrDefault("$top")
+  valid_568363 = validateParameter(valid_568363, JInt, required = false, default = nil)
+  if valid_568363 != nil:
+    section.add "$top", valid_568363
+  var valid_568364 = query.getOrDefault("timestamp")
+  valid_568364 = validateParameter(valid_568364, JString, required = false,
                                  default = nil)
-  if valid_594135 != nil:
-    section.add "timestamp", valid_594135
-  var valid_594136 = query.getOrDefault("startTime")
-  valid_594136 = validateParameter(valid_594136, JString, required = false,
+  if valid_568364 != nil:
+    section.add "timestamp", valid_568364
+  var valid_568365 = query.getOrDefault("startTime")
+  valid_568365 = validateParameter(valid_568365, JString, required = false,
                                  default = nil)
-  if valid_594136 != nil:
-    section.add "startTime", valid_594136
+  if valid_568365 != nil:
+    section.add "startTime", valid_568365
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1479,20 +1479,20 @@ proc validate_MachinesListByWorkspace_594113(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594137: Call_MachinesListByWorkspace_594112; path: JsonNode;
+proc call*(call_568366: Call_MachinesListByWorkspace_568341; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a collection of machines matching the specified conditions.  The returned collection represents either machines that are active/live during the specified interval  of time (`live=true` and `startTime`/`endTime` are specified) or that are known to have existed at or  some time prior to the specified point in time (`live=false` and `timestamp` is specified).
   ## 
-  let valid = call_594137.validator(path, query, header, formData, body)
-  let scheme = call_594137.pickScheme
+  let valid = call_568366.validator(path, query, header, formData, body)
+  let scheme = call_568366.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594137.url(scheme.get, call_594137.host, call_594137.base,
-                         call_594137.route, valid.getOrDefault("path"),
+  let url = call_568366.url(scheme.get, call_568366.host, call_568366.base,
+                         call_568366.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594137, url, valid)
+  result = hook(call_568366, url, valid)
 
-proc call*(call_594138: Call_MachinesListByWorkspace_594112;
+proc call*(call_568367: Call_MachinesListByWorkspace_568341;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           workspaceName: string; live: bool = true; endTime: string = ""; Top: int = 0;
           timestamp: string = ""; startTime: string = ""): Recallable =
@@ -1516,27 +1516,27 @@ proc call*(call_594138: Call_MachinesListByWorkspace_594112;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594139 = newJObject()
-  var query_594140 = newJObject()
-  add(path_594139, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594140, "api-version", newJString(apiVersion))
-  add(path_594139, "subscriptionId", newJString(subscriptionId))
-  add(query_594140, "live", newJBool(live))
-  add(query_594140, "endTime", newJString(endTime))
-  add(query_594140, "$top", newJInt(Top))
-  add(query_594140, "timestamp", newJString(timestamp))
-  add(query_594140, "startTime", newJString(startTime))
-  add(path_594139, "workspaceName", newJString(workspaceName))
-  result = call_594138.call(path_594139, query_594140, nil, nil, nil)
+  var path_568368 = newJObject()
+  var query_568369 = newJObject()
+  add(path_568368, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568369, "api-version", newJString(apiVersion))
+  add(path_568368, "subscriptionId", newJString(subscriptionId))
+  add(query_568369, "live", newJBool(live))
+  add(query_568369, "endTime", newJString(endTime))
+  add(query_568369, "$top", newJInt(Top))
+  add(query_568369, "timestamp", newJString(timestamp))
+  add(query_568369, "startTime", newJString(startTime))
+  add(path_568368, "workspaceName", newJString(workspaceName))
+  result = call_568367.call(path_568368, query_568369, nil, nil, nil)
 
-var machinesListByWorkspace* = Call_MachinesListByWorkspace_594112(
+var machinesListByWorkspace* = Call_MachinesListByWorkspace_568341(
     name: "machinesListByWorkspace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines",
-    validator: validate_MachinesListByWorkspace_594113, base: "",
-    url: url_MachinesListByWorkspace_594114, schemes: {Scheme.Https})
+    validator: validate_MachinesListByWorkspace_568342, base: "",
+    url: url_MachinesListByWorkspace_568343, schemes: {Scheme.Https})
 type
-  Call_MachinesGet_594141 = ref object of OpenApiRestCall_593437
-proc url_MachinesGet_594143(protocol: Scheme; host: string; base: string;
+  Call_MachinesGet_568370 = ref object of OpenApiRestCall_567666
+proc url_MachinesGet_568372(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1562,7 +1562,7 @@ proc url_MachinesGet_594143(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachinesGet_594142(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_MachinesGet_568371(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the specified machine.
   ## 
@@ -1580,26 +1580,26 @@ proc validate_MachinesGet_594142(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594144 = path.getOrDefault("resourceGroupName")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  var valid_568373 = path.getOrDefault("resourceGroupName")
+  valid_568373 = validateParameter(valid_568373, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "resourceGroupName", valid_594144
-  var valid_594145 = path.getOrDefault("machineName")
-  valid_594145 = validateParameter(valid_594145, JString, required = true,
+  if valid_568373 != nil:
+    section.add "resourceGroupName", valid_568373
+  var valid_568374 = path.getOrDefault("machineName")
+  valid_568374 = validateParameter(valid_568374, JString, required = true,
                                  default = nil)
-  if valid_594145 != nil:
-    section.add "machineName", valid_594145
-  var valid_594146 = path.getOrDefault("subscriptionId")
-  valid_594146 = validateParameter(valid_594146, JString, required = true,
+  if valid_568374 != nil:
+    section.add "machineName", valid_568374
+  var valid_568375 = path.getOrDefault("subscriptionId")
+  valid_568375 = validateParameter(valid_568375, JString, required = true,
                                  default = nil)
-  if valid_594146 != nil:
-    section.add "subscriptionId", valid_594146
-  var valid_594147 = path.getOrDefault("workspaceName")
-  valid_594147 = validateParameter(valid_594147, JString, required = true,
+  if valid_568375 != nil:
+    section.add "subscriptionId", valid_568375
+  var valid_568376 = path.getOrDefault("workspaceName")
+  valid_568376 = validateParameter(valid_568376, JString, required = true,
                                  default = nil)
-  if valid_594147 != nil:
-    section.add "workspaceName", valid_594147
+  if valid_568376 != nil:
+    section.add "workspaceName", valid_568376
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1609,16 +1609,16 @@ proc validate_MachinesGet_594142(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594148 = query.getOrDefault("api-version")
-  valid_594148 = validateParameter(valid_594148, JString, required = true,
+  var valid_568377 = query.getOrDefault("api-version")
+  valid_568377 = validateParameter(valid_568377, JString, required = true,
                                  default = nil)
-  if valid_594148 != nil:
-    section.add "api-version", valid_594148
-  var valid_594149 = query.getOrDefault("timestamp")
-  valid_594149 = validateParameter(valid_594149, JString, required = false,
+  if valid_568377 != nil:
+    section.add "api-version", valid_568377
+  var valid_568378 = query.getOrDefault("timestamp")
+  valid_568378 = validateParameter(valid_568378, JString, required = false,
                                  default = nil)
-  if valid_594149 != nil:
-    section.add "timestamp", valid_594149
+  if valid_568378 != nil:
+    section.add "timestamp", valid_568378
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1627,20 +1627,20 @@ proc validate_MachinesGet_594142(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594150: Call_MachinesGet_594141; path: JsonNode; query: JsonNode;
+proc call*(call_568379: Call_MachinesGet_568370; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the specified machine.
   ## 
-  let valid = call_594150.validator(path, query, header, formData, body)
-  let scheme = call_594150.pickScheme
+  let valid = call_568379.validator(path, query, header, formData, body)
+  let scheme = call_568379.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594150.url(scheme.get, call_594150.host, call_594150.base,
-                         call_594150.route, valid.getOrDefault("path"),
+  let url = call_568379.url(scheme.get, call_568379.host, call_568379.base,
+                         call_568379.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594150, url, valid)
+  result = hook(call_568379, url, valid)
 
-proc call*(call_594151: Call_MachinesGet_594141; resourceGroupName: string;
+proc call*(call_568380: Call_MachinesGet_568370; resourceGroupName: string;
           apiVersion: string; machineName: string; subscriptionId: string;
           workspaceName: string; timestamp: string = ""): Recallable =
   ## machinesGet
@@ -1657,25 +1657,25 @@ proc call*(call_594151: Call_MachinesGet_594141; resourceGroupName: string;
   ##            : UTC date and time specifying a time instance relative to which to evaluate the machine resource. When not specified, the service uses DateTime.UtcNow.
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594152 = newJObject()
-  var query_594153 = newJObject()
-  add(path_594152, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594153, "api-version", newJString(apiVersion))
-  add(path_594152, "machineName", newJString(machineName))
-  add(path_594152, "subscriptionId", newJString(subscriptionId))
-  add(query_594153, "timestamp", newJString(timestamp))
-  add(path_594152, "workspaceName", newJString(workspaceName))
-  result = call_594151.call(path_594152, query_594153, nil, nil, nil)
+  var path_568381 = newJObject()
+  var query_568382 = newJObject()
+  add(path_568381, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568382, "api-version", newJString(apiVersion))
+  add(path_568381, "machineName", newJString(machineName))
+  add(path_568381, "subscriptionId", newJString(subscriptionId))
+  add(query_568382, "timestamp", newJString(timestamp))
+  add(path_568381, "workspaceName", newJString(workspaceName))
+  result = call_568380.call(path_568381, query_568382, nil, nil, nil)
 
-var machinesGet* = Call_MachinesGet_594141(name: "machinesGet",
+var machinesGet* = Call_MachinesGet_568370(name: "machinesGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}",
-                                        validator: validate_MachinesGet_594142,
-                                        base: "", url: url_MachinesGet_594143,
+                                        validator: validate_MachinesGet_568371,
+                                        base: "", url: url_MachinesGet_568372,
                                         schemes: {Scheme.Https})
 type
-  Call_MachinesListConnections_594154 = ref object of OpenApiRestCall_593437
-proc url_MachinesListConnections_594156(protocol: Scheme; host: string; base: string;
+  Call_MachinesListConnections_568383 = ref object of OpenApiRestCall_567666
+proc url_MachinesListConnections_568385(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1703,7 +1703,7 @@ proc url_MachinesListConnections_594156(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachinesListConnections_594155(path: JsonNode; query: JsonNode;
+proc validate_MachinesListConnections_568384(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a collection of connections terminating or originating at the specified machine
   ## 
@@ -1721,26 +1721,26 @@ proc validate_MachinesListConnections_594155(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594157 = path.getOrDefault("resourceGroupName")
-  valid_594157 = validateParameter(valid_594157, JString, required = true,
+  var valid_568386 = path.getOrDefault("resourceGroupName")
+  valid_568386 = validateParameter(valid_568386, JString, required = true,
                                  default = nil)
-  if valid_594157 != nil:
-    section.add "resourceGroupName", valid_594157
-  var valid_594158 = path.getOrDefault("machineName")
-  valid_594158 = validateParameter(valid_594158, JString, required = true,
+  if valid_568386 != nil:
+    section.add "resourceGroupName", valid_568386
+  var valid_568387 = path.getOrDefault("machineName")
+  valid_568387 = validateParameter(valid_568387, JString, required = true,
                                  default = nil)
-  if valid_594158 != nil:
-    section.add "machineName", valid_594158
-  var valid_594159 = path.getOrDefault("subscriptionId")
-  valid_594159 = validateParameter(valid_594159, JString, required = true,
+  if valid_568387 != nil:
+    section.add "machineName", valid_568387
+  var valid_568388 = path.getOrDefault("subscriptionId")
+  valid_568388 = validateParameter(valid_568388, JString, required = true,
                                  default = nil)
-  if valid_594159 != nil:
-    section.add "subscriptionId", valid_594159
-  var valid_594160 = path.getOrDefault("workspaceName")
-  valid_594160 = validateParameter(valid_594160, JString, required = true,
+  if valid_568388 != nil:
+    section.add "subscriptionId", valid_568388
+  var valid_568389 = path.getOrDefault("workspaceName")
+  valid_568389 = validateParameter(valid_568389, JString, required = true,
                                  default = nil)
-  if valid_594160 != nil:
-    section.add "workspaceName", valid_594160
+  if valid_568389 != nil:
+    section.add "workspaceName", valid_568389
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1752,21 +1752,21 @@ proc validate_MachinesListConnections_594155(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594161 = query.getOrDefault("api-version")
-  valid_594161 = validateParameter(valid_594161, JString, required = true,
+  var valid_568390 = query.getOrDefault("api-version")
+  valid_568390 = validateParameter(valid_568390, JString, required = true,
                                  default = nil)
-  if valid_594161 != nil:
-    section.add "api-version", valid_594161
-  var valid_594162 = query.getOrDefault("endTime")
-  valid_594162 = validateParameter(valid_594162, JString, required = false,
+  if valid_568390 != nil:
+    section.add "api-version", valid_568390
+  var valid_568391 = query.getOrDefault("endTime")
+  valid_568391 = validateParameter(valid_568391, JString, required = false,
                                  default = nil)
-  if valid_594162 != nil:
-    section.add "endTime", valid_594162
-  var valid_594163 = query.getOrDefault("startTime")
-  valid_594163 = validateParameter(valid_594163, JString, required = false,
+  if valid_568391 != nil:
+    section.add "endTime", valid_568391
+  var valid_568392 = query.getOrDefault("startTime")
+  valid_568392 = validateParameter(valid_568392, JString, required = false,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "startTime", valid_594163
+  if valid_568392 != nil:
+    section.add "startTime", valid_568392
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1775,20 +1775,20 @@ proc validate_MachinesListConnections_594155(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594164: Call_MachinesListConnections_594154; path: JsonNode;
+proc call*(call_568393: Call_MachinesListConnections_568383; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a collection of connections terminating or originating at the specified machine
   ## 
-  let valid = call_594164.validator(path, query, header, formData, body)
-  let scheme = call_594164.pickScheme
+  let valid = call_568393.validator(path, query, header, formData, body)
+  let scheme = call_568393.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594164.url(scheme.get, call_594164.host, call_594164.base,
-                         call_594164.route, valid.getOrDefault("path"),
+  let url = call_568393.url(scheme.get, call_568393.host, call_568393.base,
+                         call_568393.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594164, url, valid)
+  result = hook(call_568393, url, valid)
 
-proc call*(call_594165: Call_MachinesListConnections_594154;
+proc call*(call_568394: Call_MachinesListConnections_568383;
           resourceGroupName: string; apiVersion: string; machineName: string;
           subscriptionId: string; workspaceName: string; endTime: string = "";
           startTime: string = ""): Recallable =
@@ -1808,25 +1808,25 @@ proc call*(call_594165: Call_MachinesListConnections_594154;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594166 = newJObject()
-  var query_594167 = newJObject()
-  add(path_594166, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594167, "api-version", newJString(apiVersion))
-  add(path_594166, "machineName", newJString(machineName))
-  add(path_594166, "subscriptionId", newJString(subscriptionId))
-  add(query_594167, "endTime", newJString(endTime))
-  add(query_594167, "startTime", newJString(startTime))
-  add(path_594166, "workspaceName", newJString(workspaceName))
-  result = call_594165.call(path_594166, query_594167, nil, nil, nil)
+  var path_568395 = newJObject()
+  var query_568396 = newJObject()
+  add(path_568395, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568396, "api-version", newJString(apiVersion))
+  add(path_568395, "machineName", newJString(machineName))
+  add(path_568395, "subscriptionId", newJString(subscriptionId))
+  add(query_568396, "endTime", newJString(endTime))
+  add(query_568396, "startTime", newJString(startTime))
+  add(path_568395, "workspaceName", newJString(workspaceName))
+  result = call_568394.call(path_568395, query_568396, nil, nil, nil)
 
-var machinesListConnections* = Call_MachinesListConnections_594154(
+var machinesListConnections* = Call_MachinesListConnections_568383(
     name: "machinesListConnections", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/connections",
-    validator: validate_MachinesListConnections_594155, base: "",
-    url: url_MachinesListConnections_594156, schemes: {Scheme.Https})
+    validator: validate_MachinesListConnections_568384, base: "",
+    url: url_MachinesListConnections_568385, schemes: {Scheme.Https})
 type
-  Call_MachinesGetLiveness_594168 = ref object of OpenApiRestCall_593437
-proc url_MachinesGetLiveness_594170(protocol: Scheme; host: string; base: string;
+  Call_MachinesGetLiveness_568397 = ref object of OpenApiRestCall_567666
+proc url_MachinesGetLiveness_568399(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1853,7 +1853,7 @@ proc url_MachinesGetLiveness_594170(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachinesGetLiveness_594169(path: JsonNode; query: JsonNode;
+proc validate_MachinesGetLiveness_568398(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Obtains the liveness status of the machine during the specified time interval.
@@ -1872,26 +1872,26 @@ proc validate_MachinesGetLiveness_594169(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594171 = path.getOrDefault("resourceGroupName")
-  valid_594171 = validateParameter(valid_594171, JString, required = true,
+  var valid_568400 = path.getOrDefault("resourceGroupName")
+  valid_568400 = validateParameter(valid_568400, JString, required = true,
                                  default = nil)
-  if valid_594171 != nil:
-    section.add "resourceGroupName", valid_594171
-  var valid_594172 = path.getOrDefault("machineName")
-  valid_594172 = validateParameter(valid_594172, JString, required = true,
+  if valid_568400 != nil:
+    section.add "resourceGroupName", valid_568400
+  var valid_568401 = path.getOrDefault("machineName")
+  valid_568401 = validateParameter(valid_568401, JString, required = true,
                                  default = nil)
-  if valid_594172 != nil:
-    section.add "machineName", valid_594172
-  var valid_594173 = path.getOrDefault("subscriptionId")
-  valid_594173 = validateParameter(valid_594173, JString, required = true,
+  if valid_568401 != nil:
+    section.add "machineName", valid_568401
+  var valid_568402 = path.getOrDefault("subscriptionId")
+  valid_568402 = validateParameter(valid_568402, JString, required = true,
                                  default = nil)
-  if valid_594173 != nil:
-    section.add "subscriptionId", valid_594173
-  var valid_594174 = path.getOrDefault("workspaceName")
-  valid_594174 = validateParameter(valid_594174, JString, required = true,
+  if valid_568402 != nil:
+    section.add "subscriptionId", valid_568402
+  var valid_568403 = path.getOrDefault("workspaceName")
+  valid_568403 = validateParameter(valid_568403, JString, required = true,
                                  default = nil)
-  if valid_594174 != nil:
-    section.add "workspaceName", valid_594174
+  if valid_568403 != nil:
+    section.add "workspaceName", valid_568403
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1903,21 +1903,21 @@ proc validate_MachinesGetLiveness_594169(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594175 = query.getOrDefault("api-version")
-  valid_594175 = validateParameter(valid_594175, JString, required = true,
+  var valid_568404 = query.getOrDefault("api-version")
+  valid_568404 = validateParameter(valid_568404, JString, required = true,
                                  default = nil)
-  if valid_594175 != nil:
-    section.add "api-version", valid_594175
-  var valid_594176 = query.getOrDefault("endTime")
-  valid_594176 = validateParameter(valid_594176, JString, required = false,
+  if valid_568404 != nil:
+    section.add "api-version", valid_568404
+  var valid_568405 = query.getOrDefault("endTime")
+  valid_568405 = validateParameter(valid_568405, JString, required = false,
                                  default = nil)
-  if valid_594176 != nil:
-    section.add "endTime", valid_594176
-  var valid_594177 = query.getOrDefault("startTime")
-  valid_594177 = validateParameter(valid_594177, JString, required = false,
+  if valid_568405 != nil:
+    section.add "endTime", valid_568405
+  var valid_568406 = query.getOrDefault("startTime")
+  valid_568406 = validateParameter(valid_568406, JString, required = false,
                                  default = nil)
-  if valid_594177 != nil:
-    section.add "startTime", valid_594177
+  if valid_568406 != nil:
+    section.add "startTime", valid_568406
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1926,20 +1926,20 @@ proc validate_MachinesGetLiveness_594169(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594178: Call_MachinesGetLiveness_594168; path: JsonNode;
+proc call*(call_568407: Call_MachinesGetLiveness_568397; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Obtains the liveness status of the machine during the specified time interval.
   ## 
-  let valid = call_594178.validator(path, query, header, formData, body)
-  let scheme = call_594178.pickScheme
+  let valid = call_568407.validator(path, query, header, formData, body)
+  let scheme = call_568407.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594178.url(scheme.get, call_594178.host, call_594178.base,
-                         call_594178.route, valid.getOrDefault("path"),
+  let url = call_568407.url(scheme.get, call_568407.host, call_568407.base,
+                         call_568407.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594178, url, valid)
+  result = hook(call_568407, url, valid)
 
-proc call*(call_594179: Call_MachinesGetLiveness_594168; resourceGroupName: string;
+proc call*(call_568408: Call_MachinesGetLiveness_568397; resourceGroupName: string;
           apiVersion: string; machineName: string; subscriptionId: string;
           workspaceName: string; endTime: string = ""; startTime: string = ""): Recallable =
   ## machinesGetLiveness
@@ -1958,25 +1958,25 @@ proc call*(call_594179: Call_MachinesGetLiveness_594168; resourceGroupName: stri
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594180 = newJObject()
-  var query_594181 = newJObject()
-  add(path_594180, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594181, "api-version", newJString(apiVersion))
-  add(path_594180, "machineName", newJString(machineName))
-  add(path_594180, "subscriptionId", newJString(subscriptionId))
-  add(query_594181, "endTime", newJString(endTime))
-  add(query_594181, "startTime", newJString(startTime))
-  add(path_594180, "workspaceName", newJString(workspaceName))
-  result = call_594179.call(path_594180, query_594181, nil, nil, nil)
+  var path_568409 = newJObject()
+  var query_568410 = newJObject()
+  add(path_568409, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568410, "api-version", newJString(apiVersion))
+  add(path_568409, "machineName", newJString(machineName))
+  add(path_568409, "subscriptionId", newJString(subscriptionId))
+  add(query_568410, "endTime", newJString(endTime))
+  add(query_568410, "startTime", newJString(startTime))
+  add(path_568409, "workspaceName", newJString(workspaceName))
+  result = call_568408.call(path_568409, query_568410, nil, nil, nil)
 
-var machinesGetLiveness* = Call_MachinesGetLiveness_594168(
+var machinesGetLiveness* = Call_MachinesGetLiveness_568397(
     name: "machinesGetLiveness", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/liveness",
-    validator: validate_MachinesGetLiveness_594169, base: "",
-    url: url_MachinesGetLiveness_594170, schemes: {Scheme.Https})
+    validator: validate_MachinesGetLiveness_568398, base: "",
+    url: url_MachinesGetLiveness_568399, schemes: {Scheme.Https})
 type
-  Call_MachinesListMachineGroupMembership_594182 = ref object of OpenApiRestCall_593437
-proc url_MachinesListMachineGroupMembership_594184(protocol: Scheme; host: string;
+  Call_MachinesListMachineGroupMembership_568411 = ref object of OpenApiRestCall_567666
+proc url_MachinesListMachineGroupMembership_568413(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2003,7 +2003,7 @@ proc url_MachinesListMachineGroupMembership_594184(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachinesListMachineGroupMembership_594183(path: JsonNode;
+proc validate_MachinesListMachineGroupMembership_568412(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a collection of machine groups this machine belongs to during the specified time interval.
   ## 
@@ -2021,26 +2021,26 @@ proc validate_MachinesListMachineGroupMembership_594183(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594185 = path.getOrDefault("resourceGroupName")
-  valid_594185 = validateParameter(valid_594185, JString, required = true,
+  var valid_568414 = path.getOrDefault("resourceGroupName")
+  valid_568414 = validateParameter(valid_568414, JString, required = true,
                                  default = nil)
-  if valid_594185 != nil:
-    section.add "resourceGroupName", valid_594185
-  var valid_594186 = path.getOrDefault("machineName")
-  valid_594186 = validateParameter(valid_594186, JString, required = true,
+  if valid_568414 != nil:
+    section.add "resourceGroupName", valid_568414
+  var valid_568415 = path.getOrDefault("machineName")
+  valid_568415 = validateParameter(valid_568415, JString, required = true,
                                  default = nil)
-  if valid_594186 != nil:
-    section.add "machineName", valid_594186
-  var valid_594187 = path.getOrDefault("subscriptionId")
-  valid_594187 = validateParameter(valid_594187, JString, required = true,
+  if valid_568415 != nil:
+    section.add "machineName", valid_568415
+  var valid_568416 = path.getOrDefault("subscriptionId")
+  valid_568416 = validateParameter(valid_568416, JString, required = true,
                                  default = nil)
-  if valid_594187 != nil:
-    section.add "subscriptionId", valid_594187
-  var valid_594188 = path.getOrDefault("workspaceName")
-  valid_594188 = validateParameter(valid_594188, JString, required = true,
+  if valid_568416 != nil:
+    section.add "subscriptionId", valid_568416
+  var valid_568417 = path.getOrDefault("workspaceName")
+  valid_568417 = validateParameter(valid_568417, JString, required = true,
                                  default = nil)
-  if valid_594188 != nil:
-    section.add "workspaceName", valid_594188
+  if valid_568417 != nil:
+    section.add "workspaceName", valid_568417
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2052,21 +2052,21 @@ proc validate_MachinesListMachineGroupMembership_594183(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594189 = query.getOrDefault("api-version")
-  valid_594189 = validateParameter(valid_594189, JString, required = true,
+  var valid_568418 = query.getOrDefault("api-version")
+  valid_568418 = validateParameter(valid_568418, JString, required = true,
                                  default = nil)
-  if valid_594189 != nil:
-    section.add "api-version", valid_594189
-  var valid_594190 = query.getOrDefault("endTime")
-  valid_594190 = validateParameter(valid_594190, JString, required = false,
+  if valid_568418 != nil:
+    section.add "api-version", valid_568418
+  var valid_568419 = query.getOrDefault("endTime")
+  valid_568419 = validateParameter(valid_568419, JString, required = false,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "endTime", valid_594190
-  var valid_594191 = query.getOrDefault("startTime")
-  valid_594191 = validateParameter(valid_594191, JString, required = false,
+  if valid_568419 != nil:
+    section.add "endTime", valid_568419
+  var valid_568420 = query.getOrDefault("startTime")
+  valid_568420 = validateParameter(valid_568420, JString, required = false,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "startTime", valid_594191
+  if valid_568420 != nil:
+    section.add "startTime", valid_568420
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2075,21 +2075,21 @@ proc validate_MachinesListMachineGroupMembership_594183(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594192: Call_MachinesListMachineGroupMembership_594182;
+proc call*(call_568421: Call_MachinesListMachineGroupMembership_568411;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns a collection of machine groups this machine belongs to during the specified time interval.
   ## 
-  let valid = call_594192.validator(path, query, header, formData, body)
-  let scheme = call_594192.pickScheme
+  let valid = call_568421.validator(path, query, header, formData, body)
+  let scheme = call_568421.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594192.url(scheme.get, call_594192.host, call_594192.base,
-                         call_594192.route, valid.getOrDefault("path"),
+  let url = call_568421.url(scheme.get, call_568421.host, call_568421.base,
+                         call_568421.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594192, url, valid)
+  result = hook(call_568421, url, valid)
 
-proc call*(call_594193: Call_MachinesListMachineGroupMembership_594182;
+proc call*(call_568422: Call_MachinesListMachineGroupMembership_568411;
           resourceGroupName: string; apiVersion: string; machineName: string;
           subscriptionId: string; workspaceName: string; endTime: string = "";
           startTime: string = ""): Recallable =
@@ -2109,25 +2109,25 @@ proc call*(call_594193: Call_MachinesListMachineGroupMembership_594182;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594194 = newJObject()
-  var query_594195 = newJObject()
-  add(path_594194, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594195, "api-version", newJString(apiVersion))
-  add(path_594194, "machineName", newJString(machineName))
-  add(path_594194, "subscriptionId", newJString(subscriptionId))
-  add(query_594195, "endTime", newJString(endTime))
-  add(query_594195, "startTime", newJString(startTime))
-  add(path_594194, "workspaceName", newJString(workspaceName))
-  result = call_594193.call(path_594194, query_594195, nil, nil, nil)
+  var path_568423 = newJObject()
+  var query_568424 = newJObject()
+  add(path_568423, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568424, "api-version", newJString(apiVersion))
+  add(path_568423, "machineName", newJString(machineName))
+  add(path_568423, "subscriptionId", newJString(subscriptionId))
+  add(query_568424, "endTime", newJString(endTime))
+  add(query_568424, "startTime", newJString(startTime))
+  add(path_568423, "workspaceName", newJString(workspaceName))
+  result = call_568422.call(path_568423, query_568424, nil, nil, nil)
 
-var machinesListMachineGroupMembership* = Call_MachinesListMachineGroupMembership_594182(
+var machinesListMachineGroupMembership* = Call_MachinesListMachineGroupMembership_568411(
     name: "machinesListMachineGroupMembership", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/machineGroups",
-    validator: validate_MachinesListMachineGroupMembership_594183, base: "",
-    url: url_MachinesListMachineGroupMembership_594184, schemes: {Scheme.Https})
+    validator: validate_MachinesListMachineGroupMembership_568412, base: "",
+    url: url_MachinesListMachineGroupMembership_568413, schemes: {Scheme.Https})
 type
-  Call_MachinesListPorts_594196 = ref object of OpenApiRestCall_593437
-proc url_MachinesListPorts_594198(protocol: Scheme; host: string; base: string;
+  Call_MachinesListPorts_568425 = ref object of OpenApiRestCall_567666
+proc url_MachinesListPorts_568427(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2154,7 +2154,7 @@ proc url_MachinesListPorts_594198(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachinesListPorts_594197(path: JsonNode; query: JsonNode;
+proc validate_MachinesListPorts_568426(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Returns a collection of live ports on the specified machine during the specified time interval.
@@ -2173,26 +2173,26 @@ proc validate_MachinesListPorts_594197(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594199 = path.getOrDefault("resourceGroupName")
-  valid_594199 = validateParameter(valid_594199, JString, required = true,
+  var valid_568428 = path.getOrDefault("resourceGroupName")
+  valid_568428 = validateParameter(valid_568428, JString, required = true,
                                  default = nil)
-  if valid_594199 != nil:
-    section.add "resourceGroupName", valid_594199
-  var valid_594200 = path.getOrDefault("machineName")
-  valid_594200 = validateParameter(valid_594200, JString, required = true,
+  if valid_568428 != nil:
+    section.add "resourceGroupName", valid_568428
+  var valid_568429 = path.getOrDefault("machineName")
+  valid_568429 = validateParameter(valid_568429, JString, required = true,
                                  default = nil)
-  if valid_594200 != nil:
-    section.add "machineName", valid_594200
-  var valid_594201 = path.getOrDefault("subscriptionId")
-  valid_594201 = validateParameter(valid_594201, JString, required = true,
+  if valid_568429 != nil:
+    section.add "machineName", valid_568429
+  var valid_568430 = path.getOrDefault("subscriptionId")
+  valid_568430 = validateParameter(valid_568430, JString, required = true,
                                  default = nil)
-  if valid_594201 != nil:
-    section.add "subscriptionId", valid_594201
-  var valid_594202 = path.getOrDefault("workspaceName")
-  valid_594202 = validateParameter(valid_594202, JString, required = true,
+  if valid_568430 != nil:
+    section.add "subscriptionId", valid_568430
+  var valid_568431 = path.getOrDefault("workspaceName")
+  valid_568431 = validateParameter(valid_568431, JString, required = true,
                                  default = nil)
-  if valid_594202 != nil:
-    section.add "workspaceName", valid_594202
+  if valid_568431 != nil:
+    section.add "workspaceName", valid_568431
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2204,21 +2204,21 @@ proc validate_MachinesListPorts_594197(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594203 = query.getOrDefault("api-version")
-  valid_594203 = validateParameter(valid_594203, JString, required = true,
+  var valid_568432 = query.getOrDefault("api-version")
+  valid_568432 = validateParameter(valid_568432, JString, required = true,
                                  default = nil)
-  if valid_594203 != nil:
-    section.add "api-version", valid_594203
-  var valid_594204 = query.getOrDefault("endTime")
-  valid_594204 = validateParameter(valid_594204, JString, required = false,
+  if valid_568432 != nil:
+    section.add "api-version", valid_568432
+  var valid_568433 = query.getOrDefault("endTime")
+  valid_568433 = validateParameter(valid_568433, JString, required = false,
                                  default = nil)
-  if valid_594204 != nil:
-    section.add "endTime", valid_594204
-  var valid_594205 = query.getOrDefault("startTime")
-  valid_594205 = validateParameter(valid_594205, JString, required = false,
+  if valid_568433 != nil:
+    section.add "endTime", valid_568433
+  var valid_568434 = query.getOrDefault("startTime")
+  valid_568434 = validateParameter(valid_568434, JString, required = false,
                                  default = nil)
-  if valid_594205 != nil:
-    section.add "startTime", valid_594205
+  if valid_568434 != nil:
+    section.add "startTime", valid_568434
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2227,20 +2227,20 @@ proc validate_MachinesListPorts_594197(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594206: Call_MachinesListPorts_594196; path: JsonNode;
+proc call*(call_568435: Call_MachinesListPorts_568425; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a collection of live ports on the specified machine during the specified time interval.
   ## 
-  let valid = call_594206.validator(path, query, header, formData, body)
-  let scheme = call_594206.pickScheme
+  let valid = call_568435.validator(path, query, header, formData, body)
+  let scheme = call_568435.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594206.url(scheme.get, call_594206.host, call_594206.base,
-                         call_594206.route, valid.getOrDefault("path"),
+  let url = call_568435.url(scheme.get, call_568435.host, call_568435.base,
+                         call_568435.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594206, url, valid)
+  result = hook(call_568435, url, valid)
 
-proc call*(call_594207: Call_MachinesListPorts_594196; resourceGroupName: string;
+proc call*(call_568436: Call_MachinesListPorts_568425; resourceGroupName: string;
           apiVersion: string; machineName: string; subscriptionId: string;
           workspaceName: string; endTime: string = ""; startTime: string = ""): Recallable =
   ## machinesListPorts
@@ -2259,24 +2259,24 @@ proc call*(call_594207: Call_MachinesListPorts_594196; resourceGroupName: string
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594208 = newJObject()
-  var query_594209 = newJObject()
-  add(path_594208, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594209, "api-version", newJString(apiVersion))
-  add(path_594208, "machineName", newJString(machineName))
-  add(path_594208, "subscriptionId", newJString(subscriptionId))
-  add(query_594209, "endTime", newJString(endTime))
-  add(query_594209, "startTime", newJString(startTime))
-  add(path_594208, "workspaceName", newJString(workspaceName))
-  result = call_594207.call(path_594208, query_594209, nil, nil, nil)
+  var path_568437 = newJObject()
+  var query_568438 = newJObject()
+  add(path_568437, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568438, "api-version", newJString(apiVersion))
+  add(path_568437, "machineName", newJString(machineName))
+  add(path_568437, "subscriptionId", newJString(subscriptionId))
+  add(query_568438, "endTime", newJString(endTime))
+  add(query_568438, "startTime", newJString(startTime))
+  add(path_568437, "workspaceName", newJString(workspaceName))
+  result = call_568436.call(path_568437, query_568438, nil, nil, nil)
 
-var machinesListPorts* = Call_MachinesListPorts_594196(name: "machinesListPorts",
+var machinesListPorts* = Call_MachinesListPorts_568425(name: "machinesListPorts",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/ports",
-    validator: validate_MachinesListPorts_594197, base: "",
-    url: url_MachinesListPorts_594198, schemes: {Scheme.Https})
+    validator: validate_MachinesListPorts_568426, base: "",
+    url: url_MachinesListPorts_568427, schemes: {Scheme.Https})
 type
-  Call_PortsGet_594210 = ref object of OpenApiRestCall_593437
-proc url_PortsGet_594212(protocol: Scheme; host: string; base: string; route: string;
+  Call_PortsGet_568439 = ref object of OpenApiRestCall_567666
+proc url_PortsGet_568441(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2305,7 +2305,7 @@ proc url_PortsGet_594212(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PortsGet_594211(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PortsGet_568440(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the specified port. The port must be live during the specified time interval. If the port is not live during the interval, status 404 (Not Found) is returned.
   ## 
@@ -2325,31 +2325,31 @@ proc validate_PortsGet_594211(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594213 = path.getOrDefault("resourceGroupName")
-  valid_594213 = validateParameter(valid_594213, JString, required = true,
+  var valid_568442 = path.getOrDefault("resourceGroupName")
+  valid_568442 = validateParameter(valid_568442, JString, required = true,
                                  default = nil)
-  if valid_594213 != nil:
-    section.add "resourceGroupName", valid_594213
-  var valid_594214 = path.getOrDefault("machineName")
-  valid_594214 = validateParameter(valid_594214, JString, required = true,
+  if valid_568442 != nil:
+    section.add "resourceGroupName", valid_568442
+  var valid_568443 = path.getOrDefault("machineName")
+  valid_568443 = validateParameter(valid_568443, JString, required = true,
                                  default = nil)
-  if valid_594214 != nil:
-    section.add "machineName", valid_594214
-  var valid_594215 = path.getOrDefault("subscriptionId")
-  valid_594215 = validateParameter(valid_594215, JString, required = true,
+  if valid_568443 != nil:
+    section.add "machineName", valid_568443
+  var valid_568444 = path.getOrDefault("subscriptionId")
+  valid_568444 = validateParameter(valid_568444, JString, required = true,
                                  default = nil)
-  if valid_594215 != nil:
-    section.add "subscriptionId", valid_594215
-  var valid_594216 = path.getOrDefault("portName")
-  valid_594216 = validateParameter(valid_594216, JString, required = true,
+  if valid_568444 != nil:
+    section.add "subscriptionId", valid_568444
+  var valid_568445 = path.getOrDefault("portName")
+  valid_568445 = validateParameter(valid_568445, JString, required = true,
                                  default = nil)
-  if valid_594216 != nil:
-    section.add "portName", valid_594216
-  var valid_594217 = path.getOrDefault("workspaceName")
-  valid_594217 = validateParameter(valid_594217, JString, required = true,
+  if valid_568445 != nil:
+    section.add "portName", valid_568445
+  var valid_568446 = path.getOrDefault("workspaceName")
+  valid_568446 = validateParameter(valid_568446, JString, required = true,
                                  default = nil)
-  if valid_594217 != nil:
-    section.add "workspaceName", valid_594217
+  if valid_568446 != nil:
+    section.add "workspaceName", valid_568446
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2361,21 +2361,21 @@ proc validate_PortsGet_594211(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594218 = query.getOrDefault("api-version")
-  valid_594218 = validateParameter(valid_594218, JString, required = true,
+  var valid_568447 = query.getOrDefault("api-version")
+  valid_568447 = validateParameter(valid_568447, JString, required = true,
                                  default = nil)
-  if valid_594218 != nil:
-    section.add "api-version", valid_594218
-  var valid_594219 = query.getOrDefault("endTime")
-  valid_594219 = validateParameter(valid_594219, JString, required = false,
+  if valid_568447 != nil:
+    section.add "api-version", valid_568447
+  var valid_568448 = query.getOrDefault("endTime")
+  valid_568448 = validateParameter(valid_568448, JString, required = false,
                                  default = nil)
-  if valid_594219 != nil:
-    section.add "endTime", valid_594219
-  var valid_594220 = query.getOrDefault("startTime")
-  valid_594220 = validateParameter(valid_594220, JString, required = false,
+  if valid_568448 != nil:
+    section.add "endTime", valid_568448
+  var valid_568449 = query.getOrDefault("startTime")
+  valid_568449 = validateParameter(valid_568449, JString, required = false,
                                  default = nil)
-  if valid_594220 != nil:
-    section.add "startTime", valid_594220
+  if valid_568449 != nil:
+    section.add "startTime", valid_568449
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2384,20 +2384,20 @@ proc validate_PortsGet_594211(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594221: Call_PortsGet_594210; path: JsonNode; query: JsonNode;
+proc call*(call_568450: Call_PortsGet_568439; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the specified port. The port must be live during the specified time interval. If the port is not live during the interval, status 404 (Not Found) is returned.
   ## 
-  let valid = call_594221.validator(path, query, header, formData, body)
-  let scheme = call_594221.pickScheme
+  let valid = call_568450.validator(path, query, header, formData, body)
+  let scheme = call_568450.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594221.url(scheme.get, call_594221.host, call_594221.base,
-                         call_594221.route, valid.getOrDefault("path"),
+  let url = call_568450.url(scheme.get, call_568450.host, call_568450.base,
+                         call_568450.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594221, url, valid)
+  result = hook(call_568450, url, valid)
 
-proc call*(call_594222: Call_PortsGet_594210; resourceGroupName: string;
+proc call*(call_568451: Call_PortsGet_568439; resourceGroupName: string;
           apiVersion: string; machineName: string; subscriptionId: string;
           portName: string; workspaceName: string; endTime: string = "";
           startTime: string = ""): Recallable =
@@ -2419,26 +2419,26 @@ proc call*(call_594222: Call_PortsGet_594210; resourceGroupName: string;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594223 = newJObject()
-  var query_594224 = newJObject()
-  add(path_594223, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594224, "api-version", newJString(apiVersion))
-  add(path_594223, "machineName", newJString(machineName))
-  add(path_594223, "subscriptionId", newJString(subscriptionId))
-  add(query_594224, "endTime", newJString(endTime))
-  add(path_594223, "portName", newJString(portName))
-  add(query_594224, "startTime", newJString(startTime))
-  add(path_594223, "workspaceName", newJString(workspaceName))
-  result = call_594222.call(path_594223, query_594224, nil, nil, nil)
+  var path_568452 = newJObject()
+  var query_568453 = newJObject()
+  add(path_568452, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568453, "api-version", newJString(apiVersion))
+  add(path_568452, "machineName", newJString(machineName))
+  add(path_568452, "subscriptionId", newJString(subscriptionId))
+  add(query_568453, "endTime", newJString(endTime))
+  add(path_568452, "portName", newJString(portName))
+  add(query_568453, "startTime", newJString(startTime))
+  add(path_568452, "workspaceName", newJString(workspaceName))
+  result = call_568451.call(path_568452, query_568453, nil, nil, nil)
 
-var portsGet* = Call_PortsGet_594210(name: "portsGet", meth: HttpMethod.HttpGet,
+var portsGet* = Call_PortsGet_568439(name: "portsGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/ports/{portName}",
-                                  validator: validate_PortsGet_594211, base: "",
-                                  url: url_PortsGet_594212,
+                                  validator: validate_PortsGet_568440, base: "",
+                                  url: url_PortsGet_568441,
                                   schemes: {Scheme.Https})
 type
-  Call_PortsListAcceptingProcesses_594225 = ref object of OpenApiRestCall_593437
-proc url_PortsListAcceptingProcesses_594227(protocol: Scheme; host: string;
+  Call_PortsListAcceptingProcesses_568454 = ref object of OpenApiRestCall_567666
+proc url_PortsListAcceptingProcesses_568456(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2468,7 +2468,7 @@ proc url_PortsListAcceptingProcesses_594227(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PortsListAcceptingProcesses_594226(path: JsonNode; query: JsonNode;
+proc validate_PortsListAcceptingProcesses_568455(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a collection of processes accepting on the specified port
   ## 
@@ -2488,31 +2488,31 @@ proc validate_PortsListAcceptingProcesses_594226(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594228 = path.getOrDefault("resourceGroupName")
-  valid_594228 = validateParameter(valid_594228, JString, required = true,
+  var valid_568457 = path.getOrDefault("resourceGroupName")
+  valid_568457 = validateParameter(valid_568457, JString, required = true,
                                  default = nil)
-  if valid_594228 != nil:
-    section.add "resourceGroupName", valid_594228
-  var valid_594229 = path.getOrDefault("machineName")
-  valid_594229 = validateParameter(valid_594229, JString, required = true,
+  if valid_568457 != nil:
+    section.add "resourceGroupName", valid_568457
+  var valid_568458 = path.getOrDefault("machineName")
+  valid_568458 = validateParameter(valid_568458, JString, required = true,
                                  default = nil)
-  if valid_594229 != nil:
-    section.add "machineName", valid_594229
-  var valid_594230 = path.getOrDefault("subscriptionId")
-  valid_594230 = validateParameter(valid_594230, JString, required = true,
+  if valid_568458 != nil:
+    section.add "machineName", valid_568458
+  var valid_568459 = path.getOrDefault("subscriptionId")
+  valid_568459 = validateParameter(valid_568459, JString, required = true,
                                  default = nil)
-  if valid_594230 != nil:
-    section.add "subscriptionId", valid_594230
-  var valid_594231 = path.getOrDefault("portName")
-  valid_594231 = validateParameter(valid_594231, JString, required = true,
+  if valid_568459 != nil:
+    section.add "subscriptionId", valid_568459
+  var valid_568460 = path.getOrDefault("portName")
+  valid_568460 = validateParameter(valid_568460, JString, required = true,
                                  default = nil)
-  if valid_594231 != nil:
-    section.add "portName", valid_594231
-  var valid_594232 = path.getOrDefault("workspaceName")
-  valid_594232 = validateParameter(valid_594232, JString, required = true,
+  if valid_568460 != nil:
+    section.add "portName", valid_568460
+  var valid_568461 = path.getOrDefault("workspaceName")
+  valid_568461 = validateParameter(valid_568461, JString, required = true,
                                  default = nil)
-  if valid_594232 != nil:
-    section.add "workspaceName", valid_594232
+  if valid_568461 != nil:
+    section.add "workspaceName", valid_568461
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2524,21 +2524,21 @@ proc validate_PortsListAcceptingProcesses_594226(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594233 = query.getOrDefault("api-version")
-  valid_594233 = validateParameter(valid_594233, JString, required = true,
+  var valid_568462 = query.getOrDefault("api-version")
+  valid_568462 = validateParameter(valid_568462, JString, required = true,
                                  default = nil)
-  if valid_594233 != nil:
-    section.add "api-version", valid_594233
-  var valid_594234 = query.getOrDefault("endTime")
-  valid_594234 = validateParameter(valid_594234, JString, required = false,
+  if valid_568462 != nil:
+    section.add "api-version", valid_568462
+  var valid_568463 = query.getOrDefault("endTime")
+  valid_568463 = validateParameter(valid_568463, JString, required = false,
                                  default = nil)
-  if valid_594234 != nil:
-    section.add "endTime", valid_594234
-  var valid_594235 = query.getOrDefault("startTime")
-  valid_594235 = validateParameter(valid_594235, JString, required = false,
+  if valid_568463 != nil:
+    section.add "endTime", valid_568463
+  var valid_568464 = query.getOrDefault("startTime")
+  valid_568464 = validateParameter(valid_568464, JString, required = false,
                                  default = nil)
-  if valid_594235 != nil:
-    section.add "startTime", valid_594235
+  if valid_568464 != nil:
+    section.add "startTime", valid_568464
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2547,20 +2547,20 @@ proc validate_PortsListAcceptingProcesses_594226(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594236: Call_PortsListAcceptingProcesses_594225; path: JsonNode;
+proc call*(call_568465: Call_PortsListAcceptingProcesses_568454; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a collection of processes accepting on the specified port
   ## 
-  let valid = call_594236.validator(path, query, header, formData, body)
-  let scheme = call_594236.pickScheme
+  let valid = call_568465.validator(path, query, header, formData, body)
+  let scheme = call_568465.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594236.url(scheme.get, call_594236.host, call_594236.base,
-                         call_594236.route, valid.getOrDefault("path"),
+  let url = call_568465.url(scheme.get, call_568465.host, call_568465.base,
+                         call_568465.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594236, url, valid)
+  result = hook(call_568465, url, valid)
 
-proc call*(call_594237: Call_PortsListAcceptingProcesses_594225;
+proc call*(call_568466: Call_PortsListAcceptingProcesses_568454;
           resourceGroupName: string; apiVersion: string; machineName: string;
           subscriptionId: string; portName: string; workspaceName: string;
           endTime: string = ""; startTime: string = ""): Recallable =
@@ -2582,26 +2582,26 @@ proc call*(call_594237: Call_PortsListAcceptingProcesses_594225;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594238 = newJObject()
-  var query_594239 = newJObject()
-  add(path_594238, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594239, "api-version", newJString(apiVersion))
-  add(path_594238, "machineName", newJString(machineName))
-  add(path_594238, "subscriptionId", newJString(subscriptionId))
-  add(query_594239, "endTime", newJString(endTime))
-  add(path_594238, "portName", newJString(portName))
-  add(query_594239, "startTime", newJString(startTime))
-  add(path_594238, "workspaceName", newJString(workspaceName))
-  result = call_594237.call(path_594238, query_594239, nil, nil, nil)
+  var path_568467 = newJObject()
+  var query_568468 = newJObject()
+  add(path_568467, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568468, "api-version", newJString(apiVersion))
+  add(path_568467, "machineName", newJString(machineName))
+  add(path_568467, "subscriptionId", newJString(subscriptionId))
+  add(query_568468, "endTime", newJString(endTime))
+  add(path_568467, "portName", newJString(portName))
+  add(query_568468, "startTime", newJString(startTime))
+  add(path_568467, "workspaceName", newJString(workspaceName))
+  result = call_568466.call(path_568467, query_568468, nil, nil, nil)
 
-var portsListAcceptingProcesses* = Call_PortsListAcceptingProcesses_594225(
+var portsListAcceptingProcesses* = Call_PortsListAcceptingProcesses_568454(
     name: "portsListAcceptingProcesses", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/ports/{portName}/acceptingProcesses",
-    validator: validate_PortsListAcceptingProcesses_594226, base: "",
-    url: url_PortsListAcceptingProcesses_594227, schemes: {Scheme.Https})
+    validator: validate_PortsListAcceptingProcesses_568455, base: "",
+    url: url_PortsListAcceptingProcesses_568456, schemes: {Scheme.Https})
 type
-  Call_PortsListConnections_594240 = ref object of OpenApiRestCall_593437
-proc url_PortsListConnections_594242(protocol: Scheme; host: string; base: string;
+  Call_PortsListConnections_568469 = ref object of OpenApiRestCall_567666
+proc url_PortsListConnections_568471(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2631,7 +2631,7 @@ proc url_PortsListConnections_594242(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PortsListConnections_594241(path: JsonNode; query: JsonNode;
+proc validate_PortsListConnections_568470(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a collection of connections established via the specified port.
   ## 
@@ -2651,31 +2651,31 @@ proc validate_PortsListConnections_594241(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594243 = path.getOrDefault("resourceGroupName")
-  valid_594243 = validateParameter(valid_594243, JString, required = true,
+  var valid_568472 = path.getOrDefault("resourceGroupName")
+  valid_568472 = validateParameter(valid_568472, JString, required = true,
                                  default = nil)
-  if valid_594243 != nil:
-    section.add "resourceGroupName", valid_594243
-  var valid_594244 = path.getOrDefault("machineName")
-  valid_594244 = validateParameter(valid_594244, JString, required = true,
+  if valid_568472 != nil:
+    section.add "resourceGroupName", valid_568472
+  var valid_568473 = path.getOrDefault("machineName")
+  valid_568473 = validateParameter(valid_568473, JString, required = true,
                                  default = nil)
-  if valid_594244 != nil:
-    section.add "machineName", valid_594244
-  var valid_594245 = path.getOrDefault("subscriptionId")
-  valid_594245 = validateParameter(valid_594245, JString, required = true,
+  if valid_568473 != nil:
+    section.add "machineName", valid_568473
+  var valid_568474 = path.getOrDefault("subscriptionId")
+  valid_568474 = validateParameter(valid_568474, JString, required = true,
                                  default = nil)
-  if valid_594245 != nil:
-    section.add "subscriptionId", valid_594245
-  var valid_594246 = path.getOrDefault("portName")
-  valid_594246 = validateParameter(valid_594246, JString, required = true,
+  if valid_568474 != nil:
+    section.add "subscriptionId", valid_568474
+  var valid_568475 = path.getOrDefault("portName")
+  valid_568475 = validateParameter(valid_568475, JString, required = true,
                                  default = nil)
-  if valid_594246 != nil:
-    section.add "portName", valid_594246
-  var valid_594247 = path.getOrDefault("workspaceName")
-  valid_594247 = validateParameter(valid_594247, JString, required = true,
+  if valid_568475 != nil:
+    section.add "portName", valid_568475
+  var valid_568476 = path.getOrDefault("workspaceName")
+  valid_568476 = validateParameter(valid_568476, JString, required = true,
                                  default = nil)
-  if valid_594247 != nil:
-    section.add "workspaceName", valid_594247
+  if valid_568476 != nil:
+    section.add "workspaceName", valid_568476
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2687,21 +2687,21 @@ proc validate_PortsListConnections_594241(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594248 = query.getOrDefault("api-version")
-  valid_594248 = validateParameter(valid_594248, JString, required = true,
+  var valid_568477 = query.getOrDefault("api-version")
+  valid_568477 = validateParameter(valid_568477, JString, required = true,
                                  default = nil)
-  if valid_594248 != nil:
-    section.add "api-version", valid_594248
-  var valid_594249 = query.getOrDefault("endTime")
-  valid_594249 = validateParameter(valid_594249, JString, required = false,
+  if valid_568477 != nil:
+    section.add "api-version", valid_568477
+  var valid_568478 = query.getOrDefault("endTime")
+  valid_568478 = validateParameter(valid_568478, JString, required = false,
                                  default = nil)
-  if valid_594249 != nil:
-    section.add "endTime", valid_594249
-  var valid_594250 = query.getOrDefault("startTime")
-  valid_594250 = validateParameter(valid_594250, JString, required = false,
+  if valid_568478 != nil:
+    section.add "endTime", valid_568478
+  var valid_568479 = query.getOrDefault("startTime")
+  valid_568479 = validateParameter(valid_568479, JString, required = false,
                                  default = nil)
-  if valid_594250 != nil:
-    section.add "startTime", valid_594250
+  if valid_568479 != nil:
+    section.add "startTime", valid_568479
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2710,20 +2710,20 @@ proc validate_PortsListConnections_594241(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594251: Call_PortsListConnections_594240; path: JsonNode;
+proc call*(call_568480: Call_PortsListConnections_568469; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a collection of connections established via the specified port.
   ## 
-  let valid = call_594251.validator(path, query, header, formData, body)
-  let scheme = call_594251.pickScheme
+  let valid = call_568480.validator(path, query, header, formData, body)
+  let scheme = call_568480.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594251.url(scheme.get, call_594251.host, call_594251.base,
-                         call_594251.route, valid.getOrDefault("path"),
+  let url = call_568480.url(scheme.get, call_568480.host, call_568480.base,
+                         call_568480.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594251, url, valid)
+  result = hook(call_568480, url, valid)
 
-proc call*(call_594252: Call_PortsListConnections_594240;
+proc call*(call_568481: Call_PortsListConnections_568469;
           resourceGroupName: string; apiVersion: string; machineName: string;
           subscriptionId: string; portName: string; workspaceName: string;
           endTime: string = ""; startTime: string = ""): Recallable =
@@ -2745,26 +2745,26 @@ proc call*(call_594252: Call_PortsListConnections_594240;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594253 = newJObject()
-  var query_594254 = newJObject()
-  add(path_594253, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594254, "api-version", newJString(apiVersion))
-  add(path_594253, "machineName", newJString(machineName))
-  add(path_594253, "subscriptionId", newJString(subscriptionId))
-  add(query_594254, "endTime", newJString(endTime))
-  add(path_594253, "portName", newJString(portName))
-  add(query_594254, "startTime", newJString(startTime))
-  add(path_594253, "workspaceName", newJString(workspaceName))
-  result = call_594252.call(path_594253, query_594254, nil, nil, nil)
+  var path_568482 = newJObject()
+  var query_568483 = newJObject()
+  add(path_568482, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568483, "api-version", newJString(apiVersion))
+  add(path_568482, "machineName", newJString(machineName))
+  add(path_568482, "subscriptionId", newJString(subscriptionId))
+  add(query_568483, "endTime", newJString(endTime))
+  add(path_568482, "portName", newJString(portName))
+  add(query_568483, "startTime", newJString(startTime))
+  add(path_568482, "workspaceName", newJString(workspaceName))
+  result = call_568481.call(path_568482, query_568483, nil, nil, nil)
 
-var portsListConnections* = Call_PortsListConnections_594240(
+var portsListConnections* = Call_PortsListConnections_568469(
     name: "portsListConnections", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/ports/{portName}/connections",
-    validator: validate_PortsListConnections_594241, base: "",
-    url: url_PortsListConnections_594242, schemes: {Scheme.Https})
+    validator: validate_PortsListConnections_568470, base: "",
+    url: url_PortsListConnections_568471, schemes: {Scheme.Https})
 type
-  Call_PortsGetLiveness_594255 = ref object of OpenApiRestCall_593437
-proc url_PortsGetLiveness_594257(protocol: Scheme; host: string; base: string;
+  Call_PortsGetLiveness_568484 = ref object of OpenApiRestCall_567666
+proc url_PortsGetLiveness_568486(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2794,7 +2794,7 @@ proc url_PortsGetLiveness_594257(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PortsGetLiveness_594256(path: JsonNode; query: JsonNode;
+proc validate_PortsGetLiveness_568485(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Obtains the liveness status of the port during the specified time interval.
@@ -2815,31 +2815,31 @@ proc validate_PortsGetLiveness_594256(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594258 = path.getOrDefault("resourceGroupName")
-  valid_594258 = validateParameter(valid_594258, JString, required = true,
+  var valid_568487 = path.getOrDefault("resourceGroupName")
+  valid_568487 = validateParameter(valid_568487, JString, required = true,
                                  default = nil)
-  if valid_594258 != nil:
-    section.add "resourceGroupName", valid_594258
-  var valid_594259 = path.getOrDefault("machineName")
-  valid_594259 = validateParameter(valid_594259, JString, required = true,
+  if valid_568487 != nil:
+    section.add "resourceGroupName", valid_568487
+  var valid_568488 = path.getOrDefault("machineName")
+  valid_568488 = validateParameter(valid_568488, JString, required = true,
                                  default = nil)
-  if valid_594259 != nil:
-    section.add "machineName", valid_594259
-  var valid_594260 = path.getOrDefault("subscriptionId")
-  valid_594260 = validateParameter(valid_594260, JString, required = true,
+  if valid_568488 != nil:
+    section.add "machineName", valid_568488
+  var valid_568489 = path.getOrDefault("subscriptionId")
+  valid_568489 = validateParameter(valid_568489, JString, required = true,
                                  default = nil)
-  if valid_594260 != nil:
-    section.add "subscriptionId", valid_594260
-  var valid_594261 = path.getOrDefault("portName")
-  valid_594261 = validateParameter(valid_594261, JString, required = true,
+  if valid_568489 != nil:
+    section.add "subscriptionId", valid_568489
+  var valid_568490 = path.getOrDefault("portName")
+  valid_568490 = validateParameter(valid_568490, JString, required = true,
                                  default = nil)
-  if valid_594261 != nil:
-    section.add "portName", valid_594261
-  var valid_594262 = path.getOrDefault("workspaceName")
-  valid_594262 = validateParameter(valid_594262, JString, required = true,
+  if valid_568490 != nil:
+    section.add "portName", valid_568490
+  var valid_568491 = path.getOrDefault("workspaceName")
+  valid_568491 = validateParameter(valid_568491, JString, required = true,
                                  default = nil)
-  if valid_594262 != nil:
-    section.add "workspaceName", valid_594262
+  if valid_568491 != nil:
+    section.add "workspaceName", valid_568491
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2851,21 +2851,21 @@ proc validate_PortsGetLiveness_594256(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594263 = query.getOrDefault("api-version")
-  valid_594263 = validateParameter(valid_594263, JString, required = true,
+  var valid_568492 = query.getOrDefault("api-version")
+  valid_568492 = validateParameter(valid_568492, JString, required = true,
                                  default = nil)
-  if valid_594263 != nil:
-    section.add "api-version", valid_594263
-  var valid_594264 = query.getOrDefault("endTime")
-  valid_594264 = validateParameter(valid_594264, JString, required = false,
+  if valid_568492 != nil:
+    section.add "api-version", valid_568492
+  var valid_568493 = query.getOrDefault("endTime")
+  valid_568493 = validateParameter(valid_568493, JString, required = false,
                                  default = nil)
-  if valid_594264 != nil:
-    section.add "endTime", valid_594264
-  var valid_594265 = query.getOrDefault("startTime")
-  valid_594265 = validateParameter(valid_594265, JString, required = false,
+  if valid_568493 != nil:
+    section.add "endTime", valid_568493
+  var valid_568494 = query.getOrDefault("startTime")
+  valid_568494 = validateParameter(valid_568494, JString, required = false,
                                  default = nil)
-  if valid_594265 != nil:
-    section.add "startTime", valid_594265
+  if valid_568494 != nil:
+    section.add "startTime", valid_568494
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2874,20 +2874,20 @@ proc validate_PortsGetLiveness_594256(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594266: Call_PortsGetLiveness_594255; path: JsonNode;
+proc call*(call_568495: Call_PortsGetLiveness_568484; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Obtains the liveness status of the port during the specified time interval.
   ## 
-  let valid = call_594266.validator(path, query, header, formData, body)
-  let scheme = call_594266.pickScheme
+  let valid = call_568495.validator(path, query, header, formData, body)
+  let scheme = call_568495.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594266.url(scheme.get, call_594266.host, call_594266.base,
-                         call_594266.route, valid.getOrDefault("path"),
+  let url = call_568495.url(scheme.get, call_568495.host, call_568495.base,
+                         call_568495.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594266, url, valid)
+  result = hook(call_568495, url, valid)
 
-proc call*(call_594267: Call_PortsGetLiveness_594255; resourceGroupName: string;
+proc call*(call_568496: Call_PortsGetLiveness_568484; resourceGroupName: string;
           apiVersion: string; machineName: string; subscriptionId: string;
           portName: string; workspaceName: string; endTime: string = "";
           startTime: string = ""): Recallable =
@@ -2909,25 +2909,25 @@ proc call*(call_594267: Call_PortsGetLiveness_594255; resourceGroupName: string;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594268 = newJObject()
-  var query_594269 = newJObject()
-  add(path_594268, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594269, "api-version", newJString(apiVersion))
-  add(path_594268, "machineName", newJString(machineName))
-  add(path_594268, "subscriptionId", newJString(subscriptionId))
-  add(query_594269, "endTime", newJString(endTime))
-  add(path_594268, "portName", newJString(portName))
-  add(query_594269, "startTime", newJString(startTime))
-  add(path_594268, "workspaceName", newJString(workspaceName))
-  result = call_594267.call(path_594268, query_594269, nil, nil, nil)
+  var path_568497 = newJObject()
+  var query_568498 = newJObject()
+  add(path_568497, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568498, "api-version", newJString(apiVersion))
+  add(path_568497, "machineName", newJString(machineName))
+  add(path_568497, "subscriptionId", newJString(subscriptionId))
+  add(query_568498, "endTime", newJString(endTime))
+  add(path_568497, "portName", newJString(portName))
+  add(query_568498, "startTime", newJString(startTime))
+  add(path_568497, "workspaceName", newJString(workspaceName))
+  result = call_568496.call(path_568497, query_568498, nil, nil, nil)
 
-var portsGetLiveness* = Call_PortsGetLiveness_594255(name: "portsGetLiveness",
+var portsGetLiveness* = Call_PortsGetLiveness_568484(name: "portsGetLiveness",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/ports/{portName}/liveness",
-    validator: validate_PortsGetLiveness_594256, base: "",
-    url: url_PortsGetLiveness_594257, schemes: {Scheme.Https})
+    validator: validate_PortsGetLiveness_568485, base: "",
+    url: url_PortsGetLiveness_568486, schemes: {Scheme.Https})
 type
-  Call_MachinesListProcesses_594270 = ref object of OpenApiRestCall_593437
-proc url_MachinesListProcesses_594272(protocol: Scheme; host: string; base: string;
+  Call_MachinesListProcesses_568499 = ref object of OpenApiRestCall_567666
+proc url_MachinesListProcesses_568501(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2954,7 +2954,7 @@ proc url_MachinesListProcesses_594272(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachinesListProcesses_594271(path: JsonNode; query: JsonNode;
+proc validate_MachinesListProcesses_568500(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a collection of processes on the specified machine matching the specified conditions. The returned collection represents either processes that are active/live during the specified interval  of time (`live=true` and `startTime`/`endTime` are specified) or that are known to have existed at or  some time prior to the specified point in time (`live=false` and `timestamp` is specified).        
   ## 
@@ -2972,26 +2972,26 @@ proc validate_MachinesListProcesses_594271(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594273 = path.getOrDefault("resourceGroupName")
-  valid_594273 = validateParameter(valid_594273, JString, required = true,
+  var valid_568502 = path.getOrDefault("resourceGroupName")
+  valid_568502 = validateParameter(valid_568502, JString, required = true,
                                  default = nil)
-  if valid_594273 != nil:
-    section.add "resourceGroupName", valid_594273
-  var valid_594274 = path.getOrDefault("machineName")
-  valid_594274 = validateParameter(valid_594274, JString, required = true,
+  if valid_568502 != nil:
+    section.add "resourceGroupName", valid_568502
+  var valid_568503 = path.getOrDefault("machineName")
+  valid_568503 = validateParameter(valid_568503, JString, required = true,
                                  default = nil)
-  if valid_594274 != nil:
-    section.add "machineName", valid_594274
-  var valid_594275 = path.getOrDefault("subscriptionId")
-  valid_594275 = validateParameter(valid_594275, JString, required = true,
+  if valid_568503 != nil:
+    section.add "machineName", valid_568503
+  var valid_568504 = path.getOrDefault("subscriptionId")
+  valid_568504 = validateParameter(valid_568504, JString, required = true,
                                  default = nil)
-  if valid_594275 != nil:
-    section.add "subscriptionId", valid_594275
-  var valid_594276 = path.getOrDefault("workspaceName")
-  valid_594276 = validateParameter(valid_594276, JString, required = true,
+  if valid_568504 != nil:
+    section.add "subscriptionId", valid_568504
+  var valid_568505 = path.getOrDefault("workspaceName")
+  valid_568505 = validateParameter(valid_568505, JString, required = true,
                                  default = nil)
-  if valid_594276 != nil:
-    section.add "workspaceName", valid_594276
+  if valid_568505 != nil:
+    section.add "workspaceName", valid_568505
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3007,31 +3007,31 @@ proc validate_MachinesListProcesses_594271(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594277 = query.getOrDefault("api-version")
-  valid_594277 = validateParameter(valid_594277, JString, required = true,
+  var valid_568506 = query.getOrDefault("api-version")
+  valid_568506 = validateParameter(valid_568506, JString, required = true,
                                  default = nil)
-  if valid_594277 != nil:
-    section.add "api-version", valid_594277
-  var valid_594278 = query.getOrDefault("live")
-  valid_594278 = validateParameter(valid_594278, JBool, required = false,
+  if valid_568506 != nil:
+    section.add "api-version", valid_568506
+  var valid_568507 = query.getOrDefault("live")
+  valid_568507 = validateParameter(valid_568507, JBool, required = false,
                                  default = newJBool(true))
-  if valid_594278 != nil:
-    section.add "live", valid_594278
-  var valid_594279 = query.getOrDefault("endTime")
-  valid_594279 = validateParameter(valid_594279, JString, required = false,
+  if valid_568507 != nil:
+    section.add "live", valid_568507
+  var valid_568508 = query.getOrDefault("endTime")
+  valid_568508 = validateParameter(valid_568508, JString, required = false,
                                  default = nil)
-  if valid_594279 != nil:
-    section.add "endTime", valid_594279
-  var valid_594280 = query.getOrDefault("timestamp")
-  valid_594280 = validateParameter(valid_594280, JString, required = false,
+  if valid_568508 != nil:
+    section.add "endTime", valid_568508
+  var valid_568509 = query.getOrDefault("timestamp")
+  valid_568509 = validateParameter(valid_568509, JString, required = false,
                                  default = nil)
-  if valid_594280 != nil:
-    section.add "timestamp", valid_594280
-  var valid_594281 = query.getOrDefault("startTime")
-  valid_594281 = validateParameter(valid_594281, JString, required = false,
+  if valid_568509 != nil:
+    section.add "timestamp", valid_568509
+  var valid_568510 = query.getOrDefault("startTime")
+  valid_568510 = validateParameter(valid_568510, JString, required = false,
                                  default = nil)
-  if valid_594281 != nil:
-    section.add "startTime", valid_594281
+  if valid_568510 != nil:
+    section.add "startTime", valid_568510
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3040,20 +3040,20 @@ proc validate_MachinesListProcesses_594271(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594282: Call_MachinesListProcesses_594270; path: JsonNode;
+proc call*(call_568511: Call_MachinesListProcesses_568499; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a collection of processes on the specified machine matching the specified conditions. The returned collection represents either processes that are active/live during the specified interval  of time (`live=true` and `startTime`/`endTime` are specified) or that are known to have existed at or  some time prior to the specified point in time (`live=false` and `timestamp` is specified).        
   ## 
-  let valid = call_594282.validator(path, query, header, formData, body)
-  let scheme = call_594282.pickScheme
+  let valid = call_568511.validator(path, query, header, formData, body)
+  let scheme = call_568511.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594282.url(scheme.get, call_594282.host, call_594282.base,
-                         call_594282.route, valid.getOrDefault("path"),
+  let url = call_568511.url(scheme.get, call_568511.host, call_568511.base,
+                         call_568511.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594282, url, valid)
+  result = hook(call_568511, url, valid)
 
-proc call*(call_594283: Call_MachinesListProcesses_594270;
+proc call*(call_568512: Call_MachinesListProcesses_568499;
           resourceGroupName: string; apiVersion: string; machineName: string;
           subscriptionId: string; workspaceName: string; live: bool = true;
           endTime: string = ""; timestamp: string = ""; startTime: string = ""): Recallable =
@@ -3077,27 +3077,27 @@ proc call*(call_594283: Call_MachinesListProcesses_594270;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594284 = newJObject()
-  var query_594285 = newJObject()
-  add(path_594284, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594285, "api-version", newJString(apiVersion))
-  add(path_594284, "machineName", newJString(machineName))
-  add(path_594284, "subscriptionId", newJString(subscriptionId))
-  add(query_594285, "live", newJBool(live))
-  add(query_594285, "endTime", newJString(endTime))
-  add(query_594285, "timestamp", newJString(timestamp))
-  add(query_594285, "startTime", newJString(startTime))
-  add(path_594284, "workspaceName", newJString(workspaceName))
-  result = call_594283.call(path_594284, query_594285, nil, nil, nil)
+  var path_568513 = newJObject()
+  var query_568514 = newJObject()
+  add(path_568513, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568514, "api-version", newJString(apiVersion))
+  add(path_568513, "machineName", newJString(machineName))
+  add(path_568513, "subscriptionId", newJString(subscriptionId))
+  add(query_568514, "live", newJBool(live))
+  add(query_568514, "endTime", newJString(endTime))
+  add(query_568514, "timestamp", newJString(timestamp))
+  add(query_568514, "startTime", newJString(startTime))
+  add(path_568513, "workspaceName", newJString(workspaceName))
+  result = call_568512.call(path_568513, query_568514, nil, nil, nil)
 
-var machinesListProcesses* = Call_MachinesListProcesses_594270(
+var machinesListProcesses* = Call_MachinesListProcesses_568499(
     name: "machinesListProcesses", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/processes",
-    validator: validate_MachinesListProcesses_594271, base: "",
-    url: url_MachinesListProcesses_594272, schemes: {Scheme.Https})
+    validator: validate_MachinesListProcesses_568500, base: "",
+    url: url_MachinesListProcesses_568501, schemes: {Scheme.Https})
 type
-  Call_ProcessesGet_594286 = ref object of OpenApiRestCall_593437
-proc url_ProcessesGet_594288(protocol: Scheme; host: string; base: string;
+  Call_ProcessesGet_568515 = ref object of OpenApiRestCall_567666
+proc url_ProcessesGet_568517(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3126,7 +3126,7 @@ proc url_ProcessesGet_594288(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProcessesGet_594287(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ProcessesGet_568516(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the specified process.
   ## 
@@ -3146,31 +3146,31 @@ proc validate_ProcessesGet_594287(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594289 = path.getOrDefault("resourceGroupName")
-  valid_594289 = validateParameter(valid_594289, JString, required = true,
+  var valid_568518 = path.getOrDefault("resourceGroupName")
+  valid_568518 = validateParameter(valid_568518, JString, required = true,
                                  default = nil)
-  if valid_594289 != nil:
-    section.add "resourceGroupName", valid_594289
-  var valid_594290 = path.getOrDefault("machineName")
-  valid_594290 = validateParameter(valid_594290, JString, required = true,
+  if valid_568518 != nil:
+    section.add "resourceGroupName", valid_568518
+  var valid_568519 = path.getOrDefault("machineName")
+  valid_568519 = validateParameter(valid_568519, JString, required = true,
                                  default = nil)
-  if valid_594290 != nil:
-    section.add "machineName", valid_594290
-  var valid_594291 = path.getOrDefault("subscriptionId")
-  valid_594291 = validateParameter(valid_594291, JString, required = true,
+  if valid_568519 != nil:
+    section.add "machineName", valid_568519
+  var valid_568520 = path.getOrDefault("subscriptionId")
+  valid_568520 = validateParameter(valid_568520, JString, required = true,
                                  default = nil)
-  if valid_594291 != nil:
-    section.add "subscriptionId", valid_594291
-  var valid_594292 = path.getOrDefault("processName")
-  valid_594292 = validateParameter(valid_594292, JString, required = true,
+  if valid_568520 != nil:
+    section.add "subscriptionId", valid_568520
+  var valid_568521 = path.getOrDefault("processName")
+  valid_568521 = validateParameter(valid_568521, JString, required = true,
                                  default = nil)
-  if valid_594292 != nil:
-    section.add "processName", valid_594292
-  var valid_594293 = path.getOrDefault("workspaceName")
-  valid_594293 = validateParameter(valid_594293, JString, required = true,
+  if valid_568521 != nil:
+    section.add "processName", valid_568521
+  var valid_568522 = path.getOrDefault("workspaceName")
+  valid_568522 = validateParameter(valid_568522, JString, required = true,
                                  default = nil)
-  if valid_594293 != nil:
-    section.add "workspaceName", valid_594293
+  if valid_568522 != nil:
+    section.add "workspaceName", valid_568522
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3180,16 +3180,16 @@ proc validate_ProcessesGet_594287(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594294 = query.getOrDefault("api-version")
-  valid_594294 = validateParameter(valid_594294, JString, required = true,
+  var valid_568523 = query.getOrDefault("api-version")
+  valid_568523 = validateParameter(valid_568523, JString, required = true,
                                  default = nil)
-  if valid_594294 != nil:
-    section.add "api-version", valid_594294
-  var valid_594295 = query.getOrDefault("timestamp")
-  valid_594295 = validateParameter(valid_594295, JString, required = false,
+  if valid_568523 != nil:
+    section.add "api-version", valid_568523
+  var valid_568524 = query.getOrDefault("timestamp")
+  valid_568524 = validateParameter(valid_568524, JString, required = false,
                                  default = nil)
-  if valid_594295 != nil:
-    section.add "timestamp", valid_594295
+  if valid_568524 != nil:
+    section.add "timestamp", valid_568524
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3198,20 +3198,20 @@ proc validate_ProcessesGet_594287(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594296: Call_ProcessesGet_594286; path: JsonNode; query: JsonNode;
+proc call*(call_568525: Call_ProcessesGet_568515; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the specified process.
   ## 
-  let valid = call_594296.validator(path, query, header, formData, body)
-  let scheme = call_594296.pickScheme
+  let valid = call_568525.validator(path, query, header, formData, body)
+  let scheme = call_568525.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594296.url(scheme.get, call_594296.host, call_594296.base,
-                         call_594296.route, valid.getOrDefault("path"),
+  let url = call_568525.url(scheme.get, call_568525.host, call_568525.base,
+                         call_568525.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594296, url, valid)
+  result = hook(call_568525, url, valid)
 
-proc call*(call_594297: Call_ProcessesGet_594286; resourceGroupName: string;
+proc call*(call_568526: Call_ProcessesGet_568515; resourceGroupName: string;
           apiVersion: string; machineName: string; subscriptionId: string;
           processName: string; workspaceName: string; timestamp: string = ""): Recallable =
   ## processesGet
@@ -3230,24 +3230,24 @@ proc call*(call_594297: Call_ProcessesGet_594286; resourceGroupName: string;
   ##            : UTC date and time specifying a time instance relative to which to evaluate a resource. When not specified, the service uses DateTime.UtcNow.
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594298 = newJObject()
-  var query_594299 = newJObject()
-  add(path_594298, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594299, "api-version", newJString(apiVersion))
-  add(path_594298, "machineName", newJString(machineName))
-  add(path_594298, "subscriptionId", newJString(subscriptionId))
-  add(path_594298, "processName", newJString(processName))
-  add(query_594299, "timestamp", newJString(timestamp))
-  add(path_594298, "workspaceName", newJString(workspaceName))
-  result = call_594297.call(path_594298, query_594299, nil, nil, nil)
+  var path_568527 = newJObject()
+  var query_568528 = newJObject()
+  add(path_568527, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568528, "api-version", newJString(apiVersion))
+  add(path_568527, "machineName", newJString(machineName))
+  add(path_568527, "subscriptionId", newJString(subscriptionId))
+  add(path_568527, "processName", newJString(processName))
+  add(query_568528, "timestamp", newJString(timestamp))
+  add(path_568527, "workspaceName", newJString(workspaceName))
+  result = call_568526.call(path_568527, query_568528, nil, nil, nil)
 
-var processesGet* = Call_ProcessesGet_594286(name: "processesGet",
+var processesGet* = Call_ProcessesGet_568515(name: "processesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/processes/{processName}",
-    validator: validate_ProcessesGet_594287, base: "", url: url_ProcessesGet_594288,
+    validator: validate_ProcessesGet_568516, base: "", url: url_ProcessesGet_568517,
     schemes: {Scheme.Https})
 type
-  Call_ProcessesListAcceptingPorts_594300 = ref object of OpenApiRestCall_593437
-proc url_ProcessesListAcceptingPorts_594302(protocol: Scheme; host: string;
+  Call_ProcessesListAcceptingPorts_568529 = ref object of OpenApiRestCall_567666
+proc url_ProcessesListAcceptingPorts_568531(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3277,7 +3277,7 @@ proc url_ProcessesListAcceptingPorts_594302(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProcessesListAcceptingPorts_594301(path: JsonNode; query: JsonNode;
+proc validate_ProcessesListAcceptingPorts_568530(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a collection of ports on which this process is accepting
   ## 
@@ -3297,31 +3297,31 @@ proc validate_ProcessesListAcceptingPorts_594301(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594303 = path.getOrDefault("resourceGroupName")
-  valid_594303 = validateParameter(valid_594303, JString, required = true,
+  var valid_568532 = path.getOrDefault("resourceGroupName")
+  valid_568532 = validateParameter(valid_568532, JString, required = true,
                                  default = nil)
-  if valid_594303 != nil:
-    section.add "resourceGroupName", valid_594303
-  var valid_594304 = path.getOrDefault("machineName")
-  valid_594304 = validateParameter(valid_594304, JString, required = true,
+  if valid_568532 != nil:
+    section.add "resourceGroupName", valid_568532
+  var valid_568533 = path.getOrDefault("machineName")
+  valid_568533 = validateParameter(valid_568533, JString, required = true,
                                  default = nil)
-  if valid_594304 != nil:
-    section.add "machineName", valid_594304
-  var valid_594305 = path.getOrDefault("subscriptionId")
-  valid_594305 = validateParameter(valid_594305, JString, required = true,
+  if valid_568533 != nil:
+    section.add "machineName", valid_568533
+  var valid_568534 = path.getOrDefault("subscriptionId")
+  valid_568534 = validateParameter(valid_568534, JString, required = true,
                                  default = nil)
-  if valid_594305 != nil:
-    section.add "subscriptionId", valid_594305
-  var valid_594306 = path.getOrDefault("processName")
-  valid_594306 = validateParameter(valid_594306, JString, required = true,
+  if valid_568534 != nil:
+    section.add "subscriptionId", valid_568534
+  var valid_568535 = path.getOrDefault("processName")
+  valid_568535 = validateParameter(valid_568535, JString, required = true,
                                  default = nil)
-  if valid_594306 != nil:
-    section.add "processName", valid_594306
-  var valid_594307 = path.getOrDefault("workspaceName")
-  valid_594307 = validateParameter(valid_594307, JString, required = true,
+  if valid_568535 != nil:
+    section.add "processName", valid_568535
+  var valid_568536 = path.getOrDefault("workspaceName")
+  valid_568536 = validateParameter(valid_568536, JString, required = true,
                                  default = nil)
-  if valid_594307 != nil:
-    section.add "workspaceName", valid_594307
+  if valid_568536 != nil:
+    section.add "workspaceName", valid_568536
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3333,21 +3333,21 @@ proc validate_ProcessesListAcceptingPorts_594301(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594308 = query.getOrDefault("api-version")
-  valid_594308 = validateParameter(valid_594308, JString, required = true,
+  var valid_568537 = query.getOrDefault("api-version")
+  valid_568537 = validateParameter(valid_568537, JString, required = true,
                                  default = nil)
-  if valid_594308 != nil:
-    section.add "api-version", valid_594308
-  var valid_594309 = query.getOrDefault("endTime")
-  valid_594309 = validateParameter(valid_594309, JString, required = false,
+  if valid_568537 != nil:
+    section.add "api-version", valid_568537
+  var valid_568538 = query.getOrDefault("endTime")
+  valid_568538 = validateParameter(valid_568538, JString, required = false,
                                  default = nil)
-  if valid_594309 != nil:
-    section.add "endTime", valid_594309
-  var valid_594310 = query.getOrDefault("startTime")
-  valid_594310 = validateParameter(valid_594310, JString, required = false,
+  if valid_568538 != nil:
+    section.add "endTime", valid_568538
+  var valid_568539 = query.getOrDefault("startTime")
+  valid_568539 = validateParameter(valid_568539, JString, required = false,
                                  default = nil)
-  if valid_594310 != nil:
-    section.add "startTime", valid_594310
+  if valid_568539 != nil:
+    section.add "startTime", valid_568539
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3356,20 +3356,20 @@ proc validate_ProcessesListAcceptingPorts_594301(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594311: Call_ProcessesListAcceptingPorts_594300; path: JsonNode;
+proc call*(call_568540: Call_ProcessesListAcceptingPorts_568529; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a collection of ports on which this process is accepting
   ## 
-  let valid = call_594311.validator(path, query, header, formData, body)
-  let scheme = call_594311.pickScheme
+  let valid = call_568540.validator(path, query, header, formData, body)
+  let scheme = call_568540.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594311.url(scheme.get, call_594311.host, call_594311.base,
-                         call_594311.route, valid.getOrDefault("path"),
+  let url = call_568540.url(scheme.get, call_568540.host, call_568540.base,
+                         call_568540.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594311, url, valid)
+  result = hook(call_568540, url, valid)
 
-proc call*(call_594312: Call_ProcessesListAcceptingPorts_594300;
+proc call*(call_568541: Call_ProcessesListAcceptingPorts_568529;
           resourceGroupName: string; apiVersion: string; machineName: string;
           subscriptionId: string; processName: string; workspaceName: string;
           endTime: string = ""; startTime: string = ""): Recallable =
@@ -3391,26 +3391,26 @@ proc call*(call_594312: Call_ProcessesListAcceptingPorts_594300;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594313 = newJObject()
-  var query_594314 = newJObject()
-  add(path_594313, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594314, "api-version", newJString(apiVersion))
-  add(path_594313, "machineName", newJString(machineName))
-  add(path_594313, "subscriptionId", newJString(subscriptionId))
-  add(query_594314, "endTime", newJString(endTime))
-  add(path_594313, "processName", newJString(processName))
-  add(query_594314, "startTime", newJString(startTime))
-  add(path_594313, "workspaceName", newJString(workspaceName))
-  result = call_594312.call(path_594313, query_594314, nil, nil, nil)
+  var path_568542 = newJObject()
+  var query_568543 = newJObject()
+  add(path_568542, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568543, "api-version", newJString(apiVersion))
+  add(path_568542, "machineName", newJString(machineName))
+  add(path_568542, "subscriptionId", newJString(subscriptionId))
+  add(query_568543, "endTime", newJString(endTime))
+  add(path_568542, "processName", newJString(processName))
+  add(query_568543, "startTime", newJString(startTime))
+  add(path_568542, "workspaceName", newJString(workspaceName))
+  result = call_568541.call(path_568542, query_568543, nil, nil, nil)
 
-var processesListAcceptingPorts* = Call_ProcessesListAcceptingPorts_594300(
+var processesListAcceptingPorts* = Call_ProcessesListAcceptingPorts_568529(
     name: "processesListAcceptingPorts", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/processes/{processName}/acceptingPorts",
-    validator: validate_ProcessesListAcceptingPorts_594301, base: "",
-    url: url_ProcessesListAcceptingPorts_594302, schemes: {Scheme.Https})
+    validator: validate_ProcessesListAcceptingPorts_568530, base: "",
+    url: url_ProcessesListAcceptingPorts_568531, schemes: {Scheme.Https})
 type
-  Call_ProcessesListConnections_594315 = ref object of OpenApiRestCall_593437
-proc url_ProcessesListConnections_594317(protocol: Scheme; host: string;
+  Call_ProcessesListConnections_568544 = ref object of OpenApiRestCall_567666
+proc url_ProcessesListConnections_568546(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3441,7 +3441,7 @@ proc url_ProcessesListConnections_594317(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProcessesListConnections_594316(path: JsonNode; query: JsonNode;
+proc validate_ProcessesListConnections_568545(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a collection of connections terminating or originating at the specified process
   ## 
@@ -3461,31 +3461,31 @@ proc validate_ProcessesListConnections_594316(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594318 = path.getOrDefault("resourceGroupName")
-  valid_594318 = validateParameter(valid_594318, JString, required = true,
+  var valid_568547 = path.getOrDefault("resourceGroupName")
+  valid_568547 = validateParameter(valid_568547, JString, required = true,
                                  default = nil)
-  if valid_594318 != nil:
-    section.add "resourceGroupName", valid_594318
-  var valid_594319 = path.getOrDefault("machineName")
-  valid_594319 = validateParameter(valid_594319, JString, required = true,
+  if valid_568547 != nil:
+    section.add "resourceGroupName", valid_568547
+  var valid_568548 = path.getOrDefault("machineName")
+  valid_568548 = validateParameter(valid_568548, JString, required = true,
                                  default = nil)
-  if valid_594319 != nil:
-    section.add "machineName", valid_594319
-  var valid_594320 = path.getOrDefault("subscriptionId")
-  valid_594320 = validateParameter(valid_594320, JString, required = true,
+  if valid_568548 != nil:
+    section.add "machineName", valid_568548
+  var valid_568549 = path.getOrDefault("subscriptionId")
+  valid_568549 = validateParameter(valid_568549, JString, required = true,
                                  default = nil)
-  if valid_594320 != nil:
-    section.add "subscriptionId", valid_594320
-  var valid_594321 = path.getOrDefault("processName")
-  valid_594321 = validateParameter(valid_594321, JString, required = true,
+  if valid_568549 != nil:
+    section.add "subscriptionId", valid_568549
+  var valid_568550 = path.getOrDefault("processName")
+  valid_568550 = validateParameter(valid_568550, JString, required = true,
                                  default = nil)
-  if valid_594321 != nil:
-    section.add "processName", valid_594321
-  var valid_594322 = path.getOrDefault("workspaceName")
-  valid_594322 = validateParameter(valid_594322, JString, required = true,
+  if valid_568550 != nil:
+    section.add "processName", valid_568550
+  var valid_568551 = path.getOrDefault("workspaceName")
+  valid_568551 = validateParameter(valid_568551, JString, required = true,
                                  default = nil)
-  if valid_594322 != nil:
-    section.add "workspaceName", valid_594322
+  if valid_568551 != nil:
+    section.add "workspaceName", valid_568551
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3497,21 +3497,21 @@ proc validate_ProcessesListConnections_594316(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594323 = query.getOrDefault("api-version")
-  valid_594323 = validateParameter(valid_594323, JString, required = true,
+  var valid_568552 = query.getOrDefault("api-version")
+  valid_568552 = validateParameter(valid_568552, JString, required = true,
                                  default = nil)
-  if valid_594323 != nil:
-    section.add "api-version", valid_594323
-  var valid_594324 = query.getOrDefault("endTime")
-  valid_594324 = validateParameter(valid_594324, JString, required = false,
+  if valid_568552 != nil:
+    section.add "api-version", valid_568552
+  var valid_568553 = query.getOrDefault("endTime")
+  valid_568553 = validateParameter(valid_568553, JString, required = false,
                                  default = nil)
-  if valid_594324 != nil:
-    section.add "endTime", valid_594324
-  var valid_594325 = query.getOrDefault("startTime")
-  valid_594325 = validateParameter(valid_594325, JString, required = false,
+  if valid_568553 != nil:
+    section.add "endTime", valid_568553
+  var valid_568554 = query.getOrDefault("startTime")
+  valid_568554 = validateParameter(valid_568554, JString, required = false,
                                  default = nil)
-  if valid_594325 != nil:
-    section.add "startTime", valid_594325
+  if valid_568554 != nil:
+    section.add "startTime", valid_568554
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3520,20 +3520,20 @@ proc validate_ProcessesListConnections_594316(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594326: Call_ProcessesListConnections_594315; path: JsonNode;
+proc call*(call_568555: Call_ProcessesListConnections_568544; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a collection of connections terminating or originating at the specified process
   ## 
-  let valid = call_594326.validator(path, query, header, formData, body)
-  let scheme = call_594326.pickScheme
+  let valid = call_568555.validator(path, query, header, formData, body)
+  let scheme = call_568555.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594326.url(scheme.get, call_594326.host, call_594326.base,
-                         call_594326.route, valid.getOrDefault("path"),
+  let url = call_568555.url(scheme.get, call_568555.host, call_568555.base,
+                         call_568555.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594326, url, valid)
+  result = hook(call_568555, url, valid)
 
-proc call*(call_594327: Call_ProcessesListConnections_594315;
+proc call*(call_568556: Call_ProcessesListConnections_568544;
           resourceGroupName: string; apiVersion: string; machineName: string;
           subscriptionId: string; processName: string; workspaceName: string;
           endTime: string = ""; startTime: string = ""): Recallable =
@@ -3555,26 +3555,26 @@ proc call*(call_594327: Call_ProcessesListConnections_594315;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594328 = newJObject()
-  var query_594329 = newJObject()
-  add(path_594328, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594329, "api-version", newJString(apiVersion))
-  add(path_594328, "machineName", newJString(machineName))
-  add(path_594328, "subscriptionId", newJString(subscriptionId))
-  add(query_594329, "endTime", newJString(endTime))
-  add(path_594328, "processName", newJString(processName))
-  add(query_594329, "startTime", newJString(startTime))
-  add(path_594328, "workspaceName", newJString(workspaceName))
-  result = call_594327.call(path_594328, query_594329, nil, nil, nil)
+  var path_568557 = newJObject()
+  var query_568558 = newJObject()
+  add(path_568557, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568558, "api-version", newJString(apiVersion))
+  add(path_568557, "machineName", newJString(machineName))
+  add(path_568557, "subscriptionId", newJString(subscriptionId))
+  add(query_568558, "endTime", newJString(endTime))
+  add(path_568557, "processName", newJString(processName))
+  add(query_568558, "startTime", newJString(startTime))
+  add(path_568557, "workspaceName", newJString(workspaceName))
+  result = call_568556.call(path_568557, query_568558, nil, nil, nil)
 
-var processesListConnections* = Call_ProcessesListConnections_594315(
+var processesListConnections* = Call_ProcessesListConnections_568544(
     name: "processesListConnections", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/processes/{processName}/connections",
-    validator: validate_ProcessesListConnections_594316, base: "",
-    url: url_ProcessesListConnections_594317, schemes: {Scheme.Https})
+    validator: validate_ProcessesListConnections_568545, base: "",
+    url: url_ProcessesListConnections_568546, schemes: {Scheme.Https})
 type
-  Call_ProcessesGetLiveness_594330 = ref object of OpenApiRestCall_593437
-proc url_ProcessesGetLiveness_594332(protocol: Scheme; host: string; base: string;
+  Call_ProcessesGetLiveness_568559 = ref object of OpenApiRestCall_567666
+proc url_ProcessesGetLiveness_568561(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3604,7 +3604,7 @@ proc url_ProcessesGetLiveness_594332(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProcessesGetLiveness_594331(path: JsonNode; query: JsonNode;
+proc validate_ProcessesGetLiveness_568560(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Obtains the liveness status of the process during the specified time interval.
   ## 
@@ -3624,31 +3624,31 @@ proc validate_ProcessesGetLiveness_594331(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594333 = path.getOrDefault("resourceGroupName")
-  valid_594333 = validateParameter(valid_594333, JString, required = true,
+  var valid_568562 = path.getOrDefault("resourceGroupName")
+  valid_568562 = validateParameter(valid_568562, JString, required = true,
                                  default = nil)
-  if valid_594333 != nil:
-    section.add "resourceGroupName", valid_594333
-  var valid_594334 = path.getOrDefault("machineName")
-  valid_594334 = validateParameter(valid_594334, JString, required = true,
+  if valid_568562 != nil:
+    section.add "resourceGroupName", valid_568562
+  var valid_568563 = path.getOrDefault("machineName")
+  valid_568563 = validateParameter(valid_568563, JString, required = true,
                                  default = nil)
-  if valid_594334 != nil:
-    section.add "machineName", valid_594334
-  var valid_594335 = path.getOrDefault("subscriptionId")
-  valid_594335 = validateParameter(valid_594335, JString, required = true,
+  if valid_568563 != nil:
+    section.add "machineName", valid_568563
+  var valid_568564 = path.getOrDefault("subscriptionId")
+  valid_568564 = validateParameter(valid_568564, JString, required = true,
                                  default = nil)
-  if valid_594335 != nil:
-    section.add "subscriptionId", valid_594335
-  var valid_594336 = path.getOrDefault("processName")
-  valid_594336 = validateParameter(valid_594336, JString, required = true,
+  if valid_568564 != nil:
+    section.add "subscriptionId", valid_568564
+  var valid_568565 = path.getOrDefault("processName")
+  valid_568565 = validateParameter(valid_568565, JString, required = true,
                                  default = nil)
-  if valid_594336 != nil:
-    section.add "processName", valid_594336
-  var valid_594337 = path.getOrDefault("workspaceName")
-  valid_594337 = validateParameter(valid_594337, JString, required = true,
+  if valid_568565 != nil:
+    section.add "processName", valid_568565
+  var valid_568566 = path.getOrDefault("workspaceName")
+  valid_568566 = validateParameter(valid_568566, JString, required = true,
                                  default = nil)
-  if valid_594337 != nil:
-    section.add "workspaceName", valid_594337
+  if valid_568566 != nil:
+    section.add "workspaceName", valid_568566
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3660,21 +3660,21 @@ proc validate_ProcessesGetLiveness_594331(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594338 = query.getOrDefault("api-version")
-  valid_594338 = validateParameter(valid_594338, JString, required = true,
+  var valid_568567 = query.getOrDefault("api-version")
+  valid_568567 = validateParameter(valid_568567, JString, required = true,
                                  default = nil)
-  if valid_594338 != nil:
-    section.add "api-version", valid_594338
-  var valid_594339 = query.getOrDefault("endTime")
-  valid_594339 = validateParameter(valid_594339, JString, required = false,
+  if valid_568567 != nil:
+    section.add "api-version", valid_568567
+  var valid_568568 = query.getOrDefault("endTime")
+  valid_568568 = validateParameter(valid_568568, JString, required = false,
                                  default = nil)
-  if valid_594339 != nil:
-    section.add "endTime", valid_594339
-  var valid_594340 = query.getOrDefault("startTime")
-  valid_594340 = validateParameter(valid_594340, JString, required = false,
+  if valid_568568 != nil:
+    section.add "endTime", valid_568568
+  var valid_568569 = query.getOrDefault("startTime")
+  valid_568569 = validateParameter(valid_568569, JString, required = false,
                                  default = nil)
-  if valid_594340 != nil:
-    section.add "startTime", valid_594340
+  if valid_568569 != nil:
+    section.add "startTime", valid_568569
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3683,20 +3683,20 @@ proc validate_ProcessesGetLiveness_594331(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594341: Call_ProcessesGetLiveness_594330; path: JsonNode;
+proc call*(call_568570: Call_ProcessesGetLiveness_568559; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Obtains the liveness status of the process during the specified time interval.
   ## 
-  let valid = call_594341.validator(path, query, header, formData, body)
-  let scheme = call_594341.pickScheme
+  let valid = call_568570.validator(path, query, header, formData, body)
+  let scheme = call_568570.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594341.url(scheme.get, call_594341.host, call_594341.base,
-                         call_594341.route, valid.getOrDefault("path"),
+  let url = call_568570.url(scheme.get, call_568570.host, call_568570.base,
+                         call_568570.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594341, url, valid)
+  result = hook(call_568570, url, valid)
 
-proc call*(call_594342: Call_ProcessesGetLiveness_594330;
+proc call*(call_568571: Call_ProcessesGetLiveness_568559;
           resourceGroupName: string; apiVersion: string; machineName: string;
           subscriptionId: string; processName: string; workspaceName: string;
           endTime: string = ""; startTime: string = ""): Recallable =
@@ -3718,26 +3718,26 @@ proc call*(call_594342: Call_ProcessesGetLiveness_594330;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594343 = newJObject()
-  var query_594344 = newJObject()
-  add(path_594343, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594344, "api-version", newJString(apiVersion))
-  add(path_594343, "machineName", newJString(machineName))
-  add(path_594343, "subscriptionId", newJString(subscriptionId))
-  add(query_594344, "endTime", newJString(endTime))
-  add(path_594343, "processName", newJString(processName))
-  add(query_594344, "startTime", newJString(startTime))
-  add(path_594343, "workspaceName", newJString(workspaceName))
-  result = call_594342.call(path_594343, query_594344, nil, nil, nil)
+  var path_568572 = newJObject()
+  var query_568573 = newJObject()
+  add(path_568572, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568573, "api-version", newJString(apiVersion))
+  add(path_568572, "machineName", newJString(machineName))
+  add(path_568572, "subscriptionId", newJString(subscriptionId))
+  add(query_568573, "endTime", newJString(endTime))
+  add(path_568572, "processName", newJString(processName))
+  add(query_568573, "startTime", newJString(startTime))
+  add(path_568572, "workspaceName", newJString(workspaceName))
+  result = call_568571.call(path_568572, query_568573, nil, nil, nil)
 
-var processesGetLiveness* = Call_ProcessesGetLiveness_594330(
+var processesGetLiveness* = Call_ProcessesGetLiveness_568559(
     name: "processesGetLiveness", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/machines/{machineName}/processes/{processName}/liveness",
-    validator: validate_ProcessesGetLiveness_594331, base: "",
-    url: url_ProcessesGetLiveness_594332, schemes: {Scheme.Https})
+    validator: validate_ProcessesGetLiveness_568560, base: "",
+    url: url_ProcessesGetLiveness_568561, schemes: {Scheme.Https})
 type
-  Call_SummariesGetMachines_594345 = ref object of OpenApiRestCall_593437
-proc url_SummariesGetMachines_594347(protocol: Scheme; host: string; base: string;
+  Call_SummariesGetMachines_568574 = ref object of OpenApiRestCall_567666
+proc url_SummariesGetMachines_568576(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3761,7 +3761,7 @@ proc url_SummariesGetMachines_594347(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SummariesGetMachines_594346(path: JsonNode; query: JsonNode;
+proc validate_SummariesGetMachines_568575(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns summary information about the machines in the workspace.
   ## 
@@ -3777,21 +3777,21 @@ proc validate_SummariesGetMachines_594346(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594348 = path.getOrDefault("resourceGroupName")
-  valid_594348 = validateParameter(valid_594348, JString, required = true,
+  var valid_568577 = path.getOrDefault("resourceGroupName")
+  valid_568577 = validateParameter(valid_568577, JString, required = true,
                                  default = nil)
-  if valid_594348 != nil:
-    section.add "resourceGroupName", valid_594348
-  var valid_594349 = path.getOrDefault("subscriptionId")
-  valid_594349 = validateParameter(valid_594349, JString, required = true,
+  if valid_568577 != nil:
+    section.add "resourceGroupName", valid_568577
+  var valid_568578 = path.getOrDefault("subscriptionId")
+  valid_568578 = validateParameter(valid_568578, JString, required = true,
                                  default = nil)
-  if valid_594349 != nil:
-    section.add "subscriptionId", valid_594349
-  var valid_594350 = path.getOrDefault("workspaceName")
-  valid_594350 = validateParameter(valid_594350, JString, required = true,
+  if valid_568578 != nil:
+    section.add "subscriptionId", valid_568578
+  var valid_568579 = path.getOrDefault("workspaceName")
+  valid_568579 = validateParameter(valid_568579, JString, required = true,
                                  default = nil)
-  if valid_594350 != nil:
-    section.add "workspaceName", valid_594350
+  if valid_568579 != nil:
+    section.add "workspaceName", valid_568579
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3803,21 +3803,21 @@ proc validate_SummariesGetMachines_594346(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594351 = query.getOrDefault("api-version")
-  valid_594351 = validateParameter(valid_594351, JString, required = true,
+  var valid_568580 = query.getOrDefault("api-version")
+  valid_568580 = validateParameter(valid_568580, JString, required = true,
                                  default = nil)
-  if valid_594351 != nil:
-    section.add "api-version", valid_594351
-  var valid_594352 = query.getOrDefault("endTime")
-  valid_594352 = validateParameter(valid_594352, JString, required = false,
+  if valid_568580 != nil:
+    section.add "api-version", valid_568580
+  var valid_568581 = query.getOrDefault("endTime")
+  valid_568581 = validateParameter(valid_568581, JString, required = false,
                                  default = nil)
-  if valid_594352 != nil:
-    section.add "endTime", valid_594352
-  var valid_594353 = query.getOrDefault("startTime")
-  valid_594353 = validateParameter(valid_594353, JString, required = false,
+  if valid_568581 != nil:
+    section.add "endTime", valid_568581
+  var valid_568582 = query.getOrDefault("startTime")
+  valid_568582 = validateParameter(valid_568582, JString, required = false,
                                  default = nil)
-  if valid_594353 != nil:
-    section.add "startTime", valid_594353
+  if valid_568582 != nil:
+    section.add "startTime", valid_568582
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3826,20 +3826,20 @@ proc validate_SummariesGetMachines_594346(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594354: Call_SummariesGetMachines_594345; path: JsonNode;
+proc call*(call_568583: Call_SummariesGetMachines_568574; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns summary information about the machines in the workspace.
   ## 
-  let valid = call_594354.validator(path, query, header, formData, body)
-  let scheme = call_594354.pickScheme
+  let valid = call_568583.validator(path, query, header, formData, body)
+  let scheme = call_568583.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594354.url(scheme.get, call_594354.host, call_594354.base,
-                         call_594354.route, valid.getOrDefault("path"),
+  let url = call_568583.url(scheme.get, call_568583.host, call_568583.base,
+                         call_568583.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594354, url, valid)
+  result = hook(call_568583, url, valid)
 
-proc call*(call_594355: Call_SummariesGetMachines_594345;
+proc call*(call_568584: Call_SummariesGetMachines_568574;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           workspaceName: string; endTime: string = ""; startTime: string = ""): Recallable =
   ## summariesGetMachines
@@ -3856,21 +3856,21 @@ proc call*(call_594355: Call_SummariesGetMachines_594345;
   ##            : UTC date and time specifying the start time of an interval. When not specified the service uses DateTime.UtcNow - 10m
   ##   workspaceName: string (required)
   ##                : OMS workspace containing the resources of interest.
-  var path_594356 = newJObject()
-  var query_594357 = newJObject()
-  add(path_594356, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594357, "api-version", newJString(apiVersion))
-  add(path_594356, "subscriptionId", newJString(subscriptionId))
-  add(query_594357, "endTime", newJString(endTime))
-  add(query_594357, "startTime", newJString(startTime))
-  add(path_594356, "workspaceName", newJString(workspaceName))
-  result = call_594355.call(path_594356, query_594357, nil, nil, nil)
+  var path_568585 = newJObject()
+  var query_568586 = newJObject()
+  add(path_568585, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568586, "api-version", newJString(apiVersion))
+  add(path_568585, "subscriptionId", newJString(subscriptionId))
+  add(query_568586, "endTime", newJString(endTime))
+  add(query_568586, "startTime", newJString(startTime))
+  add(path_568585, "workspaceName", newJString(workspaceName))
+  result = call_568584.call(path_568585, query_568586, nil, nil, nil)
 
-var summariesGetMachines* = Call_SummariesGetMachines_594345(
+var summariesGetMachines* = Call_SummariesGetMachines_568574(
     name: "summariesGetMachines", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/summaries/machines",
-    validator: validate_SummariesGetMachines_594346, base: "",
-    url: url_SummariesGetMachines_594347, schemes: {Scheme.Https})
+    validator: validate_SummariesGetMachines_568575, base: "",
+    url: url_SummariesGetMachines_568576, schemes: {Scheme.Https})
 export
   rest
 

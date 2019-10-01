@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkAdminManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_574458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-Quotas"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_QuotasList_593647 = ref object of OpenApiRestCall_593425
-proc url_QuotasList_593649(protocol: Scheme; host: string; base: string; route: string;
+  Call_QuotasList_574680 = ref object of OpenApiRestCall_574458
+proc url_QuotasList_574682(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +124,7 @@ proc url_QuotasList_593649(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotasList_593648(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QuotasList_574681(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## List all quotas.
   ## 
@@ -138,16 +138,16 @@ proc validate_QuotasList_593648(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  var valid_574843 = path.getOrDefault("subscriptionId")
+  valid_574843 = validateParameter(valid_574843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593811 = path.getOrDefault("location")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_574843 != nil:
+    section.add "subscriptionId", valid_574843
+  var valid_574844 = path.getOrDefault("location")
+  valid_574844 = validateParameter(valid_574844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "location", valid_593811
+  if valid_574844 != nil:
+    section.add "location", valid_574844
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -157,16 +157,16 @@ proc validate_QuotasList_593648(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_574858 = query.getOrDefault("api-version")
+  valid_574858 = validateParameter(valid_574858, JString, required = true,
                                  default = newJString("2015-06-15"))
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
-  var valid_593826 = query.getOrDefault("$filter")
-  valid_593826 = validateParameter(valid_593826, JString, required = false,
+  if valid_574858 != nil:
+    section.add "api-version", valid_574858
+  var valid_574859 = query.getOrDefault("$filter")
+  valid_574859 = validateParameter(valid_574859, JString, required = false,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "$filter", valid_593826
+  if valid_574859 != nil:
+    section.add "$filter", valid_574859
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -175,20 +175,20 @@ proc validate_QuotasList_593648(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593853: Call_QuotasList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_574886: Call_QuotasList_574680; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all quotas.
   ## 
-  let valid = call_593853.validator(path, query, header, formData, body)
-  let scheme = call_593853.pickScheme
+  let valid = call_574886.validator(path, query, header, formData, body)
+  let scheme = call_574886.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593853.url(scheme.get, call_593853.host, call_593853.base,
-                         call_593853.route, valid.getOrDefault("path"),
+  let url = call_574886.url(scheme.get, call_574886.host, call_574886.base,
+                         call_574886.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593853, url, valid)
+  result = hook(call_574886, url, valid)
 
-proc call*(call_593924: Call_QuotasList_593647; subscriptionId: string;
+proc call*(call_574957: Call_QuotasList_574680; subscriptionId: string;
           location: string; apiVersion: string = "2015-06-15"; Filter: string = ""): Recallable =
   ## quotasList
   ## List all quotas.
@@ -200,22 +200,22 @@ proc call*(call_593924: Call_QuotasList_593647; subscriptionId: string;
   ##           : Location of the resource.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_593925 = newJObject()
-  var query_593927 = newJObject()
-  add(query_593927, "api-version", newJString(apiVersion))
-  add(path_593925, "subscriptionId", newJString(subscriptionId))
-  add(path_593925, "location", newJString(location))
-  add(query_593927, "$filter", newJString(Filter))
-  result = call_593924.call(path_593925, query_593927, nil, nil, nil)
+  var path_574958 = newJObject()
+  var query_574960 = newJObject()
+  add(query_574960, "api-version", newJString(apiVersion))
+  add(path_574958, "subscriptionId", newJString(subscriptionId))
+  add(path_574958, "location", newJString(location))
+  add(query_574960, "$filter", newJString(Filter))
+  result = call_574957.call(path_574958, query_574960, nil, nil, nil)
 
-var quotasList* = Call_QuotasList_593647(name: "quotasList",
+var quotasList* = Call_QuotasList_574680(name: "quotasList",
                                       meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network.Admin/locations/{location}/quotas",
-                                      validator: validate_QuotasList_593648,
-                                      base: "", url: url_QuotasList_593649,
+                                      validator: validate_QuotasList_574681,
+                                      base: "", url: url_QuotasList_574682,
                                       schemes: {Scheme.Https})
 type
-  Call_QuotasCreateOrUpdate_593977 = ref object of OpenApiRestCall_593425
-proc url_QuotasCreateOrUpdate_593979(protocol: Scheme; host: string; base: string;
+  Call_QuotasCreateOrUpdate_575010 = ref object of OpenApiRestCall_574458
+proc url_QuotasCreateOrUpdate_575012(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -237,7 +237,7 @@ proc url_QuotasCreateOrUpdate_593979(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotasCreateOrUpdate_593978(path: JsonNode; query: JsonNode;
+proc validate_QuotasCreateOrUpdate_575011(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a quota.
   ## 
@@ -253,21 +253,21 @@ proc validate_QuotasCreateOrUpdate_593978(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594006 = path.getOrDefault("subscriptionId")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_575039 = path.getOrDefault("subscriptionId")
+  valid_575039 = validateParameter(valid_575039, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "subscriptionId", valid_594006
-  var valid_594007 = path.getOrDefault("resourceName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_575039 != nil:
+    section.add "subscriptionId", valid_575039
+  var valid_575040 = path.getOrDefault("resourceName")
+  valid_575040 = validateParameter(valid_575040, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "resourceName", valid_594007
-  var valid_594008 = path.getOrDefault("location")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_575040 != nil:
+    section.add "resourceName", valid_575040
+  var valid_575041 = path.getOrDefault("location")
+  valid_575041 = validateParameter(valid_575041, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "location", valid_594008
+  if valid_575041 != nil:
+    section.add "location", valid_575041
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -275,11 +275,11 @@ proc validate_QuotasCreateOrUpdate_593978(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594009 = query.getOrDefault("api-version")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_575042 = query.getOrDefault("api-version")
+  valid_575042 = validateParameter(valid_575042, JString, required = true,
                                  default = newJString("2015-06-15"))
-  if valid_594009 != nil:
-    section.add "api-version", valid_594009
+  if valid_575042 != nil:
+    section.add "api-version", valid_575042
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -293,20 +293,20 @@ proc validate_QuotasCreateOrUpdate_593978(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594011: Call_QuotasCreateOrUpdate_593977; path: JsonNode;
+proc call*(call_575044: Call_QuotasCreateOrUpdate_575010; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a quota.
   ## 
-  let valid = call_594011.validator(path, query, header, formData, body)
-  let scheme = call_594011.pickScheme
+  let valid = call_575044.validator(path, query, header, formData, body)
+  let scheme = call_575044.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594011.url(scheme.get, call_594011.host, call_594011.base,
-                         call_594011.route, valid.getOrDefault("path"),
+  let url = call_575044.url(scheme.get, call_575044.host, call_575044.base,
+                         call_575044.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594011, url, valid)
+  result = hook(call_575044, url, valid)
 
-proc call*(call_594012: Call_QuotasCreateOrUpdate_593977; subscriptionId: string;
+proc call*(call_575045: Call_QuotasCreateOrUpdate_575010; subscriptionId: string;
           resourceName: string; Quota: JsonNode; location: string;
           apiVersion: string = "2015-06-15"): Recallable =
   ## quotasCreateOrUpdate
@@ -321,25 +321,25 @@ proc call*(call_594012: Call_QuotasCreateOrUpdate_593977; subscriptionId: string
   ##        : New network quota to create.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_594013 = newJObject()
-  var query_594014 = newJObject()
-  var body_594015 = newJObject()
-  add(query_594014, "api-version", newJString(apiVersion))
-  add(path_594013, "subscriptionId", newJString(subscriptionId))
-  add(path_594013, "resourceName", newJString(resourceName))
+  var path_575046 = newJObject()
+  var query_575047 = newJObject()
+  var body_575048 = newJObject()
+  add(query_575047, "api-version", newJString(apiVersion))
+  add(path_575046, "subscriptionId", newJString(subscriptionId))
+  add(path_575046, "resourceName", newJString(resourceName))
   if Quota != nil:
-    body_594015 = Quota
-  add(path_594013, "location", newJString(location))
-  result = call_594012.call(path_594013, query_594014, nil, nil, body_594015)
+    body_575048 = Quota
+  add(path_575046, "location", newJString(location))
+  result = call_575045.call(path_575046, query_575047, nil, nil, body_575048)
 
-var quotasCreateOrUpdate* = Call_QuotasCreateOrUpdate_593977(
+var quotasCreateOrUpdate* = Call_QuotasCreateOrUpdate_575010(
     name: "quotasCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network.Admin/locations/{location}/quotas/{resourceName}",
-    validator: validate_QuotasCreateOrUpdate_593978, base: "",
-    url: url_QuotasCreateOrUpdate_593979, schemes: {Scheme.Https})
+    validator: validate_QuotasCreateOrUpdate_575011, base: "",
+    url: url_QuotasCreateOrUpdate_575012, schemes: {Scheme.Https})
 type
-  Call_QuotasGet_593966 = ref object of OpenApiRestCall_593425
-proc url_QuotasGet_593968(protocol: Scheme; host: string; base: string; route: string;
+  Call_QuotasGet_574999 = ref object of OpenApiRestCall_574458
+proc url_QuotasGet_575001(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -361,7 +361,7 @@ proc url_QuotasGet_593968(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotasGet_593967(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QuotasGet_575000(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a quota by name.
   ## 
@@ -377,21 +377,21 @@ proc validate_QuotasGet_593967(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593969 = path.getOrDefault("subscriptionId")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_575002 = path.getOrDefault("subscriptionId")
+  valid_575002 = validateParameter(valid_575002, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "subscriptionId", valid_593969
-  var valid_593970 = path.getOrDefault("resourceName")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_575002 != nil:
+    section.add "subscriptionId", valid_575002
+  var valid_575003 = path.getOrDefault("resourceName")
+  valid_575003 = validateParameter(valid_575003, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "resourceName", valid_593970
-  var valid_593971 = path.getOrDefault("location")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  if valid_575003 != nil:
+    section.add "resourceName", valid_575003
+  var valid_575004 = path.getOrDefault("location")
+  valid_575004 = validateParameter(valid_575004, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "location", valid_593971
+  if valid_575004 != nil:
+    section.add "location", valid_575004
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -399,11 +399,11 @@ proc validate_QuotasGet_593967(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593972 = query.getOrDefault("api-version")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_575005 = query.getOrDefault("api-version")
+  valid_575005 = validateParameter(valid_575005, JString, required = true,
                                  default = newJString("2015-06-15"))
-  if valid_593972 != nil:
-    section.add "api-version", valid_593972
+  if valid_575005 != nil:
+    section.add "api-version", valid_575005
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -412,20 +412,20 @@ proc validate_QuotasGet_593967(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593973: Call_QuotasGet_593966; path: JsonNode; query: JsonNode;
+proc call*(call_575006: Call_QuotasGet_574999; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a quota by name.
   ## 
-  let valid = call_593973.validator(path, query, header, formData, body)
-  let scheme = call_593973.pickScheme
+  let valid = call_575006.validator(path, query, header, formData, body)
+  let scheme = call_575006.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593973.url(scheme.get, call_593973.host, call_593973.base,
-                         call_593973.route, valid.getOrDefault("path"),
+  let url = call_575006.url(scheme.get, call_575006.host, call_575006.base,
+                         call_575006.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593973, url, valid)
+  result = hook(call_575006, url, valid)
 
-proc call*(call_593974: Call_QuotasGet_593966; subscriptionId: string;
+proc call*(call_575007: Call_QuotasGet_574999; subscriptionId: string;
           resourceName: string; location: string; apiVersion: string = "2015-06-15"): Recallable =
   ## quotasGet
   ## Get a quota by name.
@@ -437,21 +437,21 @@ proc call*(call_593974: Call_QuotasGet_593966; subscriptionId: string;
   ##               : Name of the resource.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593975 = newJObject()
-  var query_593976 = newJObject()
-  add(query_593976, "api-version", newJString(apiVersion))
-  add(path_593975, "subscriptionId", newJString(subscriptionId))
-  add(path_593975, "resourceName", newJString(resourceName))
-  add(path_593975, "location", newJString(location))
-  result = call_593974.call(path_593975, query_593976, nil, nil, nil)
+  var path_575008 = newJObject()
+  var query_575009 = newJObject()
+  add(query_575009, "api-version", newJString(apiVersion))
+  add(path_575008, "subscriptionId", newJString(subscriptionId))
+  add(path_575008, "resourceName", newJString(resourceName))
+  add(path_575008, "location", newJString(location))
+  result = call_575007.call(path_575008, query_575009, nil, nil, nil)
 
-var quotasGet* = Call_QuotasGet_593966(name: "quotasGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network.Admin/locations/{location}/quotas/{resourceName}",
-                                    validator: validate_QuotasGet_593967,
-                                    base: "", url: url_QuotasGet_593968,
+var quotasGet* = Call_QuotasGet_574999(name: "quotasGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network.Admin/locations/{location}/quotas/{resourceName}",
+                                    validator: validate_QuotasGet_575000,
+                                    base: "", url: url_QuotasGet_575001,
                                     schemes: {Scheme.Https})
 type
-  Call_QuotasDelete_594016 = ref object of OpenApiRestCall_593425
-proc url_QuotasDelete_594018(protocol: Scheme; host: string; base: string;
+  Call_QuotasDelete_575049 = ref object of OpenApiRestCall_574458
+proc url_QuotasDelete_575051(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -473,7 +473,7 @@ proc url_QuotasDelete_594018(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotasDelete_594017(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QuotasDelete_575050(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a quota by name.
   ## 
@@ -489,21 +489,21 @@ proc validate_QuotasDelete_594017(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594019 = path.getOrDefault("subscriptionId")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_575052 = path.getOrDefault("subscriptionId")
+  valid_575052 = validateParameter(valid_575052, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "subscriptionId", valid_594019
-  var valid_594020 = path.getOrDefault("resourceName")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  if valid_575052 != nil:
+    section.add "subscriptionId", valid_575052
+  var valid_575053 = path.getOrDefault("resourceName")
+  valid_575053 = validateParameter(valid_575053, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "resourceName", valid_594020
-  var valid_594021 = path.getOrDefault("location")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  if valid_575053 != nil:
+    section.add "resourceName", valid_575053
+  var valid_575054 = path.getOrDefault("location")
+  valid_575054 = validateParameter(valid_575054, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "location", valid_594021
+  if valid_575054 != nil:
+    section.add "location", valid_575054
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -511,11 +511,11 @@ proc validate_QuotasDelete_594017(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594022 = query.getOrDefault("api-version")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  var valid_575055 = query.getOrDefault("api-version")
+  valid_575055 = validateParameter(valid_575055, JString, required = true,
                                  default = newJString("2015-06-15"))
-  if valid_594022 != nil:
-    section.add "api-version", valid_594022
+  if valid_575055 != nil:
+    section.add "api-version", valid_575055
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -524,20 +524,20 @@ proc validate_QuotasDelete_594017(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594023: Call_QuotasDelete_594016; path: JsonNode; query: JsonNode;
+proc call*(call_575056: Call_QuotasDelete_575049; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a quota by name.
   ## 
-  let valid = call_594023.validator(path, query, header, formData, body)
-  let scheme = call_594023.pickScheme
+  let valid = call_575056.validator(path, query, header, formData, body)
+  let scheme = call_575056.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594023.url(scheme.get, call_594023.host, call_594023.base,
-                         call_594023.route, valid.getOrDefault("path"),
+  let url = call_575056.url(scheme.get, call_575056.host, call_575056.base,
+                         call_575056.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594023, url, valid)
+  result = hook(call_575056, url, valid)
 
-proc call*(call_594024: Call_QuotasDelete_594016; subscriptionId: string;
+proc call*(call_575057: Call_QuotasDelete_575049; subscriptionId: string;
           resourceName: string; location: string; apiVersion: string = "2015-06-15"): Recallable =
   ## quotasDelete
   ## Delete a quota by name.
@@ -549,18 +549,18 @@ proc call*(call_594024: Call_QuotasDelete_594016; subscriptionId: string;
   ##               : Name of the resource.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_594025 = newJObject()
-  var query_594026 = newJObject()
-  add(query_594026, "api-version", newJString(apiVersion))
-  add(path_594025, "subscriptionId", newJString(subscriptionId))
-  add(path_594025, "resourceName", newJString(resourceName))
-  add(path_594025, "location", newJString(location))
-  result = call_594024.call(path_594025, query_594026, nil, nil, nil)
+  var path_575058 = newJObject()
+  var query_575059 = newJObject()
+  add(query_575059, "api-version", newJString(apiVersion))
+  add(path_575058, "subscriptionId", newJString(subscriptionId))
+  add(path_575058, "resourceName", newJString(resourceName))
+  add(path_575058, "location", newJString(location))
+  result = call_575057.call(path_575058, query_575059, nil, nil, nil)
 
-var quotasDelete* = Call_QuotasDelete_594016(name: "quotasDelete",
+var quotasDelete* = Call_QuotasDelete_575049(name: "quotasDelete",
     meth: HttpMethod.HttpDelete,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network.Admin/locations/{location}/quotas/{resourceName}",
-    validator: validate_QuotasDelete_594017, base: "", url: url_QuotasDelete_594018,
+    validator: validate_QuotasDelete_575050, base: "", url: url_QuotasDelete_575051,
     schemes: {Scheme.Https})
 export
   rest

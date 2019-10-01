@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: RecoveryServicesBackupClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593422 = ref object of OpenApiRestCall
+  OpenApiRestCall_567651 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593422](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567651](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593422): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567651): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "recoveryservicesbackup"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BackupEnginesGet_593644 = ref object of OpenApiRestCall_593422
-proc url_BackupEnginesGet_593646(protocol: Scheme; host: string; base: string;
+  Call_BackupEnginesGet_567873 = ref object of OpenApiRestCall_567651
+proc url_BackupEnginesGet_567875(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +128,7 @@ proc url_BackupEnginesGet_593646(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupEnginesGet_593645(path: JsonNode; query: JsonNode;
+proc validate_BackupEnginesGet_567874(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## The backup management servers registered to a Recovery Services vault. This returns a pageable list of servers.
@@ -145,21 +145,21 @@ proc validate_BackupEnginesGet_593645(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593820 = path.getOrDefault("resourceGroupName")
-  valid_593820 = validateParameter(valid_593820, JString, required = true,
+  var valid_568049 = path.getOrDefault("resourceGroupName")
+  valid_568049 = validateParameter(valid_568049, JString, required = true,
                                  default = nil)
-  if valid_593820 != nil:
-    section.add "resourceGroupName", valid_593820
-  var valid_593821 = path.getOrDefault("subscriptionId")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  if valid_568049 != nil:
+    section.add "resourceGroupName", valid_568049
+  var valid_568050 = path.getOrDefault("subscriptionId")
+  valid_568050 = validateParameter(valid_568050, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "subscriptionId", valid_593821
-  var valid_593822 = path.getOrDefault("vaultName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_568050 != nil:
+    section.add "subscriptionId", valid_568050
+  var valid_568051 = path.getOrDefault("vaultName")
+  valid_568051 = validateParameter(valid_568051, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "vaultName", valid_593822
+  if valid_568051 != nil:
+    section.add "vaultName", valid_568051
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -171,21 +171,21 @@ proc validate_BackupEnginesGet_593645(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593823 = query.getOrDefault("api-version")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_568052 = query.getOrDefault("api-version")
+  valid_568052 = validateParameter(valid_568052, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "api-version", valid_593823
-  var valid_593824 = query.getOrDefault("$skipToken")
-  valid_593824 = validateParameter(valid_593824, JString, required = false,
+  if valid_568052 != nil:
+    section.add "api-version", valid_568052
+  var valid_568053 = query.getOrDefault("$skipToken")
+  valid_568053 = validateParameter(valid_568053, JString, required = false,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "$skipToken", valid_593824
-  var valid_593825 = query.getOrDefault("$filter")
-  valid_593825 = validateParameter(valid_593825, JString, required = false,
+  if valid_568053 != nil:
+    section.add "$skipToken", valid_568053
+  var valid_568054 = query.getOrDefault("$filter")
+  valid_568054 = validateParameter(valid_568054, JString, required = false,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "$filter", valid_593825
+  if valid_568054 != nil:
+    section.add "$filter", valid_568054
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -194,20 +194,20 @@ proc validate_BackupEnginesGet_593645(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593848: Call_BackupEnginesGet_593644; path: JsonNode;
+proc call*(call_568077: Call_BackupEnginesGet_567873; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The backup management servers registered to a Recovery Services vault. This returns a pageable list of servers.
   ## 
-  let valid = call_593848.validator(path, query, header, formData, body)
-  let scheme = call_593848.pickScheme
+  let valid = call_568077.validator(path, query, header, formData, body)
+  let scheme = call_568077.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593848.url(scheme.get, call_593848.host, call_593848.base,
-                         call_593848.route, valid.getOrDefault("path"),
+  let url = call_568077.url(scheme.get, call_568077.host, call_568077.base,
+                         call_568077.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593848, url, valid)
+  result = hook(call_568077, url, valid)
 
-proc call*(call_593919: Call_BackupEnginesGet_593644; resourceGroupName: string;
+proc call*(call_568148: Call_BackupEnginesGet_567873; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; vaultName: string;
           SkipToken: string = ""; Filter: string = ""): Recallable =
   ## backupEnginesGet
@@ -224,23 +224,23 @@ proc call*(call_593919: Call_BackupEnginesGet_593644; resourceGroupName: string;
   ##            : The Skip Token filter.
   ##   Filter: string
   ##         : Use this filter to choose the specific backup management server. backupManagementType { AzureIaasVM, MAB, DPM, AzureBackupServer, AzureSql }.
-  var path_593920 = newJObject()
-  var query_593922 = newJObject()
-  add(path_593920, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593922, "api-version", newJString(apiVersion))
-  add(path_593920, "subscriptionId", newJString(subscriptionId))
-  add(path_593920, "vaultName", newJString(vaultName))
-  add(query_593922, "$skipToken", newJString(SkipToken))
-  add(query_593922, "$filter", newJString(Filter))
-  result = call_593919.call(path_593920, query_593922, nil, nil, nil)
+  var path_568149 = newJObject()
+  var query_568151 = newJObject()
+  add(path_568149, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568151, "api-version", newJString(apiVersion))
+  add(path_568149, "subscriptionId", newJString(subscriptionId))
+  add(path_568149, "vaultName", newJString(vaultName))
+  add(query_568151, "$skipToken", newJString(SkipToken))
+  add(query_568151, "$filter", newJString(Filter))
+  result = call_568148.call(path_568149, query_568151, nil, nil, nil)
 
-var backupEnginesGet* = Call_BackupEnginesGet_593644(name: "backupEnginesGet",
+var backupEnginesGet* = Call_BackupEnginesGet_567873(name: "backupEnginesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupEngines",
-    validator: validate_BackupEnginesGet_593645, base: "",
-    url: url_BackupEnginesGet_593646, schemes: {Scheme.Https})
+    validator: validate_BackupEnginesGet_567874, base: "",
+    url: url_BackupEnginesGet_567875, schemes: {Scheme.Https})
 type
-  Call_ProtectionContainerRefreshOperationResultsGet_593961 = ref object of OpenApiRestCall_593422
-proc url_ProtectionContainerRefreshOperationResultsGet_593963(protocol: Scheme;
+  Call_ProtectionContainerRefreshOperationResultsGet_568190 = ref object of OpenApiRestCall_567651
+proc url_ProtectionContainerRefreshOperationResultsGet_568192(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -269,7 +269,7 @@ proc url_ProtectionContainerRefreshOperationResultsGet_593963(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionContainerRefreshOperationResultsGet_593962(
+proc validate_ProtectionContainerRefreshOperationResultsGet_568191(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Provides the result of the refresh operation triggered by the BeginRefresh operation.
@@ -290,31 +290,31 @@ proc validate_ProtectionContainerRefreshOperationResultsGet_593962(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_593964 = path.getOrDefault("fabricName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_568193 = path.getOrDefault("fabricName")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "fabricName", valid_593964
-  var valid_593965 = path.getOrDefault("resourceGroupName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568193 != nil:
+    section.add "fabricName", valid_568193
+  var valid_568194 = path.getOrDefault("resourceGroupName")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "resourceGroupName", valid_593965
-  var valid_593966 = path.getOrDefault("subscriptionId")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_568194 != nil:
+    section.add "resourceGroupName", valid_568194
+  var valid_568195 = path.getOrDefault("subscriptionId")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "subscriptionId", valid_593966
-  var valid_593967 = path.getOrDefault("vaultName")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_568195 != nil:
+    section.add "subscriptionId", valid_568195
+  var valid_568196 = path.getOrDefault("vaultName")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "vaultName", valid_593967
-  var valid_593968 = path.getOrDefault("operationId")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  if valid_568196 != nil:
+    section.add "vaultName", valid_568196
+  var valid_568197 = path.getOrDefault("operationId")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "operationId", valid_593968
+  if valid_568197 != nil:
+    section.add "operationId", valid_568197
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -322,11 +322,11 @@ proc validate_ProtectionContainerRefreshOperationResultsGet_593962(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593969 = query.getOrDefault("api-version")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_568198 = query.getOrDefault("api-version")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "api-version", valid_593969
+  if valid_568198 != nil:
+    section.add "api-version", valid_568198
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -335,21 +335,21 @@ proc validate_ProtectionContainerRefreshOperationResultsGet_593962(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593970: Call_ProtectionContainerRefreshOperationResultsGet_593961;
+proc call*(call_568199: Call_ProtectionContainerRefreshOperationResultsGet_568190;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Provides the result of the refresh operation triggered by the BeginRefresh operation.
   ## 
-  let valid = call_593970.validator(path, query, header, formData, body)
-  let scheme = call_593970.pickScheme
+  let valid = call_568199.validator(path, query, header, formData, body)
+  let scheme = call_568199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593970.url(scheme.get, call_593970.host, call_593970.base,
-                         call_593970.route, valid.getOrDefault("path"),
+  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
+                         call_568199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593970, url, valid)
+  result = hook(call_568199, url, valid)
 
-proc call*(call_593971: Call_ProtectionContainerRefreshOperationResultsGet_593961;
+proc call*(call_568200: Call_ProtectionContainerRefreshOperationResultsGet_568190;
           fabricName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; vaultName: string; operationId: string): Recallable =
   ## protectionContainerRefreshOperationResultsGet
@@ -366,25 +366,25 @@ proc call*(call_593971: Call_ProtectionContainerRefreshOperationResultsGet_59396
   ##            : The name of the Recovery Services vault.
   ##   operationId: string (required)
   ##              : The operation ID used for this GET operation.
-  var path_593972 = newJObject()
-  var query_593973 = newJObject()
-  add(path_593972, "fabricName", newJString(fabricName))
-  add(path_593972, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593973, "api-version", newJString(apiVersion))
-  add(path_593972, "subscriptionId", newJString(subscriptionId))
-  add(path_593972, "vaultName", newJString(vaultName))
-  add(path_593972, "operationId", newJString(operationId))
-  result = call_593971.call(path_593972, query_593973, nil, nil, nil)
+  var path_568201 = newJObject()
+  var query_568202 = newJObject()
+  add(path_568201, "fabricName", newJString(fabricName))
+  add(path_568201, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568202, "api-version", newJString(apiVersion))
+  add(path_568201, "subscriptionId", newJString(subscriptionId))
+  add(path_568201, "vaultName", newJString(vaultName))
+  add(path_568201, "operationId", newJString(operationId))
+  result = call_568200.call(path_568201, query_568202, nil, nil, nil)
 
-var protectionContainerRefreshOperationResultsGet* = Call_ProtectionContainerRefreshOperationResultsGet_593961(
+var protectionContainerRefreshOperationResultsGet* = Call_ProtectionContainerRefreshOperationResultsGet_568190(
     name: "protectionContainerRefreshOperationResultsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/operationResults/{operationId}",
-    validator: validate_ProtectionContainerRefreshOperationResultsGet_593962,
-    base: "", url: url_ProtectionContainerRefreshOperationResultsGet_593963,
+    validator: validate_ProtectionContainerRefreshOperationResultsGet_568191,
+    base: "", url: url_ProtectionContainerRefreshOperationResultsGet_568192,
     schemes: {Scheme.Https})
 type
-  Call_ProtectionContainersGet_593974 = ref object of OpenApiRestCall_593422
-proc url_ProtectionContainersGet_593976(protocol: Scheme; host: string; base: string;
+  Call_ProtectionContainersGet_568203 = ref object of OpenApiRestCall_567651
+proc url_ProtectionContainersGet_568205(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -414,7 +414,7 @@ proc url_ProtectionContainersGet_593976(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionContainersGet_593975(path: JsonNode; query: JsonNode;
+proc validate_ProtectionContainersGet_568204(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets details of the specific container registered to your Recovery Services vault.
   ## 
@@ -434,31 +434,31 @@ proc validate_ProtectionContainersGet_593975(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_593977 = path.getOrDefault("fabricName")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  var valid_568206 = path.getOrDefault("fabricName")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "fabricName", valid_593977
-  var valid_593978 = path.getOrDefault("resourceGroupName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  if valid_568206 != nil:
+    section.add "fabricName", valid_568206
+  var valid_568207 = path.getOrDefault("resourceGroupName")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "resourceGroupName", valid_593978
-  var valid_593979 = path.getOrDefault("containerName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_568207 != nil:
+    section.add "resourceGroupName", valid_568207
+  var valid_568208 = path.getOrDefault("containerName")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "containerName", valid_593979
-  var valid_593980 = path.getOrDefault("subscriptionId")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_568208 != nil:
+    section.add "containerName", valid_568208
+  var valid_568209 = path.getOrDefault("subscriptionId")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "subscriptionId", valid_593980
-  var valid_593981 = path.getOrDefault("vaultName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_568209 != nil:
+    section.add "subscriptionId", valid_568209
+  var valid_568210 = path.getOrDefault("vaultName")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "vaultName", valid_593981
+  if valid_568210 != nil:
+    section.add "vaultName", valid_568210
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -466,11 +466,11 @@ proc validate_ProtectionContainersGet_593975(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593982 = query.getOrDefault("api-version")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568211 = query.getOrDefault("api-version")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "api-version", valid_593982
+  if valid_568211 != nil:
+    section.add "api-version", valid_568211
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -479,20 +479,20 @@ proc validate_ProtectionContainersGet_593975(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593983: Call_ProtectionContainersGet_593974; path: JsonNode;
+proc call*(call_568212: Call_ProtectionContainersGet_568203; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets details of the specific container registered to your Recovery Services vault.
   ## 
-  let valid = call_593983.validator(path, query, header, formData, body)
-  let scheme = call_593983.pickScheme
+  let valid = call_568212.validator(path, query, header, formData, body)
+  let scheme = call_568212.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593983.url(scheme.get, call_593983.host, call_593983.base,
-                         call_593983.route, valid.getOrDefault("path"),
+  let url = call_568212.url(scheme.get, call_568212.host, call_568212.base,
+                         call_568212.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593983, url, valid)
+  result = hook(call_568212, url, valid)
 
-proc call*(call_593984: Call_ProtectionContainersGet_593974; fabricName: string;
+proc call*(call_568213: Call_ProtectionContainersGet_568203; fabricName: string;
           resourceGroupName: string; apiVersion: string; containerName: string;
           subscriptionId: string; vaultName: string): Recallable =
   ## protectionContainersGet
@@ -509,24 +509,24 @@ proc call*(call_593984: Call_ProtectionContainersGet_593974; fabricName: string;
   ##                 : The subscription ID.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_593985 = newJObject()
-  var query_593986 = newJObject()
-  add(path_593985, "fabricName", newJString(fabricName))
-  add(path_593985, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593986, "api-version", newJString(apiVersion))
-  add(path_593985, "containerName", newJString(containerName))
-  add(path_593985, "subscriptionId", newJString(subscriptionId))
-  add(path_593985, "vaultName", newJString(vaultName))
-  result = call_593984.call(path_593985, query_593986, nil, nil, nil)
+  var path_568214 = newJObject()
+  var query_568215 = newJObject()
+  add(path_568214, "fabricName", newJString(fabricName))
+  add(path_568214, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568215, "api-version", newJString(apiVersion))
+  add(path_568214, "containerName", newJString(containerName))
+  add(path_568214, "subscriptionId", newJString(subscriptionId))
+  add(path_568214, "vaultName", newJString(vaultName))
+  result = call_568213.call(path_568214, query_568215, nil, nil, nil)
 
-var protectionContainersGet* = Call_ProtectionContainersGet_593974(
+var protectionContainersGet* = Call_ProtectionContainersGet_568203(
     name: "protectionContainersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}",
-    validator: validate_ProtectionContainersGet_593975, base: "",
-    url: url_ProtectionContainersGet_593976, schemes: {Scheme.Https})
+    validator: validate_ProtectionContainersGet_568204, base: "",
+    url: url_ProtectionContainersGet_568205, schemes: {Scheme.Https})
 type
-  Call_ProtectionContainerOperationResultsGet_593987 = ref object of OpenApiRestCall_593422
-proc url_ProtectionContainerOperationResultsGet_593989(protocol: Scheme;
+  Call_ProtectionContainerOperationResultsGet_568216 = ref object of OpenApiRestCall_567651
+proc url_ProtectionContainerOperationResultsGet_568218(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -558,7 +558,7 @@ proc url_ProtectionContainerOperationResultsGet_593989(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionContainerOperationResultsGet_593988(path: JsonNode;
+proc validate_ProtectionContainerOperationResultsGet_568217(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the result of any operation on the container.
   ## 
@@ -580,36 +580,36 @@ proc validate_ProtectionContainerOperationResultsGet_593988(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_593990 = path.getOrDefault("fabricName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568219 = path.getOrDefault("fabricName")
+  valid_568219 = validateParameter(valid_568219, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "fabricName", valid_593990
-  var valid_593991 = path.getOrDefault("resourceGroupName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_568219 != nil:
+    section.add "fabricName", valid_568219
+  var valid_568220 = path.getOrDefault("resourceGroupName")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "resourceGroupName", valid_593991
-  var valid_593992 = path.getOrDefault("containerName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_568220 != nil:
+    section.add "resourceGroupName", valid_568220
+  var valid_568221 = path.getOrDefault("containerName")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "containerName", valid_593992
-  var valid_593993 = path.getOrDefault("subscriptionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568221 != nil:
+    section.add "containerName", valid_568221
+  var valid_568222 = path.getOrDefault("subscriptionId")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "subscriptionId", valid_593993
-  var valid_593994 = path.getOrDefault("vaultName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568222 != nil:
+    section.add "subscriptionId", valid_568222
+  var valid_568223 = path.getOrDefault("vaultName")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "vaultName", valid_593994
-  var valid_593995 = path.getOrDefault("operationId")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_568223 != nil:
+    section.add "vaultName", valid_568223
+  var valid_568224 = path.getOrDefault("operationId")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "operationId", valid_593995
+  if valid_568224 != nil:
+    section.add "operationId", valid_568224
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -617,11 +617,11 @@ proc validate_ProtectionContainerOperationResultsGet_593988(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593996 = query.getOrDefault("api-version")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_568225 = query.getOrDefault("api-version")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "api-version", valid_593996
+  if valid_568225 != nil:
+    section.add "api-version", valid_568225
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -630,21 +630,21 @@ proc validate_ProtectionContainerOperationResultsGet_593988(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_ProtectionContainerOperationResultsGet_593987;
+proc call*(call_568226: Call_ProtectionContainerOperationResultsGet_568216;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the result of any operation on the container.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568226.validator(path, query, header, formData, body)
+  let scheme = call_568226.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568226.url(scheme.get, call_568226.host, call_568226.base,
+                         call_568226.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568226, url, valid)
 
-proc call*(call_593998: Call_ProtectionContainerOperationResultsGet_593987;
+proc call*(call_568227: Call_ProtectionContainerOperationResultsGet_568216;
           fabricName: string; resourceGroupName: string; apiVersion: string;
           containerName: string; subscriptionId: string; vaultName: string;
           operationId: string): Recallable =
@@ -664,26 +664,26 @@ proc call*(call_593998: Call_ProtectionContainerOperationResultsGet_593987;
   ##            : The name of the Recovery Services vault.
   ##   operationId: string (required)
   ##              : The operation ID used for this GET operation.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  add(path_593999, "fabricName", newJString(fabricName))
-  add(path_593999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "containerName", newJString(containerName))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
-  add(path_593999, "vaultName", newJString(vaultName))
-  add(path_593999, "operationId", newJString(operationId))
-  result = call_593998.call(path_593999, query_594000, nil, nil, nil)
+  var path_568228 = newJObject()
+  var query_568229 = newJObject()
+  add(path_568228, "fabricName", newJString(fabricName))
+  add(path_568228, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568229, "api-version", newJString(apiVersion))
+  add(path_568228, "containerName", newJString(containerName))
+  add(path_568228, "subscriptionId", newJString(subscriptionId))
+  add(path_568228, "vaultName", newJString(vaultName))
+  add(path_568228, "operationId", newJString(operationId))
+  result = call_568227.call(path_568228, query_568229, nil, nil, nil)
 
-var protectionContainerOperationResultsGet* = Call_ProtectionContainerOperationResultsGet_593987(
+var protectionContainerOperationResultsGet* = Call_ProtectionContainerOperationResultsGet_568216(
     name: "protectionContainerOperationResultsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/operationResults/{operationId}",
-    validator: validate_ProtectionContainerOperationResultsGet_593988, base: "",
-    url: url_ProtectionContainerOperationResultsGet_593989,
+    validator: validate_ProtectionContainerOperationResultsGet_568217, base: "",
+    url: url_ProtectionContainerOperationResultsGet_568218,
     schemes: {Scheme.Https})
 type
-  Call_ProtectedItemsCreateOrUpdate_594016 = ref object of OpenApiRestCall_593422
-proc url_ProtectedItemsCreateOrUpdate_594018(protocol: Scheme; host: string;
+  Call_ProtectedItemsCreateOrUpdate_568245 = ref object of OpenApiRestCall_567651
+proc url_ProtectedItemsCreateOrUpdate_568247(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -716,7 +716,7 @@ proc url_ProtectedItemsCreateOrUpdate_594018(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectedItemsCreateOrUpdate_594017(path: JsonNode; query: JsonNode;
+proc validate_ProtectedItemsCreateOrUpdate_568246(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation enables an item to be backed up, or modifies the existing backup policy information for an item that has been backed up. This is an asynchronous operation. To learn the status of the operation, call the GetItemOperationResult API.
   ## 
@@ -738,36 +738,36 @@ proc validate_ProtectedItemsCreateOrUpdate_594017(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594036 = path.getOrDefault("fabricName")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  var valid_568265 = path.getOrDefault("fabricName")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "fabricName", valid_594036
-  var valid_594037 = path.getOrDefault("protectedItemName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_568265 != nil:
+    section.add "fabricName", valid_568265
+  var valid_568266 = path.getOrDefault("protectedItemName")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "protectedItemName", valid_594037
-  var valid_594038 = path.getOrDefault("resourceGroupName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_568266 != nil:
+    section.add "protectedItemName", valid_568266
+  var valid_568267 = path.getOrDefault("resourceGroupName")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "resourceGroupName", valid_594038
-  var valid_594039 = path.getOrDefault("containerName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_568267 != nil:
+    section.add "resourceGroupName", valid_568267
+  var valid_568268 = path.getOrDefault("containerName")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "containerName", valid_594039
-  var valid_594040 = path.getOrDefault("subscriptionId")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_568268 != nil:
+    section.add "containerName", valid_568268
+  var valid_568269 = path.getOrDefault("subscriptionId")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "subscriptionId", valid_594040
-  var valid_594041 = path.getOrDefault("vaultName")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  if valid_568269 != nil:
+    section.add "subscriptionId", valid_568269
+  var valid_568270 = path.getOrDefault("vaultName")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "vaultName", valid_594041
+  if valid_568270 != nil:
+    section.add "vaultName", valid_568270
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -775,11 +775,11 @@ proc validate_ProtectedItemsCreateOrUpdate_594017(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594042 = query.getOrDefault("api-version")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  var valid_568271 = query.getOrDefault("api-version")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "api-version", valid_594042
+  if valid_568271 != nil:
+    section.add "api-version", valid_568271
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -793,20 +793,20 @@ proc validate_ProtectedItemsCreateOrUpdate_594017(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594044: Call_ProtectedItemsCreateOrUpdate_594016; path: JsonNode;
+proc call*(call_568273: Call_ProtectedItemsCreateOrUpdate_568245; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation enables an item to be backed up, or modifies the existing backup policy information for an item that has been backed up. This is an asynchronous operation. To learn the status of the operation, call the GetItemOperationResult API.
   ## 
-  let valid = call_594044.validator(path, query, header, formData, body)
-  let scheme = call_594044.pickScheme
+  let valid = call_568273.validator(path, query, header, formData, body)
+  let scheme = call_568273.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594044.url(scheme.get, call_594044.host, call_594044.base,
-                         call_594044.route, valid.getOrDefault("path"),
+  let url = call_568273.url(scheme.get, call_568273.host, call_568273.base,
+                         call_568273.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594044, url, valid)
+  result = hook(call_568273, url, valid)
 
-proc call*(call_594045: Call_ProtectedItemsCreateOrUpdate_594016;
+proc call*(call_568274: Call_ProtectedItemsCreateOrUpdate_568245;
           fabricName: string; protectedItemName: string; resourceGroupName: string;
           apiVersion: string; containerName: string; subscriptionId: string;
           resourceProtectedItem: JsonNode; vaultName: string): Recallable =
@@ -828,28 +828,28 @@ proc call*(call_594045: Call_ProtectedItemsCreateOrUpdate_594016;
   ##                        : The resource backup item.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594046 = newJObject()
-  var query_594047 = newJObject()
-  var body_594048 = newJObject()
-  add(path_594046, "fabricName", newJString(fabricName))
-  add(path_594046, "protectedItemName", newJString(protectedItemName))
-  add(path_594046, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594047, "api-version", newJString(apiVersion))
-  add(path_594046, "containerName", newJString(containerName))
-  add(path_594046, "subscriptionId", newJString(subscriptionId))
+  var path_568275 = newJObject()
+  var query_568276 = newJObject()
+  var body_568277 = newJObject()
+  add(path_568275, "fabricName", newJString(fabricName))
+  add(path_568275, "protectedItemName", newJString(protectedItemName))
+  add(path_568275, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568276, "api-version", newJString(apiVersion))
+  add(path_568275, "containerName", newJString(containerName))
+  add(path_568275, "subscriptionId", newJString(subscriptionId))
   if resourceProtectedItem != nil:
-    body_594048 = resourceProtectedItem
-  add(path_594046, "vaultName", newJString(vaultName))
-  result = call_594045.call(path_594046, query_594047, nil, nil, body_594048)
+    body_568277 = resourceProtectedItem
+  add(path_568275, "vaultName", newJString(vaultName))
+  result = call_568274.call(path_568275, query_568276, nil, nil, body_568277)
 
-var protectedItemsCreateOrUpdate* = Call_ProtectedItemsCreateOrUpdate_594016(
+var protectedItemsCreateOrUpdate* = Call_ProtectedItemsCreateOrUpdate_568245(
     name: "protectedItemsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}",
-    validator: validate_ProtectedItemsCreateOrUpdate_594017, base: "",
-    url: url_ProtectedItemsCreateOrUpdate_594018, schemes: {Scheme.Https})
+    validator: validate_ProtectedItemsCreateOrUpdate_568246, base: "",
+    url: url_ProtectedItemsCreateOrUpdate_568247, schemes: {Scheme.Https})
 type
-  Call_ProtectedItemsGet_594001 = ref object of OpenApiRestCall_593422
-proc url_ProtectedItemsGet_594003(protocol: Scheme; host: string; base: string;
+  Call_ProtectedItemsGet_568230 = ref object of OpenApiRestCall_567651
+proc url_ProtectedItemsGet_568232(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -882,7 +882,7 @@ proc url_ProtectedItemsGet_594003(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectedItemsGet_594002(path: JsonNode; query: JsonNode;
+proc validate_ProtectedItemsGet_568231(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Provides the details of the backup item. This is an asynchronous operation. To know the status of the operation, call the GetItemOperationResult API.
@@ -905,36 +905,36 @@ proc validate_ProtectedItemsGet_594002(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594004 = path.getOrDefault("fabricName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568233 = path.getOrDefault("fabricName")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "fabricName", valid_594004
-  var valid_594005 = path.getOrDefault("protectedItemName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  if valid_568233 != nil:
+    section.add "fabricName", valid_568233
+  var valid_568234 = path.getOrDefault("protectedItemName")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "protectedItemName", valid_594005
-  var valid_594006 = path.getOrDefault("resourceGroupName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_568234 != nil:
+    section.add "protectedItemName", valid_568234
+  var valid_568235 = path.getOrDefault("resourceGroupName")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "resourceGroupName", valid_594006
-  var valid_594007 = path.getOrDefault("containerName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568235 != nil:
+    section.add "resourceGroupName", valid_568235
+  var valid_568236 = path.getOrDefault("containerName")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "containerName", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568236 != nil:
+    section.add "containerName", valid_568236
+  var valid_568237 = path.getOrDefault("subscriptionId")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
-  var valid_594009 = path.getOrDefault("vaultName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_568237 != nil:
+    section.add "subscriptionId", valid_568237
+  var valid_568238 = path.getOrDefault("vaultName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "vaultName", valid_594009
+  if valid_568238 != nil:
+    section.add "vaultName", valid_568238
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -944,16 +944,16 @@ proc validate_ProtectedItemsGet_594002(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594010 = query.getOrDefault("api-version")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  var valid_568239 = query.getOrDefault("api-version")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "api-version", valid_594010
-  var valid_594011 = query.getOrDefault("$filter")
-  valid_594011 = validateParameter(valid_594011, JString, required = false,
+  if valid_568239 != nil:
+    section.add "api-version", valid_568239
+  var valid_568240 = query.getOrDefault("$filter")
+  valid_568240 = validateParameter(valid_568240, JString, required = false,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "$filter", valid_594011
+  if valid_568240 != nil:
+    section.add "$filter", valid_568240
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -962,20 +962,20 @@ proc validate_ProtectedItemsGet_594002(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594012: Call_ProtectedItemsGet_594001; path: JsonNode;
+proc call*(call_568241: Call_ProtectedItemsGet_568230; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Provides the details of the backup item. This is an asynchronous operation. To know the status of the operation, call the GetItemOperationResult API.
   ## 
-  let valid = call_594012.validator(path, query, header, formData, body)
-  let scheme = call_594012.pickScheme
+  let valid = call_568241.validator(path, query, header, formData, body)
+  let scheme = call_568241.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594012.url(scheme.get, call_594012.host, call_594012.base,
-                         call_594012.route, valid.getOrDefault("path"),
+  let url = call_568241.url(scheme.get, call_568241.host, call_568241.base,
+                         call_568241.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594012, url, valid)
+  result = hook(call_568241, url, valid)
 
-proc call*(call_594013: Call_ProtectedItemsGet_594001; fabricName: string;
+proc call*(call_568242: Call_ProtectedItemsGet_568230; fabricName: string;
           protectedItemName: string; resourceGroupName: string; apiVersion: string;
           containerName: string; subscriptionId: string; vaultName: string;
           Filter: string = ""): Recallable =
@@ -997,25 +997,25 @@ proc call*(call_594013: Call_ProtectedItemsGet_594001; fabricName: string;
   ##            : The name of the Recovery Services vault.
   ##   Filter: string
   ##         : expand eq {extendedInfo}. This filter enables you to choose (or filter) specific items in the list of backup items.
-  var path_594014 = newJObject()
-  var query_594015 = newJObject()
-  add(path_594014, "fabricName", newJString(fabricName))
-  add(path_594014, "protectedItemName", newJString(protectedItemName))
-  add(path_594014, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594015, "api-version", newJString(apiVersion))
-  add(path_594014, "containerName", newJString(containerName))
-  add(path_594014, "subscriptionId", newJString(subscriptionId))
-  add(path_594014, "vaultName", newJString(vaultName))
-  add(query_594015, "$filter", newJString(Filter))
-  result = call_594013.call(path_594014, query_594015, nil, nil, nil)
+  var path_568243 = newJObject()
+  var query_568244 = newJObject()
+  add(path_568243, "fabricName", newJString(fabricName))
+  add(path_568243, "protectedItemName", newJString(protectedItemName))
+  add(path_568243, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568244, "api-version", newJString(apiVersion))
+  add(path_568243, "containerName", newJString(containerName))
+  add(path_568243, "subscriptionId", newJString(subscriptionId))
+  add(path_568243, "vaultName", newJString(vaultName))
+  add(query_568244, "$filter", newJString(Filter))
+  result = call_568242.call(path_568243, query_568244, nil, nil, nil)
 
-var protectedItemsGet* = Call_ProtectedItemsGet_594001(name: "protectedItemsGet",
+var protectedItemsGet* = Call_ProtectedItemsGet_568230(name: "protectedItemsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}",
-    validator: validate_ProtectedItemsGet_594002, base: "",
-    url: url_ProtectedItemsGet_594003, schemes: {Scheme.Https})
+    validator: validate_ProtectedItemsGet_568231, base: "",
+    url: url_ProtectedItemsGet_568232, schemes: {Scheme.Https})
 type
-  Call_ProtectedItemsDelete_594049 = ref object of OpenApiRestCall_593422
-proc url_ProtectedItemsDelete_594051(protocol: Scheme; host: string; base: string;
+  Call_ProtectedItemsDelete_568278 = ref object of OpenApiRestCall_567651
+proc url_ProtectedItemsDelete_568280(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1048,7 +1048,7 @@ proc url_ProtectedItemsDelete_594051(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectedItemsDelete_594050(path: JsonNode; query: JsonNode;
+proc validate_ProtectedItemsDelete_568279(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Used to disable the backup job for an item within a container. This is an asynchronous operation. To learn the status of the request, call the GetItemOperationResult API.
   ## 
@@ -1070,36 +1070,36 @@ proc validate_ProtectedItemsDelete_594050(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594052 = path.getOrDefault("fabricName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  var valid_568281 = path.getOrDefault("fabricName")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "fabricName", valid_594052
-  var valid_594053 = path.getOrDefault("protectedItemName")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  if valid_568281 != nil:
+    section.add "fabricName", valid_568281
+  var valid_568282 = path.getOrDefault("protectedItemName")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "protectedItemName", valid_594053
-  var valid_594054 = path.getOrDefault("resourceGroupName")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  if valid_568282 != nil:
+    section.add "protectedItemName", valid_568282
+  var valid_568283 = path.getOrDefault("resourceGroupName")
+  valid_568283 = validateParameter(valid_568283, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "resourceGroupName", valid_594054
-  var valid_594055 = path.getOrDefault("containerName")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  if valid_568283 != nil:
+    section.add "resourceGroupName", valid_568283
+  var valid_568284 = path.getOrDefault("containerName")
+  valid_568284 = validateParameter(valid_568284, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "containerName", valid_594055
-  var valid_594056 = path.getOrDefault("subscriptionId")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  if valid_568284 != nil:
+    section.add "containerName", valid_568284
+  var valid_568285 = path.getOrDefault("subscriptionId")
+  valid_568285 = validateParameter(valid_568285, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "subscriptionId", valid_594056
-  var valid_594057 = path.getOrDefault("vaultName")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  if valid_568285 != nil:
+    section.add "subscriptionId", valid_568285
+  var valid_568286 = path.getOrDefault("vaultName")
+  valid_568286 = validateParameter(valid_568286, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "vaultName", valid_594057
+  if valid_568286 != nil:
+    section.add "vaultName", valid_568286
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1107,11 +1107,11 @@ proc validate_ProtectedItemsDelete_594050(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594058 = query.getOrDefault("api-version")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  var valid_568287 = query.getOrDefault("api-version")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "api-version", valid_594058
+  if valid_568287 != nil:
+    section.add "api-version", valid_568287
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1120,20 +1120,20 @@ proc validate_ProtectedItemsDelete_594050(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594059: Call_ProtectedItemsDelete_594049; path: JsonNode;
+proc call*(call_568288: Call_ProtectedItemsDelete_568278; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Used to disable the backup job for an item within a container. This is an asynchronous operation. To learn the status of the request, call the GetItemOperationResult API.
   ## 
-  let valid = call_594059.validator(path, query, header, formData, body)
-  let scheme = call_594059.pickScheme
+  let valid = call_568288.validator(path, query, header, formData, body)
+  let scheme = call_568288.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594059.url(scheme.get, call_594059.host, call_594059.base,
-                         call_594059.route, valid.getOrDefault("path"),
+  let url = call_568288.url(scheme.get, call_568288.host, call_568288.base,
+                         call_568288.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594059, url, valid)
+  result = hook(call_568288, url, valid)
 
-proc call*(call_594060: Call_ProtectedItemsDelete_594049; fabricName: string;
+proc call*(call_568289: Call_ProtectedItemsDelete_568278; fabricName: string;
           protectedItemName: string; resourceGroupName: string; apiVersion: string;
           containerName: string; subscriptionId: string; vaultName: string): Recallable =
   ## protectedItemsDelete
@@ -1152,25 +1152,25 @@ proc call*(call_594060: Call_ProtectedItemsDelete_594049; fabricName: string;
   ##                 : The subscription ID.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594061 = newJObject()
-  var query_594062 = newJObject()
-  add(path_594061, "fabricName", newJString(fabricName))
-  add(path_594061, "protectedItemName", newJString(protectedItemName))
-  add(path_594061, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594062, "api-version", newJString(apiVersion))
-  add(path_594061, "containerName", newJString(containerName))
-  add(path_594061, "subscriptionId", newJString(subscriptionId))
-  add(path_594061, "vaultName", newJString(vaultName))
-  result = call_594060.call(path_594061, query_594062, nil, nil, nil)
+  var path_568290 = newJObject()
+  var query_568291 = newJObject()
+  add(path_568290, "fabricName", newJString(fabricName))
+  add(path_568290, "protectedItemName", newJString(protectedItemName))
+  add(path_568290, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568291, "api-version", newJString(apiVersion))
+  add(path_568290, "containerName", newJString(containerName))
+  add(path_568290, "subscriptionId", newJString(subscriptionId))
+  add(path_568290, "vaultName", newJString(vaultName))
+  result = call_568289.call(path_568290, query_568291, nil, nil, nil)
 
-var protectedItemsDelete* = Call_ProtectedItemsDelete_594049(
+var protectedItemsDelete* = Call_ProtectedItemsDelete_568278(
     name: "protectedItemsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}",
-    validator: validate_ProtectedItemsDelete_594050, base: "",
-    url: url_ProtectedItemsDelete_594051, schemes: {Scheme.Https})
+    validator: validate_ProtectedItemsDelete_568279, base: "",
+    url: url_ProtectedItemsDelete_568280, schemes: {Scheme.Https})
 type
-  Call_BackupsTrigger_594063 = ref object of OpenApiRestCall_593422
-proc url_BackupsTrigger_594065(protocol: Scheme; host: string; base: string;
+  Call_BackupsTrigger_568292 = ref object of OpenApiRestCall_567651
+proc url_BackupsTrigger_568294(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1204,7 +1204,7 @@ proc url_BackupsTrigger_594065(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupsTrigger_594064(path: JsonNode; query: JsonNode;
+proc validate_BackupsTrigger_568293(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Triggers the backup job for the specified backup item. This is an asynchronous operation. To know the status of the operation, call GetProtectedItemOperationResult API.
@@ -1227,36 +1227,36 @@ proc validate_BackupsTrigger_594064(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594066 = path.getOrDefault("fabricName")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  var valid_568295 = path.getOrDefault("fabricName")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "fabricName", valid_594066
-  var valid_594067 = path.getOrDefault("protectedItemName")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  if valid_568295 != nil:
+    section.add "fabricName", valid_568295
+  var valid_568296 = path.getOrDefault("protectedItemName")
+  valid_568296 = validateParameter(valid_568296, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "protectedItemName", valid_594067
-  var valid_594068 = path.getOrDefault("resourceGroupName")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  if valid_568296 != nil:
+    section.add "protectedItemName", valid_568296
+  var valid_568297 = path.getOrDefault("resourceGroupName")
+  valid_568297 = validateParameter(valid_568297, JString, required = true,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "resourceGroupName", valid_594068
-  var valid_594069 = path.getOrDefault("containerName")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  if valid_568297 != nil:
+    section.add "resourceGroupName", valid_568297
+  var valid_568298 = path.getOrDefault("containerName")
+  valid_568298 = validateParameter(valid_568298, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "containerName", valid_594069
-  var valid_594070 = path.getOrDefault("subscriptionId")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  if valid_568298 != nil:
+    section.add "containerName", valid_568298
+  var valid_568299 = path.getOrDefault("subscriptionId")
+  valid_568299 = validateParameter(valid_568299, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "subscriptionId", valid_594070
-  var valid_594071 = path.getOrDefault("vaultName")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  if valid_568299 != nil:
+    section.add "subscriptionId", valid_568299
+  var valid_568300 = path.getOrDefault("vaultName")
+  valid_568300 = validateParameter(valid_568300, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "vaultName", valid_594071
+  if valid_568300 != nil:
+    section.add "vaultName", valid_568300
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1264,11 +1264,11 @@ proc validate_BackupsTrigger_594064(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594072 = query.getOrDefault("api-version")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  var valid_568301 = query.getOrDefault("api-version")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "api-version", valid_594072
+  if valid_568301 != nil:
+    section.add "api-version", valid_568301
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1282,20 +1282,20 @@ proc validate_BackupsTrigger_594064(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594074: Call_BackupsTrigger_594063; path: JsonNode; query: JsonNode;
+proc call*(call_568303: Call_BackupsTrigger_568292; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Triggers the backup job for the specified backup item. This is an asynchronous operation. To know the status of the operation, call GetProtectedItemOperationResult API.
   ## 
-  let valid = call_594074.validator(path, query, header, formData, body)
-  let scheme = call_594074.pickScheme
+  let valid = call_568303.validator(path, query, header, formData, body)
+  let scheme = call_568303.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594074.url(scheme.get, call_594074.host, call_594074.base,
-                         call_594074.route, valid.getOrDefault("path"),
+  let url = call_568303.url(scheme.get, call_568303.host, call_568303.base,
+                         call_568303.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594074, url, valid)
+  result = hook(call_568303, url, valid)
 
-proc call*(call_594075: Call_BackupsTrigger_594063; fabricName: string;
+proc call*(call_568304: Call_BackupsTrigger_568292; fabricName: string;
           protectedItemName: string; resourceGroupName: string; apiVersion: string;
           containerName: string; resourceBackupRequest: JsonNode;
           subscriptionId: string; vaultName: string): Recallable =
@@ -1317,27 +1317,27 @@ proc call*(call_594075: Call_BackupsTrigger_594063; fabricName: string;
   ##                 : The subscription ID.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594076 = newJObject()
-  var query_594077 = newJObject()
-  var body_594078 = newJObject()
-  add(path_594076, "fabricName", newJString(fabricName))
-  add(path_594076, "protectedItemName", newJString(protectedItemName))
-  add(path_594076, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594077, "api-version", newJString(apiVersion))
-  add(path_594076, "containerName", newJString(containerName))
+  var path_568305 = newJObject()
+  var query_568306 = newJObject()
+  var body_568307 = newJObject()
+  add(path_568305, "fabricName", newJString(fabricName))
+  add(path_568305, "protectedItemName", newJString(protectedItemName))
+  add(path_568305, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568306, "api-version", newJString(apiVersion))
+  add(path_568305, "containerName", newJString(containerName))
   if resourceBackupRequest != nil:
-    body_594078 = resourceBackupRequest
-  add(path_594076, "subscriptionId", newJString(subscriptionId))
-  add(path_594076, "vaultName", newJString(vaultName))
-  result = call_594075.call(path_594076, query_594077, nil, nil, body_594078)
+    body_568307 = resourceBackupRequest
+  add(path_568305, "subscriptionId", newJString(subscriptionId))
+  add(path_568305, "vaultName", newJString(vaultName))
+  result = call_568304.call(path_568305, query_568306, nil, nil, body_568307)
 
-var backupsTrigger* = Call_BackupsTrigger_594063(name: "backupsTrigger",
+var backupsTrigger* = Call_BackupsTrigger_568292(name: "backupsTrigger",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}/backup",
-    validator: validate_BackupsTrigger_594064, base: "", url: url_BackupsTrigger_594065,
+    validator: validate_BackupsTrigger_568293, base: "", url: url_BackupsTrigger_568294,
     schemes: {Scheme.Https})
 type
-  Call_ProtectedItemOperationResultsGet_594079 = ref object of OpenApiRestCall_593422
-proc url_ProtectedItemOperationResultsGet_594081(protocol: Scheme; host: string;
+  Call_ProtectedItemOperationResultsGet_568308 = ref object of OpenApiRestCall_567651
+proc url_ProtectedItemOperationResultsGet_568310(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1373,7 +1373,7 @@ proc url_ProtectedItemOperationResultsGet_594081(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectedItemOperationResultsGet_594080(path: JsonNode;
+proc validate_ProtectedItemOperationResultsGet_568309(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the result of any operation on the backup item.
   ## 
@@ -1397,41 +1397,41 @@ proc validate_ProtectedItemOperationResultsGet_594080(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594082 = path.getOrDefault("fabricName")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  var valid_568311 = path.getOrDefault("fabricName")
+  valid_568311 = validateParameter(valid_568311, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "fabricName", valid_594082
-  var valid_594083 = path.getOrDefault("protectedItemName")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
+  if valid_568311 != nil:
+    section.add "fabricName", valid_568311
+  var valid_568312 = path.getOrDefault("protectedItemName")
+  valid_568312 = validateParameter(valid_568312, JString, required = true,
                                  default = nil)
-  if valid_594083 != nil:
-    section.add "protectedItemName", valid_594083
-  var valid_594084 = path.getOrDefault("resourceGroupName")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  if valid_568312 != nil:
+    section.add "protectedItemName", valid_568312
+  var valid_568313 = path.getOrDefault("resourceGroupName")
+  valid_568313 = validateParameter(valid_568313, JString, required = true,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "resourceGroupName", valid_594084
-  var valid_594085 = path.getOrDefault("containerName")
-  valid_594085 = validateParameter(valid_594085, JString, required = true,
+  if valid_568313 != nil:
+    section.add "resourceGroupName", valid_568313
+  var valid_568314 = path.getOrDefault("containerName")
+  valid_568314 = validateParameter(valid_568314, JString, required = true,
                                  default = nil)
-  if valid_594085 != nil:
-    section.add "containerName", valid_594085
-  var valid_594086 = path.getOrDefault("subscriptionId")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  if valid_568314 != nil:
+    section.add "containerName", valid_568314
+  var valid_568315 = path.getOrDefault("subscriptionId")
+  valid_568315 = validateParameter(valid_568315, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "subscriptionId", valid_594086
-  var valid_594087 = path.getOrDefault("vaultName")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  if valid_568315 != nil:
+    section.add "subscriptionId", valid_568315
+  var valid_568316 = path.getOrDefault("vaultName")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "vaultName", valid_594087
-  var valid_594088 = path.getOrDefault("operationId")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  if valid_568316 != nil:
+    section.add "vaultName", valid_568316
+  var valid_568317 = path.getOrDefault("operationId")
+  valid_568317 = validateParameter(valid_568317, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "operationId", valid_594088
+  if valid_568317 != nil:
+    section.add "operationId", valid_568317
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1439,11 +1439,11 @@ proc validate_ProtectedItemOperationResultsGet_594080(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594089 = query.getOrDefault("api-version")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_568318 = query.getOrDefault("api-version")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "api-version", valid_594089
+  if valid_568318 != nil:
+    section.add "api-version", valid_568318
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1452,21 +1452,21 @@ proc validate_ProtectedItemOperationResultsGet_594080(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594090: Call_ProtectedItemOperationResultsGet_594079;
+proc call*(call_568319: Call_ProtectedItemOperationResultsGet_568308;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the result of any operation on the backup item.
   ## 
-  let valid = call_594090.validator(path, query, header, formData, body)
-  let scheme = call_594090.pickScheme
+  let valid = call_568319.validator(path, query, header, formData, body)
+  let scheme = call_568319.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594090.url(scheme.get, call_594090.host, call_594090.base,
-                         call_594090.route, valid.getOrDefault("path"),
+  let url = call_568319.url(scheme.get, call_568319.host, call_568319.base,
+                         call_568319.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594090, url, valid)
+  result = hook(call_568319, url, valid)
 
-proc call*(call_594091: Call_ProtectedItemOperationResultsGet_594079;
+proc call*(call_568320: Call_ProtectedItemOperationResultsGet_568308;
           fabricName: string; protectedItemName: string; resourceGroupName: string;
           apiVersion: string; containerName: string; subscriptionId: string;
           vaultName: string; operationId: string): Recallable =
@@ -1488,26 +1488,26 @@ proc call*(call_594091: Call_ProtectedItemOperationResultsGet_594079;
   ##            : The name of the Recovery Services vault.
   ##   operationId: string (required)
   ##              : The OperationID used in this GET operation.
-  var path_594092 = newJObject()
-  var query_594093 = newJObject()
-  add(path_594092, "fabricName", newJString(fabricName))
-  add(path_594092, "protectedItemName", newJString(protectedItemName))
-  add(path_594092, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594093, "api-version", newJString(apiVersion))
-  add(path_594092, "containerName", newJString(containerName))
-  add(path_594092, "subscriptionId", newJString(subscriptionId))
-  add(path_594092, "vaultName", newJString(vaultName))
-  add(path_594092, "operationId", newJString(operationId))
-  result = call_594091.call(path_594092, query_594093, nil, nil, nil)
+  var path_568321 = newJObject()
+  var query_568322 = newJObject()
+  add(path_568321, "fabricName", newJString(fabricName))
+  add(path_568321, "protectedItemName", newJString(protectedItemName))
+  add(path_568321, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568322, "api-version", newJString(apiVersion))
+  add(path_568321, "containerName", newJString(containerName))
+  add(path_568321, "subscriptionId", newJString(subscriptionId))
+  add(path_568321, "vaultName", newJString(vaultName))
+  add(path_568321, "operationId", newJString(operationId))
+  result = call_568320.call(path_568321, query_568322, nil, nil, nil)
 
-var protectedItemOperationResultsGet* = Call_ProtectedItemOperationResultsGet_594079(
+var protectedItemOperationResultsGet* = Call_ProtectedItemOperationResultsGet_568308(
     name: "protectedItemOperationResultsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}/operationResults/{operationId}",
-    validator: validate_ProtectedItemOperationResultsGet_594080, base: "",
-    url: url_ProtectedItemOperationResultsGet_594081, schemes: {Scheme.Https})
+    validator: validate_ProtectedItemOperationResultsGet_568309, base: "",
+    url: url_ProtectedItemOperationResultsGet_568310, schemes: {Scheme.Https})
 type
-  Call_ProtectedItemOperationStatusesGet_594094 = ref object of OpenApiRestCall_593422
-proc url_ProtectedItemOperationStatusesGet_594096(protocol: Scheme; host: string;
+  Call_ProtectedItemOperationStatusesGet_568323 = ref object of OpenApiRestCall_567651
+proc url_ProtectedItemOperationStatusesGet_568325(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1543,7 +1543,7 @@ proc url_ProtectedItemOperationStatusesGet_594096(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectedItemOperationStatusesGet_594095(path: JsonNode;
+proc validate_ProtectedItemOperationStatusesGet_568324(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the status of an operation such as triggering a backup or restore. The status can be: In progress, Completed, or Failed. You can refer to the OperationStatus enum for all the possible states of the operation. Some operations create jobs. This method returns the list of jobs associated with the operation.
   ## 
@@ -1567,41 +1567,41 @@ proc validate_ProtectedItemOperationStatusesGet_594095(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594097 = path.getOrDefault("fabricName")
-  valid_594097 = validateParameter(valid_594097, JString, required = true,
+  var valid_568326 = path.getOrDefault("fabricName")
+  valid_568326 = validateParameter(valid_568326, JString, required = true,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "fabricName", valid_594097
-  var valid_594098 = path.getOrDefault("protectedItemName")
-  valid_594098 = validateParameter(valid_594098, JString, required = true,
+  if valid_568326 != nil:
+    section.add "fabricName", valid_568326
+  var valid_568327 = path.getOrDefault("protectedItemName")
+  valid_568327 = validateParameter(valid_568327, JString, required = true,
                                  default = nil)
-  if valid_594098 != nil:
-    section.add "protectedItemName", valid_594098
-  var valid_594099 = path.getOrDefault("resourceGroupName")
-  valid_594099 = validateParameter(valid_594099, JString, required = true,
+  if valid_568327 != nil:
+    section.add "protectedItemName", valid_568327
+  var valid_568328 = path.getOrDefault("resourceGroupName")
+  valid_568328 = validateParameter(valid_568328, JString, required = true,
                                  default = nil)
-  if valid_594099 != nil:
-    section.add "resourceGroupName", valid_594099
-  var valid_594100 = path.getOrDefault("containerName")
-  valid_594100 = validateParameter(valid_594100, JString, required = true,
+  if valid_568328 != nil:
+    section.add "resourceGroupName", valid_568328
+  var valid_568329 = path.getOrDefault("containerName")
+  valid_568329 = validateParameter(valid_568329, JString, required = true,
                                  default = nil)
-  if valid_594100 != nil:
-    section.add "containerName", valid_594100
-  var valid_594101 = path.getOrDefault("subscriptionId")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  if valid_568329 != nil:
+    section.add "containerName", valid_568329
+  var valid_568330 = path.getOrDefault("subscriptionId")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "subscriptionId", valid_594101
-  var valid_594102 = path.getOrDefault("vaultName")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  if valid_568330 != nil:
+    section.add "subscriptionId", valid_568330
+  var valid_568331 = path.getOrDefault("vaultName")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "vaultName", valid_594102
-  var valid_594103 = path.getOrDefault("operationId")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  if valid_568331 != nil:
+    section.add "vaultName", valid_568331
+  var valid_568332 = path.getOrDefault("operationId")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "operationId", valid_594103
+  if valid_568332 != nil:
+    section.add "operationId", valid_568332
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1609,11 +1609,11 @@ proc validate_ProtectedItemOperationStatusesGet_594095(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594104 = query.getOrDefault("api-version")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  var valid_568333 = query.getOrDefault("api-version")
+  valid_568333 = validateParameter(valid_568333, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "api-version", valid_594104
+  if valid_568333 != nil:
+    section.add "api-version", valid_568333
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1622,21 +1622,21 @@ proc validate_ProtectedItemOperationStatusesGet_594095(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594105: Call_ProtectedItemOperationStatusesGet_594094;
+proc call*(call_568334: Call_ProtectedItemOperationStatusesGet_568323;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the status of an operation such as triggering a backup or restore. The status can be: In progress, Completed, or Failed. You can refer to the OperationStatus enum for all the possible states of the operation. Some operations create jobs. This method returns the list of jobs associated with the operation.
   ## 
-  let valid = call_594105.validator(path, query, header, formData, body)
-  let scheme = call_594105.pickScheme
+  let valid = call_568334.validator(path, query, header, formData, body)
+  let scheme = call_568334.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594105.url(scheme.get, call_594105.host, call_594105.base,
-                         call_594105.route, valid.getOrDefault("path"),
+  let url = call_568334.url(scheme.get, call_568334.host, call_568334.base,
+                         call_568334.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594105, url, valid)
+  result = hook(call_568334, url, valid)
 
-proc call*(call_594106: Call_ProtectedItemOperationStatusesGet_594094;
+proc call*(call_568335: Call_ProtectedItemOperationStatusesGet_568323;
           fabricName: string; protectedItemName: string; resourceGroupName: string;
           apiVersion: string; containerName: string; subscriptionId: string;
           vaultName: string; operationId: string): Recallable =
@@ -1658,26 +1658,26 @@ proc call*(call_594106: Call_ProtectedItemOperationStatusesGet_594094;
   ##            : The name of the Recovery Services vault.
   ##   operationId: string (required)
   ##              : The OperationID used in this GET operation.
-  var path_594107 = newJObject()
-  var query_594108 = newJObject()
-  add(path_594107, "fabricName", newJString(fabricName))
-  add(path_594107, "protectedItemName", newJString(protectedItemName))
-  add(path_594107, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594108, "api-version", newJString(apiVersion))
-  add(path_594107, "containerName", newJString(containerName))
-  add(path_594107, "subscriptionId", newJString(subscriptionId))
-  add(path_594107, "vaultName", newJString(vaultName))
-  add(path_594107, "operationId", newJString(operationId))
-  result = call_594106.call(path_594107, query_594108, nil, nil, nil)
+  var path_568336 = newJObject()
+  var query_568337 = newJObject()
+  add(path_568336, "fabricName", newJString(fabricName))
+  add(path_568336, "protectedItemName", newJString(protectedItemName))
+  add(path_568336, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568337, "api-version", newJString(apiVersion))
+  add(path_568336, "containerName", newJString(containerName))
+  add(path_568336, "subscriptionId", newJString(subscriptionId))
+  add(path_568336, "vaultName", newJString(vaultName))
+  add(path_568336, "operationId", newJString(operationId))
+  result = call_568335.call(path_568336, query_568337, nil, nil, nil)
 
-var protectedItemOperationStatusesGet* = Call_ProtectedItemOperationStatusesGet_594094(
+var protectedItemOperationStatusesGet* = Call_ProtectedItemOperationStatusesGet_568323(
     name: "protectedItemOperationStatusesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}/operationsStatus/{operationId}",
-    validator: validate_ProtectedItemOperationStatusesGet_594095, base: "",
-    url: url_ProtectedItemOperationStatusesGet_594096, schemes: {Scheme.Https})
+    validator: validate_ProtectedItemOperationStatusesGet_568324, base: "",
+    url: url_ProtectedItemOperationStatusesGet_568325, schemes: {Scheme.Https})
 type
-  Call_RecoveryPointsList_594109 = ref object of OpenApiRestCall_593422
-proc url_RecoveryPointsList_594111(protocol: Scheme; host: string; base: string;
+  Call_RecoveryPointsList_568338 = ref object of OpenApiRestCall_567651
+proc url_RecoveryPointsList_568340(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1711,7 +1711,7 @@ proc url_RecoveryPointsList_594111(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoveryPointsList_594110(path: JsonNode; query: JsonNode;
+proc validate_RecoveryPointsList_568339(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Lists the recovery points, or backup copies, for the specified backup item.
@@ -1734,36 +1734,36 @@ proc validate_RecoveryPointsList_594110(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594112 = path.getOrDefault("fabricName")
-  valid_594112 = validateParameter(valid_594112, JString, required = true,
+  var valid_568341 = path.getOrDefault("fabricName")
+  valid_568341 = validateParameter(valid_568341, JString, required = true,
                                  default = nil)
-  if valid_594112 != nil:
-    section.add "fabricName", valid_594112
-  var valid_594113 = path.getOrDefault("protectedItemName")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  if valid_568341 != nil:
+    section.add "fabricName", valid_568341
+  var valid_568342 = path.getOrDefault("protectedItemName")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = nil)
-  if valid_594113 != nil:
-    section.add "protectedItemName", valid_594113
-  var valid_594114 = path.getOrDefault("resourceGroupName")
-  valid_594114 = validateParameter(valid_594114, JString, required = true,
+  if valid_568342 != nil:
+    section.add "protectedItemName", valid_568342
+  var valid_568343 = path.getOrDefault("resourceGroupName")
+  valid_568343 = validateParameter(valid_568343, JString, required = true,
                                  default = nil)
-  if valid_594114 != nil:
-    section.add "resourceGroupName", valid_594114
-  var valid_594115 = path.getOrDefault("containerName")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  if valid_568343 != nil:
+    section.add "resourceGroupName", valid_568343
+  var valid_568344 = path.getOrDefault("containerName")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "containerName", valid_594115
-  var valid_594116 = path.getOrDefault("subscriptionId")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_568344 != nil:
+    section.add "containerName", valid_568344
+  var valid_568345 = path.getOrDefault("subscriptionId")
+  valid_568345 = validateParameter(valid_568345, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "subscriptionId", valid_594116
-  var valid_594117 = path.getOrDefault("vaultName")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  if valid_568345 != nil:
+    section.add "subscriptionId", valid_568345
+  var valid_568346 = path.getOrDefault("vaultName")
+  valid_568346 = validateParameter(valid_568346, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "vaultName", valid_594117
+  if valid_568346 != nil:
+    section.add "vaultName", valid_568346
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1773,16 +1773,16 @@ proc validate_RecoveryPointsList_594110(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594118 = query.getOrDefault("api-version")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  var valid_568347 = query.getOrDefault("api-version")
+  valid_568347 = validateParameter(valid_568347, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "api-version", valid_594118
-  var valid_594119 = query.getOrDefault("$filter")
-  valid_594119 = validateParameter(valid_594119, JString, required = false,
+  if valid_568347 != nil:
+    section.add "api-version", valid_568347
+  var valid_568348 = query.getOrDefault("$filter")
+  valid_568348 = validateParameter(valid_568348, JString, required = false,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "$filter", valid_594119
+  if valid_568348 != nil:
+    section.add "$filter", valid_568348
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1791,20 +1791,20 @@ proc validate_RecoveryPointsList_594110(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594120: Call_RecoveryPointsList_594109; path: JsonNode;
+proc call*(call_568349: Call_RecoveryPointsList_568338; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the recovery points, or backup copies, for the specified backup item.
   ## 
-  let valid = call_594120.validator(path, query, header, formData, body)
-  let scheme = call_594120.pickScheme
+  let valid = call_568349.validator(path, query, header, formData, body)
+  let scheme = call_568349.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594120.url(scheme.get, call_594120.host, call_594120.base,
-                         call_594120.route, valid.getOrDefault("path"),
+  let url = call_568349.url(scheme.get, call_568349.host, call_568349.base,
+                         call_568349.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594120, url, valid)
+  result = hook(call_568349, url, valid)
 
-proc call*(call_594121: Call_RecoveryPointsList_594109; fabricName: string;
+proc call*(call_568350: Call_RecoveryPointsList_568338; fabricName: string;
           protectedItemName: string; resourceGroupName: string; apiVersion: string;
           containerName: string; subscriptionId: string; vaultName: string;
           Filter: string = ""): Recallable =
@@ -1826,26 +1826,26 @@ proc call*(call_594121: Call_RecoveryPointsList_594109; fabricName: string;
   ##            : The name of the Recovery Services vault.
   ##   Filter: string
   ##         : startDate eq {yyyy-mm-dd hh:mm:ss PM} and endDate { yyyy-mm-dd hh:mm:ss PM}.
-  var path_594122 = newJObject()
-  var query_594123 = newJObject()
-  add(path_594122, "fabricName", newJString(fabricName))
-  add(path_594122, "protectedItemName", newJString(protectedItemName))
-  add(path_594122, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594123, "api-version", newJString(apiVersion))
-  add(path_594122, "containerName", newJString(containerName))
-  add(path_594122, "subscriptionId", newJString(subscriptionId))
-  add(path_594122, "vaultName", newJString(vaultName))
-  add(query_594123, "$filter", newJString(Filter))
-  result = call_594121.call(path_594122, query_594123, nil, nil, nil)
+  var path_568351 = newJObject()
+  var query_568352 = newJObject()
+  add(path_568351, "fabricName", newJString(fabricName))
+  add(path_568351, "protectedItemName", newJString(protectedItemName))
+  add(path_568351, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568352, "api-version", newJString(apiVersion))
+  add(path_568351, "containerName", newJString(containerName))
+  add(path_568351, "subscriptionId", newJString(subscriptionId))
+  add(path_568351, "vaultName", newJString(vaultName))
+  add(query_568352, "$filter", newJString(Filter))
+  result = call_568350.call(path_568351, query_568352, nil, nil, nil)
 
-var recoveryPointsList* = Call_RecoveryPointsList_594109(
+var recoveryPointsList* = Call_RecoveryPointsList_568338(
     name: "recoveryPointsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}/recoveryPoints",
-    validator: validate_RecoveryPointsList_594110, base: "",
-    url: url_RecoveryPointsList_594111, schemes: {Scheme.Https})
+    validator: validate_RecoveryPointsList_568339, base: "",
+    url: url_RecoveryPointsList_568340, schemes: {Scheme.Https})
 type
-  Call_RecoveryPointsGet_594124 = ref object of OpenApiRestCall_593422
-proc url_RecoveryPointsGet_594126(protocol: Scheme; host: string; base: string;
+  Call_RecoveryPointsGet_568353 = ref object of OpenApiRestCall_567651
+proc url_RecoveryPointsGet_568355(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1881,7 +1881,7 @@ proc url_RecoveryPointsGet_594126(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoveryPointsGet_594125(path: JsonNode; query: JsonNode;
+proc validate_RecoveryPointsGet_568354(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Provides the backup data for the RecoveryPointID. This is an asynchronous operation. To learn the status of the operation, call the GetProtectedItemOperationResult API.
@@ -1906,41 +1906,41 @@ proc validate_RecoveryPointsGet_594125(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594127 = path.getOrDefault("fabricName")
-  valid_594127 = validateParameter(valid_594127, JString, required = true,
+  var valid_568356 = path.getOrDefault("fabricName")
+  valid_568356 = validateParameter(valid_568356, JString, required = true,
                                  default = nil)
-  if valid_594127 != nil:
-    section.add "fabricName", valid_594127
-  var valid_594128 = path.getOrDefault("protectedItemName")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  if valid_568356 != nil:
+    section.add "fabricName", valid_568356
+  var valid_568357 = path.getOrDefault("protectedItemName")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "protectedItemName", valid_594128
-  var valid_594129 = path.getOrDefault("resourceGroupName")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  if valid_568357 != nil:
+    section.add "protectedItemName", valid_568357
+  var valid_568358 = path.getOrDefault("resourceGroupName")
+  valid_568358 = validateParameter(valid_568358, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "resourceGroupName", valid_594129
-  var valid_594130 = path.getOrDefault("recoveryPointId")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  if valid_568358 != nil:
+    section.add "resourceGroupName", valid_568358
+  var valid_568359 = path.getOrDefault("recoveryPointId")
+  valid_568359 = validateParameter(valid_568359, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "recoveryPointId", valid_594130
-  var valid_594131 = path.getOrDefault("containerName")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  if valid_568359 != nil:
+    section.add "recoveryPointId", valid_568359
+  var valid_568360 = path.getOrDefault("containerName")
+  valid_568360 = validateParameter(valid_568360, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "containerName", valid_594131
-  var valid_594132 = path.getOrDefault("subscriptionId")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  if valid_568360 != nil:
+    section.add "containerName", valid_568360
+  var valid_568361 = path.getOrDefault("subscriptionId")
+  valid_568361 = validateParameter(valid_568361, JString, required = true,
                                  default = nil)
-  if valid_594132 != nil:
-    section.add "subscriptionId", valid_594132
-  var valid_594133 = path.getOrDefault("vaultName")
-  valid_594133 = validateParameter(valid_594133, JString, required = true,
+  if valid_568361 != nil:
+    section.add "subscriptionId", valid_568361
+  var valid_568362 = path.getOrDefault("vaultName")
+  valid_568362 = validateParameter(valid_568362, JString, required = true,
                                  default = nil)
-  if valid_594133 != nil:
-    section.add "vaultName", valid_594133
+  if valid_568362 != nil:
+    section.add "vaultName", valid_568362
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1948,11 +1948,11 @@ proc validate_RecoveryPointsGet_594125(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594134 = query.getOrDefault("api-version")
-  valid_594134 = validateParameter(valid_594134, JString, required = true,
+  var valid_568363 = query.getOrDefault("api-version")
+  valid_568363 = validateParameter(valid_568363, JString, required = true,
                                  default = nil)
-  if valid_594134 != nil:
-    section.add "api-version", valid_594134
+  if valid_568363 != nil:
+    section.add "api-version", valid_568363
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1961,20 +1961,20 @@ proc validate_RecoveryPointsGet_594125(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594135: Call_RecoveryPointsGet_594124; path: JsonNode;
+proc call*(call_568364: Call_RecoveryPointsGet_568353; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Provides the backup data for the RecoveryPointID. This is an asynchronous operation. To learn the status of the operation, call the GetProtectedItemOperationResult API.
   ## 
-  let valid = call_594135.validator(path, query, header, formData, body)
-  let scheme = call_594135.pickScheme
+  let valid = call_568364.validator(path, query, header, formData, body)
+  let scheme = call_568364.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594135.url(scheme.get, call_594135.host, call_594135.base,
-                         call_594135.route, valid.getOrDefault("path"),
+  let url = call_568364.url(scheme.get, call_568364.host, call_568364.base,
+                         call_568364.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594135, url, valid)
+  result = hook(call_568364, url, valid)
 
-proc call*(call_594136: Call_RecoveryPointsGet_594124; fabricName: string;
+proc call*(call_568365: Call_RecoveryPointsGet_568353; fabricName: string;
           protectedItemName: string; resourceGroupName: string; apiVersion: string;
           recoveryPointId: string; containerName: string; subscriptionId: string;
           vaultName: string): Recallable =
@@ -1996,25 +1996,25 @@ proc call*(call_594136: Call_RecoveryPointsGet_594124; fabricName: string;
   ##                 : The subscription ID.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594137 = newJObject()
-  var query_594138 = newJObject()
-  add(path_594137, "fabricName", newJString(fabricName))
-  add(path_594137, "protectedItemName", newJString(protectedItemName))
-  add(path_594137, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594138, "api-version", newJString(apiVersion))
-  add(path_594137, "recoveryPointId", newJString(recoveryPointId))
-  add(path_594137, "containerName", newJString(containerName))
-  add(path_594137, "subscriptionId", newJString(subscriptionId))
-  add(path_594137, "vaultName", newJString(vaultName))
-  result = call_594136.call(path_594137, query_594138, nil, nil, nil)
+  var path_568366 = newJObject()
+  var query_568367 = newJObject()
+  add(path_568366, "fabricName", newJString(fabricName))
+  add(path_568366, "protectedItemName", newJString(protectedItemName))
+  add(path_568366, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568367, "api-version", newJString(apiVersion))
+  add(path_568366, "recoveryPointId", newJString(recoveryPointId))
+  add(path_568366, "containerName", newJString(containerName))
+  add(path_568366, "subscriptionId", newJString(subscriptionId))
+  add(path_568366, "vaultName", newJString(vaultName))
+  result = call_568365.call(path_568366, query_568367, nil, nil, nil)
 
-var recoveryPointsGet* = Call_RecoveryPointsGet_594124(name: "recoveryPointsGet",
+var recoveryPointsGet* = Call_RecoveryPointsGet_568353(name: "recoveryPointsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}/recoveryPoints/{recoveryPointId}",
-    validator: validate_RecoveryPointsGet_594125, base: "",
-    url: url_RecoveryPointsGet_594126, schemes: {Scheme.Https})
+    validator: validate_RecoveryPointsGet_568354, base: "",
+    url: url_RecoveryPointsGet_568355, schemes: {Scheme.Https})
 type
-  Call_ItemLevelRecoveryConnectionsProvision_594139 = ref object of OpenApiRestCall_593422
-proc url_ItemLevelRecoveryConnectionsProvision_594141(protocol: Scheme;
+  Call_ItemLevelRecoveryConnectionsProvision_568368 = ref object of OpenApiRestCall_567651
+proc url_ItemLevelRecoveryConnectionsProvision_568370(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2051,7 +2051,7 @@ proc url_ItemLevelRecoveryConnectionsProvision_594141(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ItemLevelRecoveryConnectionsProvision_594140(path: JsonNode;
+proc validate_ItemLevelRecoveryConnectionsProvision_568369(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Provisions a script which invokes an iSCSI connection to the backup data. Executing this script opens File Explorer which displays the recoverable files and folders. This is an asynchronous operation. To get the provisioning status, call GetProtectedItemOperationResult API.
   ## 
@@ -2075,41 +2075,41 @@ proc validate_ItemLevelRecoveryConnectionsProvision_594140(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594142 = path.getOrDefault("fabricName")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  var valid_568371 = path.getOrDefault("fabricName")
+  valid_568371 = validateParameter(valid_568371, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "fabricName", valid_594142
-  var valid_594143 = path.getOrDefault("protectedItemName")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+  if valid_568371 != nil:
+    section.add "fabricName", valid_568371
+  var valid_568372 = path.getOrDefault("protectedItemName")
+  valid_568372 = validateParameter(valid_568372, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "protectedItemName", valid_594143
-  var valid_594144 = path.getOrDefault("resourceGroupName")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  if valid_568372 != nil:
+    section.add "protectedItemName", valid_568372
+  var valid_568373 = path.getOrDefault("resourceGroupName")
+  valid_568373 = validateParameter(valid_568373, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "resourceGroupName", valid_594144
-  var valid_594145 = path.getOrDefault("recoveryPointId")
-  valid_594145 = validateParameter(valid_594145, JString, required = true,
+  if valid_568373 != nil:
+    section.add "resourceGroupName", valid_568373
+  var valid_568374 = path.getOrDefault("recoveryPointId")
+  valid_568374 = validateParameter(valid_568374, JString, required = true,
                                  default = nil)
-  if valid_594145 != nil:
-    section.add "recoveryPointId", valid_594145
-  var valid_594146 = path.getOrDefault("containerName")
-  valid_594146 = validateParameter(valid_594146, JString, required = true,
+  if valid_568374 != nil:
+    section.add "recoveryPointId", valid_568374
+  var valid_568375 = path.getOrDefault("containerName")
+  valid_568375 = validateParameter(valid_568375, JString, required = true,
                                  default = nil)
-  if valid_594146 != nil:
-    section.add "containerName", valid_594146
-  var valid_594147 = path.getOrDefault("subscriptionId")
-  valid_594147 = validateParameter(valid_594147, JString, required = true,
+  if valid_568375 != nil:
+    section.add "containerName", valid_568375
+  var valid_568376 = path.getOrDefault("subscriptionId")
+  valid_568376 = validateParameter(valid_568376, JString, required = true,
                                  default = nil)
-  if valid_594147 != nil:
-    section.add "subscriptionId", valid_594147
-  var valid_594148 = path.getOrDefault("vaultName")
-  valid_594148 = validateParameter(valid_594148, JString, required = true,
+  if valid_568376 != nil:
+    section.add "subscriptionId", valid_568376
+  var valid_568377 = path.getOrDefault("vaultName")
+  valid_568377 = validateParameter(valid_568377, JString, required = true,
                                  default = nil)
-  if valid_594148 != nil:
-    section.add "vaultName", valid_594148
+  if valid_568377 != nil:
+    section.add "vaultName", valid_568377
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2117,11 +2117,11 @@ proc validate_ItemLevelRecoveryConnectionsProvision_594140(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594149 = query.getOrDefault("api-version")
-  valid_594149 = validateParameter(valid_594149, JString, required = true,
+  var valid_568378 = query.getOrDefault("api-version")
+  valid_568378 = validateParameter(valid_568378, JString, required = true,
                                  default = nil)
-  if valid_594149 != nil:
-    section.add "api-version", valid_594149
+  if valid_568378 != nil:
+    section.add "api-version", valid_568378
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2135,21 +2135,21 @@ proc validate_ItemLevelRecoveryConnectionsProvision_594140(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594151: Call_ItemLevelRecoveryConnectionsProvision_594139;
+proc call*(call_568380: Call_ItemLevelRecoveryConnectionsProvision_568368;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Provisions a script which invokes an iSCSI connection to the backup data. Executing this script opens File Explorer which displays the recoverable files and folders. This is an asynchronous operation. To get the provisioning status, call GetProtectedItemOperationResult API.
   ## 
-  let valid = call_594151.validator(path, query, header, formData, body)
-  let scheme = call_594151.pickScheme
+  let valid = call_568380.validator(path, query, header, formData, body)
+  let scheme = call_568380.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594151.url(scheme.get, call_594151.host, call_594151.base,
-                         call_594151.route, valid.getOrDefault("path"),
+  let url = call_568380.url(scheme.get, call_568380.host, call_568380.base,
+                         call_568380.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594151, url, valid)
+  result = hook(call_568380, url, valid)
 
-proc call*(call_594152: Call_ItemLevelRecoveryConnectionsProvision_594139;
+proc call*(call_568381: Call_ItemLevelRecoveryConnectionsProvision_568368;
           fabricName: string; protectedItemName: string; resourceGroupName: string;
           apiVersion: string; recoveryPointId: string; containerName: string;
           subscriptionId: string; resourceILRRequest: JsonNode; vaultName: string): Recallable =
@@ -2173,29 +2173,29 @@ proc call*(call_594152: Call_ItemLevelRecoveryConnectionsProvision_594139;
   ##                     : The resource Item Level Recovery (ILR) request.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594153 = newJObject()
-  var query_594154 = newJObject()
-  var body_594155 = newJObject()
-  add(path_594153, "fabricName", newJString(fabricName))
-  add(path_594153, "protectedItemName", newJString(protectedItemName))
-  add(path_594153, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594154, "api-version", newJString(apiVersion))
-  add(path_594153, "recoveryPointId", newJString(recoveryPointId))
-  add(path_594153, "containerName", newJString(containerName))
-  add(path_594153, "subscriptionId", newJString(subscriptionId))
+  var path_568382 = newJObject()
+  var query_568383 = newJObject()
+  var body_568384 = newJObject()
+  add(path_568382, "fabricName", newJString(fabricName))
+  add(path_568382, "protectedItemName", newJString(protectedItemName))
+  add(path_568382, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568383, "api-version", newJString(apiVersion))
+  add(path_568382, "recoveryPointId", newJString(recoveryPointId))
+  add(path_568382, "containerName", newJString(containerName))
+  add(path_568382, "subscriptionId", newJString(subscriptionId))
   if resourceILRRequest != nil:
-    body_594155 = resourceILRRequest
-  add(path_594153, "vaultName", newJString(vaultName))
-  result = call_594152.call(path_594153, query_594154, nil, nil, body_594155)
+    body_568384 = resourceILRRequest
+  add(path_568382, "vaultName", newJString(vaultName))
+  result = call_568381.call(path_568382, query_568383, nil, nil, body_568384)
 
-var itemLevelRecoveryConnectionsProvision* = Call_ItemLevelRecoveryConnectionsProvision_594139(
+var itemLevelRecoveryConnectionsProvision* = Call_ItemLevelRecoveryConnectionsProvision_568368(
     name: "itemLevelRecoveryConnectionsProvision", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}/recoveryPoints/{recoveryPointId}/provisionInstantItemRecovery",
-    validator: validate_ItemLevelRecoveryConnectionsProvision_594140, base: "",
-    url: url_ItemLevelRecoveryConnectionsProvision_594141, schemes: {Scheme.Https})
+    validator: validate_ItemLevelRecoveryConnectionsProvision_568369, base: "",
+    url: url_ItemLevelRecoveryConnectionsProvision_568370, schemes: {Scheme.Https})
 type
-  Call_RestoresTrigger_594156 = ref object of OpenApiRestCall_593422
-proc url_RestoresTrigger_594158(protocol: Scheme; host: string; base: string;
+  Call_RestoresTrigger_568385 = ref object of OpenApiRestCall_567651
+proc url_RestoresTrigger_568387(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2232,7 +2232,7 @@ proc url_RestoresTrigger_594158(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RestoresTrigger_594157(path: JsonNode; query: JsonNode;
+proc validate_RestoresTrigger_568386(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Restores the specified backup data. This is an asynchronous operation. To know the status of this API call, use GetProtectedItemOperationResult API.
@@ -2257,41 +2257,41 @@ proc validate_RestoresTrigger_594157(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594159 = path.getOrDefault("fabricName")
-  valid_594159 = validateParameter(valid_594159, JString, required = true,
+  var valid_568388 = path.getOrDefault("fabricName")
+  valid_568388 = validateParameter(valid_568388, JString, required = true,
                                  default = nil)
-  if valid_594159 != nil:
-    section.add "fabricName", valid_594159
-  var valid_594160 = path.getOrDefault("protectedItemName")
-  valid_594160 = validateParameter(valid_594160, JString, required = true,
+  if valid_568388 != nil:
+    section.add "fabricName", valid_568388
+  var valid_568389 = path.getOrDefault("protectedItemName")
+  valid_568389 = validateParameter(valid_568389, JString, required = true,
                                  default = nil)
-  if valid_594160 != nil:
-    section.add "protectedItemName", valid_594160
-  var valid_594161 = path.getOrDefault("resourceGroupName")
-  valid_594161 = validateParameter(valid_594161, JString, required = true,
+  if valid_568389 != nil:
+    section.add "protectedItemName", valid_568389
+  var valid_568390 = path.getOrDefault("resourceGroupName")
+  valid_568390 = validateParameter(valid_568390, JString, required = true,
                                  default = nil)
-  if valid_594161 != nil:
-    section.add "resourceGroupName", valid_594161
-  var valid_594162 = path.getOrDefault("recoveryPointId")
-  valid_594162 = validateParameter(valid_594162, JString, required = true,
+  if valid_568390 != nil:
+    section.add "resourceGroupName", valid_568390
+  var valid_568391 = path.getOrDefault("recoveryPointId")
+  valid_568391 = validateParameter(valid_568391, JString, required = true,
                                  default = nil)
-  if valid_594162 != nil:
-    section.add "recoveryPointId", valid_594162
-  var valid_594163 = path.getOrDefault("containerName")
-  valid_594163 = validateParameter(valid_594163, JString, required = true,
+  if valid_568391 != nil:
+    section.add "recoveryPointId", valid_568391
+  var valid_568392 = path.getOrDefault("containerName")
+  valid_568392 = validateParameter(valid_568392, JString, required = true,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "containerName", valid_594163
-  var valid_594164 = path.getOrDefault("subscriptionId")
-  valid_594164 = validateParameter(valid_594164, JString, required = true,
+  if valid_568392 != nil:
+    section.add "containerName", valid_568392
+  var valid_568393 = path.getOrDefault("subscriptionId")
+  valid_568393 = validateParameter(valid_568393, JString, required = true,
                                  default = nil)
-  if valid_594164 != nil:
-    section.add "subscriptionId", valid_594164
-  var valid_594165 = path.getOrDefault("vaultName")
-  valid_594165 = validateParameter(valid_594165, JString, required = true,
+  if valid_568393 != nil:
+    section.add "subscriptionId", valid_568393
+  var valid_568394 = path.getOrDefault("vaultName")
+  valid_568394 = validateParameter(valid_568394, JString, required = true,
                                  default = nil)
-  if valid_594165 != nil:
-    section.add "vaultName", valid_594165
+  if valid_568394 != nil:
+    section.add "vaultName", valid_568394
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2299,11 +2299,11 @@ proc validate_RestoresTrigger_594157(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594166 = query.getOrDefault("api-version")
-  valid_594166 = validateParameter(valid_594166, JString, required = true,
+  var valid_568395 = query.getOrDefault("api-version")
+  valid_568395 = validateParameter(valid_568395, JString, required = true,
                                  default = nil)
-  if valid_594166 != nil:
-    section.add "api-version", valid_594166
+  if valid_568395 != nil:
+    section.add "api-version", valid_568395
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2317,20 +2317,20 @@ proc validate_RestoresTrigger_594157(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594168: Call_RestoresTrigger_594156; path: JsonNode; query: JsonNode;
+proc call*(call_568397: Call_RestoresTrigger_568385; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restores the specified backup data. This is an asynchronous operation. To know the status of this API call, use GetProtectedItemOperationResult API.
   ## 
-  let valid = call_594168.validator(path, query, header, formData, body)
-  let scheme = call_594168.pickScheme
+  let valid = call_568397.validator(path, query, header, formData, body)
+  let scheme = call_568397.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594168.url(scheme.get, call_594168.host, call_594168.base,
-                         call_594168.route, valid.getOrDefault("path"),
+  let url = call_568397.url(scheme.get, call_568397.host, call_568397.base,
+                         call_568397.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594168, url, valid)
+  result = hook(call_568397, url, valid)
 
-proc call*(call_594169: Call_RestoresTrigger_594156; fabricName: string;
+proc call*(call_568398: Call_RestoresTrigger_568385; fabricName: string;
           protectedItemName: string; resourceGroupName: string;
           resourceRestoreRequest: JsonNode; apiVersion: string;
           recoveryPointId: string; containerName: string; subscriptionId: string;
@@ -2355,28 +2355,28 @@ proc call*(call_594169: Call_RestoresTrigger_594156; fabricName: string;
   ##                 : The subscription ID.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594170 = newJObject()
-  var query_594171 = newJObject()
-  var body_594172 = newJObject()
-  add(path_594170, "fabricName", newJString(fabricName))
-  add(path_594170, "protectedItemName", newJString(protectedItemName))
-  add(path_594170, "resourceGroupName", newJString(resourceGroupName))
+  var path_568399 = newJObject()
+  var query_568400 = newJObject()
+  var body_568401 = newJObject()
+  add(path_568399, "fabricName", newJString(fabricName))
+  add(path_568399, "protectedItemName", newJString(protectedItemName))
+  add(path_568399, "resourceGroupName", newJString(resourceGroupName))
   if resourceRestoreRequest != nil:
-    body_594172 = resourceRestoreRequest
-  add(query_594171, "api-version", newJString(apiVersion))
-  add(path_594170, "recoveryPointId", newJString(recoveryPointId))
-  add(path_594170, "containerName", newJString(containerName))
-  add(path_594170, "subscriptionId", newJString(subscriptionId))
-  add(path_594170, "vaultName", newJString(vaultName))
-  result = call_594169.call(path_594170, query_594171, nil, nil, body_594172)
+    body_568401 = resourceRestoreRequest
+  add(query_568400, "api-version", newJString(apiVersion))
+  add(path_568399, "recoveryPointId", newJString(recoveryPointId))
+  add(path_568399, "containerName", newJString(containerName))
+  add(path_568399, "subscriptionId", newJString(subscriptionId))
+  add(path_568399, "vaultName", newJString(vaultName))
+  result = call_568398.call(path_568399, query_568400, nil, nil, body_568401)
 
-var restoresTrigger* = Call_RestoresTrigger_594156(name: "restoresTrigger",
+var restoresTrigger* = Call_RestoresTrigger_568385(name: "restoresTrigger",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}/recoveryPoints/{recoveryPointId}/restore",
-    validator: validate_RestoresTrigger_594157, base: "", url: url_RestoresTrigger_594158,
+    validator: validate_RestoresTrigger_568386, base: "", url: url_RestoresTrigger_568387,
     schemes: {Scheme.Https})
 type
-  Call_ItemLevelRecoveryConnectionsRevoke_594173 = ref object of OpenApiRestCall_593422
-proc url_ItemLevelRecoveryConnectionsRevoke_594175(protocol: Scheme; host: string;
+  Call_ItemLevelRecoveryConnectionsRevoke_568402 = ref object of OpenApiRestCall_567651
+proc url_ItemLevelRecoveryConnectionsRevoke_568404(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2413,7 +2413,7 @@ proc url_ItemLevelRecoveryConnectionsRevoke_594175(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ItemLevelRecoveryConnectionsRevoke_594174(path: JsonNode;
+proc validate_ItemLevelRecoveryConnectionsRevoke_568403(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Revokes an iSCSI connection which can be used to download a script. Executing this script opens a file explorer displaying all recoverable files and folders. This is an asynchronous operation.
   ## 
@@ -2437,41 +2437,41 @@ proc validate_ItemLevelRecoveryConnectionsRevoke_594174(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594176 = path.getOrDefault("fabricName")
-  valid_594176 = validateParameter(valid_594176, JString, required = true,
+  var valid_568405 = path.getOrDefault("fabricName")
+  valid_568405 = validateParameter(valid_568405, JString, required = true,
                                  default = nil)
-  if valid_594176 != nil:
-    section.add "fabricName", valid_594176
-  var valid_594177 = path.getOrDefault("protectedItemName")
-  valid_594177 = validateParameter(valid_594177, JString, required = true,
+  if valid_568405 != nil:
+    section.add "fabricName", valid_568405
+  var valid_568406 = path.getOrDefault("protectedItemName")
+  valid_568406 = validateParameter(valid_568406, JString, required = true,
                                  default = nil)
-  if valid_594177 != nil:
-    section.add "protectedItemName", valid_594177
-  var valid_594178 = path.getOrDefault("resourceGroupName")
-  valid_594178 = validateParameter(valid_594178, JString, required = true,
+  if valid_568406 != nil:
+    section.add "protectedItemName", valid_568406
+  var valid_568407 = path.getOrDefault("resourceGroupName")
+  valid_568407 = validateParameter(valid_568407, JString, required = true,
                                  default = nil)
-  if valid_594178 != nil:
-    section.add "resourceGroupName", valid_594178
-  var valid_594179 = path.getOrDefault("recoveryPointId")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  if valid_568407 != nil:
+    section.add "resourceGroupName", valid_568407
+  var valid_568408 = path.getOrDefault("recoveryPointId")
+  valid_568408 = validateParameter(valid_568408, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "recoveryPointId", valid_594179
-  var valid_594180 = path.getOrDefault("containerName")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  if valid_568408 != nil:
+    section.add "recoveryPointId", valid_568408
+  var valid_568409 = path.getOrDefault("containerName")
+  valid_568409 = validateParameter(valid_568409, JString, required = true,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "containerName", valid_594180
-  var valid_594181 = path.getOrDefault("subscriptionId")
-  valid_594181 = validateParameter(valid_594181, JString, required = true,
+  if valid_568409 != nil:
+    section.add "containerName", valid_568409
+  var valid_568410 = path.getOrDefault("subscriptionId")
+  valid_568410 = validateParameter(valid_568410, JString, required = true,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "subscriptionId", valid_594181
-  var valid_594182 = path.getOrDefault("vaultName")
-  valid_594182 = validateParameter(valid_594182, JString, required = true,
+  if valid_568410 != nil:
+    section.add "subscriptionId", valid_568410
+  var valid_568411 = path.getOrDefault("vaultName")
+  valid_568411 = validateParameter(valid_568411, JString, required = true,
                                  default = nil)
-  if valid_594182 != nil:
-    section.add "vaultName", valid_594182
+  if valid_568411 != nil:
+    section.add "vaultName", valid_568411
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2479,11 +2479,11 @@ proc validate_ItemLevelRecoveryConnectionsRevoke_594174(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594183 = query.getOrDefault("api-version")
-  valid_594183 = validateParameter(valid_594183, JString, required = true,
+  var valid_568412 = query.getOrDefault("api-version")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594183 != nil:
-    section.add "api-version", valid_594183
+  if valid_568412 != nil:
+    section.add "api-version", valid_568412
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2492,21 +2492,21 @@ proc validate_ItemLevelRecoveryConnectionsRevoke_594174(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594184: Call_ItemLevelRecoveryConnectionsRevoke_594173;
+proc call*(call_568413: Call_ItemLevelRecoveryConnectionsRevoke_568402;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Revokes an iSCSI connection which can be used to download a script. Executing this script opens a file explorer displaying all recoverable files and folders. This is an asynchronous operation.
   ## 
-  let valid = call_594184.validator(path, query, header, formData, body)
-  let scheme = call_594184.pickScheme
+  let valid = call_568413.validator(path, query, header, formData, body)
+  let scheme = call_568413.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594184.url(scheme.get, call_594184.host, call_594184.base,
-                         call_594184.route, valid.getOrDefault("path"),
+  let url = call_568413.url(scheme.get, call_568413.host, call_568413.base,
+                         call_568413.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594184, url, valid)
+  result = hook(call_568413, url, valid)
 
-proc call*(call_594185: Call_ItemLevelRecoveryConnectionsRevoke_594173;
+proc call*(call_568414: Call_ItemLevelRecoveryConnectionsRevoke_568402;
           fabricName: string; protectedItemName: string; resourceGroupName: string;
           apiVersion: string; recoveryPointId: string; containerName: string;
           subscriptionId: string; vaultName: string): Recallable =
@@ -2528,26 +2528,26 @@ proc call*(call_594185: Call_ItemLevelRecoveryConnectionsRevoke_594173;
   ##                 : The subscription ID.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594186 = newJObject()
-  var query_594187 = newJObject()
-  add(path_594186, "fabricName", newJString(fabricName))
-  add(path_594186, "protectedItemName", newJString(protectedItemName))
-  add(path_594186, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594187, "api-version", newJString(apiVersion))
-  add(path_594186, "recoveryPointId", newJString(recoveryPointId))
-  add(path_594186, "containerName", newJString(containerName))
-  add(path_594186, "subscriptionId", newJString(subscriptionId))
-  add(path_594186, "vaultName", newJString(vaultName))
-  result = call_594185.call(path_594186, query_594187, nil, nil, nil)
+  var path_568415 = newJObject()
+  var query_568416 = newJObject()
+  add(path_568415, "fabricName", newJString(fabricName))
+  add(path_568415, "protectedItemName", newJString(protectedItemName))
+  add(path_568415, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568416, "api-version", newJString(apiVersion))
+  add(path_568415, "recoveryPointId", newJString(recoveryPointId))
+  add(path_568415, "containerName", newJString(containerName))
+  add(path_568415, "subscriptionId", newJString(subscriptionId))
+  add(path_568415, "vaultName", newJString(vaultName))
+  result = call_568414.call(path_568415, query_568416, nil, nil, nil)
 
-var itemLevelRecoveryConnectionsRevoke* = Call_ItemLevelRecoveryConnectionsRevoke_594173(
+var itemLevelRecoveryConnectionsRevoke* = Call_ItemLevelRecoveryConnectionsRevoke_568402(
     name: "itemLevelRecoveryConnectionsRevoke", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/protectionContainers/{containerName}/protectedItems/{protectedItemName}/recoveryPoints/{recoveryPointId}/revokeInstantItemRecovery",
-    validator: validate_ItemLevelRecoveryConnectionsRevoke_594174, base: "",
-    url: url_ItemLevelRecoveryConnectionsRevoke_594175, schemes: {Scheme.Https})
+    validator: validate_ItemLevelRecoveryConnectionsRevoke_568403, base: "",
+    url: url_ItemLevelRecoveryConnectionsRevoke_568404, schemes: {Scheme.Https})
 type
-  Call_ProtectionContainersRefresh_594188 = ref object of OpenApiRestCall_593422
-proc url_ProtectionContainersRefresh_594190(protocol: Scheme; host: string;
+  Call_ProtectionContainersRefresh_568417 = ref object of OpenApiRestCall_567651
+proc url_ProtectionContainersRefresh_568419(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2574,7 +2574,7 @@ proc url_ProtectionContainersRefresh_594190(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionContainersRefresh_594189(path: JsonNode; query: JsonNode;
+proc validate_ProtectionContainersRefresh_568418(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Discovers the containers in the subscription that can be protected in a Recovery Services vault. This is an asynchronous operation. To learn the status of the operation, use the GetRefreshOperationResult API.
   ## 
@@ -2592,26 +2592,26 @@ proc validate_ProtectionContainersRefresh_594189(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `fabricName` field"
-  var valid_594191 = path.getOrDefault("fabricName")
-  valid_594191 = validateParameter(valid_594191, JString, required = true,
+  var valid_568420 = path.getOrDefault("fabricName")
+  valid_568420 = validateParameter(valid_568420, JString, required = true,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "fabricName", valid_594191
-  var valid_594192 = path.getOrDefault("resourceGroupName")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  if valid_568420 != nil:
+    section.add "fabricName", valid_568420
+  var valid_568421 = path.getOrDefault("resourceGroupName")
+  valid_568421 = validateParameter(valid_568421, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "resourceGroupName", valid_594192
-  var valid_594193 = path.getOrDefault("subscriptionId")
-  valid_594193 = validateParameter(valid_594193, JString, required = true,
+  if valid_568421 != nil:
+    section.add "resourceGroupName", valid_568421
+  var valid_568422 = path.getOrDefault("subscriptionId")
+  valid_568422 = validateParameter(valid_568422, JString, required = true,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "subscriptionId", valid_594193
-  var valid_594194 = path.getOrDefault("vaultName")
-  valid_594194 = validateParameter(valid_594194, JString, required = true,
+  if valid_568422 != nil:
+    section.add "subscriptionId", valid_568422
+  var valid_568423 = path.getOrDefault("vaultName")
+  valid_568423 = validateParameter(valid_568423, JString, required = true,
                                  default = nil)
-  if valid_594194 != nil:
-    section.add "vaultName", valid_594194
+  if valid_568423 != nil:
+    section.add "vaultName", valid_568423
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2619,11 +2619,11 @@ proc validate_ProtectionContainersRefresh_594189(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594195 = query.getOrDefault("api-version")
-  valid_594195 = validateParameter(valid_594195, JString, required = true,
+  var valid_568424 = query.getOrDefault("api-version")
+  valid_568424 = validateParameter(valid_568424, JString, required = true,
                                  default = nil)
-  if valid_594195 != nil:
-    section.add "api-version", valid_594195
+  if valid_568424 != nil:
+    section.add "api-version", valid_568424
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2632,20 +2632,20 @@ proc validate_ProtectionContainersRefresh_594189(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594196: Call_ProtectionContainersRefresh_594188; path: JsonNode;
+proc call*(call_568425: Call_ProtectionContainersRefresh_568417; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Discovers the containers in the subscription that can be protected in a Recovery Services vault. This is an asynchronous operation. To learn the status of the operation, use the GetRefreshOperationResult API.
   ## 
-  let valid = call_594196.validator(path, query, header, formData, body)
-  let scheme = call_594196.pickScheme
+  let valid = call_568425.validator(path, query, header, formData, body)
+  let scheme = call_568425.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594196.url(scheme.get, call_594196.host, call_594196.base,
-                         call_594196.route, valid.getOrDefault("path"),
+  let url = call_568425.url(scheme.get, call_568425.host, call_568425.base,
+                         call_568425.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594196, url, valid)
+  result = hook(call_568425, url, valid)
 
-proc call*(call_594197: Call_ProtectionContainersRefresh_594188;
+proc call*(call_568426: Call_ProtectionContainersRefresh_568417;
           fabricName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; vaultName: string): Recallable =
   ## protectionContainersRefresh
@@ -2660,23 +2660,23 @@ proc call*(call_594197: Call_ProtectionContainersRefresh_594188;
   ##                 : The subscription ID.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594198 = newJObject()
-  var query_594199 = newJObject()
-  add(path_594198, "fabricName", newJString(fabricName))
-  add(path_594198, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594199, "api-version", newJString(apiVersion))
-  add(path_594198, "subscriptionId", newJString(subscriptionId))
-  add(path_594198, "vaultName", newJString(vaultName))
-  result = call_594197.call(path_594198, query_594199, nil, nil, nil)
+  var path_568427 = newJObject()
+  var query_568428 = newJObject()
+  add(path_568427, "fabricName", newJString(fabricName))
+  add(path_568427, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568428, "api-version", newJString(apiVersion))
+  add(path_568427, "subscriptionId", newJString(subscriptionId))
+  add(path_568427, "vaultName", newJString(vaultName))
+  result = call_568426.call(path_568427, query_568428, nil, nil, nil)
 
-var protectionContainersRefresh* = Call_ProtectionContainersRefresh_594188(
+var protectionContainersRefresh* = Call_ProtectionContainersRefresh_568417(
     name: "protectionContainersRefresh", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupFabrics/{fabricName}/refreshContainers",
-    validator: validate_ProtectionContainersRefresh_594189, base: "",
-    url: url_ProtectionContainersRefresh_594190, schemes: {Scheme.Https})
+    validator: validate_ProtectionContainersRefresh_568418, base: "",
+    url: url_ProtectionContainersRefresh_568419, schemes: {Scheme.Https})
 type
-  Call_JobsList_594200 = ref object of OpenApiRestCall_593422
-proc url_JobsList_594202(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsList_568429 = ref object of OpenApiRestCall_567651
+proc url_JobsList_568431(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2700,7 +2700,7 @@ proc url_JobsList_594202(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsList_594201(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsList_568430(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Provides a pageable list of jobs.
   ## 
@@ -2716,21 +2716,21 @@ proc validate_JobsList_594201(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594203 = path.getOrDefault("resourceGroupName")
-  valid_594203 = validateParameter(valid_594203, JString, required = true,
+  var valid_568432 = path.getOrDefault("resourceGroupName")
+  valid_568432 = validateParameter(valid_568432, JString, required = true,
                                  default = nil)
-  if valid_594203 != nil:
-    section.add "resourceGroupName", valid_594203
-  var valid_594204 = path.getOrDefault("subscriptionId")
-  valid_594204 = validateParameter(valid_594204, JString, required = true,
+  if valid_568432 != nil:
+    section.add "resourceGroupName", valid_568432
+  var valid_568433 = path.getOrDefault("subscriptionId")
+  valid_568433 = validateParameter(valid_568433, JString, required = true,
                                  default = nil)
-  if valid_594204 != nil:
-    section.add "subscriptionId", valid_594204
-  var valid_594205 = path.getOrDefault("vaultName")
-  valid_594205 = validateParameter(valid_594205, JString, required = true,
+  if valid_568433 != nil:
+    section.add "subscriptionId", valid_568433
+  var valid_568434 = path.getOrDefault("vaultName")
+  valid_568434 = validateParameter(valid_568434, JString, required = true,
                                  default = nil)
-  if valid_594205 != nil:
-    section.add "vaultName", valid_594205
+  if valid_568434 != nil:
+    section.add "vaultName", valid_568434
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2742,21 +2742,21 @@ proc validate_JobsList_594201(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594206 = query.getOrDefault("api-version")
-  valid_594206 = validateParameter(valid_594206, JString, required = true,
+  var valid_568435 = query.getOrDefault("api-version")
+  valid_568435 = validateParameter(valid_568435, JString, required = true,
                                  default = nil)
-  if valid_594206 != nil:
-    section.add "api-version", valid_594206
-  var valid_594207 = query.getOrDefault("$skipToken")
-  valid_594207 = validateParameter(valid_594207, JString, required = false,
+  if valid_568435 != nil:
+    section.add "api-version", valid_568435
+  var valid_568436 = query.getOrDefault("$skipToken")
+  valid_568436 = validateParameter(valid_568436, JString, required = false,
                                  default = nil)
-  if valid_594207 != nil:
-    section.add "$skipToken", valid_594207
-  var valid_594208 = query.getOrDefault("$filter")
-  valid_594208 = validateParameter(valid_594208, JString, required = false,
+  if valid_568436 != nil:
+    section.add "$skipToken", valid_568436
+  var valid_568437 = query.getOrDefault("$filter")
+  valid_568437 = validateParameter(valid_568437, JString, required = false,
                                  default = nil)
-  if valid_594208 != nil:
-    section.add "$filter", valid_594208
+  if valid_568437 != nil:
+    section.add "$filter", valid_568437
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2765,20 +2765,20 @@ proc validate_JobsList_594201(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594209: Call_JobsList_594200; path: JsonNode; query: JsonNode;
+proc call*(call_568438: Call_JobsList_568429; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Provides a pageable list of jobs.
   ## 
-  let valid = call_594209.validator(path, query, header, formData, body)
-  let scheme = call_594209.pickScheme
+  let valid = call_568438.validator(path, query, header, formData, body)
+  let scheme = call_568438.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594209.url(scheme.get, call_594209.host, call_594209.base,
-                         call_594209.route, valid.getOrDefault("path"),
+  let url = call_568438.url(scheme.get, call_568438.host, call_568438.base,
+                         call_568438.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594209, url, valid)
+  result = hook(call_568438, url, valid)
 
-proc call*(call_594210: Call_JobsList_594200; resourceGroupName: string;
+proc call*(call_568439: Call_JobsList_568429; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; vaultName: string;
           SkipToken: string = ""; Filter: string = ""): Recallable =
   ## jobsList
@@ -2795,24 +2795,24 @@ proc call*(call_594210: Call_JobsList_594200; resourceGroupName: string;
   ##            : The Skip Token filter.
   ##   Filter: string
   ##         : The following equation can be used to filter the list of jobs based on status, type, start date, and end date. status eq { InProgress , Completed , Failed , CompletedWithWarnings , Cancelled , Cancelling } and backupManagementType eq {AzureIaasVM, MAB, DPM, AzureBackupServer, AzureSql } and operation eq { ConfigureBackup , Backup , Restore , DisableBackup , DeleteBackupData } and jobId eq {guid} and startTime eq { yyyy-mm-dd hh:mm:ss PM } and endTime eq { yyyy-mm-dd hh:mm:ss PM }.
-  var path_594211 = newJObject()
-  var query_594212 = newJObject()
-  add(path_594211, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594212, "api-version", newJString(apiVersion))
-  add(path_594211, "subscriptionId", newJString(subscriptionId))
-  add(path_594211, "vaultName", newJString(vaultName))
-  add(query_594212, "$skipToken", newJString(SkipToken))
-  add(query_594212, "$filter", newJString(Filter))
-  result = call_594210.call(path_594211, query_594212, nil, nil, nil)
+  var path_568440 = newJObject()
+  var query_568441 = newJObject()
+  add(path_568440, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568441, "api-version", newJString(apiVersion))
+  add(path_568440, "subscriptionId", newJString(subscriptionId))
+  add(path_568440, "vaultName", newJString(vaultName))
+  add(query_568441, "$skipToken", newJString(SkipToken))
+  add(query_568441, "$filter", newJString(Filter))
+  result = call_568439.call(path_568440, query_568441, nil, nil, nil)
 
-var jobsList* = Call_JobsList_594200(name: "jobsList", meth: HttpMethod.HttpGet,
+var jobsList* = Call_JobsList_568429(name: "jobsList", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupJobs",
-                                  validator: validate_JobsList_594201, base: "",
-                                  url: url_JobsList_594202,
+                                  validator: validate_JobsList_568430, base: "",
+                                  url: url_JobsList_568431,
                                   schemes: {Scheme.Https})
 type
-  Call_ExportJobsOperationResultsGet_594213 = ref object of OpenApiRestCall_593422
-proc url_ExportJobsOperationResultsGet_594215(protocol: Scheme; host: string;
+  Call_ExportJobsOperationResultsGet_568442 = ref object of OpenApiRestCall_567651
+proc url_ExportJobsOperationResultsGet_568444(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2838,7 +2838,7 @@ proc url_ExportJobsOperationResultsGet_594215(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExportJobsOperationResultsGet_594214(path: JsonNode; query: JsonNode;
+proc validate_ExportJobsOperationResultsGet_568443(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the result of the operation triggered by the ExportJob API.
   ## 
@@ -2856,26 +2856,26 @@ proc validate_ExportJobsOperationResultsGet_594214(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594216 = path.getOrDefault("resourceGroupName")
-  valid_594216 = validateParameter(valid_594216, JString, required = true,
+  var valid_568445 = path.getOrDefault("resourceGroupName")
+  valid_568445 = validateParameter(valid_568445, JString, required = true,
                                  default = nil)
-  if valid_594216 != nil:
-    section.add "resourceGroupName", valid_594216
-  var valid_594217 = path.getOrDefault("subscriptionId")
-  valid_594217 = validateParameter(valid_594217, JString, required = true,
+  if valid_568445 != nil:
+    section.add "resourceGroupName", valid_568445
+  var valid_568446 = path.getOrDefault("subscriptionId")
+  valid_568446 = validateParameter(valid_568446, JString, required = true,
                                  default = nil)
-  if valid_594217 != nil:
-    section.add "subscriptionId", valid_594217
-  var valid_594218 = path.getOrDefault("vaultName")
-  valid_594218 = validateParameter(valid_594218, JString, required = true,
+  if valid_568446 != nil:
+    section.add "subscriptionId", valid_568446
+  var valid_568447 = path.getOrDefault("vaultName")
+  valid_568447 = validateParameter(valid_568447, JString, required = true,
                                  default = nil)
-  if valid_594218 != nil:
-    section.add "vaultName", valid_594218
-  var valid_594219 = path.getOrDefault("operationId")
-  valid_594219 = validateParameter(valid_594219, JString, required = true,
+  if valid_568447 != nil:
+    section.add "vaultName", valid_568447
+  var valid_568448 = path.getOrDefault("operationId")
+  valid_568448 = validateParameter(valid_568448, JString, required = true,
                                  default = nil)
-  if valid_594219 != nil:
-    section.add "operationId", valid_594219
+  if valid_568448 != nil:
+    section.add "operationId", valid_568448
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2883,11 +2883,11 @@ proc validate_ExportJobsOperationResultsGet_594214(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594220 = query.getOrDefault("api-version")
-  valid_594220 = validateParameter(valid_594220, JString, required = true,
+  var valid_568449 = query.getOrDefault("api-version")
+  valid_568449 = validateParameter(valid_568449, JString, required = true,
                                  default = nil)
-  if valid_594220 != nil:
-    section.add "api-version", valid_594220
+  if valid_568449 != nil:
+    section.add "api-version", valid_568449
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2896,20 +2896,20 @@ proc validate_ExportJobsOperationResultsGet_594214(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594221: Call_ExportJobsOperationResultsGet_594213; path: JsonNode;
+proc call*(call_568450: Call_ExportJobsOperationResultsGet_568442; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the result of the operation triggered by the ExportJob API.
   ## 
-  let valid = call_594221.validator(path, query, header, formData, body)
-  let scheme = call_594221.pickScheme
+  let valid = call_568450.validator(path, query, header, formData, body)
+  let scheme = call_568450.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594221.url(scheme.get, call_594221.host, call_594221.base,
-                         call_594221.route, valid.getOrDefault("path"),
+  let url = call_568450.url(scheme.get, call_568450.host, call_568450.base,
+                         call_568450.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594221, url, valid)
+  result = hook(call_568450, url, valid)
 
-proc call*(call_594222: Call_ExportJobsOperationResultsGet_594213;
+proc call*(call_568451: Call_ExportJobsOperationResultsGet_568442;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           vaultName: string; operationId: string): Recallable =
   ## exportJobsOperationResultsGet
@@ -2924,23 +2924,23 @@ proc call*(call_594222: Call_ExportJobsOperationResultsGet_594213;
   ##            : The name of the Recovery Services vault.
   ##   operationId: string (required)
   ##              : The ID associated with the export job.
-  var path_594223 = newJObject()
-  var query_594224 = newJObject()
-  add(path_594223, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594224, "api-version", newJString(apiVersion))
-  add(path_594223, "subscriptionId", newJString(subscriptionId))
-  add(path_594223, "vaultName", newJString(vaultName))
-  add(path_594223, "operationId", newJString(operationId))
-  result = call_594222.call(path_594223, query_594224, nil, nil, nil)
+  var path_568452 = newJObject()
+  var query_568453 = newJObject()
+  add(path_568452, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568453, "api-version", newJString(apiVersion))
+  add(path_568452, "subscriptionId", newJString(subscriptionId))
+  add(path_568452, "vaultName", newJString(vaultName))
+  add(path_568452, "operationId", newJString(operationId))
+  result = call_568451.call(path_568452, query_568453, nil, nil, nil)
 
-var exportJobsOperationResultsGet* = Call_ExportJobsOperationResultsGet_594213(
+var exportJobsOperationResultsGet* = Call_ExportJobsOperationResultsGet_568442(
     name: "exportJobsOperationResultsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupJobs/operationResults/{operationId}",
-    validator: validate_ExportJobsOperationResultsGet_594214, base: "",
-    url: url_ExportJobsOperationResultsGet_594215, schemes: {Scheme.Https})
+    validator: validate_ExportJobsOperationResultsGet_568443, base: "",
+    url: url_ExportJobsOperationResultsGet_568444, schemes: {Scheme.Https})
 type
-  Call_JobDetailsGet_594225 = ref object of OpenApiRestCall_593422
-proc url_JobDetailsGet_594227(protocol: Scheme; host: string; base: string;
+  Call_JobDetailsGet_568454 = ref object of OpenApiRestCall_567651
+proc url_JobDetailsGet_568456(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2966,7 +2966,7 @@ proc url_JobDetailsGet_594227(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobDetailsGet_594226(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobDetailsGet_568455(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets extended information associated with the job.
   ## 
@@ -2984,26 +2984,26 @@ proc validate_JobDetailsGet_594226(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594228 = path.getOrDefault("resourceGroupName")
-  valid_594228 = validateParameter(valid_594228, JString, required = true,
+  var valid_568457 = path.getOrDefault("resourceGroupName")
+  valid_568457 = validateParameter(valid_568457, JString, required = true,
                                  default = nil)
-  if valid_594228 != nil:
-    section.add "resourceGroupName", valid_594228
-  var valid_594229 = path.getOrDefault("subscriptionId")
-  valid_594229 = validateParameter(valid_594229, JString, required = true,
+  if valid_568457 != nil:
+    section.add "resourceGroupName", valid_568457
+  var valid_568458 = path.getOrDefault("subscriptionId")
+  valid_568458 = validateParameter(valid_568458, JString, required = true,
                                  default = nil)
-  if valid_594229 != nil:
-    section.add "subscriptionId", valid_594229
-  var valid_594230 = path.getOrDefault("jobName")
-  valid_594230 = validateParameter(valid_594230, JString, required = true,
+  if valid_568458 != nil:
+    section.add "subscriptionId", valid_568458
+  var valid_568459 = path.getOrDefault("jobName")
+  valid_568459 = validateParameter(valid_568459, JString, required = true,
                                  default = nil)
-  if valid_594230 != nil:
-    section.add "jobName", valid_594230
-  var valid_594231 = path.getOrDefault("vaultName")
-  valid_594231 = validateParameter(valid_594231, JString, required = true,
+  if valid_568459 != nil:
+    section.add "jobName", valid_568459
+  var valid_568460 = path.getOrDefault("vaultName")
+  valid_568460 = validateParameter(valid_568460, JString, required = true,
                                  default = nil)
-  if valid_594231 != nil:
-    section.add "vaultName", valid_594231
+  if valid_568460 != nil:
+    section.add "vaultName", valid_568460
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3011,11 +3011,11 @@ proc validate_JobDetailsGet_594226(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594232 = query.getOrDefault("api-version")
-  valid_594232 = validateParameter(valid_594232, JString, required = true,
+  var valid_568461 = query.getOrDefault("api-version")
+  valid_568461 = validateParameter(valid_568461, JString, required = true,
                                  default = nil)
-  if valid_594232 != nil:
-    section.add "api-version", valid_594232
+  if valid_568461 != nil:
+    section.add "api-version", valid_568461
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3024,20 +3024,20 @@ proc validate_JobDetailsGet_594226(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594233: Call_JobDetailsGet_594225; path: JsonNode; query: JsonNode;
+proc call*(call_568462: Call_JobDetailsGet_568454; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets extended information associated with the job.
   ## 
-  let valid = call_594233.validator(path, query, header, formData, body)
-  let scheme = call_594233.pickScheme
+  let valid = call_568462.validator(path, query, header, formData, body)
+  let scheme = call_568462.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594233.url(scheme.get, call_594233.host, call_594233.base,
-                         call_594233.route, valid.getOrDefault("path"),
+  let url = call_568462.url(scheme.get, call_568462.host, call_568462.base,
+                         call_568462.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594233, url, valid)
+  result = hook(call_568462, url, valid)
 
-proc call*(call_594234: Call_JobDetailsGet_594225; resourceGroupName: string;
+proc call*(call_568463: Call_JobDetailsGet_568454; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; jobName: string;
           vaultName: string): Recallable =
   ## jobDetailsGet
@@ -3052,22 +3052,22 @@ proc call*(call_594234: Call_JobDetailsGet_594225; resourceGroupName: string;
   ##          : Name of the job associated with this GET operation.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594235 = newJObject()
-  var query_594236 = newJObject()
-  add(path_594235, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594236, "api-version", newJString(apiVersion))
-  add(path_594235, "subscriptionId", newJString(subscriptionId))
-  add(path_594235, "jobName", newJString(jobName))
-  add(path_594235, "vaultName", newJString(vaultName))
-  result = call_594234.call(path_594235, query_594236, nil, nil, nil)
+  var path_568464 = newJObject()
+  var query_568465 = newJObject()
+  add(path_568464, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568465, "api-version", newJString(apiVersion))
+  add(path_568464, "subscriptionId", newJString(subscriptionId))
+  add(path_568464, "jobName", newJString(jobName))
+  add(path_568464, "vaultName", newJString(vaultName))
+  result = call_568463.call(path_568464, query_568465, nil, nil, nil)
 
-var jobDetailsGet* = Call_JobDetailsGet_594225(name: "jobDetailsGet",
+var jobDetailsGet* = Call_JobDetailsGet_568454(name: "jobDetailsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupJobs/{jobName}",
-    validator: validate_JobDetailsGet_594226, base: "", url: url_JobDetailsGet_594227,
+    validator: validate_JobDetailsGet_568455, base: "", url: url_JobDetailsGet_568456,
     schemes: {Scheme.Https})
 type
-  Call_JobCancellationsTrigger_594237 = ref object of OpenApiRestCall_593422
-proc url_JobCancellationsTrigger_594239(protocol: Scheme; host: string; base: string;
+  Call_JobCancellationsTrigger_568466 = ref object of OpenApiRestCall_567651
+proc url_JobCancellationsTrigger_568468(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3095,7 +3095,7 @@ proc url_JobCancellationsTrigger_594239(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobCancellationsTrigger_594238(path: JsonNode; query: JsonNode;
+proc validate_JobCancellationsTrigger_568467(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancels the job. This is an asynchronous operation. To know the status of the cancellation, call the GetCancelOperationResult API.
   ## 
@@ -3113,26 +3113,26 @@ proc validate_JobCancellationsTrigger_594238(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594240 = path.getOrDefault("resourceGroupName")
-  valid_594240 = validateParameter(valid_594240, JString, required = true,
+  var valid_568469 = path.getOrDefault("resourceGroupName")
+  valid_568469 = validateParameter(valid_568469, JString, required = true,
                                  default = nil)
-  if valid_594240 != nil:
-    section.add "resourceGroupName", valid_594240
-  var valid_594241 = path.getOrDefault("subscriptionId")
-  valid_594241 = validateParameter(valid_594241, JString, required = true,
+  if valid_568469 != nil:
+    section.add "resourceGroupName", valid_568469
+  var valid_568470 = path.getOrDefault("subscriptionId")
+  valid_568470 = validateParameter(valid_568470, JString, required = true,
                                  default = nil)
-  if valid_594241 != nil:
-    section.add "subscriptionId", valid_594241
-  var valid_594242 = path.getOrDefault("jobName")
-  valid_594242 = validateParameter(valid_594242, JString, required = true,
+  if valid_568470 != nil:
+    section.add "subscriptionId", valid_568470
+  var valid_568471 = path.getOrDefault("jobName")
+  valid_568471 = validateParameter(valid_568471, JString, required = true,
                                  default = nil)
-  if valid_594242 != nil:
-    section.add "jobName", valid_594242
-  var valid_594243 = path.getOrDefault("vaultName")
-  valid_594243 = validateParameter(valid_594243, JString, required = true,
+  if valid_568471 != nil:
+    section.add "jobName", valid_568471
+  var valid_568472 = path.getOrDefault("vaultName")
+  valid_568472 = validateParameter(valid_568472, JString, required = true,
                                  default = nil)
-  if valid_594243 != nil:
-    section.add "vaultName", valid_594243
+  if valid_568472 != nil:
+    section.add "vaultName", valid_568472
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3140,11 +3140,11 @@ proc validate_JobCancellationsTrigger_594238(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594244 = query.getOrDefault("api-version")
-  valid_594244 = validateParameter(valid_594244, JString, required = true,
+  var valid_568473 = query.getOrDefault("api-version")
+  valid_568473 = validateParameter(valid_568473, JString, required = true,
                                  default = nil)
-  if valid_594244 != nil:
-    section.add "api-version", valid_594244
+  if valid_568473 != nil:
+    section.add "api-version", valid_568473
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3153,20 +3153,20 @@ proc validate_JobCancellationsTrigger_594238(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594245: Call_JobCancellationsTrigger_594237; path: JsonNode;
+proc call*(call_568474: Call_JobCancellationsTrigger_568466; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Cancels the job. This is an asynchronous operation. To know the status of the cancellation, call the GetCancelOperationResult API.
   ## 
-  let valid = call_594245.validator(path, query, header, formData, body)
-  let scheme = call_594245.pickScheme
+  let valid = call_568474.validator(path, query, header, formData, body)
+  let scheme = call_568474.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594245.url(scheme.get, call_594245.host, call_594245.base,
-                         call_594245.route, valid.getOrDefault("path"),
+  let url = call_568474.url(scheme.get, call_568474.host, call_568474.base,
+                         call_568474.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594245, url, valid)
+  result = hook(call_568474, url, valid)
 
-proc call*(call_594246: Call_JobCancellationsTrigger_594237;
+proc call*(call_568475: Call_JobCancellationsTrigger_568466;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           jobName: string; vaultName: string): Recallable =
   ## jobCancellationsTrigger
@@ -3181,23 +3181,23 @@ proc call*(call_594246: Call_JobCancellationsTrigger_594237;
   ##          : Name of the job to cancel.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594247 = newJObject()
-  var query_594248 = newJObject()
-  add(path_594247, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594248, "api-version", newJString(apiVersion))
-  add(path_594247, "subscriptionId", newJString(subscriptionId))
-  add(path_594247, "jobName", newJString(jobName))
-  add(path_594247, "vaultName", newJString(vaultName))
-  result = call_594246.call(path_594247, query_594248, nil, nil, nil)
+  var path_568476 = newJObject()
+  var query_568477 = newJObject()
+  add(path_568476, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568477, "api-version", newJString(apiVersion))
+  add(path_568476, "subscriptionId", newJString(subscriptionId))
+  add(path_568476, "jobName", newJString(jobName))
+  add(path_568476, "vaultName", newJString(vaultName))
+  result = call_568475.call(path_568476, query_568477, nil, nil, nil)
 
-var jobCancellationsTrigger* = Call_JobCancellationsTrigger_594237(
+var jobCancellationsTrigger* = Call_JobCancellationsTrigger_568466(
     name: "jobCancellationsTrigger", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupJobs/{jobName}/cancel",
-    validator: validate_JobCancellationsTrigger_594238, base: "",
-    url: url_JobCancellationsTrigger_594239, schemes: {Scheme.Https})
+    validator: validate_JobCancellationsTrigger_568467, base: "",
+    url: url_JobCancellationsTrigger_568468, schemes: {Scheme.Https})
 type
-  Call_JobOperationResultsGet_594249 = ref object of OpenApiRestCall_593422
-proc url_JobOperationResultsGet_594251(protocol: Scheme; host: string; base: string;
+  Call_JobOperationResultsGet_568478 = ref object of OpenApiRestCall_567651
+proc url_JobOperationResultsGet_568480(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3226,7 +3226,7 @@ proc url_JobOperationResultsGet_594251(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobOperationResultsGet_594250(path: JsonNode; query: JsonNode;
+proc validate_JobOperationResultsGet_568479(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the result of the operation.
   ## 
@@ -3246,31 +3246,31 @@ proc validate_JobOperationResultsGet_594250(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594252 = path.getOrDefault("resourceGroupName")
-  valid_594252 = validateParameter(valid_594252, JString, required = true,
+  var valid_568481 = path.getOrDefault("resourceGroupName")
+  valid_568481 = validateParameter(valid_568481, JString, required = true,
                                  default = nil)
-  if valid_594252 != nil:
-    section.add "resourceGroupName", valid_594252
-  var valid_594253 = path.getOrDefault("subscriptionId")
-  valid_594253 = validateParameter(valid_594253, JString, required = true,
+  if valid_568481 != nil:
+    section.add "resourceGroupName", valid_568481
+  var valid_568482 = path.getOrDefault("subscriptionId")
+  valid_568482 = validateParameter(valid_568482, JString, required = true,
                                  default = nil)
-  if valid_594253 != nil:
-    section.add "subscriptionId", valid_594253
-  var valid_594254 = path.getOrDefault("jobName")
-  valid_594254 = validateParameter(valid_594254, JString, required = true,
+  if valid_568482 != nil:
+    section.add "subscriptionId", valid_568482
+  var valid_568483 = path.getOrDefault("jobName")
+  valid_568483 = validateParameter(valid_568483, JString, required = true,
                                  default = nil)
-  if valid_594254 != nil:
-    section.add "jobName", valid_594254
-  var valid_594255 = path.getOrDefault("vaultName")
-  valid_594255 = validateParameter(valid_594255, JString, required = true,
+  if valid_568483 != nil:
+    section.add "jobName", valid_568483
+  var valid_568484 = path.getOrDefault("vaultName")
+  valid_568484 = validateParameter(valid_568484, JString, required = true,
                                  default = nil)
-  if valid_594255 != nil:
-    section.add "vaultName", valid_594255
-  var valid_594256 = path.getOrDefault("operationId")
-  valid_594256 = validateParameter(valid_594256, JString, required = true,
+  if valid_568484 != nil:
+    section.add "vaultName", valid_568484
+  var valid_568485 = path.getOrDefault("operationId")
+  valid_568485 = validateParameter(valid_568485, JString, required = true,
                                  default = nil)
-  if valid_594256 != nil:
-    section.add "operationId", valid_594256
+  if valid_568485 != nil:
+    section.add "operationId", valid_568485
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3278,11 +3278,11 @@ proc validate_JobOperationResultsGet_594250(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594257 = query.getOrDefault("api-version")
-  valid_594257 = validateParameter(valid_594257, JString, required = true,
+  var valid_568486 = query.getOrDefault("api-version")
+  valid_568486 = validateParameter(valid_568486, JString, required = true,
                                  default = nil)
-  if valid_594257 != nil:
-    section.add "api-version", valid_594257
+  if valid_568486 != nil:
+    section.add "api-version", valid_568486
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3291,20 +3291,20 @@ proc validate_JobOperationResultsGet_594250(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594258: Call_JobOperationResultsGet_594249; path: JsonNode;
+proc call*(call_568487: Call_JobOperationResultsGet_568478; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the result of the operation.
   ## 
-  let valid = call_594258.validator(path, query, header, formData, body)
-  let scheme = call_594258.pickScheme
+  let valid = call_568487.validator(path, query, header, formData, body)
+  let scheme = call_568487.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594258.url(scheme.get, call_594258.host, call_594258.base,
-                         call_594258.route, valid.getOrDefault("path"),
+  let url = call_568487.url(scheme.get, call_568487.host, call_568487.base,
+                         call_568487.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594258, url, valid)
+  result = hook(call_568487, url, valid)
 
-proc call*(call_594259: Call_JobOperationResultsGet_594249;
+proc call*(call_568488: Call_JobOperationResultsGet_568478;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           jobName: string; vaultName: string; operationId: string): Recallable =
   ## jobOperationResultsGet
@@ -3321,24 +3321,24 @@ proc call*(call_594259: Call_JobOperationResultsGet_594249;
   ##            : The name of the Recovery Services vault.
   ##   operationId: string (required)
   ##              : OperationID associated with this GET operation.
-  var path_594260 = newJObject()
-  var query_594261 = newJObject()
-  add(path_594260, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594261, "api-version", newJString(apiVersion))
-  add(path_594260, "subscriptionId", newJString(subscriptionId))
-  add(path_594260, "jobName", newJString(jobName))
-  add(path_594260, "vaultName", newJString(vaultName))
-  add(path_594260, "operationId", newJString(operationId))
-  result = call_594259.call(path_594260, query_594261, nil, nil, nil)
+  var path_568489 = newJObject()
+  var query_568490 = newJObject()
+  add(path_568489, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568490, "api-version", newJString(apiVersion))
+  add(path_568489, "subscriptionId", newJString(subscriptionId))
+  add(path_568489, "jobName", newJString(jobName))
+  add(path_568489, "vaultName", newJString(vaultName))
+  add(path_568489, "operationId", newJString(operationId))
+  result = call_568488.call(path_568489, query_568490, nil, nil, nil)
 
-var jobOperationResultsGet* = Call_JobOperationResultsGet_594249(
+var jobOperationResultsGet* = Call_JobOperationResultsGet_568478(
     name: "jobOperationResultsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupJobs/{jobName}/operationResults/{operationId}",
-    validator: validate_JobOperationResultsGet_594250, base: "",
-    url: url_JobOperationResultsGet_594251, schemes: {Scheme.Https})
+    validator: validate_JobOperationResultsGet_568479, base: "",
+    url: url_JobOperationResultsGet_568480, schemes: {Scheme.Https})
 type
-  Call_JobsExport_594262 = ref object of OpenApiRestCall_593422
-proc url_JobsExport_594264(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsExport_568491 = ref object of OpenApiRestCall_567651
+proc url_JobsExport_568493(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3362,7 +3362,7 @@ proc url_JobsExport_594264(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsExport_594263(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsExport_568492(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Exports all jobs for a given Shared Access Signatures (SAS) URL. The SAS URL expires within 15 minutes of its creation.
   ## 
@@ -3378,21 +3378,21 @@ proc validate_JobsExport_594263(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594265 = path.getOrDefault("resourceGroupName")
-  valid_594265 = validateParameter(valid_594265, JString, required = true,
+  var valid_568494 = path.getOrDefault("resourceGroupName")
+  valid_568494 = validateParameter(valid_568494, JString, required = true,
                                  default = nil)
-  if valid_594265 != nil:
-    section.add "resourceGroupName", valid_594265
-  var valid_594266 = path.getOrDefault("subscriptionId")
-  valid_594266 = validateParameter(valid_594266, JString, required = true,
+  if valid_568494 != nil:
+    section.add "resourceGroupName", valid_568494
+  var valid_568495 = path.getOrDefault("subscriptionId")
+  valid_568495 = validateParameter(valid_568495, JString, required = true,
                                  default = nil)
-  if valid_594266 != nil:
-    section.add "subscriptionId", valid_594266
-  var valid_594267 = path.getOrDefault("vaultName")
-  valid_594267 = validateParameter(valid_594267, JString, required = true,
+  if valid_568495 != nil:
+    section.add "subscriptionId", valid_568495
+  var valid_568496 = path.getOrDefault("vaultName")
+  valid_568496 = validateParameter(valid_568496, JString, required = true,
                                  default = nil)
-  if valid_594267 != nil:
-    section.add "vaultName", valid_594267
+  if valid_568496 != nil:
+    section.add "vaultName", valid_568496
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3402,16 +3402,16 @@ proc validate_JobsExport_594263(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594268 = query.getOrDefault("api-version")
-  valid_594268 = validateParameter(valid_594268, JString, required = true,
+  var valid_568497 = query.getOrDefault("api-version")
+  valid_568497 = validateParameter(valid_568497, JString, required = true,
                                  default = nil)
-  if valid_594268 != nil:
-    section.add "api-version", valid_594268
-  var valid_594269 = query.getOrDefault("$filter")
-  valid_594269 = validateParameter(valid_594269, JString, required = false,
+  if valid_568497 != nil:
+    section.add "api-version", valid_568497
+  var valid_568498 = query.getOrDefault("$filter")
+  valid_568498 = validateParameter(valid_568498, JString, required = false,
                                  default = nil)
-  if valid_594269 != nil:
-    section.add "$filter", valid_594269
+  if valid_568498 != nil:
+    section.add "$filter", valid_568498
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3420,20 +3420,20 @@ proc validate_JobsExport_594263(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594270: Call_JobsExport_594262; path: JsonNode; query: JsonNode;
+proc call*(call_568499: Call_JobsExport_568491; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Exports all jobs for a given Shared Access Signatures (SAS) URL. The SAS URL expires within 15 minutes of its creation.
   ## 
-  let valid = call_594270.validator(path, query, header, formData, body)
-  let scheme = call_594270.pickScheme
+  let valid = call_568499.validator(path, query, header, formData, body)
+  let scheme = call_568499.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594270.url(scheme.get, call_594270.host, call_594270.base,
-                         call_594270.route, valid.getOrDefault("path"),
+  let url = call_568499.url(scheme.get, call_568499.host, call_568499.base,
+                         call_568499.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594270, url, valid)
+  result = hook(call_568499, url, valid)
 
-proc call*(call_594271: Call_JobsExport_594262; resourceGroupName: string;
+proc call*(call_568500: Call_JobsExport_568491; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; vaultName: string;
           Filter: string = ""): Recallable =
   ## jobsExport
@@ -3448,24 +3448,24 @@ proc call*(call_594271: Call_JobsExport_594262; resourceGroupName: string;
   ##            : The name of the Recovery Services vault.
   ##   Filter: string
   ##         : The OData filter options. status eq { InProgress , Completed , Failed , CompletedWithWarnings , Cancelled , Cancelling } and backupManagementType eq {AzureIaasVM, MAB, DPM, AzureBackupServer, AzureSql } and operation eq { ConfigureBackup , Backup , Restore , DisableBackup , DeleteBackupData } and jobId eq {guid} and startTime eq { yyyy-mm-dd hh:mm:ss PM } and endTime eq { yyyy-mm-dd hh:mm:ss PM }.
-  var path_594272 = newJObject()
-  var query_594273 = newJObject()
-  add(path_594272, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594273, "api-version", newJString(apiVersion))
-  add(path_594272, "subscriptionId", newJString(subscriptionId))
-  add(path_594272, "vaultName", newJString(vaultName))
-  add(query_594273, "$filter", newJString(Filter))
-  result = call_594271.call(path_594272, query_594273, nil, nil, nil)
+  var path_568501 = newJObject()
+  var query_568502 = newJObject()
+  add(path_568501, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568502, "api-version", newJString(apiVersion))
+  add(path_568501, "subscriptionId", newJString(subscriptionId))
+  add(path_568501, "vaultName", newJString(vaultName))
+  add(query_568502, "$filter", newJString(Filter))
+  result = call_568500.call(path_568501, query_568502, nil, nil, nil)
 
-var jobsExport* = Call_JobsExport_594262(name: "jobsExport",
+var jobsExport* = Call_JobsExport_568491(name: "jobsExport",
                                       meth: HttpMethod.HttpPost,
                                       host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupJobsExport",
-                                      validator: validate_JobsExport_594263,
-                                      base: "", url: url_JobsExport_594264,
+                                      validator: validate_JobsExport_568492,
+                                      base: "", url: url_JobsExport_568493,
                                       schemes: {Scheme.Https})
 type
-  Call_BackupOperationResultsGet_594274 = ref object of OpenApiRestCall_593422
-proc url_BackupOperationResultsGet_594276(protocol: Scheme; host: string;
+  Call_BackupOperationResultsGet_568503 = ref object of OpenApiRestCall_567651
+proc url_BackupOperationResultsGet_568505(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3491,7 +3491,7 @@ proc url_BackupOperationResultsGet_594276(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupOperationResultsGet_594275(path: JsonNode; query: JsonNode;
+proc validate_BackupOperationResultsGet_568504(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Provides the status of the delete operations, for example, deleting a backup item. Once the operation starts, the response status code is Accepted. The response status code remains in this state until the operation reaches completion. On successful completion, the status code changes to OK. This method expects OperationID as an argument. OperationID is part of the Location header of the operation response.
   ## 
@@ -3509,26 +3509,26 @@ proc validate_BackupOperationResultsGet_594275(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594277 = path.getOrDefault("resourceGroupName")
-  valid_594277 = validateParameter(valid_594277, JString, required = true,
+  var valid_568506 = path.getOrDefault("resourceGroupName")
+  valid_568506 = validateParameter(valid_568506, JString, required = true,
                                  default = nil)
-  if valid_594277 != nil:
-    section.add "resourceGroupName", valid_594277
-  var valid_594278 = path.getOrDefault("subscriptionId")
-  valid_594278 = validateParameter(valid_594278, JString, required = true,
+  if valid_568506 != nil:
+    section.add "resourceGroupName", valid_568506
+  var valid_568507 = path.getOrDefault("subscriptionId")
+  valid_568507 = validateParameter(valid_568507, JString, required = true,
                                  default = nil)
-  if valid_594278 != nil:
-    section.add "subscriptionId", valid_594278
-  var valid_594279 = path.getOrDefault("vaultName")
-  valid_594279 = validateParameter(valid_594279, JString, required = true,
+  if valid_568507 != nil:
+    section.add "subscriptionId", valid_568507
+  var valid_568508 = path.getOrDefault("vaultName")
+  valid_568508 = validateParameter(valid_568508, JString, required = true,
                                  default = nil)
-  if valid_594279 != nil:
-    section.add "vaultName", valid_594279
-  var valid_594280 = path.getOrDefault("operationId")
-  valid_594280 = validateParameter(valid_594280, JString, required = true,
+  if valid_568508 != nil:
+    section.add "vaultName", valid_568508
+  var valid_568509 = path.getOrDefault("operationId")
+  valid_568509 = validateParameter(valid_568509, JString, required = true,
                                  default = nil)
-  if valid_594280 != nil:
-    section.add "operationId", valid_594280
+  if valid_568509 != nil:
+    section.add "operationId", valid_568509
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3536,11 +3536,11 @@ proc validate_BackupOperationResultsGet_594275(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594281 = query.getOrDefault("api-version")
-  valid_594281 = validateParameter(valid_594281, JString, required = true,
+  var valid_568510 = query.getOrDefault("api-version")
+  valid_568510 = validateParameter(valid_568510, JString, required = true,
                                  default = nil)
-  if valid_594281 != nil:
-    section.add "api-version", valid_594281
+  if valid_568510 != nil:
+    section.add "api-version", valid_568510
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3549,20 +3549,20 @@ proc validate_BackupOperationResultsGet_594275(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594282: Call_BackupOperationResultsGet_594274; path: JsonNode;
+proc call*(call_568511: Call_BackupOperationResultsGet_568503; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Provides the status of the delete operations, for example, deleting a backup item. Once the operation starts, the response status code is Accepted. The response status code remains in this state until the operation reaches completion. On successful completion, the status code changes to OK. This method expects OperationID as an argument. OperationID is part of the Location header of the operation response.
   ## 
-  let valid = call_594282.validator(path, query, header, formData, body)
-  let scheme = call_594282.pickScheme
+  let valid = call_568511.validator(path, query, header, formData, body)
+  let scheme = call_568511.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594282.url(scheme.get, call_594282.host, call_594282.base,
-                         call_594282.route, valid.getOrDefault("path"),
+  let url = call_568511.url(scheme.get, call_568511.host, call_568511.base,
+                         call_568511.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594282, url, valid)
+  result = hook(call_568511, url, valid)
 
-proc call*(call_594283: Call_BackupOperationResultsGet_594274;
+proc call*(call_568512: Call_BackupOperationResultsGet_568503;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           vaultName: string; operationId: string): Recallable =
   ## backupOperationResultsGet
@@ -3577,23 +3577,23 @@ proc call*(call_594283: Call_BackupOperationResultsGet_594274;
   ##            : The name of the Recovery Services vault.
   ##   operationId: string (required)
   ##              : The ID of the operation.
-  var path_594284 = newJObject()
-  var query_594285 = newJObject()
-  add(path_594284, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594285, "api-version", newJString(apiVersion))
-  add(path_594284, "subscriptionId", newJString(subscriptionId))
-  add(path_594284, "vaultName", newJString(vaultName))
-  add(path_594284, "operationId", newJString(operationId))
-  result = call_594283.call(path_594284, query_594285, nil, nil, nil)
+  var path_568513 = newJObject()
+  var query_568514 = newJObject()
+  add(path_568513, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568514, "api-version", newJString(apiVersion))
+  add(path_568513, "subscriptionId", newJString(subscriptionId))
+  add(path_568513, "vaultName", newJString(vaultName))
+  add(path_568513, "operationId", newJString(operationId))
+  result = call_568512.call(path_568513, query_568514, nil, nil, nil)
 
-var backupOperationResultsGet* = Call_BackupOperationResultsGet_594274(
+var backupOperationResultsGet* = Call_BackupOperationResultsGet_568503(
     name: "backupOperationResultsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupOperationResults/{operationId}",
-    validator: validate_BackupOperationResultsGet_594275, base: "",
-    url: url_BackupOperationResultsGet_594276, schemes: {Scheme.Https})
+    validator: validate_BackupOperationResultsGet_568504, base: "",
+    url: url_BackupOperationResultsGet_568505, schemes: {Scheme.Https})
 type
-  Call_BackupOperationStatusesGet_594286 = ref object of OpenApiRestCall_593422
-proc url_BackupOperationStatusesGet_594288(protocol: Scheme; host: string;
+  Call_BackupOperationStatusesGet_568515 = ref object of OpenApiRestCall_567651
+proc url_BackupOperationStatusesGet_568517(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3619,7 +3619,7 @@ proc url_BackupOperationStatusesGet_594288(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupOperationStatusesGet_594287(path: JsonNode; query: JsonNode;
+proc validate_BackupOperationStatusesGet_568516(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the status of an operation such as triggering a backup or restore. The status can be In progress, Completed or Failed. You can refer to the OperationStatus enum for all the possible states of an operation. Some operations create jobs. This method returns the list of jobs when the operation is complete.
   ## 
@@ -3637,26 +3637,26 @@ proc validate_BackupOperationStatusesGet_594287(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594289 = path.getOrDefault("resourceGroupName")
-  valid_594289 = validateParameter(valid_594289, JString, required = true,
+  var valid_568518 = path.getOrDefault("resourceGroupName")
+  valid_568518 = validateParameter(valid_568518, JString, required = true,
                                  default = nil)
-  if valid_594289 != nil:
-    section.add "resourceGroupName", valid_594289
-  var valid_594290 = path.getOrDefault("subscriptionId")
-  valid_594290 = validateParameter(valid_594290, JString, required = true,
+  if valid_568518 != nil:
+    section.add "resourceGroupName", valid_568518
+  var valid_568519 = path.getOrDefault("subscriptionId")
+  valid_568519 = validateParameter(valid_568519, JString, required = true,
                                  default = nil)
-  if valid_594290 != nil:
-    section.add "subscriptionId", valid_594290
-  var valid_594291 = path.getOrDefault("vaultName")
-  valid_594291 = validateParameter(valid_594291, JString, required = true,
+  if valid_568519 != nil:
+    section.add "subscriptionId", valid_568519
+  var valid_568520 = path.getOrDefault("vaultName")
+  valid_568520 = validateParameter(valid_568520, JString, required = true,
                                  default = nil)
-  if valid_594291 != nil:
-    section.add "vaultName", valid_594291
-  var valid_594292 = path.getOrDefault("operationId")
-  valid_594292 = validateParameter(valid_594292, JString, required = true,
+  if valid_568520 != nil:
+    section.add "vaultName", valid_568520
+  var valid_568521 = path.getOrDefault("operationId")
+  valid_568521 = validateParameter(valid_568521, JString, required = true,
                                  default = nil)
-  if valid_594292 != nil:
-    section.add "operationId", valid_594292
+  if valid_568521 != nil:
+    section.add "operationId", valid_568521
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3664,11 +3664,11 @@ proc validate_BackupOperationStatusesGet_594287(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594293 = query.getOrDefault("api-version")
-  valid_594293 = validateParameter(valid_594293, JString, required = true,
+  var valid_568522 = query.getOrDefault("api-version")
+  valid_568522 = validateParameter(valid_568522, JString, required = true,
                                  default = nil)
-  if valid_594293 != nil:
-    section.add "api-version", valid_594293
+  if valid_568522 != nil:
+    section.add "api-version", valid_568522
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3677,20 +3677,20 @@ proc validate_BackupOperationStatusesGet_594287(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594294: Call_BackupOperationStatusesGet_594286; path: JsonNode;
+proc call*(call_568523: Call_BackupOperationStatusesGet_568515; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the status of an operation such as triggering a backup or restore. The status can be In progress, Completed or Failed. You can refer to the OperationStatus enum for all the possible states of an operation. Some operations create jobs. This method returns the list of jobs when the operation is complete.
   ## 
-  let valid = call_594294.validator(path, query, header, formData, body)
-  let scheme = call_594294.pickScheme
+  let valid = call_568523.validator(path, query, header, formData, body)
+  let scheme = call_568523.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594294.url(scheme.get, call_594294.host, call_594294.base,
-                         call_594294.route, valid.getOrDefault("path"),
+  let url = call_568523.url(scheme.get, call_568523.host, call_568523.base,
+                         call_568523.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594294, url, valid)
+  result = hook(call_568523, url, valid)
 
-proc call*(call_594295: Call_BackupOperationStatusesGet_594286;
+proc call*(call_568524: Call_BackupOperationStatusesGet_568515;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           vaultName: string; operationId: string): Recallable =
   ## backupOperationStatusesGet
@@ -3705,23 +3705,23 @@ proc call*(call_594295: Call_BackupOperationStatusesGet_594286;
   ##            : The name of the Recovery Services vault.
   ##   operationId: string (required)
   ##              : The ID of the operation.
-  var path_594296 = newJObject()
-  var query_594297 = newJObject()
-  add(path_594296, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594297, "api-version", newJString(apiVersion))
-  add(path_594296, "subscriptionId", newJString(subscriptionId))
-  add(path_594296, "vaultName", newJString(vaultName))
-  add(path_594296, "operationId", newJString(operationId))
-  result = call_594295.call(path_594296, query_594297, nil, nil, nil)
+  var path_568525 = newJObject()
+  var query_568526 = newJObject()
+  add(path_568525, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568526, "api-version", newJString(apiVersion))
+  add(path_568525, "subscriptionId", newJString(subscriptionId))
+  add(path_568525, "vaultName", newJString(vaultName))
+  add(path_568525, "operationId", newJString(operationId))
+  result = call_568524.call(path_568525, query_568526, nil, nil, nil)
 
-var backupOperationStatusesGet* = Call_BackupOperationStatusesGet_594286(
+var backupOperationStatusesGet* = Call_BackupOperationStatusesGet_568515(
     name: "backupOperationStatusesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupOperations/{operationId}",
-    validator: validate_BackupOperationStatusesGet_594287, base: "",
-    url: url_BackupOperationStatusesGet_594288, schemes: {Scheme.Https})
+    validator: validate_BackupOperationStatusesGet_568516, base: "",
+    url: url_BackupOperationStatusesGet_568517, schemes: {Scheme.Https})
 type
-  Call_ProtectionPoliciesList_594298 = ref object of OpenApiRestCall_593422
-proc url_ProtectionPoliciesList_594300(protocol: Scheme; host: string; base: string;
+  Call_ProtectionPoliciesList_568527 = ref object of OpenApiRestCall_567651
+proc url_ProtectionPoliciesList_568529(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3745,7 +3745,7 @@ proc url_ProtectionPoliciesList_594300(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionPoliciesList_594299(path: JsonNode; query: JsonNode;
+proc validate_ProtectionPoliciesList_568528(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the backup policies associated with the Recovery Services vault. The API provides parameters to Get scoped results.
   ## 
@@ -3761,21 +3761,21 @@ proc validate_ProtectionPoliciesList_594299(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594301 = path.getOrDefault("resourceGroupName")
-  valid_594301 = validateParameter(valid_594301, JString, required = true,
+  var valid_568530 = path.getOrDefault("resourceGroupName")
+  valid_568530 = validateParameter(valid_568530, JString, required = true,
                                  default = nil)
-  if valid_594301 != nil:
-    section.add "resourceGroupName", valid_594301
-  var valid_594302 = path.getOrDefault("subscriptionId")
-  valid_594302 = validateParameter(valid_594302, JString, required = true,
+  if valid_568530 != nil:
+    section.add "resourceGroupName", valid_568530
+  var valid_568531 = path.getOrDefault("subscriptionId")
+  valid_568531 = validateParameter(valid_568531, JString, required = true,
                                  default = nil)
-  if valid_594302 != nil:
-    section.add "subscriptionId", valid_594302
-  var valid_594303 = path.getOrDefault("vaultName")
-  valid_594303 = validateParameter(valid_594303, JString, required = true,
+  if valid_568531 != nil:
+    section.add "subscriptionId", valid_568531
+  var valid_568532 = path.getOrDefault("vaultName")
+  valid_568532 = validateParameter(valid_568532, JString, required = true,
                                  default = nil)
-  if valid_594303 != nil:
-    section.add "vaultName", valid_594303
+  if valid_568532 != nil:
+    section.add "vaultName", valid_568532
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3785,16 +3785,16 @@ proc validate_ProtectionPoliciesList_594299(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594304 = query.getOrDefault("api-version")
-  valid_594304 = validateParameter(valid_594304, JString, required = true,
+  var valid_568533 = query.getOrDefault("api-version")
+  valid_568533 = validateParameter(valid_568533, JString, required = true,
                                  default = nil)
-  if valid_594304 != nil:
-    section.add "api-version", valid_594304
-  var valid_594305 = query.getOrDefault("$filter")
-  valid_594305 = validateParameter(valid_594305, JString, required = false,
+  if valid_568533 != nil:
+    section.add "api-version", valid_568533
+  var valid_568534 = query.getOrDefault("$filter")
+  valid_568534 = validateParameter(valid_568534, JString, required = false,
                                  default = nil)
-  if valid_594305 != nil:
-    section.add "$filter", valid_594305
+  if valid_568534 != nil:
+    section.add "$filter", valid_568534
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3803,20 +3803,20 @@ proc validate_ProtectionPoliciesList_594299(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594306: Call_ProtectionPoliciesList_594298; path: JsonNode;
+proc call*(call_568535: Call_ProtectionPoliciesList_568527; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the backup policies associated with the Recovery Services vault. The API provides parameters to Get scoped results.
   ## 
-  let valid = call_594306.validator(path, query, header, formData, body)
-  let scheme = call_594306.pickScheme
+  let valid = call_568535.validator(path, query, header, formData, body)
+  let scheme = call_568535.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594306.url(scheme.get, call_594306.host, call_594306.base,
-                         call_594306.route, valid.getOrDefault("path"),
+  let url = call_568535.url(scheme.get, call_568535.host, call_568535.base,
+                         call_568535.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594306, url, valid)
+  result = hook(call_568535, url, valid)
 
-proc call*(call_594307: Call_ProtectionPoliciesList_594298;
+proc call*(call_568536: Call_ProtectionPoliciesList_568527;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           vaultName: string; Filter: string = ""): Recallable =
   ## protectionPoliciesList
@@ -3831,23 +3831,23 @@ proc call*(call_594307: Call_ProtectionPoliciesList_594298;
   ##            : The name of the Recovery Services vault.
   ##   Filter: string
   ##         : The following equation can be used to filter the list of backup policies. backupManagementType eq {AzureIaasVM, MAB, DPM, AzureBackupServer, AzureSql}.
-  var path_594308 = newJObject()
-  var query_594309 = newJObject()
-  add(path_594308, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594309, "api-version", newJString(apiVersion))
-  add(path_594308, "subscriptionId", newJString(subscriptionId))
-  add(path_594308, "vaultName", newJString(vaultName))
-  add(query_594309, "$filter", newJString(Filter))
-  result = call_594307.call(path_594308, query_594309, nil, nil, nil)
+  var path_568537 = newJObject()
+  var query_568538 = newJObject()
+  add(path_568537, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568538, "api-version", newJString(apiVersion))
+  add(path_568537, "subscriptionId", newJString(subscriptionId))
+  add(path_568537, "vaultName", newJString(vaultName))
+  add(query_568538, "$filter", newJString(Filter))
+  result = call_568536.call(path_568537, query_568538, nil, nil, nil)
 
-var protectionPoliciesList* = Call_ProtectionPoliciesList_594298(
+var protectionPoliciesList* = Call_ProtectionPoliciesList_568527(
     name: "protectionPoliciesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies",
-    validator: validate_ProtectionPoliciesList_594299, base: "",
-    url: url_ProtectionPoliciesList_594300, schemes: {Scheme.Https})
+    validator: validate_ProtectionPoliciesList_568528, base: "",
+    url: url_ProtectionPoliciesList_568529, schemes: {Scheme.Https})
 type
-  Call_ProtectionPoliciesCreateOrUpdate_594322 = ref object of OpenApiRestCall_593422
-proc url_ProtectionPoliciesCreateOrUpdate_594324(protocol: Scheme; host: string;
+  Call_ProtectionPoliciesCreateOrUpdate_568551 = ref object of OpenApiRestCall_567651
+proc url_ProtectionPoliciesCreateOrUpdate_568553(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3873,7 +3873,7 @@ proc url_ProtectionPoliciesCreateOrUpdate_594324(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionPoliciesCreateOrUpdate_594323(path: JsonNode;
+proc validate_ProtectionPoliciesCreateOrUpdate_568552(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or modifies a backup policy. This is an asynchronous operation. Use the GetPolicyOperationResult API to Get the operation status.
   ## 
@@ -3891,26 +3891,26 @@ proc validate_ProtectionPoliciesCreateOrUpdate_594323(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594325 = path.getOrDefault("resourceGroupName")
-  valid_594325 = validateParameter(valid_594325, JString, required = true,
+  var valid_568554 = path.getOrDefault("resourceGroupName")
+  valid_568554 = validateParameter(valid_568554, JString, required = true,
                                  default = nil)
-  if valid_594325 != nil:
-    section.add "resourceGroupName", valid_594325
-  var valid_594326 = path.getOrDefault("subscriptionId")
-  valid_594326 = validateParameter(valid_594326, JString, required = true,
+  if valid_568554 != nil:
+    section.add "resourceGroupName", valid_568554
+  var valid_568555 = path.getOrDefault("subscriptionId")
+  valid_568555 = validateParameter(valid_568555, JString, required = true,
                                  default = nil)
-  if valid_594326 != nil:
-    section.add "subscriptionId", valid_594326
-  var valid_594327 = path.getOrDefault("policyName")
-  valid_594327 = validateParameter(valid_594327, JString, required = true,
+  if valid_568555 != nil:
+    section.add "subscriptionId", valid_568555
+  var valid_568556 = path.getOrDefault("policyName")
+  valid_568556 = validateParameter(valid_568556, JString, required = true,
                                  default = nil)
-  if valid_594327 != nil:
-    section.add "policyName", valid_594327
-  var valid_594328 = path.getOrDefault("vaultName")
-  valid_594328 = validateParameter(valid_594328, JString, required = true,
+  if valid_568556 != nil:
+    section.add "policyName", valid_568556
+  var valid_568557 = path.getOrDefault("vaultName")
+  valid_568557 = validateParameter(valid_568557, JString, required = true,
                                  default = nil)
-  if valid_594328 != nil:
-    section.add "vaultName", valid_594328
+  if valid_568557 != nil:
+    section.add "vaultName", valid_568557
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3918,11 +3918,11 @@ proc validate_ProtectionPoliciesCreateOrUpdate_594323(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594329 = query.getOrDefault("api-version")
-  valid_594329 = validateParameter(valid_594329, JString, required = true,
+  var valid_568558 = query.getOrDefault("api-version")
+  valid_568558 = validateParameter(valid_568558, JString, required = true,
                                  default = nil)
-  if valid_594329 != nil:
-    section.add "api-version", valid_594329
+  if valid_568558 != nil:
+    section.add "api-version", valid_568558
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3936,21 +3936,21 @@ proc validate_ProtectionPoliciesCreateOrUpdate_594323(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594331: Call_ProtectionPoliciesCreateOrUpdate_594322;
+proc call*(call_568560: Call_ProtectionPoliciesCreateOrUpdate_568551;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or modifies a backup policy. This is an asynchronous operation. Use the GetPolicyOperationResult API to Get the operation status.
   ## 
-  let valid = call_594331.validator(path, query, header, formData, body)
-  let scheme = call_594331.pickScheme
+  let valid = call_568560.validator(path, query, header, formData, body)
+  let scheme = call_568560.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594331.url(scheme.get, call_594331.host, call_594331.base,
-                         call_594331.route, valid.getOrDefault("path"),
+  let url = call_568560.url(scheme.get, call_568560.host, call_568560.base,
+                         call_568560.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594331, url, valid)
+  result = hook(call_568560, url, valid)
 
-proc call*(call_594332: Call_ProtectionPoliciesCreateOrUpdate_594322;
+proc call*(call_568561: Call_ProtectionPoliciesCreateOrUpdate_568551;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           policyName: string; vaultName: string; resourceProtectionPolicy: JsonNode): Recallable =
   ## protectionPoliciesCreateOrUpdate
@@ -3967,26 +3967,26 @@ proc call*(call_594332: Call_ProtectionPoliciesCreateOrUpdate_594322;
   ##            : The name of the Recovery Services vault.
   ##   resourceProtectionPolicy: JObject (required)
   ##                           : The resource backup policy.
-  var path_594333 = newJObject()
-  var query_594334 = newJObject()
-  var body_594335 = newJObject()
-  add(path_594333, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594334, "api-version", newJString(apiVersion))
-  add(path_594333, "subscriptionId", newJString(subscriptionId))
-  add(path_594333, "policyName", newJString(policyName))
-  add(path_594333, "vaultName", newJString(vaultName))
+  var path_568562 = newJObject()
+  var query_568563 = newJObject()
+  var body_568564 = newJObject()
+  add(path_568562, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568563, "api-version", newJString(apiVersion))
+  add(path_568562, "subscriptionId", newJString(subscriptionId))
+  add(path_568562, "policyName", newJString(policyName))
+  add(path_568562, "vaultName", newJString(vaultName))
   if resourceProtectionPolicy != nil:
-    body_594335 = resourceProtectionPolicy
-  result = call_594332.call(path_594333, query_594334, nil, nil, body_594335)
+    body_568564 = resourceProtectionPolicy
+  result = call_568561.call(path_568562, query_568563, nil, nil, body_568564)
 
-var protectionPoliciesCreateOrUpdate* = Call_ProtectionPoliciesCreateOrUpdate_594322(
+var protectionPoliciesCreateOrUpdate* = Call_ProtectionPoliciesCreateOrUpdate_568551(
     name: "protectionPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}",
-    validator: validate_ProtectionPoliciesCreateOrUpdate_594323, base: "",
-    url: url_ProtectionPoliciesCreateOrUpdate_594324, schemes: {Scheme.Https})
+    validator: validate_ProtectionPoliciesCreateOrUpdate_568552, base: "",
+    url: url_ProtectionPoliciesCreateOrUpdate_568553, schemes: {Scheme.Https})
 type
-  Call_ProtectionPoliciesGet_594310 = ref object of OpenApiRestCall_593422
-proc url_ProtectionPoliciesGet_594312(protocol: Scheme; host: string; base: string;
+  Call_ProtectionPoliciesGet_568539 = ref object of OpenApiRestCall_567651
+proc url_ProtectionPoliciesGet_568541(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4012,7 +4012,7 @@ proc url_ProtectionPoliciesGet_594312(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionPoliciesGet_594311(path: JsonNode; query: JsonNode;
+proc validate_ProtectionPoliciesGet_568540(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the backup policy associated with the Recovery Services vault. This is an asynchronous operation. Use the GetPolicyOperationResult API to Get the operation status.
   ## 
@@ -4030,26 +4030,26 @@ proc validate_ProtectionPoliciesGet_594311(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594313 = path.getOrDefault("resourceGroupName")
-  valid_594313 = validateParameter(valid_594313, JString, required = true,
+  var valid_568542 = path.getOrDefault("resourceGroupName")
+  valid_568542 = validateParameter(valid_568542, JString, required = true,
                                  default = nil)
-  if valid_594313 != nil:
-    section.add "resourceGroupName", valid_594313
-  var valid_594314 = path.getOrDefault("subscriptionId")
-  valid_594314 = validateParameter(valid_594314, JString, required = true,
+  if valid_568542 != nil:
+    section.add "resourceGroupName", valid_568542
+  var valid_568543 = path.getOrDefault("subscriptionId")
+  valid_568543 = validateParameter(valid_568543, JString, required = true,
                                  default = nil)
-  if valid_594314 != nil:
-    section.add "subscriptionId", valid_594314
-  var valid_594315 = path.getOrDefault("policyName")
-  valid_594315 = validateParameter(valid_594315, JString, required = true,
+  if valid_568543 != nil:
+    section.add "subscriptionId", valid_568543
+  var valid_568544 = path.getOrDefault("policyName")
+  valid_568544 = validateParameter(valid_568544, JString, required = true,
                                  default = nil)
-  if valid_594315 != nil:
-    section.add "policyName", valid_594315
-  var valid_594316 = path.getOrDefault("vaultName")
-  valid_594316 = validateParameter(valid_594316, JString, required = true,
+  if valid_568544 != nil:
+    section.add "policyName", valid_568544
+  var valid_568545 = path.getOrDefault("vaultName")
+  valid_568545 = validateParameter(valid_568545, JString, required = true,
                                  default = nil)
-  if valid_594316 != nil:
-    section.add "vaultName", valid_594316
+  if valid_568545 != nil:
+    section.add "vaultName", valid_568545
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4057,11 +4057,11 @@ proc validate_ProtectionPoliciesGet_594311(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594317 = query.getOrDefault("api-version")
-  valid_594317 = validateParameter(valid_594317, JString, required = true,
+  var valid_568546 = query.getOrDefault("api-version")
+  valid_568546 = validateParameter(valid_568546, JString, required = true,
                                  default = nil)
-  if valid_594317 != nil:
-    section.add "api-version", valid_594317
+  if valid_568546 != nil:
+    section.add "api-version", valid_568546
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4070,20 +4070,20 @@ proc validate_ProtectionPoliciesGet_594311(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594318: Call_ProtectionPoliciesGet_594310; path: JsonNode;
+proc call*(call_568547: Call_ProtectionPoliciesGet_568539; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the backup policy associated with the Recovery Services vault. This is an asynchronous operation. Use the GetPolicyOperationResult API to Get the operation status.
   ## 
-  let valid = call_594318.validator(path, query, header, formData, body)
-  let scheme = call_594318.pickScheme
+  let valid = call_568547.validator(path, query, header, formData, body)
+  let scheme = call_568547.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594318.url(scheme.get, call_594318.host, call_594318.base,
-                         call_594318.route, valid.getOrDefault("path"),
+  let url = call_568547.url(scheme.get, call_568547.host, call_568547.base,
+                         call_568547.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594318, url, valid)
+  result = hook(call_568547, url, valid)
 
-proc call*(call_594319: Call_ProtectionPoliciesGet_594310;
+proc call*(call_568548: Call_ProtectionPoliciesGet_568539;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           policyName: string; vaultName: string): Recallable =
   ## protectionPoliciesGet
@@ -4098,23 +4098,23 @@ proc call*(call_594319: Call_ProtectionPoliciesGet_594310;
   ##             : The backup policy name used in this GET operation.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594320 = newJObject()
-  var query_594321 = newJObject()
-  add(path_594320, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594321, "api-version", newJString(apiVersion))
-  add(path_594320, "subscriptionId", newJString(subscriptionId))
-  add(path_594320, "policyName", newJString(policyName))
-  add(path_594320, "vaultName", newJString(vaultName))
-  result = call_594319.call(path_594320, query_594321, nil, nil, nil)
+  var path_568549 = newJObject()
+  var query_568550 = newJObject()
+  add(path_568549, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568550, "api-version", newJString(apiVersion))
+  add(path_568549, "subscriptionId", newJString(subscriptionId))
+  add(path_568549, "policyName", newJString(policyName))
+  add(path_568549, "vaultName", newJString(vaultName))
+  result = call_568548.call(path_568549, query_568550, nil, nil, nil)
 
-var protectionPoliciesGet* = Call_ProtectionPoliciesGet_594310(
+var protectionPoliciesGet* = Call_ProtectionPoliciesGet_568539(
     name: "protectionPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}",
-    validator: validate_ProtectionPoliciesGet_594311, base: "",
-    url: url_ProtectionPoliciesGet_594312, schemes: {Scheme.Https})
+    validator: validate_ProtectionPoliciesGet_568540, base: "",
+    url: url_ProtectionPoliciesGet_568541, schemes: {Scheme.Https})
 type
-  Call_ProtectionPoliciesDelete_594336 = ref object of OpenApiRestCall_593422
-proc url_ProtectionPoliciesDelete_594338(protocol: Scheme; host: string;
+  Call_ProtectionPoliciesDelete_568565 = ref object of OpenApiRestCall_567651
+proc url_ProtectionPoliciesDelete_568567(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4141,7 +4141,7 @@ proc url_ProtectionPoliciesDelete_594338(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionPoliciesDelete_594337(path: JsonNode; query: JsonNode;
+proc validate_ProtectionPoliciesDelete_568566(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified backup policy from your Recovery Services vault. This is an asynchronous operation. Use the GetPolicyOperationResult API to Get the operation status.
   ## 
@@ -4159,26 +4159,26 @@ proc validate_ProtectionPoliciesDelete_594337(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594339 = path.getOrDefault("resourceGroupName")
-  valid_594339 = validateParameter(valid_594339, JString, required = true,
+  var valid_568568 = path.getOrDefault("resourceGroupName")
+  valid_568568 = validateParameter(valid_568568, JString, required = true,
                                  default = nil)
-  if valid_594339 != nil:
-    section.add "resourceGroupName", valid_594339
-  var valid_594340 = path.getOrDefault("subscriptionId")
-  valid_594340 = validateParameter(valid_594340, JString, required = true,
+  if valid_568568 != nil:
+    section.add "resourceGroupName", valid_568568
+  var valid_568569 = path.getOrDefault("subscriptionId")
+  valid_568569 = validateParameter(valid_568569, JString, required = true,
                                  default = nil)
-  if valid_594340 != nil:
-    section.add "subscriptionId", valid_594340
-  var valid_594341 = path.getOrDefault("policyName")
-  valid_594341 = validateParameter(valid_594341, JString, required = true,
+  if valid_568569 != nil:
+    section.add "subscriptionId", valid_568569
+  var valid_568570 = path.getOrDefault("policyName")
+  valid_568570 = validateParameter(valid_568570, JString, required = true,
                                  default = nil)
-  if valid_594341 != nil:
-    section.add "policyName", valid_594341
-  var valid_594342 = path.getOrDefault("vaultName")
-  valid_594342 = validateParameter(valid_594342, JString, required = true,
+  if valid_568570 != nil:
+    section.add "policyName", valid_568570
+  var valid_568571 = path.getOrDefault("vaultName")
+  valid_568571 = validateParameter(valid_568571, JString, required = true,
                                  default = nil)
-  if valid_594342 != nil:
-    section.add "vaultName", valid_594342
+  if valid_568571 != nil:
+    section.add "vaultName", valid_568571
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4186,11 +4186,11 @@ proc validate_ProtectionPoliciesDelete_594337(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594343 = query.getOrDefault("api-version")
-  valid_594343 = validateParameter(valid_594343, JString, required = true,
+  var valid_568572 = query.getOrDefault("api-version")
+  valid_568572 = validateParameter(valid_568572, JString, required = true,
                                  default = nil)
-  if valid_594343 != nil:
-    section.add "api-version", valid_594343
+  if valid_568572 != nil:
+    section.add "api-version", valid_568572
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4199,20 +4199,20 @@ proc validate_ProtectionPoliciesDelete_594337(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594344: Call_ProtectionPoliciesDelete_594336; path: JsonNode;
+proc call*(call_568573: Call_ProtectionPoliciesDelete_568565; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified backup policy from your Recovery Services vault. This is an asynchronous operation. Use the GetPolicyOperationResult API to Get the operation status.
   ## 
-  let valid = call_594344.validator(path, query, header, formData, body)
-  let scheme = call_594344.pickScheme
+  let valid = call_568573.validator(path, query, header, formData, body)
+  let scheme = call_568573.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594344.url(scheme.get, call_594344.host, call_594344.base,
-                         call_594344.route, valid.getOrDefault("path"),
+  let url = call_568573.url(scheme.get, call_568573.host, call_568573.base,
+                         call_568573.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594344, url, valid)
+  result = hook(call_568573, url, valid)
 
-proc call*(call_594345: Call_ProtectionPoliciesDelete_594336;
+proc call*(call_568574: Call_ProtectionPoliciesDelete_568565;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           policyName: string; vaultName: string): Recallable =
   ## protectionPoliciesDelete
@@ -4227,23 +4227,23 @@ proc call*(call_594345: Call_ProtectionPoliciesDelete_594336;
   ##             : The name of the backup policy to be deleted.
   ##   vaultName: string (required)
   ##            : The name of the Recovery Services vault.
-  var path_594346 = newJObject()
-  var query_594347 = newJObject()
-  add(path_594346, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594347, "api-version", newJString(apiVersion))
-  add(path_594346, "subscriptionId", newJString(subscriptionId))
-  add(path_594346, "policyName", newJString(policyName))
-  add(path_594346, "vaultName", newJString(vaultName))
-  result = call_594345.call(path_594346, query_594347, nil, nil, nil)
+  var path_568575 = newJObject()
+  var query_568576 = newJObject()
+  add(path_568575, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568576, "api-version", newJString(apiVersion))
+  add(path_568575, "subscriptionId", newJString(subscriptionId))
+  add(path_568575, "policyName", newJString(policyName))
+  add(path_568575, "vaultName", newJString(vaultName))
+  result = call_568574.call(path_568575, query_568576, nil, nil, nil)
 
-var protectionPoliciesDelete* = Call_ProtectionPoliciesDelete_594336(
+var protectionPoliciesDelete* = Call_ProtectionPoliciesDelete_568565(
     name: "protectionPoliciesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}",
-    validator: validate_ProtectionPoliciesDelete_594337, base: "",
-    url: url_ProtectionPoliciesDelete_594338, schemes: {Scheme.Https})
+    validator: validate_ProtectionPoliciesDelete_568566, base: "",
+    url: url_ProtectionPoliciesDelete_568567, schemes: {Scheme.Https})
 type
-  Call_ProtectionPolicyOperationResultsGet_594348 = ref object of OpenApiRestCall_593422
-proc url_ProtectionPolicyOperationResultsGet_594350(protocol: Scheme; host: string;
+  Call_ProtectionPolicyOperationResultsGet_568577 = ref object of OpenApiRestCall_567651
+proc url_ProtectionPolicyOperationResultsGet_568579(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4272,7 +4272,7 @@ proc url_ProtectionPolicyOperationResultsGet_594350(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionPolicyOperationResultsGet_594349(path: JsonNode;
+proc validate_ProtectionPolicyOperationResultsGet_568578(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Provides the result of an operation.
   ## 
@@ -4292,31 +4292,31 @@ proc validate_ProtectionPolicyOperationResultsGet_594349(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594351 = path.getOrDefault("resourceGroupName")
-  valid_594351 = validateParameter(valid_594351, JString, required = true,
+  var valid_568580 = path.getOrDefault("resourceGroupName")
+  valid_568580 = validateParameter(valid_568580, JString, required = true,
                                  default = nil)
-  if valid_594351 != nil:
-    section.add "resourceGroupName", valid_594351
-  var valid_594352 = path.getOrDefault("subscriptionId")
-  valid_594352 = validateParameter(valid_594352, JString, required = true,
+  if valid_568580 != nil:
+    section.add "resourceGroupName", valid_568580
+  var valid_568581 = path.getOrDefault("subscriptionId")
+  valid_568581 = validateParameter(valid_568581, JString, required = true,
                                  default = nil)
-  if valid_594352 != nil:
-    section.add "subscriptionId", valid_594352
-  var valid_594353 = path.getOrDefault("policyName")
-  valid_594353 = validateParameter(valid_594353, JString, required = true,
+  if valid_568581 != nil:
+    section.add "subscriptionId", valid_568581
+  var valid_568582 = path.getOrDefault("policyName")
+  valid_568582 = validateParameter(valid_568582, JString, required = true,
                                  default = nil)
-  if valid_594353 != nil:
-    section.add "policyName", valid_594353
-  var valid_594354 = path.getOrDefault("vaultName")
-  valid_594354 = validateParameter(valid_594354, JString, required = true,
+  if valid_568582 != nil:
+    section.add "policyName", valid_568582
+  var valid_568583 = path.getOrDefault("vaultName")
+  valid_568583 = validateParameter(valid_568583, JString, required = true,
                                  default = nil)
-  if valid_594354 != nil:
-    section.add "vaultName", valid_594354
-  var valid_594355 = path.getOrDefault("operationId")
-  valid_594355 = validateParameter(valid_594355, JString, required = true,
+  if valid_568583 != nil:
+    section.add "vaultName", valid_568583
+  var valid_568584 = path.getOrDefault("operationId")
+  valid_568584 = validateParameter(valid_568584, JString, required = true,
                                  default = nil)
-  if valid_594355 != nil:
-    section.add "operationId", valid_594355
+  if valid_568584 != nil:
+    section.add "operationId", valid_568584
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4324,11 +4324,11 @@ proc validate_ProtectionPolicyOperationResultsGet_594349(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594356 = query.getOrDefault("api-version")
-  valid_594356 = validateParameter(valid_594356, JString, required = true,
+  var valid_568585 = query.getOrDefault("api-version")
+  valid_568585 = validateParameter(valid_568585, JString, required = true,
                                  default = nil)
-  if valid_594356 != nil:
-    section.add "api-version", valid_594356
+  if valid_568585 != nil:
+    section.add "api-version", valid_568585
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4337,21 +4337,21 @@ proc validate_ProtectionPolicyOperationResultsGet_594349(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594357: Call_ProtectionPolicyOperationResultsGet_594348;
+proc call*(call_568586: Call_ProtectionPolicyOperationResultsGet_568577;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Provides the result of an operation.
   ## 
-  let valid = call_594357.validator(path, query, header, formData, body)
-  let scheme = call_594357.pickScheme
+  let valid = call_568586.validator(path, query, header, formData, body)
+  let scheme = call_568586.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594357.url(scheme.get, call_594357.host, call_594357.base,
-                         call_594357.route, valid.getOrDefault("path"),
+  let url = call_568586.url(scheme.get, call_568586.host, call_568586.base,
+                         call_568586.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594357, url, valid)
+  result = hook(call_568586, url, valid)
 
-proc call*(call_594358: Call_ProtectionPolicyOperationResultsGet_594348;
+proc call*(call_568587: Call_ProtectionPolicyOperationResultsGet_568577;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           policyName: string; vaultName: string; operationId: string): Recallable =
   ## protectionPolicyOperationResultsGet
@@ -4368,24 +4368,24 @@ proc call*(call_594358: Call_ProtectionPolicyOperationResultsGet_594348;
   ##            : The name of the Recovery Services vault.
   ##   operationId: string (required)
   ##              : The ID associated with this GET operation.
-  var path_594359 = newJObject()
-  var query_594360 = newJObject()
-  add(path_594359, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594360, "api-version", newJString(apiVersion))
-  add(path_594359, "subscriptionId", newJString(subscriptionId))
-  add(path_594359, "policyName", newJString(policyName))
-  add(path_594359, "vaultName", newJString(vaultName))
-  add(path_594359, "operationId", newJString(operationId))
-  result = call_594358.call(path_594359, query_594360, nil, nil, nil)
+  var path_568588 = newJObject()
+  var query_568589 = newJObject()
+  add(path_568588, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568589, "api-version", newJString(apiVersion))
+  add(path_568588, "subscriptionId", newJString(subscriptionId))
+  add(path_568588, "policyName", newJString(policyName))
+  add(path_568588, "vaultName", newJString(vaultName))
+  add(path_568588, "operationId", newJString(operationId))
+  result = call_568587.call(path_568588, query_568589, nil, nil, nil)
 
-var protectionPolicyOperationResultsGet* = Call_ProtectionPolicyOperationResultsGet_594348(
+var protectionPolicyOperationResultsGet* = Call_ProtectionPolicyOperationResultsGet_568577(
     name: "protectionPolicyOperationResultsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}/operationResults/{operationId}",
-    validator: validate_ProtectionPolicyOperationResultsGet_594349, base: "",
-    url: url_ProtectionPolicyOperationResultsGet_594350, schemes: {Scheme.Https})
+    validator: validate_ProtectionPolicyOperationResultsGet_568578, base: "",
+    url: url_ProtectionPolicyOperationResultsGet_568579, schemes: {Scheme.Https})
 type
-  Call_ProtectionPolicyOperationStatusesGet_594361 = ref object of OpenApiRestCall_593422
-proc url_ProtectionPolicyOperationStatusesGet_594363(protocol: Scheme;
+  Call_ProtectionPolicyOperationStatusesGet_568590 = ref object of OpenApiRestCall_567651
+proc url_ProtectionPolicyOperationStatusesGet_568592(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4414,7 +4414,7 @@ proc url_ProtectionPolicyOperationStatusesGet_594363(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionPolicyOperationStatusesGet_594362(path: JsonNode;
+proc validate_ProtectionPolicyOperationStatusesGet_568591(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Provides the status of the asynchronous operations like backup or restore. The status can be: in progress, completed, or failed. You can refer to the Operation Status enumeration for the possible states of an operation. Some operations create jobs. This method returns the list of jobs associated with the operation.
   ## 
@@ -4434,31 +4434,31 @@ proc validate_ProtectionPolicyOperationStatusesGet_594362(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594364 = path.getOrDefault("resourceGroupName")
-  valid_594364 = validateParameter(valid_594364, JString, required = true,
+  var valid_568593 = path.getOrDefault("resourceGroupName")
+  valid_568593 = validateParameter(valid_568593, JString, required = true,
                                  default = nil)
-  if valid_594364 != nil:
-    section.add "resourceGroupName", valid_594364
-  var valid_594365 = path.getOrDefault("subscriptionId")
-  valid_594365 = validateParameter(valid_594365, JString, required = true,
+  if valid_568593 != nil:
+    section.add "resourceGroupName", valid_568593
+  var valid_568594 = path.getOrDefault("subscriptionId")
+  valid_568594 = validateParameter(valid_568594, JString, required = true,
                                  default = nil)
-  if valid_594365 != nil:
-    section.add "subscriptionId", valid_594365
-  var valid_594366 = path.getOrDefault("policyName")
-  valid_594366 = validateParameter(valid_594366, JString, required = true,
+  if valid_568594 != nil:
+    section.add "subscriptionId", valid_568594
+  var valid_568595 = path.getOrDefault("policyName")
+  valid_568595 = validateParameter(valid_568595, JString, required = true,
                                  default = nil)
-  if valid_594366 != nil:
-    section.add "policyName", valid_594366
-  var valid_594367 = path.getOrDefault("vaultName")
-  valid_594367 = validateParameter(valid_594367, JString, required = true,
+  if valid_568595 != nil:
+    section.add "policyName", valid_568595
+  var valid_568596 = path.getOrDefault("vaultName")
+  valid_568596 = validateParameter(valid_568596, JString, required = true,
                                  default = nil)
-  if valid_594367 != nil:
-    section.add "vaultName", valid_594367
-  var valid_594368 = path.getOrDefault("operationId")
-  valid_594368 = validateParameter(valid_594368, JString, required = true,
+  if valid_568596 != nil:
+    section.add "vaultName", valid_568596
+  var valid_568597 = path.getOrDefault("operationId")
+  valid_568597 = validateParameter(valid_568597, JString, required = true,
                                  default = nil)
-  if valid_594368 != nil:
-    section.add "operationId", valid_594368
+  if valid_568597 != nil:
+    section.add "operationId", valid_568597
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4466,11 +4466,11 @@ proc validate_ProtectionPolicyOperationStatusesGet_594362(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594369 = query.getOrDefault("api-version")
-  valid_594369 = validateParameter(valid_594369, JString, required = true,
+  var valid_568598 = query.getOrDefault("api-version")
+  valid_568598 = validateParameter(valid_568598, JString, required = true,
                                  default = nil)
-  if valid_594369 != nil:
-    section.add "api-version", valid_594369
+  if valid_568598 != nil:
+    section.add "api-version", valid_568598
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4479,21 +4479,21 @@ proc validate_ProtectionPolicyOperationStatusesGet_594362(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594370: Call_ProtectionPolicyOperationStatusesGet_594361;
+proc call*(call_568599: Call_ProtectionPolicyOperationStatusesGet_568590;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Provides the status of the asynchronous operations like backup or restore. The status can be: in progress, completed, or failed. You can refer to the Operation Status enumeration for the possible states of an operation. Some operations create jobs. This method returns the list of jobs associated with the operation.
   ## 
-  let valid = call_594370.validator(path, query, header, formData, body)
-  let scheme = call_594370.pickScheme
+  let valid = call_568599.validator(path, query, header, formData, body)
+  let scheme = call_568599.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594370.url(scheme.get, call_594370.host, call_594370.base,
-                         call_594370.route, valid.getOrDefault("path"),
+  let url = call_568599.url(scheme.get, call_568599.host, call_568599.base,
+                         call_568599.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594370, url, valid)
+  result = hook(call_568599, url, valid)
 
-proc call*(call_594371: Call_ProtectionPolicyOperationStatusesGet_594361;
+proc call*(call_568600: Call_ProtectionPolicyOperationStatusesGet_568590;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           policyName: string; vaultName: string; operationId: string): Recallable =
   ## protectionPolicyOperationStatusesGet
@@ -4510,24 +4510,24 @@ proc call*(call_594371: Call_ProtectionPolicyOperationStatusesGet_594361;
   ##            : The name of the Recovery Services vault.
   ##   operationId: string (required)
   ##              : The ID associated with this GET operation.
-  var path_594372 = newJObject()
-  var query_594373 = newJObject()
-  add(path_594372, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594373, "api-version", newJString(apiVersion))
-  add(path_594372, "subscriptionId", newJString(subscriptionId))
-  add(path_594372, "policyName", newJString(policyName))
-  add(path_594372, "vaultName", newJString(vaultName))
-  add(path_594372, "operationId", newJString(operationId))
-  result = call_594371.call(path_594372, query_594373, nil, nil, nil)
+  var path_568601 = newJObject()
+  var query_568602 = newJObject()
+  add(path_568601, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568602, "api-version", newJString(apiVersion))
+  add(path_568601, "subscriptionId", newJString(subscriptionId))
+  add(path_568601, "policyName", newJString(policyName))
+  add(path_568601, "vaultName", newJString(vaultName))
+  add(path_568601, "operationId", newJString(operationId))
+  result = call_568600.call(path_568601, query_568602, nil, nil, nil)
 
-var protectionPolicyOperationStatusesGet* = Call_ProtectionPolicyOperationStatusesGet_594361(
+var protectionPolicyOperationStatusesGet* = Call_ProtectionPolicyOperationStatusesGet_568590(
     name: "protectionPolicyOperationStatusesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupPolicies/{policyName}/operations/{operationId}",
-    validator: validate_ProtectionPolicyOperationStatusesGet_594362, base: "",
-    url: url_ProtectionPolicyOperationStatusesGet_594363, schemes: {Scheme.Https})
+    validator: validate_ProtectionPolicyOperationStatusesGet_568591, base: "",
+    url: url_ProtectionPolicyOperationStatusesGet_568592, schemes: {Scheme.Https})
 type
-  Call_ProtectableItemsList_594374 = ref object of OpenApiRestCall_593422
-proc url_ProtectableItemsList_594376(protocol: Scheme; host: string; base: string;
+  Call_ProtectableItemsList_568603 = ref object of OpenApiRestCall_567651
+proc url_ProtectableItemsList_568605(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4551,7 +4551,7 @@ proc url_ProtectableItemsList_594376(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectableItemsList_594375(path: JsonNode; query: JsonNode;
+proc validate_ProtectableItemsList_568604(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Based on the query filter and the pagination parameters, this operation provides a pageable list of objects within the subscription that can be protected.
   ## 
@@ -4567,21 +4567,21 @@ proc validate_ProtectableItemsList_594375(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594377 = path.getOrDefault("resourceGroupName")
-  valid_594377 = validateParameter(valid_594377, JString, required = true,
+  var valid_568606 = path.getOrDefault("resourceGroupName")
+  valid_568606 = validateParameter(valid_568606, JString, required = true,
                                  default = nil)
-  if valid_594377 != nil:
-    section.add "resourceGroupName", valid_594377
-  var valid_594378 = path.getOrDefault("subscriptionId")
-  valid_594378 = validateParameter(valid_594378, JString, required = true,
+  if valid_568606 != nil:
+    section.add "resourceGroupName", valid_568606
+  var valid_568607 = path.getOrDefault("subscriptionId")
+  valid_568607 = validateParameter(valid_568607, JString, required = true,
                                  default = nil)
-  if valid_594378 != nil:
-    section.add "subscriptionId", valid_594378
-  var valid_594379 = path.getOrDefault("vaultName")
-  valid_594379 = validateParameter(valid_594379, JString, required = true,
+  if valid_568607 != nil:
+    section.add "subscriptionId", valid_568607
+  var valid_568608 = path.getOrDefault("vaultName")
+  valid_568608 = validateParameter(valid_568608, JString, required = true,
                                  default = nil)
-  if valid_594379 != nil:
-    section.add "vaultName", valid_594379
+  if valid_568608 != nil:
+    section.add "vaultName", valid_568608
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4593,21 +4593,21 @@ proc validate_ProtectableItemsList_594375(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594380 = query.getOrDefault("api-version")
-  valid_594380 = validateParameter(valid_594380, JString, required = true,
+  var valid_568609 = query.getOrDefault("api-version")
+  valid_568609 = validateParameter(valid_568609, JString, required = true,
                                  default = nil)
-  if valid_594380 != nil:
-    section.add "api-version", valid_594380
-  var valid_594381 = query.getOrDefault("$skipToken")
-  valid_594381 = validateParameter(valid_594381, JString, required = false,
+  if valid_568609 != nil:
+    section.add "api-version", valid_568609
+  var valid_568610 = query.getOrDefault("$skipToken")
+  valid_568610 = validateParameter(valid_568610, JString, required = false,
                                  default = nil)
-  if valid_594381 != nil:
-    section.add "$skipToken", valid_594381
-  var valid_594382 = query.getOrDefault("$filter")
-  valid_594382 = validateParameter(valid_594382, JString, required = false,
+  if valid_568610 != nil:
+    section.add "$skipToken", valid_568610
+  var valid_568611 = query.getOrDefault("$filter")
+  valid_568611 = validateParameter(valid_568611, JString, required = false,
                                  default = nil)
-  if valid_594382 != nil:
-    section.add "$filter", valid_594382
+  if valid_568611 != nil:
+    section.add "$filter", valid_568611
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4616,20 +4616,20 @@ proc validate_ProtectableItemsList_594375(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594383: Call_ProtectableItemsList_594374; path: JsonNode;
+proc call*(call_568612: Call_ProtectableItemsList_568603; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Based on the query filter and the pagination parameters, this operation provides a pageable list of objects within the subscription that can be protected.
   ## 
-  let valid = call_594383.validator(path, query, header, formData, body)
-  let scheme = call_594383.pickScheme
+  let valid = call_568612.validator(path, query, header, formData, body)
+  let scheme = call_568612.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594383.url(scheme.get, call_594383.host, call_594383.base,
-                         call_594383.route, valid.getOrDefault("path"),
+  let url = call_568612.url(scheme.get, call_568612.host, call_568612.base,
+                         call_568612.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594383, url, valid)
+  result = hook(call_568612, url, valid)
 
-proc call*(call_594384: Call_ProtectableItemsList_594374;
+proc call*(call_568613: Call_ProtectableItemsList_568603;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           vaultName: string; SkipToken: string = ""; Filter: string = ""): Recallable =
   ## protectableItemsList
@@ -4646,24 +4646,24 @@ proc call*(call_594384: Call_ProtectableItemsList_594374;
   ##            : The Skip Token filter.
   ##   Filter: string
   ##         : Using the following query filters, you can sort a specific backup item based on: type of backup item, status, name of the item, and more.  providerType eq { AzureIaasVM, MAB, DPM, AzureBackupServer, AzureSql } and status eq { NotProtected , Protecting , Protected } and friendlyName {name} and skipToken eq {string which provides the next set of list} and topToken eq {int} and backupManagementType eq { AzureIaasVM, MAB, DPM, AzureBackupServer, AzureSql }.
-  var path_594385 = newJObject()
-  var query_594386 = newJObject()
-  add(path_594385, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594386, "api-version", newJString(apiVersion))
-  add(path_594385, "subscriptionId", newJString(subscriptionId))
-  add(path_594385, "vaultName", newJString(vaultName))
-  add(query_594386, "$skipToken", newJString(SkipToken))
-  add(query_594386, "$filter", newJString(Filter))
-  result = call_594384.call(path_594385, query_594386, nil, nil, nil)
+  var path_568614 = newJObject()
+  var query_568615 = newJObject()
+  add(path_568614, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568615, "api-version", newJString(apiVersion))
+  add(path_568614, "subscriptionId", newJString(subscriptionId))
+  add(path_568614, "vaultName", newJString(vaultName))
+  add(query_568615, "$skipToken", newJString(SkipToken))
+  add(query_568615, "$filter", newJString(Filter))
+  result = call_568613.call(path_568614, query_568615, nil, nil, nil)
 
-var protectableItemsList* = Call_ProtectableItemsList_594374(
+var protectableItemsList* = Call_ProtectableItemsList_568603(
     name: "protectableItemsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupProtectableItems",
-    validator: validate_ProtectableItemsList_594375, base: "",
-    url: url_ProtectableItemsList_594376, schemes: {Scheme.Https})
+    validator: validate_ProtectableItemsList_568604, base: "",
+    url: url_ProtectableItemsList_568605, schemes: {Scheme.Https})
 type
-  Call_ProtectedItemsList_594387 = ref object of OpenApiRestCall_593422
-proc url_ProtectedItemsList_594389(protocol: Scheme; host: string; base: string;
+  Call_ProtectedItemsList_568616 = ref object of OpenApiRestCall_567651
+proc url_ProtectedItemsList_568618(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4687,7 +4687,7 @@ proc url_ProtectedItemsList_594389(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectedItemsList_594388(path: JsonNode; query: JsonNode;
+proc validate_ProtectedItemsList_568617(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Provides a pageable list of all items in a subscription, that can be protected.
@@ -4704,21 +4704,21 @@ proc validate_ProtectedItemsList_594388(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594390 = path.getOrDefault("resourceGroupName")
-  valid_594390 = validateParameter(valid_594390, JString, required = true,
+  var valid_568619 = path.getOrDefault("resourceGroupName")
+  valid_568619 = validateParameter(valid_568619, JString, required = true,
                                  default = nil)
-  if valid_594390 != nil:
-    section.add "resourceGroupName", valid_594390
-  var valid_594391 = path.getOrDefault("subscriptionId")
-  valid_594391 = validateParameter(valid_594391, JString, required = true,
+  if valid_568619 != nil:
+    section.add "resourceGroupName", valid_568619
+  var valid_568620 = path.getOrDefault("subscriptionId")
+  valid_568620 = validateParameter(valid_568620, JString, required = true,
                                  default = nil)
-  if valid_594391 != nil:
-    section.add "subscriptionId", valid_594391
-  var valid_594392 = path.getOrDefault("vaultName")
-  valid_594392 = validateParameter(valid_594392, JString, required = true,
+  if valid_568620 != nil:
+    section.add "subscriptionId", valid_568620
+  var valid_568621 = path.getOrDefault("vaultName")
+  valid_568621 = validateParameter(valid_568621, JString, required = true,
                                  default = nil)
-  if valid_594392 != nil:
-    section.add "vaultName", valid_594392
+  if valid_568621 != nil:
+    section.add "vaultName", valid_568621
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4730,21 +4730,21 @@ proc validate_ProtectedItemsList_594388(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594393 = query.getOrDefault("api-version")
-  valid_594393 = validateParameter(valid_594393, JString, required = true,
+  var valid_568622 = query.getOrDefault("api-version")
+  valid_568622 = validateParameter(valid_568622, JString, required = true,
                                  default = nil)
-  if valid_594393 != nil:
-    section.add "api-version", valid_594393
-  var valid_594394 = query.getOrDefault("$skipToken")
-  valid_594394 = validateParameter(valid_594394, JString, required = false,
+  if valid_568622 != nil:
+    section.add "api-version", valid_568622
+  var valid_568623 = query.getOrDefault("$skipToken")
+  valid_568623 = validateParameter(valid_568623, JString, required = false,
                                  default = nil)
-  if valid_594394 != nil:
-    section.add "$skipToken", valid_594394
-  var valid_594395 = query.getOrDefault("$filter")
-  valid_594395 = validateParameter(valid_594395, JString, required = false,
+  if valid_568623 != nil:
+    section.add "$skipToken", valid_568623
+  var valid_568624 = query.getOrDefault("$filter")
+  valid_568624 = validateParameter(valid_568624, JString, required = false,
                                  default = nil)
-  if valid_594395 != nil:
-    section.add "$filter", valid_594395
+  if valid_568624 != nil:
+    section.add "$filter", valid_568624
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4753,20 +4753,20 @@ proc validate_ProtectedItemsList_594388(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594396: Call_ProtectedItemsList_594387; path: JsonNode;
+proc call*(call_568625: Call_ProtectedItemsList_568616; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Provides a pageable list of all items in a subscription, that can be protected.
   ## 
-  let valid = call_594396.validator(path, query, header, formData, body)
-  let scheme = call_594396.pickScheme
+  let valid = call_568625.validator(path, query, header, formData, body)
+  let scheme = call_568625.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594396.url(scheme.get, call_594396.host, call_594396.base,
-                         call_594396.route, valid.getOrDefault("path"),
+  let url = call_568625.url(scheme.get, call_568625.host, call_568625.base,
+                         call_568625.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594396, url, valid)
+  result = hook(call_568625, url, valid)
 
-proc call*(call_594397: Call_ProtectedItemsList_594387; resourceGroupName: string;
+proc call*(call_568626: Call_ProtectedItemsList_568616; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; vaultName: string;
           SkipToken: string = ""; Filter: string = ""): Recallable =
   ## protectedItemsList
@@ -4783,24 +4783,24 @@ proc call*(call_594397: Call_ProtectedItemsList_594387; resourceGroupName: strin
   ##            :  The Skip Token filter.
   ##   Filter: string
   ##         :  itemType eq { VM , FileFolder , AzureSqlDb , SQLDB , Exchange , Sharepoint , DPMUnknown } and providerType eq { AzureIaasVM, MAB, DPM, AzureBackupServer, AzureSql } and policyName eq {policyName} and containerName eq {containername} and backupManagementType eq { AzureIaasVM, MAB, DPM, AzureBackupServer, AzureSql }.
-  var path_594398 = newJObject()
-  var query_594399 = newJObject()
-  add(path_594398, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594399, "api-version", newJString(apiVersion))
-  add(path_594398, "subscriptionId", newJString(subscriptionId))
-  add(path_594398, "vaultName", newJString(vaultName))
-  add(query_594399, "$skipToken", newJString(SkipToken))
-  add(query_594399, "$filter", newJString(Filter))
-  result = call_594397.call(path_594398, query_594399, nil, nil, nil)
+  var path_568627 = newJObject()
+  var query_568628 = newJObject()
+  add(path_568627, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568628, "api-version", newJString(apiVersion))
+  add(path_568627, "subscriptionId", newJString(subscriptionId))
+  add(path_568627, "vaultName", newJString(vaultName))
+  add(query_568628, "$skipToken", newJString(SkipToken))
+  add(query_568628, "$filter", newJString(Filter))
+  result = call_568626.call(path_568627, query_568628, nil, nil, nil)
 
-var protectedItemsList* = Call_ProtectedItemsList_594387(
+var protectedItemsList* = Call_ProtectedItemsList_568616(
     name: "protectedItemsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupProtectedItems",
-    validator: validate_ProtectedItemsList_594388, base: "",
-    url: url_ProtectedItemsList_594389, schemes: {Scheme.Https})
+    validator: validate_ProtectedItemsList_568617, base: "",
+    url: url_ProtectedItemsList_568618, schemes: {Scheme.Https})
 type
-  Call_ProtectionContainersList_594400 = ref object of OpenApiRestCall_593422
-proc url_ProtectionContainersList_594402(protocol: Scheme; host: string;
+  Call_ProtectionContainersList_568629 = ref object of OpenApiRestCall_567651
+proc url_ProtectionContainersList_568631(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4825,7 +4825,7 @@ proc url_ProtectionContainersList_594402(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProtectionContainersList_594401(path: JsonNode; query: JsonNode;
+proc validate_ProtectionContainersList_568630(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the containers registered to the Recovery Services vault.
   ## 
@@ -4841,21 +4841,21 @@ proc validate_ProtectionContainersList_594401(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594403 = path.getOrDefault("resourceGroupName")
-  valid_594403 = validateParameter(valid_594403, JString, required = true,
+  var valid_568632 = path.getOrDefault("resourceGroupName")
+  valid_568632 = validateParameter(valid_568632, JString, required = true,
                                  default = nil)
-  if valid_594403 != nil:
-    section.add "resourceGroupName", valid_594403
-  var valid_594404 = path.getOrDefault("subscriptionId")
-  valid_594404 = validateParameter(valid_594404, JString, required = true,
+  if valid_568632 != nil:
+    section.add "resourceGroupName", valid_568632
+  var valid_568633 = path.getOrDefault("subscriptionId")
+  valid_568633 = validateParameter(valid_568633, JString, required = true,
                                  default = nil)
-  if valid_594404 != nil:
-    section.add "subscriptionId", valid_594404
-  var valid_594405 = path.getOrDefault("vaultName")
-  valid_594405 = validateParameter(valid_594405, JString, required = true,
+  if valid_568633 != nil:
+    section.add "subscriptionId", valid_568633
+  var valid_568634 = path.getOrDefault("vaultName")
+  valid_568634 = validateParameter(valid_568634, JString, required = true,
                                  default = nil)
-  if valid_594405 != nil:
-    section.add "vaultName", valid_594405
+  if valid_568634 != nil:
+    section.add "vaultName", valid_568634
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4865,16 +4865,16 @@ proc validate_ProtectionContainersList_594401(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594406 = query.getOrDefault("api-version")
-  valid_594406 = validateParameter(valid_594406, JString, required = true,
+  var valid_568635 = query.getOrDefault("api-version")
+  valid_568635 = validateParameter(valid_568635, JString, required = true,
                                  default = nil)
-  if valid_594406 != nil:
-    section.add "api-version", valid_594406
-  var valid_594407 = query.getOrDefault("$filter")
-  valid_594407 = validateParameter(valid_594407, JString, required = false,
+  if valid_568635 != nil:
+    section.add "api-version", valid_568635
+  var valid_568636 = query.getOrDefault("$filter")
+  valid_568636 = validateParameter(valid_568636, JString, required = false,
                                  default = nil)
-  if valid_594407 != nil:
-    section.add "$filter", valid_594407
+  if valid_568636 != nil:
+    section.add "$filter", valid_568636
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4883,20 +4883,20 @@ proc validate_ProtectionContainersList_594401(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594408: Call_ProtectionContainersList_594400; path: JsonNode;
+proc call*(call_568637: Call_ProtectionContainersList_568629; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the containers registered to the Recovery Services vault.
   ## 
-  let valid = call_594408.validator(path, query, header, formData, body)
-  let scheme = call_594408.pickScheme
+  let valid = call_568637.validator(path, query, header, formData, body)
+  let scheme = call_568637.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594408.url(scheme.get, call_594408.host, call_594408.base,
-                         call_594408.route, valid.getOrDefault("path"),
+  let url = call_568637.url(scheme.get, call_568637.host, call_568637.base,
+                         call_568637.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594408, url, valid)
+  result = hook(call_568637, url, valid)
 
-proc call*(call_594409: Call_ProtectionContainersList_594400;
+proc call*(call_568638: Call_ProtectionContainersList_568629;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           vaultName: string; Filter: string = ""): Recallable =
   ## protectionContainersList
@@ -4911,20 +4911,20 @@ proc call*(call_594409: Call_ProtectionContainersList_594400;
   ##            : The name of the Recovery Services vault.
   ##   Filter: string
   ##         : The following equation is used to sort or filter the containers registered to the vault. providerType eq {AzureIaasVM, MAB, DPM, AzureBackupServer, AzureSql} and status eq {Unknown, NotRegistered, Registered, Registering} and friendlyName eq {containername} and backupManagementType eq {AzureIaasVM, MAB, DPM, AzureBackupServer, AzureSql}.
-  var path_594410 = newJObject()
-  var query_594411 = newJObject()
-  add(path_594410, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594411, "api-version", newJString(apiVersion))
-  add(path_594410, "subscriptionId", newJString(subscriptionId))
-  add(path_594410, "vaultName", newJString(vaultName))
-  add(query_594411, "$filter", newJString(Filter))
-  result = call_594409.call(path_594410, query_594411, nil, nil, nil)
+  var path_568639 = newJObject()
+  var query_568640 = newJObject()
+  add(path_568639, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568640, "api-version", newJString(apiVersion))
+  add(path_568639, "subscriptionId", newJString(subscriptionId))
+  add(path_568639, "vaultName", newJString(vaultName))
+  add(query_568640, "$filter", newJString(Filter))
+  result = call_568638.call(path_568639, query_568640, nil, nil, nil)
 
-var protectionContainersList* = Call_ProtectionContainersList_594400(
+var protectionContainersList* = Call_ProtectionContainersList_568629(
     name: "protectionContainersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/backupProtectionContainers",
-    validator: validate_ProtectionContainersList_594401, base: "",
-    url: url_ProtectionContainersList_594402, schemes: {Scheme.Https})
+    validator: validate_ProtectionContainersList_568630, base: "",
+    url: url_ProtectionContainersList_568631, schemes: {Scheme.Https})
 export
   rest
 

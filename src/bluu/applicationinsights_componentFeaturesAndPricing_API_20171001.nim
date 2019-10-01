@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_596457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "applicationinsights-componentFeaturesAndPricing_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ComponentCurrentPricingPlanCreateAndUpdate_593960 = ref object of OpenApiRestCall_593424
-proc url_ComponentCurrentPricingPlanCreateAndUpdate_593962(protocol: Scheme;
+  Call_ComponentCurrentPricingPlanCreateAndUpdate_596993 = ref object of OpenApiRestCall_596457
+proc url_ComponentCurrentPricingPlanCreateAndUpdate_596995(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_ComponentCurrentPricingPlanCreateAndUpdate_593962(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentCurrentPricingPlanCreateAndUpdate_593961(path: JsonNode;
+proc validate_ComponentCurrentPricingPlanCreateAndUpdate_596994(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Replace current pricing plan for an Application Insights component.
   ## 
@@ -143,21 +143,21 @@ proc validate_ComponentCurrentPricingPlanCreateAndUpdate_593961(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593963 = path.getOrDefault("resourceGroupName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_596996 = path.getOrDefault("resourceGroupName")
+  valid_596996 = validateParameter(valid_596996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "resourceGroupName", valid_593963
-  var valid_593964 = path.getOrDefault("subscriptionId")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_596996 != nil:
+    section.add "resourceGroupName", valid_596996
+  var valid_596997 = path.getOrDefault("subscriptionId")
+  valid_596997 = validateParameter(valid_596997, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "subscriptionId", valid_593964
-  var valid_593965 = path.getOrDefault("resourceName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_596997 != nil:
+    section.add "subscriptionId", valid_596997
+  var valid_596998 = path.getOrDefault("resourceName")
+  valid_596998 = validateParameter(valid_596998, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "resourceName", valid_593965
+  if valid_596998 != nil:
+    section.add "resourceName", valid_596998
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +165,11 @@ proc validate_ComponentCurrentPricingPlanCreateAndUpdate_593961(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593966 = query.getOrDefault("api-version")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_596999 = query.getOrDefault("api-version")
+  valid_596999 = validateParameter(valid_596999, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "api-version", valid_593966
+  if valid_596999 != nil:
+    section.add "api-version", valid_596999
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -183,21 +183,21 @@ proc validate_ComponentCurrentPricingPlanCreateAndUpdate_593961(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_ComponentCurrentPricingPlanCreateAndUpdate_593960;
+proc call*(call_597001: Call_ComponentCurrentPricingPlanCreateAndUpdate_596993;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Replace current pricing plan for an Application Insights component.
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_597001.validator(path, query, header, formData, body)
+  let scheme = call_597001.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_597001.url(scheme.get, call_597001.host, call_597001.base,
+                         call_597001.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_597001, url, valid)
 
-proc call*(call_593969: Call_ComponentCurrentPricingPlanCreateAndUpdate_593960;
+proc call*(call_597002: Call_ComponentCurrentPricingPlanCreateAndUpdate_596993;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; PricingPlanProperties: JsonNode): Recallable =
   ## componentCurrentPricingPlanCreateAndUpdate
@@ -212,26 +212,26 @@ proc call*(call_593969: Call_ComponentCurrentPricingPlanCreateAndUpdate_593960;
   ##               : The name of the Application Insights component resource.
   ##   PricingPlanProperties: JObject (required)
   ##                        : Properties that need to be specified to update current pricing plan for an Application Insights component.
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  var body_593972 = newJObject()
-  add(path_593970, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(path_593970, "subscriptionId", newJString(subscriptionId))
-  add(path_593970, "resourceName", newJString(resourceName))
+  var path_597003 = newJObject()
+  var query_597004 = newJObject()
+  var body_597005 = newJObject()
+  add(path_597003, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597004, "api-version", newJString(apiVersion))
+  add(path_597003, "subscriptionId", newJString(subscriptionId))
+  add(path_597003, "resourceName", newJString(resourceName))
   if PricingPlanProperties != nil:
-    body_593972 = PricingPlanProperties
-  result = call_593969.call(path_593970, query_593971, nil, nil, body_593972)
+    body_597005 = PricingPlanProperties
+  result = call_597002.call(path_597003, query_597004, nil, nil, body_597005)
 
-var componentCurrentPricingPlanCreateAndUpdate* = Call_ComponentCurrentPricingPlanCreateAndUpdate_593960(
+var componentCurrentPricingPlanCreateAndUpdate* = Call_ComponentCurrentPricingPlanCreateAndUpdate_596993(
     name: "componentCurrentPricingPlanCreateAndUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/components/{resourceName}/pricingPlans/current",
-    validator: validate_ComponentCurrentPricingPlanCreateAndUpdate_593961,
-    base: "", url: url_ComponentCurrentPricingPlanCreateAndUpdate_593962,
+    validator: validate_ComponentCurrentPricingPlanCreateAndUpdate_596994,
+    base: "", url: url_ComponentCurrentPricingPlanCreateAndUpdate_596995,
     schemes: {Scheme.Https})
 type
-  Call_ComponentCurrentPricingPlanGet_593646 = ref object of OpenApiRestCall_593424
-proc url_ComponentCurrentPricingPlanGet_593648(protocol: Scheme; host: string;
+  Call_ComponentCurrentPricingPlanGet_596679 = ref object of OpenApiRestCall_596457
+proc url_ComponentCurrentPricingPlanGet_596681(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -254,7 +254,7 @@ proc url_ComponentCurrentPricingPlanGet_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentCurrentPricingPlanGet_593647(path: JsonNode;
+proc validate_ComponentCurrentPricingPlanGet_596680(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the current pricing plan setting for an Application Insights component.
   ## 
@@ -270,21 +270,21 @@ proc validate_ComponentCurrentPricingPlanGet_593647(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593821 = path.getOrDefault("resourceGroupName")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_596854 = path.getOrDefault("resourceGroupName")
+  valid_596854 = validateParameter(valid_596854, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "resourceGroupName", valid_593821
-  var valid_593822 = path.getOrDefault("subscriptionId")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_596854 != nil:
+    section.add "resourceGroupName", valid_596854
+  var valid_596855 = path.getOrDefault("subscriptionId")
+  valid_596855 = validateParameter(valid_596855, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "subscriptionId", valid_593822
-  var valid_593823 = path.getOrDefault("resourceName")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_596855 != nil:
+    section.add "subscriptionId", valid_596855
+  var valid_596856 = path.getOrDefault("resourceName")
+  valid_596856 = validateParameter(valid_596856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "resourceName", valid_593823
+  if valid_596856 != nil:
+    section.add "resourceName", valid_596856
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -292,11 +292,11 @@ proc validate_ComponentCurrentPricingPlanGet_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593824 = query.getOrDefault("api-version")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  var valid_596857 = query.getOrDefault("api-version")
+  valid_596857 = validateParameter(valid_596857, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "api-version", valid_593824
+  if valid_596857 != nil:
+    section.add "api-version", valid_596857
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -305,20 +305,20 @@ proc validate_ComponentCurrentPricingPlanGet_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593847: Call_ComponentCurrentPricingPlanGet_593646; path: JsonNode;
+proc call*(call_596880: Call_ComponentCurrentPricingPlanGet_596679; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the current pricing plan setting for an Application Insights component.
   ## 
-  let valid = call_593847.validator(path, query, header, formData, body)
-  let scheme = call_593847.pickScheme
+  let valid = call_596880.validator(path, query, header, formData, body)
+  let scheme = call_596880.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593847.url(scheme.get, call_593847.host, call_593847.base,
-                         call_593847.route, valid.getOrDefault("path"),
+  let url = call_596880.url(scheme.get, call_596880.host, call_596880.base,
+                         call_596880.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593847, url, valid)
+  result = hook(call_596880, url, valid)
 
-proc call*(call_593918: Call_ComponentCurrentPricingPlanGet_593646;
+proc call*(call_596951: Call_ComponentCurrentPricingPlanGet_596679;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## componentCurrentPricingPlanGet
@@ -331,22 +331,22 @@ proc call*(call_593918: Call_ComponentCurrentPricingPlanGet_593646;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593919 = newJObject()
-  var query_593921 = newJObject()
-  add(path_593919, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593921, "api-version", newJString(apiVersion))
-  add(path_593919, "subscriptionId", newJString(subscriptionId))
-  add(path_593919, "resourceName", newJString(resourceName))
-  result = call_593918.call(path_593919, query_593921, nil, nil, nil)
+  var path_596952 = newJObject()
+  var query_596954 = newJObject()
+  add(path_596952, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596954, "api-version", newJString(apiVersion))
+  add(path_596952, "subscriptionId", newJString(subscriptionId))
+  add(path_596952, "resourceName", newJString(resourceName))
+  result = call_596951.call(path_596952, query_596954, nil, nil, nil)
 
-var componentCurrentPricingPlanGet* = Call_ComponentCurrentPricingPlanGet_593646(
+var componentCurrentPricingPlanGet* = Call_ComponentCurrentPricingPlanGet_596679(
     name: "componentCurrentPricingPlanGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/components/{resourceName}/pricingPlans/current",
-    validator: validate_ComponentCurrentPricingPlanGet_593647, base: "",
-    url: url_ComponentCurrentPricingPlanGet_593648, schemes: {Scheme.Https})
+    validator: validate_ComponentCurrentPricingPlanGet_596680, base: "",
+    url: url_ComponentCurrentPricingPlanGet_596681, schemes: {Scheme.Https})
 type
-  Call_ComponentCurrentPricingPlanUpdate_593973 = ref object of OpenApiRestCall_593424
-proc url_ComponentCurrentPricingPlanUpdate_593975(protocol: Scheme; host: string;
+  Call_ComponentCurrentPricingPlanUpdate_597006 = ref object of OpenApiRestCall_596457
+proc url_ComponentCurrentPricingPlanUpdate_597008(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -369,7 +369,7 @@ proc url_ComponentCurrentPricingPlanUpdate_593975(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentCurrentPricingPlanUpdate_593974(path: JsonNode;
+proc validate_ComponentCurrentPricingPlanUpdate_597007(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update current pricing plan for an Application Insights component.
   ## 
@@ -385,21 +385,21 @@ proc validate_ComponentCurrentPricingPlanUpdate_593974(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593976 = path.getOrDefault("resourceGroupName")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_597009 = path.getOrDefault("resourceGroupName")
+  valid_597009 = validateParameter(valid_597009, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "resourceGroupName", valid_593976
-  var valid_593977 = path.getOrDefault("subscriptionId")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_597009 != nil:
+    section.add "resourceGroupName", valid_597009
+  var valid_597010 = path.getOrDefault("subscriptionId")
+  valid_597010 = validateParameter(valid_597010, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "subscriptionId", valid_593977
-  var valid_593978 = path.getOrDefault("resourceName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  if valid_597010 != nil:
+    section.add "subscriptionId", valid_597010
+  var valid_597011 = path.getOrDefault("resourceName")
+  valid_597011 = validateParameter(valid_597011, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "resourceName", valid_593978
+  if valid_597011 != nil:
+    section.add "resourceName", valid_597011
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -407,11 +407,11 @@ proc validate_ComponentCurrentPricingPlanUpdate_593974(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593979 = query.getOrDefault("api-version")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_597012 = query.getOrDefault("api-version")
+  valid_597012 = validateParameter(valid_597012, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "api-version", valid_593979
+  if valid_597012 != nil:
+    section.add "api-version", valid_597012
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -425,21 +425,21 @@ proc validate_ComponentCurrentPricingPlanUpdate_593974(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593981: Call_ComponentCurrentPricingPlanUpdate_593973;
+proc call*(call_597014: Call_ComponentCurrentPricingPlanUpdate_597006;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update current pricing plan for an Application Insights component.
   ## 
-  let valid = call_593981.validator(path, query, header, formData, body)
-  let scheme = call_593981.pickScheme
+  let valid = call_597014.validator(path, query, header, formData, body)
+  let scheme = call_597014.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593981.url(scheme.get, call_593981.host, call_593981.base,
-                         call_593981.route, valid.getOrDefault("path"),
+  let url = call_597014.url(scheme.get, call_597014.host, call_597014.base,
+                         call_597014.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593981, url, valid)
+  result = hook(call_597014, url, valid)
 
-proc call*(call_593982: Call_ComponentCurrentPricingPlanUpdate_593973;
+proc call*(call_597015: Call_ComponentCurrentPricingPlanUpdate_597006;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; PricingPlanProperties: JsonNode): Recallable =
   ## componentCurrentPricingPlanUpdate
@@ -454,22 +454,22 @@ proc call*(call_593982: Call_ComponentCurrentPricingPlanUpdate_593973;
   ##               : The name of the Application Insights component resource.
   ##   PricingPlanProperties: JObject (required)
   ##                        : Properties that need to be specified to update current pricing plan for an Application Insights component.
-  var path_593983 = newJObject()
-  var query_593984 = newJObject()
-  var body_593985 = newJObject()
-  add(path_593983, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593984, "api-version", newJString(apiVersion))
-  add(path_593983, "subscriptionId", newJString(subscriptionId))
-  add(path_593983, "resourceName", newJString(resourceName))
+  var path_597016 = newJObject()
+  var query_597017 = newJObject()
+  var body_597018 = newJObject()
+  add(path_597016, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597017, "api-version", newJString(apiVersion))
+  add(path_597016, "subscriptionId", newJString(subscriptionId))
+  add(path_597016, "resourceName", newJString(resourceName))
   if PricingPlanProperties != nil:
-    body_593985 = PricingPlanProperties
-  result = call_593982.call(path_593983, query_593984, nil, nil, body_593985)
+    body_597018 = PricingPlanProperties
+  result = call_597015.call(path_597016, query_597017, nil, nil, body_597018)
 
-var componentCurrentPricingPlanUpdate* = Call_ComponentCurrentPricingPlanUpdate_593973(
+var componentCurrentPricingPlanUpdate* = Call_ComponentCurrentPricingPlanUpdate_597006(
     name: "componentCurrentPricingPlanUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/components/{resourceName}/pricingPlans/current",
-    validator: validate_ComponentCurrentPricingPlanUpdate_593974, base: "",
-    url: url_ComponentCurrentPricingPlanUpdate_593975, schemes: {Scheme.Https})
+    validator: validate_ComponentCurrentPricingPlanUpdate_597007, base: "",
+    url: url_ComponentCurrentPricingPlanUpdate_597008, schemes: {Scheme.Https})
 export
   rest
 

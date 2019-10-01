@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Dynamics Telemetry
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "dynamicstelemetry"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593630 = ref object of OpenApiRestCall_593408
-proc url_OperationsList_593632(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567863 = ref object of OpenApiRestCall_567641
+proc url_OperationsList_567865(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593631(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   var section: JsonNode
@@ -127,25 +127,25 @@ proc validate_OperationsList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593737: Call_OperationsList_593630; path: JsonNode; query: JsonNode;
+proc call*(call_567970: Call_OperationsList_567863; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593737.validator(path, query, header, formData, body)
-  let scheme = call_593737.pickScheme
+  let valid = call_567970.validator(path, query, header, formData, body)
+  let scheme = call_567970.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593737.url(scheme.get, call_593737.host, call_593737.base,
-                         call_593737.route, valid.getOrDefault("path"),
+  let url = call_567970.url(scheme.get, call_567970.host, call_567970.base,
+                         call_567970.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593737, url, valid)
+  result = hook(call_567970, url, valid)
 
-proc call*(call_593821: Call_OperationsList_593630): Recallable =
+proc call*(call_568054: Call_OperationsList_567863): Recallable =
   ## operationsList
-  result = call_593821.call(nil, nil, nil, nil, nil)
+  result = call_568054.call(nil, nil, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593630(name: "operationsList",
+var operationsList* = Call_OperationsList_567863(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.DynamicsTelemetry/operations",
-    validator: validate_OperationsList_593631, base: "", url: url_OperationsList_593632,
+    validator: validate_OperationsList_567864, base: "", url: url_OperationsList_567865,
     schemes: {Scheme.Https})
 export
   rest

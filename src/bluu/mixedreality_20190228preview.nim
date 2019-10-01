@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Mixed Reality
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "mixedreality"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_OperationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
+proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Exposing Available Operations
@@ -126,11 +126,11 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = query.getOrDefault("api-version")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_568041 != nil:
+    section.add "api-version", valid_568041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593831: Call_OperationsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568064: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Exposing Available Operations
   ## 
-  let valid = call_593831.validator(path, query, header, formData, body)
-  let scheme = call_593831.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593831.url(scheme.get, call_593831.host, call_593831.base,
-                         call_593831.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593831, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593902: Call_OperationsList_593647; apiVersion: string): Recallable =
+proc call*(call_568135: Call_OperationsList_567880; apiVersion: string): Recallable =
   ## operationsList
   ## Exposing Available Operations
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  var query_593903 = newJObject()
-  add(query_593903, "api-version", newJString(apiVersion))
-  result = call_593902.call(nil, query_593903, nil, nil, nil)
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  result = call_568135.call(nil, query_568136, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593647(name: "operationsList",
+var operationsList* = Call_OperationsList_567880(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.MixedReality/operations",
-    validator: validate_OperationsList_593648, base: "", url: url_OperationsList_593649,
+    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
     schemes: {Scheme.Https})
 type
-  Call_CheckNameAvailabilityLocal_593943 = ref object of OpenApiRestCall_593425
-proc url_CheckNameAvailabilityLocal_593945(protocol: Scheme; host: string;
+  Call_CheckNameAvailabilityLocal_568176 = ref object of OpenApiRestCall_567658
+proc url_CheckNameAvailabilityLocal_568178(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -188,7 +188,7 @@ proc url_CheckNameAvailabilityLocal_593945(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CheckNameAvailabilityLocal_593944(path: JsonNode; query: JsonNode;
+proc validate_CheckNameAvailabilityLocal_568177(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check Name Availability for global uniqueness
   ## 
@@ -202,16 +202,16 @@ proc validate_CheckNameAvailabilityLocal_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_568193 = path.getOrDefault("subscriptionId")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
-  var valid_593961 = path.getOrDefault("location")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  if valid_568193 != nil:
+    section.add "subscriptionId", valid_568193
+  var valid_568194 = path.getOrDefault("location")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "location", valid_593961
+  if valid_568194 != nil:
+    section.add "location", valid_568194
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -219,11 +219,11 @@ proc validate_CheckNameAvailabilityLocal_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593962 = query.getOrDefault("api-version")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_568195 = query.getOrDefault("api-version")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "api-version", valid_593962
+  if valid_568195 != nil:
+    section.add "api-version", valid_568195
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -237,20 +237,20 @@ proc validate_CheckNameAvailabilityLocal_593944(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593964: Call_CheckNameAvailabilityLocal_593943; path: JsonNode;
+proc call*(call_568197: Call_CheckNameAvailabilityLocal_568176; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Check Name Availability for global uniqueness
   ## 
-  let valid = call_593964.validator(path, query, header, formData, body)
-  let scheme = call_593964.pickScheme
+  let valid = call_568197.validator(path, query, header, formData, body)
+  let scheme = call_568197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593964.url(scheme.get, call_593964.host, call_593964.base,
-                         call_593964.route, valid.getOrDefault("path"),
+  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
+                         call_568197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593964, url, valid)
+  result = hook(call_568197, url, valid)
 
-proc call*(call_593965: Call_CheckNameAvailabilityLocal_593943; apiVersion: string;
+proc call*(call_568198: Call_CheckNameAvailabilityLocal_568176; apiVersion: string;
           subscriptionId: string; location: string; checkNameAvailability: JsonNode): Recallable =
   ## checkNameAvailabilityLocal
   ## Check Name Availability for global uniqueness
@@ -262,24 +262,24 @@ proc call*(call_593965: Call_CheckNameAvailabilityLocal_593943; apiVersion: stri
   ##           : The location in which uniqueness will be verified.
   ##   checkNameAvailability: JObject (required)
   ##                        : Check Name Availability Request.
-  var path_593966 = newJObject()
-  var query_593967 = newJObject()
-  var body_593968 = newJObject()
-  add(query_593967, "api-version", newJString(apiVersion))
-  add(path_593966, "subscriptionId", newJString(subscriptionId))
-  add(path_593966, "location", newJString(location))
+  var path_568199 = newJObject()
+  var query_568200 = newJObject()
+  var body_568201 = newJObject()
+  add(query_568200, "api-version", newJString(apiVersion))
+  add(path_568199, "subscriptionId", newJString(subscriptionId))
+  add(path_568199, "location", newJString(location))
   if checkNameAvailability != nil:
-    body_593968 = checkNameAvailability
-  result = call_593965.call(path_593966, query_593967, nil, nil, body_593968)
+    body_568201 = checkNameAvailability
+  result = call_568198.call(path_568199, query_568200, nil, nil, body_568201)
 
-var checkNameAvailabilityLocal* = Call_CheckNameAvailabilityLocal_593943(
+var checkNameAvailabilityLocal* = Call_CheckNameAvailabilityLocal_568176(
     name: "checkNameAvailabilityLocal", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MixedReality/locations/{location}/checkNameAvailability",
-    validator: validate_CheckNameAvailabilityLocal_593944, base: "",
-    url: url_CheckNameAvailabilityLocal_593945, schemes: {Scheme.Https})
+    validator: validate_CheckNameAvailabilityLocal_568177, base: "",
+    url: url_CheckNameAvailabilityLocal_568178, schemes: {Scheme.Https})
 type
-  Call_SpatialAnchorsAccountsListBySubscription_593969 = ref object of OpenApiRestCall_593425
-proc url_SpatialAnchorsAccountsListBySubscription_593971(protocol: Scheme;
+  Call_SpatialAnchorsAccountsListBySubscription_568202 = ref object of OpenApiRestCall_567658
+proc url_SpatialAnchorsAccountsListBySubscription_568204(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -296,7 +296,7 @@ proc url_SpatialAnchorsAccountsListBySubscription_593971(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SpatialAnchorsAccountsListBySubscription_593970(path: JsonNode;
+proc validate_SpatialAnchorsAccountsListBySubscription_568203(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List Spatial Anchors Accounts by Subscription
   ## 
@@ -308,11 +308,11 @@ proc validate_SpatialAnchorsAccountsListBySubscription_593970(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593972 = path.getOrDefault("subscriptionId")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_568205 = path.getOrDefault("subscriptionId")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "subscriptionId", valid_593972
+  if valid_568205 != nil:
+    section.add "subscriptionId", valid_568205
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -320,11 +320,11 @@ proc validate_SpatialAnchorsAccountsListBySubscription_593970(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593973 = query.getOrDefault("api-version")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568206 = query.getOrDefault("api-version")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "api-version", valid_593973
+  if valid_568206 != nil:
+    section.add "api-version", valid_568206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -333,21 +333,21 @@ proc validate_SpatialAnchorsAccountsListBySubscription_593970(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593974: Call_SpatialAnchorsAccountsListBySubscription_593969;
+proc call*(call_568207: Call_SpatialAnchorsAccountsListBySubscription_568202;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List Spatial Anchors Accounts by Subscription
   ## 
-  let valid = call_593974.validator(path, query, header, formData, body)
-  let scheme = call_593974.pickScheme
+  let valid = call_568207.validator(path, query, header, formData, body)
+  let scheme = call_568207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593974.url(scheme.get, call_593974.host, call_593974.base,
-                         call_593974.route, valid.getOrDefault("path"),
+  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
+                         call_568207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593974, url, valid)
+  result = hook(call_568207, url, valid)
 
-proc call*(call_593975: Call_SpatialAnchorsAccountsListBySubscription_593969;
+proc call*(call_568208: Call_SpatialAnchorsAccountsListBySubscription_568202;
           apiVersion: string; subscriptionId: string): Recallable =
   ## spatialAnchorsAccountsListBySubscription
   ## List Spatial Anchors Accounts by Subscription
@@ -355,21 +355,21 @@ proc call*(call_593975: Call_SpatialAnchorsAccountsListBySubscription_593969;
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
-  var path_593976 = newJObject()
-  var query_593977 = newJObject()
-  add(query_593977, "api-version", newJString(apiVersion))
-  add(path_593976, "subscriptionId", newJString(subscriptionId))
-  result = call_593975.call(path_593976, query_593977, nil, nil, nil)
+  var path_568209 = newJObject()
+  var query_568210 = newJObject()
+  add(query_568210, "api-version", newJString(apiVersion))
+  add(path_568209, "subscriptionId", newJString(subscriptionId))
+  result = call_568208.call(path_568209, query_568210, nil, nil, nil)
 
-var spatialAnchorsAccountsListBySubscription* = Call_SpatialAnchorsAccountsListBySubscription_593969(
+var spatialAnchorsAccountsListBySubscription* = Call_SpatialAnchorsAccountsListBySubscription_568202(
     name: "spatialAnchorsAccountsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MixedReality/spatialAnchorsAccounts",
-    validator: validate_SpatialAnchorsAccountsListBySubscription_593970, base: "",
-    url: url_SpatialAnchorsAccountsListBySubscription_593971,
+    validator: validate_SpatialAnchorsAccountsListBySubscription_568203, base: "",
+    url: url_SpatialAnchorsAccountsListBySubscription_568204,
     schemes: {Scheme.Https})
 type
-  Call_SpatialAnchorsAccountsListByResourceGroup_593978 = ref object of OpenApiRestCall_593425
-proc url_SpatialAnchorsAccountsListByResourceGroup_593980(protocol: Scheme;
+  Call_SpatialAnchorsAccountsListByResourceGroup_568211 = ref object of OpenApiRestCall_567658
+proc url_SpatialAnchorsAccountsListByResourceGroup_568213(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -390,7 +390,7 @@ proc url_SpatialAnchorsAccountsListByResourceGroup_593980(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SpatialAnchorsAccountsListByResourceGroup_593979(path: JsonNode;
+proc validate_SpatialAnchorsAccountsListByResourceGroup_568212(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List Resources by Resource Group
   ## 
@@ -404,16 +404,16 @@ proc validate_SpatialAnchorsAccountsListByResourceGroup_593979(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593981 = path.getOrDefault("resourceGroupName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = path.getOrDefault("resourceGroupName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "resourceGroupName", valid_593981
-  var valid_593982 = path.getOrDefault("subscriptionId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568214 != nil:
+    section.add "resourceGroupName", valid_568214
+  var valid_568215 = path.getOrDefault("subscriptionId")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "subscriptionId", valid_593982
+  if valid_568215 != nil:
+    section.add "subscriptionId", valid_568215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -421,11 +421,11 @@ proc validate_SpatialAnchorsAccountsListByResourceGroup_593979(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = query.getOrDefault("api-version")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_568216 != nil:
+    section.add "api-version", valid_568216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -434,21 +434,21 @@ proc validate_SpatialAnchorsAccountsListByResourceGroup_593979(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_SpatialAnchorsAccountsListByResourceGroup_593978;
+proc call*(call_568217: Call_SpatialAnchorsAccountsListByResourceGroup_568211;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List Resources by Resource Group
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_568217.validator(path, query, header, formData, body)
+  let scheme = call_568217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
+                         call_568217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_568217, url, valid)
 
-proc call*(call_593985: Call_SpatialAnchorsAccountsListByResourceGroup_593978;
+proc call*(call_568218: Call_SpatialAnchorsAccountsListByResourceGroup_568211;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## spatialAnchorsAccountsListByResourceGroup
   ## List Resources by Resource Group
@@ -458,22 +458,22 @@ proc call*(call_593985: Call_SpatialAnchorsAccountsListByResourceGroup_593978;
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  add(path_593986, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
-  result = call_593985.call(path_593986, query_593987, nil, nil, nil)
+  var path_568219 = newJObject()
+  var query_568220 = newJObject()
+  add(path_568219, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568220, "api-version", newJString(apiVersion))
+  add(path_568219, "subscriptionId", newJString(subscriptionId))
+  result = call_568218.call(path_568219, query_568220, nil, nil, nil)
 
-var spatialAnchorsAccountsListByResourceGroup* = Call_SpatialAnchorsAccountsListByResourceGroup_593978(
+var spatialAnchorsAccountsListByResourceGroup* = Call_SpatialAnchorsAccountsListByResourceGroup_568211(
     name: "spatialAnchorsAccountsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MixedReality/spatialAnchorsAccounts",
-    validator: validate_SpatialAnchorsAccountsListByResourceGroup_593979,
-    base: "", url: url_SpatialAnchorsAccountsListByResourceGroup_593980,
+    validator: validate_SpatialAnchorsAccountsListByResourceGroup_568212,
+    base: "", url: url_SpatialAnchorsAccountsListByResourceGroup_568213,
     schemes: {Scheme.Https})
 type
-  Call_SpatialAnchorsAccountsCreate_593999 = ref object of OpenApiRestCall_593425
-proc url_SpatialAnchorsAccountsCreate_594001(protocol: Scheme; host: string;
+  Call_SpatialAnchorsAccountsCreate_568232 = ref object of OpenApiRestCall_567658
+proc url_SpatialAnchorsAccountsCreate_568234(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -497,7 +497,7 @@ proc url_SpatialAnchorsAccountsCreate_594001(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SpatialAnchorsAccountsCreate_594000(path: JsonNode; query: JsonNode;
+proc validate_SpatialAnchorsAccountsCreate_568233(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creating or Updating a Spatial Anchors Account.
   ## 
@@ -513,21 +513,21 @@ proc validate_SpatialAnchorsAccountsCreate_594000(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594002 = path.getOrDefault("resourceGroupName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_568235 = path.getOrDefault("resourceGroupName")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "resourceGroupName", valid_594002
-  var valid_594003 = path.getOrDefault("subscriptionId")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_568235 != nil:
+    section.add "resourceGroupName", valid_568235
+  var valid_568236 = path.getOrDefault("subscriptionId")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "subscriptionId", valid_594003
-  var valid_594004 = path.getOrDefault("spatialAnchorsAccountName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  if valid_568236 != nil:
+    section.add "subscriptionId", valid_568236
+  var valid_568237 = path.getOrDefault("spatialAnchorsAccountName")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "spatialAnchorsAccountName", valid_594004
+  if valid_568237 != nil:
+    section.add "spatialAnchorsAccountName", valid_568237
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -535,11 +535,11 @@ proc validate_SpatialAnchorsAccountsCreate_594000(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594005 = query.getOrDefault("api-version")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_568238 = query.getOrDefault("api-version")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "api-version", valid_594005
+  if valid_568238 != nil:
+    section.add "api-version", valid_568238
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -553,20 +553,20 @@ proc validate_SpatialAnchorsAccountsCreate_594000(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594007: Call_SpatialAnchorsAccountsCreate_593999; path: JsonNode;
+proc call*(call_568240: Call_SpatialAnchorsAccountsCreate_568232; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creating or Updating a Spatial Anchors Account.
   ## 
-  let valid = call_594007.validator(path, query, header, formData, body)
-  let scheme = call_594007.pickScheme
+  let valid = call_568240.validator(path, query, header, formData, body)
+  let scheme = call_568240.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594007.url(scheme.get, call_594007.host, call_594007.base,
-                         call_594007.route, valid.getOrDefault("path"),
+  let url = call_568240.url(scheme.get, call_568240.host, call_568240.base,
+                         call_568240.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594007, url, valid)
+  result = hook(call_568240, url, valid)
 
-proc call*(call_594008: Call_SpatialAnchorsAccountsCreate_593999;
+proc call*(call_568241: Call_SpatialAnchorsAccountsCreate_568232;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           spatialAnchorsAccountName: string; spatialAnchorsAccount: JsonNode): Recallable =
   ## spatialAnchorsAccountsCreate
@@ -581,26 +581,26 @@ proc call*(call_594008: Call_SpatialAnchorsAccountsCreate_593999;
   ##                            : Name of an Mixed Reality Spatial Anchors Account.
   ##   spatialAnchorsAccount: JObject (required)
   ##                        : Spatial Anchors Account parameter.
-  var path_594009 = newJObject()
-  var query_594010 = newJObject()
-  var body_594011 = newJObject()
-  add(path_594009, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594010, "api-version", newJString(apiVersion))
-  add(path_594009, "subscriptionId", newJString(subscriptionId))
-  add(path_594009, "spatialAnchorsAccountName",
+  var path_568242 = newJObject()
+  var query_568243 = newJObject()
+  var body_568244 = newJObject()
+  add(path_568242, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568243, "api-version", newJString(apiVersion))
+  add(path_568242, "subscriptionId", newJString(subscriptionId))
+  add(path_568242, "spatialAnchorsAccountName",
       newJString(spatialAnchorsAccountName))
   if spatialAnchorsAccount != nil:
-    body_594011 = spatialAnchorsAccount
-  result = call_594008.call(path_594009, query_594010, nil, nil, body_594011)
+    body_568244 = spatialAnchorsAccount
+  result = call_568241.call(path_568242, query_568243, nil, nil, body_568244)
 
-var spatialAnchorsAccountsCreate* = Call_SpatialAnchorsAccountsCreate_593999(
+var spatialAnchorsAccountsCreate* = Call_SpatialAnchorsAccountsCreate_568232(
     name: "spatialAnchorsAccountsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MixedReality/spatialAnchorsAccounts/{spatialAnchorsAccountName}",
-    validator: validate_SpatialAnchorsAccountsCreate_594000, base: "",
-    url: url_SpatialAnchorsAccountsCreate_594001, schemes: {Scheme.Https})
+    validator: validate_SpatialAnchorsAccountsCreate_568233, base: "",
+    url: url_SpatialAnchorsAccountsCreate_568234, schemes: {Scheme.Https})
 type
-  Call_SpatialAnchorsAccountsGet_593988 = ref object of OpenApiRestCall_593425
-proc url_SpatialAnchorsAccountsGet_593990(protocol: Scheme; host: string;
+  Call_SpatialAnchorsAccountsGet_568221 = ref object of OpenApiRestCall_567658
+proc url_SpatialAnchorsAccountsGet_568223(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -624,7 +624,7 @@ proc url_SpatialAnchorsAccountsGet_593990(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SpatialAnchorsAccountsGet_593989(path: JsonNode; query: JsonNode;
+proc validate_SpatialAnchorsAccountsGet_568222(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a Spatial Anchors Account.
   ## 
@@ -640,21 +640,21 @@ proc validate_SpatialAnchorsAccountsGet_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593991 = path.getOrDefault("resourceGroupName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_568224 = path.getOrDefault("resourceGroupName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "resourceGroupName", valid_593991
-  var valid_593992 = path.getOrDefault("subscriptionId")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_568224 != nil:
+    section.add "resourceGroupName", valid_568224
+  var valid_568225 = path.getOrDefault("subscriptionId")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "subscriptionId", valid_593992
-  var valid_593993 = path.getOrDefault("spatialAnchorsAccountName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "subscriptionId", valid_568225
+  var valid_568226 = path.getOrDefault("spatialAnchorsAccountName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "spatialAnchorsAccountName", valid_593993
+  if valid_568226 != nil:
+    section.add "spatialAnchorsAccountName", valid_568226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -662,11 +662,11 @@ proc validate_SpatialAnchorsAccountsGet_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568227 = query.getOrDefault("api-version")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
+  if valid_568227 != nil:
+    section.add "api-version", valid_568227
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -675,20 +675,20 @@ proc validate_SpatialAnchorsAccountsGet_593989(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593995: Call_SpatialAnchorsAccountsGet_593988; path: JsonNode;
+proc call*(call_568228: Call_SpatialAnchorsAccountsGet_568221; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a Spatial Anchors Account.
   ## 
-  let valid = call_593995.validator(path, query, header, formData, body)
-  let scheme = call_593995.pickScheme
+  let valid = call_568228.validator(path, query, header, formData, body)
+  let scheme = call_568228.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593995.url(scheme.get, call_593995.host, call_593995.base,
-                         call_593995.route, valid.getOrDefault("path"),
+  let url = call_568228.url(scheme.get, call_568228.host, call_568228.base,
+                         call_568228.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593995, url, valid)
+  result = hook(call_568228, url, valid)
 
-proc call*(call_593996: Call_SpatialAnchorsAccountsGet_593988;
+proc call*(call_568229: Call_SpatialAnchorsAccountsGet_568221;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           spatialAnchorsAccountName: string): Recallable =
   ## spatialAnchorsAccountsGet
@@ -701,23 +701,23 @@ proc call*(call_593996: Call_SpatialAnchorsAccountsGet_593988;
   ##                 : Azure subscription ID.
   ##   spatialAnchorsAccountName: string (required)
   ##                            : Name of an Mixed Reality Spatial Anchors Account.
-  var path_593997 = newJObject()
-  var query_593998 = newJObject()
-  add(path_593997, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593998, "api-version", newJString(apiVersion))
-  add(path_593997, "subscriptionId", newJString(subscriptionId))
-  add(path_593997, "spatialAnchorsAccountName",
+  var path_568230 = newJObject()
+  var query_568231 = newJObject()
+  add(path_568230, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568231, "api-version", newJString(apiVersion))
+  add(path_568230, "subscriptionId", newJString(subscriptionId))
+  add(path_568230, "spatialAnchorsAccountName",
       newJString(spatialAnchorsAccountName))
-  result = call_593996.call(path_593997, query_593998, nil, nil, nil)
+  result = call_568229.call(path_568230, query_568231, nil, nil, nil)
 
-var spatialAnchorsAccountsGet* = Call_SpatialAnchorsAccountsGet_593988(
+var spatialAnchorsAccountsGet* = Call_SpatialAnchorsAccountsGet_568221(
     name: "spatialAnchorsAccountsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MixedReality/spatialAnchorsAccounts/{spatialAnchorsAccountName}",
-    validator: validate_SpatialAnchorsAccountsGet_593989, base: "",
-    url: url_SpatialAnchorsAccountsGet_593990, schemes: {Scheme.Https})
+    validator: validate_SpatialAnchorsAccountsGet_568222, base: "",
+    url: url_SpatialAnchorsAccountsGet_568223, schemes: {Scheme.Https})
 type
-  Call_SpatialAnchorsAccountsUpdate_594023 = ref object of OpenApiRestCall_593425
-proc url_SpatialAnchorsAccountsUpdate_594025(protocol: Scheme; host: string;
+  Call_SpatialAnchorsAccountsUpdate_568256 = ref object of OpenApiRestCall_567658
+proc url_SpatialAnchorsAccountsUpdate_568258(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -741,7 +741,7 @@ proc url_SpatialAnchorsAccountsUpdate_594025(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SpatialAnchorsAccountsUpdate_594024(path: JsonNode; query: JsonNode;
+proc validate_SpatialAnchorsAccountsUpdate_568257(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updating a Spatial Anchors Account
   ## 
@@ -757,21 +757,21 @@ proc validate_SpatialAnchorsAccountsUpdate_594024(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594026 = path.getOrDefault("resourceGroupName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_568259 = path.getOrDefault("resourceGroupName")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "resourceGroupName", valid_594026
-  var valid_594027 = path.getOrDefault("subscriptionId")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_568259 != nil:
+    section.add "resourceGroupName", valid_568259
+  var valid_568260 = path.getOrDefault("subscriptionId")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "subscriptionId", valid_594027
-  var valid_594028 = path.getOrDefault("spatialAnchorsAccountName")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  if valid_568260 != nil:
+    section.add "subscriptionId", valid_568260
+  var valid_568261 = path.getOrDefault("spatialAnchorsAccountName")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "spatialAnchorsAccountName", valid_594028
+  if valid_568261 != nil:
+    section.add "spatialAnchorsAccountName", valid_568261
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -779,11 +779,11 @@ proc validate_SpatialAnchorsAccountsUpdate_594024(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594029 = query.getOrDefault("api-version")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_568262 = query.getOrDefault("api-version")
+  valid_568262 = validateParameter(valid_568262, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "api-version", valid_594029
+  if valid_568262 != nil:
+    section.add "api-version", valid_568262
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -797,20 +797,20 @@ proc validate_SpatialAnchorsAccountsUpdate_594024(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594031: Call_SpatialAnchorsAccountsUpdate_594023; path: JsonNode;
+proc call*(call_568264: Call_SpatialAnchorsAccountsUpdate_568256; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updating a Spatial Anchors Account
   ## 
-  let valid = call_594031.validator(path, query, header, formData, body)
-  let scheme = call_594031.pickScheme
+  let valid = call_568264.validator(path, query, header, formData, body)
+  let scheme = call_568264.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594031.url(scheme.get, call_594031.host, call_594031.base,
-                         call_594031.route, valid.getOrDefault("path"),
+  let url = call_568264.url(scheme.get, call_568264.host, call_568264.base,
+                         call_568264.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594031, url, valid)
+  result = hook(call_568264, url, valid)
 
-proc call*(call_594032: Call_SpatialAnchorsAccountsUpdate_594023;
+proc call*(call_568265: Call_SpatialAnchorsAccountsUpdate_568256;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           spatialAnchorsAccountName: string; spatialAnchorsAccount: JsonNode): Recallable =
   ## spatialAnchorsAccountsUpdate
@@ -825,26 +825,26 @@ proc call*(call_594032: Call_SpatialAnchorsAccountsUpdate_594023;
   ##                            : Name of an Mixed Reality Spatial Anchors Account.
   ##   spatialAnchorsAccount: JObject (required)
   ##                        : Spatial Anchors Account parameter.
-  var path_594033 = newJObject()
-  var query_594034 = newJObject()
-  var body_594035 = newJObject()
-  add(path_594033, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594034, "api-version", newJString(apiVersion))
-  add(path_594033, "subscriptionId", newJString(subscriptionId))
-  add(path_594033, "spatialAnchorsAccountName",
+  var path_568266 = newJObject()
+  var query_568267 = newJObject()
+  var body_568268 = newJObject()
+  add(path_568266, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568267, "api-version", newJString(apiVersion))
+  add(path_568266, "subscriptionId", newJString(subscriptionId))
+  add(path_568266, "spatialAnchorsAccountName",
       newJString(spatialAnchorsAccountName))
   if spatialAnchorsAccount != nil:
-    body_594035 = spatialAnchorsAccount
-  result = call_594032.call(path_594033, query_594034, nil, nil, body_594035)
+    body_568268 = spatialAnchorsAccount
+  result = call_568265.call(path_568266, query_568267, nil, nil, body_568268)
 
-var spatialAnchorsAccountsUpdate* = Call_SpatialAnchorsAccountsUpdate_594023(
+var spatialAnchorsAccountsUpdate* = Call_SpatialAnchorsAccountsUpdate_568256(
     name: "spatialAnchorsAccountsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MixedReality/spatialAnchorsAccounts/{spatialAnchorsAccountName}",
-    validator: validate_SpatialAnchorsAccountsUpdate_594024, base: "",
-    url: url_SpatialAnchorsAccountsUpdate_594025, schemes: {Scheme.Https})
+    validator: validate_SpatialAnchorsAccountsUpdate_568257, base: "",
+    url: url_SpatialAnchorsAccountsUpdate_568258, schemes: {Scheme.Https})
 type
-  Call_SpatialAnchorsAccountsDelete_594012 = ref object of OpenApiRestCall_593425
-proc url_SpatialAnchorsAccountsDelete_594014(protocol: Scheme; host: string;
+  Call_SpatialAnchorsAccountsDelete_568245 = ref object of OpenApiRestCall_567658
+proc url_SpatialAnchorsAccountsDelete_568247(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -868,7 +868,7 @@ proc url_SpatialAnchorsAccountsDelete_594014(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SpatialAnchorsAccountsDelete_594013(path: JsonNode; query: JsonNode;
+proc validate_SpatialAnchorsAccountsDelete_568246(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a Spatial Anchors Account.
   ## 
@@ -884,21 +884,21 @@ proc validate_SpatialAnchorsAccountsDelete_594013(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594015 = path.getOrDefault("resourceGroupName")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_568248 = path.getOrDefault("resourceGroupName")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "resourceGroupName", valid_594015
-  var valid_594016 = path.getOrDefault("subscriptionId")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_568248 != nil:
+    section.add "resourceGroupName", valid_568248
+  var valid_568249 = path.getOrDefault("subscriptionId")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "subscriptionId", valid_594016
-  var valid_594017 = path.getOrDefault("spatialAnchorsAccountName")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  if valid_568249 != nil:
+    section.add "subscriptionId", valid_568249
+  var valid_568250 = path.getOrDefault("spatialAnchorsAccountName")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "spatialAnchorsAccountName", valid_594017
+  if valid_568250 != nil:
+    section.add "spatialAnchorsAccountName", valid_568250
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -906,11 +906,11 @@ proc validate_SpatialAnchorsAccountsDelete_594013(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594018 = query.getOrDefault("api-version")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  var valid_568251 = query.getOrDefault("api-version")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "api-version", valid_594018
+  if valid_568251 != nil:
+    section.add "api-version", valid_568251
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -919,20 +919,20 @@ proc validate_SpatialAnchorsAccountsDelete_594013(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594019: Call_SpatialAnchorsAccountsDelete_594012; path: JsonNode;
+proc call*(call_568252: Call_SpatialAnchorsAccountsDelete_568245; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Spatial Anchors Account.
   ## 
-  let valid = call_594019.validator(path, query, header, formData, body)
-  let scheme = call_594019.pickScheme
+  let valid = call_568252.validator(path, query, header, formData, body)
+  let scheme = call_568252.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594019.url(scheme.get, call_594019.host, call_594019.base,
-                         call_594019.route, valid.getOrDefault("path"),
+  let url = call_568252.url(scheme.get, call_568252.host, call_568252.base,
+                         call_568252.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594019, url, valid)
+  result = hook(call_568252, url, valid)
 
-proc call*(call_594020: Call_SpatialAnchorsAccountsDelete_594012;
+proc call*(call_568253: Call_SpatialAnchorsAccountsDelete_568245;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           spatialAnchorsAccountName: string): Recallable =
   ## spatialAnchorsAccountsDelete
@@ -945,23 +945,23 @@ proc call*(call_594020: Call_SpatialAnchorsAccountsDelete_594012;
   ##                 : Azure subscription ID.
   ##   spatialAnchorsAccountName: string (required)
   ##                            : Name of an Mixed Reality Spatial Anchors Account.
-  var path_594021 = newJObject()
-  var query_594022 = newJObject()
-  add(path_594021, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594022, "api-version", newJString(apiVersion))
-  add(path_594021, "subscriptionId", newJString(subscriptionId))
-  add(path_594021, "spatialAnchorsAccountName",
+  var path_568254 = newJObject()
+  var query_568255 = newJObject()
+  add(path_568254, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568255, "api-version", newJString(apiVersion))
+  add(path_568254, "subscriptionId", newJString(subscriptionId))
+  add(path_568254, "spatialAnchorsAccountName",
       newJString(spatialAnchorsAccountName))
-  result = call_594020.call(path_594021, query_594022, nil, nil, nil)
+  result = call_568253.call(path_568254, query_568255, nil, nil, nil)
 
-var spatialAnchorsAccountsDelete* = Call_SpatialAnchorsAccountsDelete_594012(
+var spatialAnchorsAccountsDelete* = Call_SpatialAnchorsAccountsDelete_568245(
     name: "spatialAnchorsAccountsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MixedReality/spatialAnchorsAccounts/{spatialAnchorsAccountName}",
-    validator: validate_SpatialAnchorsAccountsDelete_594013, base: "",
-    url: url_SpatialAnchorsAccountsDelete_594014, schemes: {Scheme.Https})
+    validator: validate_SpatialAnchorsAccountsDelete_568246, base: "",
+    url: url_SpatialAnchorsAccountsDelete_568247, schemes: {Scheme.Https})
 type
-  Call_SpatialAnchorsAccountsRegenerateKeys_594047 = ref object of OpenApiRestCall_593425
-proc url_SpatialAnchorsAccountsRegenerateKeys_594049(protocol: Scheme;
+  Call_SpatialAnchorsAccountsRegenerateKeys_568280 = ref object of OpenApiRestCall_567658
+proc url_SpatialAnchorsAccountsRegenerateKeys_568282(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -986,7 +986,7 @@ proc url_SpatialAnchorsAccountsRegenerateKeys_594049(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SpatialAnchorsAccountsRegenerateKeys_594048(path: JsonNode;
+proc validate_SpatialAnchorsAccountsRegenerateKeys_568281(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerate 1 Key of a Spatial Anchors Account
   ## 
@@ -1002,21 +1002,21 @@ proc validate_SpatialAnchorsAccountsRegenerateKeys_594048(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594050 = path.getOrDefault("resourceGroupName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  var valid_568283 = path.getOrDefault("resourceGroupName")
+  valid_568283 = validateParameter(valid_568283, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "resourceGroupName", valid_594050
-  var valid_594051 = path.getOrDefault("subscriptionId")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_568283 != nil:
+    section.add "resourceGroupName", valid_568283
+  var valid_568284 = path.getOrDefault("subscriptionId")
+  valid_568284 = validateParameter(valid_568284, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "subscriptionId", valid_594051
-  var valid_594052 = path.getOrDefault("spatialAnchorsAccountName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_568284 != nil:
+    section.add "subscriptionId", valid_568284
+  var valid_568285 = path.getOrDefault("spatialAnchorsAccountName")
+  valid_568285 = validateParameter(valid_568285, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "spatialAnchorsAccountName", valid_594052
+  if valid_568285 != nil:
+    section.add "spatialAnchorsAccountName", valid_568285
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1024,11 +1024,11 @@ proc validate_SpatialAnchorsAccountsRegenerateKeys_594048(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594053 = query.getOrDefault("api-version")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_568286 = query.getOrDefault("api-version")
+  valid_568286 = validateParameter(valid_568286, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "api-version", valid_594053
+  if valid_568286 != nil:
+    section.add "api-version", valid_568286
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1042,21 +1042,21 @@ proc validate_SpatialAnchorsAccountsRegenerateKeys_594048(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594055: Call_SpatialAnchorsAccountsRegenerateKeys_594047;
+proc call*(call_568288: Call_SpatialAnchorsAccountsRegenerateKeys_568280;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerate 1 Key of a Spatial Anchors Account
   ## 
-  let valid = call_594055.validator(path, query, header, formData, body)
-  let scheme = call_594055.pickScheme
+  let valid = call_568288.validator(path, query, header, formData, body)
+  let scheme = call_568288.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594055.url(scheme.get, call_594055.host, call_594055.base,
-                         call_594055.route, valid.getOrDefault("path"),
+  let url = call_568288.url(scheme.get, call_568288.host, call_568288.base,
+                         call_568288.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594055, url, valid)
+  result = hook(call_568288, url, valid)
 
-proc call*(call_594056: Call_SpatialAnchorsAccountsRegenerateKeys_594047;
+proc call*(call_568289: Call_SpatialAnchorsAccountsRegenerateKeys_568280;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           spatialAnchorsAccountName: string;
           spatialAnchorsAccountKeyRegenerate: JsonNode): Recallable =
@@ -1072,26 +1072,26 @@ proc call*(call_594056: Call_SpatialAnchorsAccountsRegenerateKeys_594047;
   ##                            : Name of an Mixed Reality Spatial Anchors Account.
   ##   spatialAnchorsAccountKeyRegenerate: JObject (required)
   ##                                     : Specifying which key to be regenerated.
-  var path_594057 = newJObject()
-  var query_594058 = newJObject()
-  var body_594059 = newJObject()
-  add(path_594057, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594058, "api-version", newJString(apiVersion))
-  add(path_594057, "subscriptionId", newJString(subscriptionId))
-  add(path_594057, "spatialAnchorsAccountName",
+  var path_568290 = newJObject()
+  var query_568291 = newJObject()
+  var body_568292 = newJObject()
+  add(path_568290, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568291, "api-version", newJString(apiVersion))
+  add(path_568290, "subscriptionId", newJString(subscriptionId))
+  add(path_568290, "spatialAnchorsAccountName",
       newJString(spatialAnchorsAccountName))
   if spatialAnchorsAccountKeyRegenerate != nil:
-    body_594059 = spatialAnchorsAccountKeyRegenerate
-  result = call_594056.call(path_594057, query_594058, nil, nil, body_594059)
+    body_568292 = spatialAnchorsAccountKeyRegenerate
+  result = call_568289.call(path_568290, query_568291, nil, nil, body_568292)
 
-var spatialAnchorsAccountsRegenerateKeys* = Call_SpatialAnchorsAccountsRegenerateKeys_594047(
+var spatialAnchorsAccountsRegenerateKeys* = Call_SpatialAnchorsAccountsRegenerateKeys_568280(
     name: "spatialAnchorsAccountsRegenerateKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MixedReality/spatialAnchorsAccounts/{spatialAnchorsAccountName}/keys",
-    validator: validate_SpatialAnchorsAccountsRegenerateKeys_594048, base: "",
-    url: url_SpatialAnchorsAccountsRegenerateKeys_594049, schemes: {Scheme.Https})
+    validator: validate_SpatialAnchorsAccountsRegenerateKeys_568281, base: "",
+    url: url_SpatialAnchorsAccountsRegenerateKeys_568282, schemes: {Scheme.Https})
 type
-  Call_SpatialAnchorsAccountsGetKeys_594036 = ref object of OpenApiRestCall_593425
-proc url_SpatialAnchorsAccountsGetKeys_594038(protocol: Scheme; host: string;
+  Call_SpatialAnchorsAccountsGetKeys_568269 = ref object of OpenApiRestCall_567658
+proc url_SpatialAnchorsAccountsGetKeys_568271(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1116,7 +1116,7 @@ proc url_SpatialAnchorsAccountsGetKeys_594038(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SpatialAnchorsAccountsGetKeys_594037(path: JsonNode; query: JsonNode;
+proc validate_SpatialAnchorsAccountsGetKeys_568270(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get Both of the 2 Keys of a Spatial Anchors Account
   ## 
@@ -1132,21 +1132,21 @@ proc validate_SpatialAnchorsAccountsGetKeys_594037(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594039 = path.getOrDefault("resourceGroupName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  var valid_568272 = path.getOrDefault("resourceGroupName")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "resourceGroupName", valid_594039
-  var valid_594040 = path.getOrDefault("subscriptionId")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_568272 != nil:
+    section.add "resourceGroupName", valid_568272
+  var valid_568273 = path.getOrDefault("subscriptionId")
+  valid_568273 = validateParameter(valid_568273, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "subscriptionId", valid_594040
-  var valid_594041 = path.getOrDefault("spatialAnchorsAccountName")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  if valid_568273 != nil:
+    section.add "subscriptionId", valid_568273
+  var valid_568274 = path.getOrDefault("spatialAnchorsAccountName")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "spatialAnchorsAccountName", valid_594041
+  if valid_568274 != nil:
+    section.add "spatialAnchorsAccountName", valid_568274
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1154,11 +1154,11 @@ proc validate_SpatialAnchorsAccountsGetKeys_594037(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594042 = query.getOrDefault("api-version")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  var valid_568275 = query.getOrDefault("api-version")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "api-version", valid_594042
+  if valid_568275 != nil:
+    section.add "api-version", valid_568275
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1167,20 +1167,20 @@ proc validate_SpatialAnchorsAccountsGetKeys_594037(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594043: Call_SpatialAnchorsAccountsGetKeys_594036; path: JsonNode;
+proc call*(call_568276: Call_SpatialAnchorsAccountsGetKeys_568269; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get Both of the 2 Keys of a Spatial Anchors Account
   ## 
-  let valid = call_594043.validator(path, query, header, formData, body)
-  let scheme = call_594043.pickScheme
+  let valid = call_568276.validator(path, query, header, formData, body)
+  let scheme = call_568276.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594043.url(scheme.get, call_594043.host, call_594043.base,
-                         call_594043.route, valid.getOrDefault("path"),
+  let url = call_568276.url(scheme.get, call_568276.host, call_568276.base,
+                         call_568276.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594043, url, valid)
+  result = hook(call_568276, url, valid)
 
-proc call*(call_594044: Call_SpatialAnchorsAccountsGetKeys_594036;
+proc call*(call_568277: Call_SpatialAnchorsAccountsGetKeys_568269;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           spatialAnchorsAccountName: string): Recallable =
   ## spatialAnchorsAccountsGetKeys
@@ -1193,20 +1193,20 @@ proc call*(call_594044: Call_SpatialAnchorsAccountsGetKeys_594036;
   ##                 : Azure subscription ID.
   ##   spatialAnchorsAccountName: string (required)
   ##                            : Name of an Mixed Reality Spatial Anchors Account.
-  var path_594045 = newJObject()
-  var query_594046 = newJObject()
-  add(path_594045, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594046, "api-version", newJString(apiVersion))
-  add(path_594045, "subscriptionId", newJString(subscriptionId))
-  add(path_594045, "spatialAnchorsAccountName",
+  var path_568278 = newJObject()
+  var query_568279 = newJObject()
+  add(path_568278, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568279, "api-version", newJString(apiVersion))
+  add(path_568278, "subscriptionId", newJString(subscriptionId))
+  add(path_568278, "spatialAnchorsAccountName",
       newJString(spatialAnchorsAccountName))
-  result = call_594044.call(path_594045, query_594046, nil, nil, nil)
+  result = call_568277.call(path_568278, query_568279, nil, nil, nil)
 
-var spatialAnchorsAccountsGetKeys* = Call_SpatialAnchorsAccountsGetKeys_594036(
+var spatialAnchorsAccountsGetKeys* = Call_SpatialAnchorsAccountsGetKeys_568269(
     name: "spatialAnchorsAccountsGetKeys", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MixedReality/spatialAnchorsAccounts/{spatialAnchorsAccountName}/keys",
-    validator: validate_SpatialAnchorsAccountsGetKeys_594037, base: "",
-    url: url_SpatialAnchorsAccountsGetKeys_594038, schemes: {Scheme.Https})
+    validator: validate_SpatialAnchorsAccountsGetKeys_568270, base: "",
+    url: url_SpatialAnchorsAccountsGetKeys_568271, schemes: {Scheme.Https})
 export
   rest
 

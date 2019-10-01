@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SearchIndexClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593426 = ref object of OpenApiRestCall
+  OpenApiRestCall_567659 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593426](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567659](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593426): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567659): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "search-searchindex"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DocumentsSearchGet_593648 = ref object of OpenApiRestCall_593426
-proc url_DocumentsSearchGet_593650(protocol: Scheme; host: string; base: string;
+  Call_DocumentsSearchGet_567881 = ref object of OpenApiRestCall_567659
+proc url_DocumentsSearchGet_567883(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DocumentsSearchGet_593649(path: JsonNode; query: JsonNode;
+proc validate_DocumentsSearchGet_567882(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Searches for documents in the Azure Search index.
@@ -159,126 +159,126 @@ proc validate_DocumentsSearchGet_593649(path: JsonNode; query: JsonNode;
   ##   searchFields: JArray
   ##               : The list of field names to which to scope the full-text search. When using fielded search (fieldName:searchExpression) in a full Lucene query, the field names of each fielded search expression take precedence over any field names listed in this parameter.
   section = newJObject()
-  var valid_593810 = query.getOrDefault("$orderby")
-  valid_593810 = validateParameter(valid_593810, JArray, required = false,
+  var valid_568043 = query.getOrDefault("$orderby")
+  valid_568043 = validateParameter(valid_568043, JArray, required = false,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "$orderby", valid_593810
+  if valid_568043 != nil:
+    section.add "$orderby", valid_568043
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593811 = query.getOrDefault("api-version")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  var valid_568044 = query.getOrDefault("api-version")
+  valid_568044 = validateParameter(valid_568044, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "api-version", valid_593811
-  var valid_593812 = query.getOrDefault("scoringProfile")
-  valid_593812 = validateParameter(valid_593812, JString, required = false,
+  if valid_568044 != nil:
+    section.add "api-version", valid_568044
+  var valid_568045 = query.getOrDefault("scoringProfile")
+  valid_568045 = validateParameter(valid_568045, JString, required = false,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "scoringProfile", valid_593812
-  var valid_593813 = query.getOrDefault("minimumCoverage")
-  valid_593813 = validateParameter(valid_593813, JFloat, required = false,
+  if valid_568045 != nil:
+    section.add "scoringProfile", valid_568045
+  var valid_568046 = query.getOrDefault("minimumCoverage")
+  valid_568046 = validateParameter(valid_568046, JFloat, required = false,
                                  default = nil)
-  if valid_593813 != nil:
-    section.add "minimumCoverage", valid_593813
-  var valid_593814 = query.getOrDefault("scoringParameter")
-  valid_593814 = validateParameter(valid_593814, JArray, required = false,
+  if valid_568046 != nil:
+    section.add "minimumCoverage", valid_568046
+  var valid_568047 = query.getOrDefault("scoringParameter")
+  valid_568047 = validateParameter(valid_568047, JArray, required = false,
                                  default = nil)
-  if valid_593814 != nil:
-    section.add "scoringParameter", valid_593814
-  var valid_593815 = query.getOrDefault("$top")
-  valid_593815 = validateParameter(valid_593815, JInt, required = false, default = nil)
-  if valid_593815 != nil:
-    section.add "$top", valid_593815
-  var valid_593816 = query.getOrDefault("highlight")
-  valid_593816 = validateParameter(valid_593816, JArray, required = false,
+  if valid_568047 != nil:
+    section.add "scoringParameter", valid_568047
+  var valid_568048 = query.getOrDefault("$top")
+  valid_568048 = validateParameter(valid_568048, JInt, required = false, default = nil)
+  if valid_568048 != nil:
+    section.add "$top", valid_568048
+  var valid_568049 = query.getOrDefault("highlight")
+  valid_568049 = validateParameter(valid_568049, JArray, required = false,
                                  default = nil)
-  if valid_593816 != nil:
-    section.add "highlight", valid_593816
-  var valid_593817 = query.getOrDefault("$select")
-  valid_593817 = validateParameter(valid_593817, JArray, required = false,
+  if valid_568049 != nil:
+    section.add "highlight", valid_568049
+  var valid_568050 = query.getOrDefault("$select")
+  valid_568050 = validateParameter(valid_568050, JArray, required = false,
                                  default = nil)
-  if valid_593817 != nil:
-    section.add "$select", valid_593817
-  var valid_593818 = query.getOrDefault("highlightPreTag")
-  valid_593818 = validateParameter(valid_593818, JString, required = false,
+  if valid_568050 != nil:
+    section.add "$select", valid_568050
+  var valid_568051 = query.getOrDefault("highlightPreTag")
+  valid_568051 = validateParameter(valid_568051, JString, required = false,
                                  default = nil)
-  if valid_593818 != nil:
-    section.add "highlightPreTag", valid_593818
-  var valid_593819 = query.getOrDefault("$skip")
-  valid_593819 = validateParameter(valid_593819, JInt, required = false, default = nil)
-  if valid_593819 != nil:
-    section.add "$skip", valid_593819
-  var valid_593820 = query.getOrDefault("search")
-  valid_593820 = validateParameter(valid_593820, JString, required = false,
+  if valid_568051 != nil:
+    section.add "highlightPreTag", valid_568051
+  var valid_568052 = query.getOrDefault("$skip")
+  valid_568052 = validateParameter(valid_568052, JInt, required = false, default = nil)
+  if valid_568052 != nil:
+    section.add "$skip", valid_568052
+  var valid_568053 = query.getOrDefault("search")
+  valid_568053 = validateParameter(valid_568053, JString, required = false,
                                  default = nil)
-  if valid_593820 != nil:
-    section.add "search", valid_593820
-  var valid_593821 = query.getOrDefault("$count")
-  valid_593821 = validateParameter(valid_593821, JBool, required = false, default = nil)
-  if valid_593821 != nil:
-    section.add "$count", valid_593821
-  var valid_593835 = query.getOrDefault("queryType")
-  valid_593835 = validateParameter(valid_593835, JString, required = false,
+  if valid_568053 != nil:
+    section.add "search", valid_568053
+  var valid_568054 = query.getOrDefault("$count")
+  valid_568054 = validateParameter(valid_568054, JBool, required = false, default = nil)
+  if valid_568054 != nil:
+    section.add "$count", valid_568054
+  var valid_568068 = query.getOrDefault("queryType")
+  valid_568068 = validateParameter(valid_568068, JString, required = false,
                                  default = newJString("simple"))
-  if valid_593835 != nil:
-    section.add "queryType", valid_593835
-  var valid_593836 = query.getOrDefault("searchMode")
-  valid_593836 = validateParameter(valid_593836, JString, required = false,
+  if valid_568068 != nil:
+    section.add "queryType", valid_568068
+  var valid_568069 = query.getOrDefault("searchMode")
+  valid_568069 = validateParameter(valid_568069, JString, required = false,
                                  default = newJString("any"))
-  if valid_593836 != nil:
-    section.add "searchMode", valid_593836
-  var valid_593837 = query.getOrDefault("$filter")
-  valid_593837 = validateParameter(valid_593837, JString, required = false,
+  if valid_568069 != nil:
+    section.add "searchMode", valid_568069
+  var valid_568070 = query.getOrDefault("$filter")
+  valid_568070 = validateParameter(valid_568070, JString, required = false,
                                  default = nil)
-  if valid_593837 != nil:
-    section.add "$filter", valid_593837
-  var valid_593838 = query.getOrDefault("facet")
-  valid_593838 = validateParameter(valid_593838, JArray, required = false,
+  if valid_568070 != nil:
+    section.add "$filter", valid_568070
+  var valid_568071 = query.getOrDefault("facet")
+  valid_568071 = validateParameter(valid_568071, JArray, required = false,
                                  default = nil)
-  if valid_593838 != nil:
-    section.add "facet", valid_593838
-  var valid_593839 = query.getOrDefault("highlightPostTag")
-  valid_593839 = validateParameter(valid_593839, JString, required = false,
+  if valid_568071 != nil:
+    section.add "facet", valid_568071
+  var valid_568072 = query.getOrDefault("highlightPostTag")
+  valid_568072 = validateParameter(valid_568072, JString, required = false,
                                  default = nil)
-  if valid_593839 != nil:
-    section.add "highlightPostTag", valid_593839
-  var valid_593840 = query.getOrDefault("searchFields")
-  valid_593840 = validateParameter(valid_593840, JArray, required = false,
+  if valid_568072 != nil:
+    section.add "highlightPostTag", valid_568072
+  var valid_568073 = query.getOrDefault("searchFields")
+  valid_568073 = validateParameter(valid_568073, JArray, required = false,
                                  default = nil)
-  if valid_593840 != nil:
-    section.add "searchFields", valid_593840
+  if valid_568073 != nil:
+    section.add "searchFields", valid_568073
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : The tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_593841 = header.getOrDefault("client-request-id")
-  valid_593841 = validateParameter(valid_593841, JString, required = false,
+  var valid_568074 = header.getOrDefault("client-request-id")
+  valid_568074 = validateParameter(valid_568074, JString, required = false,
                                  default = nil)
-  if valid_593841 != nil:
-    section.add "client-request-id", valid_593841
+  if valid_568074 != nil:
+    section.add "client-request-id", valid_568074
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_593864: Call_DocumentsSearchGet_593648; path: JsonNode;
+proc call*(call_568097: Call_DocumentsSearchGet_567881; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Searches for documents in the Azure Search index.
   ## 
   ## https://docs.microsoft.com/rest/api/searchservice/Search-Documents
-  let valid = call_593864.validator(path, query, header, formData, body)
-  let scheme = call_593864.pickScheme
+  let valid = call_568097.validator(path, query, header, formData, body)
+  let scheme = call_568097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593864.url(scheme.get, call_593864.host, call_593864.base,
-                         call_593864.route, valid.getOrDefault("path"),
+  let url = call_568097.url(scheme.get, call_568097.host, call_568097.base,
+                         call_568097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593864, url, valid)
+  result = hook(call_568097, url, valid)
 
-proc call*(call_593935: Call_DocumentsSearchGet_593648; apiVersion: string;
+proc call*(call_568168: Call_DocumentsSearchGet_567881; apiVersion: string;
           Orderby: JsonNode = nil; scoringProfile: string = "";
           minimumCoverage: float = 0.0; scoringParameter: JsonNode = nil; Top: int = 0;
           highlight: JsonNode = nil; Select: JsonNode = nil;
@@ -325,40 +325,40 @@ proc call*(call_593935: Call_DocumentsSearchGet_593648; apiVersion: string;
   ##                   : A string tag that is appended to hit highlights. Must be set with highlightPreTag. Default is &lt;/em&gt;.
   ##   searchFields: JArray
   ##               : The list of field names to which to scope the full-text search. When using fielded search (fieldName:searchExpression) in a full Lucene query, the field names of each fielded search expression take precedence over any field names listed in this parameter.
-  var query_593936 = newJObject()
+  var query_568169 = newJObject()
   if Orderby != nil:
-    query_593936.add "$orderby", Orderby
-  add(query_593936, "api-version", newJString(apiVersion))
-  add(query_593936, "scoringProfile", newJString(scoringProfile))
-  add(query_593936, "minimumCoverage", newJFloat(minimumCoverage))
+    query_568169.add "$orderby", Orderby
+  add(query_568169, "api-version", newJString(apiVersion))
+  add(query_568169, "scoringProfile", newJString(scoringProfile))
+  add(query_568169, "minimumCoverage", newJFloat(minimumCoverage))
   if scoringParameter != nil:
-    query_593936.add "scoringParameter", scoringParameter
-  add(query_593936, "$top", newJInt(Top))
+    query_568169.add "scoringParameter", scoringParameter
+  add(query_568169, "$top", newJInt(Top))
   if highlight != nil:
-    query_593936.add "highlight", highlight
+    query_568169.add "highlight", highlight
   if Select != nil:
-    query_593936.add "$select", Select
-  add(query_593936, "highlightPreTag", newJString(highlightPreTag))
-  add(query_593936, "$skip", newJInt(Skip))
-  add(query_593936, "search", newJString(search))
-  add(query_593936, "$count", newJBool(Count))
-  add(query_593936, "queryType", newJString(queryType))
-  add(query_593936, "searchMode", newJString(searchMode))
-  add(query_593936, "$filter", newJString(Filter))
+    query_568169.add "$select", Select
+  add(query_568169, "highlightPreTag", newJString(highlightPreTag))
+  add(query_568169, "$skip", newJInt(Skip))
+  add(query_568169, "search", newJString(search))
+  add(query_568169, "$count", newJBool(Count))
+  add(query_568169, "queryType", newJString(queryType))
+  add(query_568169, "searchMode", newJString(searchMode))
+  add(query_568169, "$filter", newJString(Filter))
   if facet != nil:
-    query_593936.add "facet", facet
-  add(query_593936, "highlightPostTag", newJString(highlightPostTag))
+    query_568169.add "facet", facet
+  add(query_568169, "highlightPostTag", newJString(highlightPostTag))
   if searchFields != nil:
-    query_593936.add "searchFields", searchFields
-  result = call_593935.call(nil, query_593936, nil, nil, nil)
+    query_568169.add "searchFields", searchFields
+  result = call_568168.call(nil, query_568169, nil, nil, nil)
 
-var documentsSearchGet* = Call_DocumentsSearchGet_593648(
+var documentsSearchGet* = Call_DocumentsSearchGet_567881(
     name: "documentsSearchGet", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/docs", validator: validate_DocumentsSearchGet_593649, base: "",
-    url: url_DocumentsSearchGet_593650, schemes: {Scheme.Https})
+    route: "/docs", validator: validate_DocumentsSearchGet_567882, base: "",
+    url: url_DocumentsSearchGet_567883, schemes: {Scheme.Https})
 type
-  Call_DocumentsGet_593976 = ref object of OpenApiRestCall_593426
-proc url_DocumentsGet_593978(protocol: Scheme; host: string; base: string;
+  Call_DocumentsGet_568209 = ref object of OpenApiRestCall_567659
+proc url_DocumentsGet_568211(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -374,7 +374,7 @@ proc url_DocumentsGet_593978(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DocumentsGet_593977(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DocumentsGet_568210(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves a document from the Azure Search index.
   ## 
@@ -386,11 +386,11 @@ proc validate_DocumentsGet_593977(path: JsonNode; query: JsonNode; header: JsonN
   ##      : The key of the document to retrieve.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `key` field"
-  var valid_593993 = path.getOrDefault("key")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568226 = path.getOrDefault("key")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "key", valid_593993
+  if valid_568226 != nil:
+    section.add "key", valid_568226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -400,47 +400,47 @@ proc validate_DocumentsGet_593977(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568227 = query.getOrDefault("api-version")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
-  var valid_593995 = query.getOrDefault("$select")
-  valid_593995 = validateParameter(valid_593995, JArray, required = false,
+  if valid_568227 != nil:
+    section.add "api-version", valid_568227
+  var valid_568228 = query.getOrDefault("$select")
+  valid_568228 = validateParameter(valid_568228, JArray, required = false,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "$select", valid_593995
+  if valid_568228 != nil:
+    section.add "$select", valid_568228
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : The tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_593996 = header.getOrDefault("client-request-id")
-  valid_593996 = validateParameter(valid_593996, JString, required = false,
+  var valid_568229 = header.getOrDefault("client-request-id")
+  valid_568229 = validateParameter(valid_568229, JString, required = false,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "client-request-id", valid_593996
+  if valid_568229 != nil:
+    section.add "client-request-id", valid_568229
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_DocumentsGet_593976; path: JsonNode; query: JsonNode;
+proc call*(call_568230: Call_DocumentsGet_568209; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves a document from the Azure Search index.
   ## 
   ## https://docs.microsoft.com/rest/api/searchservice/lookup-document
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_DocumentsGet_593976; apiVersion: string; key: string;
+proc call*(call_568231: Call_DocumentsGet_568209; apiVersion: string; key: string;
           Select: JsonNode = nil): Recallable =
   ## documentsGet
   ## Retrieves a document from the Azure Search index.
@@ -451,28 +451,28 @@ proc call*(call_593998: Call_DocumentsGet_593976; apiVersion: string; key: strin
   ##         : List of field names to retrieve for the document; Any field not retrieved will be missing from the returned document.
   ##   key: string (required)
   ##      : The key of the document to retrieve.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  add(query_594000, "api-version", newJString(apiVersion))
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  add(query_568233, "api-version", newJString(apiVersion))
   if Select != nil:
-    query_594000.add "$select", Select
-  add(path_593999, "key", newJString(key))
-  result = call_593998.call(path_593999, query_594000, nil, nil, nil)
+    query_568233.add "$select", Select
+  add(path_568232, "key", newJString(key))
+  result = call_568231.call(path_568232, query_568233, nil, nil, nil)
 
-var documentsGet* = Call_DocumentsGet_593976(name: "documentsGet",
+var documentsGet* = Call_DocumentsGet_568209(name: "documentsGet",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/docs(\'{key}\')",
-    validator: validate_DocumentsGet_593977, base: "", url: url_DocumentsGet_593978,
+    validator: validate_DocumentsGet_568210, base: "", url: url_DocumentsGet_568211,
     schemes: {Scheme.Https})
 type
-  Call_DocumentsCount_594001 = ref object of OpenApiRestCall_593426
-proc url_DocumentsCount_594003(protocol: Scheme; host: string; base: string;
+  Call_DocumentsCount_568234 = ref object of OpenApiRestCall_567659
+proc url_DocumentsCount_568236(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DocumentsCount_594002(path: JsonNode; query: JsonNode;
+proc validate_DocumentsCount_568235(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Queries the number of documents in the Azure Search index.
@@ -488,58 +488,58 @@ proc validate_DocumentsCount_594002(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594004 = query.getOrDefault("api-version")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = query.getOrDefault("api-version")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "api-version", valid_594004
+  if valid_568237 != nil:
+    section.add "api-version", valid_568237
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : The tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_594005 = header.getOrDefault("client-request-id")
-  valid_594005 = validateParameter(valid_594005, JString, required = false,
+  var valid_568238 = header.getOrDefault("client-request-id")
+  valid_568238 = validateParameter(valid_568238, JString, required = false,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "client-request-id", valid_594005
+  if valid_568238 != nil:
+    section.add "client-request-id", valid_568238
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594006: Call_DocumentsCount_594001; path: JsonNode; query: JsonNode;
+proc call*(call_568239: Call_DocumentsCount_568234; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Queries the number of documents in the Azure Search index.
   ## 
   ## https://docs.microsoft.com/rest/api/searchservice/Count-Documents
-  let valid = call_594006.validator(path, query, header, formData, body)
-  let scheme = call_594006.pickScheme
+  let valid = call_568239.validator(path, query, header, formData, body)
+  let scheme = call_568239.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594006.url(scheme.get, call_594006.host, call_594006.base,
-                         call_594006.route, valid.getOrDefault("path"),
+  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
+                         call_568239.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594006, url, valid)
+  result = hook(call_568239, url, valid)
 
-proc call*(call_594007: Call_DocumentsCount_594001; apiVersion: string): Recallable =
+proc call*(call_568240: Call_DocumentsCount_568234; apiVersion: string): Recallable =
   ## documentsCount
   ## Queries the number of documents in the Azure Search index.
   ## https://docs.microsoft.com/rest/api/searchservice/Count-Documents
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_594008 = newJObject()
-  add(query_594008, "api-version", newJString(apiVersion))
-  result = call_594007.call(nil, query_594008, nil, nil, nil)
+  var query_568241 = newJObject()
+  add(query_568241, "api-version", newJString(apiVersion))
+  result = call_568240.call(nil, query_568241, nil, nil, nil)
 
-var documentsCount* = Call_DocumentsCount_594001(name: "documentsCount",
+var documentsCount* = Call_DocumentsCount_568234(name: "documentsCount",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/docs/$count",
-    validator: validate_DocumentsCount_594002, base: "", url: url_DocumentsCount_594003,
+    validator: validate_DocumentsCount_568235, base: "", url: url_DocumentsCount_568236,
     schemes: {Scheme.Https})
 type
-  Call_DocumentsAutocompleteGet_594009 = ref object of OpenApiRestCall_593426
-proc url_DocumentsAutocompleteGet_594011(protocol: Scheme; host: string;
+  Call_DocumentsAutocompleteGet_568242 = ref object of OpenApiRestCall_567659
+proc url_DocumentsAutocompleteGet_568244(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -547,7 +547,7 @@ proc url_DocumentsAutocompleteGet_594011(protocol: Scheme; host: string;
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DocumentsAutocompleteGet_594010(path: JsonNode; query: JsonNode;
+proc validate_DocumentsAutocompleteGet_568243(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Autocompletes incomplete query terms based on input text and matching terms in the Azure Search index.
   ## 
@@ -582,90 +582,90 @@ proc validate_DocumentsAutocompleteGet_594010(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594012 = query.getOrDefault("api-version")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  var valid_568245 = query.getOrDefault("api-version")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "api-version", valid_594012
-  var valid_594013 = query.getOrDefault("minimumCoverage")
-  valid_594013 = validateParameter(valid_594013, JFloat, required = false,
+  if valid_568245 != nil:
+    section.add "api-version", valid_568245
+  var valid_568246 = query.getOrDefault("minimumCoverage")
+  valid_568246 = validateParameter(valid_568246, JFloat, required = false,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "minimumCoverage", valid_594013
-  var valid_594014 = query.getOrDefault("autocompleteMode")
-  valid_594014 = validateParameter(valid_594014, JString, required = false,
+  if valid_568246 != nil:
+    section.add "minimumCoverage", valid_568246
+  var valid_568247 = query.getOrDefault("autocompleteMode")
+  valid_568247 = validateParameter(valid_568247, JString, required = false,
                                  default = newJString("oneTerm"))
-  if valid_594014 != nil:
-    section.add "autocompleteMode", valid_594014
-  var valid_594015 = query.getOrDefault("$top")
-  valid_594015 = validateParameter(valid_594015, JInt, required = false, default = nil)
-  if valid_594015 != nil:
-    section.add "$top", valid_594015
-  var valid_594016 = query.getOrDefault("fuzzy")
-  valid_594016 = validateParameter(valid_594016, JBool, required = false, default = nil)
-  if valid_594016 != nil:
-    section.add "fuzzy", valid_594016
-  var valid_594017 = query.getOrDefault("highlightPreTag")
-  valid_594017 = validateParameter(valid_594017, JString, required = false,
+  if valid_568247 != nil:
+    section.add "autocompleteMode", valid_568247
+  var valid_568248 = query.getOrDefault("$top")
+  valid_568248 = validateParameter(valid_568248, JInt, required = false, default = nil)
+  if valid_568248 != nil:
+    section.add "$top", valid_568248
+  var valid_568249 = query.getOrDefault("fuzzy")
+  valid_568249 = validateParameter(valid_568249, JBool, required = false, default = nil)
+  if valid_568249 != nil:
+    section.add "fuzzy", valid_568249
+  var valid_568250 = query.getOrDefault("highlightPreTag")
+  valid_568250 = validateParameter(valid_568250, JString, required = false,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "highlightPreTag", valid_594017
-  var valid_594018 = query.getOrDefault("search")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  if valid_568250 != nil:
+    section.add "highlightPreTag", valid_568250
+  var valid_568251 = query.getOrDefault("search")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "search", valid_594018
-  var valid_594019 = query.getOrDefault("$filter")
-  valid_594019 = validateParameter(valid_594019, JString, required = false,
+  if valid_568251 != nil:
+    section.add "search", valid_568251
+  var valid_568252 = query.getOrDefault("$filter")
+  valid_568252 = validateParameter(valid_568252, JString, required = false,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "$filter", valid_594019
-  var valid_594020 = query.getOrDefault("highlightPostTag")
-  valid_594020 = validateParameter(valid_594020, JString, required = false,
+  if valid_568252 != nil:
+    section.add "$filter", valid_568252
+  var valid_568253 = query.getOrDefault("highlightPostTag")
+  valid_568253 = validateParameter(valid_568253, JString, required = false,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "highlightPostTag", valid_594020
-  var valid_594021 = query.getOrDefault("suggesterName")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  if valid_568253 != nil:
+    section.add "highlightPostTag", valid_568253
+  var valid_568254 = query.getOrDefault("suggesterName")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "suggesterName", valid_594021
-  var valid_594022 = query.getOrDefault("searchFields")
-  valid_594022 = validateParameter(valid_594022, JArray, required = false,
+  if valid_568254 != nil:
+    section.add "suggesterName", valid_568254
+  var valid_568255 = query.getOrDefault("searchFields")
+  valid_568255 = validateParameter(valid_568255, JArray, required = false,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "searchFields", valid_594022
+  if valid_568255 != nil:
+    section.add "searchFields", valid_568255
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : The tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_594023 = header.getOrDefault("client-request-id")
-  valid_594023 = validateParameter(valid_594023, JString, required = false,
+  var valid_568256 = header.getOrDefault("client-request-id")
+  valid_568256 = validateParameter(valid_568256, JString, required = false,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "client-request-id", valid_594023
+  if valid_568256 != nil:
+    section.add "client-request-id", valid_568256
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594024: Call_DocumentsAutocompleteGet_594009; path: JsonNode;
+proc call*(call_568257: Call_DocumentsAutocompleteGet_568242; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Autocompletes incomplete query terms based on input text and matching terms in the Azure Search index.
   ## 
   ## https://docs.microsoft.com/rest/api/searchservice/autocomplete
-  let valid = call_594024.validator(path, query, header, formData, body)
-  let scheme = call_594024.pickScheme
+  let valid = call_568257.validator(path, query, header, formData, body)
+  let scheme = call_568257.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594024.url(scheme.get, call_594024.host, call_594024.base,
-                         call_594024.route, valid.getOrDefault("path"),
+  let url = call_568257.url(scheme.get, call_568257.host, call_568257.base,
+                         call_568257.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594024, url, valid)
+  result = hook(call_568257, url, valid)
 
-proc call*(call_594025: Call_DocumentsAutocompleteGet_594009; apiVersion: string;
+proc call*(call_568258: Call_DocumentsAutocompleteGet_568242; apiVersion: string;
           search: string; suggesterName: string; minimumCoverage: float = 0.0;
           autocompleteMode: string = "oneTerm"; Top: int = 0; fuzzy: bool = false;
           highlightPreTag: string = ""; Filter: string = "";
@@ -695,36 +695,36 @@ proc call*(call_594025: Call_DocumentsAutocompleteGet_594009; apiVersion: string
   ##                : The name of the suggester as specified in the suggesters collection that's part of the index definition.
   ##   searchFields: JArray
   ##               : The list of field names to consider when querying for auto-completed terms. Target fields must be included in the specified suggester.
-  var query_594026 = newJObject()
-  add(query_594026, "api-version", newJString(apiVersion))
-  add(query_594026, "minimumCoverage", newJFloat(minimumCoverage))
-  add(query_594026, "autocompleteMode", newJString(autocompleteMode))
-  add(query_594026, "$top", newJInt(Top))
-  add(query_594026, "fuzzy", newJBool(fuzzy))
-  add(query_594026, "highlightPreTag", newJString(highlightPreTag))
-  add(query_594026, "search", newJString(search))
-  add(query_594026, "$filter", newJString(Filter))
-  add(query_594026, "highlightPostTag", newJString(highlightPostTag))
-  add(query_594026, "suggesterName", newJString(suggesterName))
+  var query_568259 = newJObject()
+  add(query_568259, "api-version", newJString(apiVersion))
+  add(query_568259, "minimumCoverage", newJFloat(minimumCoverage))
+  add(query_568259, "autocompleteMode", newJString(autocompleteMode))
+  add(query_568259, "$top", newJInt(Top))
+  add(query_568259, "fuzzy", newJBool(fuzzy))
+  add(query_568259, "highlightPreTag", newJString(highlightPreTag))
+  add(query_568259, "search", newJString(search))
+  add(query_568259, "$filter", newJString(Filter))
+  add(query_568259, "highlightPostTag", newJString(highlightPostTag))
+  add(query_568259, "suggesterName", newJString(suggesterName))
   if searchFields != nil:
-    query_594026.add "searchFields", searchFields
-  result = call_594025.call(nil, query_594026, nil, nil, nil)
+    query_568259.add "searchFields", searchFields
+  result = call_568258.call(nil, query_568259, nil, nil, nil)
 
-var documentsAutocompleteGet* = Call_DocumentsAutocompleteGet_594009(
+var documentsAutocompleteGet* = Call_DocumentsAutocompleteGet_568242(
     name: "documentsAutocompleteGet", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/docs/search.autocomplete",
-    validator: validate_DocumentsAutocompleteGet_594010, base: "",
-    url: url_DocumentsAutocompleteGet_594011, schemes: {Scheme.Https})
+    validator: validate_DocumentsAutocompleteGet_568243, base: "",
+    url: url_DocumentsAutocompleteGet_568244, schemes: {Scheme.Https})
 type
-  Call_DocumentsIndex_594027 = ref object of OpenApiRestCall_593426
-proc url_DocumentsIndex_594029(protocol: Scheme; host: string; base: string;
+  Call_DocumentsIndex_568260 = ref object of OpenApiRestCall_567659
+proc url_DocumentsIndex_568262(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DocumentsIndex_594028(path: JsonNode; query: JsonNode;
+proc validate_DocumentsIndex_568261(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Sends a batch of document write actions to the Azure Search index.
@@ -740,21 +740,21 @@ proc validate_DocumentsIndex_594028(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594047 = query.getOrDefault("api-version")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  var valid_568280 = query.getOrDefault("api-version")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "api-version", valid_594047
+  if valid_568280 != nil:
+    section.add "api-version", valid_568280
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : The tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_594048 = header.getOrDefault("client-request-id")
-  valid_594048 = validateParameter(valid_594048, JString, required = false,
+  var valid_568281 = header.getOrDefault("client-request-id")
+  valid_568281 = validateParameter(valid_568281, JString, required = false,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "client-request-id", valid_594048
+  if valid_568281 != nil:
+    section.add "client-request-id", valid_568281
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -766,21 +766,21 @@ proc validate_DocumentsIndex_594028(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594050: Call_DocumentsIndex_594027; path: JsonNode; query: JsonNode;
+proc call*(call_568283: Call_DocumentsIndex_568260; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Sends a batch of document write actions to the Azure Search index.
   ## 
   ## https://docs.microsoft.com/rest/api/searchservice/addupdate-or-delete-documents
-  let valid = call_594050.validator(path, query, header, formData, body)
-  let scheme = call_594050.pickScheme
+  let valid = call_568283.validator(path, query, header, formData, body)
+  let scheme = call_568283.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594050.url(scheme.get, call_594050.host, call_594050.base,
-                         call_594050.route, valid.getOrDefault("path"),
+  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
+                         call_568283.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594050, url, valid)
+  result = hook(call_568283, url, valid)
 
-proc call*(call_594051: Call_DocumentsIndex_594027; apiVersion: string;
+proc call*(call_568284: Call_DocumentsIndex_568260; apiVersion: string;
           batch: JsonNode): Recallable =
   ## documentsIndex
   ## Sends a batch of document write actions to the Azure Search index.
@@ -789,27 +789,27 @@ proc call*(call_594051: Call_DocumentsIndex_594027; apiVersion: string;
   ##             : Client Api Version.
   ##   batch: JObject (required)
   ##        : The batch of index actions.
-  var query_594052 = newJObject()
-  var body_594053 = newJObject()
-  add(query_594052, "api-version", newJString(apiVersion))
+  var query_568285 = newJObject()
+  var body_568286 = newJObject()
+  add(query_568285, "api-version", newJString(apiVersion))
   if batch != nil:
-    body_594053 = batch
-  result = call_594051.call(nil, query_594052, nil, nil, body_594053)
+    body_568286 = batch
+  result = call_568284.call(nil, query_568285, nil, nil, body_568286)
 
-var documentsIndex* = Call_DocumentsIndex_594027(name: "documentsIndex",
+var documentsIndex* = Call_DocumentsIndex_568260(name: "documentsIndex",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/docs/search.index",
-    validator: validate_DocumentsIndex_594028, base: "", url: url_DocumentsIndex_594029,
+    validator: validate_DocumentsIndex_568261, base: "", url: url_DocumentsIndex_568262,
     schemes: {Scheme.Https})
 type
-  Call_DocumentsAutocompletePost_594054 = ref object of OpenApiRestCall_593426
-proc url_DocumentsAutocompletePost_594056(protocol: Scheme; host: string;
+  Call_DocumentsAutocompletePost_568287 = ref object of OpenApiRestCall_567659
+proc url_DocumentsAutocompletePost_568289(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DocumentsAutocompletePost_594055(path: JsonNode; query: JsonNode;
+proc validate_DocumentsAutocompletePost_568288(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Autocompletes incomplete query terms based on input text and matching terms in the Azure Search index.
   ## 
@@ -824,21 +824,21 @@ proc validate_DocumentsAutocompletePost_594055(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594057 = query.getOrDefault("api-version")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  var valid_568290 = query.getOrDefault("api-version")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "api-version", valid_594057
+  if valid_568290 != nil:
+    section.add "api-version", valid_568290
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : The tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_594058 = header.getOrDefault("client-request-id")
-  valid_594058 = validateParameter(valid_594058, JString, required = false,
+  var valid_568291 = header.getOrDefault("client-request-id")
+  valid_568291 = validateParameter(valid_568291, JString, required = false,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "client-request-id", valid_594058
+  if valid_568291 != nil:
+    section.add "client-request-id", valid_568291
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -850,21 +850,21 @@ proc validate_DocumentsAutocompletePost_594055(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594060: Call_DocumentsAutocompletePost_594054; path: JsonNode;
+proc call*(call_568293: Call_DocumentsAutocompletePost_568287; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Autocompletes incomplete query terms based on input text and matching terms in the Azure Search index.
   ## 
   ## https://docs.microsoft.com/rest/api/searchservice/autocomplete
-  let valid = call_594060.validator(path, query, header, formData, body)
-  let scheme = call_594060.pickScheme
+  let valid = call_568293.validator(path, query, header, formData, body)
+  let scheme = call_568293.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594060.url(scheme.get, call_594060.host, call_594060.base,
-                         call_594060.route, valid.getOrDefault("path"),
+  let url = call_568293.url(scheme.get, call_568293.host, call_568293.base,
+                         call_568293.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594060, url, valid)
+  result = hook(call_568293, url, valid)
 
-proc call*(call_594061: Call_DocumentsAutocompletePost_594054; apiVersion: string;
+proc call*(call_568294: Call_DocumentsAutocompletePost_568287; apiVersion: string;
           autocompleteRequest: JsonNode): Recallable =
   ## documentsAutocompletePost
   ## Autocompletes incomplete query terms based on input text and matching terms in the Azure Search index.
@@ -873,28 +873,28 @@ proc call*(call_594061: Call_DocumentsAutocompletePost_594054; apiVersion: strin
   ##             : Client Api Version.
   ##   autocompleteRequest: JObject (required)
   ##                      : The definition of the Autocomplete request.
-  var query_594062 = newJObject()
-  var body_594063 = newJObject()
-  add(query_594062, "api-version", newJString(apiVersion))
+  var query_568295 = newJObject()
+  var body_568296 = newJObject()
+  add(query_568295, "api-version", newJString(apiVersion))
   if autocompleteRequest != nil:
-    body_594063 = autocompleteRequest
-  result = call_594061.call(nil, query_594062, nil, nil, body_594063)
+    body_568296 = autocompleteRequest
+  result = call_568294.call(nil, query_568295, nil, nil, body_568296)
 
-var documentsAutocompletePost* = Call_DocumentsAutocompletePost_594054(
+var documentsAutocompletePost* = Call_DocumentsAutocompletePost_568287(
     name: "documentsAutocompletePost", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/docs/search.post.autocomplete",
-    validator: validate_DocumentsAutocompletePost_594055, base: "",
-    url: url_DocumentsAutocompletePost_594056, schemes: {Scheme.Https})
+    validator: validate_DocumentsAutocompletePost_568288, base: "",
+    url: url_DocumentsAutocompletePost_568289, schemes: {Scheme.Https})
 type
-  Call_DocumentsSearchPost_594064 = ref object of OpenApiRestCall_593426
-proc url_DocumentsSearchPost_594066(protocol: Scheme; host: string; base: string;
+  Call_DocumentsSearchPost_568297 = ref object of OpenApiRestCall_567659
+proc url_DocumentsSearchPost_568299(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DocumentsSearchPost_594065(path: JsonNode; query: JsonNode;
+proc validate_DocumentsSearchPost_568298(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Searches for documents in the Azure Search index.
@@ -910,21 +910,21 @@ proc validate_DocumentsSearchPost_594065(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594067 = query.getOrDefault("api-version")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  var valid_568300 = query.getOrDefault("api-version")
+  valid_568300 = validateParameter(valid_568300, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "api-version", valid_594067
+  if valid_568300 != nil:
+    section.add "api-version", valid_568300
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : The tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_594068 = header.getOrDefault("client-request-id")
-  valid_594068 = validateParameter(valid_594068, JString, required = false,
+  var valid_568301 = header.getOrDefault("client-request-id")
+  valid_568301 = validateParameter(valid_568301, JString, required = false,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "client-request-id", valid_594068
+  if valid_568301 != nil:
+    section.add "client-request-id", valid_568301
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -936,21 +936,21 @@ proc validate_DocumentsSearchPost_594065(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594070: Call_DocumentsSearchPost_594064; path: JsonNode;
+proc call*(call_568303: Call_DocumentsSearchPost_568297; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Searches for documents in the Azure Search index.
   ## 
   ## https://docs.microsoft.com/rest/api/searchservice/Search-Documents
-  let valid = call_594070.validator(path, query, header, formData, body)
-  let scheme = call_594070.pickScheme
+  let valid = call_568303.validator(path, query, header, formData, body)
+  let scheme = call_568303.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594070.url(scheme.get, call_594070.host, call_594070.base,
-                         call_594070.route, valid.getOrDefault("path"),
+  let url = call_568303.url(scheme.get, call_568303.host, call_568303.base,
+                         call_568303.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594070, url, valid)
+  result = hook(call_568303, url, valid)
 
-proc call*(call_594071: Call_DocumentsSearchPost_594064; apiVersion: string;
+proc call*(call_568304: Call_DocumentsSearchPost_568297; apiVersion: string;
           searchRequest: JsonNode): Recallable =
   ## documentsSearchPost
   ## Searches for documents in the Azure Search index.
@@ -959,27 +959,27 @@ proc call*(call_594071: Call_DocumentsSearchPost_594064; apiVersion: string;
   ##             : Client Api Version.
   ##   searchRequest: JObject (required)
   ##                : The definition of the Search request.
-  var query_594072 = newJObject()
-  var body_594073 = newJObject()
-  add(query_594072, "api-version", newJString(apiVersion))
+  var query_568305 = newJObject()
+  var body_568306 = newJObject()
+  add(query_568305, "api-version", newJString(apiVersion))
   if searchRequest != nil:
-    body_594073 = searchRequest
-  result = call_594071.call(nil, query_594072, nil, nil, body_594073)
+    body_568306 = searchRequest
+  result = call_568304.call(nil, query_568305, nil, nil, body_568306)
 
-var documentsSearchPost* = Call_DocumentsSearchPost_594064(
+var documentsSearchPost* = Call_DocumentsSearchPost_568297(
     name: "documentsSearchPost", meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/docs/search.post.search", validator: validate_DocumentsSearchPost_594065,
-    base: "", url: url_DocumentsSearchPost_594066, schemes: {Scheme.Https})
+    route: "/docs/search.post.search", validator: validate_DocumentsSearchPost_568298,
+    base: "", url: url_DocumentsSearchPost_568299, schemes: {Scheme.Https})
 type
-  Call_DocumentsSuggestPost_594074 = ref object of OpenApiRestCall_593426
-proc url_DocumentsSuggestPost_594076(protocol: Scheme; host: string; base: string;
+  Call_DocumentsSuggestPost_568307 = ref object of OpenApiRestCall_567659
+proc url_DocumentsSuggestPost_568309(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DocumentsSuggestPost_594075(path: JsonNode; query: JsonNode;
+proc validate_DocumentsSuggestPost_568308(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Suggests documents in the Azure Search index that match the given partial query text.
   ## 
@@ -994,21 +994,21 @@ proc validate_DocumentsSuggestPost_594075(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594077 = query.getOrDefault("api-version")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  var valid_568310 = query.getOrDefault("api-version")
+  valid_568310 = validateParameter(valid_568310, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "api-version", valid_594077
+  if valid_568310 != nil:
+    section.add "api-version", valid_568310
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : The tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_594078 = header.getOrDefault("client-request-id")
-  valid_594078 = validateParameter(valid_594078, JString, required = false,
+  var valid_568311 = header.getOrDefault("client-request-id")
+  valid_568311 = validateParameter(valid_568311, JString, required = false,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "client-request-id", valid_594078
+  if valid_568311 != nil:
+    section.add "client-request-id", valid_568311
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1020,21 +1020,21 @@ proc validate_DocumentsSuggestPost_594075(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594080: Call_DocumentsSuggestPost_594074; path: JsonNode;
+proc call*(call_568313: Call_DocumentsSuggestPost_568307; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Suggests documents in the Azure Search index that match the given partial query text.
   ## 
   ## https://docs.microsoft.com/rest/api/searchservice/suggestions
-  let valid = call_594080.validator(path, query, header, formData, body)
-  let scheme = call_594080.pickScheme
+  let valid = call_568313.validator(path, query, header, formData, body)
+  let scheme = call_568313.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594080.url(scheme.get, call_594080.host, call_594080.base,
-                         call_594080.route, valid.getOrDefault("path"),
+  let url = call_568313.url(scheme.get, call_568313.host, call_568313.base,
+                         call_568313.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594080, url, valid)
+  result = hook(call_568313, url, valid)
 
-proc call*(call_594081: Call_DocumentsSuggestPost_594074; apiVersion: string;
+proc call*(call_568314: Call_DocumentsSuggestPost_568307; apiVersion: string;
           suggestRequest: JsonNode): Recallable =
   ## documentsSuggestPost
   ## Suggests documents in the Azure Search index that match the given partial query text.
@@ -1043,27 +1043,27 @@ proc call*(call_594081: Call_DocumentsSuggestPost_594074; apiVersion: string;
   ##             : Client Api Version.
   ##   suggestRequest: JObject (required)
   ##                 : The Suggest request.
-  var query_594082 = newJObject()
-  var body_594083 = newJObject()
-  add(query_594082, "api-version", newJString(apiVersion))
+  var query_568315 = newJObject()
+  var body_568316 = newJObject()
+  add(query_568315, "api-version", newJString(apiVersion))
   if suggestRequest != nil:
-    body_594083 = suggestRequest
-  result = call_594081.call(nil, query_594082, nil, nil, body_594083)
+    body_568316 = suggestRequest
+  result = call_568314.call(nil, query_568315, nil, nil, body_568316)
 
-var documentsSuggestPost* = Call_DocumentsSuggestPost_594074(
+var documentsSuggestPost* = Call_DocumentsSuggestPost_568307(
     name: "documentsSuggestPost", meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/docs/search.post.suggest", validator: validate_DocumentsSuggestPost_594075,
-    base: "", url: url_DocumentsSuggestPost_594076, schemes: {Scheme.Https})
+    route: "/docs/search.post.suggest", validator: validate_DocumentsSuggestPost_568308,
+    base: "", url: url_DocumentsSuggestPost_568309, schemes: {Scheme.Https})
 type
-  Call_DocumentsSuggestGet_594084 = ref object of OpenApiRestCall_593426
-proc url_DocumentsSuggestGet_594086(protocol: Scheme; host: string; base: string;
+  Call_DocumentsSuggestGet_568317 = ref object of OpenApiRestCall_567659
+proc url_DocumentsSuggestGet_568319(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DocumentsSuggestGet_594085(path: JsonNode; query: JsonNode;
+proc validate_DocumentsSuggestGet_568318(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Suggests documents in the Azure Search index that match the given partial query text.
@@ -1099,97 +1099,97 @@ proc validate_DocumentsSuggestGet_594085(path: JsonNode; query: JsonNode;
   ##   searchFields: JArray
   ##               : The list of field names to search for the specified search text. Target fields must be included in the specified suggester.
   section = newJObject()
-  var valid_594087 = query.getOrDefault("$orderby")
-  valid_594087 = validateParameter(valid_594087, JArray, required = false,
+  var valid_568320 = query.getOrDefault("$orderby")
+  valid_568320 = validateParameter(valid_568320, JArray, required = false,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "$orderby", valid_594087
+  if valid_568320 != nil:
+    section.add "$orderby", valid_568320
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594088 = query.getOrDefault("api-version")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  var valid_568321 = query.getOrDefault("api-version")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "api-version", valid_594088
-  var valid_594089 = query.getOrDefault("minimumCoverage")
-  valid_594089 = validateParameter(valid_594089, JFloat, required = false,
+  if valid_568321 != nil:
+    section.add "api-version", valid_568321
+  var valid_568322 = query.getOrDefault("minimumCoverage")
+  valid_568322 = validateParameter(valid_568322, JFloat, required = false,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "minimumCoverage", valid_594089
-  var valid_594090 = query.getOrDefault("$top")
-  valid_594090 = validateParameter(valid_594090, JInt, required = false, default = nil)
-  if valid_594090 != nil:
-    section.add "$top", valid_594090
-  var valid_594091 = query.getOrDefault("$select")
-  valid_594091 = validateParameter(valid_594091, JArray, required = false,
+  if valid_568322 != nil:
+    section.add "minimumCoverage", valid_568322
+  var valid_568323 = query.getOrDefault("$top")
+  valid_568323 = validateParameter(valid_568323, JInt, required = false, default = nil)
+  if valid_568323 != nil:
+    section.add "$top", valid_568323
+  var valid_568324 = query.getOrDefault("$select")
+  valid_568324 = validateParameter(valid_568324, JArray, required = false,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "$select", valid_594091
-  var valid_594092 = query.getOrDefault("fuzzy")
-  valid_594092 = validateParameter(valid_594092, JBool, required = false, default = nil)
-  if valid_594092 != nil:
-    section.add "fuzzy", valid_594092
-  var valid_594093 = query.getOrDefault("highlightPreTag")
-  valid_594093 = validateParameter(valid_594093, JString, required = false,
+  if valid_568324 != nil:
+    section.add "$select", valid_568324
+  var valid_568325 = query.getOrDefault("fuzzy")
+  valid_568325 = validateParameter(valid_568325, JBool, required = false, default = nil)
+  if valid_568325 != nil:
+    section.add "fuzzy", valid_568325
+  var valid_568326 = query.getOrDefault("highlightPreTag")
+  valid_568326 = validateParameter(valid_568326, JString, required = false,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "highlightPreTag", valid_594093
-  var valid_594094 = query.getOrDefault("search")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  if valid_568326 != nil:
+    section.add "highlightPreTag", valid_568326
+  var valid_568327 = query.getOrDefault("search")
+  valid_568327 = validateParameter(valid_568327, JString, required = true,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "search", valid_594094
-  var valid_594095 = query.getOrDefault("$filter")
-  valid_594095 = validateParameter(valid_594095, JString, required = false,
+  if valid_568327 != nil:
+    section.add "search", valid_568327
+  var valid_568328 = query.getOrDefault("$filter")
+  valid_568328 = validateParameter(valid_568328, JString, required = false,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "$filter", valid_594095
-  var valid_594096 = query.getOrDefault("highlightPostTag")
-  valid_594096 = validateParameter(valid_594096, JString, required = false,
+  if valid_568328 != nil:
+    section.add "$filter", valid_568328
+  var valid_568329 = query.getOrDefault("highlightPostTag")
+  valid_568329 = validateParameter(valid_568329, JString, required = false,
                                  default = nil)
-  if valid_594096 != nil:
-    section.add "highlightPostTag", valid_594096
-  var valid_594097 = query.getOrDefault("suggesterName")
-  valid_594097 = validateParameter(valid_594097, JString, required = true,
+  if valid_568329 != nil:
+    section.add "highlightPostTag", valid_568329
+  var valid_568330 = query.getOrDefault("suggesterName")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "suggesterName", valid_594097
-  var valid_594098 = query.getOrDefault("searchFields")
-  valid_594098 = validateParameter(valid_594098, JArray, required = false,
+  if valid_568330 != nil:
+    section.add "suggesterName", valid_568330
+  var valid_568331 = query.getOrDefault("searchFields")
+  valid_568331 = validateParameter(valid_568331, JArray, required = false,
                                  default = nil)
-  if valid_594098 != nil:
-    section.add "searchFields", valid_594098
+  if valid_568331 != nil:
+    section.add "searchFields", valid_568331
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : The tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_594099 = header.getOrDefault("client-request-id")
-  valid_594099 = validateParameter(valid_594099, JString, required = false,
+  var valid_568332 = header.getOrDefault("client-request-id")
+  valid_568332 = validateParameter(valid_568332, JString, required = false,
                                  default = nil)
-  if valid_594099 != nil:
-    section.add "client-request-id", valid_594099
+  if valid_568332 != nil:
+    section.add "client-request-id", valid_568332
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594100: Call_DocumentsSuggestGet_594084; path: JsonNode;
+proc call*(call_568333: Call_DocumentsSuggestGet_568317; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Suggests documents in the Azure Search index that match the given partial query text.
   ## 
   ## https://docs.microsoft.com/rest/api/searchservice/suggestions
-  let valid = call_594100.validator(path, query, header, formData, body)
-  let scheme = call_594100.pickScheme
+  let valid = call_568333.validator(path, query, header, formData, body)
+  let scheme = call_568333.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594100.url(scheme.get, call_594100.host, call_594100.base,
-                         call_594100.route, valid.getOrDefault("path"),
+  let url = call_568333.url(scheme.get, call_568333.host, call_568333.base,
+                         call_568333.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594100, url, valid)
+  result = hook(call_568333, url, valid)
 
-proc call*(call_594101: Call_DocumentsSuggestGet_594084; apiVersion: string;
+proc call*(call_568334: Call_DocumentsSuggestGet_568317; apiVersion: string;
           search: string; suggesterName: string; Orderby: JsonNode = nil;
           minimumCoverage: float = 0.0; Top: int = 0; Select: JsonNode = nil;
           fuzzy: bool = false; highlightPreTag: string = ""; Filter: string = "";
@@ -1221,28 +1221,28 @@ proc call*(call_594101: Call_DocumentsSuggestGet_594084; apiVersion: string;
   ##                : The name of the suggester as specified in the suggesters collection that's part of the index definition.
   ##   searchFields: JArray
   ##               : The list of field names to search for the specified search text. Target fields must be included in the specified suggester.
-  var query_594102 = newJObject()
+  var query_568335 = newJObject()
   if Orderby != nil:
-    query_594102.add "$orderby", Orderby
-  add(query_594102, "api-version", newJString(apiVersion))
-  add(query_594102, "minimumCoverage", newJFloat(minimumCoverage))
-  add(query_594102, "$top", newJInt(Top))
+    query_568335.add "$orderby", Orderby
+  add(query_568335, "api-version", newJString(apiVersion))
+  add(query_568335, "minimumCoverage", newJFloat(minimumCoverage))
+  add(query_568335, "$top", newJInt(Top))
   if Select != nil:
-    query_594102.add "$select", Select
-  add(query_594102, "fuzzy", newJBool(fuzzy))
-  add(query_594102, "highlightPreTag", newJString(highlightPreTag))
-  add(query_594102, "search", newJString(search))
-  add(query_594102, "$filter", newJString(Filter))
-  add(query_594102, "highlightPostTag", newJString(highlightPostTag))
-  add(query_594102, "suggesterName", newJString(suggesterName))
+    query_568335.add "$select", Select
+  add(query_568335, "fuzzy", newJBool(fuzzy))
+  add(query_568335, "highlightPreTag", newJString(highlightPreTag))
+  add(query_568335, "search", newJString(search))
+  add(query_568335, "$filter", newJString(Filter))
+  add(query_568335, "highlightPostTag", newJString(highlightPostTag))
+  add(query_568335, "suggesterName", newJString(suggesterName))
   if searchFields != nil:
-    query_594102.add "searchFields", searchFields
-  result = call_594101.call(nil, query_594102, nil, nil, nil)
+    query_568335.add "searchFields", searchFields
+  result = call_568334.call(nil, query_568335, nil, nil, nil)
 
-var documentsSuggestGet* = Call_DocumentsSuggestGet_594084(
+var documentsSuggestGet* = Call_DocumentsSuggestGet_568317(
     name: "documentsSuggestGet", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/docs/search.suggest", validator: validate_DocumentsSuggestGet_594085,
-    base: "", url: url_DocumentsSuggestGet_594086, schemes: {Scheme.Https})
+    route: "/docs/search.suggest", validator: validate_DocumentsSuggestGet_568318,
+    base: "", url: url_DocumentsSuggestGet_568319, schemes: {Scheme.Https})
 export
   rest
 

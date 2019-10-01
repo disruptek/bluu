@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: PolicyClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "resources-policyAssignments"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_PolicyAssignmentsList_593646 = ref object of OpenApiRestCall_593424
-proc url_PolicyAssignmentsList_593648(protocol: Scheme; host: string; base: string;
+  Call_PolicyAssignmentsList_567879 = ref object of OpenApiRestCall_567657
+proc url_PolicyAssignmentsList_567881(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_PolicyAssignmentsList_593648(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyAssignmentsList_593647(path: JsonNode; query: JsonNode;
+proc validate_PolicyAssignmentsList_567880(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the policy assignments for a subscription.
   ## 
@@ -133,11 +133,11 @@ proc validate_PolicyAssignmentsList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593822 = path.getOrDefault("subscriptionId")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = path.getOrDefault("subscriptionId")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "subscriptionId", valid_593822
+  if valid_568055 != nil:
+    section.add "subscriptionId", valid_568055
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -147,16 +147,16 @@ proc validate_PolicyAssignmentsList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593823 = query.getOrDefault("api-version")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_568056 = query.getOrDefault("api-version")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "api-version", valid_593823
-  var valid_593824 = query.getOrDefault("$filter")
-  valid_593824 = validateParameter(valid_593824, JString, required = false,
+  if valid_568056 != nil:
+    section.add "api-version", valid_568056
+  var valid_568057 = query.getOrDefault("$filter")
+  valid_568057 = validateParameter(valid_568057, JString, required = false,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "$filter", valid_593824
+  if valid_568057 != nil:
+    section.add "$filter", valid_568057
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -165,20 +165,20 @@ proc validate_PolicyAssignmentsList_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593847: Call_PolicyAssignmentsList_593646; path: JsonNode;
+proc call*(call_568080: Call_PolicyAssignmentsList_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the policy assignments for a subscription.
   ## 
-  let valid = call_593847.validator(path, query, header, formData, body)
-  let scheme = call_593847.pickScheme
+  let valid = call_568080.validator(path, query, header, formData, body)
+  let scheme = call_568080.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593847.url(scheme.get, call_593847.host, call_593847.base,
-                         call_593847.route, valid.getOrDefault("path"),
+  let url = call_568080.url(scheme.get, call_568080.host, call_568080.base,
+                         call_568080.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593847, url, valid)
+  result = hook(call_568080, url, valid)
 
-proc call*(call_593918: Call_PolicyAssignmentsList_593646; apiVersion: string;
+proc call*(call_568151: Call_PolicyAssignmentsList_567879; apiVersion: string;
           subscriptionId: string; Filter: string = ""): Recallable =
   ## policyAssignmentsList
   ## Gets all the policy assignments for a subscription.
@@ -188,21 +188,21 @@ proc call*(call_593918: Call_PolicyAssignmentsList_593646; apiVersion: string;
   ##                 : The ID of the target subscription.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_593919 = newJObject()
-  var query_593921 = newJObject()
-  add(query_593921, "api-version", newJString(apiVersion))
-  add(path_593919, "subscriptionId", newJString(subscriptionId))
-  add(query_593921, "$filter", newJString(Filter))
-  result = call_593918.call(path_593919, query_593921, nil, nil, nil)
+  var path_568152 = newJObject()
+  var query_568154 = newJObject()
+  add(query_568154, "api-version", newJString(apiVersion))
+  add(path_568152, "subscriptionId", newJString(subscriptionId))
+  add(query_568154, "$filter", newJString(Filter))
+  result = call_568151.call(path_568152, query_568154, nil, nil, nil)
 
-var policyAssignmentsList* = Call_PolicyAssignmentsList_593646(
+var policyAssignmentsList* = Call_PolicyAssignmentsList_567879(
     name: "policyAssignmentsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments",
-    validator: validate_PolicyAssignmentsList_593647, base: "",
-    url: url_PolicyAssignmentsList_593648, schemes: {Scheme.Https})
+    validator: validate_PolicyAssignmentsList_567880, base: "",
+    url: url_PolicyAssignmentsList_567881, schemes: {Scheme.Https})
 type
-  Call_PolicyAssignmentsListForResourceGroup_593960 = ref object of OpenApiRestCall_593424
-proc url_PolicyAssignmentsListForResourceGroup_593962(protocol: Scheme;
+  Call_PolicyAssignmentsListForResourceGroup_568193 = ref object of OpenApiRestCall_567657
+proc url_PolicyAssignmentsListForResourceGroup_568195(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -223,7 +223,7 @@ proc url_PolicyAssignmentsListForResourceGroup_593962(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyAssignmentsListForResourceGroup_593961(path: JsonNode;
+proc validate_PolicyAssignmentsListForResourceGroup_568194(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets policy assignments for the resource group.
   ## 
@@ -237,16 +237,16 @@ proc validate_PolicyAssignmentsListForResourceGroup_593961(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593963 = path.getOrDefault("resourceGroupName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = path.getOrDefault("resourceGroupName")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "resourceGroupName", valid_593963
-  var valid_593964 = path.getOrDefault("subscriptionId")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_568196 != nil:
+    section.add "resourceGroupName", valid_568196
+  var valid_568197 = path.getOrDefault("subscriptionId")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "subscriptionId", valid_593964
+  if valid_568197 != nil:
+    section.add "subscriptionId", valid_568197
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -256,16 +256,16 @@ proc validate_PolicyAssignmentsListForResourceGroup_593961(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593965 = query.getOrDefault("api-version")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_568198 = query.getOrDefault("api-version")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "api-version", valid_593965
-  var valid_593966 = query.getOrDefault("$filter")
-  valid_593966 = validateParameter(valid_593966, JString, required = false,
+  if valid_568198 != nil:
+    section.add "api-version", valid_568198
+  var valid_568199 = query.getOrDefault("$filter")
+  valid_568199 = validateParameter(valid_568199, JString, required = false,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "$filter", valid_593966
+  if valid_568199 != nil:
+    section.add "$filter", valid_568199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -274,21 +274,21 @@ proc validate_PolicyAssignmentsListForResourceGroup_593961(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593967: Call_PolicyAssignmentsListForResourceGroup_593960;
+proc call*(call_568200: Call_PolicyAssignmentsListForResourceGroup_568193;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets policy assignments for the resource group.
   ## 
-  let valid = call_593967.validator(path, query, header, formData, body)
-  let scheme = call_593967.pickScheme
+  let valid = call_568200.validator(path, query, header, formData, body)
+  let scheme = call_568200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593967.url(scheme.get, call_593967.host, call_593967.base,
-                         call_593967.route, valid.getOrDefault("path"),
+  let url = call_568200.url(scheme.get, call_568200.host, call_568200.base,
+                         call_568200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593967, url, valid)
+  result = hook(call_568200, url, valid)
 
-proc call*(call_593968: Call_PolicyAssignmentsListForResourceGroup_593960;
+proc call*(call_568201: Call_PolicyAssignmentsListForResourceGroup_568193;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           Filter: string = ""): Recallable =
   ## policyAssignmentsListForResourceGroup
@@ -301,22 +301,22 @@ proc call*(call_593968: Call_PolicyAssignmentsListForResourceGroup_593960;
   ##                 : The ID of the target subscription.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_593969 = newJObject()
-  var query_593970 = newJObject()
-  add(path_593969, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593970, "api-version", newJString(apiVersion))
-  add(path_593969, "subscriptionId", newJString(subscriptionId))
-  add(query_593970, "$filter", newJString(Filter))
-  result = call_593968.call(path_593969, query_593970, nil, nil, nil)
+  var path_568202 = newJObject()
+  var query_568203 = newJObject()
+  add(path_568202, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568203, "api-version", newJString(apiVersion))
+  add(path_568202, "subscriptionId", newJString(subscriptionId))
+  add(query_568203, "$filter", newJString(Filter))
+  result = call_568201.call(path_568202, query_568203, nil, nil, nil)
 
-var policyAssignmentsListForResourceGroup* = Call_PolicyAssignmentsListForResourceGroup_593960(
+var policyAssignmentsListForResourceGroup* = Call_PolicyAssignmentsListForResourceGroup_568193(
     name: "policyAssignmentsListForResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Authorization/policyAssignments",
-    validator: validate_PolicyAssignmentsListForResourceGroup_593961, base: "",
-    url: url_PolicyAssignmentsListForResourceGroup_593962, schemes: {Scheme.Https})
+    validator: validate_PolicyAssignmentsListForResourceGroup_568194, base: "",
+    url: url_PolicyAssignmentsListForResourceGroup_568195, schemes: {Scheme.Https})
 type
-  Call_PolicyAssignmentsListForResource_593971 = ref object of OpenApiRestCall_593424
-proc url_PolicyAssignmentsListForResource_593973(protocol: Scheme; host: string;
+  Call_PolicyAssignmentsListForResource_568204 = ref object of OpenApiRestCall_567657
+proc url_PolicyAssignmentsListForResource_568206(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -351,7 +351,7 @@ proc url_PolicyAssignmentsListForResource_593973(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyAssignmentsListForResource_593972(path: JsonNode;
+proc validate_PolicyAssignmentsListForResource_568205(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets policy assignments for a resource.
   ## 
@@ -373,36 +373,36 @@ proc validate_PolicyAssignmentsListForResource_593972(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceType` field"
-  var valid_593974 = path.getOrDefault("resourceType")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_568207 = path.getOrDefault("resourceType")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "resourceType", valid_593974
-  var valid_593975 = path.getOrDefault("resourceGroupName")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  if valid_568207 != nil:
+    section.add "resourceType", valid_568207
+  var valid_568208 = path.getOrDefault("resourceGroupName")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "resourceGroupName", valid_593975
-  var valid_593976 = path.getOrDefault("subscriptionId")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  if valid_568208 != nil:
+    section.add "resourceGroupName", valid_568208
+  var valid_568209 = path.getOrDefault("subscriptionId")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "subscriptionId", valid_593976
-  var valid_593977 = path.getOrDefault("resourceName")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_568209 != nil:
+    section.add "subscriptionId", valid_568209
+  var valid_568210 = path.getOrDefault("resourceName")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "resourceName", valid_593977
-  var valid_593978 = path.getOrDefault("resourceProviderNamespace")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  if valid_568210 != nil:
+    section.add "resourceName", valid_568210
+  var valid_568211 = path.getOrDefault("resourceProviderNamespace")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "resourceProviderNamespace", valid_593978
-  var valid_593979 = path.getOrDefault("parentResourcePath")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_568211 != nil:
+    section.add "resourceProviderNamespace", valid_568211
+  var valid_568212 = path.getOrDefault("parentResourcePath")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "parentResourcePath", valid_593979
+  if valid_568212 != nil:
+    section.add "parentResourcePath", valid_568212
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -412,16 +412,16 @@ proc validate_PolicyAssignmentsListForResource_593972(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593980 = query.getOrDefault("api-version")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_568213 = query.getOrDefault("api-version")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "api-version", valid_593980
-  var valid_593981 = query.getOrDefault("$filter")
-  valid_593981 = validateParameter(valid_593981, JString, required = false,
+  if valid_568213 != nil:
+    section.add "api-version", valid_568213
+  var valid_568214 = query.getOrDefault("$filter")
+  valid_568214 = validateParameter(valid_568214, JString, required = false,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "$filter", valid_593981
+  if valid_568214 != nil:
+    section.add "$filter", valid_568214
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -430,21 +430,21 @@ proc validate_PolicyAssignmentsListForResource_593972(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593982: Call_PolicyAssignmentsListForResource_593971;
+proc call*(call_568215: Call_PolicyAssignmentsListForResource_568204;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets policy assignments for a resource.
   ## 
-  let valid = call_593982.validator(path, query, header, formData, body)
-  let scheme = call_593982.pickScheme
+  let valid = call_568215.validator(path, query, header, formData, body)
+  let scheme = call_568215.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593982.url(scheme.get, call_593982.host, call_593982.base,
-                         call_593982.route, valid.getOrDefault("path"),
+  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
+                         call_568215.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593982, url, valid)
+  result = hook(call_568215, url, valid)
 
-proc call*(call_593983: Call_PolicyAssignmentsListForResource_593971;
+proc call*(call_568216: Call_PolicyAssignmentsListForResource_568204;
           resourceType: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; resourceName: string;
           resourceProviderNamespace: string; parentResourcePath: string;
@@ -467,27 +467,27 @@ proc call*(call_593983: Call_PolicyAssignmentsListForResource_593971;
   ##                     : The parent resource path.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_593984 = newJObject()
-  var query_593985 = newJObject()
-  add(path_593984, "resourceType", newJString(resourceType))
-  add(path_593984, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593985, "api-version", newJString(apiVersion))
-  add(path_593984, "subscriptionId", newJString(subscriptionId))
-  add(path_593984, "resourceName", newJString(resourceName))
-  add(path_593984, "resourceProviderNamespace",
+  var path_568217 = newJObject()
+  var query_568218 = newJObject()
+  add(path_568217, "resourceType", newJString(resourceType))
+  add(path_568217, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568218, "api-version", newJString(apiVersion))
+  add(path_568217, "subscriptionId", newJString(subscriptionId))
+  add(path_568217, "resourceName", newJString(resourceName))
+  add(path_568217, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  add(path_593984, "parentResourcePath", newJString(parentResourcePath))
-  add(query_593985, "$filter", newJString(Filter))
-  result = call_593983.call(path_593984, query_593985, nil, nil, nil)
+  add(path_568217, "parentResourcePath", newJString(parentResourcePath))
+  add(query_568218, "$filter", newJString(Filter))
+  result = call_568216.call(path_568217, query_568218, nil, nil, nil)
 
-var policyAssignmentsListForResource* = Call_PolicyAssignmentsListForResource_593971(
+var policyAssignmentsListForResource* = Call_PolicyAssignmentsListForResource_568204(
     name: "policyAssignmentsListForResource", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/providers/Microsoft.Authorization/policyAssignments",
-    validator: validate_PolicyAssignmentsListForResource_593972, base: "",
-    url: url_PolicyAssignmentsListForResource_593973, schemes: {Scheme.Https})
+    validator: validate_PolicyAssignmentsListForResource_568205, base: "",
+    url: url_PolicyAssignmentsListForResource_568206, schemes: {Scheme.Https})
 type
-  Call_PolicyAssignmentsCreateById_593995 = ref object of OpenApiRestCall_593424
-proc url_PolicyAssignmentsCreateById_593997(protocol: Scheme; host: string;
+  Call_PolicyAssignmentsCreateById_568228 = ref object of OpenApiRestCall_567657
+proc url_PolicyAssignmentsCreateById_568230(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -503,7 +503,7 @@ proc url_PolicyAssignmentsCreateById_593997(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyAssignmentsCreateById_593996(path: JsonNode; query: JsonNode;
+proc validate_PolicyAssignmentsCreateById_568229(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Policy assignments are inherited by child resources. For example, when you apply a policy to a resource group that policy is assigned to all resources in the group. When providing a scope for the assignment, use '/subscriptions/{subscription-id}/' for subscriptions, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for resource groups, and '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider-namespace}/{resource-type}/{resource-name}' for resources.
   ## 
@@ -516,11 +516,11 @@ proc validate_PolicyAssignmentsCreateById_593996(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `policyAssignmentId` field"
-  var valid_594015 = path.getOrDefault("policyAssignmentId")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_568248 = path.getOrDefault("policyAssignmentId")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "policyAssignmentId", valid_594015
+  if valid_568248 != nil:
+    section.add "policyAssignmentId", valid_568248
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -528,11 +528,11 @@ proc validate_PolicyAssignmentsCreateById_593996(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594016 = query.getOrDefault("api-version")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_568249 = query.getOrDefault("api-version")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "api-version", valid_594016
+  if valid_568249 != nil:
+    section.add "api-version", valid_568249
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -546,20 +546,20 @@ proc validate_PolicyAssignmentsCreateById_593996(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_PolicyAssignmentsCreateById_593995; path: JsonNode;
+proc call*(call_568251: Call_PolicyAssignmentsCreateById_568228; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Policy assignments are inherited by child resources. For example, when you apply a policy to a resource group that policy is assigned to all resources in the group. When providing a scope for the assignment, use '/subscriptions/{subscription-id}/' for subscriptions, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for resource groups, and '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider-namespace}/{resource-type}/{resource-name}' for resources.
   ## 
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_568251.validator(path, query, header, formData, body)
+  let scheme = call_568251.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_568251.url(scheme.get, call_568251.host, call_568251.base,
+                         call_568251.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_568251, url, valid)
 
-proc call*(call_594019: Call_PolicyAssignmentsCreateById_593995;
+proc call*(call_568252: Call_PolicyAssignmentsCreateById_568228;
           apiVersion: string; parameters: JsonNode; policyAssignmentId: string): Recallable =
   ## policyAssignmentsCreateById
   ## Policy assignments are inherited by child resources. For example, when you apply a policy to a resource group that policy is assigned to all resources in the group. When providing a scope for the assignment, use '/subscriptions/{subscription-id}/' for subscriptions, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for resource groups, and '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider-namespace}/{resource-type}/{resource-name}' for resources.
@@ -570,23 +570,23 @@ proc call*(call_594019: Call_PolicyAssignmentsCreateById_593995;
   ##   policyAssignmentId: string (required)
   ##                     : The ID of the policy assignment to create. Use the format 
   ## '/{scope}/providers/Microsoft.Authorization/policyAssignments/{policy-assignment-name}'.
-  var path_594020 = newJObject()
-  var query_594021 = newJObject()
-  var body_594022 = newJObject()
-  add(query_594021, "api-version", newJString(apiVersion))
+  var path_568253 = newJObject()
+  var query_568254 = newJObject()
+  var body_568255 = newJObject()
+  add(query_568254, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_594022 = parameters
-  add(path_594020, "policyAssignmentId", newJString(policyAssignmentId))
-  result = call_594019.call(path_594020, query_594021, nil, nil, body_594022)
+    body_568255 = parameters
+  add(path_568253, "policyAssignmentId", newJString(policyAssignmentId))
+  result = call_568252.call(path_568253, query_568254, nil, nil, body_568255)
 
-var policyAssignmentsCreateById* = Call_PolicyAssignmentsCreateById_593995(
+var policyAssignmentsCreateById* = Call_PolicyAssignmentsCreateById_568228(
     name: "policyAssignmentsCreateById", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{policyAssignmentId}",
-    validator: validate_PolicyAssignmentsCreateById_593996, base: "",
-    url: url_PolicyAssignmentsCreateById_593997, schemes: {Scheme.Https})
+    validator: validate_PolicyAssignmentsCreateById_568229, base: "",
+    url: url_PolicyAssignmentsCreateById_568230, schemes: {Scheme.Https})
 type
-  Call_PolicyAssignmentsGetById_593986 = ref object of OpenApiRestCall_593424
-proc url_PolicyAssignmentsGetById_593988(protocol: Scheme; host: string;
+  Call_PolicyAssignmentsGetById_568219 = ref object of OpenApiRestCall_567657
+proc url_PolicyAssignmentsGetById_568221(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -603,7 +603,7 @@ proc url_PolicyAssignmentsGetById_593988(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyAssignmentsGetById_593987(path: JsonNode; query: JsonNode;
+proc validate_PolicyAssignmentsGetById_568220(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## When providing a scope for the assignment, use '/subscriptions/{subscription-id}/' for subscriptions, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for resource groups, and '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider-namespace}/{resource-type}/{resource-name}' for resources.
   ## 
@@ -616,11 +616,11 @@ proc validate_PolicyAssignmentsGetById_593987(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `policyAssignmentId` field"
-  var valid_593989 = path.getOrDefault("policyAssignmentId")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  var valid_568222 = path.getOrDefault("policyAssignmentId")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "policyAssignmentId", valid_593989
+  if valid_568222 != nil:
+    section.add "policyAssignmentId", valid_568222
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -628,11 +628,11 @@ proc validate_PolicyAssignmentsGetById_593987(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593990 = query.getOrDefault("api-version")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568223 = query.getOrDefault("api-version")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "api-version", valid_593990
+  if valid_568223 != nil:
+    section.add "api-version", valid_568223
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -641,20 +641,20 @@ proc validate_PolicyAssignmentsGetById_593987(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593991: Call_PolicyAssignmentsGetById_593986; path: JsonNode;
+proc call*(call_568224: Call_PolicyAssignmentsGetById_568219; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## When providing a scope for the assignment, use '/subscriptions/{subscription-id}/' for subscriptions, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for resource groups, and '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider-namespace}/{resource-type}/{resource-name}' for resources.
   ## 
-  let valid = call_593991.validator(path, query, header, formData, body)
-  let scheme = call_593991.pickScheme
+  let valid = call_568224.validator(path, query, header, formData, body)
+  let scheme = call_568224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593991.url(scheme.get, call_593991.host, call_593991.base,
-                         call_593991.route, valid.getOrDefault("path"),
+  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
+                         call_568224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593991, url, valid)
+  result = hook(call_568224, url, valid)
 
-proc call*(call_593992: Call_PolicyAssignmentsGetById_593986; apiVersion: string;
+proc call*(call_568225: Call_PolicyAssignmentsGetById_568219; apiVersion: string;
           policyAssignmentId: string): Recallable =
   ## policyAssignmentsGetById
   ## When providing a scope for the assignment, use '/subscriptions/{subscription-id}/' for subscriptions, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for resource groups, and '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider-namespace}/{resource-type}/{resource-name}' for resources.
@@ -663,20 +663,20 @@ proc call*(call_593992: Call_PolicyAssignmentsGetById_593986; apiVersion: string
   ##   policyAssignmentId: string (required)
   ##                     : The ID of the policy assignment to get. Use the format 
   ## '/{scope}/providers/Microsoft.Authorization/policyAssignments/{policy-assignment-name}'.
-  var path_593993 = newJObject()
-  var query_593994 = newJObject()
-  add(query_593994, "api-version", newJString(apiVersion))
-  add(path_593993, "policyAssignmentId", newJString(policyAssignmentId))
-  result = call_593992.call(path_593993, query_593994, nil, nil, nil)
+  var path_568226 = newJObject()
+  var query_568227 = newJObject()
+  add(query_568227, "api-version", newJString(apiVersion))
+  add(path_568226, "policyAssignmentId", newJString(policyAssignmentId))
+  result = call_568225.call(path_568226, query_568227, nil, nil, nil)
 
-var policyAssignmentsGetById* = Call_PolicyAssignmentsGetById_593986(
+var policyAssignmentsGetById* = Call_PolicyAssignmentsGetById_568219(
     name: "policyAssignmentsGetById", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{policyAssignmentId}",
-    validator: validate_PolicyAssignmentsGetById_593987, base: "",
-    url: url_PolicyAssignmentsGetById_593988, schemes: {Scheme.Https})
+    validator: validate_PolicyAssignmentsGetById_568220, base: "",
+    url: url_PolicyAssignmentsGetById_568221, schemes: {Scheme.Https})
 type
-  Call_PolicyAssignmentsDeleteById_594023 = ref object of OpenApiRestCall_593424
-proc url_PolicyAssignmentsDeleteById_594025(protocol: Scheme; host: string;
+  Call_PolicyAssignmentsDeleteById_568256 = ref object of OpenApiRestCall_567657
+proc url_PolicyAssignmentsDeleteById_568258(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -692,7 +692,7 @@ proc url_PolicyAssignmentsDeleteById_594025(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyAssignmentsDeleteById_594024(path: JsonNode; query: JsonNode;
+proc validate_PolicyAssignmentsDeleteById_568257(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## When providing a scope for the assignment, use '/subscriptions/{subscription-id}/' for subscriptions, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for resource groups, and '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider-namespace}/{resource-type}/{resource-name}' for resources.
   ## 
@@ -705,11 +705,11 @@ proc validate_PolicyAssignmentsDeleteById_594024(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `policyAssignmentId` field"
-  var valid_594026 = path.getOrDefault("policyAssignmentId")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_568259 = path.getOrDefault("policyAssignmentId")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "policyAssignmentId", valid_594026
+  if valid_568259 != nil:
+    section.add "policyAssignmentId", valid_568259
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -717,11 +717,11 @@ proc validate_PolicyAssignmentsDeleteById_594024(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594027 = query.getOrDefault("api-version")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  var valid_568260 = query.getOrDefault("api-version")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "api-version", valid_594027
+  if valid_568260 != nil:
+    section.add "api-version", valid_568260
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -730,20 +730,20 @@ proc validate_PolicyAssignmentsDeleteById_594024(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594028: Call_PolicyAssignmentsDeleteById_594023; path: JsonNode;
+proc call*(call_568261: Call_PolicyAssignmentsDeleteById_568256; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## When providing a scope for the assignment, use '/subscriptions/{subscription-id}/' for subscriptions, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for resource groups, and '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider-namespace}/{resource-type}/{resource-name}' for resources.
   ## 
-  let valid = call_594028.validator(path, query, header, formData, body)
-  let scheme = call_594028.pickScheme
+  let valid = call_568261.validator(path, query, header, formData, body)
+  let scheme = call_568261.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594028.url(scheme.get, call_594028.host, call_594028.base,
-                         call_594028.route, valid.getOrDefault("path"),
+  let url = call_568261.url(scheme.get, call_568261.host, call_568261.base,
+                         call_568261.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594028, url, valid)
+  result = hook(call_568261, url, valid)
 
-proc call*(call_594029: Call_PolicyAssignmentsDeleteById_594023;
+proc call*(call_568262: Call_PolicyAssignmentsDeleteById_568256;
           apiVersion: string; policyAssignmentId: string): Recallable =
   ## policyAssignmentsDeleteById
   ## When providing a scope for the assignment, use '/subscriptions/{subscription-id}/' for subscriptions, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for resource groups, and '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider-namespace}/{resource-type}/{resource-name}' for resources.
@@ -752,20 +752,20 @@ proc call*(call_594029: Call_PolicyAssignmentsDeleteById_594023;
   ##   policyAssignmentId: string (required)
   ##                     : The ID of the policy assignment to delete. Use the format 
   ## '/{scope}/providers/Microsoft.Authorization/policyAssignments/{policy-assignment-name}'.
-  var path_594030 = newJObject()
-  var query_594031 = newJObject()
-  add(query_594031, "api-version", newJString(apiVersion))
-  add(path_594030, "policyAssignmentId", newJString(policyAssignmentId))
-  result = call_594029.call(path_594030, query_594031, nil, nil, nil)
+  var path_568263 = newJObject()
+  var query_568264 = newJObject()
+  add(query_568264, "api-version", newJString(apiVersion))
+  add(path_568263, "policyAssignmentId", newJString(policyAssignmentId))
+  result = call_568262.call(path_568263, query_568264, nil, nil, nil)
 
-var policyAssignmentsDeleteById* = Call_PolicyAssignmentsDeleteById_594023(
+var policyAssignmentsDeleteById* = Call_PolicyAssignmentsDeleteById_568256(
     name: "policyAssignmentsDeleteById", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/{policyAssignmentId}",
-    validator: validate_PolicyAssignmentsDeleteById_594024, base: "",
-    url: url_PolicyAssignmentsDeleteById_594025, schemes: {Scheme.Https})
+    validator: validate_PolicyAssignmentsDeleteById_568257, base: "",
+    url: url_PolicyAssignmentsDeleteById_568258, schemes: {Scheme.Https})
 type
-  Call_PolicyAssignmentsCreate_594042 = ref object of OpenApiRestCall_593424
-proc url_PolicyAssignmentsCreate_594044(protocol: Scheme; host: string; base: string;
+  Call_PolicyAssignmentsCreate_568275 = ref object of OpenApiRestCall_567657
+proc url_PolicyAssignmentsCreate_568277(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -785,7 +785,7 @@ proc url_PolicyAssignmentsCreate_594044(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyAssignmentsCreate_594043(path: JsonNode; query: JsonNode;
+proc validate_PolicyAssignmentsCreate_568276(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Policy assignments are inherited by child resources. For example, when you apply a policy to a resource group that policy is assigned to all resources in the group.
   ## 
@@ -798,16 +798,16 @@ proc validate_PolicyAssignmentsCreate_594043(path: JsonNode; query: JsonNode;
   ##        : The scope of the policy assignment.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `policyAssignmentName` field"
-  var valid_594045 = path.getOrDefault("policyAssignmentName")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  var valid_568278 = path.getOrDefault("policyAssignmentName")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "policyAssignmentName", valid_594045
-  var valid_594046 = path.getOrDefault("scope")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  if valid_568278 != nil:
+    section.add "policyAssignmentName", valid_568278
+  var valid_568279 = path.getOrDefault("scope")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "scope", valid_594046
+  if valid_568279 != nil:
+    section.add "scope", valid_568279
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -815,11 +815,11 @@ proc validate_PolicyAssignmentsCreate_594043(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594047 = query.getOrDefault("api-version")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  var valid_568280 = query.getOrDefault("api-version")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "api-version", valid_594047
+  if valid_568280 != nil:
+    section.add "api-version", valid_568280
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -833,20 +833,20 @@ proc validate_PolicyAssignmentsCreate_594043(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594049: Call_PolicyAssignmentsCreate_594042; path: JsonNode;
+proc call*(call_568282: Call_PolicyAssignmentsCreate_568275; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Policy assignments are inherited by child resources. For example, when you apply a policy to a resource group that policy is assigned to all resources in the group.
   ## 
-  let valid = call_594049.validator(path, query, header, formData, body)
-  let scheme = call_594049.pickScheme
+  let valid = call_568282.validator(path, query, header, formData, body)
+  let scheme = call_568282.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594049.url(scheme.get, call_594049.host, call_594049.base,
-                         call_594049.route, valid.getOrDefault("path"),
+  let url = call_568282.url(scheme.get, call_568282.host, call_568282.base,
+                         call_568282.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594049, url, valid)
+  result = hook(call_568282, url, valid)
 
-proc call*(call_594050: Call_PolicyAssignmentsCreate_594042; apiVersion: string;
+proc call*(call_568283: Call_PolicyAssignmentsCreate_568275; apiVersion: string;
           policyAssignmentName: string; parameters: JsonNode; scope: string): Recallable =
   ## policyAssignmentsCreate
   ## Policy assignments are inherited by child resources. For example, when you apply a policy to a resource group that policy is assigned to all resources in the group.
@@ -858,24 +858,24 @@ proc call*(call_594050: Call_PolicyAssignmentsCreate_594042; apiVersion: string;
   ##             : Parameters for the policy assignment.
   ##   scope: string (required)
   ##        : The scope of the policy assignment.
-  var path_594051 = newJObject()
-  var query_594052 = newJObject()
-  var body_594053 = newJObject()
-  add(query_594052, "api-version", newJString(apiVersion))
-  add(path_594051, "policyAssignmentName", newJString(policyAssignmentName))
+  var path_568284 = newJObject()
+  var query_568285 = newJObject()
+  var body_568286 = newJObject()
+  add(query_568285, "api-version", newJString(apiVersion))
+  add(path_568284, "policyAssignmentName", newJString(policyAssignmentName))
   if parameters != nil:
-    body_594053 = parameters
-  add(path_594051, "scope", newJString(scope))
-  result = call_594050.call(path_594051, query_594052, nil, nil, body_594053)
+    body_568286 = parameters
+  add(path_568284, "scope", newJString(scope))
+  result = call_568283.call(path_568284, query_568285, nil, nil, body_568286)
 
-var policyAssignmentsCreate* = Call_PolicyAssignmentsCreate_594042(
+var policyAssignmentsCreate* = Call_PolicyAssignmentsCreate_568275(
     name: "policyAssignmentsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Authorization/policyAssignments/{policyAssignmentName}",
-    validator: validate_PolicyAssignmentsCreate_594043, base: "",
-    url: url_PolicyAssignmentsCreate_594044, schemes: {Scheme.Https})
+    validator: validate_PolicyAssignmentsCreate_568276, base: "",
+    url: url_PolicyAssignmentsCreate_568277, schemes: {Scheme.Https})
 type
-  Call_PolicyAssignmentsGet_594032 = ref object of OpenApiRestCall_593424
-proc url_PolicyAssignmentsGet_594034(protocol: Scheme; host: string; base: string;
+  Call_PolicyAssignmentsGet_568265 = ref object of OpenApiRestCall_567657
+proc url_PolicyAssignmentsGet_568267(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -894,7 +894,7 @@ proc url_PolicyAssignmentsGet_594034(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyAssignmentsGet_594033(path: JsonNode; query: JsonNode;
+proc validate_PolicyAssignmentsGet_568266(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a policy assignment.
   ## 
@@ -907,16 +907,16 @@ proc validate_PolicyAssignmentsGet_594033(path: JsonNode; query: JsonNode;
   ##        : The scope of the policy assignment.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `policyAssignmentName` field"
-  var valid_594035 = path.getOrDefault("policyAssignmentName")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  var valid_568268 = path.getOrDefault("policyAssignmentName")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "policyAssignmentName", valid_594035
-  var valid_594036 = path.getOrDefault("scope")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  if valid_568268 != nil:
+    section.add "policyAssignmentName", valid_568268
+  var valid_568269 = path.getOrDefault("scope")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "scope", valid_594036
+  if valid_568269 != nil:
+    section.add "scope", valid_568269
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -924,11 +924,11 @@ proc validate_PolicyAssignmentsGet_594033(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594037 = query.getOrDefault("api-version")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  var valid_568270 = query.getOrDefault("api-version")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "api-version", valid_594037
+  if valid_568270 != nil:
+    section.add "api-version", valid_568270
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -937,20 +937,20 @@ proc validate_PolicyAssignmentsGet_594033(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594038: Call_PolicyAssignmentsGet_594032; path: JsonNode;
+proc call*(call_568271: Call_PolicyAssignmentsGet_568265; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a policy assignment.
   ## 
-  let valid = call_594038.validator(path, query, header, formData, body)
-  let scheme = call_594038.pickScheme
+  let valid = call_568271.validator(path, query, header, formData, body)
+  let scheme = call_568271.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594038.url(scheme.get, call_594038.host, call_594038.base,
-                         call_594038.route, valid.getOrDefault("path"),
+  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
+                         call_568271.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594038, url, valid)
+  result = hook(call_568271, url, valid)
 
-proc call*(call_594039: Call_PolicyAssignmentsGet_594032; apiVersion: string;
+proc call*(call_568272: Call_PolicyAssignmentsGet_568265; apiVersion: string;
           policyAssignmentName: string; scope: string): Recallable =
   ## policyAssignmentsGet
   ## Gets a policy assignment.
@@ -960,21 +960,21 @@ proc call*(call_594039: Call_PolicyAssignmentsGet_594032; apiVersion: string;
   ##                       : The name of the policy assignment to get.
   ##   scope: string (required)
   ##        : The scope of the policy assignment.
-  var path_594040 = newJObject()
-  var query_594041 = newJObject()
-  add(query_594041, "api-version", newJString(apiVersion))
-  add(path_594040, "policyAssignmentName", newJString(policyAssignmentName))
-  add(path_594040, "scope", newJString(scope))
-  result = call_594039.call(path_594040, query_594041, nil, nil, nil)
+  var path_568273 = newJObject()
+  var query_568274 = newJObject()
+  add(query_568274, "api-version", newJString(apiVersion))
+  add(path_568273, "policyAssignmentName", newJString(policyAssignmentName))
+  add(path_568273, "scope", newJString(scope))
+  result = call_568272.call(path_568273, query_568274, nil, nil, nil)
 
-var policyAssignmentsGet* = Call_PolicyAssignmentsGet_594032(
+var policyAssignmentsGet* = Call_PolicyAssignmentsGet_568265(
     name: "policyAssignmentsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Authorization/policyAssignments/{policyAssignmentName}",
-    validator: validate_PolicyAssignmentsGet_594033, base: "",
-    url: url_PolicyAssignmentsGet_594034, schemes: {Scheme.Https})
+    validator: validate_PolicyAssignmentsGet_568266, base: "",
+    url: url_PolicyAssignmentsGet_568267, schemes: {Scheme.Https})
 type
-  Call_PolicyAssignmentsDelete_594054 = ref object of OpenApiRestCall_593424
-proc url_PolicyAssignmentsDelete_594056(protocol: Scheme; host: string; base: string;
+  Call_PolicyAssignmentsDelete_568287 = ref object of OpenApiRestCall_567657
+proc url_PolicyAssignmentsDelete_568289(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -994,7 +994,7 @@ proc url_PolicyAssignmentsDelete_594056(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyAssignmentsDelete_594055(path: JsonNode; query: JsonNode;
+proc validate_PolicyAssignmentsDelete_568288(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a policy assignment.
   ## 
@@ -1007,16 +1007,16 @@ proc validate_PolicyAssignmentsDelete_594055(path: JsonNode; query: JsonNode;
   ##        : The scope of the policy assignment.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `policyAssignmentName` field"
-  var valid_594057 = path.getOrDefault("policyAssignmentName")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  var valid_568290 = path.getOrDefault("policyAssignmentName")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "policyAssignmentName", valid_594057
-  var valid_594058 = path.getOrDefault("scope")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  if valid_568290 != nil:
+    section.add "policyAssignmentName", valid_568290
+  var valid_568291 = path.getOrDefault("scope")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "scope", valid_594058
+  if valid_568291 != nil:
+    section.add "scope", valid_568291
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1024,11 +1024,11 @@ proc validate_PolicyAssignmentsDelete_594055(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594059 = query.getOrDefault("api-version")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  var valid_568292 = query.getOrDefault("api-version")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "api-version", valid_594059
+  if valid_568292 != nil:
+    section.add "api-version", valid_568292
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1037,20 +1037,20 @@ proc validate_PolicyAssignmentsDelete_594055(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594060: Call_PolicyAssignmentsDelete_594054; path: JsonNode;
+proc call*(call_568293: Call_PolicyAssignmentsDelete_568287; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a policy assignment.
   ## 
-  let valid = call_594060.validator(path, query, header, formData, body)
-  let scheme = call_594060.pickScheme
+  let valid = call_568293.validator(path, query, header, formData, body)
+  let scheme = call_568293.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594060.url(scheme.get, call_594060.host, call_594060.base,
-                         call_594060.route, valid.getOrDefault("path"),
+  let url = call_568293.url(scheme.get, call_568293.host, call_568293.base,
+                         call_568293.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594060, url, valid)
+  result = hook(call_568293, url, valid)
 
-proc call*(call_594061: Call_PolicyAssignmentsDelete_594054; apiVersion: string;
+proc call*(call_568294: Call_PolicyAssignmentsDelete_568287; apiVersion: string;
           policyAssignmentName: string; scope: string): Recallable =
   ## policyAssignmentsDelete
   ## Deletes a policy assignment.
@@ -1060,18 +1060,18 @@ proc call*(call_594061: Call_PolicyAssignmentsDelete_594054; apiVersion: string;
   ##                       : The name of the policy assignment to delete.
   ##   scope: string (required)
   ##        : The scope of the policy assignment.
-  var path_594062 = newJObject()
-  var query_594063 = newJObject()
-  add(query_594063, "api-version", newJString(apiVersion))
-  add(path_594062, "policyAssignmentName", newJString(policyAssignmentName))
-  add(path_594062, "scope", newJString(scope))
-  result = call_594061.call(path_594062, query_594063, nil, nil, nil)
+  var path_568295 = newJObject()
+  var query_568296 = newJObject()
+  add(query_568296, "api-version", newJString(apiVersion))
+  add(path_568295, "policyAssignmentName", newJString(policyAssignmentName))
+  add(path_568295, "scope", newJString(scope))
+  result = call_568294.call(path_568295, query_568296, nil, nil, nil)
 
-var policyAssignmentsDelete* = Call_PolicyAssignmentsDelete_594054(
+var policyAssignmentsDelete* = Call_PolicyAssignmentsDelete_568287(
     name: "policyAssignmentsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Authorization/policyAssignments/{policyAssignmentName}",
-    validator: validate_PolicyAssignmentsDelete_594055, base: "",
-    url: url_PolicyAssignmentsDelete_594056, schemes: {Scheme.Https})
+    validator: validate_PolicyAssignmentsDelete_568288, base: "",
+    url: url_PolicyAssignmentsDelete_568289, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: AzureBridgeAdminClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_582441 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_582441](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_582441): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-Activation"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ActivationsList_593630 = ref object of OpenApiRestCall_593408
-proc url_ActivationsList_593632(protocol: Scheme; host: string; base: string;
+  Call_ActivationsList_582663 = ref object of OpenApiRestCall_582441
+proc url_ActivationsList_582665(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +124,7 @@ proc url_ActivationsList_593632(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivationsList_593631(path: JsonNode; query: JsonNode;
+proc validate_ActivationsList_582664(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Returns the list of activations.
@@ -139,16 +139,16 @@ proc validate_ActivationsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593792 = path.getOrDefault("subscriptionId")
-  valid_593792 = validateParameter(valid_593792, JString, required = true,
+  var valid_582825 = path.getOrDefault("subscriptionId")
+  valid_582825 = validateParameter(valid_582825, JString, required = true,
                                  default = nil)
-  if valid_593792 != nil:
-    section.add "subscriptionId", valid_593792
-  var valid_593793 = path.getOrDefault("resourceGroup")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  if valid_582825 != nil:
+    section.add "subscriptionId", valid_582825
+  var valid_582826 = path.getOrDefault("resourceGroup")
+  valid_582826 = validateParameter(valid_582826, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "resourceGroup", valid_593793
+  if valid_582826 != nil:
+    section.add "resourceGroup", valid_582826
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -156,11 +156,11 @@ proc validate_ActivationsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_582840 = query.getOrDefault("api-version")
+  valid_582840 = validateParameter(valid_582840, JString, required = true,
                                  default = newJString("2016-01-01"))
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_582840 != nil:
+    section.add "api-version", valid_582840
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -169,20 +169,20 @@ proc validate_ActivationsList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593834: Call_ActivationsList_593630; path: JsonNode; query: JsonNode;
+proc call*(call_582867: Call_ActivationsList_582663; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of activations.
   ## 
-  let valid = call_593834.validator(path, query, header, formData, body)
-  let scheme = call_593834.pickScheme
+  let valid = call_582867.validator(path, query, header, formData, body)
+  let scheme = call_582867.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593834.url(scheme.get, call_593834.host, call_593834.base,
-                         call_593834.route, valid.getOrDefault("path"),
+  let url = call_582867.url(scheme.get, call_582867.host, call_582867.base,
+                         call_582867.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593834, url, valid)
+  result = hook(call_582867, url, valid)
 
-proc call*(call_593905: Call_ActivationsList_593630; subscriptionId: string;
+proc call*(call_582938: Call_ActivationsList_582663; subscriptionId: string;
           resourceGroup: string; apiVersion: string = "2016-01-01"): Recallable =
   ## activationsList
   ## Returns the list of activations.
@@ -192,20 +192,20 @@ proc call*(call_593905: Call_ActivationsList_593630; subscriptionId: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   resourceGroup: string (required)
   ##                : The resource group the resource is located under.
-  var path_593906 = newJObject()
-  var query_593908 = newJObject()
-  add(query_593908, "api-version", newJString(apiVersion))
-  add(path_593906, "subscriptionId", newJString(subscriptionId))
-  add(path_593906, "resourceGroup", newJString(resourceGroup))
-  result = call_593905.call(path_593906, query_593908, nil, nil, nil)
+  var path_582939 = newJObject()
+  var query_582941 = newJObject()
+  add(query_582941, "api-version", newJString(apiVersion))
+  add(path_582939, "subscriptionId", newJString(subscriptionId))
+  add(path_582939, "resourceGroup", newJString(resourceGroup))
+  result = call_582938.call(path_582939, query_582941, nil, nil, nil)
 
-var activationsList* = Call_ActivationsList_593630(name: "activationsList",
+var activationsList* = Call_ActivationsList_582663(name: "activationsList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.AzureBridge.Admin/activations",
-    validator: validate_ActivationsList_593631, base: "", url: url_ActivationsList_593632,
+    validator: validate_ActivationsList_582664, base: "", url: url_ActivationsList_582665,
     schemes: {Scheme.Https})
 type
-  Call_ActivationsCreateOrUpdate_593958 = ref object of OpenApiRestCall_593408
-proc url_ActivationsCreateOrUpdate_593960(protocol: Scheme; host: string;
+  Call_ActivationsCreateOrUpdate_582991 = ref object of OpenApiRestCall_582441
+proc url_ActivationsCreateOrUpdate_582993(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -227,7 +227,7 @@ proc url_ActivationsCreateOrUpdate_593960(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivationsCreateOrUpdate_593959(path: JsonNode; query: JsonNode;
+proc validate_ActivationsCreateOrUpdate_582992(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new activation.
   ## 
@@ -243,21 +243,21 @@ proc validate_ActivationsCreateOrUpdate_593959(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `activationName` field"
-  var valid_593970 = path.getOrDefault("activationName")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  var valid_583003 = path.getOrDefault("activationName")
+  valid_583003 = validateParameter(valid_583003, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "activationName", valid_593970
-  var valid_593971 = path.getOrDefault("subscriptionId")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  if valid_583003 != nil:
+    section.add "activationName", valid_583003
+  var valid_583004 = path.getOrDefault("subscriptionId")
+  valid_583004 = validateParameter(valid_583004, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "subscriptionId", valid_593971
-  var valid_593972 = path.getOrDefault("resourceGroup")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  if valid_583004 != nil:
+    section.add "subscriptionId", valid_583004
+  var valid_583005 = path.getOrDefault("resourceGroup")
+  valid_583005 = validateParameter(valid_583005, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "resourceGroup", valid_593972
+  if valid_583005 != nil:
+    section.add "resourceGroup", valid_583005
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -265,11 +265,11 @@ proc validate_ActivationsCreateOrUpdate_593959(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593973 = query.getOrDefault("api-version")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_583006 = query.getOrDefault("api-version")
+  valid_583006 = validateParameter(valid_583006, JString, required = true,
                                  default = newJString("2016-01-01"))
-  if valid_593973 != nil:
-    section.add "api-version", valid_593973
+  if valid_583006 != nil:
+    section.add "api-version", valid_583006
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -283,20 +283,20 @@ proc validate_ActivationsCreateOrUpdate_593959(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593975: Call_ActivationsCreateOrUpdate_593958; path: JsonNode;
+proc call*(call_583008: Call_ActivationsCreateOrUpdate_582991; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new activation.
   ## 
-  let valid = call_593975.validator(path, query, header, formData, body)
-  let scheme = call_593975.pickScheme
+  let valid = call_583008.validator(path, query, header, formData, body)
+  let scheme = call_583008.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593975.url(scheme.get, call_593975.host, call_593975.base,
-                         call_593975.route, valid.getOrDefault("path"),
+  let url = call_583008.url(scheme.get, call_583008.host, call_583008.base,
+                         call_583008.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593975, url, valid)
+  result = hook(call_583008, url, valid)
 
-proc call*(call_593976: Call_ActivationsCreateOrUpdate_593958;
+proc call*(call_583009: Call_ActivationsCreateOrUpdate_582991;
           activationName: string; subscriptionId: string; resourceGroup: string;
           activation: JsonNode; apiVersion: string = "2016-01-01"): Recallable =
   ## activationsCreateOrUpdate
@@ -311,25 +311,25 @@ proc call*(call_593976: Call_ActivationsCreateOrUpdate_593958;
   ##                : The resource group the resource is located under.
   ##   activation: JObject (required)
   ##             : new activation.
-  var path_593977 = newJObject()
-  var query_593978 = newJObject()
-  var body_593979 = newJObject()
-  add(query_593978, "api-version", newJString(apiVersion))
-  add(path_593977, "activationName", newJString(activationName))
-  add(path_593977, "subscriptionId", newJString(subscriptionId))
-  add(path_593977, "resourceGroup", newJString(resourceGroup))
+  var path_583010 = newJObject()
+  var query_583011 = newJObject()
+  var body_583012 = newJObject()
+  add(query_583011, "api-version", newJString(apiVersion))
+  add(path_583010, "activationName", newJString(activationName))
+  add(path_583010, "subscriptionId", newJString(subscriptionId))
+  add(path_583010, "resourceGroup", newJString(resourceGroup))
   if activation != nil:
-    body_593979 = activation
-  result = call_593976.call(path_593977, query_593978, nil, nil, body_593979)
+    body_583012 = activation
+  result = call_583009.call(path_583010, query_583011, nil, nil, body_583012)
 
-var activationsCreateOrUpdate* = Call_ActivationsCreateOrUpdate_593958(
+var activationsCreateOrUpdate* = Call_ActivationsCreateOrUpdate_582991(
     name: "activationsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.AzureBridge.Admin/activations/{activationName}",
-    validator: validate_ActivationsCreateOrUpdate_593959, base: "",
-    url: url_ActivationsCreateOrUpdate_593960, schemes: {Scheme.Https})
+    validator: validate_ActivationsCreateOrUpdate_582992, base: "",
+    url: url_ActivationsCreateOrUpdate_582993, schemes: {Scheme.Https})
 type
-  Call_ActivationsGet_593947 = ref object of OpenApiRestCall_593408
-proc url_ActivationsGet_593949(protocol: Scheme; host: string; base: string;
+  Call_ActivationsGet_582980 = ref object of OpenApiRestCall_582441
+proc url_ActivationsGet_582982(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -351,7 +351,7 @@ proc url_ActivationsGet_593949(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivationsGet_593948(path: JsonNode; query: JsonNode;
+proc validate_ActivationsGet_582981(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Returns activation name.
@@ -368,21 +368,21 @@ proc validate_ActivationsGet_593948(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `activationName` field"
-  var valid_593950 = path.getOrDefault("activationName")
-  valid_593950 = validateParameter(valid_593950, JString, required = true,
+  var valid_582983 = path.getOrDefault("activationName")
+  valid_582983 = validateParameter(valid_582983, JString, required = true,
                                  default = nil)
-  if valid_593950 != nil:
-    section.add "activationName", valid_593950
-  var valid_593951 = path.getOrDefault("subscriptionId")
-  valid_593951 = validateParameter(valid_593951, JString, required = true,
+  if valid_582983 != nil:
+    section.add "activationName", valid_582983
+  var valid_582984 = path.getOrDefault("subscriptionId")
+  valid_582984 = validateParameter(valid_582984, JString, required = true,
                                  default = nil)
-  if valid_593951 != nil:
-    section.add "subscriptionId", valid_593951
-  var valid_593952 = path.getOrDefault("resourceGroup")
-  valid_593952 = validateParameter(valid_593952, JString, required = true,
+  if valid_582984 != nil:
+    section.add "subscriptionId", valid_582984
+  var valid_582985 = path.getOrDefault("resourceGroup")
+  valid_582985 = validateParameter(valid_582985, JString, required = true,
                                  default = nil)
-  if valid_593952 != nil:
-    section.add "resourceGroup", valid_593952
+  if valid_582985 != nil:
+    section.add "resourceGroup", valid_582985
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -390,11 +390,11 @@ proc validate_ActivationsGet_593948(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593953 = query.getOrDefault("api-version")
-  valid_593953 = validateParameter(valid_593953, JString, required = true,
+  var valid_582986 = query.getOrDefault("api-version")
+  valid_582986 = validateParameter(valid_582986, JString, required = true,
                                  default = newJString("2016-01-01"))
-  if valid_593953 != nil:
-    section.add "api-version", valid_593953
+  if valid_582986 != nil:
+    section.add "api-version", valid_582986
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -403,20 +403,20 @@ proc validate_ActivationsGet_593948(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593954: Call_ActivationsGet_593947; path: JsonNode; query: JsonNode;
+proc call*(call_582987: Call_ActivationsGet_582980; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns activation name.
   ## 
-  let valid = call_593954.validator(path, query, header, formData, body)
-  let scheme = call_593954.pickScheme
+  let valid = call_582987.validator(path, query, header, formData, body)
+  let scheme = call_582987.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593954.url(scheme.get, call_593954.host, call_593954.base,
-                         call_593954.route, valid.getOrDefault("path"),
+  let url = call_582987.url(scheme.get, call_582987.host, call_582987.base,
+                         call_582987.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593954, url, valid)
+  result = hook(call_582987, url, valid)
 
-proc call*(call_593955: Call_ActivationsGet_593947; activationName: string;
+proc call*(call_582988: Call_ActivationsGet_582980; activationName: string;
           subscriptionId: string; resourceGroup: string;
           apiVersion: string = "2016-01-01"): Recallable =
   ## activationsGet
@@ -429,21 +429,21 @@ proc call*(call_593955: Call_ActivationsGet_593947; activationName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   resourceGroup: string (required)
   ##                : The resource group the resource is located under.
-  var path_593956 = newJObject()
-  var query_593957 = newJObject()
-  add(query_593957, "api-version", newJString(apiVersion))
-  add(path_593956, "activationName", newJString(activationName))
-  add(path_593956, "subscriptionId", newJString(subscriptionId))
-  add(path_593956, "resourceGroup", newJString(resourceGroup))
-  result = call_593955.call(path_593956, query_593957, nil, nil, nil)
+  var path_582989 = newJObject()
+  var query_582990 = newJObject()
+  add(query_582990, "api-version", newJString(apiVersion))
+  add(path_582989, "activationName", newJString(activationName))
+  add(path_582989, "subscriptionId", newJString(subscriptionId))
+  add(path_582989, "resourceGroup", newJString(resourceGroup))
+  result = call_582988.call(path_582989, query_582990, nil, nil, nil)
 
-var activationsGet* = Call_ActivationsGet_593947(name: "activationsGet",
+var activationsGet* = Call_ActivationsGet_582980(name: "activationsGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.AzureBridge.Admin/activations/{activationName}",
-    validator: validate_ActivationsGet_593948, base: "", url: url_ActivationsGet_593949,
+    validator: validate_ActivationsGet_582981, base: "", url: url_ActivationsGet_582982,
     schemes: {Scheme.Https})
 type
-  Call_ActivationsDelete_593980 = ref object of OpenApiRestCall_593408
-proc url_ActivationsDelete_593982(protocol: Scheme; host: string; base: string;
+  Call_ActivationsDelete_583013 = ref object of OpenApiRestCall_582441
+proc url_ActivationsDelete_583015(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -465,7 +465,7 @@ proc url_ActivationsDelete_593982(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivationsDelete_593981(path: JsonNode; query: JsonNode;
+proc validate_ActivationsDelete_583014(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Delete an activation.
@@ -482,21 +482,21 @@ proc validate_ActivationsDelete_593981(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `activationName` field"
-  var valid_593983 = path.getOrDefault("activationName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_583016 = path.getOrDefault("activationName")
+  valid_583016 = validateParameter(valid_583016, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "activationName", valid_593983
-  var valid_593984 = path.getOrDefault("subscriptionId")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_583016 != nil:
+    section.add "activationName", valid_583016
+  var valid_583017 = path.getOrDefault("subscriptionId")
+  valid_583017 = validateParameter(valid_583017, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "subscriptionId", valid_593984
-  var valid_593985 = path.getOrDefault("resourceGroup")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  if valid_583017 != nil:
+    section.add "subscriptionId", valid_583017
+  var valid_583018 = path.getOrDefault("resourceGroup")
+  valid_583018 = validateParameter(valid_583018, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "resourceGroup", valid_593985
+  if valid_583018 != nil:
+    section.add "resourceGroup", valid_583018
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -504,11 +504,11 @@ proc validate_ActivationsDelete_593981(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593986 = query.getOrDefault("api-version")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  var valid_583019 = query.getOrDefault("api-version")
+  valid_583019 = validateParameter(valid_583019, JString, required = true,
                                  default = newJString("2016-01-01"))
-  if valid_593986 != nil:
-    section.add "api-version", valid_593986
+  if valid_583019 != nil:
+    section.add "api-version", valid_583019
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -517,20 +517,20 @@ proc validate_ActivationsDelete_593981(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593987: Call_ActivationsDelete_593980; path: JsonNode;
+proc call*(call_583020: Call_ActivationsDelete_583013; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an activation.
   ## 
-  let valid = call_593987.validator(path, query, header, formData, body)
-  let scheme = call_593987.pickScheme
+  let valid = call_583020.validator(path, query, header, formData, body)
+  let scheme = call_583020.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593987.url(scheme.get, call_593987.host, call_593987.base,
-                         call_593987.route, valid.getOrDefault("path"),
+  let url = call_583020.url(scheme.get, call_583020.host, call_583020.base,
+                         call_583020.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593987, url, valid)
+  result = hook(call_583020, url, valid)
 
-proc call*(call_593988: Call_ActivationsDelete_593980; activationName: string;
+proc call*(call_583021: Call_ActivationsDelete_583013; activationName: string;
           subscriptionId: string; resourceGroup: string;
           apiVersion: string = "2016-01-01"): Recallable =
   ## activationsDelete
@@ -543,19 +543,19 @@ proc call*(call_593988: Call_ActivationsDelete_593980; activationName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   resourceGroup: string (required)
   ##                : The resource group the resource is located under.
-  var path_593989 = newJObject()
-  var query_593990 = newJObject()
-  add(query_593990, "api-version", newJString(apiVersion))
-  add(path_593989, "activationName", newJString(activationName))
-  add(path_593989, "subscriptionId", newJString(subscriptionId))
-  add(path_593989, "resourceGroup", newJString(resourceGroup))
-  result = call_593988.call(path_593989, query_593990, nil, nil, nil)
+  var path_583022 = newJObject()
+  var query_583023 = newJObject()
+  add(query_583023, "api-version", newJString(apiVersion))
+  add(path_583022, "activationName", newJString(activationName))
+  add(path_583022, "subscriptionId", newJString(subscriptionId))
+  add(path_583022, "resourceGroup", newJString(resourceGroup))
+  result = call_583021.call(path_583022, query_583023, nil, nil, nil)
 
-var activationsDelete* = Call_ActivationsDelete_593980(name: "activationsDelete",
+var activationsDelete* = Call_ActivationsDelete_583013(name: "activationsDelete",
     meth: HttpMethod.HttpDelete,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.AzureBridge.Admin/activations/{activationName}",
-    validator: validate_ActivationsDelete_593981, base: "",
-    url: url_ActivationsDelete_593982, schemes: {Scheme.Https})
+    validator: validate_ActivationsDelete_583014, base: "",
+    url: url_ActivationsDelete_583015, schemes: {Scheme.Https})
 export
   rest
 

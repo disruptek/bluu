@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: MicrosoftSerialConsoleClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "serialconsole"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ListConsoleDisabled_593630 = ref object of OpenApiRestCall_593408
-proc url_ListConsoleDisabled_593632(protocol: Scheme; host: string; base: string;
+  Call_ListConsoleDisabled_567863 = ref object of OpenApiRestCall_567641
+proc url_ListConsoleDisabled_567865(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -123,7 +123,7 @@ proc url_ListConsoleDisabled_593632(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListConsoleDisabled_593631(path: JsonNode; query: JsonNode;
+proc validate_ListConsoleDisabled_567864(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets if Serial Console is disabled for a subscription.
@@ -137,16 +137,16 @@ proc validate_ListConsoleDisabled_593631(path: JsonNode; query: JsonNode;
   ##                 : The ID of the target subscription.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `default` field"
-  var valid_593818 = path.getOrDefault("default")
-  valid_593818 = validateParameter(valid_593818, JString, required = true,
+  var valid_568051 = path.getOrDefault("default")
+  valid_568051 = validateParameter(valid_568051, JString, required = true,
                                  default = newJString("default"))
-  if valid_593818 != nil:
-    section.add "default", valid_593818
-  var valid_593819 = path.getOrDefault("subscriptionId")
-  valid_593819 = validateParameter(valid_593819, JString, required = true,
+  if valid_568051 != nil:
+    section.add "default", valid_568051
+  var valid_568052 = path.getOrDefault("subscriptionId")
+  valid_568052 = validateParameter(valid_568052, JString, required = true,
                                  default = nil)
-  if valid_593819 != nil:
-    section.add "subscriptionId", valid_593819
+  if valid_568052 != nil:
+    section.add "subscriptionId", valid_568052
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -154,11 +154,11 @@ proc validate_ListConsoleDisabled_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593820 = query.getOrDefault("api-version")
-  valid_593820 = validateParameter(valid_593820, JString, required = true,
+  var valid_568053 = query.getOrDefault("api-version")
+  valid_568053 = validateParameter(valid_568053, JString, required = true,
                                  default = nil)
-  if valid_593820 != nil:
-    section.add "api-version", valid_593820
+  if valid_568053 != nil:
+    section.add "api-version", valid_568053
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -167,20 +167,20 @@ proc validate_ListConsoleDisabled_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593843: Call_ListConsoleDisabled_593630; path: JsonNode;
+proc call*(call_568076: Call_ListConsoleDisabled_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets if Serial Console is disabled for a subscription.
   ## 
-  let valid = call_593843.validator(path, query, header, formData, body)
-  let scheme = call_593843.pickScheme
+  let valid = call_568076.validator(path, query, header, formData, body)
+  let scheme = call_568076.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593843.url(scheme.get, call_593843.host, call_593843.base,
-                         call_593843.route, valid.getOrDefault("path"),
+  let url = call_568076.url(scheme.get, call_568076.host, call_568076.base,
+                         call_568076.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593843, url, valid)
+  result = hook(call_568076, url, valid)
 
-proc call*(call_593914: Call_ListConsoleDisabled_593630; apiVersion: string;
+proc call*(call_568147: Call_ListConsoleDisabled_567863; apiVersion: string;
           subscriptionId: string; default: string = "default"): Recallable =
   ## listConsoleDisabled
   ## Gets if Serial Console is disabled for a subscription.
@@ -190,21 +190,21 @@ proc call*(call_593914: Call_ListConsoleDisabled_593630; apiVersion: string;
   ##          : Default string modeled as parameter for URL to work correctly.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_593915 = newJObject()
-  var query_593917 = newJObject()
-  add(query_593917, "api-version", newJString(apiVersion))
-  add(path_593915, "default", newJString(default))
-  add(path_593915, "subscriptionId", newJString(subscriptionId))
-  result = call_593914.call(path_593915, query_593917, nil, nil, nil)
+  var path_568148 = newJObject()
+  var query_568150 = newJObject()
+  add(query_568150, "api-version", newJString(apiVersion))
+  add(path_568148, "default", newJString(default))
+  add(path_568148, "subscriptionId", newJString(subscriptionId))
+  result = call_568147.call(path_568148, query_568150, nil, nil, nil)
 
-var listConsoleDisabled* = Call_ListConsoleDisabled_593630(
+var listConsoleDisabled* = Call_ListConsoleDisabled_567863(
     name: "listConsoleDisabled", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.SerialConsole/consoleServices/{default}",
-    validator: validate_ListConsoleDisabled_593631, base: "",
-    url: url_ListConsoleDisabled_593632, schemes: {Scheme.Https})
+    validator: validate_ListConsoleDisabled_567864, base: "",
+    url: url_ListConsoleDisabled_567865, schemes: {Scheme.Https})
 type
-  Call_ConsoleDisableConsole_593956 = ref object of OpenApiRestCall_593408
-proc url_ConsoleDisableConsole_593958(protocol: Scheme; host: string; base: string;
+  Call_ConsoleDisableConsole_568189 = ref object of OpenApiRestCall_567641
+proc url_ConsoleDisableConsole_568191(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -224,7 +224,7 @@ proc url_ConsoleDisableConsole_593958(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConsoleDisableConsole_593957(path: JsonNode; query: JsonNode;
+proc validate_ConsoleDisableConsole_568190(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Disables Serial Console for a subscription
   ## 
@@ -237,16 +237,16 @@ proc validate_ConsoleDisableConsole_593957(path: JsonNode; query: JsonNode;
   ##                 : The ID of the target subscription.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `default` field"
-  var valid_593959 = path.getOrDefault("default")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  var valid_568192 = path.getOrDefault("default")
+  valid_568192 = validateParameter(valid_568192, JString, required = true,
                                  default = newJString("default"))
-  if valid_593959 != nil:
-    section.add "default", valid_593959
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  if valid_568192 != nil:
+    section.add "default", valid_568192
+  var valid_568193 = path.getOrDefault("subscriptionId")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
+  if valid_568193 != nil:
+    section.add "subscriptionId", valid_568193
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -254,11 +254,11 @@ proc validate_ConsoleDisableConsole_593957(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593961 = query.getOrDefault("api-version")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = query.getOrDefault("api-version")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "api-version", valid_593961
+  if valid_568194 != nil:
+    section.add "api-version", valid_568194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -267,20 +267,20 @@ proc validate_ConsoleDisableConsole_593957(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593962: Call_ConsoleDisableConsole_593956; path: JsonNode;
+proc call*(call_568195: Call_ConsoleDisableConsole_568189; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Disables Serial Console for a subscription
   ## 
-  let valid = call_593962.validator(path, query, header, formData, body)
-  let scheme = call_593962.pickScheme
+  let valid = call_568195.validator(path, query, header, formData, body)
+  let scheme = call_568195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593962.url(scheme.get, call_593962.host, call_593962.base,
-                         call_593962.route, valid.getOrDefault("path"),
+  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
+                         call_568195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593962, url, valid)
+  result = hook(call_568195, url, valid)
 
-proc call*(call_593963: Call_ConsoleDisableConsole_593956; apiVersion: string;
+proc call*(call_568196: Call_ConsoleDisableConsole_568189; apiVersion: string;
           subscriptionId: string; default: string = "default"): Recallable =
   ## consoleDisableConsole
   ## Disables Serial Console for a subscription
@@ -290,21 +290,21 @@ proc call*(call_593963: Call_ConsoleDisableConsole_593956; apiVersion: string;
   ##          : Default string modeled as parameter for URL to work correctly.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_593964 = newJObject()
-  var query_593965 = newJObject()
-  add(query_593965, "api-version", newJString(apiVersion))
-  add(path_593964, "default", newJString(default))
-  add(path_593964, "subscriptionId", newJString(subscriptionId))
-  result = call_593963.call(path_593964, query_593965, nil, nil, nil)
+  var path_568197 = newJObject()
+  var query_568198 = newJObject()
+  add(query_568198, "api-version", newJString(apiVersion))
+  add(path_568197, "default", newJString(default))
+  add(path_568197, "subscriptionId", newJString(subscriptionId))
+  result = call_568196.call(path_568197, query_568198, nil, nil, nil)
 
-var consoleDisableConsole* = Call_ConsoleDisableConsole_593956(
+var consoleDisableConsole* = Call_ConsoleDisableConsole_568189(
     name: "consoleDisableConsole", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.SerialConsole/consoleServices/{default}/disableConsole",
-    validator: validate_ConsoleDisableConsole_593957, base: "",
-    url: url_ConsoleDisableConsole_593958, schemes: {Scheme.Https})
+    validator: validate_ConsoleDisableConsole_568190, base: "",
+    url: url_ConsoleDisableConsole_568191, schemes: {Scheme.Https})
 type
-  Call_ConsoleEnableConsole_593966 = ref object of OpenApiRestCall_593408
-proc url_ConsoleEnableConsole_593968(protocol: Scheme; host: string; base: string;
+  Call_ConsoleEnableConsole_568199 = ref object of OpenApiRestCall_567641
+proc url_ConsoleEnableConsole_568201(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -324,7 +324,7 @@ proc url_ConsoleEnableConsole_593968(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConsoleEnableConsole_593967(path: JsonNode; query: JsonNode;
+proc validate_ConsoleEnableConsole_568200(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Enables Serial Console for a subscription
   ## 
@@ -337,16 +337,16 @@ proc validate_ConsoleEnableConsole_593967(path: JsonNode; query: JsonNode;
   ##                 : The ID of the target subscription.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `default` field"
-  var valid_593969 = path.getOrDefault("default")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_568202 = path.getOrDefault("default")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = newJString("default"))
-  if valid_593969 != nil:
-    section.add "default", valid_593969
-  var valid_593970 = path.getOrDefault("subscriptionId")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_568202 != nil:
+    section.add "default", valid_568202
+  var valid_568203 = path.getOrDefault("subscriptionId")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "subscriptionId", valid_593970
+  if valid_568203 != nil:
+    section.add "subscriptionId", valid_568203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -354,11 +354,11 @@ proc validate_ConsoleEnableConsole_593967(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568204 = query.getOrDefault("api-version")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
+  if valid_568204 != nil:
+    section.add "api-version", valid_568204
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -367,20 +367,20 @@ proc validate_ConsoleEnableConsole_593967(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593972: Call_ConsoleEnableConsole_593966; path: JsonNode;
+proc call*(call_568205: Call_ConsoleEnableConsole_568199; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Enables Serial Console for a subscription
   ## 
-  let valid = call_593972.validator(path, query, header, formData, body)
-  let scheme = call_593972.pickScheme
+  let valid = call_568205.validator(path, query, header, formData, body)
+  let scheme = call_568205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593972.url(scheme.get, call_593972.host, call_593972.base,
-                         call_593972.route, valid.getOrDefault("path"),
+  let url = call_568205.url(scheme.get, call_568205.host, call_568205.base,
+                         call_568205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593972, url, valid)
+  result = hook(call_568205, url, valid)
 
-proc call*(call_593973: Call_ConsoleEnableConsole_593966; apiVersion: string;
+proc call*(call_568206: Call_ConsoleEnableConsole_568199; apiVersion: string;
           subscriptionId: string; default: string = "default"): Recallable =
   ## consoleEnableConsole
   ## Enables Serial Console for a subscription
@@ -390,21 +390,21 @@ proc call*(call_593973: Call_ConsoleEnableConsole_593966; apiVersion: string;
   ##          : Default string modeled as parameter for URL to work correctly.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_593974 = newJObject()
-  var query_593975 = newJObject()
-  add(query_593975, "api-version", newJString(apiVersion))
-  add(path_593974, "default", newJString(default))
-  add(path_593974, "subscriptionId", newJString(subscriptionId))
-  result = call_593973.call(path_593974, query_593975, nil, nil, nil)
+  var path_568207 = newJObject()
+  var query_568208 = newJObject()
+  add(query_568208, "api-version", newJString(apiVersion))
+  add(path_568207, "default", newJString(default))
+  add(path_568207, "subscriptionId", newJString(subscriptionId))
+  result = call_568206.call(path_568207, query_568208, nil, nil, nil)
 
-var consoleEnableConsole* = Call_ConsoleEnableConsole_593966(
+var consoleEnableConsole* = Call_ConsoleEnableConsole_568199(
     name: "consoleEnableConsole", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.SerialConsole/consoleServices/{default}/enableConsole",
-    validator: validate_ConsoleEnableConsole_593967, base: "",
-    url: url_ConsoleEnableConsole_593968, schemes: {Scheme.Https})
+    validator: validate_ConsoleEnableConsole_568200, base: "",
+    url: url_ConsoleEnableConsole_568201, schemes: {Scheme.Https})
 type
-  Call_ListOperations_593976 = ref object of OpenApiRestCall_593408
-proc url_ListOperations_593978(protocol: Scheme; host: string; base: string;
+  Call_ListOperations_568209 = ref object of OpenApiRestCall_567641
+proc url_ListOperations_568211(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -421,7 +421,7 @@ proc url_ListOperations_593978(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListOperations_593977(path: JsonNode; query: JsonNode;
+proc validate_ListOperations_568210(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets a list of Serial Console API operations.
@@ -434,11 +434,11 @@ proc validate_ListOperations_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593979 = path.getOrDefault("subscriptionId")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_568212 = path.getOrDefault("subscriptionId")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "subscriptionId", valid_593979
+  if valid_568212 != nil:
+    section.add "subscriptionId", valid_568212
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -446,11 +446,11 @@ proc validate_ListOperations_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593980 = query.getOrDefault("api-version")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_568213 = query.getOrDefault("api-version")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "api-version", valid_593980
+  if valid_568213 != nil:
+    section.add "api-version", valid_568213
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -459,20 +459,20 @@ proc validate_ListOperations_593977(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593981: Call_ListOperations_593976; path: JsonNode; query: JsonNode;
+proc call*(call_568214: Call_ListOperations_568209; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of Serial Console API operations.
   ## 
-  let valid = call_593981.validator(path, query, header, formData, body)
-  let scheme = call_593981.pickScheme
+  let valid = call_568214.validator(path, query, header, formData, body)
+  let scheme = call_568214.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593981.url(scheme.get, call_593981.host, call_593981.base,
-                         call_593981.route, valid.getOrDefault("path"),
+  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
+                         call_568214.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593981, url, valid)
+  result = hook(call_568214, url, valid)
 
-proc call*(call_593982: Call_ListOperations_593976; apiVersion: string;
+proc call*(call_568215: Call_ListOperations_568209; apiVersion: string;
           subscriptionId: string): Recallable =
   ## listOperations
   ## Gets a list of Serial Console API operations.
@@ -480,15 +480,15 @@ proc call*(call_593982: Call_ListOperations_593976; apiVersion: string;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_593983 = newJObject()
-  var query_593984 = newJObject()
-  add(query_593984, "api-version", newJString(apiVersion))
-  add(path_593983, "subscriptionId", newJString(subscriptionId))
-  result = call_593982.call(path_593983, query_593984, nil, nil, nil)
+  var path_568216 = newJObject()
+  var query_568217 = newJObject()
+  add(query_568217, "api-version", newJString(apiVersion))
+  add(path_568216, "subscriptionId", newJString(subscriptionId))
+  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
 
-var listOperations* = Call_ListOperations_593976(name: "listOperations",
+var listOperations* = Call_ListOperations_568209(name: "listOperations",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.SerialConsole/operations",
-    validator: validate_ListOperations_593977, base: "", url: url_ListOperations_593978,
+    validator: validate_ListOperations_568210, base: "", url: url_ListOperations_568211,
     schemes: {Scheme.Https})
 export
   rest

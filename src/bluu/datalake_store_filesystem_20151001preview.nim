@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: DataLakeStoreFileSystemManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "datalake-store-filesystem"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_FileSystemSetFileExpiry_593630 = ref object of OpenApiRestCall_593408
-proc url_FileSystemSetFileExpiry_593632(protocol: Scheme; host: string; base: string;
+  Call_FileSystemSetFileExpiry_567863 = ref object of OpenApiRestCall_567641
+proc url_FileSystemSetFileExpiry_567865(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -120,7 +120,7 @@ proc url_FileSystemSetFileExpiry_593632(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSystemSetFileExpiry_593631(path: JsonNode; query: JsonNode;
+proc validate_FileSystemSetFileExpiry_567864(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sets or removes the expiration time on the specified file. This operation can only be executed against files. Folders are not supported.
   ## 
@@ -131,11 +131,11 @@ proc validate_FileSystemSetFileExpiry_593631(path: JsonNode; query: JsonNode;
   ##           : The Data Lake Store path (starting with '/') of the file on which to set or remove the expiration time.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `filePath` field"
-  var valid_593805 = path.getOrDefault("filePath")
-  valid_593805 = validateParameter(valid_593805, JString, required = true,
+  var valid_568038 = path.getOrDefault("filePath")
+  valid_568038 = validateParameter(valid_568038, JString, required = true,
                                  default = nil)
-  if valid_593805 != nil:
-    section.add "filePath", valid_593805
+  if valid_568038 != nil:
+    section.add "filePath", valid_568038
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -149,25 +149,25 @@ proc validate_FileSystemSetFileExpiry_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593806 = query.getOrDefault("api-version")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_568039 = query.getOrDefault("api-version")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "api-version", valid_593806
-  var valid_593820 = query.getOrDefault("op")
-  valid_593820 = validateParameter(valid_593820, JString, required = true,
+  if valid_568039 != nil:
+    section.add "api-version", valid_568039
+  var valid_568053 = query.getOrDefault("op")
+  valid_568053 = validateParameter(valid_568053, JString, required = true,
                                  default = newJString("SETEXPIRY"))
-  if valid_593820 != nil:
-    section.add "op", valid_593820
-  var valid_593821 = query.getOrDefault("expiryOption")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  if valid_568053 != nil:
+    section.add "op", valid_568053
+  var valid_568054 = query.getOrDefault("expiryOption")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = newJString("NeverExpire"))
-  if valid_593821 != nil:
-    section.add "expiryOption", valid_593821
-  var valid_593822 = query.getOrDefault("expireTime")
-  valid_593822 = validateParameter(valid_593822, JInt, required = false, default = nil)
-  if valid_593822 != nil:
-    section.add "expireTime", valid_593822
+  if valid_568054 != nil:
+    section.add "expiryOption", valid_568054
+  var valid_568055 = query.getOrDefault("expireTime")
+  valid_568055 = validateParameter(valid_568055, JInt, required = false, default = nil)
+  if valid_568055 != nil:
+    section.add "expireTime", valid_568055
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -176,20 +176,20 @@ proc validate_FileSystemSetFileExpiry_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593845: Call_FileSystemSetFileExpiry_593630; path: JsonNode;
+proc call*(call_568078: Call_FileSystemSetFileExpiry_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Sets or removes the expiration time on the specified file. This operation can only be executed against files. Folders are not supported.
   ## 
-  let valid = call_593845.validator(path, query, header, formData, body)
-  let scheme = call_593845.pickScheme
+  let valid = call_568078.validator(path, query, header, formData, body)
+  let scheme = call_568078.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593845.url(scheme.get, call_593845.host, call_593845.base,
-                         call_593845.route, valid.getOrDefault("path"),
+  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
+                         call_568078.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593845, url, valid)
+  result = hook(call_568078, url, valid)
 
-proc call*(call_593916: Call_FileSystemSetFileExpiry_593630; apiVersion: string;
+proc call*(call_568149: Call_FileSystemSetFileExpiry_567863; apiVersion: string;
           filePath: string; op: string = "SETEXPIRY";
           expiryOption: string = "NeverExpire"; expireTime: int = 0): Recallable =
   ## fileSystemSetFileExpiry
@@ -204,22 +204,22 @@ proc call*(call_593916: Call_FileSystemSetFileExpiry_593630; apiVersion: string;
   ##               : Indicates the type of expiration to use for the file: 1. NeverExpire: ExpireTime is ignored. 2. RelativeToNow: ExpireTime is an integer in milliseconds representing the expiration date relative to when file expiration is updated. 3. RelativeToCreationDate: ExpireTime is an integer in milliseconds representing the expiration date relative to file creation. 4. Absolute: ExpireTime is an integer in milliseconds, as a Unix timestamp relative to 1/1/1970 00:00:00.
   ##   expireTime: int
   ##             : The time that the file will expire, corresponding to the ExpiryOption that was set.
-  var path_593917 = newJObject()
-  var query_593919 = newJObject()
-  add(query_593919, "api-version", newJString(apiVersion))
-  add(path_593917, "filePath", newJString(filePath))
-  add(query_593919, "op", newJString(op))
-  add(query_593919, "expiryOption", newJString(expiryOption))
-  add(query_593919, "expireTime", newJInt(expireTime))
-  result = call_593916.call(path_593917, query_593919, nil, nil, nil)
+  var path_568150 = newJObject()
+  var query_568152 = newJObject()
+  add(query_568152, "api-version", newJString(apiVersion))
+  add(path_568150, "filePath", newJString(filePath))
+  add(query_568152, "op", newJString(op))
+  add(query_568152, "expiryOption", newJString(expiryOption))
+  add(query_568152, "expireTime", newJInt(expireTime))
+  result = call_568149.call(path_568150, query_568152, nil, nil, nil)
 
-var fileSystemSetFileExpiry* = Call_FileSystemSetFileExpiry_593630(
+var fileSystemSetFileExpiry* = Call_FileSystemSetFileExpiry_567863(
     name: "fileSystemSetFileExpiry", meth: HttpMethod.HttpPut, host: "azure.local",
-    route: "/WebHdfsExt/{filePath}", validator: validate_FileSystemSetFileExpiry_593631,
-    base: "", url: url_FileSystemSetFileExpiry_593632, schemes: {Scheme.Https})
+    route: "/WebHdfsExt/{filePath}", validator: validate_FileSystemSetFileExpiry_567864,
+    base: "", url: url_FileSystemSetFileExpiry_567865, schemes: {Scheme.Https})
 type
-  Call_FileSystemConcurrentAppend_593958 = ref object of OpenApiRestCall_593408
-proc url_FileSystemConcurrentAppend_593960(protocol: Scheme; host: string;
+  Call_FileSystemConcurrentAppend_568191 = ref object of OpenApiRestCall_567641
+proc url_FileSystemConcurrentAppend_568193(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -234,7 +234,7 @@ proc url_FileSystemConcurrentAppend_593960(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSystemConcurrentAppend_593959(path: JsonNode; query: JsonNode;
+proc validate_FileSystemConcurrentAppend_568192(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Appends to the specified file. This method supports multiple concurrent appends to the file. NOTE: ConcurrentAppend and normal (serial) Append CANNOT be used interchangeably; once a file has been appended to using either of these append options, it can only be appended to using that append option. ConcurrentAppend DOES NOT guarantee order and can result in duplicated data landing in the target file. In order to close a file after using ConcurrentAppend, call the Flush method.
   ## 
@@ -245,11 +245,11 @@ proc validate_FileSystemConcurrentAppend_593959(path: JsonNode; query: JsonNode;
   ##           : The Data Lake Store path (starting with '/') of the file to which to append using concurrent append.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `filePath` field"
-  var valid_593961 = path.getOrDefault("filePath")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = path.getOrDefault("filePath")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "filePath", valid_593961
+  if valid_568194 != nil:
+    section.add "filePath", valid_568194
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -261,32 +261,32 @@ proc validate_FileSystemConcurrentAppend_593959(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593962 = query.getOrDefault("api-version")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_568195 = query.getOrDefault("api-version")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "api-version", valid_593962
-  var valid_593963 = query.getOrDefault("op")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_568195 != nil:
+    section.add "api-version", valid_568195
+  var valid_568196 = query.getOrDefault("op")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = newJString("CONCURRENTAPPEND"))
-  if valid_593963 != nil:
-    section.add "op", valid_593963
-  var valid_593964 = query.getOrDefault("appendMode")
-  valid_593964 = validateParameter(valid_593964, JString, required = false,
+  if valid_568196 != nil:
+    section.add "op", valid_568196
+  var valid_568197 = query.getOrDefault("appendMode")
+  valid_568197 = validateParameter(valid_568197, JString, required = false,
                                  default = newJString("autocreate"))
-  if valid_593964 != nil:
-    section.add "appendMode", valid_593964
+  if valid_568197 != nil:
+    section.add "appendMode", valid_568197
   result.add "query", section
   ## parameters in `header` object:
   ##   Transfer-Encoding: JString (required)
   ##                    : Indicates the data being sent to the server is being streamed in chunks.
   section = newJObject()
   assert header != nil, "header argument is necessary due to required `Transfer-Encoding` field"
-  var valid_593965 = header.getOrDefault("Transfer-Encoding")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_568198 = header.getOrDefault("Transfer-Encoding")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = newJString("chunked"))
-  if valid_593965 != nil:
-    section.add "Transfer-Encoding", valid_593965
+  if valid_568198 != nil:
+    section.add "Transfer-Encoding", valid_568198
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -298,20 +298,20 @@ proc validate_FileSystemConcurrentAppend_593959(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593967: Call_FileSystemConcurrentAppend_593958; path: JsonNode;
+proc call*(call_568200: Call_FileSystemConcurrentAppend_568191; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Appends to the specified file. This method supports multiple concurrent appends to the file. NOTE: ConcurrentAppend and normal (serial) Append CANNOT be used interchangeably; once a file has been appended to using either of these append options, it can only be appended to using that append option. ConcurrentAppend DOES NOT guarantee order and can result in duplicated data landing in the target file. In order to close a file after using ConcurrentAppend, call the Flush method.
   ## 
-  let valid = call_593967.validator(path, query, header, formData, body)
-  let scheme = call_593967.pickScheme
+  let valid = call_568200.validator(path, query, header, formData, body)
+  let scheme = call_568200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593967.url(scheme.get, call_593967.host, call_593967.base,
-                         call_593967.route, valid.getOrDefault("path"),
+  let url = call_568200.url(scheme.get, call_568200.host, call_568200.base,
+                         call_568200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593967, url, valid)
+  result = hook(call_568200, url, valid)
 
-proc call*(call_593968: Call_FileSystemConcurrentAppend_593958; apiVersion: string;
+proc call*(call_568201: Call_FileSystemConcurrentAppend_568191; apiVersion: string;
           filePath: string; streamContents: JsonNode;
           op: string = "CONCURRENTAPPEND"; appendMode: string = "autocreate"): Recallable =
   ## fileSystemConcurrentAppend
@@ -326,25 +326,25 @@ proc call*(call_593968: Call_FileSystemConcurrentAppend_593958; apiVersion: stri
   ##                 : The file contents to include when appending to the file.  The maximum content size is 4MB.  For content larger than 4MB you must append the content in 4MB chunks.
   ##   appendMode: string
   ##             : Indicates the concurrent append call should create the file if it doesn't exist or just open the existing file for append
-  var path_593969 = newJObject()
-  var query_593970 = newJObject()
-  var body_593971 = newJObject()
-  add(query_593970, "api-version", newJString(apiVersion))
-  add(path_593969, "filePath", newJString(filePath))
-  add(query_593970, "op", newJString(op))
+  var path_568202 = newJObject()
+  var query_568203 = newJObject()
+  var body_568204 = newJObject()
+  add(query_568203, "api-version", newJString(apiVersion))
+  add(path_568202, "filePath", newJString(filePath))
+  add(query_568203, "op", newJString(op))
   if streamContents != nil:
-    body_593971 = streamContents
-  add(query_593970, "appendMode", newJString(appendMode))
-  result = call_593968.call(path_593969, query_593970, nil, nil, body_593971)
+    body_568204 = streamContents
+  add(query_568203, "appendMode", newJString(appendMode))
+  result = call_568201.call(path_568202, query_568203, nil, nil, body_568204)
 
-var fileSystemConcurrentAppend* = Call_FileSystemConcurrentAppend_593958(
+var fileSystemConcurrentAppend* = Call_FileSystemConcurrentAppend_568191(
     name: "fileSystemConcurrentAppend", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/WebHdfsExt/{filePath}",
-    validator: validate_FileSystemConcurrentAppend_593959, base: "",
-    url: url_FileSystemConcurrentAppend_593960, schemes: {Scheme.Https})
+    validator: validate_FileSystemConcurrentAppend_568192, base: "",
+    url: url_FileSystemConcurrentAppend_568193, schemes: {Scheme.Https})
 type
-  Call_FileSystemMkdirs_593983 = ref object of OpenApiRestCall_593408
-proc url_FileSystemMkdirs_593985(protocol: Scheme; host: string; base: string;
+  Call_FileSystemMkdirs_568216 = ref object of OpenApiRestCall_567641
+proc url_FileSystemMkdirs_568218(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -359,7 +359,7 @@ proc url_FileSystemMkdirs_593985(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSystemMkdirs_593984(path: JsonNode; query: JsonNode;
+proc validate_FileSystemMkdirs_568217(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Creates a directory.
@@ -371,11 +371,11 @@ proc validate_FileSystemMkdirs_593984(path: JsonNode; query: JsonNode;
   ##       : The Data Lake Store path (starting with '/') of the directory to create.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `path` field"
-  var valid_593986 = path.getOrDefault("path")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  var valid_568219 = path.getOrDefault("path")
+  valid_568219 = validateParameter(valid_568219, JString, required = true,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "path", valid_593986
+  if valid_568219 != nil:
+    section.add "path", valid_568219
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -385,16 +385,16 @@ proc validate_FileSystemMkdirs_593984(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593987 = query.getOrDefault("api-version")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+  var valid_568220 = query.getOrDefault("api-version")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "api-version", valid_593987
-  var valid_593988 = query.getOrDefault("op")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  if valid_568220 != nil:
+    section.add "api-version", valid_568220
+  var valid_568221 = query.getOrDefault("op")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = newJString("MKDIRS"))
-  if valid_593988 != nil:
-    section.add "op", valid_593988
+  if valid_568221 != nil:
+    section.add "op", valid_568221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -403,20 +403,20 @@ proc validate_FileSystemMkdirs_593984(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593989: Call_FileSystemMkdirs_593983; path: JsonNode;
+proc call*(call_568222: Call_FileSystemMkdirs_568216; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a directory.
   ## 
-  let valid = call_593989.validator(path, query, header, formData, body)
-  let scheme = call_593989.pickScheme
+  let valid = call_568222.validator(path, query, header, formData, body)
+  let scheme = call_568222.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593989.url(scheme.get, call_593989.host, call_593989.base,
-                         call_593989.route, valid.getOrDefault("path"),
+  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
+                         call_568222.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593989, url, valid)
+  result = hook(call_568222, url, valid)
 
-proc call*(call_593990: Call_FileSystemMkdirs_593983; apiVersion: string;
+proc call*(call_568223: Call_FileSystemMkdirs_568216; apiVersion: string;
           path: string; op: string = "MKDIRS"): Recallable =
   ## fileSystemMkdirs
   ## Creates a directory.
@@ -426,20 +426,20 @@ proc call*(call_593990: Call_FileSystemMkdirs_593983; apiVersion: string;
   ##       : The Data Lake Store path (starting with '/') of the directory to create.
   ##   op: string (required)
   ##     : The constant value for the operation.
-  var path_593991 = newJObject()
-  var query_593992 = newJObject()
-  add(query_593992, "api-version", newJString(apiVersion))
-  add(path_593991, "path", newJString(path))
-  add(query_593992, "op", newJString(op))
-  result = call_593990.call(path_593991, query_593992, nil, nil, nil)
+  var path_568224 = newJObject()
+  var query_568225 = newJObject()
+  add(query_568225, "api-version", newJString(apiVersion))
+  add(path_568224, "path", newJString(path))
+  add(query_568225, "op", newJString(op))
+  result = call_568223.call(path_568224, query_568225, nil, nil, nil)
 
-var fileSystemMkdirs* = Call_FileSystemMkdirs_593983(name: "fileSystemMkdirs",
+var fileSystemMkdirs* = Call_FileSystemMkdirs_568216(name: "fileSystemMkdirs",
     meth: HttpMethod.HttpPut, host: "azure.local", route: "/webhdfs/v1/{path}",
-    validator: validate_FileSystemMkdirs_593984, base: "",
-    url: url_FileSystemMkdirs_593985, schemes: {Scheme.Https})
+    validator: validate_FileSystemMkdirs_568217, base: "",
+    url: url_FileSystemMkdirs_568218, schemes: {Scheme.Https})
 type
-  Call_FileSystemCheckAccess_593972 = ref object of OpenApiRestCall_593408
-proc url_FileSystemCheckAccess_593974(protocol: Scheme; host: string; base: string;
+  Call_FileSystemCheckAccess_568205 = ref object of OpenApiRestCall_567641
+proc url_FileSystemCheckAccess_568207(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -454,7 +454,7 @@ proc url_FileSystemCheckAccess_593974(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSystemCheckAccess_593973(path: JsonNode; query: JsonNode;
+proc validate_FileSystemCheckAccess_568206(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks if the specified access is available at the given path.
   ## 
@@ -465,11 +465,11 @@ proc validate_FileSystemCheckAccess_593973(path: JsonNode; query: JsonNode;
   ##       : The Data Lake Store path (starting with '/') of the file or directory for which to check access.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `path` field"
-  var valid_593975 = path.getOrDefault("path")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_568208 = path.getOrDefault("path")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "path", valid_593975
+  if valid_568208 != nil:
+    section.add "path", valid_568208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -481,21 +481,21 @@ proc validate_FileSystemCheckAccess_593973(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593976 = query.getOrDefault("api-version")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_568209 = query.getOrDefault("api-version")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "api-version", valid_593976
-  var valid_593977 = query.getOrDefault("op")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_568209 != nil:
+    section.add "api-version", valid_568209
+  var valid_568210 = query.getOrDefault("op")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = newJString("CHECKACCESS"))
-  if valid_593977 != nil:
-    section.add "op", valid_593977
-  var valid_593978 = query.getOrDefault("fsaction")
-  valid_593978 = validateParameter(valid_593978, JString, required = false,
+  if valid_568210 != nil:
+    section.add "op", valid_568210
+  var valid_568211 = query.getOrDefault("fsaction")
+  valid_568211 = validateParameter(valid_568211, JString, required = false,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "fsaction", valid_593978
+  if valid_568211 != nil:
+    section.add "fsaction", valid_568211
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -504,20 +504,20 @@ proc validate_FileSystemCheckAccess_593973(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593979: Call_FileSystemCheckAccess_593972; path: JsonNode;
+proc call*(call_568212: Call_FileSystemCheckAccess_568205; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks if the specified access is available at the given path.
   ## 
-  let valid = call_593979.validator(path, query, header, formData, body)
-  let scheme = call_593979.pickScheme
+  let valid = call_568212.validator(path, query, header, formData, body)
+  let scheme = call_568212.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593979.url(scheme.get, call_593979.host, call_593979.base,
-                         call_593979.route, valid.getOrDefault("path"),
+  let url = call_568212.url(scheme.get, call_568212.host, call_568212.base,
+                         call_568212.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593979, url, valid)
+  result = hook(call_568212, url, valid)
 
-proc call*(call_593980: Call_FileSystemCheckAccess_593972; apiVersion: string;
+proc call*(call_568213: Call_FileSystemCheckAccess_568205; apiVersion: string;
           path: string; op: string = "CHECKACCESS"; fsaction: string = ""): Recallable =
   ## fileSystemCheckAccess
   ## Checks if the specified access is available at the given path.
@@ -529,18 +529,18 @@ proc call*(call_593980: Call_FileSystemCheckAccess_593972; apiVersion: string;
   ##     : The constant value for the operation.
   ##   fsaction: string
   ##           : File system operation read/write/execute in string form, matching regex pattern '[rwx-]{3}'
-  var path_593981 = newJObject()
-  var query_593982 = newJObject()
-  add(query_593982, "api-version", newJString(apiVersion))
-  add(path_593981, "path", newJString(path))
-  add(query_593982, "op", newJString(op))
-  add(query_593982, "fsaction", newJString(fsaction))
-  result = call_593980.call(path_593981, query_593982, nil, nil, nil)
+  var path_568214 = newJObject()
+  var query_568215 = newJObject()
+  add(query_568215, "api-version", newJString(apiVersion))
+  add(path_568214, "path", newJString(path))
+  add(query_568215, "op", newJString(op))
+  add(query_568215, "fsaction", newJString(fsaction))
+  result = call_568213.call(path_568214, query_568215, nil, nil, nil)
 
-var fileSystemCheckAccess* = Call_FileSystemCheckAccess_593972(
+var fileSystemCheckAccess* = Call_FileSystemCheckAccess_568205(
     name: "fileSystemCheckAccess", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/webhdfs/v1/{path}", validator: validate_FileSystemCheckAccess_593973,
-    base: "", url: url_FileSystemCheckAccess_593974, schemes: {Scheme.Https})
+    route: "/webhdfs/v1/{path}", validator: validate_FileSystemCheckAccess_568206,
+    base: "", url: url_FileSystemCheckAccess_568207, schemes: {Scheme.Https})
 export
   rest
 

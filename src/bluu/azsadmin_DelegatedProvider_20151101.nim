@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SubscriptionsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_582442 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_582442](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_582442): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-DelegatedProvider"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DelegatedProvidersList_593631 = ref object of OpenApiRestCall_593409
-proc url_DelegatedProvidersList_593633(protocol: Scheme; host: string; base: string;
+  Call_DelegatedProvidersList_582664 = ref object of OpenApiRestCall_582442
+proc url_DelegatedProvidersList_582666(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_DelegatedProvidersList_593633(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DelegatedProvidersList_593632(path: JsonNode; query: JsonNode;
+proc validate_DelegatedProvidersList_582665(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the list of delegatedProviders.
   ## 
@@ -133,11 +133,11 @@ proc validate_DelegatedProvidersList_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593793 = path.getOrDefault("subscriptionId")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  var valid_582826 = path.getOrDefault("subscriptionId")
+  valid_582826 = validateParameter(valid_582826, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "subscriptionId", valid_593793
+  if valid_582826 != nil:
+    section.add "subscriptionId", valid_582826
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_DelegatedProvidersList_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_582840 = query.getOrDefault("api-version")
+  valid_582840 = validateParameter(valid_582840, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_582840 != nil:
+    section.add "api-version", valid_582840
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_DelegatedProvidersList_593632(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593834: Call_DelegatedProvidersList_593631; path: JsonNode;
+proc call*(call_582867: Call_DelegatedProvidersList_582664; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the list of delegatedProviders.
   ## 
-  let valid = call_593834.validator(path, query, header, formData, body)
-  let scheme = call_593834.pickScheme
+  let valid = call_582867.validator(path, query, header, formData, body)
+  let scheme = call_582867.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593834.url(scheme.get, call_593834.host, call_593834.base,
-                         call_593834.route, valid.getOrDefault("path"),
+  let url = call_582867.url(scheme.get, call_582867.host, call_582867.base,
+                         call_582867.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593834, url, valid)
+  result = hook(call_582867, url, valid)
 
-proc call*(call_593905: Call_DelegatedProvidersList_593631; subscriptionId: string;
+proc call*(call_582938: Call_DelegatedProvidersList_582664; subscriptionId: string;
           apiVersion: string = "2015-11-01"): Recallable =
   ## delegatedProvidersList
   ## Get the list of delegatedProviders.
@@ -179,20 +179,20 @@ proc call*(call_593905: Call_DelegatedProvidersList_593631; subscriptionId: stri
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  var path_593906 = newJObject()
-  var query_593908 = newJObject()
-  add(query_593908, "api-version", newJString(apiVersion))
-  add(path_593906, "subscriptionId", newJString(subscriptionId))
-  result = call_593905.call(path_593906, query_593908, nil, nil, nil)
+  var path_582939 = newJObject()
+  var query_582941 = newJObject()
+  add(query_582941, "api-version", newJString(apiVersion))
+  add(path_582939, "subscriptionId", newJString(subscriptionId))
+  result = call_582938.call(path_582939, query_582941, nil, nil, nil)
 
-var delegatedProvidersList* = Call_DelegatedProvidersList_593631(
+var delegatedProvidersList* = Call_DelegatedProvidersList_582664(
     name: "delegatedProvidersList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/delegatedProviders",
-    validator: validate_DelegatedProvidersList_593632, base: "",
-    url: url_DelegatedProvidersList_593633, schemes: {Scheme.Https})
+    validator: validate_DelegatedProvidersList_582665, base: "",
+    url: url_DelegatedProvidersList_582666, schemes: {Scheme.Https})
 type
-  Call_DelegatedProvidersGet_593947 = ref object of OpenApiRestCall_593409
-proc url_DelegatedProvidersGet_593949(protocol: Scheme; host: string; base: string;
+  Call_DelegatedProvidersGet_582980 = ref object of OpenApiRestCall_582442
+proc url_DelegatedProvidersGet_582982(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -212,7 +212,7 @@ proc url_DelegatedProvidersGet_593949(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DelegatedProvidersGet_593948(path: JsonNode; query: JsonNode;
+proc validate_DelegatedProvidersGet_582981(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the specified delegated provider.
   ## 
@@ -226,16 +226,16 @@ proc validate_DelegatedProvidersGet_593948(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `delegatedProvider` field"
-  var valid_593950 = path.getOrDefault("delegatedProvider")
-  valid_593950 = validateParameter(valid_593950, JString, required = true,
+  var valid_582983 = path.getOrDefault("delegatedProvider")
+  valid_582983 = validateParameter(valid_582983, JString, required = true,
                                  default = nil)
-  if valid_593950 != nil:
-    section.add "delegatedProvider", valid_593950
-  var valid_593951 = path.getOrDefault("subscriptionId")
-  valid_593951 = validateParameter(valid_593951, JString, required = true,
+  if valid_582983 != nil:
+    section.add "delegatedProvider", valid_582983
+  var valid_582984 = path.getOrDefault("subscriptionId")
+  valid_582984 = validateParameter(valid_582984, JString, required = true,
                                  default = nil)
-  if valid_593951 != nil:
-    section.add "subscriptionId", valid_593951
+  if valid_582984 != nil:
+    section.add "subscriptionId", valid_582984
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -243,11 +243,11 @@ proc validate_DelegatedProvidersGet_593948(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593952 = query.getOrDefault("api-version")
-  valid_593952 = validateParameter(valid_593952, JString, required = true,
+  var valid_582985 = query.getOrDefault("api-version")
+  valid_582985 = validateParameter(valid_582985, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_593952 != nil:
-    section.add "api-version", valid_593952
+  if valid_582985 != nil:
+    section.add "api-version", valid_582985
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -256,20 +256,20 @@ proc validate_DelegatedProvidersGet_593948(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593953: Call_DelegatedProvidersGet_593947; path: JsonNode;
+proc call*(call_582986: Call_DelegatedProvidersGet_582980; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the specified delegated provider.
   ## 
-  let valid = call_593953.validator(path, query, header, formData, body)
-  let scheme = call_593953.pickScheme
+  let valid = call_582986.validator(path, query, header, formData, body)
+  let scheme = call_582986.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593953.url(scheme.get, call_593953.host, call_593953.base,
-                         call_593953.route, valid.getOrDefault("path"),
+  let url = call_582986.url(scheme.get, call_582986.host, call_582986.base,
+                         call_582986.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593953, url, valid)
+  result = hook(call_582986, url, valid)
 
-proc call*(call_593954: Call_DelegatedProvidersGet_593947;
+proc call*(call_582987: Call_DelegatedProvidersGet_582980;
           delegatedProvider: string; subscriptionId: string;
           apiVersion: string = "2015-11-01"): Recallable =
   ## delegatedProvidersGet
@@ -280,18 +280,18 @@ proc call*(call_593954: Call_DelegatedProvidersGet_593947;
   ##                    : DelegatedProvider identifier.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  var path_593955 = newJObject()
-  var query_593956 = newJObject()
-  add(query_593956, "api-version", newJString(apiVersion))
-  add(path_593955, "delegatedProvider", newJString(delegatedProvider))
-  add(path_593955, "subscriptionId", newJString(subscriptionId))
-  result = call_593954.call(path_593955, query_593956, nil, nil, nil)
+  var path_582988 = newJObject()
+  var query_582989 = newJObject()
+  add(query_582989, "api-version", newJString(apiVersion))
+  add(path_582988, "delegatedProvider", newJString(delegatedProvider))
+  add(path_582988, "subscriptionId", newJString(subscriptionId))
+  result = call_582987.call(path_582988, query_582989, nil, nil, nil)
 
-var delegatedProvidersGet* = Call_DelegatedProvidersGet_593947(
+var delegatedProvidersGet* = Call_DelegatedProvidersGet_582980(
     name: "delegatedProvidersGet", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/delegatedProviders/{delegatedProvider}",
-    validator: validate_DelegatedProvidersGet_593948, base: "",
-    url: url_DelegatedProvidersGet_593949, schemes: {Scheme.Https})
+    validator: validate_DelegatedProvidersGet_582981, base: "",
+    url: url_DelegatedProvidersGet_582982, schemes: {Scheme.Https})
 export
   rest
 

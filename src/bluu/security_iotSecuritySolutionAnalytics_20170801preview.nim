@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "security-iotSecuritySolutionAnalytics"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_IoTSecuritySolutionsAnalyticsGetAll_593646 = ref object of OpenApiRestCall_593424
-proc url_IoTSecuritySolutionsAnalyticsGetAll_593648(protocol: Scheme; host: string;
+  Call_IoTSecuritySolutionsAnalyticsGetAll_567879 = ref object of OpenApiRestCall_567657
+proc url_IoTSecuritySolutionsAnalyticsGetAll_567881(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +128,7 @@ proc url_IoTSecuritySolutionsAnalyticsGetAll_593648(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSecuritySolutionsAnalyticsGetAll_593647(path: JsonNode;
+proc validate_IoTSecuritySolutionsAnalyticsGetAll_567880(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security Analytics of a security solution
   ## 
@@ -144,21 +144,21 @@ proc validate_IoTSecuritySolutionsAnalyticsGetAll_593647(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_593821 = path.getOrDefault("solutionName")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("solutionName")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "solutionName", valid_593821
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_568054 != nil:
+    section.add "solutionName", valid_568054
+  var valid_568055 = path.getOrDefault("resourceGroupName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "resourceGroupName", valid_568055
+  var valid_568056 = path.getOrDefault("subscriptionId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
+  if valid_568056 != nil:
+    section.add "subscriptionId", valid_568056
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -166,11 +166,11 @@ proc validate_IoTSecuritySolutionsAnalyticsGetAll_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593824 = query.getOrDefault("api-version")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  var valid_568057 = query.getOrDefault("api-version")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "api-version", valid_593824
+  if valid_568057 != nil:
+    section.add "api-version", valid_568057
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -179,21 +179,21 @@ proc validate_IoTSecuritySolutionsAnalyticsGetAll_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593847: Call_IoTSecuritySolutionsAnalyticsGetAll_593646;
+proc call*(call_568080: Call_IoTSecuritySolutionsAnalyticsGetAll_567879;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Security Analytics of a security solution
   ## 
-  let valid = call_593847.validator(path, query, header, formData, body)
-  let scheme = call_593847.pickScheme
+  let valid = call_568080.validator(path, query, header, formData, body)
+  let scheme = call_568080.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593847.url(scheme.get, call_593847.host, call_593847.base,
-                         call_593847.route, valid.getOrDefault("path"),
+  let url = call_568080.url(scheme.get, call_568080.host, call_568080.base,
+                         call_568080.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593847, url, valid)
+  result = hook(call_568080, url, valid)
 
-proc call*(call_593918: Call_IoTSecuritySolutionsAnalyticsGetAll_593646;
+proc call*(call_568151: Call_IoTSecuritySolutionsAnalyticsGetAll_567879;
           solutionName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## ioTSecuritySolutionsAnalyticsGetAll
@@ -206,22 +206,22 @@ proc call*(call_593918: Call_IoTSecuritySolutionsAnalyticsGetAll_593646;
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_593919 = newJObject()
-  var query_593921 = newJObject()
-  add(path_593919, "solutionName", newJString(solutionName))
-  add(path_593919, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593921, "api-version", newJString(apiVersion))
-  add(path_593919, "subscriptionId", newJString(subscriptionId))
-  result = call_593918.call(path_593919, query_593921, nil, nil, nil)
+  var path_568152 = newJObject()
+  var query_568154 = newJObject()
+  add(path_568152, "solutionName", newJString(solutionName))
+  add(path_568152, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568154, "api-version", newJString(apiVersion))
+  add(path_568152, "subscriptionId", newJString(subscriptionId))
+  result = call_568151.call(path_568152, query_568154, nil, nil, nil)
 
-var ioTSecuritySolutionsAnalyticsGetAll* = Call_IoTSecuritySolutionsAnalyticsGetAll_593646(
+var ioTSecuritySolutionsAnalyticsGetAll* = Call_IoTSecuritySolutionsAnalyticsGetAll_567879(
     name: "ioTSecuritySolutionsAnalyticsGetAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/iotSecuritySolutions/{solutionName}/analyticsModels",
-    validator: validate_IoTSecuritySolutionsAnalyticsGetAll_593647, base: "",
-    url: url_IoTSecuritySolutionsAnalyticsGetAll_593648, schemes: {Scheme.Https})
+    validator: validate_IoTSecuritySolutionsAnalyticsGetAll_567880, base: "",
+    url: url_IoTSecuritySolutionsAnalyticsGetAll_567881, schemes: {Scheme.Https})
 type
-  Call_IoTSecuritySolutionsAnalyticsGetDefault_593960 = ref object of OpenApiRestCall_593424
-proc url_IoTSecuritySolutionsAnalyticsGetDefault_593962(protocol: Scheme;
+  Call_IoTSecuritySolutionsAnalyticsGetDefault_568193 = ref object of OpenApiRestCall_567657
+proc url_IoTSecuritySolutionsAnalyticsGetDefault_568195(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -245,7 +245,7 @@ proc url_IoTSecuritySolutionsAnalyticsGetDefault_593962(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSecuritySolutionsAnalyticsGetDefault_593961(path: JsonNode;
+proc validate_IoTSecuritySolutionsAnalyticsGetDefault_568194(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security Analytics of a security solution
   ## 
@@ -261,21 +261,21 @@ proc validate_IoTSecuritySolutionsAnalyticsGetDefault_593961(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_593963 = path.getOrDefault("solutionName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = path.getOrDefault("solutionName")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "solutionName", valid_593963
-  var valid_593964 = path.getOrDefault("resourceGroupName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_568196 != nil:
+    section.add "solutionName", valid_568196
+  var valid_568197 = path.getOrDefault("resourceGroupName")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "resourceGroupName", valid_593964
-  var valid_593965 = path.getOrDefault("subscriptionId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "resourceGroupName", valid_568197
+  var valid_568198 = path.getOrDefault("subscriptionId")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "subscriptionId", valid_593965
+  if valid_568198 != nil:
+    section.add "subscriptionId", valid_568198
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -283,11 +283,11 @@ proc validate_IoTSecuritySolutionsAnalyticsGetDefault_593961(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593966 = query.getOrDefault("api-version")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_568199 = query.getOrDefault("api-version")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "api-version", valid_593966
+  if valid_568199 != nil:
+    section.add "api-version", valid_568199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -296,21 +296,21 @@ proc validate_IoTSecuritySolutionsAnalyticsGetDefault_593961(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593967: Call_IoTSecuritySolutionsAnalyticsGetDefault_593960;
+proc call*(call_568200: Call_IoTSecuritySolutionsAnalyticsGetDefault_568193;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Security Analytics of a security solution
   ## 
-  let valid = call_593967.validator(path, query, header, formData, body)
-  let scheme = call_593967.pickScheme
+  let valid = call_568200.validator(path, query, header, formData, body)
+  let scheme = call_568200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593967.url(scheme.get, call_593967.host, call_593967.base,
-                         call_593967.route, valid.getOrDefault("path"),
+  let url = call_568200.url(scheme.get, call_568200.host, call_568200.base,
+                         call_568200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593967, url, valid)
+  result = hook(call_568200, url, valid)
 
-proc call*(call_593968: Call_IoTSecuritySolutionsAnalyticsGetDefault_593960;
+proc call*(call_568201: Call_IoTSecuritySolutionsAnalyticsGetDefault_568193;
           solutionName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## ioTSecuritySolutionsAnalyticsGetDefault
@@ -323,23 +323,23 @@ proc call*(call_593968: Call_IoTSecuritySolutionsAnalyticsGetDefault_593960;
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_593969 = newJObject()
-  var query_593970 = newJObject()
-  add(path_593969, "solutionName", newJString(solutionName))
-  add(path_593969, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593970, "api-version", newJString(apiVersion))
-  add(path_593969, "subscriptionId", newJString(subscriptionId))
-  result = call_593968.call(path_593969, query_593970, nil, nil, nil)
+  var path_568202 = newJObject()
+  var query_568203 = newJObject()
+  add(path_568202, "solutionName", newJString(solutionName))
+  add(path_568202, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568203, "api-version", newJString(apiVersion))
+  add(path_568202, "subscriptionId", newJString(subscriptionId))
+  result = call_568201.call(path_568202, query_568203, nil, nil, nil)
 
-var ioTSecuritySolutionsAnalyticsGetDefault* = Call_IoTSecuritySolutionsAnalyticsGetDefault_593960(
+var ioTSecuritySolutionsAnalyticsGetDefault* = Call_IoTSecuritySolutionsAnalyticsGetDefault_568193(
     name: "ioTSecuritySolutionsAnalyticsGetDefault", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/iotSecuritySolutions/{solutionName}/analyticsModels/default",
-    validator: validate_IoTSecuritySolutionsAnalyticsGetDefault_593961, base: "",
-    url: url_IoTSecuritySolutionsAnalyticsGetDefault_593962,
+    validator: validate_IoTSecuritySolutionsAnalyticsGetDefault_568194, base: "",
+    url: url_IoTSecuritySolutionsAnalyticsGetDefault_568195,
     schemes: {Scheme.Https})
 type
-  Call_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593971 = ref object of OpenApiRestCall_593424
-proc url_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593973(
+  Call_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_568204 = ref object of OpenApiRestCall_567657
+proc url_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_568206(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -364,7 +364,7 @@ proc url_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593973(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593972(
+proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_568205(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Security Analytics of a security solution
@@ -381,21 +381,21 @@ proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593972(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_593975 = path.getOrDefault("solutionName")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_568208 = path.getOrDefault("solutionName")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "solutionName", valid_593975
-  var valid_593976 = path.getOrDefault("resourceGroupName")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  if valid_568208 != nil:
+    section.add "solutionName", valid_568208
+  var valid_568209 = path.getOrDefault("resourceGroupName")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "resourceGroupName", valid_593976
-  var valid_593977 = path.getOrDefault("subscriptionId")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_568209 != nil:
+    section.add "resourceGroupName", valid_568209
+  var valid_568210 = path.getOrDefault("subscriptionId")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "subscriptionId", valid_593977
+  if valid_568210 != nil:
+    section.add "subscriptionId", valid_568210
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -405,15 +405,15 @@ proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593972(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593978 = query.getOrDefault("api-version")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_568211 = query.getOrDefault("api-version")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "api-version", valid_593978
-  var valid_593979 = query.getOrDefault("$top")
-  valid_593979 = validateParameter(valid_593979, JInt, required = false, default = nil)
-  if valid_593979 != nil:
-    section.add "$top", valid_593979
+  if valid_568211 != nil:
+    section.add "api-version", valid_568211
+  var valid_568212 = query.getOrDefault("$top")
+  valid_568212 = validateParameter(valid_568212, JInt, required = false, default = nil)
+  if valid_568212 != nil:
+    section.add "$top", valid_568212
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -422,21 +422,21 @@ proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593972(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593980: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593971;
+proc call*(call_568213: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_568204;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Security Analytics of a security solution
   ## 
-  let valid = call_593980.validator(path, query, header, formData, body)
-  let scheme = call_593980.pickScheme
+  let valid = call_568213.validator(path, query, header, formData, body)
+  let scheme = call_568213.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593980.url(scheme.get, call_593980.host, call_593980.base,
-                         call_593980.route, valid.getOrDefault("path"),
+  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
+                         call_568213.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593980, url, valid)
+  result = hook(call_568213, url, valid)
 
-proc call*(call_593981: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593971;
+proc call*(call_568214: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_568204;
           solutionName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; Top: int = 0): Recallable =
   ## ioTSecuritySolutionsAnalyticsAggregatedAlertsList
@@ -451,24 +451,24 @@ proc call*(call_593981: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_5
   ##                 : Azure subscription ID
   ##   Top: int
   ##      : The number of results to retrieve.
-  var path_593982 = newJObject()
-  var query_593983 = newJObject()
-  add(path_593982, "solutionName", newJString(solutionName))
-  add(path_593982, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593983, "api-version", newJString(apiVersion))
-  add(path_593982, "subscriptionId", newJString(subscriptionId))
-  add(query_593983, "$top", newJInt(Top))
-  result = call_593981.call(path_593982, query_593983, nil, nil, nil)
+  var path_568215 = newJObject()
+  var query_568216 = newJObject()
+  add(path_568215, "solutionName", newJString(solutionName))
+  add(path_568215, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568216, "api-version", newJString(apiVersion))
+  add(path_568215, "subscriptionId", newJString(subscriptionId))
+  add(query_568216, "$top", newJInt(Top))
+  result = call_568214.call(path_568215, query_568216, nil, nil, nil)
 
-var ioTSecuritySolutionsAnalyticsAggregatedAlertsList* = Call_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593971(
+var ioTSecuritySolutionsAnalyticsAggregatedAlertsList* = Call_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_568204(
     name: "ioTSecuritySolutionsAnalyticsAggregatedAlertsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/iotSecuritySolutions/{solutionName}/analyticsModels/default/aggregatedAlerts",
-    validator: validate_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593972,
-    base: "", url: url_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_593973,
+    validator: validate_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_568205,
+    base: "", url: url_IoTSecuritySolutionsAnalyticsAggregatedAlertsList_568206,
     schemes: {Scheme.Https})
 type
-  Call_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593984 = ref object of OpenApiRestCall_593424
-proc url_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593986(protocol: Scheme;
+  Call_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_568217 = ref object of OpenApiRestCall_567657
+proc url_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_568219(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -495,7 +495,7 @@ proc url_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593986(protocol: Scheme
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593985(
+proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_568218(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Security Analytics of a security solution
@@ -514,26 +514,26 @@ proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593985(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_593987 = path.getOrDefault("solutionName")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+  var valid_568220 = path.getOrDefault("solutionName")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "solutionName", valid_593987
-  var valid_593988 = path.getOrDefault("resourceGroupName")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  if valid_568220 != nil:
+    section.add "solutionName", valid_568220
+  var valid_568221 = path.getOrDefault("resourceGroupName")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "resourceGroupName", valid_593988
-  var valid_593989 = path.getOrDefault("aggregatedAlertName")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_568221 != nil:
+    section.add "resourceGroupName", valid_568221
+  var valid_568222 = path.getOrDefault("aggregatedAlertName")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "aggregatedAlertName", valid_593989
-  var valid_593990 = path.getOrDefault("subscriptionId")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  if valid_568222 != nil:
+    section.add "aggregatedAlertName", valid_568222
+  var valid_568223 = path.getOrDefault("subscriptionId")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "subscriptionId", valid_593990
+  if valid_568223 != nil:
+    section.add "subscriptionId", valid_568223
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -541,11 +541,11 @@ proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593985(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593991 = query.getOrDefault("api-version")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_568224 = query.getOrDefault("api-version")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "api-version", valid_593991
+  if valid_568224 != nil:
+    section.add "api-version", valid_568224
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -554,21 +554,21 @@ proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593985(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593992: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593984;
+proc call*(call_568225: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_568217;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Security Analytics of a security solution
   ## 
-  let valid = call_593992.validator(path, query, header, formData, body)
-  let scheme = call_593992.pickScheme
+  let valid = call_568225.validator(path, query, header, formData, body)
+  let scheme = call_568225.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593992.url(scheme.get, call_593992.host, call_593992.base,
-                         call_593992.route, valid.getOrDefault("path"),
+  let url = call_568225.url(scheme.get, call_568225.host, call_568225.base,
+                         call_568225.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593992, url, valid)
+  result = hook(call_568225, url, valid)
 
-proc call*(call_593993: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593984;
+proc call*(call_568226: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_568217;
           solutionName: string; resourceGroupName: string; apiVersion: string;
           aggregatedAlertName: string; subscriptionId: string): Recallable =
   ## ioTSecuritySolutionsAnalyticsAggregatedAlertGet
@@ -583,24 +583,24 @@ proc call*(call_593993: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593
   ##                      : Identifier of the aggregated alert
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_593994 = newJObject()
-  var query_593995 = newJObject()
-  add(path_593994, "solutionName", newJString(solutionName))
-  add(path_593994, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593995, "api-version", newJString(apiVersion))
-  add(path_593994, "aggregatedAlertName", newJString(aggregatedAlertName))
-  add(path_593994, "subscriptionId", newJString(subscriptionId))
-  result = call_593993.call(path_593994, query_593995, nil, nil, nil)
+  var path_568227 = newJObject()
+  var query_568228 = newJObject()
+  add(path_568227, "solutionName", newJString(solutionName))
+  add(path_568227, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568228, "api-version", newJString(apiVersion))
+  add(path_568227, "aggregatedAlertName", newJString(aggregatedAlertName))
+  add(path_568227, "subscriptionId", newJString(subscriptionId))
+  result = call_568226.call(path_568227, query_568228, nil, nil, nil)
 
-var ioTSecuritySolutionsAnalyticsAggregatedAlertGet* = Call_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593984(
+var ioTSecuritySolutionsAnalyticsAggregatedAlertGet* = Call_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_568217(
     name: "ioTSecuritySolutionsAnalyticsAggregatedAlertGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/iotSecuritySolutions/{solutionName}/analyticsModels/default/aggregatedAlerts/{aggregatedAlertName}",
-    validator: validate_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593985,
-    base: "", url: url_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_593986,
+    validator: validate_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_568218,
+    base: "", url: url_IoTSecuritySolutionsAnalyticsAggregatedAlertGet_568219,
     schemes: {Scheme.Https})
 type
-  Call_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593996 = ref object of OpenApiRestCall_593424
-proc url_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593998(
+  Call_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_568229 = ref object of OpenApiRestCall_567657
+proc url_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_568231(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -629,7 +629,7 @@ proc url_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593998(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593997(
+proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_568230(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Security Analytics of a security solution
@@ -648,26 +648,26 @@ proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593997(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_593999 = path.getOrDefault("solutionName")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  var valid_568232 = path.getOrDefault("solutionName")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "solutionName", valid_593999
-  var valid_594000 = path.getOrDefault("resourceGroupName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  if valid_568232 != nil:
+    section.add "solutionName", valid_568232
+  var valid_568233 = path.getOrDefault("resourceGroupName")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "resourceGroupName", valid_594000
-  var valid_594001 = path.getOrDefault("aggregatedAlertName")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_568233 != nil:
+    section.add "resourceGroupName", valid_568233
+  var valid_568234 = path.getOrDefault("aggregatedAlertName")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "aggregatedAlertName", valid_594001
-  var valid_594002 = path.getOrDefault("subscriptionId")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_568234 != nil:
+    section.add "aggregatedAlertName", valid_568234
+  var valid_568235 = path.getOrDefault("subscriptionId")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "subscriptionId", valid_594002
+  if valid_568235 != nil:
+    section.add "subscriptionId", valid_568235
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -675,11 +675,11 @@ proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593997(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594003 = query.getOrDefault("api-version")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  var valid_568236 = query.getOrDefault("api-version")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "api-version", valid_594003
+  if valid_568236 != nil:
+    section.add "api-version", valid_568236
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -688,21 +688,21 @@ proc validate_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593997(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594004: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593996;
+proc call*(call_568237: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_568229;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Security Analytics of a security solution
   ## 
-  let valid = call_594004.validator(path, query, header, formData, body)
-  let scheme = call_594004.pickScheme
+  let valid = call_568237.validator(path, query, header, formData, body)
+  let scheme = call_568237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594004.url(scheme.get, call_594004.host, call_594004.base,
-                         call_594004.route, valid.getOrDefault("path"),
+  let url = call_568237.url(scheme.get, call_568237.host, call_568237.base,
+                         call_568237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594004, url, valid)
+  result = hook(call_568237, url, valid)
 
-proc call*(call_594005: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593996;
+proc call*(call_568238: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_568229;
           solutionName: string; resourceGroupName: string; apiVersion: string;
           aggregatedAlertName: string; subscriptionId: string): Recallable =
   ## ioTSecuritySolutionsAnalyticsAggregatedAlertDismiss
@@ -717,24 +717,24 @@ proc call*(call_594005: Call_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss
   ##                      : Identifier of the aggregated alert
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_594006 = newJObject()
-  var query_594007 = newJObject()
-  add(path_594006, "solutionName", newJString(solutionName))
-  add(path_594006, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594007, "api-version", newJString(apiVersion))
-  add(path_594006, "aggregatedAlertName", newJString(aggregatedAlertName))
-  add(path_594006, "subscriptionId", newJString(subscriptionId))
-  result = call_594005.call(path_594006, query_594007, nil, nil, nil)
+  var path_568239 = newJObject()
+  var query_568240 = newJObject()
+  add(path_568239, "solutionName", newJString(solutionName))
+  add(path_568239, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568240, "api-version", newJString(apiVersion))
+  add(path_568239, "aggregatedAlertName", newJString(aggregatedAlertName))
+  add(path_568239, "subscriptionId", newJString(subscriptionId))
+  result = call_568238.call(path_568239, query_568240, nil, nil, nil)
 
-var ioTSecuritySolutionsAnalyticsAggregatedAlertDismiss* = Call_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593996(
+var ioTSecuritySolutionsAnalyticsAggregatedAlertDismiss* = Call_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_568229(
     name: "ioTSecuritySolutionsAnalyticsAggregatedAlertDismiss",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/iotSecuritySolutions/{solutionName}/analyticsModels/default/aggregatedAlerts/{aggregatedAlertName}/dismiss",
-    validator: validate_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593997,
-    base: "", url: url_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_593998,
+    validator: validate_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_568230,
+    base: "", url: url_IoTSecuritySolutionsAnalyticsAggregatedAlertDismiss_568231,
     schemes: {Scheme.Https})
 type
-  Call_IoTSecuritySolutionsAnalyticsRecommendationsList_594008 = ref object of OpenApiRestCall_593424
-proc url_IoTSecuritySolutionsAnalyticsRecommendationsList_594010(
+  Call_IoTSecuritySolutionsAnalyticsRecommendationsList_568241 = ref object of OpenApiRestCall_567657
+proc url_IoTSecuritySolutionsAnalyticsRecommendationsList_568243(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -760,7 +760,7 @@ proc url_IoTSecuritySolutionsAnalyticsRecommendationsList_594010(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSecuritySolutionsAnalyticsRecommendationsList_594009(
+proc validate_IoTSecuritySolutionsAnalyticsRecommendationsList_568242(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Security Analytics of a security solution
@@ -777,21 +777,21 @@ proc validate_IoTSecuritySolutionsAnalyticsRecommendationsList_594009(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_594011 = path.getOrDefault("solutionName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_568244 = path.getOrDefault("solutionName")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "solutionName", valid_594011
-  var valid_594012 = path.getOrDefault("resourceGroupName")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_568244 != nil:
+    section.add "solutionName", valid_568244
+  var valid_568245 = path.getOrDefault("resourceGroupName")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "resourceGroupName", valid_594012
-  var valid_594013 = path.getOrDefault("subscriptionId")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  if valid_568245 != nil:
+    section.add "resourceGroupName", valid_568245
+  var valid_568246 = path.getOrDefault("subscriptionId")
+  valid_568246 = validateParameter(valid_568246, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "subscriptionId", valid_594013
+  if valid_568246 != nil:
+    section.add "subscriptionId", valid_568246
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -801,15 +801,15 @@ proc validate_IoTSecuritySolutionsAnalyticsRecommendationsList_594009(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594014 = query.getOrDefault("api-version")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_568247 = query.getOrDefault("api-version")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "api-version", valid_594014
-  var valid_594015 = query.getOrDefault("$top")
-  valid_594015 = validateParameter(valid_594015, JInt, required = false, default = nil)
-  if valid_594015 != nil:
-    section.add "$top", valid_594015
+  if valid_568247 != nil:
+    section.add "api-version", valid_568247
+  var valid_568248 = query.getOrDefault("$top")
+  valid_568248 = validateParameter(valid_568248, JInt, required = false, default = nil)
+  if valid_568248 != nil:
+    section.add "$top", valid_568248
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -818,21 +818,21 @@ proc validate_IoTSecuritySolutionsAnalyticsRecommendationsList_594009(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594016: Call_IoTSecuritySolutionsAnalyticsRecommendationsList_594008;
+proc call*(call_568249: Call_IoTSecuritySolutionsAnalyticsRecommendationsList_568241;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Security Analytics of a security solution
   ## 
-  let valid = call_594016.validator(path, query, header, formData, body)
-  let scheme = call_594016.pickScheme
+  let valid = call_568249.validator(path, query, header, formData, body)
+  let scheme = call_568249.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594016.url(scheme.get, call_594016.host, call_594016.base,
-                         call_594016.route, valid.getOrDefault("path"),
+  let url = call_568249.url(scheme.get, call_568249.host, call_568249.base,
+                         call_568249.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594016, url, valid)
+  result = hook(call_568249, url, valid)
 
-proc call*(call_594017: Call_IoTSecuritySolutionsAnalyticsRecommendationsList_594008;
+proc call*(call_568250: Call_IoTSecuritySolutionsAnalyticsRecommendationsList_568241;
           solutionName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; Top: int = 0): Recallable =
   ## ioTSecuritySolutionsAnalyticsRecommendationsList
@@ -847,24 +847,24 @@ proc call*(call_594017: Call_IoTSecuritySolutionsAnalyticsRecommendationsList_59
   ##                 : Azure subscription ID
   ##   Top: int
   ##      : The number of results to retrieve.
-  var path_594018 = newJObject()
-  var query_594019 = newJObject()
-  add(path_594018, "solutionName", newJString(solutionName))
-  add(path_594018, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594019, "api-version", newJString(apiVersion))
-  add(path_594018, "subscriptionId", newJString(subscriptionId))
-  add(query_594019, "$top", newJInt(Top))
-  result = call_594017.call(path_594018, query_594019, nil, nil, nil)
+  var path_568251 = newJObject()
+  var query_568252 = newJObject()
+  add(path_568251, "solutionName", newJString(solutionName))
+  add(path_568251, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568252, "api-version", newJString(apiVersion))
+  add(path_568251, "subscriptionId", newJString(subscriptionId))
+  add(query_568252, "$top", newJInt(Top))
+  result = call_568250.call(path_568251, query_568252, nil, nil, nil)
 
-var ioTSecuritySolutionsAnalyticsRecommendationsList* = Call_IoTSecuritySolutionsAnalyticsRecommendationsList_594008(
+var ioTSecuritySolutionsAnalyticsRecommendationsList* = Call_IoTSecuritySolutionsAnalyticsRecommendationsList_568241(
     name: "ioTSecuritySolutionsAnalyticsRecommendationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/iotSecuritySolutions/{solutionName}/analyticsModels/default/aggregatedRecommendations",
-    validator: validate_IoTSecuritySolutionsAnalyticsRecommendationsList_594009,
-    base: "", url: url_IoTSecuritySolutionsAnalyticsRecommendationsList_594010,
+    validator: validate_IoTSecuritySolutionsAnalyticsRecommendationsList_568242,
+    base: "", url: url_IoTSecuritySolutionsAnalyticsRecommendationsList_568243,
     schemes: {Scheme.Https})
 type
-  Call_IoTSecuritySolutionsAnalyticsRecommendationGet_594020 = ref object of OpenApiRestCall_593424
-proc url_IoTSecuritySolutionsAnalyticsRecommendationGet_594022(protocol: Scheme;
+  Call_IoTSecuritySolutionsAnalyticsRecommendationGet_568253 = ref object of OpenApiRestCall_567657
+proc url_IoTSecuritySolutionsAnalyticsRecommendationGet_568255(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -892,7 +892,7 @@ proc url_IoTSecuritySolutionsAnalyticsRecommendationGet_594022(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSecuritySolutionsAnalyticsRecommendationGet_594021(
+proc validate_IoTSecuritySolutionsAnalyticsRecommendationGet_568254(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Security Analytics of a security solution
@@ -911,26 +911,26 @@ proc validate_IoTSecuritySolutionsAnalyticsRecommendationGet_594021(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_594023 = path.getOrDefault("solutionName")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  var valid_568256 = path.getOrDefault("solutionName")
+  valid_568256 = validateParameter(valid_568256, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "solutionName", valid_594023
-  var valid_594024 = path.getOrDefault("resourceGroupName")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  if valid_568256 != nil:
+    section.add "solutionName", valid_568256
+  var valid_568257 = path.getOrDefault("resourceGroupName")
+  valid_568257 = validateParameter(valid_568257, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "resourceGroupName", valid_594024
-  var valid_594025 = path.getOrDefault("subscriptionId")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  if valid_568257 != nil:
+    section.add "resourceGroupName", valid_568257
+  var valid_568258 = path.getOrDefault("subscriptionId")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "subscriptionId", valid_594025
-  var valid_594026 = path.getOrDefault("aggregatedRecommendationName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_568258 != nil:
+    section.add "subscriptionId", valid_568258
+  var valid_568259 = path.getOrDefault("aggregatedRecommendationName")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "aggregatedRecommendationName", valid_594026
+  if valid_568259 != nil:
+    section.add "aggregatedRecommendationName", valid_568259
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -938,11 +938,11 @@ proc validate_IoTSecuritySolutionsAnalyticsRecommendationGet_594021(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594027 = query.getOrDefault("api-version")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  var valid_568260 = query.getOrDefault("api-version")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "api-version", valid_594027
+  if valid_568260 != nil:
+    section.add "api-version", valid_568260
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -951,21 +951,21 @@ proc validate_IoTSecuritySolutionsAnalyticsRecommendationGet_594021(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594028: Call_IoTSecuritySolutionsAnalyticsRecommendationGet_594020;
+proc call*(call_568261: Call_IoTSecuritySolutionsAnalyticsRecommendationGet_568253;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Security Analytics of a security solution
   ## 
-  let valid = call_594028.validator(path, query, header, formData, body)
-  let scheme = call_594028.pickScheme
+  let valid = call_568261.validator(path, query, header, formData, body)
+  let scheme = call_568261.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594028.url(scheme.get, call_594028.host, call_594028.base,
-                         call_594028.route, valid.getOrDefault("path"),
+  let url = call_568261.url(scheme.get, call_568261.host, call_568261.base,
+                         call_568261.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594028, url, valid)
+  result = hook(call_568261, url, valid)
 
-proc call*(call_594029: Call_IoTSecuritySolutionsAnalyticsRecommendationGet_594020;
+proc call*(call_568262: Call_IoTSecuritySolutionsAnalyticsRecommendationGet_568253;
           solutionName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; aggregatedRecommendationName: string): Recallable =
   ## ioTSecuritySolutionsAnalyticsRecommendationGet
@@ -980,21 +980,21 @@ proc call*(call_594029: Call_IoTSecuritySolutionsAnalyticsRecommendationGet_5940
   ##                 : Azure subscription ID
   ##   aggregatedRecommendationName: string (required)
   ##                               : Identifier of the aggregated recommendation
-  var path_594030 = newJObject()
-  var query_594031 = newJObject()
-  add(path_594030, "solutionName", newJString(solutionName))
-  add(path_594030, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594031, "api-version", newJString(apiVersion))
-  add(path_594030, "subscriptionId", newJString(subscriptionId))
-  add(path_594030, "aggregatedRecommendationName",
+  var path_568263 = newJObject()
+  var query_568264 = newJObject()
+  add(path_568263, "solutionName", newJString(solutionName))
+  add(path_568263, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568264, "api-version", newJString(apiVersion))
+  add(path_568263, "subscriptionId", newJString(subscriptionId))
+  add(path_568263, "aggregatedRecommendationName",
       newJString(aggregatedRecommendationName))
-  result = call_594029.call(path_594030, query_594031, nil, nil, nil)
+  result = call_568262.call(path_568263, query_568264, nil, nil, nil)
 
-var ioTSecuritySolutionsAnalyticsRecommendationGet* = Call_IoTSecuritySolutionsAnalyticsRecommendationGet_594020(
+var ioTSecuritySolutionsAnalyticsRecommendationGet* = Call_IoTSecuritySolutionsAnalyticsRecommendationGet_568253(
     name: "ioTSecuritySolutionsAnalyticsRecommendationGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/iotSecuritySolutions/{solutionName}/analyticsModels/default/aggregatedRecommendations/{aggregatedRecommendationName}",
-    validator: validate_IoTSecuritySolutionsAnalyticsRecommendationGet_594021,
-    base: "", url: url_IoTSecuritySolutionsAnalyticsRecommendationGet_594022,
+    validator: validate_IoTSecuritySolutionsAnalyticsRecommendationGet_568254,
+    base: "", url: url_IoTSecuritySolutionsAnalyticsRecommendationGet_568255,
     schemes: {Scheme.Https})
 export
   rest

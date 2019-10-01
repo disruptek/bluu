@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: StorageManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593426 = ref object of OpenApiRestCall
+  OpenApiRestCall_574459 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593426](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574459](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593426): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574459): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-shares"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SharesList_593648 = ref object of OpenApiRestCall_593426
-proc url_SharesList_593650(protocol: Scheme; host: string; base: string; route: string;
+  Call_SharesList_574681 = ref object of OpenApiRestCall_574459
+proc url_SharesList_574683(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_SharesList_593650(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SharesList_593649(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SharesList_574682(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of storage shares.
   ## 
@@ -143,21 +143,21 @@ proc validate_SharesList_593649(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593810 = path.getOrDefault("resourceGroupName")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  var valid_574843 = path.getOrDefault("resourceGroupName")
+  valid_574843 = validateParameter(valid_574843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "resourceGroupName", valid_593810
-  var valid_593811 = path.getOrDefault("farmId")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_574843 != nil:
+    section.add "resourceGroupName", valid_574843
+  var valid_574844 = path.getOrDefault("farmId")
+  valid_574844 = validateParameter(valid_574844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "farmId", valid_593811
-  var valid_593812 = path.getOrDefault("subscriptionId")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  if valid_574844 != nil:
+    section.add "farmId", valid_574844
+  var valid_574845 = path.getOrDefault("subscriptionId")
+  valid_574845 = validateParameter(valid_574845, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "subscriptionId", valid_593812
+  if valid_574845 != nil:
+    section.add "subscriptionId", valid_574845
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +165,11 @@ proc validate_SharesList_593649(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593813 = query.getOrDefault("api-version")
-  valid_593813 = validateParameter(valid_593813, JString, required = true,
+  var valid_574846 = query.getOrDefault("api-version")
+  valid_574846 = validateParameter(valid_574846, JString, required = true,
                                  default = nil)
-  if valid_593813 != nil:
-    section.add "api-version", valid_593813
+  if valid_574846 != nil:
+    section.add "api-version", valid_574846
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,20 +178,20 @@ proc validate_SharesList_593649(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593840: Call_SharesList_593648; path: JsonNode; query: JsonNode;
+proc call*(call_574873: Call_SharesList_574681; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of storage shares.
   ## 
-  let valid = call_593840.validator(path, query, header, formData, body)
-  let scheme = call_593840.pickScheme
+  let valid = call_574873.validator(path, query, header, formData, body)
+  let scheme = call_574873.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593840.url(scheme.get, call_593840.host, call_593840.base,
-                         call_593840.route, valid.getOrDefault("path"),
+  let url = call_574873.url(scheme.get, call_574873.host, call_574873.base,
+                         call_574873.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593840, url, valid)
+  result = hook(call_574873, url, valid)
 
-proc call*(call_593911: Call_SharesList_593648; resourceGroupName: string;
+proc call*(call_574944: Call_SharesList_574681; resourceGroupName: string;
           apiVersion: string; farmId: string; subscriptionId: string): Recallable =
   ## sharesList
   ## Returns a list of storage shares.
@@ -203,22 +203,22 @@ proc call*(call_593911: Call_SharesList_593648; resourceGroupName: string;
   ##         : Farm Id.
   ##   subscriptionId: string (required)
   ##                 : Subscription Id.
-  var path_593912 = newJObject()
-  var query_593914 = newJObject()
-  add(path_593912, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593914, "api-version", newJString(apiVersion))
-  add(path_593912, "farmId", newJString(farmId))
-  add(path_593912, "subscriptionId", newJString(subscriptionId))
-  result = call_593911.call(path_593912, query_593914, nil, nil, nil)
+  var path_574945 = newJObject()
+  var query_574947 = newJObject()
+  add(path_574945, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574947, "api-version", newJString(apiVersion))
+  add(path_574945, "farmId", newJString(farmId))
+  add(path_574945, "subscriptionId", newJString(subscriptionId))
+  result = call_574944.call(path_574945, query_574947, nil, nil, nil)
 
-var sharesList* = Call_SharesList_593648(name: "sharesList",
+var sharesList* = Call_SharesList_574681(name: "sharesList",
                                       meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/shares",
-                                      validator: validate_SharesList_593649,
-                                      base: "", url: url_SharesList_593650,
+                                      validator: validate_SharesList_574682,
+                                      base: "", url: url_SharesList_574683,
                                       schemes: {Scheme.Https})
 type
-  Call_SharesGet_593953 = ref object of OpenApiRestCall_593426
-proc url_SharesGet_593955(protocol: Scheme; host: string; base: string; route: string;
+  Call_SharesGet_574986 = ref object of OpenApiRestCall_574459
+proc url_SharesGet_574988(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -243,7 +243,7 @@ proc url_SharesGet_593955(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SharesGet_593954(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SharesGet_574987(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a storage share.
   ## 
@@ -261,26 +261,26 @@ proc validate_SharesGet_593954(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593956 = path.getOrDefault("resourceGroupName")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  var valid_574989 = path.getOrDefault("resourceGroupName")
+  valid_574989 = validateParameter(valid_574989, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "resourceGroupName", valid_593956
-  var valid_593957 = path.getOrDefault("farmId")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  if valid_574989 != nil:
+    section.add "resourceGroupName", valid_574989
+  var valid_574990 = path.getOrDefault("farmId")
+  valid_574990 = validateParameter(valid_574990, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "farmId", valid_593957
-  var valid_593958 = path.getOrDefault("subscriptionId")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  if valid_574990 != nil:
+    section.add "farmId", valid_574990
+  var valid_574991 = path.getOrDefault("subscriptionId")
+  valid_574991 = validateParameter(valid_574991, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "subscriptionId", valid_593958
-  var valid_593959 = path.getOrDefault("shareName")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_574991 != nil:
+    section.add "subscriptionId", valid_574991
+  var valid_574992 = path.getOrDefault("shareName")
+  valid_574992 = validateParameter(valid_574992, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "shareName", valid_593959
+  if valid_574992 != nil:
+    section.add "shareName", valid_574992
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -288,11 +288,11 @@ proc validate_SharesGet_593954(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593960 = query.getOrDefault("api-version")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_574993 = query.getOrDefault("api-version")
+  valid_574993 = validateParameter(valid_574993, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "api-version", valid_593960
+  if valid_574993 != nil:
+    section.add "api-version", valid_574993
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -301,20 +301,20 @@ proc validate_SharesGet_593954(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593961: Call_SharesGet_593953; path: JsonNode; query: JsonNode;
+proc call*(call_574994: Call_SharesGet_574986; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a storage share.
   ## 
-  let valid = call_593961.validator(path, query, header, formData, body)
-  let scheme = call_593961.pickScheme
+  let valid = call_574994.validator(path, query, header, formData, body)
+  let scheme = call_574994.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593961.url(scheme.get, call_593961.host, call_593961.base,
-                         call_593961.route, valid.getOrDefault("path"),
+  let url = call_574994.url(scheme.get, call_574994.host, call_574994.base,
+                         call_574994.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593961, url, valid)
+  result = hook(call_574994, url, valid)
 
-proc call*(call_593962: Call_SharesGet_593953; resourceGroupName: string;
+proc call*(call_574995: Call_SharesGet_574986; resourceGroupName: string;
           apiVersion: string; farmId: string; subscriptionId: string;
           shareName: string): Recallable =
   ## sharesGet
@@ -329,22 +329,22 @@ proc call*(call_593962: Call_SharesGet_593953; resourceGroupName: string;
   ##                 : Subscription Id.
   ##   shareName: string (required)
   ##            : Share name.
-  var path_593963 = newJObject()
-  var query_593964 = newJObject()
-  add(path_593963, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593964, "api-version", newJString(apiVersion))
-  add(path_593963, "farmId", newJString(farmId))
-  add(path_593963, "subscriptionId", newJString(subscriptionId))
-  add(path_593963, "shareName", newJString(shareName))
-  result = call_593962.call(path_593963, query_593964, nil, nil, nil)
+  var path_574996 = newJObject()
+  var query_574997 = newJObject()
+  add(path_574996, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574997, "api-version", newJString(apiVersion))
+  add(path_574996, "farmId", newJString(farmId))
+  add(path_574996, "subscriptionId", newJString(subscriptionId))
+  add(path_574996, "shareName", newJString(shareName))
+  result = call_574995.call(path_574996, query_574997, nil, nil, nil)
 
-var sharesGet* = Call_SharesGet_593953(name: "sharesGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/shares/{shareName}",
-                                    validator: validate_SharesGet_593954,
-                                    base: "", url: url_SharesGet_593955,
+var sharesGet* = Call_SharesGet_574986(name: "sharesGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/shares/{shareName}",
+                                    validator: validate_SharesGet_574987,
+                                    base: "", url: url_SharesGet_574988,
                                     schemes: {Scheme.Https})
 type
-  Call_SharesListMetricDefinitions_593965 = ref object of OpenApiRestCall_593426
-proc url_SharesListMetricDefinitions_593967(protocol: Scheme; host: string;
+  Call_SharesListMetricDefinitions_574998 = ref object of OpenApiRestCall_574459
+proc url_SharesListMetricDefinitions_575000(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -370,7 +370,7 @@ proc url_SharesListMetricDefinitions_593967(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SharesListMetricDefinitions_593966(path: JsonNode; query: JsonNode;
+proc validate_SharesListMetricDefinitions_574999(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of metric definitions for a storage share.
   ## 
@@ -388,26 +388,26 @@ proc validate_SharesListMetricDefinitions_593966(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593968 = path.getOrDefault("resourceGroupName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  var valid_575001 = path.getOrDefault("resourceGroupName")
+  valid_575001 = validateParameter(valid_575001, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "resourceGroupName", valid_593968
-  var valid_593969 = path.getOrDefault("farmId")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  if valid_575001 != nil:
+    section.add "resourceGroupName", valid_575001
+  var valid_575002 = path.getOrDefault("farmId")
+  valid_575002 = validateParameter(valid_575002, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "farmId", valid_593969
-  var valid_593970 = path.getOrDefault("subscriptionId")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_575002 != nil:
+    section.add "farmId", valid_575002
+  var valid_575003 = path.getOrDefault("subscriptionId")
+  valid_575003 = validateParameter(valid_575003, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "subscriptionId", valid_593970
-  var valid_593971 = path.getOrDefault("shareName")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  if valid_575003 != nil:
+    section.add "subscriptionId", valid_575003
+  var valid_575004 = path.getOrDefault("shareName")
+  valid_575004 = validateParameter(valid_575004, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "shareName", valid_593971
+  if valid_575004 != nil:
+    section.add "shareName", valid_575004
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -415,11 +415,11 @@ proc validate_SharesListMetricDefinitions_593966(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593972 = query.getOrDefault("api-version")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_575005 = query.getOrDefault("api-version")
+  valid_575005 = validateParameter(valid_575005, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "api-version", valid_593972
+  if valid_575005 != nil:
+    section.add "api-version", valid_575005
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -428,20 +428,20 @@ proc validate_SharesListMetricDefinitions_593966(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593973: Call_SharesListMetricDefinitions_593965; path: JsonNode;
+proc call*(call_575006: Call_SharesListMetricDefinitions_574998; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of metric definitions for a storage share.
   ## 
-  let valid = call_593973.validator(path, query, header, formData, body)
-  let scheme = call_593973.pickScheme
+  let valid = call_575006.validator(path, query, header, formData, body)
+  let scheme = call_575006.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593973.url(scheme.get, call_593973.host, call_593973.base,
-                         call_593973.route, valid.getOrDefault("path"),
+  let url = call_575006.url(scheme.get, call_575006.host, call_575006.base,
+                         call_575006.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593973, url, valid)
+  result = hook(call_575006, url, valid)
 
-proc call*(call_593974: Call_SharesListMetricDefinitions_593965;
+proc call*(call_575007: Call_SharesListMetricDefinitions_574998;
           resourceGroupName: string; apiVersion: string; farmId: string;
           subscriptionId: string; shareName: string): Recallable =
   ## sharesListMetricDefinitions
@@ -456,23 +456,23 @@ proc call*(call_593974: Call_SharesListMetricDefinitions_593965;
   ##                 : Subscription Id.
   ##   shareName: string (required)
   ##            : Share name.
-  var path_593975 = newJObject()
-  var query_593976 = newJObject()
-  add(path_593975, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593976, "api-version", newJString(apiVersion))
-  add(path_593975, "farmId", newJString(farmId))
-  add(path_593975, "subscriptionId", newJString(subscriptionId))
-  add(path_593975, "shareName", newJString(shareName))
-  result = call_593974.call(path_593975, query_593976, nil, nil, nil)
+  var path_575008 = newJObject()
+  var query_575009 = newJObject()
+  add(path_575008, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575009, "api-version", newJString(apiVersion))
+  add(path_575008, "farmId", newJString(farmId))
+  add(path_575008, "subscriptionId", newJString(subscriptionId))
+  add(path_575008, "shareName", newJString(shareName))
+  result = call_575007.call(path_575008, query_575009, nil, nil, nil)
 
-var sharesListMetricDefinitions* = Call_SharesListMetricDefinitions_593965(
+var sharesListMetricDefinitions* = Call_SharesListMetricDefinitions_574998(
     name: "sharesListMetricDefinitions", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/shares/{shareName}/metricdefinitions",
-    validator: validate_SharesListMetricDefinitions_593966, base: "",
-    url: url_SharesListMetricDefinitions_593967, schemes: {Scheme.Https})
+    validator: validate_SharesListMetricDefinitions_574999, base: "",
+    url: url_SharesListMetricDefinitions_575000, schemes: {Scheme.Https})
 type
-  Call_SharesListMetrics_593977 = ref object of OpenApiRestCall_593426
-proc url_SharesListMetrics_593979(protocol: Scheme; host: string; base: string;
+  Call_SharesListMetrics_575010 = ref object of OpenApiRestCall_574459
+proc url_SharesListMetrics_575012(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -498,7 +498,7 @@ proc url_SharesListMetrics_593979(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SharesListMetrics_593978(path: JsonNode; query: JsonNode;
+proc validate_SharesListMetrics_575011(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Returns a list of metrics for a storage share.
@@ -517,26 +517,26 @@ proc validate_SharesListMetrics_593978(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593980 = path.getOrDefault("resourceGroupName")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_575013 = path.getOrDefault("resourceGroupName")
+  valid_575013 = validateParameter(valid_575013, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "resourceGroupName", valid_593980
-  var valid_593981 = path.getOrDefault("farmId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_575013 != nil:
+    section.add "resourceGroupName", valid_575013
+  var valid_575014 = path.getOrDefault("farmId")
+  valid_575014 = validateParameter(valid_575014, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "farmId", valid_593981
-  var valid_593982 = path.getOrDefault("subscriptionId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_575014 != nil:
+    section.add "farmId", valid_575014
+  var valid_575015 = path.getOrDefault("subscriptionId")
+  valid_575015 = validateParameter(valid_575015, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "subscriptionId", valid_593982
-  var valid_593983 = path.getOrDefault("shareName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_575015 != nil:
+    section.add "subscriptionId", valid_575015
+  var valid_575016 = path.getOrDefault("shareName")
+  valid_575016 = validateParameter(valid_575016, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "shareName", valid_593983
+  if valid_575016 != nil:
+    section.add "shareName", valid_575016
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -544,11 +544,11 @@ proc validate_SharesListMetrics_593978(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593984 = query.getOrDefault("api-version")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_575017 = query.getOrDefault("api-version")
+  valid_575017 = validateParameter(valid_575017, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "api-version", valid_593984
+  if valid_575017 != nil:
+    section.add "api-version", valid_575017
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -557,20 +557,20 @@ proc validate_SharesListMetrics_593978(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_SharesListMetrics_593977; path: JsonNode;
+proc call*(call_575018: Call_SharesListMetrics_575010; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of metrics for a storage share.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_575018.validator(path, query, header, formData, body)
+  let scheme = call_575018.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_575018.url(scheme.get, call_575018.host, call_575018.base,
+                         call_575018.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_575018, url, valid)
 
-proc call*(call_593986: Call_SharesListMetrics_593977; resourceGroupName: string;
+proc call*(call_575019: Call_SharesListMetrics_575010; resourceGroupName: string;
           apiVersion: string; farmId: string; subscriptionId: string;
           shareName: string): Recallable =
   ## sharesListMetrics
@@ -585,19 +585,19 @@ proc call*(call_593986: Call_SharesListMetrics_593977; resourceGroupName: string
   ##                 : Subscription Id.
   ##   shareName: string (required)
   ##            : Share name.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  add(path_593987, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "farmId", newJString(farmId))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
-  add(path_593987, "shareName", newJString(shareName))
-  result = call_593986.call(path_593987, query_593988, nil, nil, nil)
+  var path_575020 = newJObject()
+  var query_575021 = newJObject()
+  add(path_575020, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575021, "api-version", newJString(apiVersion))
+  add(path_575020, "farmId", newJString(farmId))
+  add(path_575020, "subscriptionId", newJString(subscriptionId))
+  add(path_575020, "shareName", newJString(shareName))
+  result = call_575019.call(path_575020, query_575021, nil, nil, nil)
 
-var sharesListMetrics* = Call_SharesListMetrics_593977(name: "sharesListMetrics",
+var sharesListMetrics* = Call_SharesListMetrics_575010(name: "sharesListMetrics",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/shares/{shareName}/metrics",
-    validator: validate_SharesListMetrics_593978, base: "",
-    url: url_SharesListMetrics_593979, schemes: {Scheme.Https})
+    validator: validate_SharesListMetrics_575011, base: "",
+    url: url_SharesListMetrics_575012, schemes: {Scheme.Https})
 export
   rest
 

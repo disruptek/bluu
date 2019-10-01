@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: VirtualMachineImageTemplate
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "imagebuilder"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593646 = ref object of OpenApiRestCall_593424
-proc url_OperationsList_593648(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567879 = ref object of OpenApiRestCall_567657
+proc url_OperationsList_567881(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists available operations for the Microsoft.VirtualMachineImages provider
@@ -126,11 +126,11 @@ proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_568040 = query.getOrDefault("api-version")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_568040 != nil:
+    section.add "api-version", valid_568040
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593830: Call_OperationsList_593646; path: JsonNode; query: JsonNode;
+proc call*(call_568063: Call_OperationsList_567879; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists available operations for the Microsoft.VirtualMachineImages provider
   ## 
-  let valid = call_593830.validator(path, query, header, formData, body)
-  let scheme = call_593830.pickScheme
+  let valid = call_568063.validator(path, query, header, formData, body)
+  let scheme = call_568063.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593830.url(scheme.get, call_593830.host, call_593830.base,
-                         call_593830.route, valid.getOrDefault("path"),
+  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
+                         call_568063.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593830, url, valid)
+  result = hook(call_568063, url, valid)
 
-proc call*(call_593901: Call_OperationsList_593646; apiVersion: string): Recallable =
+proc call*(call_568134: Call_OperationsList_567879; apiVersion: string): Recallable =
   ## operationsList
   ## Lists available operations for the Microsoft.VirtualMachineImages provider
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_593902 = newJObject()
-  add(query_593902, "api-version", newJString(apiVersion))
-  result = call_593901.call(nil, query_593902, nil, nil, nil)
+  var query_568135 = newJObject()
+  add(query_568135, "api-version", newJString(apiVersion))
+  result = call_568134.call(nil, query_568135, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593646(name: "operationsList",
+var operationsList* = Call_OperationsList_567879(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.VirtualMachineImages/operations",
-    validator: validate_OperationsList_593647, base: "", url: url_OperationsList_593648,
+    validator: validate_OperationsList_567880, base: "", url: url_OperationsList_567881,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImageTemplatesList_593942 = ref object of OpenApiRestCall_593424
-proc url_VirtualMachineImageTemplatesList_593944(protocol: Scheme; host: string;
+  Call_VirtualMachineImageTemplatesList_568175 = ref object of OpenApiRestCall_567657
+proc url_VirtualMachineImageTemplatesList_568177(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +185,7 @@ proc url_VirtualMachineImageTemplatesList_593944(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImageTemplatesList_593943(path: JsonNode;
+proc validate_VirtualMachineImageTemplatesList_568176(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about the VM image templates associated with the subscription.
   ## 
@@ -197,11 +197,11 @@ proc validate_VirtualMachineImageTemplatesList_593943(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593959 = path.getOrDefault("subscriptionId")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  var valid_568192 = path.getOrDefault("subscriptionId")
+  valid_568192 = validateParameter(valid_568192, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "subscriptionId", valid_593959
+  if valid_568192 != nil:
+    section.add "subscriptionId", valid_568192
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +209,11 @@ proc validate_VirtualMachineImageTemplatesList_593943(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593960 = query.getOrDefault("api-version")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_568193 = query.getOrDefault("api-version")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "api-version", valid_593960
+  if valid_568193 != nil:
+    section.add "api-version", valid_568193
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -222,21 +222,21 @@ proc validate_VirtualMachineImageTemplatesList_593943(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593961: Call_VirtualMachineImageTemplatesList_593942;
+proc call*(call_568194: Call_VirtualMachineImageTemplatesList_568175;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets information about the VM image templates associated with the subscription.
   ## 
-  let valid = call_593961.validator(path, query, header, formData, body)
-  let scheme = call_593961.pickScheme
+  let valid = call_568194.validator(path, query, header, formData, body)
+  let scheme = call_568194.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593961.url(scheme.get, call_593961.host, call_593961.base,
-                         call_593961.route, valid.getOrDefault("path"),
+  let url = call_568194.url(scheme.get, call_568194.host, call_568194.base,
+                         call_568194.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593961, url, valid)
+  result = hook(call_568194, url, valid)
 
-proc call*(call_593962: Call_VirtualMachineImageTemplatesList_593942;
+proc call*(call_568195: Call_VirtualMachineImageTemplatesList_568175;
           apiVersion: string; subscriptionId: string): Recallable =
   ## virtualMachineImageTemplatesList
   ## Gets information about the VM image templates associated with the subscription.
@@ -244,20 +244,20 @@ proc call*(call_593962: Call_VirtualMachineImageTemplatesList_593942;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
-  var path_593963 = newJObject()
-  var query_593964 = newJObject()
-  add(query_593964, "api-version", newJString(apiVersion))
-  add(path_593963, "subscriptionId", newJString(subscriptionId))
-  result = call_593962.call(path_593963, query_593964, nil, nil, nil)
+  var path_568196 = newJObject()
+  var query_568197 = newJObject()
+  add(query_568197, "api-version", newJString(apiVersion))
+  add(path_568196, "subscriptionId", newJString(subscriptionId))
+  result = call_568195.call(path_568196, query_568197, nil, nil, nil)
 
-var virtualMachineImageTemplatesList* = Call_VirtualMachineImageTemplatesList_593942(
+var virtualMachineImageTemplatesList* = Call_VirtualMachineImageTemplatesList_568175(
     name: "virtualMachineImageTemplatesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.VirtualMachineImages/imageTemplates",
-    validator: validate_VirtualMachineImageTemplatesList_593943, base: "",
-    url: url_VirtualMachineImageTemplatesList_593944, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineImageTemplatesList_568176, base: "",
+    url: url_VirtualMachineImageTemplatesList_568177, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImageTemplatesListByResourceGroup_593965 = ref object of OpenApiRestCall_593424
-proc url_VirtualMachineImageTemplatesListByResourceGroup_593967(protocol: Scheme;
+  Call_VirtualMachineImageTemplatesListByResourceGroup_568198 = ref object of OpenApiRestCall_567657
+proc url_VirtualMachineImageTemplatesListByResourceGroup_568200(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -278,7 +278,7 @@ proc url_VirtualMachineImageTemplatesListByResourceGroup_593967(protocol: Scheme
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImageTemplatesListByResourceGroup_593966(
+proc validate_VirtualMachineImageTemplatesListByResourceGroup_568199(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets information about the VM image templates associated with the specified resource group.
@@ -293,16 +293,16 @@ proc validate_VirtualMachineImageTemplatesListByResourceGroup_593966(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593968 = path.getOrDefault("resourceGroupName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  var valid_568201 = path.getOrDefault("resourceGroupName")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "resourceGroupName", valid_593968
-  var valid_593969 = path.getOrDefault("subscriptionId")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  if valid_568201 != nil:
+    section.add "resourceGroupName", valid_568201
+  var valid_568202 = path.getOrDefault("subscriptionId")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "subscriptionId", valid_593969
+  if valid_568202 != nil:
+    section.add "subscriptionId", valid_568202
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -310,11 +310,11 @@ proc validate_VirtualMachineImageTemplatesListByResourceGroup_593966(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593970 = query.getOrDefault("api-version")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  var valid_568203 = query.getOrDefault("api-version")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "api-version", valid_593970
+  if valid_568203 != nil:
+    section.add "api-version", valid_568203
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -323,21 +323,21 @@ proc validate_VirtualMachineImageTemplatesListByResourceGroup_593966(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593971: Call_VirtualMachineImageTemplatesListByResourceGroup_593965;
+proc call*(call_568204: Call_VirtualMachineImageTemplatesListByResourceGroup_568198;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets information about the VM image templates associated with the specified resource group.
   ## 
-  let valid = call_593971.validator(path, query, header, formData, body)
-  let scheme = call_593971.pickScheme
+  let valid = call_568204.validator(path, query, header, formData, body)
+  let scheme = call_568204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593971.url(scheme.get, call_593971.host, call_593971.base,
-                         call_593971.route, valid.getOrDefault("path"),
+  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
+                         call_568204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593971, url, valid)
+  result = hook(call_568204, url, valid)
 
-proc call*(call_593972: Call_VirtualMachineImageTemplatesListByResourceGroup_593965;
+proc call*(call_568205: Call_VirtualMachineImageTemplatesListByResourceGroup_568198;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## virtualMachineImageTemplatesListByResourceGroup
   ## Gets information about the VM image templates associated with the specified resource group.
@@ -347,22 +347,22 @@ proc call*(call_593972: Call_VirtualMachineImageTemplatesListByResourceGroup_593
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
-  var path_593973 = newJObject()
-  var query_593974 = newJObject()
-  add(path_593973, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593974, "api-version", newJString(apiVersion))
-  add(path_593973, "subscriptionId", newJString(subscriptionId))
-  result = call_593972.call(path_593973, query_593974, nil, nil, nil)
+  var path_568206 = newJObject()
+  var query_568207 = newJObject()
+  add(path_568206, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568207, "api-version", newJString(apiVersion))
+  add(path_568206, "subscriptionId", newJString(subscriptionId))
+  result = call_568205.call(path_568206, query_568207, nil, nil, nil)
 
-var virtualMachineImageTemplatesListByResourceGroup* = Call_VirtualMachineImageTemplatesListByResourceGroup_593965(
+var virtualMachineImageTemplatesListByResourceGroup* = Call_VirtualMachineImageTemplatesListByResourceGroup_568198(
     name: "virtualMachineImageTemplatesListByResourceGroup",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates",
-    validator: validate_VirtualMachineImageTemplatesListByResourceGroup_593966,
-    base: "", url: url_VirtualMachineImageTemplatesListByResourceGroup_593967,
+    validator: validate_VirtualMachineImageTemplatesListByResourceGroup_568199,
+    base: "", url: url_VirtualMachineImageTemplatesListByResourceGroup_568200,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImageTemplatesCreateOrUpdate_593986 = ref object of OpenApiRestCall_593424
-proc url_VirtualMachineImageTemplatesCreateOrUpdate_593988(protocol: Scheme;
+  Call_VirtualMachineImageTemplatesCreateOrUpdate_568219 = ref object of OpenApiRestCall_567657
+proc url_VirtualMachineImageTemplatesCreateOrUpdate_568221(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -386,7 +386,7 @@ proc url_VirtualMachineImageTemplatesCreateOrUpdate_593988(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImageTemplatesCreateOrUpdate_593987(path: JsonNode;
+proc validate_VirtualMachineImageTemplatesCreateOrUpdate_568220(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a virtual machine image template
   ## 
@@ -402,21 +402,21 @@ proc validate_VirtualMachineImageTemplatesCreateOrUpdate_593987(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `imageTemplateName` field"
-  var valid_594006 = path.getOrDefault("imageTemplateName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_568239 = path.getOrDefault("imageTemplateName")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "imageTemplateName", valid_594006
-  var valid_594007 = path.getOrDefault("resourceGroupName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "imageTemplateName", valid_568239
+  var valid_568240 = path.getOrDefault("resourceGroupName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "resourceGroupName", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568240 != nil:
+    section.add "resourceGroupName", valid_568240
+  var valid_568241 = path.getOrDefault("subscriptionId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
+  if valid_568241 != nil:
+    section.add "subscriptionId", valid_568241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -424,11 +424,11 @@ proc validate_VirtualMachineImageTemplatesCreateOrUpdate_593987(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594009 = query.getOrDefault("api-version")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_568242 = query.getOrDefault("api-version")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "api-version", valid_594009
+  if valid_568242 != nil:
+    section.add "api-version", valid_568242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -442,21 +442,21 @@ proc validate_VirtualMachineImageTemplatesCreateOrUpdate_593987(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594011: Call_VirtualMachineImageTemplatesCreateOrUpdate_593986;
+proc call*(call_568244: Call_VirtualMachineImageTemplatesCreateOrUpdate_568219;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a virtual machine image template
   ## 
-  let valid = call_594011.validator(path, query, header, formData, body)
-  let scheme = call_594011.pickScheme
+  let valid = call_568244.validator(path, query, header, formData, body)
+  let scheme = call_568244.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594011.url(scheme.get, call_594011.host, call_594011.base,
-                         call_594011.route, valid.getOrDefault("path"),
+  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
+                         call_568244.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594011, url, valid)
+  result = hook(call_568244, url, valid)
 
-proc call*(call_594012: Call_VirtualMachineImageTemplatesCreateOrUpdate_593986;
+proc call*(call_568245: Call_VirtualMachineImageTemplatesCreateOrUpdate_568219;
           imageTemplateName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; parameters: JsonNode): Recallable =
   ## virtualMachineImageTemplatesCreateOrUpdate
@@ -471,26 +471,26 @@ proc call*(call_594012: Call_VirtualMachineImageTemplatesCreateOrUpdate_593986;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the CreateImageTemplate operation
-  var path_594013 = newJObject()
-  var query_594014 = newJObject()
-  var body_594015 = newJObject()
-  add(path_594013, "imageTemplateName", newJString(imageTemplateName))
-  add(path_594013, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594014, "api-version", newJString(apiVersion))
-  add(path_594013, "subscriptionId", newJString(subscriptionId))
+  var path_568246 = newJObject()
+  var query_568247 = newJObject()
+  var body_568248 = newJObject()
+  add(path_568246, "imageTemplateName", newJString(imageTemplateName))
+  add(path_568246, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568247, "api-version", newJString(apiVersion))
+  add(path_568246, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594015 = parameters
-  result = call_594012.call(path_594013, query_594014, nil, nil, body_594015)
+    body_568248 = parameters
+  result = call_568245.call(path_568246, query_568247, nil, nil, body_568248)
 
-var virtualMachineImageTemplatesCreateOrUpdate* = Call_VirtualMachineImageTemplatesCreateOrUpdate_593986(
+var virtualMachineImageTemplatesCreateOrUpdate* = Call_VirtualMachineImageTemplatesCreateOrUpdate_568219(
     name: "virtualMachineImageTemplatesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
-    validator: validate_VirtualMachineImageTemplatesCreateOrUpdate_593987,
-    base: "", url: url_VirtualMachineImageTemplatesCreateOrUpdate_593988,
+    validator: validate_VirtualMachineImageTemplatesCreateOrUpdate_568220,
+    base: "", url: url_VirtualMachineImageTemplatesCreateOrUpdate_568221,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImageTemplatesGet_593975 = ref object of OpenApiRestCall_593424
-proc url_VirtualMachineImageTemplatesGet_593977(protocol: Scheme; host: string;
+  Call_VirtualMachineImageTemplatesGet_568208 = ref object of OpenApiRestCall_567657
+proc url_VirtualMachineImageTemplatesGet_568210(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -514,7 +514,7 @@ proc url_VirtualMachineImageTemplatesGet_593977(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImageTemplatesGet_593976(path: JsonNode;
+proc validate_VirtualMachineImageTemplatesGet_568209(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get information about a virtual machine image template
   ## 
@@ -530,21 +530,21 @@ proc validate_VirtualMachineImageTemplatesGet_593976(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `imageTemplateName` field"
-  var valid_593978 = path.getOrDefault("imageTemplateName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_568211 = path.getOrDefault("imageTemplateName")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "imageTemplateName", valid_593978
-  var valid_593979 = path.getOrDefault("resourceGroupName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_568211 != nil:
+    section.add "imageTemplateName", valid_568211
+  var valid_568212 = path.getOrDefault("resourceGroupName")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "resourceGroupName", valid_593979
-  var valid_593980 = path.getOrDefault("subscriptionId")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_568212 != nil:
+    section.add "resourceGroupName", valid_568212
+  var valid_568213 = path.getOrDefault("subscriptionId")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "subscriptionId", valid_593980
+  if valid_568213 != nil:
+    section.add "subscriptionId", valid_568213
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -552,11 +552,11 @@ proc validate_VirtualMachineImageTemplatesGet_593976(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593981 = query.getOrDefault("api-version")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = query.getOrDefault("api-version")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "api-version", valid_593981
+  if valid_568214 != nil:
+    section.add "api-version", valid_568214
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -565,21 +565,21 @@ proc validate_VirtualMachineImageTemplatesGet_593976(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593982: Call_VirtualMachineImageTemplatesGet_593975;
+proc call*(call_568215: Call_VirtualMachineImageTemplatesGet_568208;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get information about a virtual machine image template
   ## 
-  let valid = call_593982.validator(path, query, header, formData, body)
-  let scheme = call_593982.pickScheme
+  let valid = call_568215.validator(path, query, header, formData, body)
+  let scheme = call_568215.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593982.url(scheme.get, call_593982.host, call_593982.base,
-                         call_593982.route, valid.getOrDefault("path"),
+  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
+                         call_568215.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593982, url, valid)
+  result = hook(call_568215, url, valid)
 
-proc call*(call_593983: Call_VirtualMachineImageTemplatesGet_593975;
+proc call*(call_568216: Call_VirtualMachineImageTemplatesGet_568208;
           imageTemplateName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## virtualMachineImageTemplatesGet
@@ -592,22 +592,22 @@ proc call*(call_593983: Call_VirtualMachineImageTemplatesGet_593975;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
-  var path_593984 = newJObject()
-  var query_593985 = newJObject()
-  add(path_593984, "imageTemplateName", newJString(imageTemplateName))
-  add(path_593984, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593985, "api-version", newJString(apiVersion))
-  add(path_593984, "subscriptionId", newJString(subscriptionId))
-  result = call_593983.call(path_593984, query_593985, nil, nil, nil)
+  var path_568217 = newJObject()
+  var query_568218 = newJObject()
+  add(path_568217, "imageTemplateName", newJString(imageTemplateName))
+  add(path_568217, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568218, "api-version", newJString(apiVersion))
+  add(path_568217, "subscriptionId", newJString(subscriptionId))
+  result = call_568216.call(path_568217, query_568218, nil, nil, nil)
 
-var virtualMachineImageTemplatesGet* = Call_VirtualMachineImageTemplatesGet_593975(
+var virtualMachineImageTemplatesGet* = Call_VirtualMachineImageTemplatesGet_568208(
     name: "virtualMachineImageTemplatesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
-    validator: validate_VirtualMachineImageTemplatesGet_593976, base: "",
-    url: url_VirtualMachineImageTemplatesGet_593977, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineImageTemplatesGet_568209, base: "",
+    url: url_VirtualMachineImageTemplatesGet_568210, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImageTemplatesUpdate_594027 = ref object of OpenApiRestCall_593424
-proc url_VirtualMachineImageTemplatesUpdate_594029(protocol: Scheme; host: string;
+  Call_VirtualMachineImageTemplatesUpdate_568260 = ref object of OpenApiRestCall_567657
+proc url_VirtualMachineImageTemplatesUpdate_568262(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -631,7 +631,7 @@ proc url_VirtualMachineImageTemplatesUpdate_594029(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImageTemplatesUpdate_594028(path: JsonNode;
+proc validate_VirtualMachineImageTemplatesUpdate_568261(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the tags for this Virtual Machine Image Template
   ## 
@@ -647,21 +647,21 @@ proc validate_VirtualMachineImageTemplatesUpdate_594028(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `imageTemplateName` field"
-  var valid_594030 = path.getOrDefault("imageTemplateName")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  var valid_568263 = path.getOrDefault("imageTemplateName")
+  valid_568263 = validateParameter(valid_568263, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "imageTemplateName", valid_594030
-  var valid_594031 = path.getOrDefault("resourceGroupName")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  if valid_568263 != nil:
+    section.add "imageTemplateName", valid_568263
+  var valid_568264 = path.getOrDefault("resourceGroupName")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "resourceGroupName", valid_594031
-  var valid_594032 = path.getOrDefault("subscriptionId")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  if valid_568264 != nil:
+    section.add "resourceGroupName", valid_568264
+  var valid_568265 = path.getOrDefault("subscriptionId")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "subscriptionId", valid_594032
+  if valid_568265 != nil:
+    section.add "subscriptionId", valid_568265
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -669,11 +669,11 @@ proc validate_VirtualMachineImageTemplatesUpdate_594028(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594033 = query.getOrDefault("api-version")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  var valid_568266 = query.getOrDefault("api-version")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "api-version", valid_594033
+  if valid_568266 != nil:
+    section.add "api-version", valid_568266
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -687,21 +687,21 @@ proc validate_VirtualMachineImageTemplatesUpdate_594028(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594035: Call_VirtualMachineImageTemplatesUpdate_594027;
+proc call*(call_568268: Call_VirtualMachineImageTemplatesUpdate_568260;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update the tags for this Virtual Machine Image Template
   ## 
-  let valid = call_594035.validator(path, query, header, formData, body)
-  let scheme = call_594035.pickScheme
+  let valid = call_568268.validator(path, query, header, formData, body)
+  let scheme = call_568268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594035.url(scheme.get, call_594035.host, call_594035.base,
-                         call_594035.route, valid.getOrDefault("path"),
+  let url = call_568268.url(scheme.get, call_568268.host, call_568268.base,
+                         call_568268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594035, url, valid)
+  result = hook(call_568268, url, valid)
 
-proc call*(call_594036: Call_VirtualMachineImageTemplatesUpdate_594027;
+proc call*(call_568269: Call_VirtualMachineImageTemplatesUpdate_568260;
           imageTemplateName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; parameters: JsonNode): Recallable =
   ## virtualMachineImageTemplatesUpdate
@@ -716,25 +716,25 @@ proc call*(call_594036: Call_VirtualMachineImageTemplatesUpdate_594027;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : Additional parameters for Image Template update.
-  var path_594037 = newJObject()
-  var query_594038 = newJObject()
-  var body_594039 = newJObject()
-  add(path_594037, "imageTemplateName", newJString(imageTemplateName))
-  add(path_594037, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594038, "api-version", newJString(apiVersion))
-  add(path_594037, "subscriptionId", newJString(subscriptionId))
+  var path_568270 = newJObject()
+  var query_568271 = newJObject()
+  var body_568272 = newJObject()
+  add(path_568270, "imageTemplateName", newJString(imageTemplateName))
+  add(path_568270, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568271, "api-version", newJString(apiVersion))
+  add(path_568270, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594039 = parameters
-  result = call_594036.call(path_594037, query_594038, nil, nil, body_594039)
+    body_568272 = parameters
+  result = call_568269.call(path_568270, query_568271, nil, nil, body_568272)
 
-var virtualMachineImageTemplatesUpdate* = Call_VirtualMachineImageTemplatesUpdate_594027(
+var virtualMachineImageTemplatesUpdate* = Call_VirtualMachineImageTemplatesUpdate_568260(
     name: "virtualMachineImageTemplatesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
-    validator: validate_VirtualMachineImageTemplatesUpdate_594028, base: "",
-    url: url_VirtualMachineImageTemplatesUpdate_594029, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineImageTemplatesUpdate_568261, base: "",
+    url: url_VirtualMachineImageTemplatesUpdate_568262, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImageTemplatesDelete_594016 = ref object of OpenApiRestCall_593424
-proc url_VirtualMachineImageTemplatesDelete_594018(protocol: Scheme; host: string;
+  Call_VirtualMachineImageTemplatesDelete_568249 = ref object of OpenApiRestCall_567657
+proc url_VirtualMachineImageTemplatesDelete_568251(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -758,7 +758,7 @@ proc url_VirtualMachineImageTemplatesDelete_594018(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImageTemplatesDelete_594017(path: JsonNode;
+proc validate_VirtualMachineImageTemplatesDelete_568250(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a virtual machine image template
   ## 
@@ -774,21 +774,21 @@ proc validate_VirtualMachineImageTemplatesDelete_594017(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `imageTemplateName` field"
-  var valid_594019 = path.getOrDefault("imageTemplateName")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_568252 = path.getOrDefault("imageTemplateName")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "imageTemplateName", valid_594019
-  var valid_594020 = path.getOrDefault("resourceGroupName")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  if valid_568252 != nil:
+    section.add "imageTemplateName", valid_568252
+  var valid_568253 = path.getOrDefault("resourceGroupName")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "resourceGroupName", valid_594020
-  var valid_594021 = path.getOrDefault("subscriptionId")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  if valid_568253 != nil:
+    section.add "resourceGroupName", valid_568253
+  var valid_568254 = path.getOrDefault("subscriptionId")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "subscriptionId", valid_594021
+  if valid_568254 != nil:
+    section.add "subscriptionId", valid_568254
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -796,11 +796,11 @@ proc validate_VirtualMachineImageTemplatesDelete_594017(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594022 = query.getOrDefault("api-version")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  var valid_568255 = query.getOrDefault("api-version")
+  valid_568255 = validateParameter(valid_568255, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "api-version", valid_594022
+  if valid_568255 != nil:
+    section.add "api-version", valid_568255
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -809,21 +809,21 @@ proc validate_VirtualMachineImageTemplatesDelete_594017(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594023: Call_VirtualMachineImageTemplatesDelete_594016;
+proc call*(call_568256: Call_VirtualMachineImageTemplatesDelete_568249;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete a virtual machine image template
   ## 
-  let valid = call_594023.validator(path, query, header, formData, body)
-  let scheme = call_594023.pickScheme
+  let valid = call_568256.validator(path, query, header, formData, body)
+  let scheme = call_568256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594023.url(scheme.get, call_594023.host, call_594023.base,
-                         call_594023.route, valid.getOrDefault("path"),
+  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
+                         call_568256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594023, url, valid)
+  result = hook(call_568256, url, valid)
 
-proc call*(call_594024: Call_VirtualMachineImageTemplatesDelete_594016;
+proc call*(call_568257: Call_VirtualMachineImageTemplatesDelete_568249;
           imageTemplateName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## virtualMachineImageTemplatesDelete
@@ -836,22 +836,22 @@ proc call*(call_594024: Call_VirtualMachineImageTemplatesDelete_594016;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
-  var path_594025 = newJObject()
-  var query_594026 = newJObject()
-  add(path_594025, "imageTemplateName", newJString(imageTemplateName))
-  add(path_594025, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594026, "api-version", newJString(apiVersion))
-  add(path_594025, "subscriptionId", newJString(subscriptionId))
-  result = call_594024.call(path_594025, query_594026, nil, nil, nil)
+  var path_568258 = newJObject()
+  var query_568259 = newJObject()
+  add(path_568258, "imageTemplateName", newJString(imageTemplateName))
+  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568259, "api-version", newJString(apiVersion))
+  add(path_568258, "subscriptionId", newJString(subscriptionId))
+  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
 
-var virtualMachineImageTemplatesDelete* = Call_VirtualMachineImageTemplatesDelete_594016(
+var virtualMachineImageTemplatesDelete* = Call_VirtualMachineImageTemplatesDelete_568249(
     name: "virtualMachineImageTemplatesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}",
-    validator: validate_VirtualMachineImageTemplatesDelete_594017, base: "",
-    url: url_VirtualMachineImageTemplatesDelete_594018, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineImageTemplatesDelete_568250, base: "",
+    url: url_VirtualMachineImageTemplatesDelete_568251, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImageTemplatesRun_594040 = ref object of OpenApiRestCall_593424
-proc url_VirtualMachineImageTemplatesRun_594042(protocol: Scheme; host: string;
+  Call_VirtualMachineImageTemplatesRun_568273 = ref object of OpenApiRestCall_567657
+proc url_VirtualMachineImageTemplatesRun_568275(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -876,7 +876,7 @@ proc url_VirtualMachineImageTemplatesRun_594042(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImageTemplatesRun_594041(path: JsonNode;
+proc validate_VirtualMachineImageTemplatesRun_568274(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create artifacts from a existing image template
   ## 
@@ -892,21 +892,21 @@ proc validate_VirtualMachineImageTemplatesRun_594041(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `imageTemplateName` field"
-  var valid_594043 = path.getOrDefault("imageTemplateName")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  var valid_568276 = path.getOrDefault("imageTemplateName")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "imageTemplateName", valid_594043
-  var valid_594044 = path.getOrDefault("resourceGroupName")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  if valid_568276 != nil:
+    section.add "imageTemplateName", valid_568276
+  var valid_568277 = path.getOrDefault("resourceGroupName")
+  valid_568277 = validateParameter(valid_568277, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "resourceGroupName", valid_594044
-  var valid_594045 = path.getOrDefault("subscriptionId")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  if valid_568277 != nil:
+    section.add "resourceGroupName", valid_568277
+  var valid_568278 = path.getOrDefault("subscriptionId")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "subscriptionId", valid_594045
+  if valid_568278 != nil:
+    section.add "subscriptionId", valid_568278
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -914,11 +914,11 @@ proc validate_VirtualMachineImageTemplatesRun_594041(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594046 = query.getOrDefault("api-version")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  var valid_568279 = query.getOrDefault("api-version")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "api-version", valid_594046
+  if valid_568279 != nil:
+    section.add "api-version", valid_568279
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -927,21 +927,21 @@ proc validate_VirtualMachineImageTemplatesRun_594041(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594047: Call_VirtualMachineImageTemplatesRun_594040;
+proc call*(call_568280: Call_VirtualMachineImageTemplatesRun_568273;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create artifacts from a existing image template
   ## 
-  let valid = call_594047.validator(path, query, header, formData, body)
-  let scheme = call_594047.pickScheme
+  let valid = call_568280.validator(path, query, header, formData, body)
+  let scheme = call_568280.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594047.url(scheme.get, call_594047.host, call_594047.base,
-                         call_594047.route, valid.getOrDefault("path"),
+  let url = call_568280.url(scheme.get, call_568280.host, call_568280.base,
+                         call_568280.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594047, url, valid)
+  result = hook(call_568280, url, valid)
 
-proc call*(call_594048: Call_VirtualMachineImageTemplatesRun_594040;
+proc call*(call_568281: Call_VirtualMachineImageTemplatesRun_568273;
           imageTemplateName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## virtualMachineImageTemplatesRun
@@ -954,22 +954,22 @@ proc call*(call_594048: Call_VirtualMachineImageTemplatesRun_594040;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
-  var path_594049 = newJObject()
-  var query_594050 = newJObject()
-  add(path_594049, "imageTemplateName", newJString(imageTemplateName))
-  add(path_594049, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594050, "api-version", newJString(apiVersion))
-  add(path_594049, "subscriptionId", newJString(subscriptionId))
-  result = call_594048.call(path_594049, query_594050, nil, nil, nil)
+  var path_568282 = newJObject()
+  var query_568283 = newJObject()
+  add(path_568282, "imageTemplateName", newJString(imageTemplateName))
+  add(path_568282, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568283, "api-version", newJString(apiVersion))
+  add(path_568282, "subscriptionId", newJString(subscriptionId))
+  result = call_568281.call(path_568282, query_568283, nil, nil, nil)
 
-var virtualMachineImageTemplatesRun* = Call_VirtualMachineImageTemplatesRun_594040(
+var virtualMachineImageTemplatesRun* = Call_VirtualMachineImageTemplatesRun_568273(
     name: "virtualMachineImageTemplatesRun", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/run",
-    validator: validate_VirtualMachineImageTemplatesRun_594041, base: "",
-    url: url_VirtualMachineImageTemplatesRun_594042, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineImageTemplatesRun_568274, base: "",
+    url: url_VirtualMachineImageTemplatesRun_568275, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImageTemplatesListRunOutputs_594051 = ref object of OpenApiRestCall_593424
-proc url_VirtualMachineImageTemplatesListRunOutputs_594053(protocol: Scheme;
+  Call_VirtualMachineImageTemplatesListRunOutputs_568284 = ref object of OpenApiRestCall_567657
+proc url_VirtualMachineImageTemplatesListRunOutputs_568286(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -994,7 +994,7 @@ proc url_VirtualMachineImageTemplatesListRunOutputs_594053(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImageTemplatesListRunOutputs_594052(path: JsonNode;
+proc validate_VirtualMachineImageTemplatesListRunOutputs_568285(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all run outputs for the specified Image Template resource
   ## 
@@ -1010,21 +1010,21 @@ proc validate_VirtualMachineImageTemplatesListRunOutputs_594052(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `imageTemplateName` field"
-  var valid_594054 = path.getOrDefault("imageTemplateName")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  var valid_568287 = path.getOrDefault("imageTemplateName")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "imageTemplateName", valid_594054
-  var valid_594055 = path.getOrDefault("resourceGroupName")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  if valid_568287 != nil:
+    section.add "imageTemplateName", valid_568287
+  var valid_568288 = path.getOrDefault("resourceGroupName")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "resourceGroupName", valid_594055
-  var valid_594056 = path.getOrDefault("subscriptionId")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  if valid_568288 != nil:
+    section.add "resourceGroupName", valid_568288
+  var valid_568289 = path.getOrDefault("subscriptionId")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "subscriptionId", valid_594056
+  if valid_568289 != nil:
+    section.add "subscriptionId", valid_568289
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1032,11 +1032,11 @@ proc validate_VirtualMachineImageTemplatesListRunOutputs_594052(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594057 = query.getOrDefault("api-version")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  var valid_568290 = query.getOrDefault("api-version")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "api-version", valid_594057
+  if valid_568290 != nil:
+    section.add "api-version", valid_568290
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1045,21 +1045,21 @@ proc validate_VirtualMachineImageTemplatesListRunOutputs_594052(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594058: Call_VirtualMachineImageTemplatesListRunOutputs_594051;
+proc call*(call_568291: Call_VirtualMachineImageTemplatesListRunOutputs_568284;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all run outputs for the specified Image Template resource
   ## 
-  let valid = call_594058.validator(path, query, header, formData, body)
-  let scheme = call_594058.pickScheme
+  let valid = call_568291.validator(path, query, header, formData, body)
+  let scheme = call_568291.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594058.url(scheme.get, call_594058.host, call_594058.base,
-                         call_594058.route, valid.getOrDefault("path"),
+  let url = call_568291.url(scheme.get, call_568291.host, call_568291.base,
+                         call_568291.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594058, url, valid)
+  result = hook(call_568291, url, valid)
 
-proc call*(call_594059: Call_VirtualMachineImageTemplatesListRunOutputs_594051;
+proc call*(call_568292: Call_VirtualMachineImageTemplatesListRunOutputs_568284;
           imageTemplateName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## virtualMachineImageTemplatesListRunOutputs
@@ -1072,23 +1072,23 @@ proc call*(call_594059: Call_VirtualMachineImageTemplatesListRunOutputs_594051;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
-  var path_594060 = newJObject()
-  var query_594061 = newJObject()
-  add(path_594060, "imageTemplateName", newJString(imageTemplateName))
-  add(path_594060, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594061, "api-version", newJString(apiVersion))
-  add(path_594060, "subscriptionId", newJString(subscriptionId))
-  result = call_594059.call(path_594060, query_594061, nil, nil, nil)
+  var path_568293 = newJObject()
+  var query_568294 = newJObject()
+  add(path_568293, "imageTemplateName", newJString(imageTemplateName))
+  add(path_568293, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568294, "api-version", newJString(apiVersion))
+  add(path_568293, "subscriptionId", newJString(subscriptionId))
+  result = call_568292.call(path_568293, query_568294, nil, nil, nil)
 
-var virtualMachineImageTemplatesListRunOutputs* = Call_VirtualMachineImageTemplatesListRunOutputs_594051(
+var virtualMachineImageTemplatesListRunOutputs* = Call_VirtualMachineImageTemplatesListRunOutputs_568284(
     name: "virtualMachineImageTemplatesListRunOutputs", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/runOutputs",
-    validator: validate_VirtualMachineImageTemplatesListRunOutputs_594052,
-    base: "", url: url_VirtualMachineImageTemplatesListRunOutputs_594053,
+    validator: validate_VirtualMachineImageTemplatesListRunOutputs_568285,
+    base: "", url: url_VirtualMachineImageTemplatesListRunOutputs_568286,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImageTemplatesGetRunOutput_594062 = ref object of OpenApiRestCall_593424
-proc url_VirtualMachineImageTemplatesGetRunOutput_594064(protocol: Scheme;
+  Call_VirtualMachineImageTemplatesGetRunOutput_568295 = ref object of OpenApiRestCall_567657
+proc url_VirtualMachineImageTemplatesGetRunOutput_568297(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1115,7 +1115,7 @@ proc url_VirtualMachineImageTemplatesGetRunOutput_594064(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImageTemplatesGetRunOutput_594063(path: JsonNode;
+proc validate_VirtualMachineImageTemplatesGetRunOutput_568296(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the specified run output for the specified image template resource
   ## 
@@ -1133,26 +1133,26 @@ proc validate_VirtualMachineImageTemplatesGetRunOutput_594063(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `imageTemplateName` field"
-  var valid_594065 = path.getOrDefault("imageTemplateName")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  var valid_568298 = path.getOrDefault("imageTemplateName")
+  valid_568298 = validateParameter(valid_568298, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "imageTemplateName", valid_594065
-  var valid_594066 = path.getOrDefault("resourceGroupName")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  if valid_568298 != nil:
+    section.add "imageTemplateName", valid_568298
+  var valid_568299 = path.getOrDefault("resourceGroupName")
+  valid_568299 = validateParameter(valid_568299, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "resourceGroupName", valid_594066
-  var valid_594067 = path.getOrDefault("subscriptionId")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  if valid_568299 != nil:
+    section.add "resourceGroupName", valid_568299
+  var valid_568300 = path.getOrDefault("subscriptionId")
+  valid_568300 = validateParameter(valid_568300, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "subscriptionId", valid_594067
-  var valid_594068 = path.getOrDefault("runOutputName")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  if valid_568300 != nil:
+    section.add "subscriptionId", valid_568300
+  var valid_568301 = path.getOrDefault("runOutputName")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "runOutputName", valid_594068
+  if valid_568301 != nil:
+    section.add "runOutputName", valid_568301
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1160,11 +1160,11 @@ proc validate_VirtualMachineImageTemplatesGetRunOutput_594063(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594069 = query.getOrDefault("api-version")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  var valid_568302 = query.getOrDefault("api-version")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "api-version", valid_594069
+  if valid_568302 != nil:
+    section.add "api-version", valid_568302
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1173,21 +1173,21 @@ proc validate_VirtualMachineImageTemplatesGetRunOutput_594063(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594070: Call_VirtualMachineImageTemplatesGetRunOutput_594062;
+proc call*(call_568303: Call_VirtualMachineImageTemplatesGetRunOutput_568295;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the specified run output for the specified image template resource
   ## 
-  let valid = call_594070.validator(path, query, header, formData, body)
-  let scheme = call_594070.pickScheme
+  let valid = call_568303.validator(path, query, header, formData, body)
+  let scheme = call_568303.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594070.url(scheme.get, call_594070.host, call_594070.base,
-                         call_594070.route, valid.getOrDefault("path"),
+  let url = call_568303.url(scheme.get, call_568303.host, call_568303.base,
+                         call_568303.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594070, url, valid)
+  result = hook(call_568303, url, valid)
 
-proc call*(call_594071: Call_VirtualMachineImageTemplatesGetRunOutput_594062;
+proc call*(call_568304: Call_VirtualMachineImageTemplatesGetRunOutput_568295;
           imageTemplateName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; runOutputName: string): Recallable =
   ## virtualMachineImageTemplatesGetRunOutput
@@ -1202,20 +1202,20 @@ proc call*(call_594071: Call_VirtualMachineImageTemplatesGetRunOutput_594062;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
   ##   runOutputName: string (required)
   ##                : The name of the run output
-  var path_594072 = newJObject()
-  var query_594073 = newJObject()
-  add(path_594072, "imageTemplateName", newJString(imageTemplateName))
-  add(path_594072, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594073, "api-version", newJString(apiVersion))
-  add(path_594072, "subscriptionId", newJString(subscriptionId))
-  add(path_594072, "runOutputName", newJString(runOutputName))
-  result = call_594071.call(path_594072, query_594073, nil, nil, nil)
+  var path_568305 = newJObject()
+  var query_568306 = newJObject()
+  add(path_568305, "imageTemplateName", newJString(imageTemplateName))
+  add(path_568305, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568306, "api-version", newJString(apiVersion))
+  add(path_568305, "subscriptionId", newJString(subscriptionId))
+  add(path_568305, "runOutputName", newJString(runOutputName))
+  result = call_568304.call(path_568305, query_568306, nil, nil, nil)
 
-var virtualMachineImageTemplatesGetRunOutput* = Call_VirtualMachineImageTemplatesGetRunOutput_594062(
+var virtualMachineImageTemplatesGetRunOutput* = Call_VirtualMachineImageTemplatesGetRunOutput_568295(
     name: "virtualMachineImageTemplatesGetRunOutput", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{imageTemplateName}/runOutputs/{runOutputName}",
-    validator: validate_VirtualMachineImageTemplatesGetRunOutput_594063, base: "",
-    url: url_VirtualMachineImageTemplatesGetRunOutput_594064,
+    validator: validate_VirtualMachineImageTemplatesGetRunOutput_568296, base: "",
+    url: url_VirtualMachineImageTemplatesGetRunOutput_568297,
     schemes: {Scheme.Https})
 export
   rest

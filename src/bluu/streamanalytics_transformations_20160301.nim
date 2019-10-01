@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: StreamAnalyticsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "streamanalytics-transformations"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_TransformationsCreateOrReplace_593961 = ref object of OpenApiRestCall_593424
-proc url_TransformationsCreateOrReplace_593963(protocol: Scheme; host: string;
+  Call_TransformationsCreateOrReplace_568194 = ref object of OpenApiRestCall_567657
+proc url_TransformationsCreateOrReplace_568196(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -131,7 +131,7 @@ proc url_TransformationsCreateOrReplace_593963(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransformationsCreateOrReplace_593962(path: JsonNode;
+proc validate_TransformationsCreateOrReplace_568195(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a transformation or replaces an already existing transformation under an existing streaming job.
   ## 
@@ -149,26 +149,26 @@ proc validate_TransformationsCreateOrReplace_593962(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593981 = path.getOrDefault("resourceGroupName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = path.getOrDefault("resourceGroupName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "resourceGroupName", valid_593981
-  var valid_593982 = path.getOrDefault("subscriptionId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568214 != nil:
+    section.add "resourceGroupName", valid_568214
+  var valid_568215 = path.getOrDefault("subscriptionId")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "subscriptionId", valid_593982
-  var valid_593983 = path.getOrDefault("jobName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_568215 != nil:
+    section.add "subscriptionId", valid_568215
+  var valid_568216 = path.getOrDefault("jobName")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "jobName", valid_593983
-  var valid_593984 = path.getOrDefault("transformationName")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_568216 != nil:
+    section.add "jobName", valid_568216
+  var valid_568217 = path.getOrDefault("transformationName")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "transformationName", valid_593984
+  if valid_568217 != nil:
+    section.add "transformationName", valid_568217
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,11 +176,11 @@ proc validate_TransformationsCreateOrReplace_593962(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568218 = query.getOrDefault("api-version")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_568218 != nil:
+    section.add "api-version", valid_568218
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
@@ -188,16 +188,16 @@ proc validate_TransformationsCreateOrReplace_593962(path: JsonNode;
   ##   If-None-Match: JString
   ##                : Set to '*' to allow a new transformation to be created, but to prevent updating an existing transformation. Other values will result in a 412 Pre-condition Failed response.
   section = newJObject()
-  var valid_593986 = header.getOrDefault("If-Match")
-  valid_593986 = validateParameter(valid_593986, JString, required = false,
+  var valid_568219 = header.getOrDefault("If-Match")
+  valid_568219 = validateParameter(valid_568219, JString, required = false,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "If-Match", valid_593986
-  var valid_593987 = header.getOrDefault("If-None-Match")
-  valid_593987 = validateParameter(valid_593987, JString, required = false,
+  if valid_568219 != nil:
+    section.add "If-Match", valid_568219
+  var valid_568220 = header.getOrDefault("If-None-Match")
+  valid_568220 = validateParameter(valid_568220, JString, required = false,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "If-None-Match", valid_593987
+  if valid_568220 != nil:
+    section.add "If-None-Match", valid_568220
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -209,20 +209,20 @@ proc validate_TransformationsCreateOrReplace_593962(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593989: Call_TransformationsCreateOrReplace_593961; path: JsonNode;
+proc call*(call_568222: Call_TransformationsCreateOrReplace_568194; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a transformation or replaces an already existing transformation under an existing streaming job.
   ## 
-  let valid = call_593989.validator(path, query, header, formData, body)
-  let scheme = call_593989.pickScheme
+  let valid = call_568222.validator(path, query, header, formData, body)
+  let scheme = call_568222.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593989.url(scheme.get, call_593989.host, call_593989.base,
-                         call_593989.route, valid.getOrDefault("path"),
+  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
+                         call_568222.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593989, url, valid)
+  result = hook(call_568222, url, valid)
 
-proc call*(call_593990: Call_TransformationsCreateOrReplace_593961;
+proc call*(call_568223: Call_TransformationsCreateOrReplace_568194;
           resourceGroupName: string; apiVersion: string; transformation: JsonNode;
           subscriptionId: string; jobName: string; transformationName: string): Recallable =
   ## transformationsCreateOrReplace
@@ -239,26 +239,26 @@ proc call*(call_593990: Call_TransformationsCreateOrReplace_593961;
   ##          : The name of the streaming job.
   ##   transformationName: string (required)
   ##                     : The name of the transformation.
-  var path_593991 = newJObject()
-  var query_593992 = newJObject()
-  var body_593993 = newJObject()
-  add(path_593991, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593992, "api-version", newJString(apiVersion))
+  var path_568224 = newJObject()
+  var query_568225 = newJObject()
+  var body_568226 = newJObject()
+  add(path_568224, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568225, "api-version", newJString(apiVersion))
   if transformation != nil:
-    body_593993 = transformation
-  add(path_593991, "subscriptionId", newJString(subscriptionId))
-  add(path_593991, "jobName", newJString(jobName))
-  add(path_593991, "transformationName", newJString(transformationName))
-  result = call_593990.call(path_593991, query_593992, nil, nil, body_593993)
+    body_568226 = transformation
+  add(path_568224, "subscriptionId", newJString(subscriptionId))
+  add(path_568224, "jobName", newJString(jobName))
+  add(path_568224, "transformationName", newJString(transformationName))
+  result = call_568223.call(path_568224, query_568225, nil, nil, body_568226)
 
-var transformationsCreateOrReplace* = Call_TransformationsCreateOrReplace_593961(
+var transformationsCreateOrReplace* = Call_TransformationsCreateOrReplace_568194(
     name: "transformationsCreateOrReplace", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StreamAnalytics/streamingjobs/{jobName}/transformations/{transformationName}",
-    validator: validate_TransformationsCreateOrReplace_593962, base: "",
-    url: url_TransformationsCreateOrReplace_593963, schemes: {Scheme.Https})
+    validator: validate_TransformationsCreateOrReplace_568195, base: "",
+    url: url_TransformationsCreateOrReplace_568196, schemes: {Scheme.Https})
 type
-  Call_TransformationsGet_593646 = ref object of OpenApiRestCall_593424
-proc url_TransformationsGet_593648(protocol: Scheme; host: string; base: string;
+  Call_TransformationsGet_567879 = ref object of OpenApiRestCall_567657
+proc url_TransformationsGet_567881(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -285,7 +285,7 @@ proc url_TransformationsGet_593648(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransformationsGet_593647(path: JsonNode; query: JsonNode;
+proc validate_TransformationsGet_567880(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets details about the specified transformation.
@@ -304,26 +304,26 @@ proc validate_TransformationsGet_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593821 = path.getOrDefault("resourceGroupName")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("resourceGroupName")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "resourceGroupName", valid_593821
-  var valid_593822 = path.getOrDefault("subscriptionId")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_568054 != nil:
+    section.add "resourceGroupName", valid_568054
+  var valid_568055 = path.getOrDefault("subscriptionId")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "subscriptionId", valid_593822
-  var valid_593823 = path.getOrDefault("jobName")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "subscriptionId", valid_568055
+  var valid_568056 = path.getOrDefault("jobName")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "jobName", valid_593823
-  var valid_593824 = path.getOrDefault("transformationName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_568056 != nil:
+    section.add "jobName", valid_568056
+  var valid_568057 = path.getOrDefault("transformationName")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "transformationName", valid_593824
+  if valid_568057 != nil:
+    section.add "transformationName", valid_568057
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -331,11 +331,11 @@ proc validate_TransformationsGet_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_568058 = query.getOrDefault("api-version")
+  valid_568058 = validateParameter(valid_568058, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
+  if valid_568058 != nil:
+    section.add "api-version", valid_568058
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -344,20 +344,20 @@ proc validate_TransformationsGet_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593848: Call_TransformationsGet_593646; path: JsonNode;
+proc call*(call_568081: Call_TransformationsGet_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets details about the specified transformation.
   ## 
-  let valid = call_593848.validator(path, query, header, formData, body)
-  let scheme = call_593848.pickScheme
+  let valid = call_568081.validator(path, query, header, formData, body)
+  let scheme = call_568081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593848.url(scheme.get, call_593848.host, call_593848.base,
-                         call_593848.route, valid.getOrDefault("path"),
+  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
+                         call_568081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593848, url, valid)
+  result = hook(call_568081, url, valid)
 
-proc call*(call_593919: Call_TransformationsGet_593646; resourceGroupName: string;
+proc call*(call_568152: Call_TransformationsGet_567879; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; jobName: string;
           transformationName: string): Recallable =
   ## transformationsGet
@@ -372,23 +372,23 @@ proc call*(call_593919: Call_TransformationsGet_593646; resourceGroupName: strin
   ##          : The name of the streaming job.
   ##   transformationName: string (required)
   ##                     : The name of the transformation.
-  var path_593920 = newJObject()
-  var query_593922 = newJObject()
-  add(path_593920, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593922, "api-version", newJString(apiVersion))
-  add(path_593920, "subscriptionId", newJString(subscriptionId))
-  add(path_593920, "jobName", newJString(jobName))
-  add(path_593920, "transformationName", newJString(transformationName))
-  result = call_593919.call(path_593920, query_593922, nil, nil, nil)
+  var path_568153 = newJObject()
+  var query_568155 = newJObject()
+  add(path_568153, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568155, "api-version", newJString(apiVersion))
+  add(path_568153, "subscriptionId", newJString(subscriptionId))
+  add(path_568153, "jobName", newJString(jobName))
+  add(path_568153, "transformationName", newJString(transformationName))
+  result = call_568152.call(path_568153, query_568155, nil, nil, nil)
 
-var transformationsGet* = Call_TransformationsGet_593646(
+var transformationsGet* = Call_TransformationsGet_567879(
     name: "transformationsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StreamAnalytics/streamingjobs/{jobName}/transformations/{transformationName}",
-    validator: validate_TransformationsGet_593647, base: "",
-    url: url_TransformationsGet_593648, schemes: {Scheme.Https})
+    validator: validate_TransformationsGet_567880, base: "",
+    url: url_TransformationsGet_567881, schemes: {Scheme.Https})
 type
-  Call_TransformationsUpdate_593994 = ref object of OpenApiRestCall_593424
-proc url_TransformationsUpdate_593996(protocol: Scheme; host: string; base: string;
+  Call_TransformationsUpdate_568227 = ref object of OpenApiRestCall_567657
+proc url_TransformationsUpdate_568229(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -415,7 +415,7 @@ proc url_TransformationsUpdate_593996(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransformationsUpdate_593995(path: JsonNode; query: JsonNode;
+proc validate_TransformationsUpdate_568228(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing transformation under an existing streaming job. This can be used to partially update (ie. update one or two properties) a transformation without affecting the rest the job or transformation definition.
   ## 
@@ -433,26 +433,26 @@ proc validate_TransformationsUpdate_593995(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593997 = path.getOrDefault("resourceGroupName")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  var valid_568230 = path.getOrDefault("resourceGroupName")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "resourceGroupName", valid_593997
-  var valid_593998 = path.getOrDefault("subscriptionId")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  if valid_568230 != nil:
+    section.add "resourceGroupName", valid_568230
+  var valid_568231 = path.getOrDefault("subscriptionId")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "subscriptionId", valid_593998
-  var valid_593999 = path.getOrDefault("jobName")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  if valid_568231 != nil:
+    section.add "subscriptionId", valid_568231
+  var valid_568232 = path.getOrDefault("jobName")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "jobName", valid_593999
-  var valid_594000 = path.getOrDefault("transformationName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  if valid_568232 != nil:
+    section.add "jobName", valid_568232
+  var valid_568233 = path.getOrDefault("transformationName")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "transformationName", valid_594000
+  if valid_568233 != nil:
+    section.add "transformationName", valid_568233
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -460,21 +460,21 @@ proc validate_TransformationsUpdate_593995(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594001 = query.getOrDefault("api-version")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568234 = query.getOrDefault("api-version")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "api-version", valid_594001
+  if valid_568234 != nil:
+    section.add "api-version", valid_568234
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : The ETag of the transformation. Omit this value to always overwrite the current transformation. Specify the last-seen ETag value to prevent accidentally overwriting concurrent changes.
   section = newJObject()
-  var valid_594002 = header.getOrDefault("If-Match")
-  valid_594002 = validateParameter(valid_594002, JString, required = false,
+  var valid_568235 = header.getOrDefault("If-Match")
+  valid_568235 = validateParameter(valid_568235, JString, required = false,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "If-Match", valid_594002
+  if valid_568235 != nil:
+    section.add "If-Match", valid_568235
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -486,20 +486,20 @@ proc validate_TransformationsUpdate_593995(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594004: Call_TransformationsUpdate_593994; path: JsonNode;
+proc call*(call_568237: Call_TransformationsUpdate_568227; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing transformation under an existing streaming job. This can be used to partially update (ie. update one or two properties) a transformation without affecting the rest the job or transformation definition.
   ## 
-  let valid = call_594004.validator(path, query, header, formData, body)
-  let scheme = call_594004.pickScheme
+  let valid = call_568237.validator(path, query, header, formData, body)
+  let scheme = call_568237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594004.url(scheme.get, call_594004.host, call_594004.base,
-                         call_594004.route, valid.getOrDefault("path"),
+  let url = call_568237.url(scheme.get, call_568237.host, call_568237.base,
+                         call_568237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594004, url, valid)
+  result = hook(call_568237, url, valid)
 
-proc call*(call_594005: Call_TransformationsUpdate_593994;
+proc call*(call_568238: Call_TransformationsUpdate_568227;
           resourceGroupName: string; apiVersion: string; transformation: JsonNode;
           subscriptionId: string; jobName: string; transformationName: string): Recallable =
   ## transformationsUpdate
@@ -516,23 +516,23 @@ proc call*(call_594005: Call_TransformationsUpdate_593994;
   ##          : The name of the streaming job.
   ##   transformationName: string (required)
   ##                     : The name of the transformation.
-  var path_594006 = newJObject()
-  var query_594007 = newJObject()
-  var body_594008 = newJObject()
-  add(path_594006, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594007, "api-version", newJString(apiVersion))
+  var path_568239 = newJObject()
+  var query_568240 = newJObject()
+  var body_568241 = newJObject()
+  add(path_568239, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568240, "api-version", newJString(apiVersion))
   if transformation != nil:
-    body_594008 = transformation
-  add(path_594006, "subscriptionId", newJString(subscriptionId))
-  add(path_594006, "jobName", newJString(jobName))
-  add(path_594006, "transformationName", newJString(transformationName))
-  result = call_594005.call(path_594006, query_594007, nil, nil, body_594008)
+    body_568241 = transformation
+  add(path_568239, "subscriptionId", newJString(subscriptionId))
+  add(path_568239, "jobName", newJString(jobName))
+  add(path_568239, "transformationName", newJString(transformationName))
+  result = call_568238.call(path_568239, query_568240, nil, nil, body_568241)
 
-var transformationsUpdate* = Call_TransformationsUpdate_593994(
+var transformationsUpdate* = Call_TransformationsUpdate_568227(
     name: "transformationsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StreamAnalytics/streamingjobs/{jobName}/transformations/{transformationName}",
-    validator: validate_TransformationsUpdate_593995, base: "",
-    url: url_TransformationsUpdate_593996, schemes: {Scheme.Https})
+    validator: validate_TransformationsUpdate_568228, base: "",
+    url: url_TransformationsUpdate_568229, schemes: {Scheme.Https})
 export
   rest
 

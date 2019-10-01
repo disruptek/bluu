@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "network-expressRoutePort"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ExpressRoutePortsList_593646 = ref object of OpenApiRestCall_593424
-proc url_ExpressRoutePortsList_593648(protocol: Scheme; host: string; base: string;
+  Call_ExpressRoutePortsList_567879 = ref object of OpenApiRestCall_567657
+proc url_ExpressRoutePortsList_567881(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_ExpressRoutePortsList_593648(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExpressRoutePortsList_593647(path: JsonNode; query: JsonNode;
+proc validate_ExpressRoutePortsList_567880(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the ExpressRoutePort resources in the specified subscription.
   ## 
@@ -133,11 +133,11 @@ proc validate_ExpressRoutePortsList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593808 = path.getOrDefault("subscriptionId")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = path.getOrDefault("subscriptionId")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "subscriptionId", valid_593808
+  if valid_568041 != nil:
+    section.add "subscriptionId", valid_568041
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_ExpressRoutePortsList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593809 = query.getOrDefault("api-version")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_568042 = query.getOrDefault("api-version")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "api-version", valid_593809
+  if valid_568042 != nil:
+    section.add "api-version", valid_568042
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_ExpressRoutePortsList_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593836: Call_ExpressRoutePortsList_593646; path: JsonNode;
+proc call*(call_568069: Call_ExpressRoutePortsList_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the ExpressRoutePort resources in the specified subscription.
   ## 
-  let valid = call_593836.validator(path, query, header, formData, body)
-  let scheme = call_593836.pickScheme
+  let valid = call_568069.validator(path, query, header, formData, body)
+  let scheme = call_568069.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593836.url(scheme.get, call_593836.host, call_593836.base,
-                         call_593836.route, valid.getOrDefault("path"),
+  let url = call_568069.url(scheme.get, call_568069.host, call_568069.base,
+                         call_568069.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593836, url, valid)
+  result = hook(call_568069, url, valid)
 
-proc call*(call_593907: Call_ExpressRoutePortsList_593646; apiVersion: string;
+proc call*(call_568140: Call_ExpressRoutePortsList_567879; apiVersion: string;
           subscriptionId: string): Recallable =
   ## expressRoutePortsList
   ## List all the ExpressRoutePort resources in the specified subscription.
@@ -179,20 +179,20 @@ proc call*(call_593907: Call_ExpressRoutePortsList_593646; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593908 = newJObject()
-  var query_593910 = newJObject()
-  add(query_593910, "api-version", newJString(apiVersion))
-  add(path_593908, "subscriptionId", newJString(subscriptionId))
-  result = call_593907.call(path_593908, query_593910, nil, nil, nil)
+  var path_568141 = newJObject()
+  var query_568143 = newJObject()
+  add(query_568143, "api-version", newJString(apiVersion))
+  add(path_568141, "subscriptionId", newJString(subscriptionId))
+  result = call_568140.call(path_568141, query_568143, nil, nil, nil)
 
-var expressRoutePortsList* = Call_ExpressRoutePortsList_593646(
+var expressRoutePortsList* = Call_ExpressRoutePortsList_567879(
     name: "expressRoutePortsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/ExpressRoutePorts",
-    validator: validate_ExpressRoutePortsList_593647, base: "",
-    url: url_ExpressRoutePortsList_593648, schemes: {Scheme.Https})
+    validator: validate_ExpressRoutePortsList_567880, base: "",
+    url: url_ExpressRoutePortsList_567881, schemes: {Scheme.Https})
 type
-  Call_ExpressRoutePortsLocationsList_593949 = ref object of OpenApiRestCall_593424
-proc url_ExpressRoutePortsLocationsList_593951(protocol: Scheme; host: string;
+  Call_ExpressRoutePortsLocationsList_568182 = ref object of OpenApiRestCall_567657
+proc url_ExpressRoutePortsLocationsList_568184(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -209,7 +209,7 @@ proc url_ExpressRoutePortsLocationsList_593951(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExpressRoutePortsLocationsList_593950(path: JsonNode;
+proc validate_ExpressRoutePortsLocationsList_568183(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves all ExpressRoutePort peering locations. Does not return available bandwidths for each location. Available bandwidths can only be obtained when retrieving a specific peering location.
   ## 
@@ -221,11 +221,11 @@ proc validate_ExpressRoutePortsLocationsList_593950(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593952 = path.getOrDefault("subscriptionId")
-  valid_593952 = validateParameter(valid_593952, JString, required = true,
+  var valid_568185 = path.getOrDefault("subscriptionId")
+  valid_568185 = validateParameter(valid_568185, JString, required = true,
                                  default = nil)
-  if valid_593952 != nil:
-    section.add "subscriptionId", valid_593952
+  if valid_568185 != nil:
+    section.add "subscriptionId", valid_568185
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -233,11 +233,11 @@ proc validate_ExpressRoutePortsLocationsList_593950(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593953 = query.getOrDefault("api-version")
-  valid_593953 = validateParameter(valid_593953, JString, required = true,
+  var valid_568186 = query.getOrDefault("api-version")
+  valid_568186 = validateParameter(valid_568186, JString, required = true,
                                  default = nil)
-  if valid_593953 != nil:
-    section.add "api-version", valid_593953
+  if valid_568186 != nil:
+    section.add "api-version", valid_568186
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -246,20 +246,20 @@ proc validate_ExpressRoutePortsLocationsList_593950(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593954: Call_ExpressRoutePortsLocationsList_593949; path: JsonNode;
+proc call*(call_568187: Call_ExpressRoutePortsLocationsList_568182; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves all ExpressRoutePort peering locations. Does not return available bandwidths for each location. Available bandwidths can only be obtained when retrieving a specific peering location.
   ## 
-  let valid = call_593954.validator(path, query, header, formData, body)
-  let scheme = call_593954.pickScheme
+  let valid = call_568187.validator(path, query, header, formData, body)
+  let scheme = call_568187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593954.url(scheme.get, call_593954.host, call_593954.base,
-                         call_593954.route, valid.getOrDefault("path"),
+  let url = call_568187.url(scheme.get, call_568187.host, call_568187.base,
+                         call_568187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593954, url, valid)
+  result = hook(call_568187, url, valid)
 
-proc call*(call_593955: Call_ExpressRoutePortsLocationsList_593949;
+proc call*(call_568188: Call_ExpressRoutePortsLocationsList_568182;
           apiVersion: string; subscriptionId: string): Recallable =
   ## expressRoutePortsLocationsList
   ## Retrieves all ExpressRoutePort peering locations. Does not return available bandwidths for each location. Available bandwidths can only be obtained when retrieving a specific peering location.
@@ -267,20 +267,20 @@ proc call*(call_593955: Call_ExpressRoutePortsLocationsList_593949;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593956 = newJObject()
-  var query_593957 = newJObject()
-  add(query_593957, "api-version", newJString(apiVersion))
-  add(path_593956, "subscriptionId", newJString(subscriptionId))
-  result = call_593955.call(path_593956, query_593957, nil, nil, nil)
+  var path_568189 = newJObject()
+  var query_568190 = newJObject()
+  add(query_568190, "api-version", newJString(apiVersion))
+  add(path_568189, "subscriptionId", newJString(subscriptionId))
+  result = call_568188.call(path_568189, query_568190, nil, nil, nil)
 
-var expressRoutePortsLocationsList* = Call_ExpressRoutePortsLocationsList_593949(
+var expressRoutePortsLocationsList* = Call_ExpressRoutePortsLocationsList_568182(
     name: "expressRoutePortsLocationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/ExpressRoutePortsLocations",
-    validator: validate_ExpressRoutePortsLocationsList_593950, base: "",
-    url: url_ExpressRoutePortsLocationsList_593951, schemes: {Scheme.Https})
+    validator: validate_ExpressRoutePortsLocationsList_568183, base: "",
+    url: url_ExpressRoutePortsLocationsList_568184, schemes: {Scheme.Https})
 type
-  Call_ExpressRoutePortsLocationsGet_593958 = ref object of OpenApiRestCall_593424
-proc url_ExpressRoutePortsLocationsGet_593960(protocol: Scheme; host: string;
+  Call_ExpressRoutePortsLocationsGet_568191 = ref object of OpenApiRestCall_567657
+proc url_ExpressRoutePortsLocationsGet_568193(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -299,7 +299,7 @@ proc url_ExpressRoutePortsLocationsGet_593960(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExpressRoutePortsLocationsGet_593959(path: JsonNode; query: JsonNode;
+proc validate_ExpressRoutePortsLocationsGet_568192(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves a single ExpressRoutePort peering location, including the list of available bandwidths available at said peering location.
   ## 
@@ -313,16 +313,16 @@ proc validate_ExpressRoutePortsLocationsGet_593959(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593961 = path.getOrDefault("subscriptionId")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = path.getOrDefault("subscriptionId")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "subscriptionId", valid_593961
-  var valid_593962 = path.getOrDefault("locationName")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_568194 != nil:
+    section.add "subscriptionId", valid_568194
+  var valid_568195 = path.getOrDefault("locationName")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "locationName", valid_593962
+  if valid_568195 != nil:
+    section.add "locationName", valid_568195
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -330,11 +330,11 @@ proc validate_ExpressRoutePortsLocationsGet_593959(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593963 = query.getOrDefault("api-version")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = query.getOrDefault("api-version")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "api-version", valid_593963
+  if valid_568196 != nil:
+    section.add "api-version", valid_568196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -343,20 +343,20 @@ proc validate_ExpressRoutePortsLocationsGet_593959(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593964: Call_ExpressRoutePortsLocationsGet_593958; path: JsonNode;
+proc call*(call_568197: Call_ExpressRoutePortsLocationsGet_568191; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves a single ExpressRoutePort peering location, including the list of available bandwidths available at said peering location.
   ## 
-  let valid = call_593964.validator(path, query, header, formData, body)
-  let scheme = call_593964.pickScheme
+  let valid = call_568197.validator(path, query, header, formData, body)
+  let scheme = call_568197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593964.url(scheme.get, call_593964.host, call_593964.base,
-                         call_593964.route, valid.getOrDefault("path"),
+  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
+                         call_568197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593964, url, valid)
+  result = hook(call_568197, url, valid)
 
-proc call*(call_593965: Call_ExpressRoutePortsLocationsGet_593958;
+proc call*(call_568198: Call_ExpressRoutePortsLocationsGet_568191;
           apiVersion: string; subscriptionId: string; locationName: string): Recallable =
   ## expressRoutePortsLocationsGet
   ## Retrieves a single ExpressRoutePort peering location, including the list of available bandwidths available at said peering location.
@@ -366,21 +366,21 @@ proc call*(call_593965: Call_ExpressRoutePortsLocationsGet_593958;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   locationName: string (required)
   ##               : Name of the requested ExpressRoutePort peering location.
-  var path_593966 = newJObject()
-  var query_593967 = newJObject()
-  add(query_593967, "api-version", newJString(apiVersion))
-  add(path_593966, "subscriptionId", newJString(subscriptionId))
-  add(path_593966, "locationName", newJString(locationName))
-  result = call_593965.call(path_593966, query_593967, nil, nil, nil)
+  var path_568199 = newJObject()
+  var query_568200 = newJObject()
+  add(query_568200, "api-version", newJString(apiVersion))
+  add(path_568199, "subscriptionId", newJString(subscriptionId))
+  add(path_568199, "locationName", newJString(locationName))
+  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
 
-var expressRoutePortsLocationsGet* = Call_ExpressRoutePortsLocationsGet_593958(
+var expressRoutePortsLocationsGet* = Call_ExpressRoutePortsLocationsGet_568191(
     name: "expressRoutePortsLocationsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/ExpressRoutePortsLocations/{locationName}",
-    validator: validate_ExpressRoutePortsLocationsGet_593959, base: "",
-    url: url_ExpressRoutePortsLocationsGet_593960, schemes: {Scheme.Https})
+    validator: validate_ExpressRoutePortsLocationsGet_568192, base: "",
+    url: url_ExpressRoutePortsLocationsGet_568193, schemes: {Scheme.Https})
 type
-  Call_ExpressRoutePortsListByResourceGroup_593968 = ref object of OpenApiRestCall_593424
-proc url_ExpressRoutePortsListByResourceGroup_593970(protocol: Scheme;
+  Call_ExpressRoutePortsListByResourceGroup_568201 = ref object of OpenApiRestCall_567657
+proc url_ExpressRoutePortsListByResourceGroup_568203(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -401,7 +401,7 @@ proc url_ExpressRoutePortsListByResourceGroup_593970(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExpressRoutePortsListByResourceGroup_593969(path: JsonNode;
+proc validate_ExpressRoutePortsListByResourceGroup_568202(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the ExpressRoutePort resources in the specified resource group.
   ## 
@@ -415,16 +415,16 @@ proc validate_ExpressRoutePortsListByResourceGroup_593969(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593971 = path.getOrDefault("resourceGroupName")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568204 = path.getOrDefault("resourceGroupName")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "resourceGroupName", valid_593971
-  var valid_593972 = path.getOrDefault("subscriptionId")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  if valid_568204 != nil:
+    section.add "resourceGroupName", valid_568204
+  var valid_568205 = path.getOrDefault("subscriptionId")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "subscriptionId", valid_593972
+  if valid_568205 != nil:
+    section.add "subscriptionId", valid_568205
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -432,11 +432,11 @@ proc validate_ExpressRoutePortsListByResourceGroup_593969(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593973 = query.getOrDefault("api-version")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568206 = query.getOrDefault("api-version")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "api-version", valid_593973
+  if valid_568206 != nil:
+    section.add "api-version", valid_568206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -445,21 +445,21 @@ proc validate_ExpressRoutePortsListByResourceGroup_593969(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593974: Call_ExpressRoutePortsListByResourceGroup_593968;
+proc call*(call_568207: Call_ExpressRoutePortsListByResourceGroup_568201;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all the ExpressRoutePort resources in the specified resource group.
   ## 
-  let valid = call_593974.validator(path, query, header, formData, body)
-  let scheme = call_593974.pickScheme
+  let valid = call_568207.validator(path, query, header, formData, body)
+  let scheme = call_568207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593974.url(scheme.get, call_593974.host, call_593974.base,
-                         call_593974.route, valid.getOrDefault("path"),
+  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
+                         call_568207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593974, url, valid)
+  result = hook(call_568207, url, valid)
 
-proc call*(call_593975: Call_ExpressRoutePortsListByResourceGroup_593968;
+proc call*(call_568208: Call_ExpressRoutePortsListByResourceGroup_568201;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## expressRoutePortsListByResourceGroup
   ## List all the ExpressRoutePort resources in the specified resource group.
@@ -469,21 +469,21 @@ proc call*(call_593975: Call_ExpressRoutePortsListByResourceGroup_593968;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593976 = newJObject()
-  var query_593977 = newJObject()
-  add(path_593976, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593977, "api-version", newJString(apiVersion))
-  add(path_593976, "subscriptionId", newJString(subscriptionId))
-  result = call_593975.call(path_593976, query_593977, nil, nil, nil)
+  var path_568209 = newJObject()
+  var query_568210 = newJObject()
+  add(path_568209, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568210, "api-version", newJString(apiVersion))
+  add(path_568209, "subscriptionId", newJString(subscriptionId))
+  result = call_568208.call(path_568209, query_568210, nil, nil, nil)
 
-var expressRoutePortsListByResourceGroup* = Call_ExpressRoutePortsListByResourceGroup_593968(
+var expressRoutePortsListByResourceGroup* = Call_ExpressRoutePortsListByResourceGroup_568201(
     name: "expressRoutePortsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts",
-    validator: validate_ExpressRoutePortsListByResourceGroup_593969, base: "",
-    url: url_ExpressRoutePortsListByResourceGroup_593970, schemes: {Scheme.Https})
+    validator: validate_ExpressRoutePortsListByResourceGroup_568202, base: "",
+    url: url_ExpressRoutePortsListByResourceGroup_568203, schemes: {Scheme.Https})
 type
-  Call_ExpressRoutePortsCreateOrUpdate_593989 = ref object of OpenApiRestCall_593424
-proc url_ExpressRoutePortsCreateOrUpdate_593991(protocol: Scheme; host: string;
+  Call_ExpressRoutePortsCreateOrUpdate_568222 = ref object of OpenApiRestCall_567657
+proc url_ExpressRoutePortsCreateOrUpdate_568224(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -507,7 +507,7 @@ proc url_ExpressRoutePortsCreateOrUpdate_593991(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExpressRoutePortsCreateOrUpdate_593990(path: JsonNode;
+proc validate_ExpressRoutePortsCreateOrUpdate_568223(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the specified ExpressRoutePort resource.
   ## 
@@ -523,21 +523,21 @@ proc validate_ExpressRoutePortsCreateOrUpdate_593990(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594018 = path.getOrDefault("resourceGroupName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  var valid_568251 = path.getOrDefault("resourceGroupName")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "resourceGroupName", valid_594018
-  var valid_594019 = path.getOrDefault("subscriptionId")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  if valid_568251 != nil:
+    section.add "resourceGroupName", valid_568251
+  var valid_568252 = path.getOrDefault("subscriptionId")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "subscriptionId", valid_594019
-  var valid_594020 = path.getOrDefault("expressRoutePortName")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  if valid_568252 != nil:
+    section.add "subscriptionId", valid_568252
+  var valid_568253 = path.getOrDefault("expressRoutePortName")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "expressRoutePortName", valid_594020
+  if valid_568253 != nil:
+    section.add "expressRoutePortName", valid_568253
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -545,11 +545,11 @@ proc validate_ExpressRoutePortsCreateOrUpdate_593990(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594021 = query.getOrDefault("api-version")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  var valid_568254 = query.getOrDefault("api-version")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "api-version", valid_594021
+  if valid_568254 != nil:
+    section.add "api-version", valid_568254
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -563,21 +563,21 @@ proc validate_ExpressRoutePortsCreateOrUpdate_593990(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594023: Call_ExpressRoutePortsCreateOrUpdate_593989;
+proc call*(call_568256: Call_ExpressRoutePortsCreateOrUpdate_568222;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates the specified ExpressRoutePort resource.
   ## 
-  let valid = call_594023.validator(path, query, header, formData, body)
-  let scheme = call_594023.pickScheme
+  let valid = call_568256.validator(path, query, header, formData, body)
+  let scheme = call_568256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594023.url(scheme.get, call_594023.host, call_594023.base,
-                         call_594023.route, valid.getOrDefault("path"),
+  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
+                         call_568256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594023, url, valid)
+  result = hook(call_568256, url, valid)
 
-proc call*(call_594024: Call_ExpressRoutePortsCreateOrUpdate_593989;
+proc call*(call_568257: Call_ExpressRoutePortsCreateOrUpdate_568222;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; expressRoutePortName: string): Recallable =
   ## expressRoutePortsCreateOrUpdate
@@ -592,25 +592,25 @@ proc call*(call_594024: Call_ExpressRoutePortsCreateOrUpdate_593989;
   ##             : Parameters supplied to the create ExpressRoutePort operation.
   ##   expressRoutePortName: string (required)
   ##                       : The name of the ExpressRoutePort resource.
-  var path_594025 = newJObject()
-  var query_594026 = newJObject()
-  var body_594027 = newJObject()
-  add(path_594025, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594026, "api-version", newJString(apiVersion))
-  add(path_594025, "subscriptionId", newJString(subscriptionId))
+  var path_568258 = newJObject()
+  var query_568259 = newJObject()
+  var body_568260 = newJObject()
+  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568259, "api-version", newJString(apiVersion))
+  add(path_568258, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594027 = parameters
-  add(path_594025, "expressRoutePortName", newJString(expressRoutePortName))
-  result = call_594024.call(path_594025, query_594026, nil, nil, body_594027)
+    body_568260 = parameters
+  add(path_568258, "expressRoutePortName", newJString(expressRoutePortName))
+  result = call_568257.call(path_568258, query_568259, nil, nil, body_568260)
 
-var expressRoutePortsCreateOrUpdate* = Call_ExpressRoutePortsCreateOrUpdate_593989(
+var expressRoutePortsCreateOrUpdate* = Call_ExpressRoutePortsCreateOrUpdate_568222(
     name: "expressRoutePortsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName}",
-    validator: validate_ExpressRoutePortsCreateOrUpdate_593990, base: "",
-    url: url_ExpressRoutePortsCreateOrUpdate_593991, schemes: {Scheme.Https})
+    validator: validate_ExpressRoutePortsCreateOrUpdate_568223, base: "",
+    url: url_ExpressRoutePortsCreateOrUpdate_568224, schemes: {Scheme.Https})
 type
-  Call_ExpressRoutePortsGet_593978 = ref object of OpenApiRestCall_593424
-proc url_ExpressRoutePortsGet_593980(protocol: Scheme; host: string; base: string;
+  Call_ExpressRoutePortsGet_568211 = ref object of OpenApiRestCall_567657
+proc url_ExpressRoutePortsGet_568213(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -634,7 +634,7 @@ proc url_ExpressRoutePortsGet_593980(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExpressRoutePortsGet_593979(path: JsonNode; query: JsonNode;
+proc validate_ExpressRoutePortsGet_568212(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the requested ExpressRoutePort resource.
   ## 
@@ -650,21 +650,21 @@ proc validate_ExpressRoutePortsGet_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593981 = path.getOrDefault("resourceGroupName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = path.getOrDefault("resourceGroupName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "resourceGroupName", valid_593981
-  var valid_593982 = path.getOrDefault("subscriptionId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568214 != nil:
+    section.add "resourceGroupName", valid_568214
+  var valid_568215 = path.getOrDefault("subscriptionId")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "subscriptionId", valid_593982
-  var valid_593983 = path.getOrDefault("expressRoutePortName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_568215 != nil:
+    section.add "subscriptionId", valid_568215
+  var valid_568216 = path.getOrDefault("expressRoutePortName")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "expressRoutePortName", valid_593983
+  if valid_568216 != nil:
+    section.add "expressRoutePortName", valid_568216
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -672,11 +672,11 @@ proc validate_ExpressRoutePortsGet_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593984 = query.getOrDefault("api-version")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568217 = query.getOrDefault("api-version")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "api-version", valid_593984
+  if valid_568217 != nil:
+    section.add "api-version", valid_568217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -685,20 +685,20 @@ proc validate_ExpressRoutePortsGet_593979(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_ExpressRoutePortsGet_593978; path: JsonNode;
+proc call*(call_568218: Call_ExpressRoutePortsGet_568211; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the requested ExpressRoutePort resource.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_568218.validator(path, query, header, formData, body)
+  let scheme = call_568218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_568218.url(scheme.get, call_568218.host, call_568218.base,
+                         call_568218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_568218, url, valid)
 
-proc call*(call_593986: Call_ExpressRoutePortsGet_593978;
+proc call*(call_568219: Call_ExpressRoutePortsGet_568211;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           expressRoutePortName: string): Recallable =
   ## expressRoutePortsGet
@@ -711,22 +711,22 @@ proc call*(call_593986: Call_ExpressRoutePortsGet_593978;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   expressRoutePortName: string (required)
   ##                       : The name of ExpressRoutePort.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  add(path_593987, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
-  add(path_593987, "expressRoutePortName", newJString(expressRoutePortName))
-  result = call_593986.call(path_593987, query_593988, nil, nil, nil)
+  var path_568220 = newJObject()
+  var query_568221 = newJObject()
+  add(path_568220, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568221, "api-version", newJString(apiVersion))
+  add(path_568220, "subscriptionId", newJString(subscriptionId))
+  add(path_568220, "expressRoutePortName", newJString(expressRoutePortName))
+  result = call_568219.call(path_568220, query_568221, nil, nil, nil)
 
-var expressRoutePortsGet* = Call_ExpressRoutePortsGet_593978(
+var expressRoutePortsGet* = Call_ExpressRoutePortsGet_568211(
     name: "expressRoutePortsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName}",
-    validator: validate_ExpressRoutePortsGet_593979, base: "",
-    url: url_ExpressRoutePortsGet_593980, schemes: {Scheme.Https})
+    validator: validate_ExpressRoutePortsGet_568212, base: "",
+    url: url_ExpressRoutePortsGet_568213, schemes: {Scheme.Https})
 type
-  Call_ExpressRoutePortsUpdateTags_594039 = ref object of OpenApiRestCall_593424
-proc url_ExpressRoutePortsUpdateTags_594041(protocol: Scheme; host: string;
+  Call_ExpressRoutePortsUpdateTags_568272 = ref object of OpenApiRestCall_567657
+proc url_ExpressRoutePortsUpdateTags_568274(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -750,7 +750,7 @@ proc url_ExpressRoutePortsUpdateTags_594041(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExpressRoutePortsUpdateTags_594040(path: JsonNode; query: JsonNode;
+proc validate_ExpressRoutePortsUpdateTags_568273(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update ExpressRoutePort tags.
   ## 
@@ -766,21 +766,21 @@ proc validate_ExpressRoutePortsUpdateTags_594040(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594042 = path.getOrDefault("resourceGroupName")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  var valid_568275 = path.getOrDefault("resourceGroupName")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "resourceGroupName", valid_594042
-  var valid_594043 = path.getOrDefault("subscriptionId")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  if valid_568275 != nil:
+    section.add "resourceGroupName", valid_568275
+  var valid_568276 = path.getOrDefault("subscriptionId")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "subscriptionId", valid_594043
-  var valid_594044 = path.getOrDefault("expressRoutePortName")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  if valid_568276 != nil:
+    section.add "subscriptionId", valid_568276
+  var valid_568277 = path.getOrDefault("expressRoutePortName")
+  valid_568277 = validateParameter(valid_568277, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "expressRoutePortName", valid_594044
+  if valid_568277 != nil:
+    section.add "expressRoutePortName", valid_568277
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -788,11 +788,11 @@ proc validate_ExpressRoutePortsUpdateTags_594040(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594045 = query.getOrDefault("api-version")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  var valid_568278 = query.getOrDefault("api-version")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "api-version", valid_594045
+  if valid_568278 != nil:
+    section.add "api-version", valid_568278
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -806,20 +806,20 @@ proc validate_ExpressRoutePortsUpdateTags_594040(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594047: Call_ExpressRoutePortsUpdateTags_594039; path: JsonNode;
+proc call*(call_568280: Call_ExpressRoutePortsUpdateTags_568272; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update ExpressRoutePort tags.
   ## 
-  let valid = call_594047.validator(path, query, header, formData, body)
-  let scheme = call_594047.pickScheme
+  let valid = call_568280.validator(path, query, header, formData, body)
+  let scheme = call_568280.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594047.url(scheme.get, call_594047.host, call_594047.base,
-                         call_594047.route, valid.getOrDefault("path"),
+  let url = call_568280.url(scheme.get, call_568280.host, call_568280.base,
+                         call_568280.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594047, url, valid)
+  result = hook(call_568280, url, valid)
 
-proc call*(call_594048: Call_ExpressRoutePortsUpdateTags_594039;
+proc call*(call_568281: Call_ExpressRoutePortsUpdateTags_568272;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; expressRoutePortName: string): Recallable =
   ## expressRoutePortsUpdateTags
@@ -834,25 +834,25 @@ proc call*(call_594048: Call_ExpressRoutePortsUpdateTags_594039;
   ##             : Parameters supplied to update ExpressRoutePort resource tags.
   ##   expressRoutePortName: string (required)
   ##                       : The name of the ExpressRoutePort resource.
-  var path_594049 = newJObject()
-  var query_594050 = newJObject()
-  var body_594051 = newJObject()
-  add(path_594049, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594050, "api-version", newJString(apiVersion))
-  add(path_594049, "subscriptionId", newJString(subscriptionId))
+  var path_568282 = newJObject()
+  var query_568283 = newJObject()
+  var body_568284 = newJObject()
+  add(path_568282, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568283, "api-version", newJString(apiVersion))
+  add(path_568282, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594051 = parameters
-  add(path_594049, "expressRoutePortName", newJString(expressRoutePortName))
-  result = call_594048.call(path_594049, query_594050, nil, nil, body_594051)
+    body_568284 = parameters
+  add(path_568282, "expressRoutePortName", newJString(expressRoutePortName))
+  result = call_568281.call(path_568282, query_568283, nil, nil, body_568284)
 
-var expressRoutePortsUpdateTags* = Call_ExpressRoutePortsUpdateTags_594039(
+var expressRoutePortsUpdateTags* = Call_ExpressRoutePortsUpdateTags_568272(
     name: "expressRoutePortsUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName}",
-    validator: validate_ExpressRoutePortsUpdateTags_594040, base: "",
-    url: url_ExpressRoutePortsUpdateTags_594041, schemes: {Scheme.Https})
+    validator: validate_ExpressRoutePortsUpdateTags_568273, base: "",
+    url: url_ExpressRoutePortsUpdateTags_568274, schemes: {Scheme.Https})
 type
-  Call_ExpressRoutePortsDelete_594028 = ref object of OpenApiRestCall_593424
-proc url_ExpressRoutePortsDelete_594030(protocol: Scheme; host: string; base: string;
+  Call_ExpressRoutePortsDelete_568261 = ref object of OpenApiRestCall_567657
+proc url_ExpressRoutePortsDelete_568263(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -877,7 +877,7 @@ proc url_ExpressRoutePortsDelete_594030(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExpressRoutePortsDelete_594029(path: JsonNode; query: JsonNode;
+proc validate_ExpressRoutePortsDelete_568262(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified ExpressRoutePort resource.
   ## 
@@ -893,21 +893,21 @@ proc validate_ExpressRoutePortsDelete_594029(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594031 = path.getOrDefault("resourceGroupName")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  var valid_568264 = path.getOrDefault("resourceGroupName")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "resourceGroupName", valid_594031
-  var valid_594032 = path.getOrDefault("subscriptionId")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  if valid_568264 != nil:
+    section.add "resourceGroupName", valid_568264
+  var valid_568265 = path.getOrDefault("subscriptionId")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "subscriptionId", valid_594032
-  var valid_594033 = path.getOrDefault("expressRoutePortName")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  if valid_568265 != nil:
+    section.add "subscriptionId", valid_568265
+  var valid_568266 = path.getOrDefault("expressRoutePortName")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "expressRoutePortName", valid_594033
+  if valid_568266 != nil:
+    section.add "expressRoutePortName", valid_568266
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -915,11 +915,11 @@ proc validate_ExpressRoutePortsDelete_594029(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594034 = query.getOrDefault("api-version")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  var valid_568267 = query.getOrDefault("api-version")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "api-version", valid_594034
+  if valid_568267 != nil:
+    section.add "api-version", valid_568267
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -928,20 +928,20 @@ proc validate_ExpressRoutePortsDelete_594029(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594035: Call_ExpressRoutePortsDelete_594028; path: JsonNode;
+proc call*(call_568268: Call_ExpressRoutePortsDelete_568261; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified ExpressRoutePort resource.
   ## 
-  let valid = call_594035.validator(path, query, header, formData, body)
-  let scheme = call_594035.pickScheme
+  let valid = call_568268.validator(path, query, header, formData, body)
+  let scheme = call_568268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594035.url(scheme.get, call_594035.host, call_594035.base,
-                         call_594035.route, valid.getOrDefault("path"),
+  let url = call_568268.url(scheme.get, call_568268.host, call_568268.base,
+                         call_568268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594035, url, valid)
+  result = hook(call_568268, url, valid)
 
-proc call*(call_594036: Call_ExpressRoutePortsDelete_594028;
+proc call*(call_568269: Call_ExpressRoutePortsDelete_568261;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           expressRoutePortName: string): Recallable =
   ## expressRoutePortsDelete
@@ -954,22 +954,22 @@ proc call*(call_594036: Call_ExpressRoutePortsDelete_594028;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   expressRoutePortName: string (required)
   ##                       : The name of the ExpressRoutePort resource.
-  var path_594037 = newJObject()
-  var query_594038 = newJObject()
-  add(path_594037, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594038, "api-version", newJString(apiVersion))
-  add(path_594037, "subscriptionId", newJString(subscriptionId))
-  add(path_594037, "expressRoutePortName", newJString(expressRoutePortName))
-  result = call_594036.call(path_594037, query_594038, nil, nil, nil)
+  var path_568270 = newJObject()
+  var query_568271 = newJObject()
+  add(path_568270, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568271, "api-version", newJString(apiVersion))
+  add(path_568270, "subscriptionId", newJString(subscriptionId))
+  add(path_568270, "expressRoutePortName", newJString(expressRoutePortName))
+  result = call_568269.call(path_568270, query_568271, nil, nil, nil)
 
-var expressRoutePortsDelete* = Call_ExpressRoutePortsDelete_594028(
+var expressRoutePortsDelete* = Call_ExpressRoutePortsDelete_568261(
     name: "expressRoutePortsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName}",
-    validator: validate_ExpressRoutePortsDelete_594029, base: "",
-    url: url_ExpressRoutePortsDelete_594030, schemes: {Scheme.Https})
+    validator: validate_ExpressRoutePortsDelete_568262, base: "",
+    url: url_ExpressRoutePortsDelete_568263, schemes: {Scheme.Https})
 type
-  Call_ExpressRouteLinksList_594052 = ref object of OpenApiRestCall_593424
-proc url_ExpressRouteLinksList_594054(protocol: Scheme; host: string; base: string;
+  Call_ExpressRouteLinksList_568285 = ref object of OpenApiRestCall_567657
+proc url_ExpressRouteLinksList_568287(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -994,7 +994,7 @@ proc url_ExpressRouteLinksList_594054(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExpressRouteLinksList_594053(path: JsonNode; query: JsonNode;
+proc validate_ExpressRouteLinksList_568286(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the ExpressRouteLink sub-resources of the specified ExpressRoutePort resource.
   ## 
@@ -1010,21 +1010,21 @@ proc validate_ExpressRouteLinksList_594053(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594055 = path.getOrDefault("resourceGroupName")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  var valid_568288 = path.getOrDefault("resourceGroupName")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "resourceGroupName", valid_594055
-  var valid_594056 = path.getOrDefault("subscriptionId")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  if valid_568288 != nil:
+    section.add "resourceGroupName", valid_568288
+  var valid_568289 = path.getOrDefault("subscriptionId")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "subscriptionId", valid_594056
-  var valid_594057 = path.getOrDefault("expressRoutePortName")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  if valid_568289 != nil:
+    section.add "subscriptionId", valid_568289
+  var valid_568290 = path.getOrDefault("expressRoutePortName")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "expressRoutePortName", valid_594057
+  if valid_568290 != nil:
+    section.add "expressRoutePortName", valid_568290
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1032,11 +1032,11 @@ proc validate_ExpressRouteLinksList_594053(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594058 = query.getOrDefault("api-version")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  var valid_568291 = query.getOrDefault("api-version")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "api-version", valid_594058
+  if valid_568291 != nil:
+    section.add "api-version", valid_568291
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1045,20 +1045,20 @@ proc validate_ExpressRouteLinksList_594053(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594059: Call_ExpressRouteLinksList_594052; path: JsonNode;
+proc call*(call_568292: Call_ExpressRouteLinksList_568285; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the ExpressRouteLink sub-resources of the specified ExpressRoutePort resource.
   ## 
-  let valid = call_594059.validator(path, query, header, formData, body)
-  let scheme = call_594059.pickScheme
+  let valid = call_568292.validator(path, query, header, formData, body)
+  let scheme = call_568292.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594059.url(scheme.get, call_594059.host, call_594059.base,
-                         call_594059.route, valid.getOrDefault("path"),
+  let url = call_568292.url(scheme.get, call_568292.host, call_568292.base,
+                         call_568292.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594059, url, valid)
+  result = hook(call_568292, url, valid)
 
-proc call*(call_594060: Call_ExpressRouteLinksList_594052;
+proc call*(call_568293: Call_ExpressRouteLinksList_568285;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           expressRoutePortName: string): Recallable =
   ## expressRouteLinksList
@@ -1071,22 +1071,22 @@ proc call*(call_594060: Call_ExpressRouteLinksList_594052;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   expressRoutePortName: string (required)
   ##                       : The name of the ExpressRoutePort resource.
-  var path_594061 = newJObject()
-  var query_594062 = newJObject()
-  add(path_594061, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594062, "api-version", newJString(apiVersion))
-  add(path_594061, "subscriptionId", newJString(subscriptionId))
-  add(path_594061, "expressRoutePortName", newJString(expressRoutePortName))
-  result = call_594060.call(path_594061, query_594062, nil, nil, nil)
+  var path_568294 = newJObject()
+  var query_568295 = newJObject()
+  add(path_568294, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568295, "api-version", newJString(apiVersion))
+  add(path_568294, "subscriptionId", newJString(subscriptionId))
+  add(path_568294, "expressRoutePortName", newJString(expressRoutePortName))
+  result = call_568293.call(path_568294, query_568295, nil, nil, nil)
 
-var expressRouteLinksList* = Call_ExpressRouteLinksList_594052(
+var expressRouteLinksList* = Call_ExpressRouteLinksList_568285(
     name: "expressRouteLinksList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName}/links",
-    validator: validate_ExpressRouteLinksList_594053, base: "",
-    url: url_ExpressRouteLinksList_594054, schemes: {Scheme.Https})
+    validator: validate_ExpressRouteLinksList_568286, base: "",
+    url: url_ExpressRouteLinksList_568287, schemes: {Scheme.Https})
 type
-  Call_ExpressRouteLinksGet_594063 = ref object of OpenApiRestCall_593424
-proc url_ExpressRouteLinksGet_594065(protocol: Scheme; host: string; base: string;
+  Call_ExpressRouteLinksGet_568296 = ref object of OpenApiRestCall_567657
+proc url_ExpressRouteLinksGet_568298(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1113,7 +1113,7 @@ proc url_ExpressRouteLinksGet_594065(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExpressRouteLinksGet_594064(path: JsonNode; query: JsonNode;
+proc validate_ExpressRouteLinksGet_568297(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the specified ExpressRouteLink resource.
   ## 
@@ -1131,26 +1131,26 @@ proc validate_ExpressRouteLinksGet_594064(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594066 = path.getOrDefault("resourceGroupName")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  var valid_568299 = path.getOrDefault("resourceGroupName")
+  valid_568299 = validateParameter(valid_568299, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "resourceGroupName", valid_594066
-  var valid_594067 = path.getOrDefault("subscriptionId")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  if valid_568299 != nil:
+    section.add "resourceGroupName", valid_568299
+  var valid_568300 = path.getOrDefault("subscriptionId")
+  valid_568300 = validateParameter(valid_568300, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "subscriptionId", valid_594067
-  var valid_594068 = path.getOrDefault("linkName")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  if valid_568300 != nil:
+    section.add "subscriptionId", valid_568300
+  var valid_568301 = path.getOrDefault("linkName")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "linkName", valid_594068
-  var valid_594069 = path.getOrDefault("expressRoutePortName")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  if valid_568301 != nil:
+    section.add "linkName", valid_568301
+  var valid_568302 = path.getOrDefault("expressRoutePortName")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "expressRoutePortName", valid_594069
+  if valid_568302 != nil:
+    section.add "expressRoutePortName", valid_568302
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1158,11 +1158,11 @@ proc validate_ExpressRouteLinksGet_594064(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594070 = query.getOrDefault("api-version")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  var valid_568303 = query.getOrDefault("api-version")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "api-version", valid_594070
+  if valid_568303 != nil:
+    section.add "api-version", valid_568303
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1171,20 +1171,20 @@ proc validate_ExpressRouteLinksGet_594064(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594071: Call_ExpressRouteLinksGet_594063; path: JsonNode;
+proc call*(call_568304: Call_ExpressRouteLinksGet_568296; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified ExpressRouteLink resource.
   ## 
-  let valid = call_594071.validator(path, query, header, formData, body)
-  let scheme = call_594071.pickScheme
+  let valid = call_568304.validator(path, query, header, formData, body)
+  let scheme = call_568304.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594071.url(scheme.get, call_594071.host, call_594071.base,
-                         call_594071.route, valid.getOrDefault("path"),
+  let url = call_568304.url(scheme.get, call_568304.host, call_568304.base,
+                         call_568304.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594071, url, valid)
+  result = hook(call_568304, url, valid)
 
-proc call*(call_594072: Call_ExpressRouteLinksGet_594063;
+proc call*(call_568305: Call_ExpressRouteLinksGet_568296;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           linkName: string; expressRoutePortName: string): Recallable =
   ## expressRouteLinksGet
@@ -1199,20 +1199,20 @@ proc call*(call_594072: Call_ExpressRouteLinksGet_594063;
   ##           : The name of the ExpressRouteLink resource.
   ##   expressRoutePortName: string (required)
   ##                       : The name of the ExpressRoutePort resource.
-  var path_594073 = newJObject()
-  var query_594074 = newJObject()
-  add(path_594073, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594074, "api-version", newJString(apiVersion))
-  add(path_594073, "subscriptionId", newJString(subscriptionId))
-  add(path_594073, "linkName", newJString(linkName))
-  add(path_594073, "expressRoutePortName", newJString(expressRoutePortName))
-  result = call_594072.call(path_594073, query_594074, nil, nil, nil)
+  var path_568306 = newJObject()
+  var query_568307 = newJObject()
+  add(path_568306, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568307, "api-version", newJString(apiVersion))
+  add(path_568306, "subscriptionId", newJString(subscriptionId))
+  add(path_568306, "linkName", newJString(linkName))
+  add(path_568306, "expressRoutePortName", newJString(expressRoutePortName))
+  result = call_568305.call(path_568306, query_568307, nil, nil, nil)
 
-var expressRouteLinksGet* = Call_ExpressRouteLinksGet_594063(
+var expressRouteLinksGet* = Call_ExpressRouteLinksGet_568296(
     name: "expressRouteLinksGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ExpressRoutePorts/{expressRoutePortName}/links/{linkName}",
-    validator: validate_ExpressRouteLinksGet_594064, base: "",
-    url: url_ExpressRouteLinksGet_594065, schemes: {Scheme.Https})
+    validator: validate_ExpressRouteLinksGet_568297, base: "",
+    url: url_ExpressRouteLinksGet_568298, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Relay
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "relay"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593646 = ref object of OpenApiRestCall_593424
-proc url_OperationsList_593648(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567879 = ref object of OpenApiRestCall_567657
+proc url_OperationsList_567881(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all available Relay REST API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_568040 = query.getOrDefault("api-version")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_568040 != nil:
+    section.add "api-version", valid_568040
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593830: Call_OperationsList_593646; path: JsonNode; query: JsonNode;
+proc call*(call_568063: Call_OperationsList_567879; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all available Relay REST API operations.
   ## 
-  let valid = call_593830.validator(path, query, header, formData, body)
-  let scheme = call_593830.pickScheme
+  let valid = call_568063.validator(path, query, header, formData, body)
+  let scheme = call_568063.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593830.url(scheme.get, call_593830.host, call_593830.base,
-                         call_593830.route, valid.getOrDefault("path"),
+  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
+                         call_568063.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593830, url, valid)
+  result = hook(call_568063, url, valid)
 
-proc call*(call_593901: Call_OperationsList_593646; apiVersion: string): Recallable =
+proc call*(call_568134: Call_OperationsList_567879; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all available Relay REST API operations.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var query_593902 = newJObject()
-  add(query_593902, "api-version", newJString(apiVersion))
-  result = call_593901.call(nil, query_593902, nil, nil, nil)
+  var query_568135 = newJObject()
+  add(query_568135, "api-version", newJString(apiVersion))
+  result = call_568134.call(nil, query_568135, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593646(name: "operationsList",
+var operationsList* = Call_OperationsList_567879(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Relay/operations",
-    validator: validate_OperationsList_593647, base: "", url: url_OperationsList_593648,
+    validator: validate_OperationsList_567880, base: "", url: url_OperationsList_567881,
     schemes: {Scheme.Https})
 type
-  Call_NamespacesCheckNameAvailability_593942 = ref object of OpenApiRestCall_593424
-proc url_NamespacesCheckNameAvailability_593944(protocol: Scheme; host: string;
+  Call_NamespacesCheckNameAvailability_568175 = ref object of OpenApiRestCall_567657
+proc url_NamespacesCheckNameAvailability_568177(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +185,7 @@ proc url_NamespacesCheckNameAvailability_593944(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesCheckNameAvailability_593943(path: JsonNode;
+proc validate_NamespacesCheckNameAvailability_568176(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check the specified namespace name availability.
   ## 
@@ -197,11 +197,11 @@ proc validate_NamespacesCheckNameAvailability_593943(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593976 = path.getOrDefault("subscriptionId")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_568209 = path.getOrDefault("subscriptionId")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "subscriptionId", valid_593976
+  if valid_568209 != nil:
+    section.add "subscriptionId", valid_568209
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +209,11 @@ proc validate_NamespacesCheckNameAvailability_593943(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593977 = query.getOrDefault("api-version")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  var valid_568210 = query.getOrDefault("api-version")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "api-version", valid_593977
+  if valid_568210 != nil:
+    section.add "api-version", valid_568210
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -227,21 +227,21 @@ proc validate_NamespacesCheckNameAvailability_593943(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593979: Call_NamespacesCheckNameAvailability_593942;
+proc call*(call_568212: Call_NamespacesCheckNameAvailability_568175;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Check the specified namespace name availability.
   ## 
-  let valid = call_593979.validator(path, query, header, formData, body)
-  let scheme = call_593979.pickScheme
+  let valid = call_568212.validator(path, query, header, formData, body)
+  let scheme = call_568212.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593979.url(scheme.get, call_593979.host, call_593979.base,
-                         call_593979.route, valid.getOrDefault("path"),
+  let url = call_568212.url(scheme.get, call_568212.host, call_568212.base,
+                         call_568212.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593979, url, valid)
+  result = hook(call_568212, url, valid)
 
-proc call*(call_593980: Call_NamespacesCheckNameAvailability_593942;
+proc call*(call_568213: Call_NamespacesCheckNameAvailability_568175;
           apiVersion: string; subscriptionId: string; parameters: JsonNode): Recallable =
   ## namespacesCheckNameAvailability
   ## Check the specified namespace name availability.
@@ -251,23 +251,23 @@ proc call*(call_593980: Call_NamespacesCheckNameAvailability_593942;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : Parameters to check availability of the specified namespace name.
-  var path_593981 = newJObject()
-  var query_593982 = newJObject()
-  var body_593983 = newJObject()
-  add(query_593982, "api-version", newJString(apiVersion))
-  add(path_593981, "subscriptionId", newJString(subscriptionId))
+  var path_568214 = newJObject()
+  var query_568215 = newJObject()
+  var body_568216 = newJObject()
+  add(query_568215, "api-version", newJString(apiVersion))
+  add(path_568214, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593983 = parameters
-  result = call_593980.call(path_593981, query_593982, nil, nil, body_593983)
+    body_568216 = parameters
+  result = call_568213.call(path_568214, query_568215, nil, nil, body_568216)
 
-var namespacesCheckNameAvailability* = Call_NamespacesCheckNameAvailability_593942(
+var namespacesCheckNameAvailability* = Call_NamespacesCheckNameAvailability_568175(
     name: "namespacesCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Relay/checkNameAvailability",
-    validator: validate_NamespacesCheckNameAvailability_593943, base: "",
-    url: url_NamespacesCheckNameAvailability_593944, schemes: {Scheme.Https})
+    validator: validate_NamespacesCheckNameAvailability_568176, base: "",
+    url: url_NamespacesCheckNameAvailability_568177, schemes: {Scheme.Https})
 type
-  Call_NamespacesList_593984 = ref object of OpenApiRestCall_593424
-proc url_NamespacesList_593986(protocol: Scheme; host: string; base: string;
+  Call_NamespacesList_568217 = ref object of OpenApiRestCall_567657
+proc url_NamespacesList_568219(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -283,7 +283,7 @@ proc url_NamespacesList_593986(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesList_593985(path: JsonNode; query: JsonNode;
+proc validate_NamespacesList_568218(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all the available namespaces within the subscription regardless of the resourceGroups.
@@ -296,11 +296,11 @@ proc validate_NamespacesList_593985(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593987 = path.getOrDefault("subscriptionId")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+  var valid_568220 = path.getOrDefault("subscriptionId")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "subscriptionId", valid_593987
+  if valid_568220 != nil:
+    section.add "subscriptionId", valid_568220
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -308,11 +308,11 @@ proc validate_NamespacesList_593985(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593988 = query.getOrDefault("api-version")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_568221 = query.getOrDefault("api-version")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "api-version", valid_593988
+  if valid_568221 != nil:
+    section.add "api-version", valid_568221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -321,20 +321,20 @@ proc validate_NamespacesList_593985(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593989: Call_NamespacesList_593984; path: JsonNode; query: JsonNode;
+proc call*(call_568222: Call_NamespacesList_568217; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the available namespaces within the subscription regardless of the resourceGroups.
   ## 
-  let valid = call_593989.validator(path, query, header, formData, body)
-  let scheme = call_593989.pickScheme
+  let valid = call_568222.validator(path, query, header, formData, body)
+  let scheme = call_568222.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593989.url(scheme.get, call_593989.host, call_593989.base,
-                         call_593989.route, valid.getOrDefault("path"),
+  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
+                         call_568222.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593989, url, valid)
+  result = hook(call_568222, url, valid)
 
-proc call*(call_593990: Call_NamespacesList_593984; apiVersion: string;
+proc call*(call_568223: Call_NamespacesList_568217; apiVersion: string;
           subscriptionId: string): Recallable =
   ## namespacesList
   ## Lists all the available namespaces within the subscription regardless of the resourceGroups.
@@ -342,19 +342,19 @@ proc call*(call_593990: Call_NamespacesList_593984; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593991 = newJObject()
-  var query_593992 = newJObject()
-  add(query_593992, "api-version", newJString(apiVersion))
-  add(path_593991, "subscriptionId", newJString(subscriptionId))
-  result = call_593990.call(path_593991, query_593992, nil, nil, nil)
+  var path_568224 = newJObject()
+  var query_568225 = newJObject()
+  add(query_568225, "api-version", newJString(apiVersion))
+  add(path_568224, "subscriptionId", newJString(subscriptionId))
+  result = call_568223.call(path_568224, query_568225, nil, nil, nil)
 
-var namespacesList* = Call_NamespacesList_593984(name: "namespacesList",
+var namespacesList* = Call_NamespacesList_568217(name: "namespacesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Relay/namespaces",
-    validator: validate_NamespacesList_593985, base: "", url: url_NamespacesList_593986,
+    validator: validate_NamespacesList_568218, base: "", url: url_NamespacesList_568219,
     schemes: {Scheme.Https})
 type
-  Call_NamespacesListByResourceGroup_593993 = ref object of OpenApiRestCall_593424
-proc url_NamespacesListByResourceGroup_593995(protocol: Scheme; host: string;
+  Call_NamespacesListByResourceGroup_568226 = ref object of OpenApiRestCall_567657
+proc url_NamespacesListByResourceGroup_568228(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -374,7 +374,7 @@ proc url_NamespacesListByResourceGroup_593995(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesListByResourceGroup_593994(path: JsonNode; query: JsonNode;
+proc validate_NamespacesListByResourceGroup_568227(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the available namespaces within the ResourceGroup.
   ## 
@@ -388,16 +388,16 @@ proc validate_NamespacesListByResourceGroup_593994(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593996 = path.getOrDefault("resourceGroupName")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_568229 = path.getOrDefault("resourceGroupName")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "resourceGroupName", valid_593996
-  var valid_593997 = path.getOrDefault("subscriptionId")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  if valid_568229 != nil:
+    section.add "resourceGroupName", valid_568229
+  var valid_568230 = path.getOrDefault("subscriptionId")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "subscriptionId", valid_593997
+  if valid_568230 != nil:
+    section.add "subscriptionId", valid_568230
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -405,11 +405,11 @@ proc validate_NamespacesListByResourceGroup_593994(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593998 = query.getOrDefault("api-version")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  var valid_568231 = query.getOrDefault("api-version")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "api-version", valid_593998
+  if valid_568231 != nil:
+    section.add "api-version", valid_568231
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -418,20 +418,20 @@ proc validate_NamespacesListByResourceGroup_593994(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593999: Call_NamespacesListByResourceGroup_593993; path: JsonNode;
+proc call*(call_568232: Call_NamespacesListByResourceGroup_568226; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the available namespaces within the ResourceGroup.
   ## 
-  let valid = call_593999.validator(path, query, header, formData, body)
-  let scheme = call_593999.pickScheme
+  let valid = call_568232.validator(path, query, header, formData, body)
+  let scheme = call_568232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593999.url(scheme.get, call_593999.host, call_593999.base,
-                         call_593999.route, valid.getOrDefault("path"),
+  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
+                         call_568232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593999, url, valid)
+  result = hook(call_568232, url, valid)
 
-proc call*(call_594000: Call_NamespacesListByResourceGroup_593993;
+proc call*(call_568233: Call_NamespacesListByResourceGroup_568226;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## namespacesListByResourceGroup
   ## Lists all the available namespaces within the ResourceGroup.
@@ -441,21 +441,21 @@ proc call*(call_594000: Call_NamespacesListByResourceGroup_593993;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594001 = newJObject()
-  var query_594002 = newJObject()
-  add(path_594001, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594002, "api-version", newJString(apiVersion))
-  add(path_594001, "subscriptionId", newJString(subscriptionId))
-  result = call_594000.call(path_594001, query_594002, nil, nil, nil)
+  var path_568234 = newJObject()
+  var query_568235 = newJObject()
+  add(path_568234, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568235, "api-version", newJString(apiVersion))
+  add(path_568234, "subscriptionId", newJString(subscriptionId))
+  result = call_568233.call(path_568234, query_568235, nil, nil, nil)
 
-var namespacesListByResourceGroup* = Call_NamespacesListByResourceGroup_593993(
+var namespacesListByResourceGroup* = Call_NamespacesListByResourceGroup_568226(
     name: "namespacesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces",
-    validator: validate_NamespacesListByResourceGroup_593994, base: "",
-    url: url_NamespacesListByResourceGroup_593995, schemes: {Scheme.Https})
+    validator: validate_NamespacesListByResourceGroup_568227, base: "",
+    url: url_NamespacesListByResourceGroup_568228, schemes: {Scheme.Https})
 type
-  Call_NamespacesCreateOrUpdate_594014 = ref object of OpenApiRestCall_593424
-proc url_NamespacesCreateOrUpdate_594016(protocol: Scheme; host: string;
+  Call_NamespacesCreateOrUpdate_568247 = ref object of OpenApiRestCall_567657
+proc url_NamespacesCreateOrUpdate_568249(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -478,7 +478,7 @@ proc url_NamespacesCreateOrUpdate_594016(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesCreateOrUpdate_594015(path: JsonNode; query: JsonNode;
+proc validate_NamespacesCreateOrUpdate_568248(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create Azure Relay namespace.
   ## 
@@ -494,21 +494,21 @@ proc validate_NamespacesCreateOrUpdate_594015(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594017 = path.getOrDefault("namespaceName")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  var valid_568250 = path.getOrDefault("namespaceName")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "namespaceName", valid_594017
-  var valid_594018 = path.getOrDefault("resourceGroupName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  if valid_568250 != nil:
+    section.add "namespaceName", valid_568250
+  var valid_568251 = path.getOrDefault("resourceGroupName")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "resourceGroupName", valid_594018
-  var valid_594019 = path.getOrDefault("subscriptionId")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  if valid_568251 != nil:
+    section.add "resourceGroupName", valid_568251
+  var valid_568252 = path.getOrDefault("subscriptionId")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "subscriptionId", valid_594019
+  if valid_568252 != nil:
+    section.add "subscriptionId", valid_568252
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -516,11 +516,11 @@ proc validate_NamespacesCreateOrUpdate_594015(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594020 = query.getOrDefault("api-version")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  var valid_568253 = query.getOrDefault("api-version")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "api-version", valid_594020
+  if valid_568253 != nil:
+    section.add "api-version", valid_568253
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -534,20 +534,20 @@ proc validate_NamespacesCreateOrUpdate_594015(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594022: Call_NamespacesCreateOrUpdate_594014; path: JsonNode;
+proc call*(call_568255: Call_NamespacesCreateOrUpdate_568247; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create Azure Relay namespace.
   ## 
-  let valid = call_594022.validator(path, query, header, formData, body)
-  let scheme = call_594022.pickScheme
+  let valid = call_568255.validator(path, query, header, formData, body)
+  let scheme = call_568255.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594022.url(scheme.get, call_594022.host, call_594022.base,
-                         call_594022.route, valid.getOrDefault("path"),
+  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
+                         call_568255.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594022, url, valid)
+  result = hook(call_568255, url, valid)
 
-proc call*(call_594023: Call_NamespacesCreateOrUpdate_594014;
+proc call*(call_568256: Call_NamespacesCreateOrUpdate_568247;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; parameters: JsonNode): Recallable =
   ## namespacesCreateOrUpdate
@@ -562,25 +562,25 @@ proc call*(call_594023: Call_NamespacesCreateOrUpdate_594014;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to create a namespace resource.
-  var path_594024 = newJObject()
-  var query_594025 = newJObject()
-  var body_594026 = newJObject()
-  add(path_594024, "namespaceName", newJString(namespaceName))
-  add(path_594024, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594025, "api-version", newJString(apiVersion))
-  add(path_594024, "subscriptionId", newJString(subscriptionId))
+  var path_568257 = newJObject()
+  var query_568258 = newJObject()
+  var body_568259 = newJObject()
+  add(path_568257, "namespaceName", newJString(namespaceName))
+  add(path_568257, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568258, "api-version", newJString(apiVersion))
+  add(path_568257, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594026 = parameters
-  result = call_594023.call(path_594024, query_594025, nil, nil, body_594026)
+    body_568259 = parameters
+  result = call_568256.call(path_568257, query_568258, nil, nil, body_568259)
 
-var namespacesCreateOrUpdate* = Call_NamespacesCreateOrUpdate_594014(
+var namespacesCreateOrUpdate* = Call_NamespacesCreateOrUpdate_568247(
     name: "namespacesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}",
-    validator: validate_NamespacesCreateOrUpdate_594015, base: "",
-    url: url_NamespacesCreateOrUpdate_594016, schemes: {Scheme.Https})
+    validator: validate_NamespacesCreateOrUpdate_568248, base: "",
+    url: url_NamespacesCreateOrUpdate_568249, schemes: {Scheme.Https})
 type
-  Call_NamespacesGet_594003 = ref object of OpenApiRestCall_593424
-proc url_NamespacesGet_594005(protocol: Scheme; host: string; base: string;
+  Call_NamespacesGet_568236 = ref object of OpenApiRestCall_567657
+proc url_NamespacesGet_568238(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -602,7 +602,7 @@ proc url_NamespacesGet_594005(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesGet_594004(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_NamespacesGet_568237(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the description for the specified namespace.
   ## 
@@ -618,21 +618,21 @@ proc validate_NamespacesGet_594004(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594006 = path.getOrDefault("namespaceName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_568239 = path.getOrDefault("namespaceName")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "namespaceName", valid_594006
-  var valid_594007 = path.getOrDefault("resourceGroupName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "namespaceName", valid_568239
+  var valid_568240 = path.getOrDefault("resourceGroupName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "resourceGroupName", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568240 != nil:
+    section.add "resourceGroupName", valid_568240
+  var valid_568241 = path.getOrDefault("subscriptionId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
+  if valid_568241 != nil:
+    section.add "subscriptionId", valid_568241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -640,11 +640,11 @@ proc validate_NamespacesGet_594004(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594009 = query.getOrDefault("api-version")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_568242 = query.getOrDefault("api-version")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "api-version", valid_594009
+  if valid_568242 != nil:
+    section.add "api-version", valid_568242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -653,20 +653,20 @@ proc validate_NamespacesGet_594004(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594010: Call_NamespacesGet_594003; path: JsonNode; query: JsonNode;
+proc call*(call_568243: Call_NamespacesGet_568236; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the description for the specified namespace.
   ## 
-  let valid = call_594010.validator(path, query, header, formData, body)
-  let scheme = call_594010.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594010.url(scheme.get, call_594010.host, call_594010.base,
-                         call_594010.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594010, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594011: Call_NamespacesGet_594003; namespaceName: string;
+proc call*(call_568244: Call_NamespacesGet_568236; namespaceName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## namespacesGet
   ## Returns the description for the specified namespace.
@@ -678,21 +678,21 @@ proc call*(call_594011: Call_NamespacesGet_594003; namespaceName: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594012 = newJObject()
-  var query_594013 = newJObject()
-  add(path_594012, "namespaceName", newJString(namespaceName))
-  add(path_594012, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594013, "api-version", newJString(apiVersion))
-  add(path_594012, "subscriptionId", newJString(subscriptionId))
-  result = call_594011.call(path_594012, query_594013, nil, nil, nil)
+  var path_568245 = newJObject()
+  var query_568246 = newJObject()
+  add(path_568245, "namespaceName", newJString(namespaceName))
+  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568246, "api-version", newJString(apiVersion))
+  add(path_568245, "subscriptionId", newJString(subscriptionId))
+  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
 
-var namespacesGet* = Call_NamespacesGet_594003(name: "namespacesGet",
+var namespacesGet* = Call_NamespacesGet_568236(name: "namespacesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}",
-    validator: validate_NamespacesGet_594004, base: "", url: url_NamespacesGet_594005,
+    validator: validate_NamespacesGet_568237, base: "", url: url_NamespacesGet_568238,
     schemes: {Scheme.Https})
 type
-  Call_NamespacesUpdate_594038 = ref object of OpenApiRestCall_593424
-proc url_NamespacesUpdate_594040(protocol: Scheme; host: string; base: string;
+  Call_NamespacesUpdate_568271 = ref object of OpenApiRestCall_567657
+proc url_NamespacesUpdate_568273(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -714,7 +714,7 @@ proc url_NamespacesUpdate_594040(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesUpdate_594039(path: JsonNode; query: JsonNode;
+proc validate_NamespacesUpdate_568272(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Creates or updates a namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
@@ -731,21 +731,21 @@ proc validate_NamespacesUpdate_594039(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594041 = path.getOrDefault("namespaceName")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_568274 = path.getOrDefault("namespaceName")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "namespaceName", valid_594041
-  var valid_594042 = path.getOrDefault("resourceGroupName")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  if valid_568274 != nil:
+    section.add "namespaceName", valid_568274
+  var valid_568275 = path.getOrDefault("resourceGroupName")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "resourceGroupName", valid_594042
-  var valid_594043 = path.getOrDefault("subscriptionId")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  if valid_568275 != nil:
+    section.add "resourceGroupName", valid_568275
+  var valid_568276 = path.getOrDefault("subscriptionId")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "subscriptionId", valid_594043
+  if valid_568276 != nil:
+    section.add "subscriptionId", valid_568276
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -753,11 +753,11 @@ proc validate_NamespacesUpdate_594039(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594044 = query.getOrDefault("api-version")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  var valid_568277 = query.getOrDefault("api-version")
+  valid_568277 = validateParameter(valid_568277, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "api-version", valid_594044
+  if valid_568277 != nil:
+    section.add "api-version", valid_568277
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -771,20 +771,20 @@ proc validate_NamespacesUpdate_594039(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594046: Call_NamespacesUpdate_594038; path: JsonNode;
+proc call*(call_568279: Call_NamespacesUpdate_568271; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
   ## 
-  let valid = call_594046.validator(path, query, header, formData, body)
-  let scheme = call_594046.pickScheme
+  let valid = call_568279.validator(path, query, header, formData, body)
+  let scheme = call_568279.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594046.url(scheme.get, call_594046.host, call_594046.base,
-                         call_594046.route, valid.getOrDefault("path"),
+  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
+                         call_568279.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594046, url, valid)
+  result = hook(call_568279, url, valid)
 
-proc call*(call_594047: Call_NamespacesUpdate_594038; namespaceName: string;
+proc call*(call_568280: Call_NamespacesUpdate_568271; namespaceName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode): Recallable =
   ## namespacesUpdate
@@ -799,24 +799,24 @@ proc call*(call_594047: Call_NamespacesUpdate_594038; namespaceName: string;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : Parameters for updating a namespace resource.
-  var path_594048 = newJObject()
-  var query_594049 = newJObject()
-  var body_594050 = newJObject()
-  add(path_594048, "namespaceName", newJString(namespaceName))
-  add(path_594048, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594049, "api-version", newJString(apiVersion))
-  add(path_594048, "subscriptionId", newJString(subscriptionId))
+  var path_568281 = newJObject()
+  var query_568282 = newJObject()
+  var body_568283 = newJObject()
+  add(path_568281, "namespaceName", newJString(namespaceName))
+  add(path_568281, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568282, "api-version", newJString(apiVersion))
+  add(path_568281, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594050 = parameters
-  result = call_594047.call(path_594048, query_594049, nil, nil, body_594050)
+    body_568283 = parameters
+  result = call_568280.call(path_568281, query_568282, nil, nil, body_568283)
 
-var namespacesUpdate* = Call_NamespacesUpdate_594038(name: "namespacesUpdate",
+var namespacesUpdate* = Call_NamespacesUpdate_568271(name: "namespacesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}",
-    validator: validate_NamespacesUpdate_594039, base: "",
-    url: url_NamespacesUpdate_594040, schemes: {Scheme.Https})
+    validator: validate_NamespacesUpdate_568272, base: "",
+    url: url_NamespacesUpdate_568273, schemes: {Scheme.Https})
 type
-  Call_NamespacesDelete_594027 = ref object of OpenApiRestCall_593424
-proc url_NamespacesDelete_594029(protocol: Scheme; host: string; base: string;
+  Call_NamespacesDelete_568260 = ref object of OpenApiRestCall_567657
+proc url_NamespacesDelete_568262(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -838,7 +838,7 @@ proc url_NamespacesDelete_594029(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesDelete_594028(path: JsonNode; query: JsonNode;
+proc validate_NamespacesDelete_568261(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes an existing namespace. This operation also removes all associated resources under the namespace.
@@ -855,21 +855,21 @@ proc validate_NamespacesDelete_594028(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594030 = path.getOrDefault("namespaceName")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  var valid_568263 = path.getOrDefault("namespaceName")
+  valid_568263 = validateParameter(valid_568263, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "namespaceName", valid_594030
-  var valid_594031 = path.getOrDefault("resourceGroupName")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  if valid_568263 != nil:
+    section.add "namespaceName", valid_568263
+  var valid_568264 = path.getOrDefault("resourceGroupName")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "resourceGroupName", valid_594031
-  var valid_594032 = path.getOrDefault("subscriptionId")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  if valid_568264 != nil:
+    section.add "resourceGroupName", valid_568264
+  var valid_568265 = path.getOrDefault("subscriptionId")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "subscriptionId", valid_594032
+  if valid_568265 != nil:
+    section.add "subscriptionId", valid_568265
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -877,11 +877,11 @@ proc validate_NamespacesDelete_594028(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594033 = query.getOrDefault("api-version")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  var valid_568266 = query.getOrDefault("api-version")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "api-version", valid_594033
+  if valid_568266 != nil:
+    section.add "api-version", valid_568266
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -890,20 +890,20 @@ proc validate_NamespacesDelete_594028(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594034: Call_NamespacesDelete_594027; path: JsonNode;
+proc call*(call_568267: Call_NamespacesDelete_568260; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing namespace. This operation also removes all associated resources under the namespace.
   ## 
-  let valid = call_594034.validator(path, query, header, formData, body)
-  let scheme = call_594034.pickScheme
+  let valid = call_568267.validator(path, query, header, formData, body)
+  let scheme = call_568267.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594034.url(scheme.get, call_594034.host, call_594034.base,
-                         call_594034.route, valid.getOrDefault("path"),
+  let url = call_568267.url(scheme.get, call_568267.host, call_568267.base,
+                         call_568267.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594034, url, valid)
+  result = hook(call_568267, url, valid)
 
-proc call*(call_594035: Call_NamespacesDelete_594027; namespaceName: string;
+proc call*(call_568268: Call_NamespacesDelete_568260; namespaceName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## namespacesDelete
   ## Deletes an existing namespace. This operation also removes all associated resources under the namespace.
@@ -915,21 +915,21 @@ proc call*(call_594035: Call_NamespacesDelete_594027; namespaceName: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594036 = newJObject()
-  var query_594037 = newJObject()
-  add(path_594036, "namespaceName", newJString(namespaceName))
-  add(path_594036, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594037, "api-version", newJString(apiVersion))
-  add(path_594036, "subscriptionId", newJString(subscriptionId))
-  result = call_594035.call(path_594036, query_594037, nil, nil, nil)
+  var path_568269 = newJObject()
+  var query_568270 = newJObject()
+  add(path_568269, "namespaceName", newJString(namespaceName))
+  add(path_568269, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568270, "api-version", newJString(apiVersion))
+  add(path_568269, "subscriptionId", newJString(subscriptionId))
+  result = call_568268.call(path_568269, query_568270, nil, nil, nil)
 
-var namespacesDelete* = Call_NamespacesDelete_594027(name: "namespacesDelete",
+var namespacesDelete* = Call_NamespacesDelete_568260(name: "namespacesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}",
-    validator: validate_NamespacesDelete_594028, base: "",
-    url: url_NamespacesDelete_594029, schemes: {Scheme.Https})
+    validator: validate_NamespacesDelete_568261, base: "",
+    url: url_NamespacesDelete_568262, schemes: {Scheme.Https})
 type
-  Call_NamespacesListAuthorizationRules_594051 = ref object of OpenApiRestCall_593424
-proc url_NamespacesListAuthorizationRules_594053(protocol: Scheme; host: string;
+  Call_NamespacesListAuthorizationRules_568284 = ref object of OpenApiRestCall_567657
+proc url_NamespacesListAuthorizationRules_568286(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -952,7 +952,7 @@ proc url_NamespacesListAuthorizationRules_594053(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesListAuthorizationRules_594052(path: JsonNode;
+proc validate_NamespacesListAuthorizationRules_568285(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Authorization rules for a namespace.
   ## 
@@ -968,21 +968,21 @@ proc validate_NamespacesListAuthorizationRules_594052(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594054 = path.getOrDefault("namespaceName")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  var valid_568287 = path.getOrDefault("namespaceName")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "namespaceName", valid_594054
-  var valid_594055 = path.getOrDefault("resourceGroupName")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  if valid_568287 != nil:
+    section.add "namespaceName", valid_568287
+  var valid_568288 = path.getOrDefault("resourceGroupName")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "resourceGroupName", valid_594055
-  var valid_594056 = path.getOrDefault("subscriptionId")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  if valid_568288 != nil:
+    section.add "resourceGroupName", valid_568288
+  var valid_568289 = path.getOrDefault("subscriptionId")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "subscriptionId", valid_594056
+  if valid_568289 != nil:
+    section.add "subscriptionId", valid_568289
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -990,11 +990,11 @@ proc validate_NamespacesListAuthorizationRules_594052(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594057 = query.getOrDefault("api-version")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  var valid_568290 = query.getOrDefault("api-version")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "api-version", valid_594057
+  if valid_568290 != nil:
+    section.add "api-version", valid_568290
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1003,21 +1003,21 @@ proc validate_NamespacesListAuthorizationRules_594052(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594058: Call_NamespacesListAuthorizationRules_594051;
+proc call*(call_568291: Call_NamespacesListAuthorizationRules_568284;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Authorization rules for a namespace.
   ## 
-  let valid = call_594058.validator(path, query, header, formData, body)
-  let scheme = call_594058.pickScheme
+  let valid = call_568291.validator(path, query, header, formData, body)
+  let scheme = call_568291.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594058.url(scheme.get, call_594058.host, call_594058.base,
-                         call_594058.route, valid.getOrDefault("path"),
+  let url = call_568291.url(scheme.get, call_568291.host, call_568291.base,
+                         call_568291.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594058, url, valid)
+  result = hook(call_568291, url, valid)
 
-proc call*(call_594059: Call_NamespacesListAuthorizationRules_594051;
+proc call*(call_568292: Call_NamespacesListAuthorizationRules_568284;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## namespacesListAuthorizationRules
@@ -1030,22 +1030,22 @@ proc call*(call_594059: Call_NamespacesListAuthorizationRules_594051;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594060 = newJObject()
-  var query_594061 = newJObject()
-  add(path_594060, "namespaceName", newJString(namespaceName))
-  add(path_594060, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594061, "api-version", newJString(apiVersion))
-  add(path_594060, "subscriptionId", newJString(subscriptionId))
-  result = call_594059.call(path_594060, query_594061, nil, nil, nil)
+  var path_568293 = newJObject()
+  var query_568294 = newJObject()
+  add(path_568293, "namespaceName", newJString(namespaceName))
+  add(path_568293, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568294, "api-version", newJString(apiVersion))
+  add(path_568293, "subscriptionId", newJString(subscriptionId))
+  result = call_568292.call(path_568293, query_568294, nil, nil, nil)
 
-var namespacesListAuthorizationRules* = Call_NamespacesListAuthorizationRules_594051(
+var namespacesListAuthorizationRules* = Call_NamespacesListAuthorizationRules_568284(
     name: "namespacesListAuthorizationRules", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/authorizationRules",
-    validator: validate_NamespacesListAuthorizationRules_594052, base: "",
-    url: url_NamespacesListAuthorizationRules_594053, schemes: {Scheme.Https})
+    validator: validate_NamespacesListAuthorizationRules_568285, base: "",
+    url: url_NamespacesListAuthorizationRules_568286, schemes: {Scheme.Https})
 type
-  Call_NamespacesCreateOrUpdateAuthorizationRule_594074 = ref object of OpenApiRestCall_593424
-proc url_NamespacesCreateOrUpdateAuthorizationRule_594076(protocol: Scheme;
+  Call_NamespacesCreateOrUpdateAuthorizationRule_568307 = ref object of OpenApiRestCall_567657
+proc url_NamespacesCreateOrUpdateAuthorizationRule_568309(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1071,7 +1071,7 @@ proc url_NamespacesCreateOrUpdateAuthorizationRule_594076(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesCreateOrUpdateAuthorizationRule_594075(path: JsonNode;
+proc validate_NamespacesCreateOrUpdateAuthorizationRule_568308(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an authorization rule for a namespace.
   ## 
@@ -1089,26 +1089,26 @@ proc validate_NamespacesCreateOrUpdateAuthorizationRule_594075(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594077 = path.getOrDefault("namespaceName")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  var valid_568310 = path.getOrDefault("namespaceName")
+  valid_568310 = validateParameter(valid_568310, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "namespaceName", valid_594077
-  var valid_594078 = path.getOrDefault("resourceGroupName")
-  valid_594078 = validateParameter(valid_594078, JString, required = true,
+  if valid_568310 != nil:
+    section.add "namespaceName", valid_568310
+  var valid_568311 = path.getOrDefault("resourceGroupName")
+  valid_568311 = validateParameter(valid_568311, JString, required = true,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "resourceGroupName", valid_594078
-  var valid_594079 = path.getOrDefault("authorizationRuleName")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+  if valid_568311 != nil:
+    section.add "resourceGroupName", valid_568311
+  var valid_568312 = path.getOrDefault("authorizationRuleName")
+  valid_568312 = validateParameter(valid_568312, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "authorizationRuleName", valid_594079
-  var valid_594080 = path.getOrDefault("subscriptionId")
-  valid_594080 = validateParameter(valid_594080, JString, required = true,
+  if valid_568312 != nil:
+    section.add "authorizationRuleName", valid_568312
+  var valid_568313 = path.getOrDefault("subscriptionId")
+  valid_568313 = validateParameter(valid_568313, JString, required = true,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "subscriptionId", valid_594080
+  if valid_568313 != nil:
+    section.add "subscriptionId", valid_568313
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1116,11 +1116,11 @@ proc validate_NamespacesCreateOrUpdateAuthorizationRule_594075(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594081 = query.getOrDefault("api-version")
-  valid_594081 = validateParameter(valid_594081, JString, required = true,
+  var valid_568314 = query.getOrDefault("api-version")
+  valid_568314 = validateParameter(valid_568314, JString, required = true,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "api-version", valid_594081
+  if valid_568314 != nil:
+    section.add "api-version", valid_568314
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1134,21 +1134,21 @@ proc validate_NamespacesCreateOrUpdateAuthorizationRule_594075(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594083: Call_NamespacesCreateOrUpdateAuthorizationRule_594074;
+proc call*(call_568316: Call_NamespacesCreateOrUpdateAuthorizationRule_568307;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an authorization rule for a namespace.
   ## 
-  let valid = call_594083.validator(path, query, header, formData, body)
-  let scheme = call_594083.pickScheme
+  let valid = call_568316.validator(path, query, header, formData, body)
+  let scheme = call_568316.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594083.url(scheme.get, call_594083.host, call_594083.base,
-                         call_594083.route, valid.getOrDefault("path"),
+  let url = call_568316.url(scheme.get, call_568316.host, call_568316.base,
+                         call_568316.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594083, url, valid)
+  result = hook(call_568316, url, valid)
 
-proc call*(call_594084: Call_NamespacesCreateOrUpdateAuthorizationRule_594074;
+proc call*(call_568317: Call_NamespacesCreateOrUpdateAuthorizationRule_568307;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string;
           parameters: JsonNode): Recallable =
@@ -1166,27 +1166,27 @@ proc call*(call_594084: Call_NamespacesCreateOrUpdateAuthorizationRule_594074;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : The authorization rule parameters.
-  var path_594085 = newJObject()
-  var query_594086 = newJObject()
-  var body_594087 = newJObject()
-  add(path_594085, "namespaceName", newJString(namespaceName))
-  add(path_594085, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594086, "api-version", newJString(apiVersion))
-  add(path_594085, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594085, "subscriptionId", newJString(subscriptionId))
+  var path_568318 = newJObject()
+  var query_568319 = newJObject()
+  var body_568320 = newJObject()
+  add(path_568318, "namespaceName", newJString(namespaceName))
+  add(path_568318, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568319, "api-version", newJString(apiVersion))
+  add(path_568318, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568318, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594087 = parameters
-  result = call_594084.call(path_594085, query_594086, nil, nil, body_594087)
+    body_568320 = parameters
+  result = call_568317.call(path_568318, query_568319, nil, nil, body_568320)
 
-var namespacesCreateOrUpdateAuthorizationRule* = Call_NamespacesCreateOrUpdateAuthorizationRule_594074(
+var namespacesCreateOrUpdateAuthorizationRule* = Call_NamespacesCreateOrUpdateAuthorizationRule_568307(
     name: "namespacesCreateOrUpdateAuthorizationRule", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/authorizationRules/{authorizationRuleName}",
-    validator: validate_NamespacesCreateOrUpdateAuthorizationRule_594075,
-    base: "", url: url_NamespacesCreateOrUpdateAuthorizationRule_594076,
+    validator: validate_NamespacesCreateOrUpdateAuthorizationRule_568308,
+    base: "", url: url_NamespacesCreateOrUpdateAuthorizationRule_568309,
     schemes: {Scheme.Https})
 type
-  Call_NamespacesGetAuthorizationRule_594062 = ref object of OpenApiRestCall_593424
-proc url_NamespacesGetAuthorizationRule_594064(protocol: Scheme; host: string;
+  Call_NamespacesGetAuthorizationRule_568295 = ref object of OpenApiRestCall_567657
+proc url_NamespacesGetAuthorizationRule_568297(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1212,7 +1212,7 @@ proc url_NamespacesGetAuthorizationRule_594064(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesGetAuthorizationRule_594063(path: JsonNode;
+proc validate_NamespacesGetAuthorizationRule_568296(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Authorization rule for a namespace by name.
   ## 
@@ -1230,26 +1230,26 @@ proc validate_NamespacesGetAuthorizationRule_594063(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594065 = path.getOrDefault("namespaceName")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  var valid_568298 = path.getOrDefault("namespaceName")
+  valid_568298 = validateParameter(valid_568298, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "namespaceName", valid_594065
-  var valid_594066 = path.getOrDefault("resourceGroupName")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  if valid_568298 != nil:
+    section.add "namespaceName", valid_568298
+  var valid_568299 = path.getOrDefault("resourceGroupName")
+  valid_568299 = validateParameter(valid_568299, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "resourceGroupName", valid_594066
-  var valid_594067 = path.getOrDefault("authorizationRuleName")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  if valid_568299 != nil:
+    section.add "resourceGroupName", valid_568299
+  var valid_568300 = path.getOrDefault("authorizationRuleName")
+  valid_568300 = validateParameter(valid_568300, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "authorizationRuleName", valid_594067
-  var valid_594068 = path.getOrDefault("subscriptionId")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  if valid_568300 != nil:
+    section.add "authorizationRuleName", valid_568300
+  var valid_568301 = path.getOrDefault("subscriptionId")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "subscriptionId", valid_594068
+  if valid_568301 != nil:
+    section.add "subscriptionId", valid_568301
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1257,11 +1257,11 @@ proc validate_NamespacesGetAuthorizationRule_594063(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594069 = query.getOrDefault("api-version")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  var valid_568302 = query.getOrDefault("api-version")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "api-version", valid_594069
+  if valid_568302 != nil:
+    section.add "api-version", valid_568302
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1270,20 +1270,20 @@ proc validate_NamespacesGetAuthorizationRule_594063(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594070: Call_NamespacesGetAuthorizationRule_594062; path: JsonNode;
+proc call*(call_568303: Call_NamespacesGetAuthorizationRule_568295; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Authorization rule for a namespace by name.
   ## 
-  let valid = call_594070.validator(path, query, header, formData, body)
-  let scheme = call_594070.pickScheme
+  let valid = call_568303.validator(path, query, header, formData, body)
+  let scheme = call_568303.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594070.url(scheme.get, call_594070.host, call_594070.base,
-                         call_594070.route, valid.getOrDefault("path"),
+  let url = call_568303.url(scheme.get, call_568303.host, call_568303.base,
+                         call_568303.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594070, url, valid)
+  result = hook(call_568303, url, valid)
 
-proc call*(call_594071: Call_NamespacesGetAuthorizationRule_594062;
+proc call*(call_568304: Call_NamespacesGetAuthorizationRule_568295;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string): Recallable =
   ## namespacesGetAuthorizationRule
@@ -1298,23 +1298,23 @@ proc call*(call_594071: Call_NamespacesGetAuthorizationRule_594062;
   ##                        : The authorization rule name.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594072 = newJObject()
-  var query_594073 = newJObject()
-  add(path_594072, "namespaceName", newJString(namespaceName))
-  add(path_594072, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594073, "api-version", newJString(apiVersion))
-  add(path_594072, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594072, "subscriptionId", newJString(subscriptionId))
-  result = call_594071.call(path_594072, query_594073, nil, nil, nil)
+  var path_568305 = newJObject()
+  var query_568306 = newJObject()
+  add(path_568305, "namespaceName", newJString(namespaceName))
+  add(path_568305, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568306, "api-version", newJString(apiVersion))
+  add(path_568305, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568305, "subscriptionId", newJString(subscriptionId))
+  result = call_568304.call(path_568305, query_568306, nil, nil, nil)
 
-var namespacesGetAuthorizationRule* = Call_NamespacesGetAuthorizationRule_594062(
+var namespacesGetAuthorizationRule* = Call_NamespacesGetAuthorizationRule_568295(
     name: "namespacesGetAuthorizationRule", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/authorizationRules/{authorizationRuleName}",
-    validator: validate_NamespacesGetAuthorizationRule_594063, base: "",
-    url: url_NamespacesGetAuthorizationRule_594064, schemes: {Scheme.Https})
+    validator: validate_NamespacesGetAuthorizationRule_568296, base: "",
+    url: url_NamespacesGetAuthorizationRule_568297, schemes: {Scheme.Https})
 type
-  Call_NamespacesDeleteAuthorizationRule_594088 = ref object of OpenApiRestCall_593424
-proc url_NamespacesDeleteAuthorizationRule_594090(protocol: Scheme; host: string;
+  Call_NamespacesDeleteAuthorizationRule_568321 = ref object of OpenApiRestCall_567657
+proc url_NamespacesDeleteAuthorizationRule_568323(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1340,7 +1340,7 @@ proc url_NamespacesDeleteAuthorizationRule_594090(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesDeleteAuthorizationRule_594089(path: JsonNode;
+proc validate_NamespacesDeleteAuthorizationRule_568322(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a namespace authorization rule.
   ## 
@@ -1358,26 +1358,26 @@ proc validate_NamespacesDeleteAuthorizationRule_594089(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594091 = path.getOrDefault("namespaceName")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  var valid_568324 = path.getOrDefault("namespaceName")
+  valid_568324 = validateParameter(valid_568324, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "namespaceName", valid_594091
-  var valid_594092 = path.getOrDefault("resourceGroupName")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  if valid_568324 != nil:
+    section.add "namespaceName", valid_568324
+  var valid_568325 = path.getOrDefault("resourceGroupName")
+  valid_568325 = validateParameter(valid_568325, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "resourceGroupName", valid_594092
-  var valid_594093 = path.getOrDefault("authorizationRuleName")
-  valid_594093 = validateParameter(valid_594093, JString, required = true,
+  if valid_568325 != nil:
+    section.add "resourceGroupName", valid_568325
+  var valid_568326 = path.getOrDefault("authorizationRuleName")
+  valid_568326 = validateParameter(valid_568326, JString, required = true,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "authorizationRuleName", valid_594093
-  var valid_594094 = path.getOrDefault("subscriptionId")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  if valid_568326 != nil:
+    section.add "authorizationRuleName", valid_568326
+  var valid_568327 = path.getOrDefault("subscriptionId")
+  valid_568327 = validateParameter(valid_568327, JString, required = true,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "subscriptionId", valid_594094
+  if valid_568327 != nil:
+    section.add "subscriptionId", valid_568327
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1385,11 +1385,11 @@ proc validate_NamespacesDeleteAuthorizationRule_594089(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594095 = query.getOrDefault("api-version")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  var valid_568328 = query.getOrDefault("api-version")
+  valid_568328 = validateParameter(valid_568328, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "api-version", valid_594095
+  if valid_568328 != nil:
+    section.add "api-version", valid_568328
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1398,21 +1398,21 @@ proc validate_NamespacesDeleteAuthorizationRule_594089(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594096: Call_NamespacesDeleteAuthorizationRule_594088;
+proc call*(call_568329: Call_NamespacesDeleteAuthorizationRule_568321;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes a namespace authorization rule.
   ## 
-  let valid = call_594096.validator(path, query, header, formData, body)
-  let scheme = call_594096.pickScheme
+  let valid = call_568329.validator(path, query, header, formData, body)
+  let scheme = call_568329.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594096.url(scheme.get, call_594096.host, call_594096.base,
-                         call_594096.route, valid.getOrDefault("path"),
+  let url = call_568329.url(scheme.get, call_568329.host, call_568329.base,
+                         call_568329.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594096, url, valid)
+  result = hook(call_568329, url, valid)
 
-proc call*(call_594097: Call_NamespacesDeleteAuthorizationRule_594088;
+proc call*(call_568330: Call_NamespacesDeleteAuthorizationRule_568321;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string): Recallable =
   ## namespacesDeleteAuthorizationRule
@@ -1427,23 +1427,23 @@ proc call*(call_594097: Call_NamespacesDeleteAuthorizationRule_594088;
   ##                        : The authorization rule name.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594098 = newJObject()
-  var query_594099 = newJObject()
-  add(path_594098, "namespaceName", newJString(namespaceName))
-  add(path_594098, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594099, "api-version", newJString(apiVersion))
-  add(path_594098, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594098, "subscriptionId", newJString(subscriptionId))
-  result = call_594097.call(path_594098, query_594099, nil, nil, nil)
+  var path_568331 = newJObject()
+  var query_568332 = newJObject()
+  add(path_568331, "namespaceName", newJString(namespaceName))
+  add(path_568331, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568332, "api-version", newJString(apiVersion))
+  add(path_568331, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568331, "subscriptionId", newJString(subscriptionId))
+  result = call_568330.call(path_568331, query_568332, nil, nil, nil)
 
-var namespacesDeleteAuthorizationRule* = Call_NamespacesDeleteAuthorizationRule_594088(
+var namespacesDeleteAuthorizationRule* = Call_NamespacesDeleteAuthorizationRule_568321(
     name: "namespacesDeleteAuthorizationRule", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/authorizationRules/{authorizationRuleName}",
-    validator: validate_NamespacesDeleteAuthorizationRule_594089, base: "",
-    url: url_NamespacesDeleteAuthorizationRule_594090, schemes: {Scheme.Https})
+    validator: validate_NamespacesDeleteAuthorizationRule_568322, base: "",
+    url: url_NamespacesDeleteAuthorizationRule_568323, schemes: {Scheme.Https})
 type
-  Call_NamespacesListKeys_594100 = ref object of OpenApiRestCall_593424
-proc url_NamespacesListKeys_594102(protocol: Scheme; host: string; base: string;
+  Call_NamespacesListKeys_568333 = ref object of OpenApiRestCall_567657
+proc url_NamespacesListKeys_568335(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1470,7 +1470,7 @@ proc url_NamespacesListKeys_594102(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesListKeys_594101(path: JsonNode; query: JsonNode;
+proc validate_NamespacesListKeys_568334(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Primary and secondary connection strings to the namespace.
@@ -1489,26 +1489,26 @@ proc validate_NamespacesListKeys_594101(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594103 = path.getOrDefault("namespaceName")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  var valid_568336 = path.getOrDefault("namespaceName")
+  valid_568336 = validateParameter(valid_568336, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "namespaceName", valid_594103
-  var valid_594104 = path.getOrDefault("resourceGroupName")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  if valid_568336 != nil:
+    section.add "namespaceName", valid_568336
+  var valid_568337 = path.getOrDefault("resourceGroupName")
+  valid_568337 = validateParameter(valid_568337, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "resourceGroupName", valid_594104
-  var valid_594105 = path.getOrDefault("authorizationRuleName")
-  valid_594105 = validateParameter(valid_594105, JString, required = true,
+  if valid_568337 != nil:
+    section.add "resourceGroupName", valid_568337
+  var valid_568338 = path.getOrDefault("authorizationRuleName")
+  valid_568338 = validateParameter(valid_568338, JString, required = true,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "authorizationRuleName", valid_594105
-  var valid_594106 = path.getOrDefault("subscriptionId")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  if valid_568338 != nil:
+    section.add "authorizationRuleName", valid_568338
+  var valid_568339 = path.getOrDefault("subscriptionId")
+  valid_568339 = validateParameter(valid_568339, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "subscriptionId", valid_594106
+  if valid_568339 != nil:
+    section.add "subscriptionId", valid_568339
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1516,11 +1516,11 @@ proc validate_NamespacesListKeys_594101(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594107 = query.getOrDefault("api-version")
-  valid_594107 = validateParameter(valid_594107, JString, required = true,
+  var valid_568340 = query.getOrDefault("api-version")
+  valid_568340 = validateParameter(valid_568340, JString, required = true,
                                  default = nil)
-  if valid_594107 != nil:
-    section.add "api-version", valid_594107
+  if valid_568340 != nil:
+    section.add "api-version", valid_568340
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1529,20 +1529,20 @@ proc validate_NamespacesListKeys_594101(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594108: Call_NamespacesListKeys_594100; path: JsonNode;
+proc call*(call_568341: Call_NamespacesListKeys_568333; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Primary and secondary connection strings to the namespace.
   ## 
-  let valid = call_594108.validator(path, query, header, formData, body)
-  let scheme = call_594108.pickScheme
+  let valid = call_568341.validator(path, query, header, formData, body)
+  let scheme = call_568341.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594108.url(scheme.get, call_594108.host, call_594108.base,
-                         call_594108.route, valid.getOrDefault("path"),
+  let url = call_568341.url(scheme.get, call_568341.host, call_568341.base,
+                         call_568341.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594108, url, valid)
+  result = hook(call_568341, url, valid)
 
-proc call*(call_594109: Call_NamespacesListKeys_594100; namespaceName: string;
+proc call*(call_568342: Call_NamespacesListKeys_568333; namespaceName: string;
           resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string): Recallable =
   ## namespacesListKeys
@@ -1557,23 +1557,23 @@ proc call*(call_594109: Call_NamespacesListKeys_594100; namespaceName: string;
   ##                        : The authorization rule name.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594110 = newJObject()
-  var query_594111 = newJObject()
-  add(path_594110, "namespaceName", newJString(namespaceName))
-  add(path_594110, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594111, "api-version", newJString(apiVersion))
-  add(path_594110, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594110, "subscriptionId", newJString(subscriptionId))
-  result = call_594109.call(path_594110, query_594111, nil, nil, nil)
+  var path_568343 = newJObject()
+  var query_568344 = newJObject()
+  add(path_568343, "namespaceName", newJString(namespaceName))
+  add(path_568343, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568344, "api-version", newJString(apiVersion))
+  add(path_568343, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568343, "subscriptionId", newJString(subscriptionId))
+  result = call_568342.call(path_568343, query_568344, nil, nil, nil)
 
-var namespacesListKeys* = Call_NamespacesListKeys_594100(
+var namespacesListKeys* = Call_NamespacesListKeys_568333(
     name: "namespacesListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/authorizationRules/{authorizationRuleName}/listKeys",
-    validator: validate_NamespacesListKeys_594101, base: "",
-    url: url_NamespacesListKeys_594102, schemes: {Scheme.Https})
+    validator: validate_NamespacesListKeys_568334, base: "",
+    url: url_NamespacesListKeys_568335, schemes: {Scheme.Https})
 type
-  Call_NamespacesRegenerateKeys_594112 = ref object of OpenApiRestCall_593424
-proc url_NamespacesRegenerateKeys_594114(protocol: Scheme; host: string;
+  Call_NamespacesRegenerateKeys_568345 = ref object of OpenApiRestCall_567657
+proc url_NamespacesRegenerateKeys_568347(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1601,7 +1601,7 @@ proc url_NamespacesRegenerateKeys_594114(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesRegenerateKeys_594113(path: JsonNode; query: JsonNode;
+proc validate_NamespacesRegenerateKeys_568346(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates the primary or secondary connection strings to the namespace.
   ## 
@@ -1619,26 +1619,26 @@ proc validate_NamespacesRegenerateKeys_594113(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594115 = path.getOrDefault("namespaceName")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  var valid_568348 = path.getOrDefault("namespaceName")
+  valid_568348 = validateParameter(valid_568348, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "namespaceName", valid_594115
-  var valid_594116 = path.getOrDefault("resourceGroupName")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_568348 != nil:
+    section.add "namespaceName", valid_568348
+  var valid_568349 = path.getOrDefault("resourceGroupName")
+  valid_568349 = validateParameter(valid_568349, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "resourceGroupName", valid_594116
-  var valid_594117 = path.getOrDefault("authorizationRuleName")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  if valid_568349 != nil:
+    section.add "resourceGroupName", valid_568349
+  var valid_568350 = path.getOrDefault("authorizationRuleName")
+  valid_568350 = validateParameter(valid_568350, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "authorizationRuleName", valid_594117
-  var valid_594118 = path.getOrDefault("subscriptionId")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  if valid_568350 != nil:
+    section.add "authorizationRuleName", valid_568350
+  var valid_568351 = path.getOrDefault("subscriptionId")
+  valid_568351 = validateParameter(valid_568351, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "subscriptionId", valid_594118
+  if valid_568351 != nil:
+    section.add "subscriptionId", valid_568351
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1646,11 +1646,11 @@ proc validate_NamespacesRegenerateKeys_594113(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594119 = query.getOrDefault("api-version")
-  valid_594119 = validateParameter(valid_594119, JString, required = true,
+  var valid_568352 = query.getOrDefault("api-version")
+  valid_568352 = validateParameter(valid_568352, JString, required = true,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "api-version", valid_594119
+  if valid_568352 != nil:
+    section.add "api-version", valid_568352
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1664,20 +1664,20 @@ proc validate_NamespacesRegenerateKeys_594113(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594121: Call_NamespacesRegenerateKeys_594112; path: JsonNode;
+proc call*(call_568354: Call_NamespacesRegenerateKeys_568345; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerates the primary or secondary connection strings to the namespace.
   ## 
-  let valid = call_594121.validator(path, query, header, formData, body)
-  let scheme = call_594121.pickScheme
+  let valid = call_568354.validator(path, query, header, formData, body)
+  let scheme = call_568354.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594121.url(scheme.get, call_594121.host, call_594121.base,
-                         call_594121.route, valid.getOrDefault("path"),
+  let url = call_568354.url(scheme.get, call_568354.host, call_568354.base,
+                         call_568354.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594121, url, valid)
+  result = hook(call_568354, url, valid)
 
-proc call*(call_594122: Call_NamespacesRegenerateKeys_594112;
+proc call*(call_568355: Call_NamespacesRegenerateKeys_568345;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string;
           parameters: JsonNode): Recallable =
@@ -1695,26 +1695,26 @@ proc call*(call_594122: Call_NamespacesRegenerateKeys_594112;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to regenerate authorization rule.
-  var path_594123 = newJObject()
-  var query_594124 = newJObject()
-  var body_594125 = newJObject()
-  add(path_594123, "namespaceName", newJString(namespaceName))
-  add(path_594123, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594124, "api-version", newJString(apiVersion))
-  add(path_594123, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594123, "subscriptionId", newJString(subscriptionId))
+  var path_568356 = newJObject()
+  var query_568357 = newJObject()
+  var body_568358 = newJObject()
+  add(path_568356, "namespaceName", newJString(namespaceName))
+  add(path_568356, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568357, "api-version", newJString(apiVersion))
+  add(path_568356, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568356, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594125 = parameters
-  result = call_594122.call(path_594123, query_594124, nil, nil, body_594125)
+    body_568358 = parameters
+  result = call_568355.call(path_568356, query_568357, nil, nil, body_568358)
 
-var namespacesRegenerateKeys* = Call_NamespacesRegenerateKeys_594112(
+var namespacesRegenerateKeys* = Call_NamespacesRegenerateKeys_568345(
     name: "namespacesRegenerateKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/authorizationRules/{authorizationRuleName}/regenerateKeys",
-    validator: validate_NamespacesRegenerateKeys_594113, base: "",
-    url: url_NamespacesRegenerateKeys_594114, schemes: {Scheme.Https})
+    validator: validate_NamespacesRegenerateKeys_568346, base: "",
+    url: url_NamespacesRegenerateKeys_568347, schemes: {Scheme.Https})
 type
-  Call_HybridConnectionsListByNamespace_594126 = ref object of OpenApiRestCall_593424
-proc url_HybridConnectionsListByNamespace_594128(protocol: Scheme; host: string;
+  Call_HybridConnectionsListByNamespace_568359 = ref object of OpenApiRestCall_567657
+proc url_HybridConnectionsListByNamespace_568361(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1737,7 +1737,7 @@ proc url_HybridConnectionsListByNamespace_594128(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridConnectionsListByNamespace_594127(path: JsonNode;
+proc validate_HybridConnectionsListByNamespace_568360(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the hybrid connection within the namespace.
   ## 
@@ -1753,21 +1753,21 @@ proc validate_HybridConnectionsListByNamespace_594127(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594129 = path.getOrDefault("namespaceName")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  var valid_568362 = path.getOrDefault("namespaceName")
+  valid_568362 = validateParameter(valid_568362, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "namespaceName", valid_594129
-  var valid_594130 = path.getOrDefault("resourceGroupName")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  if valid_568362 != nil:
+    section.add "namespaceName", valid_568362
+  var valid_568363 = path.getOrDefault("resourceGroupName")
+  valid_568363 = validateParameter(valid_568363, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "resourceGroupName", valid_594130
-  var valid_594131 = path.getOrDefault("subscriptionId")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  if valid_568363 != nil:
+    section.add "resourceGroupName", valid_568363
+  var valid_568364 = path.getOrDefault("subscriptionId")
+  valid_568364 = validateParameter(valid_568364, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "subscriptionId", valid_594131
+  if valid_568364 != nil:
+    section.add "subscriptionId", valid_568364
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1775,11 +1775,11 @@ proc validate_HybridConnectionsListByNamespace_594127(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594132 = query.getOrDefault("api-version")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  var valid_568365 = query.getOrDefault("api-version")
+  valid_568365 = validateParameter(valid_568365, JString, required = true,
                                  default = nil)
-  if valid_594132 != nil:
-    section.add "api-version", valid_594132
+  if valid_568365 != nil:
+    section.add "api-version", valid_568365
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1788,21 +1788,21 @@ proc validate_HybridConnectionsListByNamespace_594127(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594133: Call_HybridConnectionsListByNamespace_594126;
+proc call*(call_568366: Call_HybridConnectionsListByNamespace_568359;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the hybrid connection within the namespace.
   ## 
-  let valid = call_594133.validator(path, query, header, formData, body)
-  let scheme = call_594133.pickScheme
+  let valid = call_568366.validator(path, query, header, formData, body)
+  let scheme = call_568366.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594133.url(scheme.get, call_594133.host, call_594133.base,
-                         call_594133.route, valid.getOrDefault("path"),
+  let url = call_568366.url(scheme.get, call_568366.host, call_568366.base,
+                         call_568366.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594133, url, valid)
+  result = hook(call_568366, url, valid)
 
-proc call*(call_594134: Call_HybridConnectionsListByNamespace_594126;
+proc call*(call_568367: Call_HybridConnectionsListByNamespace_568359;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## hybridConnectionsListByNamespace
@@ -1815,22 +1815,22 @@ proc call*(call_594134: Call_HybridConnectionsListByNamespace_594126;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594135 = newJObject()
-  var query_594136 = newJObject()
-  add(path_594135, "namespaceName", newJString(namespaceName))
-  add(path_594135, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594136, "api-version", newJString(apiVersion))
-  add(path_594135, "subscriptionId", newJString(subscriptionId))
-  result = call_594134.call(path_594135, query_594136, nil, nil, nil)
+  var path_568368 = newJObject()
+  var query_568369 = newJObject()
+  add(path_568368, "namespaceName", newJString(namespaceName))
+  add(path_568368, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568369, "api-version", newJString(apiVersion))
+  add(path_568368, "subscriptionId", newJString(subscriptionId))
+  result = call_568367.call(path_568368, query_568369, nil, nil, nil)
 
-var hybridConnectionsListByNamespace* = Call_HybridConnectionsListByNamespace_594126(
+var hybridConnectionsListByNamespace* = Call_HybridConnectionsListByNamespace_568359(
     name: "hybridConnectionsListByNamespace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/hybridConnections",
-    validator: validate_HybridConnectionsListByNamespace_594127, base: "",
-    url: url_HybridConnectionsListByNamespace_594128, schemes: {Scheme.Https})
+    validator: validate_HybridConnectionsListByNamespace_568360, base: "",
+    url: url_HybridConnectionsListByNamespace_568361, schemes: {Scheme.Https})
 type
-  Call_HybridConnectionsCreateOrUpdate_594149 = ref object of OpenApiRestCall_593424
-proc url_HybridConnectionsCreateOrUpdate_594151(protocol: Scheme; host: string;
+  Call_HybridConnectionsCreateOrUpdate_568382 = ref object of OpenApiRestCall_567657
+proc url_HybridConnectionsCreateOrUpdate_568384(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1856,7 +1856,7 @@ proc url_HybridConnectionsCreateOrUpdate_594151(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridConnectionsCreateOrUpdate_594150(path: JsonNode;
+proc validate_HybridConnectionsCreateOrUpdate_568383(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a service hybrid connection. This operation is idempotent.
   ## 
@@ -1874,26 +1874,26 @@ proc validate_HybridConnectionsCreateOrUpdate_594150(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594162 = path.getOrDefault("namespaceName")
-  valid_594162 = validateParameter(valid_594162, JString, required = true,
+  var valid_568395 = path.getOrDefault("namespaceName")
+  valid_568395 = validateParameter(valid_568395, JString, required = true,
                                  default = nil)
-  if valid_594162 != nil:
-    section.add "namespaceName", valid_594162
-  var valid_594163 = path.getOrDefault("resourceGroupName")
-  valid_594163 = validateParameter(valid_594163, JString, required = true,
+  if valid_568395 != nil:
+    section.add "namespaceName", valid_568395
+  var valid_568396 = path.getOrDefault("resourceGroupName")
+  valid_568396 = validateParameter(valid_568396, JString, required = true,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "resourceGroupName", valid_594163
-  var valid_594164 = path.getOrDefault("subscriptionId")
-  valid_594164 = validateParameter(valid_594164, JString, required = true,
+  if valid_568396 != nil:
+    section.add "resourceGroupName", valid_568396
+  var valid_568397 = path.getOrDefault("subscriptionId")
+  valid_568397 = validateParameter(valid_568397, JString, required = true,
                                  default = nil)
-  if valid_594164 != nil:
-    section.add "subscriptionId", valid_594164
-  var valid_594165 = path.getOrDefault("hybridConnectionName")
-  valid_594165 = validateParameter(valid_594165, JString, required = true,
+  if valid_568397 != nil:
+    section.add "subscriptionId", valid_568397
+  var valid_568398 = path.getOrDefault("hybridConnectionName")
+  valid_568398 = validateParameter(valid_568398, JString, required = true,
                                  default = nil)
-  if valid_594165 != nil:
-    section.add "hybridConnectionName", valid_594165
+  if valid_568398 != nil:
+    section.add "hybridConnectionName", valid_568398
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1901,11 +1901,11 @@ proc validate_HybridConnectionsCreateOrUpdate_594150(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594166 = query.getOrDefault("api-version")
-  valid_594166 = validateParameter(valid_594166, JString, required = true,
+  var valid_568399 = query.getOrDefault("api-version")
+  valid_568399 = validateParameter(valid_568399, JString, required = true,
                                  default = nil)
-  if valid_594166 != nil:
-    section.add "api-version", valid_594166
+  if valid_568399 != nil:
+    section.add "api-version", valid_568399
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1919,21 +1919,21 @@ proc validate_HybridConnectionsCreateOrUpdate_594150(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594168: Call_HybridConnectionsCreateOrUpdate_594149;
+proc call*(call_568401: Call_HybridConnectionsCreateOrUpdate_568382;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a service hybrid connection. This operation is idempotent.
   ## 
-  let valid = call_594168.validator(path, query, header, formData, body)
-  let scheme = call_594168.pickScheme
+  let valid = call_568401.validator(path, query, header, formData, body)
+  let scheme = call_568401.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594168.url(scheme.get, call_594168.host, call_594168.base,
-                         call_594168.route, valid.getOrDefault("path"),
+  let url = call_568401.url(scheme.get, call_568401.host, call_568401.base,
+                         call_568401.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594168, url, valid)
+  result = hook(call_568401, url, valid)
 
-proc call*(call_594169: Call_HybridConnectionsCreateOrUpdate_594149;
+proc call*(call_568402: Call_HybridConnectionsCreateOrUpdate_568382;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; hybridConnectionName: string; parameters: JsonNode): Recallable =
   ## hybridConnectionsCreateOrUpdate
@@ -1950,26 +1950,26 @@ proc call*(call_594169: Call_HybridConnectionsCreateOrUpdate_594149;
   ##                       : The hybrid connection name.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to create a hybrid connection.
-  var path_594170 = newJObject()
-  var query_594171 = newJObject()
-  var body_594172 = newJObject()
-  add(path_594170, "namespaceName", newJString(namespaceName))
-  add(path_594170, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594171, "api-version", newJString(apiVersion))
-  add(path_594170, "subscriptionId", newJString(subscriptionId))
-  add(path_594170, "hybridConnectionName", newJString(hybridConnectionName))
+  var path_568403 = newJObject()
+  var query_568404 = newJObject()
+  var body_568405 = newJObject()
+  add(path_568403, "namespaceName", newJString(namespaceName))
+  add(path_568403, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568404, "api-version", newJString(apiVersion))
+  add(path_568403, "subscriptionId", newJString(subscriptionId))
+  add(path_568403, "hybridConnectionName", newJString(hybridConnectionName))
   if parameters != nil:
-    body_594172 = parameters
-  result = call_594169.call(path_594170, query_594171, nil, nil, body_594172)
+    body_568405 = parameters
+  result = call_568402.call(path_568403, query_568404, nil, nil, body_568405)
 
-var hybridConnectionsCreateOrUpdate* = Call_HybridConnectionsCreateOrUpdate_594149(
+var hybridConnectionsCreateOrUpdate* = Call_HybridConnectionsCreateOrUpdate_568382(
     name: "hybridConnectionsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/hybridConnections/{hybridConnectionName}",
-    validator: validate_HybridConnectionsCreateOrUpdate_594150, base: "",
-    url: url_HybridConnectionsCreateOrUpdate_594151, schemes: {Scheme.Https})
+    validator: validate_HybridConnectionsCreateOrUpdate_568383, base: "",
+    url: url_HybridConnectionsCreateOrUpdate_568384, schemes: {Scheme.Https})
 type
-  Call_HybridConnectionsGet_594137 = ref object of OpenApiRestCall_593424
-proc url_HybridConnectionsGet_594139(protocol: Scheme; host: string; base: string;
+  Call_HybridConnectionsGet_568370 = ref object of OpenApiRestCall_567657
+proc url_HybridConnectionsGet_568372(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1995,7 +1995,7 @@ proc url_HybridConnectionsGet_594139(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridConnectionsGet_594138(path: JsonNode; query: JsonNode;
+proc validate_HybridConnectionsGet_568371(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the description for the specified hybrid connection.
   ## 
@@ -2013,26 +2013,26 @@ proc validate_HybridConnectionsGet_594138(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594140 = path.getOrDefault("namespaceName")
-  valid_594140 = validateParameter(valid_594140, JString, required = true,
+  var valid_568373 = path.getOrDefault("namespaceName")
+  valid_568373 = validateParameter(valid_568373, JString, required = true,
                                  default = nil)
-  if valid_594140 != nil:
-    section.add "namespaceName", valid_594140
-  var valid_594141 = path.getOrDefault("resourceGroupName")
-  valid_594141 = validateParameter(valid_594141, JString, required = true,
+  if valid_568373 != nil:
+    section.add "namespaceName", valid_568373
+  var valid_568374 = path.getOrDefault("resourceGroupName")
+  valid_568374 = validateParameter(valid_568374, JString, required = true,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "resourceGroupName", valid_594141
-  var valid_594142 = path.getOrDefault("subscriptionId")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  if valid_568374 != nil:
+    section.add "resourceGroupName", valid_568374
+  var valid_568375 = path.getOrDefault("subscriptionId")
+  valid_568375 = validateParameter(valid_568375, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "subscriptionId", valid_594142
-  var valid_594143 = path.getOrDefault("hybridConnectionName")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+  if valid_568375 != nil:
+    section.add "subscriptionId", valid_568375
+  var valid_568376 = path.getOrDefault("hybridConnectionName")
+  valid_568376 = validateParameter(valid_568376, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "hybridConnectionName", valid_594143
+  if valid_568376 != nil:
+    section.add "hybridConnectionName", valid_568376
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2040,11 +2040,11 @@ proc validate_HybridConnectionsGet_594138(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594144 = query.getOrDefault("api-version")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  var valid_568377 = query.getOrDefault("api-version")
+  valid_568377 = validateParameter(valid_568377, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "api-version", valid_594144
+  if valid_568377 != nil:
+    section.add "api-version", valid_568377
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2053,20 +2053,20 @@ proc validate_HybridConnectionsGet_594138(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594145: Call_HybridConnectionsGet_594137; path: JsonNode;
+proc call*(call_568378: Call_HybridConnectionsGet_568370; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the description for the specified hybrid connection.
   ## 
-  let valid = call_594145.validator(path, query, header, formData, body)
-  let scheme = call_594145.pickScheme
+  let valid = call_568378.validator(path, query, header, formData, body)
+  let scheme = call_568378.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594145.url(scheme.get, call_594145.host, call_594145.base,
-                         call_594145.route, valid.getOrDefault("path"),
+  let url = call_568378.url(scheme.get, call_568378.host, call_568378.base,
+                         call_568378.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594145, url, valid)
+  result = hook(call_568378, url, valid)
 
-proc call*(call_594146: Call_HybridConnectionsGet_594137; namespaceName: string;
+proc call*(call_568379: Call_HybridConnectionsGet_568370; namespaceName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           hybridConnectionName: string): Recallable =
   ## hybridConnectionsGet
@@ -2081,23 +2081,23 @@ proc call*(call_594146: Call_HybridConnectionsGet_594137; namespaceName: string;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   hybridConnectionName: string (required)
   ##                       : The hybrid connection name.
-  var path_594147 = newJObject()
-  var query_594148 = newJObject()
-  add(path_594147, "namespaceName", newJString(namespaceName))
-  add(path_594147, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594148, "api-version", newJString(apiVersion))
-  add(path_594147, "subscriptionId", newJString(subscriptionId))
-  add(path_594147, "hybridConnectionName", newJString(hybridConnectionName))
-  result = call_594146.call(path_594147, query_594148, nil, nil, nil)
+  var path_568380 = newJObject()
+  var query_568381 = newJObject()
+  add(path_568380, "namespaceName", newJString(namespaceName))
+  add(path_568380, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568381, "api-version", newJString(apiVersion))
+  add(path_568380, "subscriptionId", newJString(subscriptionId))
+  add(path_568380, "hybridConnectionName", newJString(hybridConnectionName))
+  result = call_568379.call(path_568380, query_568381, nil, nil, nil)
 
-var hybridConnectionsGet* = Call_HybridConnectionsGet_594137(
+var hybridConnectionsGet* = Call_HybridConnectionsGet_568370(
     name: "hybridConnectionsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/hybridConnections/{hybridConnectionName}",
-    validator: validate_HybridConnectionsGet_594138, base: "",
-    url: url_HybridConnectionsGet_594139, schemes: {Scheme.Https})
+    validator: validate_HybridConnectionsGet_568371, base: "",
+    url: url_HybridConnectionsGet_568372, schemes: {Scheme.Https})
 type
-  Call_HybridConnectionsDelete_594173 = ref object of OpenApiRestCall_593424
-proc url_HybridConnectionsDelete_594175(protocol: Scheme; host: string; base: string;
+  Call_HybridConnectionsDelete_568406 = ref object of OpenApiRestCall_567657
+proc url_HybridConnectionsDelete_568408(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2124,7 +2124,7 @@ proc url_HybridConnectionsDelete_594175(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridConnectionsDelete_594174(path: JsonNode; query: JsonNode;
+proc validate_HybridConnectionsDelete_568407(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a hybrid connection.
   ## 
@@ -2142,26 +2142,26 @@ proc validate_HybridConnectionsDelete_594174(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594176 = path.getOrDefault("namespaceName")
-  valid_594176 = validateParameter(valid_594176, JString, required = true,
+  var valid_568409 = path.getOrDefault("namespaceName")
+  valid_568409 = validateParameter(valid_568409, JString, required = true,
                                  default = nil)
-  if valid_594176 != nil:
-    section.add "namespaceName", valid_594176
-  var valid_594177 = path.getOrDefault("resourceGroupName")
-  valid_594177 = validateParameter(valid_594177, JString, required = true,
+  if valid_568409 != nil:
+    section.add "namespaceName", valid_568409
+  var valid_568410 = path.getOrDefault("resourceGroupName")
+  valid_568410 = validateParameter(valid_568410, JString, required = true,
                                  default = nil)
-  if valid_594177 != nil:
-    section.add "resourceGroupName", valid_594177
-  var valid_594178 = path.getOrDefault("subscriptionId")
-  valid_594178 = validateParameter(valid_594178, JString, required = true,
+  if valid_568410 != nil:
+    section.add "resourceGroupName", valid_568410
+  var valid_568411 = path.getOrDefault("subscriptionId")
+  valid_568411 = validateParameter(valid_568411, JString, required = true,
                                  default = nil)
-  if valid_594178 != nil:
-    section.add "subscriptionId", valid_594178
-  var valid_594179 = path.getOrDefault("hybridConnectionName")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  if valid_568411 != nil:
+    section.add "subscriptionId", valid_568411
+  var valid_568412 = path.getOrDefault("hybridConnectionName")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "hybridConnectionName", valid_594179
+  if valid_568412 != nil:
+    section.add "hybridConnectionName", valid_568412
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2169,11 +2169,11 @@ proc validate_HybridConnectionsDelete_594174(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594180 = query.getOrDefault("api-version")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  var valid_568413 = query.getOrDefault("api-version")
+  valid_568413 = validateParameter(valid_568413, JString, required = true,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "api-version", valid_594180
+  if valid_568413 != nil:
+    section.add "api-version", valid_568413
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2182,20 +2182,20 @@ proc validate_HybridConnectionsDelete_594174(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594181: Call_HybridConnectionsDelete_594173; path: JsonNode;
+proc call*(call_568414: Call_HybridConnectionsDelete_568406; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a hybrid connection.
   ## 
-  let valid = call_594181.validator(path, query, header, formData, body)
-  let scheme = call_594181.pickScheme
+  let valid = call_568414.validator(path, query, header, formData, body)
+  let scheme = call_568414.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594181.url(scheme.get, call_594181.host, call_594181.base,
-                         call_594181.route, valid.getOrDefault("path"),
+  let url = call_568414.url(scheme.get, call_568414.host, call_568414.base,
+                         call_568414.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594181, url, valid)
+  result = hook(call_568414, url, valid)
 
-proc call*(call_594182: Call_HybridConnectionsDelete_594173; namespaceName: string;
+proc call*(call_568415: Call_HybridConnectionsDelete_568406; namespaceName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           hybridConnectionName: string): Recallable =
   ## hybridConnectionsDelete
@@ -2210,23 +2210,23 @@ proc call*(call_594182: Call_HybridConnectionsDelete_594173; namespaceName: stri
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   hybridConnectionName: string (required)
   ##                       : The hybrid connection name.
-  var path_594183 = newJObject()
-  var query_594184 = newJObject()
-  add(path_594183, "namespaceName", newJString(namespaceName))
-  add(path_594183, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594184, "api-version", newJString(apiVersion))
-  add(path_594183, "subscriptionId", newJString(subscriptionId))
-  add(path_594183, "hybridConnectionName", newJString(hybridConnectionName))
-  result = call_594182.call(path_594183, query_594184, nil, nil, nil)
+  var path_568416 = newJObject()
+  var query_568417 = newJObject()
+  add(path_568416, "namespaceName", newJString(namespaceName))
+  add(path_568416, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568417, "api-version", newJString(apiVersion))
+  add(path_568416, "subscriptionId", newJString(subscriptionId))
+  add(path_568416, "hybridConnectionName", newJString(hybridConnectionName))
+  result = call_568415.call(path_568416, query_568417, nil, nil, nil)
 
-var hybridConnectionsDelete* = Call_HybridConnectionsDelete_594173(
+var hybridConnectionsDelete* = Call_HybridConnectionsDelete_568406(
     name: "hybridConnectionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/hybridConnections/{hybridConnectionName}",
-    validator: validate_HybridConnectionsDelete_594174, base: "",
-    url: url_HybridConnectionsDelete_594175, schemes: {Scheme.Https})
+    validator: validate_HybridConnectionsDelete_568407, base: "",
+    url: url_HybridConnectionsDelete_568408, schemes: {Scheme.Https})
 type
-  Call_HybridConnectionsListAuthorizationRules_594185 = ref object of OpenApiRestCall_593424
-proc url_HybridConnectionsListAuthorizationRules_594187(protocol: Scheme;
+  Call_HybridConnectionsListAuthorizationRules_568418 = ref object of OpenApiRestCall_567657
+proc url_HybridConnectionsListAuthorizationRules_568420(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2253,7 +2253,7 @@ proc url_HybridConnectionsListAuthorizationRules_594187(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridConnectionsListAuthorizationRules_594186(path: JsonNode;
+proc validate_HybridConnectionsListAuthorizationRules_568419(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Authorization rules for a hybrid connection.
   ## 
@@ -2271,26 +2271,26 @@ proc validate_HybridConnectionsListAuthorizationRules_594186(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594188 = path.getOrDefault("namespaceName")
-  valid_594188 = validateParameter(valid_594188, JString, required = true,
+  var valid_568421 = path.getOrDefault("namespaceName")
+  valid_568421 = validateParameter(valid_568421, JString, required = true,
                                  default = nil)
-  if valid_594188 != nil:
-    section.add "namespaceName", valid_594188
-  var valid_594189 = path.getOrDefault("resourceGroupName")
-  valid_594189 = validateParameter(valid_594189, JString, required = true,
+  if valid_568421 != nil:
+    section.add "namespaceName", valid_568421
+  var valid_568422 = path.getOrDefault("resourceGroupName")
+  valid_568422 = validateParameter(valid_568422, JString, required = true,
                                  default = nil)
-  if valid_594189 != nil:
-    section.add "resourceGroupName", valid_594189
-  var valid_594190 = path.getOrDefault("subscriptionId")
-  valid_594190 = validateParameter(valid_594190, JString, required = true,
+  if valid_568422 != nil:
+    section.add "resourceGroupName", valid_568422
+  var valid_568423 = path.getOrDefault("subscriptionId")
+  valid_568423 = validateParameter(valid_568423, JString, required = true,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "subscriptionId", valid_594190
-  var valid_594191 = path.getOrDefault("hybridConnectionName")
-  valid_594191 = validateParameter(valid_594191, JString, required = true,
+  if valid_568423 != nil:
+    section.add "subscriptionId", valid_568423
+  var valid_568424 = path.getOrDefault("hybridConnectionName")
+  valid_568424 = validateParameter(valid_568424, JString, required = true,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "hybridConnectionName", valid_594191
+  if valid_568424 != nil:
+    section.add "hybridConnectionName", valid_568424
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2298,11 +2298,11 @@ proc validate_HybridConnectionsListAuthorizationRules_594186(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594192 = query.getOrDefault("api-version")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  var valid_568425 = query.getOrDefault("api-version")
+  valid_568425 = validateParameter(valid_568425, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "api-version", valid_594192
+  if valid_568425 != nil:
+    section.add "api-version", valid_568425
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2311,21 +2311,21 @@ proc validate_HybridConnectionsListAuthorizationRules_594186(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594193: Call_HybridConnectionsListAuthorizationRules_594185;
+proc call*(call_568426: Call_HybridConnectionsListAuthorizationRules_568418;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Authorization rules for a hybrid connection.
   ## 
-  let valid = call_594193.validator(path, query, header, formData, body)
-  let scheme = call_594193.pickScheme
+  let valid = call_568426.validator(path, query, header, formData, body)
+  let scheme = call_568426.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594193.url(scheme.get, call_594193.host, call_594193.base,
-                         call_594193.route, valid.getOrDefault("path"),
+  let url = call_568426.url(scheme.get, call_568426.host, call_568426.base,
+                         call_568426.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594193, url, valid)
+  result = hook(call_568426, url, valid)
 
-proc call*(call_594194: Call_HybridConnectionsListAuthorizationRules_594185;
+proc call*(call_568427: Call_HybridConnectionsListAuthorizationRules_568418;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; hybridConnectionName: string): Recallable =
   ## hybridConnectionsListAuthorizationRules
@@ -2340,24 +2340,24 @@ proc call*(call_594194: Call_HybridConnectionsListAuthorizationRules_594185;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   hybridConnectionName: string (required)
   ##                       : The hybrid connection name.
-  var path_594195 = newJObject()
-  var query_594196 = newJObject()
-  add(path_594195, "namespaceName", newJString(namespaceName))
-  add(path_594195, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594196, "api-version", newJString(apiVersion))
-  add(path_594195, "subscriptionId", newJString(subscriptionId))
-  add(path_594195, "hybridConnectionName", newJString(hybridConnectionName))
-  result = call_594194.call(path_594195, query_594196, nil, nil, nil)
+  var path_568428 = newJObject()
+  var query_568429 = newJObject()
+  add(path_568428, "namespaceName", newJString(namespaceName))
+  add(path_568428, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568429, "api-version", newJString(apiVersion))
+  add(path_568428, "subscriptionId", newJString(subscriptionId))
+  add(path_568428, "hybridConnectionName", newJString(hybridConnectionName))
+  result = call_568427.call(path_568428, query_568429, nil, nil, nil)
 
-var hybridConnectionsListAuthorizationRules* = Call_HybridConnectionsListAuthorizationRules_594185(
+var hybridConnectionsListAuthorizationRules* = Call_HybridConnectionsListAuthorizationRules_568418(
     name: "hybridConnectionsListAuthorizationRules", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/hybridConnections/{hybridConnectionName}/authorizationRules",
-    validator: validate_HybridConnectionsListAuthorizationRules_594186, base: "",
-    url: url_HybridConnectionsListAuthorizationRules_594187,
+    validator: validate_HybridConnectionsListAuthorizationRules_568419, base: "",
+    url: url_HybridConnectionsListAuthorizationRules_568420,
     schemes: {Scheme.Https})
 type
-  Call_HybridConnectionsCreateOrUpdateAuthorizationRule_594210 = ref object of OpenApiRestCall_593424
-proc url_HybridConnectionsCreateOrUpdateAuthorizationRule_594212(
+  Call_HybridConnectionsCreateOrUpdateAuthorizationRule_568443 = ref object of OpenApiRestCall_567657
+proc url_HybridConnectionsCreateOrUpdateAuthorizationRule_568445(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2388,7 +2388,7 @@ proc url_HybridConnectionsCreateOrUpdateAuthorizationRule_594212(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridConnectionsCreateOrUpdateAuthorizationRule_594211(
+proc validate_HybridConnectionsCreateOrUpdateAuthorizationRule_568444(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Creates or updates an authorization rule for a hybrid connection.
@@ -2409,31 +2409,31 @@ proc validate_HybridConnectionsCreateOrUpdateAuthorizationRule_594211(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594213 = path.getOrDefault("namespaceName")
-  valid_594213 = validateParameter(valid_594213, JString, required = true,
+  var valid_568446 = path.getOrDefault("namespaceName")
+  valid_568446 = validateParameter(valid_568446, JString, required = true,
                                  default = nil)
-  if valid_594213 != nil:
-    section.add "namespaceName", valid_594213
-  var valid_594214 = path.getOrDefault("resourceGroupName")
-  valid_594214 = validateParameter(valid_594214, JString, required = true,
+  if valid_568446 != nil:
+    section.add "namespaceName", valid_568446
+  var valid_568447 = path.getOrDefault("resourceGroupName")
+  valid_568447 = validateParameter(valid_568447, JString, required = true,
                                  default = nil)
-  if valid_594214 != nil:
-    section.add "resourceGroupName", valid_594214
-  var valid_594215 = path.getOrDefault("authorizationRuleName")
-  valid_594215 = validateParameter(valid_594215, JString, required = true,
+  if valid_568447 != nil:
+    section.add "resourceGroupName", valid_568447
+  var valid_568448 = path.getOrDefault("authorizationRuleName")
+  valid_568448 = validateParameter(valid_568448, JString, required = true,
                                  default = nil)
-  if valid_594215 != nil:
-    section.add "authorizationRuleName", valid_594215
-  var valid_594216 = path.getOrDefault("subscriptionId")
-  valid_594216 = validateParameter(valid_594216, JString, required = true,
+  if valid_568448 != nil:
+    section.add "authorizationRuleName", valid_568448
+  var valid_568449 = path.getOrDefault("subscriptionId")
+  valid_568449 = validateParameter(valid_568449, JString, required = true,
                                  default = nil)
-  if valid_594216 != nil:
-    section.add "subscriptionId", valid_594216
-  var valid_594217 = path.getOrDefault("hybridConnectionName")
-  valid_594217 = validateParameter(valid_594217, JString, required = true,
+  if valid_568449 != nil:
+    section.add "subscriptionId", valid_568449
+  var valid_568450 = path.getOrDefault("hybridConnectionName")
+  valid_568450 = validateParameter(valid_568450, JString, required = true,
                                  default = nil)
-  if valid_594217 != nil:
-    section.add "hybridConnectionName", valid_594217
+  if valid_568450 != nil:
+    section.add "hybridConnectionName", valid_568450
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2441,11 +2441,11 @@ proc validate_HybridConnectionsCreateOrUpdateAuthorizationRule_594211(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594218 = query.getOrDefault("api-version")
-  valid_594218 = validateParameter(valid_594218, JString, required = true,
+  var valid_568451 = query.getOrDefault("api-version")
+  valid_568451 = validateParameter(valid_568451, JString, required = true,
                                  default = nil)
-  if valid_594218 != nil:
-    section.add "api-version", valid_594218
+  if valid_568451 != nil:
+    section.add "api-version", valid_568451
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2459,21 +2459,21 @@ proc validate_HybridConnectionsCreateOrUpdateAuthorizationRule_594211(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594220: Call_HybridConnectionsCreateOrUpdateAuthorizationRule_594210;
+proc call*(call_568453: Call_HybridConnectionsCreateOrUpdateAuthorizationRule_568443;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an authorization rule for a hybrid connection.
   ## 
-  let valid = call_594220.validator(path, query, header, formData, body)
-  let scheme = call_594220.pickScheme
+  let valid = call_568453.validator(path, query, header, formData, body)
+  let scheme = call_568453.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594220.url(scheme.get, call_594220.host, call_594220.base,
-                         call_594220.route, valid.getOrDefault("path"),
+  let url = call_568453.url(scheme.get, call_568453.host, call_568453.base,
+                         call_568453.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594220, url, valid)
+  result = hook(call_568453, url, valid)
 
-proc call*(call_594221: Call_HybridConnectionsCreateOrUpdateAuthorizationRule_594210;
+proc call*(call_568454: Call_HybridConnectionsCreateOrUpdateAuthorizationRule_568443;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string;
           hybridConnectionName: string; parameters: JsonNode): Recallable =
@@ -2493,28 +2493,28 @@ proc call*(call_594221: Call_HybridConnectionsCreateOrUpdateAuthorizationRule_59
   ##                       : The hybrid connection name.
   ##   parameters: JObject (required)
   ##             : The authorization rule parameters.
-  var path_594222 = newJObject()
-  var query_594223 = newJObject()
-  var body_594224 = newJObject()
-  add(path_594222, "namespaceName", newJString(namespaceName))
-  add(path_594222, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594223, "api-version", newJString(apiVersion))
-  add(path_594222, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594222, "subscriptionId", newJString(subscriptionId))
-  add(path_594222, "hybridConnectionName", newJString(hybridConnectionName))
+  var path_568455 = newJObject()
+  var query_568456 = newJObject()
+  var body_568457 = newJObject()
+  add(path_568455, "namespaceName", newJString(namespaceName))
+  add(path_568455, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568456, "api-version", newJString(apiVersion))
+  add(path_568455, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568455, "subscriptionId", newJString(subscriptionId))
+  add(path_568455, "hybridConnectionName", newJString(hybridConnectionName))
   if parameters != nil:
-    body_594224 = parameters
-  result = call_594221.call(path_594222, query_594223, nil, nil, body_594224)
+    body_568457 = parameters
+  result = call_568454.call(path_568455, query_568456, nil, nil, body_568457)
 
-var hybridConnectionsCreateOrUpdateAuthorizationRule* = Call_HybridConnectionsCreateOrUpdateAuthorizationRule_594210(
+var hybridConnectionsCreateOrUpdateAuthorizationRule* = Call_HybridConnectionsCreateOrUpdateAuthorizationRule_568443(
     name: "hybridConnectionsCreateOrUpdateAuthorizationRule",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/hybridConnections/{hybridConnectionName}/authorizationRules/{authorizationRuleName}",
-    validator: validate_HybridConnectionsCreateOrUpdateAuthorizationRule_594211,
-    base: "", url: url_HybridConnectionsCreateOrUpdateAuthorizationRule_594212,
+    validator: validate_HybridConnectionsCreateOrUpdateAuthorizationRule_568444,
+    base: "", url: url_HybridConnectionsCreateOrUpdateAuthorizationRule_568445,
     schemes: {Scheme.Https})
 type
-  Call_HybridConnectionsGetAuthorizationRule_594197 = ref object of OpenApiRestCall_593424
-proc url_HybridConnectionsGetAuthorizationRule_594199(protocol: Scheme;
+  Call_HybridConnectionsGetAuthorizationRule_568430 = ref object of OpenApiRestCall_567657
+proc url_HybridConnectionsGetAuthorizationRule_568432(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2544,7 +2544,7 @@ proc url_HybridConnectionsGetAuthorizationRule_594199(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridConnectionsGetAuthorizationRule_594198(path: JsonNode;
+proc validate_HybridConnectionsGetAuthorizationRule_568431(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Hybrid connection authorization rule for a hybrid connection by name.
   ## 
@@ -2564,31 +2564,31 @@ proc validate_HybridConnectionsGetAuthorizationRule_594198(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594200 = path.getOrDefault("namespaceName")
-  valid_594200 = validateParameter(valid_594200, JString, required = true,
+  var valid_568433 = path.getOrDefault("namespaceName")
+  valid_568433 = validateParameter(valid_568433, JString, required = true,
                                  default = nil)
-  if valid_594200 != nil:
-    section.add "namespaceName", valid_594200
-  var valid_594201 = path.getOrDefault("resourceGroupName")
-  valid_594201 = validateParameter(valid_594201, JString, required = true,
+  if valid_568433 != nil:
+    section.add "namespaceName", valid_568433
+  var valid_568434 = path.getOrDefault("resourceGroupName")
+  valid_568434 = validateParameter(valid_568434, JString, required = true,
                                  default = nil)
-  if valid_594201 != nil:
-    section.add "resourceGroupName", valid_594201
-  var valid_594202 = path.getOrDefault("authorizationRuleName")
-  valid_594202 = validateParameter(valid_594202, JString, required = true,
+  if valid_568434 != nil:
+    section.add "resourceGroupName", valid_568434
+  var valid_568435 = path.getOrDefault("authorizationRuleName")
+  valid_568435 = validateParameter(valid_568435, JString, required = true,
                                  default = nil)
-  if valid_594202 != nil:
-    section.add "authorizationRuleName", valid_594202
-  var valid_594203 = path.getOrDefault("subscriptionId")
-  valid_594203 = validateParameter(valid_594203, JString, required = true,
+  if valid_568435 != nil:
+    section.add "authorizationRuleName", valid_568435
+  var valid_568436 = path.getOrDefault("subscriptionId")
+  valid_568436 = validateParameter(valid_568436, JString, required = true,
                                  default = nil)
-  if valid_594203 != nil:
-    section.add "subscriptionId", valid_594203
-  var valid_594204 = path.getOrDefault("hybridConnectionName")
-  valid_594204 = validateParameter(valid_594204, JString, required = true,
+  if valid_568436 != nil:
+    section.add "subscriptionId", valid_568436
+  var valid_568437 = path.getOrDefault("hybridConnectionName")
+  valid_568437 = validateParameter(valid_568437, JString, required = true,
                                  default = nil)
-  if valid_594204 != nil:
-    section.add "hybridConnectionName", valid_594204
+  if valid_568437 != nil:
+    section.add "hybridConnectionName", valid_568437
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2596,11 +2596,11 @@ proc validate_HybridConnectionsGetAuthorizationRule_594198(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594205 = query.getOrDefault("api-version")
-  valid_594205 = validateParameter(valid_594205, JString, required = true,
+  var valid_568438 = query.getOrDefault("api-version")
+  valid_568438 = validateParameter(valid_568438, JString, required = true,
                                  default = nil)
-  if valid_594205 != nil:
-    section.add "api-version", valid_594205
+  if valid_568438 != nil:
+    section.add "api-version", valid_568438
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2609,21 +2609,21 @@ proc validate_HybridConnectionsGetAuthorizationRule_594198(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594206: Call_HybridConnectionsGetAuthorizationRule_594197;
+proc call*(call_568439: Call_HybridConnectionsGetAuthorizationRule_568430;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Hybrid connection authorization rule for a hybrid connection by name.
   ## 
-  let valid = call_594206.validator(path, query, header, formData, body)
-  let scheme = call_594206.pickScheme
+  let valid = call_568439.validator(path, query, header, formData, body)
+  let scheme = call_568439.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594206.url(scheme.get, call_594206.host, call_594206.base,
-                         call_594206.route, valid.getOrDefault("path"),
+  let url = call_568439.url(scheme.get, call_568439.host, call_568439.base,
+                         call_568439.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594206, url, valid)
+  result = hook(call_568439, url, valid)
 
-proc call*(call_594207: Call_HybridConnectionsGetAuthorizationRule_594197;
+proc call*(call_568440: Call_HybridConnectionsGetAuthorizationRule_568430;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string;
           hybridConnectionName: string): Recallable =
@@ -2641,24 +2641,24 @@ proc call*(call_594207: Call_HybridConnectionsGetAuthorizationRule_594197;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   hybridConnectionName: string (required)
   ##                       : The hybrid connection name.
-  var path_594208 = newJObject()
-  var query_594209 = newJObject()
-  add(path_594208, "namespaceName", newJString(namespaceName))
-  add(path_594208, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594209, "api-version", newJString(apiVersion))
-  add(path_594208, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594208, "subscriptionId", newJString(subscriptionId))
-  add(path_594208, "hybridConnectionName", newJString(hybridConnectionName))
-  result = call_594207.call(path_594208, query_594209, nil, nil, nil)
+  var path_568441 = newJObject()
+  var query_568442 = newJObject()
+  add(path_568441, "namespaceName", newJString(namespaceName))
+  add(path_568441, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568442, "api-version", newJString(apiVersion))
+  add(path_568441, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568441, "subscriptionId", newJString(subscriptionId))
+  add(path_568441, "hybridConnectionName", newJString(hybridConnectionName))
+  result = call_568440.call(path_568441, query_568442, nil, nil, nil)
 
-var hybridConnectionsGetAuthorizationRule* = Call_HybridConnectionsGetAuthorizationRule_594197(
+var hybridConnectionsGetAuthorizationRule* = Call_HybridConnectionsGetAuthorizationRule_568430(
     name: "hybridConnectionsGetAuthorizationRule", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/hybridConnections/{hybridConnectionName}/authorizationRules/{authorizationRuleName}",
-    validator: validate_HybridConnectionsGetAuthorizationRule_594198, base: "",
-    url: url_HybridConnectionsGetAuthorizationRule_594199, schemes: {Scheme.Https})
+    validator: validate_HybridConnectionsGetAuthorizationRule_568431, base: "",
+    url: url_HybridConnectionsGetAuthorizationRule_568432, schemes: {Scheme.Https})
 type
-  Call_HybridConnectionsDeleteAuthorizationRule_594225 = ref object of OpenApiRestCall_593424
-proc url_HybridConnectionsDeleteAuthorizationRule_594227(protocol: Scheme;
+  Call_HybridConnectionsDeleteAuthorizationRule_568458 = ref object of OpenApiRestCall_567657
+proc url_HybridConnectionsDeleteAuthorizationRule_568460(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2688,7 +2688,7 @@ proc url_HybridConnectionsDeleteAuthorizationRule_594227(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridConnectionsDeleteAuthorizationRule_594226(path: JsonNode;
+proc validate_HybridConnectionsDeleteAuthorizationRule_568459(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a hybrid connection authorization rule.
   ## 
@@ -2708,31 +2708,31 @@ proc validate_HybridConnectionsDeleteAuthorizationRule_594226(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594228 = path.getOrDefault("namespaceName")
-  valid_594228 = validateParameter(valid_594228, JString, required = true,
+  var valid_568461 = path.getOrDefault("namespaceName")
+  valid_568461 = validateParameter(valid_568461, JString, required = true,
                                  default = nil)
-  if valid_594228 != nil:
-    section.add "namespaceName", valid_594228
-  var valid_594229 = path.getOrDefault("resourceGroupName")
-  valid_594229 = validateParameter(valid_594229, JString, required = true,
+  if valid_568461 != nil:
+    section.add "namespaceName", valid_568461
+  var valid_568462 = path.getOrDefault("resourceGroupName")
+  valid_568462 = validateParameter(valid_568462, JString, required = true,
                                  default = nil)
-  if valid_594229 != nil:
-    section.add "resourceGroupName", valid_594229
-  var valid_594230 = path.getOrDefault("authorizationRuleName")
-  valid_594230 = validateParameter(valid_594230, JString, required = true,
+  if valid_568462 != nil:
+    section.add "resourceGroupName", valid_568462
+  var valid_568463 = path.getOrDefault("authorizationRuleName")
+  valid_568463 = validateParameter(valid_568463, JString, required = true,
                                  default = nil)
-  if valid_594230 != nil:
-    section.add "authorizationRuleName", valid_594230
-  var valid_594231 = path.getOrDefault("subscriptionId")
-  valid_594231 = validateParameter(valid_594231, JString, required = true,
+  if valid_568463 != nil:
+    section.add "authorizationRuleName", valid_568463
+  var valid_568464 = path.getOrDefault("subscriptionId")
+  valid_568464 = validateParameter(valid_568464, JString, required = true,
                                  default = nil)
-  if valid_594231 != nil:
-    section.add "subscriptionId", valid_594231
-  var valid_594232 = path.getOrDefault("hybridConnectionName")
-  valid_594232 = validateParameter(valid_594232, JString, required = true,
+  if valid_568464 != nil:
+    section.add "subscriptionId", valid_568464
+  var valid_568465 = path.getOrDefault("hybridConnectionName")
+  valid_568465 = validateParameter(valid_568465, JString, required = true,
                                  default = nil)
-  if valid_594232 != nil:
-    section.add "hybridConnectionName", valid_594232
+  if valid_568465 != nil:
+    section.add "hybridConnectionName", valid_568465
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2740,11 +2740,11 @@ proc validate_HybridConnectionsDeleteAuthorizationRule_594226(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594233 = query.getOrDefault("api-version")
-  valid_594233 = validateParameter(valid_594233, JString, required = true,
+  var valid_568466 = query.getOrDefault("api-version")
+  valid_568466 = validateParameter(valid_568466, JString, required = true,
                                  default = nil)
-  if valid_594233 != nil:
-    section.add "api-version", valid_594233
+  if valid_568466 != nil:
+    section.add "api-version", valid_568466
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2753,21 +2753,21 @@ proc validate_HybridConnectionsDeleteAuthorizationRule_594226(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594234: Call_HybridConnectionsDeleteAuthorizationRule_594225;
+proc call*(call_568467: Call_HybridConnectionsDeleteAuthorizationRule_568458;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes a hybrid connection authorization rule.
   ## 
-  let valid = call_594234.validator(path, query, header, formData, body)
-  let scheme = call_594234.pickScheme
+  let valid = call_568467.validator(path, query, header, formData, body)
+  let scheme = call_568467.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594234.url(scheme.get, call_594234.host, call_594234.base,
-                         call_594234.route, valid.getOrDefault("path"),
+  let url = call_568467.url(scheme.get, call_568467.host, call_568467.base,
+                         call_568467.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594234, url, valid)
+  result = hook(call_568467, url, valid)
 
-proc call*(call_594235: Call_HybridConnectionsDeleteAuthorizationRule_594225;
+proc call*(call_568468: Call_HybridConnectionsDeleteAuthorizationRule_568458;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string;
           hybridConnectionName: string): Recallable =
@@ -2785,25 +2785,25 @@ proc call*(call_594235: Call_HybridConnectionsDeleteAuthorizationRule_594225;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   hybridConnectionName: string (required)
   ##                       : The hybrid connection name.
-  var path_594236 = newJObject()
-  var query_594237 = newJObject()
-  add(path_594236, "namespaceName", newJString(namespaceName))
-  add(path_594236, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594237, "api-version", newJString(apiVersion))
-  add(path_594236, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594236, "subscriptionId", newJString(subscriptionId))
-  add(path_594236, "hybridConnectionName", newJString(hybridConnectionName))
-  result = call_594235.call(path_594236, query_594237, nil, nil, nil)
+  var path_568469 = newJObject()
+  var query_568470 = newJObject()
+  add(path_568469, "namespaceName", newJString(namespaceName))
+  add(path_568469, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568470, "api-version", newJString(apiVersion))
+  add(path_568469, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568469, "subscriptionId", newJString(subscriptionId))
+  add(path_568469, "hybridConnectionName", newJString(hybridConnectionName))
+  result = call_568468.call(path_568469, query_568470, nil, nil, nil)
 
-var hybridConnectionsDeleteAuthorizationRule* = Call_HybridConnectionsDeleteAuthorizationRule_594225(
+var hybridConnectionsDeleteAuthorizationRule* = Call_HybridConnectionsDeleteAuthorizationRule_568458(
     name: "hybridConnectionsDeleteAuthorizationRule", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/hybridConnections/{hybridConnectionName}/authorizationRules/{authorizationRuleName}",
-    validator: validate_HybridConnectionsDeleteAuthorizationRule_594226, base: "",
-    url: url_HybridConnectionsDeleteAuthorizationRule_594227,
+    validator: validate_HybridConnectionsDeleteAuthorizationRule_568459, base: "",
+    url: url_HybridConnectionsDeleteAuthorizationRule_568460,
     schemes: {Scheme.Https})
 type
-  Call_HybridConnectionsListKeys_594238 = ref object of OpenApiRestCall_593424
-proc url_HybridConnectionsListKeys_594240(protocol: Scheme; host: string;
+  Call_HybridConnectionsListKeys_568471 = ref object of OpenApiRestCall_567657
+proc url_HybridConnectionsListKeys_568473(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2834,7 +2834,7 @@ proc url_HybridConnectionsListKeys_594240(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridConnectionsListKeys_594239(path: JsonNode; query: JsonNode;
+proc validate_HybridConnectionsListKeys_568472(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Primary and secondary connection strings to the hybrid connection.
   ## 
@@ -2854,31 +2854,31 @@ proc validate_HybridConnectionsListKeys_594239(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594241 = path.getOrDefault("namespaceName")
-  valid_594241 = validateParameter(valid_594241, JString, required = true,
+  var valid_568474 = path.getOrDefault("namespaceName")
+  valid_568474 = validateParameter(valid_568474, JString, required = true,
                                  default = nil)
-  if valid_594241 != nil:
-    section.add "namespaceName", valid_594241
-  var valid_594242 = path.getOrDefault("resourceGroupName")
-  valid_594242 = validateParameter(valid_594242, JString, required = true,
+  if valid_568474 != nil:
+    section.add "namespaceName", valid_568474
+  var valid_568475 = path.getOrDefault("resourceGroupName")
+  valid_568475 = validateParameter(valid_568475, JString, required = true,
                                  default = nil)
-  if valid_594242 != nil:
-    section.add "resourceGroupName", valid_594242
-  var valid_594243 = path.getOrDefault("authorizationRuleName")
-  valid_594243 = validateParameter(valid_594243, JString, required = true,
+  if valid_568475 != nil:
+    section.add "resourceGroupName", valid_568475
+  var valid_568476 = path.getOrDefault("authorizationRuleName")
+  valid_568476 = validateParameter(valid_568476, JString, required = true,
                                  default = nil)
-  if valid_594243 != nil:
-    section.add "authorizationRuleName", valid_594243
-  var valid_594244 = path.getOrDefault("subscriptionId")
-  valid_594244 = validateParameter(valid_594244, JString, required = true,
+  if valid_568476 != nil:
+    section.add "authorizationRuleName", valid_568476
+  var valid_568477 = path.getOrDefault("subscriptionId")
+  valid_568477 = validateParameter(valid_568477, JString, required = true,
                                  default = nil)
-  if valid_594244 != nil:
-    section.add "subscriptionId", valid_594244
-  var valid_594245 = path.getOrDefault("hybridConnectionName")
-  valid_594245 = validateParameter(valid_594245, JString, required = true,
+  if valid_568477 != nil:
+    section.add "subscriptionId", valid_568477
+  var valid_568478 = path.getOrDefault("hybridConnectionName")
+  valid_568478 = validateParameter(valid_568478, JString, required = true,
                                  default = nil)
-  if valid_594245 != nil:
-    section.add "hybridConnectionName", valid_594245
+  if valid_568478 != nil:
+    section.add "hybridConnectionName", valid_568478
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2886,11 +2886,11 @@ proc validate_HybridConnectionsListKeys_594239(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594246 = query.getOrDefault("api-version")
-  valid_594246 = validateParameter(valid_594246, JString, required = true,
+  var valid_568479 = query.getOrDefault("api-version")
+  valid_568479 = validateParameter(valid_568479, JString, required = true,
                                  default = nil)
-  if valid_594246 != nil:
-    section.add "api-version", valid_594246
+  if valid_568479 != nil:
+    section.add "api-version", valid_568479
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2899,20 +2899,20 @@ proc validate_HybridConnectionsListKeys_594239(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594247: Call_HybridConnectionsListKeys_594238; path: JsonNode;
+proc call*(call_568480: Call_HybridConnectionsListKeys_568471; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Primary and secondary connection strings to the hybrid connection.
   ## 
-  let valid = call_594247.validator(path, query, header, formData, body)
-  let scheme = call_594247.pickScheme
+  let valid = call_568480.validator(path, query, header, formData, body)
+  let scheme = call_568480.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594247.url(scheme.get, call_594247.host, call_594247.base,
-                         call_594247.route, valid.getOrDefault("path"),
+  let url = call_568480.url(scheme.get, call_568480.host, call_568480.base,
+                         call_568480.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594247, url, valid)
+  result = hook(call_568480, url, valid)
 
-proc call*(call_594248: Call_HybridConnectionsListKeys_594238;
+proc call*(call_568481: Call_HybridConnectionsListKeys_568471;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string;
           hybridConnectionName: string): Recallable =
@@ -2930,24 +2930,24 @@ proc call*(call_594248: Call_HybridConnectionsListKeys_594238;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   hybridConnectionName: string (required)
   ##                       : The hybrid connection name.
-  var path_594249 = newJObject()
-  var query_594250 = newJObject()
-  add(path_594249, "namespaceName", newJString(namespaceName))
-  add(path_594249, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594250, "api-version", newJString(apiVersion))
-  add(path_594249, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594249, "subscriptionId", newJString(subscriptionId))
-  add(path_594249, "hybridConnectionName", newJString(hybridConnectionName))
-  result = call_594248.call(path_594249, query_594250, nil, nil, nil)
+  var path_568482 = newJObject()
+  var query_568483 = newJObject()
+  add(path_568482, "namespaceName", newJString(namespaceName))
+  add(path_568482, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568483, "api-version", newJString(apiVersion))
+  add(path_568482, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568482, "subscriptionId", newJString(subscriptionId))
+  add(path_568482, "hybridConnectionName", newJString(hybridConnectionName))
+  result = call_568481.call(path_568482, query_568483, nil, nil, nil)
 
-var hybridConnectionsListKeys* = Call_HybridConnectionsListKeys_594238(
+var hybridConnectionsListKeys* = Call_HybridConnectionsListKeys_568471(
     name: "hybridConnectionsListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/hybridConnections/{hybridConnectionName}/authorizationRules/{authorizationRuleName}/listKeys",
-    validator: validate_HybridConnectionsListKeys_594239, base: "",
-    url: url_HybridConnectionsListKeys_594240, schemes: {Scheme.Https})
+    validator: validate_HybridConnectionsListKeys_568472, base: "",
+    url: url_HybridConnectionsListKeys_568473, schemes: {Scheme.Https})
 type
-  Call_HybridConnectionsRegenerateKeys_594251 = ref object of OpenApiRestCall_593424
-proc url_HybridConnectionsRegenerateKeys_594253(protocol: Scheme; host: string;
+  Call_HybridConnectionsRegenerateKeys_568484 = ref object of OpenApiRestCall_567657
+proc url_HybridConnectionsRegenerateKeys_568486(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2978,7 +2978,7 @@ proc url_HybridConnectionsRegenerateKeys_594253(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridConnectionsRegenerateKeys_594252(path: JsonNode;
+proc validate_HybridConnectionsRegenerateKeys_568485(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates the primary or secondary connection strings to the hybrid connection.
   ## 
@@ -2998,31 +2998,31 @@ proc validate_HybridConnectionsRegenerateKeys_594252(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594254 = path.getOrDefault("namespaceName")
-  valid_594254 = validateParameter(valid_594254, JString, required = true,
+  var valid_568487 = path.getOrDefault("namespaceName")
+  valid_568487 = validateParameter(valid_568487, JString, required = true,
                                  default = nil)
-  if valid_594254 != nil:
-    section.add "namespaceName", valid_594254
-  var valid_594255 = path.getOrDefault("resourceGroupName")
-  valid_594255 = validateParameter(valid_594255, JString, required = true,
+  if valid_568487 != nil:
+    section.add "namespaceName", valid_568487
+  var valid_568488 = path.getOrDefault("resourceGroupName")
+  valid_568488 = validateParameter(valid_568488, JString, required = true,
                                  default = nil)
-  if valid_594255 != nil:
-    section.add "resourceGroupName", valid_594255
-  var valid_594256 = path.getOrDefault("authorizationRuleName")
-  valid_594256 = validateParameter(valid_594256, JString, required = true,
+  if valid_568488 != nil:
+    section.add "resourceGroupName", valid_568488
+  var valid_568489 = path.getOrDefault("authorizationRuleName")
+  valid_568489 = validateParameter(valid_568489, JString, required = true,
                                  default = nil)
-  if valid_594256 != nil:
-    section.add "authorizationRuleName", valid_594256
-  var valid_594257 = path.getOrDefault("subscriptionId")
-  valid_594257 = validateParameter(valid_594257, JString, required = true,
+  if valid_568489 != nil:
+    section.add "authorizationRuleName", valid_568489
+  var valid_568490 = path.getOrDefault("subscriptionId")
+  valid_568490 = validateParameter(valid_568490, JString, required = true,
                                  default = nil)
-  if valid_594257 != nil:
-    section.add "subscriptionId", valid_594257
-  var valid_594258 = path.getOrDefault("hybridConnectionName")
-  valid_594258 = validateParameter(valid_594258, JString, required = true,
+  if valid_568490 != nil:
+    section.add "subscriptionId", valid_568490
+  var valid_568491 = path.getOrDefault("hybridConnectionName")
+  valid_568491 = validateParameter(valid_568491, JString, required = true,
                                  default = nil)
-  if valid_594258 != nil:
-    section.add "hybridConnectionName", valid_594258
+  if valid_568491 != nil:
+    section.add "hybridConnectionName", valid_568491
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3030,11 +3030,11 @@ proc validate_HybridConnectionsRegenerateKeys_594252(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594259 = query.getOrDefault("api-version")
-  valid_594259 = validateParameter(valid_594259, JString, required = true,
+  var valid_568492 = query.getOrDefault("api-version")
+  valid_568492 = validateParameter(valid_568492, JString, required = true,
                                  default = nil)
-  if valid_594259 != nil:
-    section.add "api-version", valid_594259
+  if valid_568492 != nil:
+    section.add "api-version", valid_568492
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3048,21 +3048,21 @@ proc validate_HybridConnectionsRegenerateKeys_594252(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594261: Call_HybridConnectionsRegenerateKeys_594251;
+proc call*(call_568494: Call_HybridConnectionsRegenerateKeys_568484;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerates the primary or secondary connection strings to the hybrid connection.
   ## 
-  let valid = call_594261.validator(path, query, header, formData, body)
-  let scheme = call_594261.pickScheme
+  let valid = call_568494.validator(path, query, header, formData, body)
+  let scheme = call_568494.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594261.url(scheme.get, call_594261.host, call_594261.base,
-                         call_594261.route, valid.getOrDefault("path"),
+  let url = call_568494.url(scheme.get, call_568494.host, call_568494.base,
+                         call_568494.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594261, url, valid)
+  result = hook(call_568494, url, valid)
 
-proc call*(call_594262: Call_HybridConnectionsRegenerateKeys_594251;
+proc call*(call_568495: Call_HybridConnectionsRegenerateKeys_568484;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string;
           hybridConnectionName: string; parameters: JsonNode): Recallable =
@@ -3082,27 +3082,27 @@ proc call*(call_594262: Call_HybridConnectionsRegenerateKeys_594251;
   ##                       : The hybrid connection name.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to regenerate authorization rule.
-  var path_594263 = newJObject()
-  var query_594264 = newJObject()
-  var body_594265 = newJObject()
-  add(path_594263, "namespaceName", newJString(namespaceName))
-  add(path_594263, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594264, "api-version", newJString(apiVersion))
-  add(path_594263, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594263, "subscriptionId", newJString(subscriptionId))
-  add(path_594263, "hybridConnectionName", newJString(hybridConnectionName))
+  var path_568496 = newJObject()
+  var query_568497 = newJObject()
+  var body_568498 = newJObject()
+  add(path_568496, "namespaceName", newJString(namespaceName))
+  add(path_568496, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568497, "api-version", newJString(apiVersion))
+  add(path_568496, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568496, "subscriptionId", newJString(subscriptionId))
+  add(path_568496, "hybridConnectionName", newJString(hybridConnectionName))
   if parameters != nil:
-    body_594265 = parameters
-  result = call_594262.call(path_594263, query_594264, nil, nil, body_594265)
+    body_568498 = parameters
+  result = call_568495.call(path_568496, query_568497, nil, nil, body_568498)
 
-var hybridConnectionsRegenerateKeys* = Call_HybridConnectionsRegenerateKeys_594251(
+var hybridConnectionsRegenerateKeys* = Call_HybridConnectionsRegenerateKeys_568484(
     name: "hybridConnectionsRegenerateKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/hybridConnections/{hybridConnectionName}/authorizationRules/{authorizationRuleName}/regenerateKeys",
-    validator: validate_HybridConnectionsRegenerateKeys_594252, base: "",
-    url: url_HybridConnectionsRegenerateKeys_594253, schemes: {Scheme.Https})
+    validator: validate_HybridConnectionsRegenerateKeys_568485, base: "",
+    url: url_HybridConnectionsRegenerateKeys_568486, schemes: {Scheme.Https})
 type
-  Call_WcfrelaysListByNamespace_594266 = ref object of OpenApiRestCall_593424
-proc url_WcfrelaysListByNamespace_594268(protocol: Scheme; host: string;
+  Call_WcfrelaysListByNamespace_568499 = ref object of OpenApiRestCall_567657
+proc url_WcfrelaysListByNamespace_568501(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3126,7 +3126,7 @@ proc url_WcfrelaysListByNamespace_594268(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WcfrelaysListByNamespace_594267(path: JsonNode; query: JsonNode;
+proc validate_WcfrelaysListByNamespace_568500(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the WCF relays within the namespace.
   ## 
@@ -3142,21 +3142,21 @@ proc validate_WcfrelaysListByNamespace_594267(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594269 = path.getOrDefault("namespaceName")
-  valid_594269 = validateParameter(valid_594269, JString, required = true,
+  var valid_568502 = path.getOrDefault("namespaceName")
+  valid_568502 = validateParameter(valid_568502, JString, required = true,
                                  default = nil)
-  if valid_594269 != nil:
-    section.add "namespaceName", valid_594269
-  var valid_594270 = path.getOrDefault("resourceGroupName")
-  valid_594270 = validateParameter(valid_594270, JString, required = true,
+  if valid_568502 != nil:
+    section.add "namespaceName", valid_568502
+  var valid_568503 = path.getOrDefault("resourceGroupName")
+  valid_568503 = validateParameter(valid_568503, JString, required = true,
                                  default = nil)
-  if valid_594270 != nil:
-    section.add "resourceGroupName", valid_594270
-  var valid_594271 = path.getOrDefault("subscriptionId")
-  valid_594271 = validateParameter(valid_594271, JString, required = true,
+  if valid_568503 != nil:
+    section.add "resourceGroupName", valid_568503
+  var valid_568504 = path.getOrDefault("subscriptionId")
+  valid_568504 = validateParameter(valid_568504, JString, required = true,
                                  default = nil)
-  if valid_594271 != nil:
-    section.add "subscriptionId", valid_594271
+  if valid_568504 != nil:
+    section.add "subscriptionId", valid_568504
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3164,11 +3164,11 @@ proc validate_WcfrelaysListByNamespace_594267(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594272 = query.getOrDefault("api-version")
-  valid_594272 = validateParameter(valid_594272, JString, required = true,
+  var valid_568505 = query.getOrDefault("api-version")
+  valid_568505 = validateParameter(valid_568505, JString, required = true,
                                  default = nil)
-  if valid_594272 != nil:
-    section.add "api-version", valid_594272
+  if valid_568505 != nil:
+    section.add "api-version", valid_568505
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3177,20 +3177,20 @@ proc validate_WcfrelaysListByNamespace_594267(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594273: Call_WcfrelaysListByNamespace_594266; path: JsonNode;
+proc call*(call_568506: Call_WcfrelaysListByNamespace_568499; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the WCF relays within the namespace.
   ## 
-  let valid = call_594273.validator(path, query, header, formData, body)
-  let scheme = call_594273.pickScheme
+  let valid = call_568506.validator(path, query, header, formData, body)
+  let scheme = call_568506.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594273.url(scheme.get, call_594273.host, call_594273.base,
-                         call_594273.route, valid.getOrDefault("path"),
+  let url = call_568506.url(scheme.get, call_568506.host, call_568506.base,
+                         call_568506.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594273, url, valid)
+  result = hook(call_568506, url, valid)
 
-proc call*(call_594274: Call_WcfrelaysListByNamespace_594266;
+proc call*(call_568507: Call_WcfrelaysListByNamespace_568499;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## wcfrelaysListByNamespace
@@ -3203,22 +3203,22 @@ proc call*(call_594274: Call_WcfrelaysListByNamespace_594266;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594275 = newJObject()
-  var query_594276 = newJObject()
-  add(path_594275, "namespaceName", newJString(namespaceName))
-  add(path_594275, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594276, "api-version", newJString(apiVersion))
-  add(path_594275, "subscriptionId", newJString(subscriptionId))
-  result = call_594274.call(path_594275, query_594276, nil, nil, nil)
+  var path_568508 = newJObject()
+  var query_568509 = newJObject()
+  add(path_568508, "namespaceName", newJString(namespaceName))
+  add(path_568508, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568509, "api-version", newJString(apiVersion))
+  add(path_568508, "subscriptionId", newJString(subscriptionId))
+  result = call_568507.call(path_568508, query_568509, nil, nil, nil)
 
-var wcfrelaysListByNamespace* = Call_WcfrelaysListByNamespace_594266(
+var wcfrelaysListByNamespace* = Call_WcfrelaysListByNamespace_568499(
     name: "wcfrelaysListByNamespace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/wcfRelays",
-    validator: validate_WcfrelaysListByNamespace_594267, base: "",
-    url: url_WcfrelaysListByNamespace_594268, schemes: {Scheme.Https})
+    validator: validate_WcfrelaysListByNamespace_568500, base: "",
+    url: url_WcfrelaysListByNamespace_568501, schemes: {Scheme.Https})
 type
-  Call_WcfrelaysCreateOrUpdate_594289 = ref object of OpenApiRestCall_593424
-proc url_WcfrelaysCreateOrUpdate_594291(protocol: Scheme; host: string; base: string;
+  Call_WcfrelaysCreateOrUpdate_568522 = ref object of OpenApiRestCall_567657
+proc url_WcfrelaysCreateOrUpdate_568524(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3244,7 +3244,7 @@ proc url_WcfrelaysCreateOrUpdate_594291(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WcfrelaysCreateOrUpdate_594290(path: JsonNode; query: JsonNode;
+proc validate_WcfrelaysCreateOrUpdate_568523(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a WCF relay. This operation is idempotent.
   ## 
@@ -3262,26 +3262,26 @@ proc validate_WcfrelaysCreateOrUpdate_594290(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594292 = path.getOrDefault("namespaceName")
-  valid_594292 = validateParameter(valid_594292, JString, required = true,
+  var valid_568525 = path.getOrDefault("namespaceName")
+  valid_568525 = validateParameter(valid_568525, JString, required = true,
                                  default = nil)
-  if valid_594292 != nil:
-    section.add "namespaceName", valid_594292
-  var valid_594293 = path.getOrDefault("resourceGroupName")
-  valid_594293 = validateParameter(valid_594293, JString, required = true,
+  if valid_568525 != nil:
+    section.add "namespaceName", valid_568525
+  var valid_568526 = path.getOrDefault("resourceGroupName")
+  valid_568526 = validateParameter(valid_568526, JString, required = true,
                                  default = nil)
-  if valid_594293 != nil:
-    section.add "resourceGroupName", valid_594293
-  var valid_594294 = path.getOrDefault("subscriptionId")
-  valid_594294 = validateParameter(valid_594294, JString, required = true,
+  if valid_568526 != nil:
+    section.add "resourceGroupName", valid_568526
+  var valid_568527 = path.getOrDefault("subscriptionId")
+  valid_568527 = validateParameter(valid_568527, JString, required = true,
                                  default = nil)
-  if valid_594294 != nil:
-    section.add "subscriptionId", valid_594294
-  var valid_594295 = path.getOrDefault("relayName")
-  valid_594295 = validateParameter(valid_594295, JString, required = true,
+  if valid_568527 != nil:
+    section.add "subscriptionId", valid_568527
+  var valid_568528 = path.getOrDefault("relayName")
+  valid_568528 = validateParameter(valid_568528, JString, required = true,
                                  default = nil)
-  if valid_594295 != nil:
-    section.add "relayName", valid_594295
+  if valid_568528 != nil:
+    section.add "relayName", valid_568528
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3289,11 +3289,11 @@ proc validate_WcfrelaysCreateOrUpdate_594290(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594296 = query.getOrDefault("api-version")
-  valid_594296 = validateParameter(valid_594296, JString, required = true,
+  var valid_568529 = query.getOrDefault("api-version")
+  valid_568529 = validateParameter(valid_568529, JString, required = true,
                                  default = nil)
-  if valid_594296 != nil:
-    section.add "api-version", valid_594296
+  if valid_568529 != nil:
+    section.add "api-version", valid_568529
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3307,20 +3307,20 @@ proc validate_WcfrelaysCreateOrUpdate_594290(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594298: Call_WcfrelaysCreateOrUpdate_594289; path: JsonNode;
+proc call*(call_568531: Call_WcfrelaysCreateOrUpdate_568522; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a WCF relay. This operation is idempotent.
   ## 
-  let valid = call_594298.validator(path, query, header, formData, body)
-  let scheme = call_594298.pickScheme
+  let valid = call_568531.validator(path, query, header, formData, body)
+  let scheme = call_568531.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594298.url(scheme.get, call_594298.host, call_594298.base,
-                         call_594298.route, valid.getOrDefault("path"),
+  let url = call_568531.url(scheme.get, call_568531.host, call_568531.base,
+                         call_568531.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594298, url, valid)
+  result = hook(call_568531, url, valid)
 
-proc call*(call_594299: Call_WcfrelaysCreateOrUpdate_594289; namespaceName: string;
+proc call*(call_568532: Call_WcfrelaysCreateOrUpdate_568522; namespaceName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           relayName: string; parameters: JsonNode): Recallable =
   ## wcfrelaysCreateOrUpdate
@@ -3337,26 +3337,26 @@ proc call*(call_594299: Call_WcfrelaysCreateOrUpdate_594289; namespaceName: stri
   ##            : The relay name.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to create a WCF relay.
-  var path_594300 = newJObject()
-  var query_594301 = newJObject()
-  var body_594302 = newJObject()
-  add(path_594300, "namespaceName", newJString(namespaceName))
-  add(path_594300, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594301, "api-version", newJString(apiVersion))
-  add(path_594300, "subscriptionId", newJString(subscriptionId))
-  add(path_594300, "relayName", newJString(relayName))
+  var path_568533 = newJObject()
+  var query_568534 = newJObject()
+  var body_568535 = newJObject()
+  add(path_568533, "namespaceName", newJString(namespaceName))
+  add(path_568533, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568534, "api-version", newJString(apiVersion))
+  add(path_568533, "subscriptionId", newJString(subscriptionId))
+  add(path_568533, "relayName", newJString(relayName))
   if parameters != nil:
-    body_594302 = parameters
-  result = call_594299.call(path_594300, query_594301, nil, nil, body_594302)
+    body_568535 = parameters
+  result = call_568532.call(path_568533, query_568534, nil, nil, body_568535)
 
-var wcfrelaysCreateOrUpdate* = Call_WcfrelaysCreateOrUpdate_594289(
+var wcfrelaysCreateOrUpdate* = Call_WcfrelaysCreateOrUpdate_568522(
     name: "wcfrelaysCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/wcfRelays/{relayName}",
-    validator: validate_WcfrelaysCreateOrUpdate_594290, base: "",
-    url: url_WcfrelaysCreateOrUpdate_594291, schemes: {Scheme.Https})
+    validator: validate_WcfrelaysCreateOrUpdate_568523, base: "",
+    url: url_WcfrelaysCreateOrUpdate_568524, schemes: {Scheme.Https})
 type
-  Call_WcfrelaysGet_594277 = ref object of OpenApiRestCall_593424
-proc url_WcfrelaysGet_594279(protocol: Scheme; host: string; base: string;
+  Call_WcfrelaysGet_568510 = ref object of OpenApiRestCall_567657
+proc url_WcfrelaysGet_568512(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3381,7 +3381,7 @@ proc url_WcfrelaysGet_594279(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WcfrelaysGet_594278(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WcfrelaysGet_568511(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the description for the specified WCF relay.
   ## 
@@ -3399,26 +3399,26 @@ proc validate_WcfrelaysGet_594278(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594280 = path.getOrDefault("namespaceName")
-  valid_594280 = validateParameter(valid_594280, JString, required = true,
+  var valid_568513 = path.getOrDefault("namespaceName")
+  valid_568513 = validateParameter(valid_568513, JString, required = true,
                                  default = nil)
-  if valid_594280 != nil:
-    section.add "namespaceName", valid_594280
-  var valid_594281 = path.getOrDefault("resourceGroupName")
-  valid_594281 = validateParameter(valid_594281, JString, required = true,
+  if valid_568513 != nil:
+    section.add "namespaceName", valid_568513
+  var valid_568514 = path.getOrDefault("resourceGroupName")
+  valid_568514 = validateParameter(valid_568514, JString, required = true,
                                  default = nil)
-  if valid_594281 != nil:
-    section.add "resourceGroupName", valid_594281
-  var valid_594282 = path.getOrDefault("subscriptionId")
-  valid_594282 = validateParameter(valid_594282, JString, required = true,
+  if valid_568514 != nil:
+    section.add "resourceGroupName", valid_568514
+  var valid_568515 = path.getOrDefault("subscriptionId")
+  valid_568515 = validateParameter(valid_568515, JString, required = true,
                                  default = nil)
-  if valid_594282 != nil:
-    section.add "subscriptionId", valid_594282
-  var valid_594283 = path.getOrDefault("relayName")
-  valid_594283 = validateParameter(valid_594283, JString, required = true,
+  if valid_568515 != nil:
+    section.add "subscriptionId", valid_568515
+  var valid_568516 = path.getOrDefault("relayName")
+  valid_568516 = validateParameter(valid_568516, JString, required = true,
                                  default = nil)
-  if valid_594283 != nil:
-    section.add "relayName", valid_594283
+  if valid_568516 != nil:
+    section.add "relayName", valid_568516
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3426,11 +3426,11 @@ proc validate_WcfrelaysGet_594278(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594284 = query.getOrDefault("api-version")
-  valid_594284 = validateParameter(valid_594284, JString, required = true,
+  var valid_568517 = query.getOrDefault("api-version")
+  valid_568517 = validateParameter(valid_568517, JString, required = true,
                                  default = nil)
-  if valid_594284 != nil:
-    section.add "api-version", valid_594284
+  if valid_568517 != nil:
+    section.add "api-version", valid_568517
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3439,20 +3439,20 @@ proc validate_WcfrelaysGet_594278(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594285: Call_WcfrelaysGet_594277; path: JsonNode; query: JsonNode;
+proc call*(call_568518: Call_WcfrelaysGet_568510; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the description for the specified WCF relay.
   ## 
-  let valid = call_594285.validator(path, query, header, formData, body)
-  let scheme = call_594285.pickScheme
+  let valid = call_568518.validator(path, query, header, formData, body)
+  let scheme = call_568518.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594285.url(scheme.get, call_594285.host, call_594285.base,
-                         call_594285.route, valid.getOrDefault("path"),
+  let url = call_568518.url(scheme.get, call_568518.host, call_568518.base,
+                         call_568518.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594285, url, valid)
+  result = hook(call_568518, url, valid)
 
-proc call*(call_594286: Call_WcfrelaysGet_594277; namespaceName: string;
+proc call*(call_568519: Call_WcfrelaysGet_568510; namespaceName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           relayName: string): Recallable =
   ## wcfrelaysGet
@@ -3467,22 +3467,22 @@ proc call*(call_594286: Call_WcfrelaysGet_594277; namespaceName: string;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   relayName: string (required)
   ##            : The relay name.
-  var path_594287 = newJObject()
-  var query_594288 = newJObject()
-  add(path_594287, "namespaceName", newJString(namespaceName))
-  add(path_594287, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594288, "api-version", newJString(apiVersion))
-  add(path_594287, "subscriptionId", newJString(subscriptionId))
-  add(path_594287, "relayName", newJString(relayName))
-  result = call_594286.call(path_594287, query_594288, nil, nil, nil)
+  var path_568520 = newJObject()
+  var query_568521 = newJObject()
+  add(path_568520, "namespaceName", newJString(namespaceName))
+  add(path_568520, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568521, "api-version", newJString(apiVersion))
+  add(path_568520, "subscriptionId", newJString(subscriptionId))
+  add(path_568520, "relayName", newJString(relayName))
+  result = call_568519.call(path_568520, query_568521, nil, nil, nil)
 
-var wcfrelaysGet* = Call_WcfrelaysGet_594277(name: "wcfrelaysGet",
+var wcfrelaysGet* = Call_WcfrelaysGet_568510(name: "wcfrelaysGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/wcfRelays/{relayName}",
-    validator: validate_WcfrelaysGet_594278, base: "", url: url_WcfrelaysGet_594279,
+    validator: validate_WcfrelaysGet_568511, base: "", url: url_WcfrelaysGet_568512,
     schemes: {Scheme.Https})
 type
-  Call_WcfrelaysDelete_594303 = ref object of OpenApiRestCall_593424
-proc url_WcfrelaysDelete_594305(protocol: Scheme; host: string; base: string;
+  Call_WcfrelaysDelete_568536 = ref object of OpenApiRestCall_567657
+proc url_WcfrelaysDelete_568538(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3507,7 +3507,7 @@ proc url_WcfrelaysDelete_594305(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WcfrelaysDelete_594304(path: JsonNode; query: JsonNode;
+proc validate_WcfrelaysDelete_568537(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Deletes a WCF relay.
@@ -3526,26 +3526,26 @@ proc validate_WcfrelaysDelete_594304(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594306 = path.getOrDefault("namespaceName")
-  valid_594306 = validateParameter(valid_594306, JString, required = true,
+  var valid_568539 = path.getOrDefault("namespaceName")
+  valid_568539 = validateParameter(valid_568539, JString, required = true,
                                  default = nil)
-  if valid_594306 != nil:
-    section.add "namespaceName", valid_594306
-  var valid_594307 = path.getOrDefault("resourceGroupName")
-  valid_594307 = validateParameter(valid_594307, JString, required = true,
+  if valid_568539 != nil:
+    section.add "namespaceName", valid_568539
+  var valid_568540 = path.getOrDefault("resourceGroupName")
+  valid_568540 = validateParameter(valid_568540, JString, required = true,
                                  default = nil)
-  if valid_594307 != nil:
-    section.add "resourceGroupName", valid_594307
-  var valid_594308 = path.getOrDefault("subscriptionId")
-  valid_594308 = validateParameter(valid_594308, JString, required = true,
+  if valid_568540 != nil:
+    section.add "resourceGroupName", valid_568540
+  var valid_568541 = path.getOrDefault("subscriptionId")
+  valid_568541 = validateParameter(valid_568541, JString, required = true,
                                  default = nil)
-  if valid_594308 != nil:
-    section.add "subscriptionId", valid_594308
-  var valid_594309 = path.getOrDefault("relayName")
-  valid_594309 = validateParameter(valid_594309, JString, required = true,
+  if valid_568541 != nil:
+    section.add "subscriptionId", valid_568541
+  var valid_568542 = path.getOrDefault("relayName")
+  valid_568542 = validateParameter(valid_568542, JString, required = true,
                                  default = nil)
-  if valid_594309 != nil:
-    section.add "relayName", valid_594309
+  if valid_568542 != nil:
+    section.add "relayName", valid_568542
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3553,11 +3553,11 @@ proc validate_WcfrelaysDelete_594304(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594310 = query.getOrDefault("api-version")
-  valid_594310 = validateParameter(valid_594310, JString, required = true,
+  var valid_568543 = query.getOrDefault("api-version")
+  valid_568543 = validateParameter(valid_568543, JString, required = true,
                                  default = nil)
-  if valid_594310 != nil:
-    section.add "api-version", valid_594310
+  if valid_568543 != nil:
+    section.add "api-version", valid_568543
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3566,20 +3566,20 @@ proc validate_WcfrelaysDelete_594304(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594311: Call_WcfrelaysDelete_594303; path: JsonNode; query: JsonNode;
+proc call*(call_568544: Call_WcfrelaysDelete_568536; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a WCF relay.
   ## 
-  let valid = call_594311.validator(path, query, header, formData, body)
-  let scheme = call_594311.pickScheme
+  let valid = call_568544.validator(path, query, header, formData, body)
+  let scheme = call_568544.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594311.url(scheme.get, call_594311.host, call_594311.base,
-                         call_594311.route, valid.getOrDefault("path"),
+  let url = call_568544.url(scheme.get, call_568544.host, call_568544.base,
+                         call_568544.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594311, url, valid)
+  result = hook(call_568544, url, valid)
 
-proc call*(call_594312: Call_WcfrelaysDelete_594303; namespaceName: string;
+proc call*(call_568545: Call_WcfrelaysDelete_568536; namespaceName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           relayName: string): Recallable =
   ## wcfrelaysDelete
@@ -3594,22 +3594,22 @@ proc call*(call_594312: Call_WcfrelaysDelete_594303; namespaceName: string;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   relayName: string (required)
   ##            : The relay name.
-  var path_594313 = newJObject()
-  var query_594314 = newJObject()
-  add(path_594313, "namespaceName", newJString(namespaceName))
-  add(path_594313, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594314, "api-version", newJString(apiVersion))
-  add(path_594313, "subscriptionId", newJString(subscriptionId))
-  add(path_594313, "relayName", newJString(relayName))
-  result = call_594312.call(path_594313, query_594314, nil, nil, nil)
+  var path_568546 = newJObject()
+  var query_568547 = newJObject()
+  add(path_568546, "namespaceName", newJString(namespaceName))
+  add(path_568546, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568547, "api-version", newJString(apiVersion))
+  add(path_568546, "subscriptionId", newJString(subscriptionId))
+  add(path_568546, "relayName", newJString(relayName))
+  result = call_568545.call(path_568546, query_568547, nil, nil, nil)
 
-var wcfrelaysDelete* = Call_WcfrelaysDelete_594303(name: "wcfrelaysDelete",
+var wcfrelaysDelete* = Call_WcfrelaysDelete_568536(name: "wcfrelaysDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/wcfRelays/{relayName}",
-    validator: validate_WcfrelaysDelete_594304, base: "", url: url_WcfrelaysDelete_594305,
+    validator: validate_WcfrelaysDelete_568537, base: "", url: url_WcfrelaysDelete_568538,
     schemes: {Scheme.Https})
 type
-  Call_WcfrelaysListAuthorizationRules_594315 = ref object of OpenApiRestCall_593424
-proc url_WcfrelaysListAuthorizationRules_594317(protocol: Scheme; host: string;
+  Call_WcfrelaysListAuthorizationRules_568548 = ref object of OpenApiRestCall_567657
+proc url_WcfrelaysListAuthorizationRules_568550(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3635,7 +3635,7 @@ proc url_WcfrelaysListAuthorizationRules_594317(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WcfrelaysListAuthorizationRules_594316(path: JsonNode;
+proc validate_WcfrelaysListAuthorizationRules_568549(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Authorization rules for a WCF relay.
   ## 
@@ -3653,26 +3653,26 @@ proc validate_WcfrelaysListAuthorizationRules_594316(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594318 = path.getOrDefault("namespaceName")
-  valid_594318 = validateParameter(valid_594318, JString, required = true,
+  var valid_568551 = path.getOrDefault("namespaceName")
+  valid_568551 = validateParameter(valid_568551, JString, required = true,
                                  default = nil)
-  if valid_594318 != nil:
-    section.add "namespaceName", valid_594318
-  var valid_594319 = path.getOrDefault("resourceGroupName")
-  valid_594319 = validateParameter(valid_594319, JString, required = true,
+  if valid_568551 != nil:
+    section.add "namespaceName", valid_568551
+  var valid_568552 = path.getOrDefault("resourceGroupName")
+  valid_568552 = validateParameter(valid_568552, JString, required = true,
                                  default = nil)
-  if valid_594319 != nil:
-    section.add "resourceGroupName", valid_594319
-  var valid_594320 = path.getOrDefault("subscriptionId")
-  valid_594320 = validateParameter(valid_594320, JString, required = true,
+  if valid_568552 != nil:
+    section.add "resourceGroupName", valid_568552
+  var valid_568553 = path.getOrDefault("subscriptionId")
+  valid_568553 = validateParameter(valid_568553, JString, required = true,
                                  default = nil)
-  if valid_594320 != nil:
-    section.add "subscriptionId", valid_594320
-  var valid_594321 = path.getOrDefault("relayName")
-  valid_594321 = validateParameter(valid_594321, JString, required = true,
+  if valid_568553 != nil:
+    section.add "subscriptionId", valid_568553
+  var valid_568554 = path.getOrDefault("relayName")
+  valid_568554 = validateParameter(valid_568554, JString, required = true,
                                  default = nil)
-  if valid_594321 != nil:
-    section.add "relayName", valid_594321
+  if valid_568554 != nil:
+    section.add "relayName", valid_568554
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3680,11 +3680,11 @@ proc validate_WcfrelaysListAuthorizationRules_594316(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594322 = query.getOrDefault("api-version")
-  valid_594322 = validateParameter(valid_594322, JString, required = true,
+  var valid_568555 = query.getOrDefault("api-version")
+  valid_568555 = validateParameter(valid_568555, JString, required = true,
                                  default = nil)
-  if valid_594322 != nil:
-    section.add "api-version", valid_594322
+  if valid_568555 != nil:
+    section.add "api-version", valid_568555
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3693,21 +3693,21 @@ proc validate_WcfrelaysListAuthorizationRules_594316(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594323: Call_WcfrelaysListAuthorizationRules_594315;
+proc call*(call_568556: Call_WcfrelaysListAuthorizationRules_568548;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Authorization rules for a WCF relay.
   ## 
-  let valid = call_594323.validator(path, query, header, formData, body)
-  let scheme = call_594323.pickScheme
+  let valid = call_568556.validator(path, query, header, formData, body)
+  let scheme = call_568556.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594323.url(scheme.get, call_594323.host, call_594323.base,
-                         call_594323.route, valid.getOrDefault("path"),
+  let url = call_568556.url(scheme.get, call_568556.host, call_568556.base,
+                         call_568556.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594323, url, valid)
+  result = hook(call_568556, url, valid)
 
-proc call*(call_594324: Call_WcfrelaysListAuthorizationRules_594315;
+proc call*(call_568557: Call_WcfrelaysListAuthorizationRules_568548;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; relayName: string): Recallable =
   ## wcfrelaysListAuthorizationRules
@@ -3722,23 +3722,23 @@ proc call*(call_594324: Call_WcfrelaysListAuthorizationRules_594315;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   relayName: string (required)
   ##            : The relay name.
-  var path_594325 = newJObject()
-  var query_594326 = newJObject()
-  add(path_594325, "namespaceName", newJString(namespaceName))
-  add(path_594325, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594326, "api-version", newJString(apiVersion))
-  add(path_594325, "subscriptionId", newJString(subscriptionId))
-  add(path_594325, "relayName", newJString(relayName))
-  result = call_594324.call(path_594325, query_594326, nil, nil, nil)
+  var path_568558 = newJObject()
+  var query_568559 = newJObject()
+  add(path_568558, "namespaceName", newJString(namespaceName))
+  add(path_568558, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568559, "api-version", newJString(apiVersion))
+  add(path_568558, "subscriptionId", newJString(subscriptionId))
+  add(path_568558, "relayName", newJString(relayName))
+  result = call_568557.call(path_568558, query_568559, nil, nil, nil)
 
-var wcfrelaysListAuthorizationRules* = Call_WcfrelaysListAuthorizationRules_594315(
+var wcfrelaysListAuthorizationRules* = Call_WcfrelaysListAuthorizationRules_568548(
     name: "wcfrelaysListAuthorizationRules", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/wcfRelays/{relayName}/authorizationRules",
-    validator: validate_WcfrelaysListAuthorizationRules_594316, base: "",
-    url: url_WcfrelaysListAuthorizationRules_594317, schemes: {Scheme.Https})
+    validator: validate_WcfrelaysListAuthorizationRules_568549, base: "",
+    url: url_WcfrelaysListAuthorizationRules_568550, schemes: {Scheme.Https})
 type
-  Call_WcfrelaysCreateOrUpdateAuthorizationRule_594340 = ref object of OpenApiRestCall_593424
-proc url_WcfrelaysCreateOrUpdateAuthorizationRule_594342(protocol: Scheme;
+  Call_WcfrelaysCreateOrUpdateAuthorizationRule_568573 = ref object of OpenApiRestCall_567657
+proc url_WcfrelaysCreateOrUpdateAuthorizationRule_568575(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3767,7 +3767,7 @@ proc url_WcfrelaysCreateOrUpdateAuthorizationRule_594342(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WcfrelaysCreateOrUpdateAuthorizationRule_594341(path: JsonNode;
+proc validate_WcfrelaysCreateOrUpdateAuthorizationRule_568574(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an authorization rule for a WCF relay.
   ## 
@@ -3787,31 +3787,31 @@ proc validate_WcfrelaysCreateOrUpdateAuthorizationRule_594341(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594343 = path.getOrDefault("namespaceName")
-  valid_594343 = validateParameter(valid_594343, JString, required = true,
+  var valid_568576 = path.getOrDefault("namespaceName")
+  valid_568576 = validateParameter(valid_568576, JString, required = true,
                                  default = nil)
-  if valid_594343 != nil:
-    section.add "namespaceName", valid_594343
-  var valid_594344 = path.getOrDefault("resourceGroupName")
-  valid_594344 = validateParameter(valid_594344, JString, required = true,
+  if valid_568576 != nil:
+    section.add "namespaceName", valid_568576
+  var valid_568577 = path.getOrDefault("resourceGroupName")
+  valid_568577 = validateParameter(valid_568577, JString, required = true,
                                  default = nil)
-  if valid_594344 != nil:
-    section.add "resourceGroupName", valid_594344
-  var valid_594345 = path.getOrDefault("authorizationRuleName")
-  valid_594345 = validateParameter(valid_594345, JString, required = true,
+  if valid_568577 != nil:
+    section.add "resourceGroupName", valid_568577
+  var valid_568578 = path.getOrDefault("authorizationRuleName")
+  valid_568578 = validateParameter(valid_568578, JString, required = true,
                                  default = nil)
-  if valid_594345 != nil:
-    section.add "authorizationRuleName", valid_594345
-  var valid_594346 = path.getOrDefault("subscriptionId")
-  valid_594346 = validateParameter(valid_594346, JString, required = true,
+  if valid_568578 != nil:
+    section.add "authorizationRuleName", valid_568578
+  var valid_568579 = path.getOrDefault("subscriptionId")
+  valid_568579 = validateParameter(valid_568579, JString, required = true,
                                  default = nil)
-  if valid_594346 != nil:
-    section.add "subscriptionId", valid_594346
-  var valid_594347 = path.getOrDefault("relayName")
-  valid_594347 = validateParameter(valid_594347, JString, required = true,
+  if valid_568579 != nil:
+    section.add "subscriptionId", valid_568579
+  var valid_568580 = path.getOrDefault("relayName")
+  valid_568580 = validateParameter(valid_568580, JString, required = true,
                                  default = nil)
-  if valid_594347 != nil:
-    section.add "relayName", valid_594347
+  if valid_568580 != nil:
+    section.add "relayName", valid_568580
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3819,11 +3819,11 @@ proc validate_WcfrelaysCreateOrUpdateAuthorizationRule_594341(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594348 = query.getOrDefault("api-version")
-  valid_594348 = validateParameter(valid_594348, JString, required = true,
+  var valid_568581 = query.getOrDefault("api-version")
+  valid_568581 = validateParameter(valid_568581, JString, required = true,
                                  default = nil)
-  if valid_594348 != nil:
-    section.add "api-version", valid_594348
+  if valid_568581 != nil:
+    section.add "api-version", valid_568581
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3837,21 +3837,21 @@ proc validate_WcfrelaysCreateOrUpdateAuthorizationRule_594341(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594350: Call_WcfrelaysCreateOrUpdateAuthorizationRule_594340;
+proc call*(call_568583: Call_WcfrelaysCreateOrUpdateAuthorizationRule_568573;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an authorization rule for a WCF relay.
   ## 
-  let valid = call_594350.validator(path, query, header, formData, body)
-  let scheme = call_594350.pickScheme
+  let valid = call_568583.validator(path, query, header, formData, body)
+  let scheme = call_568583.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594350.url(scheme.get, call_594350.host, call_594350.base,
-                         call_594350.route, valid.getOrDefault("path"),
+  let url = call_568583.url(scheme.get, call_568583.host, call_568583.base,
+                         call_568583.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594350, url, valid)
+  result = hook(call_568583, url, valid)
 
-proc call*(call_594351: Call_WcfrelaysCreateOrUpdateAuthorizationRule_594340;
+proc call*(call_568584: Call_WcfrelaysCreateOrUpdateAuthorizationRule_568573;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string; relayName: string;
           parameters: JsonNode): Recallable =
@@ -3871,28 +3871,28 @@ proc call*(call_594351: Call_WcfrelaysCreateOrUpdateAuthorizationRule_594340;
   ##            : The relay name.
   ##   parameters: JObject (required)
   ##             : The authorization rule parameters.
-  var path_594352 = newJObject()
-  var query_594353 = newJObject()
-  var body_594354 = newJObject()
-  add(path_594352, "namespaceName", newJString(namespaceName))
-  add(path_594352, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594353, "api-version", newJString(apiVersion))
-  add(path_594352, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594352, "subscriptionId", newJString(subscriptionId))
-  add(path_594352, "relayName", newJString(relayName))
+  var path_568585 = newJObject()
+  var query_568586 = newJObject()
+  var body_568587 = newJObject()
+  add(path_568585, "namespaceName", newJString(namespaceName))
+  add(path_568585, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568586, "api-version", newJString(apiVersion))
+  add(path_568585, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568585, "subscriptionId", newJString(subscriptionId))
+  add(path_568585, "relayName", newJString(relayName))
   if parameters != nil:
-    body_594354 = parameters
-  result = call_594351.call(path_594352, query_594353, nil, nil, body_594354)
+    body_568587 = parameters
+  result = call_568584.call(path_568585, query_568586, nil, nil, body_568587)
 
-var wcfrelaysCreateOrUpdateAuthorizationRule* = Call_WcfrelaysCreateOrUpdateAuthorizationRule_594340(
+var wcfrelaysCreateOrUpdateAuthorizationRule* = Call_WcfrelaysCreateOrUpdateAuthorizationRule_568573(
     name: "wcfrelaysCreateOrUpdateAuthorizationRule", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/wcfRelays/{relayName}/authorizationRules/{authorizationRuleName}",
-    validator: validate_WcfrelaysCreateOrUpdateAuthorizationRule_594341, base: "",
-    url: url_WcfrelaysCreateOrUpdateAuthorizationRule_594342,
+    validator: validate_WcfrelaysCreateOrUpdateAuthorizationRule_568574, base: "",
+    url: url_WcfrelaysCreateOrUpdateAuthorizationRule_568575,
     schemes: {Scheme.Https})
 type
-  Call_WcfrelaysGetAuthorizationRule_594327 = ref object of OpenApiRestCall_593424
-proc url_WcfrelaysGetAuthorizationRule_594329(protocol: Scheme; host: string;
+  Call_WcfrelaysGetAuthorizationRule_568560 = ref object of OpenApiRestCall_567657
+proc url_WcfrelaysGetAuthorizationRule_568562(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3921,7 +3921,7 @@ proc url_WcfrelaysGetAuthorizationRule_594329(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WcfrelaysGetAuthorizationRule_594328(path: JsonNode; query: JsonNode;
+proc validate_WcfrelaysGetAuthorizationRule_568561(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get authorizationRule for a WCF relay by name.
   ## 
@@ -3941,31 +3941,31 @@ proc validate_WcfrelaysGetAuthorizationRule_594328(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594330 = path.getOrDefault("namespaceName")
-  valid_594330 = validateParameter(valid_594330, JString, required = true,
+  var valid_568563 = path.getOrDefault("namespaceName")
+  valid_568563 = validateParameter(valid_568563, JString, required = true,
                                  default = nil)
-  if valid_594330 != nil:
-    section.add "namespaceName", valid_594330
-  var valid_594331 = path.getOrDefault("resourceGroupName")
-  valid_594331 = validateParameter(valid_594331, JString, required = true,
+  if valid_568563 != nil:
+    section.add "namespaceName", valid_568563
+  var valid_568564 = path.getOrDefault("resourceGroupName")
+  valid_568564 = validateParameter(valid_568564, JString, required = true,
                                  default = nil)
-  if valid_594331 != nil:
-    section.add "resourceGroupName", valid_594331
-  var valid_594332 = path.getOrDefault("authorizationRuleName")
-  valid_594332 = validateParameter(valid_594332, JString, required = true,
+  if valid_568564 != nil:
+    section.add "resourceGroupName", valid_568564
+  var valid_568565 = path.getOrDefault("authorizationRuleName")
+  valid_568565 = validateParameter(valid_568565, JString, required = true,
                                  default = nil)
-  if valid_594332 != nil:
-    section.add "authorizationRuleName", valid_594332
-  var valid_594333 = path.getOrDefault("subscriptionId")
-  valid_594333 = validateParameter(valid_594333, JString, required = true,
+  if valid_568565 != nil:
+    section.add "authorizationRuleName", valid_568565
+  var valid_568566 = path.getOrDefault("subscriptionId")
+  valid_568566 = validateParameter(valid_568566, JString, required = true,
                                  default = nil)
-  if valid_594333 != nil:
-    section.add "subscriptionId", valid_594333
-  var valid_594334 = path.getOrDefault("relayName")
-  valid_594334 = validateParameter(valid_594334, JString, required = true,
+  if valid_568566 != nil:
+    section.add "subscriptionId", valid_568566
+  var valid_568567 = path.getOrDefault("relayName")
+  valid_568567 = validateParameter(valid_568567, JString, required = true,
                                  default = nil)
-  if valid_594334 != nil:
-    section.add "relayName", valid_594334
+  if valid_568567 != nil:
+    section.add "relayName", valid_568567
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3973,11 +3973,11 @@ proc validate_WcfrelaysGetAuthorizationRule_594328(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594335 = query.getOrDefault("api-version")
-  valid_594335 = validateParameter(valid_594335, JString, required = true,
+  var valid_568568 = query.getOrDefault("api-version")
+  valid_568568 = validateParameter(valid_568568, JString, required = true,
                                  default = nil)
-  if valid_594335 != nil:
-    section.add "api-version", valid_594335
+  if valid_568568 != nil:
+    section.add "api-version", valid_568568
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3986,20 +3986,20 @@ proc validate_WcfrelaysGetAuthorizationRule_594328(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594336: Call_WcfrelaysGetAuthorizationRule_594327; path: JsonNode;
+proc call*(call_568569: Call_WcfrelaysGetAuthorizationRule_568560; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get authorizationRule for a WCF relay by name.
   ## 
-  let valid = call_594336.validator(path, query, header, formData, body)
-  let scheme = call_594336.pickScheme
+  let valid = call_568569.validator(path, query, header, formData, body)
+  let scheme = call_568569.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594336.url(scheme.get, call_594336.host, call_594336.base,
-                         call_594336.route, valid.getOrDefault("path"),
+  let url = call_568569.url(scheme.get, call_568569.host, call_568569.base,
+                         call_568569.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594336, url, valid)
+  result = hook(call_568569, url, valid)
 
-proc call*(call_594337: Call_WcfrelaysGetAuthorizationRule_594327;
+proc call*(call_568570: Call_WcfrelaysGetAuthorizationRule_568560;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string; relayName: string): Recallable =
   ## wcfrelaysGetAuthorizationRule
@@ -4016,24 +4016,24 @@ proc call*(call_594337: Call_WcfrelaysGetAuthorizationRule_594327;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   relayName: string (required)
   ##            : The relay name.
-  var path_594338 = newJObject()
-  var query_594339 = newJObject()
-  add(path_594338, "namespaceName", newJString(namespaceName))
-  add(path_594338, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594339, "api-version", newJString(apiVersion))
-  add(path_594338, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594338, "subscriptionId", newJString(subscriptionId))
-  add(path_594338, "relayName", newJString(relayName))
-  result = call_594337.call(path_594338, query_594339, nil, nil, nil)
+  var path_568571 = newJObject()
+  var query_568572 = newJObject()
+  add(path_568571, "namespaceName", newJString(namespaceName))
+  add(path_568571, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568572, "api-version", newJString(apiVersion))
+  add(path_568571, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568571, "subscriptionId", newJString(subscriptionId))
+  add(path_568571, "relayName", newJString(relayName))
+  result = call_568570.call(path_568571, query_568572, nil, nil, nil)
 
-var wcfrelaysGetAuthorizationRule* = Call_WcfrelaysGetAuthorizationRule_594327(
+var wcfrelaysGetAuthorizationRule* = Call_WcfrelaysGetAuthorizationRule_568560(
     name: "wcfrelaysGetAuthorizationRule", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/wcfRelays/{relayName}/authorizationRules/{authorizationRuleName}",
-    validator: validate_WcfrelaysGetAuthorizationRule_594328, base: "",
-    url: url_WcfrelaysGetAuthorizationRule_594329, schemes: {Scheme.Https})
+    validator: validate_WcfrelaysGetAuthorizationRule_568561, base: "",
+    url: url_WcfrelaysGetAuthorizationRule_568562, schemes: {Scheme.Https})
 type
-  Call_WcfrelaysDeleteAuthorizationRule_594355 = ref object of OpenApiRestCall_593424
-proc url_WcfrelaysDeleteAuthorizationRule_594357(protocol: Scheme; host: string;
+  Call_WcfrelaysDeleteAuthorizationRule_568588 = ref object of OpenApiRestCall_567657
+proc url_WcfrelaysDeleteAuthorizationRule_568590(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4062,7 +4062,7 @@ proc url_WcfrelaysDeleteAuthorizationRule_594357(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WcfrelaysDeleteAuthorizationRule_594356(path: JsonNode;
+proc validate_WcfrelaysDeleteAuthorizationRule_568589(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a WCF relay authorization rule.
   ## 
@@ -4082,31 +4082,31 @@ proc validate_WcfrelaysDeleteAuthorizationRule_594356(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594358 = path.getOrDefault("namespaceName")
-  valid_594358 = validateParameter(valid_594358, JString, required = true,
+  var valid_568591 = path.getOrDefault("namespaceName")
+  valid_568591 = validateParameter(valid_568591, JString, required = true,
                                  default = nil)
-  if valid_594358 != nil:
-    section.add "namespaceName", valid_594358
-  var valid_594359 = path.getOrDefault("resourceGroupName")
-  valid_594359 = validateParameter(valid_594359, JString, required = true,
+  if valid_568591 != nil:
+    section.add "namespaceName", valid_568591
+  var valid_568592 = path.getOrDefault("resourceGroupName")
+  valid_568592 = validateParameter(valid_568592, JString, required = true,
                                  default = nil)
-  if valid_594359 != nil:
-    section.add "resourceGroupName", valid_594359
-  var valid_594360 = path.getOrDefault("authorizationRuleName")
-  valid_594360 = validateParameter(valid_594360, JString, required = true,
+  if valid_568592 != nil:
+    section.add "resourceGroupName", valid_568592
+  var valid_568593 = path.getOrDefault("authorizationRuleName")
+  valid_568593 = validateParameter(valid_568593, JString, required = true,
                                  default = nil)
-  if valid_594360 != nil:
-    section.add "authorizationRuleName", valid_594360
-  var valid_594361 = path.getOrDefault("subscriptionId")
-  valid_594361 = validateParameter(valid_594361, JString, required = true,
+  if valid_568593 != nil:
+    section.add "authorizationRuleName", valid_568593
+  var valid_568594 = path.getOrDefault("subscriptionId")
+  valid_568594 = validateParameter(valid_568594, JString, required = true,
                                  default = nil)
-  if valid_594361 != nil:
-    section.add "subscriptionId", valid_594361
-  var valid_594362 = path.getOrDefault("relayName")
-  valid_594362 = validateParameter(valid_594362, JString, required = true,
+  if valid_568594 != nil:
+    section.add "subscriptionId", valid_568594
+  var valid_568595 = path.getOrDefault("relayName")
+  valid_568595 = validateParameter(valid_568595, JString, required = true,
                                  default = nil)
-  if valid_594362 != nil:
-    section.add "relayName", valid_594362
+  if valid_568595 != nil:
+    section.add "relayName", valid_568595
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4114,11 +4114,11 @@ proc validate_WcfrelaysDeleteAuthorizationRule_594356(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594363 = query.getOrDefault("api-version")
-  valid_594363 = validateParameter(valid_594363, JString, required = true,
+  var valid_568596 = query.getOrDefault("api-version")
+  valid_568596 = validateParameter(valid_568596, JString, required = true,
                                  default = nil)
-  if valid_594363 != nil:
-    section.add "api-version", valid_594363
+  if valid_568596 != nil:
+    section.add "api-version", valid_568596
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4127,21 +4127,21 @@ proc validate_WcfrelaysDeleteAuthorizationRule_594356(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594364: Call_WcfrelaysDeleteAuthorizationRule_594355;
+proc call*(call_568597: Call_WcfrelaysDeleteAuthorizationRule_568588;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes a WCF relay authorization rule.
   ## 
-  let valid = call_594364.validator(path, query, header, formData, body)
-  let scheme = call_594364.pickScheme
+  let valid = call_568597.validator(path, query, header, formData, body)
+  let scheme = call_568597.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594364.url(scheme.get, call_594364.host, call_594364.base,
-                         call_594364.route, valid.getOrDefault("path"),
+  let url = call_568597.url(scheme.get, call_568597.host, call_568597.base,
+                         call_568597.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594364, url, valid)
+  result = hook(call_568597, url, valid)
 
-proc call*(call_594365: Call_WcfrelaysDeleteAuthorizationRule_594355;
+proc call*(call_568598: Call_WcfrelaysDeleteAuthorizationRule_568588;
           namespaceName: string; resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string; relayName: string): Recallable =
   ## wcfrelaysDeleteAuthorizationRule
@@ -4158,24 +4158,24 @@ proc call*(call_594365: Call_WcfrelaysDeleteAuthorizationRule_594355;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   relayName: string (required)
   ##            : The relay name.
-  var path_594366 = newJObject()
-  var query_594367 = newJObject()
-  add(path_594366, "namespaceName", newJString(namespaceName))
-  add(path_594366, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594367, "api-version", newJString(apiVersion))
-  add(path_594366, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594366, "subscriptionId", newJString(subscriptionId))
-  add(path_594366, "relayName", newJString(relayName))
-  result = call_594365.call(path_594366, query_594367, nil, nil, nil)
+  var path_568599 = newJObject()
+  var query_568600 = newJObject()
+  add(path_568599, "namespaceName", newJString(namespaceName))
+  add(path_568599, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568600, "api-version", newJString(apiVersion))
+  add(path_568599, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568599, "subscriptionId", newJString(subscriptionId))
+  add(path_568599, "relayName", newJString(relayName))
+  result = call_568598.call(path_568599, query_568600, nil, nil, nil)
 
-var wcfrelaysDeleteAuthorizationRule* = Call_WcfrelaysDeleteAuthorizationRule_594355(
+var wcfrelaysDeleteAuthorizationRule* = Call_WcfrelaysDeleteAuthorizationRule_568588(
     name: "wcfrelaysDeleteAuthorizationRule", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/wcfRelays/{relayName}/authorizationRules/{authorizationRuleName}",
-    validator: validate_WcfrelaysDeleteAuthorizationRule_594356, base: "",
-    url: url_WcfrelaysDeleteAuthorizationRule_594357, schemes: {Scheme.Https})
+    validator: validate_WcfrelaysDeleteAuthorizationRule_568589, base: "",
+    url: url_WcfrelaysDeleteAuthorizationRule_568590, schemes: {Scheme.Https})
 type
-  Call_WcfrelaysListKeys_594368 = ref object of OpenApiRestCall_593424
-proc url_WcfrelaysListKeys_594370(protocol: Scheme; host: string; base: string;
+  Call_WcfrelaysListKeys_568601 = ref object of OpenApiRestCall_567657
+proc url_WcfrelaysListKeys_568603(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4205,7 +4205,7 @@ proc url_WcfrelaysListKeys_594370(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WcfrelaysListKeys_594369(path: JsonNode; query: JsonNode;
+proc validate_WcfrelaysListKeys_568602(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Primary and secondary connection strings to the WCF relay.
@@ -4226,31 +4226,31 @@ proc validate_WcfrelaysListKeys_594369(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594371 = path.getOrDefault("namespaceName")
-  valid_594371 = validateParameter(valid_594371, JString, required = true,
+  var valid_568604 = path.getOrDefault("namespaceName")
+  valid_568604 = validateParameter(valid_568604, JString, required = true,
                                  default = nil)
-  if valid_594371 != nil:
-    section.add "namespaceName", valid_594371
-  var valid_594372 = path.getOrDefault("resourceGroupName")
-  valid_594372 = validateParameter(valid_594372, JString, required = true,
+  if valid_568604 != nil:
+    section.add "namespaceName", valid_568604
+  var valid_568605 = path.getOrDefault("resourceGroupName")
+  valid_568605 = validateParameter(valid_568605, JString, required = true,
                                  default = nil)
-  if valid_594372 != nil:
-    section.add "resourceGroupName", valid_594372
-  var valid_594373 = path.getOrDefault("authorizationRuleName")
-  valid_594373 = validateParameter(valid_594373, JString, required = true,
+  if valid_568605 != nil:
+    section.add "resourceGroupName", valid_568605
+  var valid_568606 = path.getOrDefault("authorizationRuleName")
+  valid_568606 = validateParameter(valid_568606, JString, required = true,
                                  default = nil)
-  if valid_594373 != nil:
-    section.add "authorizationRuleName", valid_594373
-  var valid_594374 = path.getOrDefault("subscriptionId")
-  valid_594374 = validateParameter(valid_594374, JString, required = true,
+  if valid_568606 != nil:
+    section.add "authorizationRuleName", valid_568606
+  var valid_568607 = path.getOrDefault("subscriptionId")
+  valid_568607 = validateParameter(valid_568607, JString, required = true,
                                  default = nil)
-  if valid_594374 != nil:
-    section.add "subscriptionId", valid_594374
-  var valid_594375 = path.getOrDefault("relayName")
-  valid_594375 = validateParameter(valid_594375, JString, required = true,
+  if valid_568607 != nil:
+    section.add "subscriptionId", valid_568607
+  var valid_568608 = path.getOrDefault("relayName")
+  valid_568608 = validateParameter(valid_568608, JString, required = true,
                                  default = nil)
-  if valid_594375 != nil:
-    section.add "relayName", valid_594375
+  if valid_568608 != nil:
+    section.add "relayName", valid_568608
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4258,11 +4258,11 @@ proc validate_WcfrelaysListKeys_594369(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594376 = query.getOrDefault("api-version")
-  valid_594376 = validateParameter(valid_594376, JString, required = true,
+  var valid_568609 = query.getOrDefault("api-version")
+  valid_568609 = validateParameter(valid_568609, JString, required = true,
                                  default = nil)
-  if valid_594376 != nil:
-    section.add "api-version", valid_594376
+  if valid_568609 != nil:
+    section.add "api-version", valid_568609
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4271,20 +4271,20 @@ proc validate_WcfrelaysListKeys_594369(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594377: Call_WcfrelaysListKeys_594368; path: JsonNode;
+proc call*(call_568610: Call_WcfrelaysListKeys_568601; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Primary and secondary connection strings to the WCF relay.
   ## 
-  let valid = call_594377.validator(path, query, header, formData, body)
-  let scheme = call_594377.pickScheme
+  let valid = call_568610.validator(path, query, header, formData, body)
+  let scheme = call_568610.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594377.url(scheme.get, call_594377.host, call_594377.base,
-                         call_594377.route, valid.getOrDefault("path"),
+  let url = call_568610.url(scheme.get, call_568610.host, call_568610.base,
+                         call_568610.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594377, url, valid)
+  result = hook(call_568610, url, valid)
 
-proc call*(call_594378: Call_WcfrelaysListKeys_594368; namespaceName: string;
+proc call*(call_568611: Call_WcfrelaysListKeys_568601; namespaceName: string;
           resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string; relayName: string): Recallable =
   ## wcfrelaysListKeys
@@ -4301,23 +4301,23 @@ proc call*(call_594378: Call_WcfrelaysListKeys_594368; namespaceName: string;
   ##                 : Subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   relayName: string (required)
   ##            : The relay name.
-  var path_594379 = newJObject()
-  var query_594380 = newJObject()
-  add(path_594379, "namespaceName", newJString(namespaceName))
-  add(path_594379, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594380, "api-version", newJString(apiVersion))
-  add(path_594379, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594379, "subscriptionId", newJString(subscriptionId))
-  add(path_594379, "relayName", newJString(relayName))
-  result = call_594378.call(path_594379, query_594380, nil, nil, nil)
+  var path_568612 = newJObject()
+  var query_568613 = newJObject()
+  add(path_568612, "namespaceName", newJString(namespaceName))
+  add(path_568612, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568613, "api-version", newJString(apiVersion))
+  add(path_568612, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568612, "subscriptionId", newJString(subscriptionId))
+  add(path_568612, "relayName", newJString(relayName))
+  result = call_568611.call(path_568612, query_568613, nil, nil, nil)
 
-var wcfrelaysListKeys* = Call_WcfrelaysListKeys_594368(name: "wcfrelaysListKeys",
+var wcfrelaysListKeys* = Call_WcfrelaysListKeys_568601(name: "wcfrelaysListKeys",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/wcfRelays/{relayName}/authorizationRules/{authorizationRuleName}/listKeys",
-    validator: validate_WcfrelaysListKeys_594369, base: "",
-    url: url_WcfrelaysListKeys_594370, schemes: {Scheme.Https})
+    validator: validate_WcfrelaysListKeys_568602, base: "",
+    url: url_WcfrelaysListKeys_568603, schemes: {Scheme.Https})
 type
-  Call_WcfrelaysRegenerateKeys_594381 = ref object of OpenApiRestCall_593424
-proc url_WcfrelaysRegenerateKeys_594383(protocol: Scheme; host: string; base: string;
+  Call_WcfrelaysRegenerateKeys_568614 = ref object of OpenApiRestCall_567657
+proc url_WcfrelaysRegenerateKeys_568616(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4348,7 +4348,7 @@ proc url_WcfrelaysRegenerateKeys_594383(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WcfrelaysRegenerateKeys_594382(path: JsonNode; query: JsonNode;
+proc validate_WcfrelaysRegenerateKeys_568615(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates the primary or secondary connection strings to the WCF relay.
   ## 
@@ -4368,31 +4368,31 @@ proc validate_WcfrelaysRegenerateKeys_594382(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_594384 = path.getOrDefault("namespaceName")
-  valid_594384 = validateParameter(valid_594384, JString, required = true,
+  var valid_568617 = path.getOrDefault("namespaceName")
+  valid_568617 = validateParameter(valid_568617, JString, required = true,
                                  default = nil)
-  if valid_594384 != nil:
-    section.add "namespaceName", valid_594384
-  var valid_594385 = path.getOrDefault("resourceGroupName")
-  valid_594385 = validateParameter(valid_594385, JString, required = true,
+  if valid_568617 != nil:
+    section.add "namespaceName", valid_568617
+  var valid_568618 = path.getOrDefault("resourceGroupName")
+  valid_568618 = validateParameter(valid_568618, JString, required = true,
                                  default = nil)
-  if valid_594385 != nil:
-    section.add "resourceGroupName", valid_594385
-  var valid_594386 = path.getOrDefault("authorizationRuleName")
-  valid_594386 = validateParameter(valid_594386, JString, required = true,
+  if valid_568618 != nil:
+    section.add "resourceGroupName", valid_568618
+  var valid_568619 = path.getOrDefault("authorizationRuleName")
+  valid_568619 = validateParameter(valid_568619, JString, required = true,
                                  default = nil)
-  if valid_594386 != nil:
-    section.add "authorizationRuleName", valid_594386
-  var valid_594387 = path.getOrDefault("subscriptionId")
-  valid_594387 = validateParameter(valid_594387, JString, required = true,
+  if valid_568619 != nil:
+    section.add "authorizationRuleName", valid_568619
+  var valid_568620 = path.getOrDefault("subscriptionId")
+  valid_568620 = validateParameter(valid_568620, JString, required = true,
                                  default = nil)
-  if valid_594387 != nil:
-    section.add "subscriptionId", valid_594387
-  var valid_594388 = path.getOrDefault("relayName")
-  valid_594388 = validateParameter(valid_594388, JString, required = true,
+  if valid_568620 != nil:
+    section.add "subscriptionId", valid_568620
+  var valid_568621 = path.getOrDefault("relayName")
+  valid_568621 = validateParameter(valid_568621, JString, required = true,
                                  default = nil)
-  if valid_594388 != nil:
-    section.add "relayName", valid_594388
+  if valid_568621 != nil:
+    section.add "relayName", valid_568621
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4400,11 +4400,11 @@ proc validate_WcfrelaysRegenerateKeys_594382(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594389 = query.getOrDefault("api-version")
-  valid_594389 = validateParameter(valid_594389, JString, required = true,
+  var valid_568622 = query.getOrDefault("api-version")
+  valid_568622 = validateParameter(valid_568622, JString, required = true,
                                  default = nil)
-  if valid_594389 != nil:
-    section.add "api-version", valid_594389
+  if valid_568622 != nil:
+    section.add "api-version", valid_568622
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4418,20 +4418,20 @@ proc validate_WcfrelaysRegenerateKeys_594382(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594391: Call_WcfrelaysRegenerateKeys_594381; path: JsonNode;
+proc call*(call_568624: Call_WcfrelaysRegenerateKeys_568614; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerates the primary or secondary connection strings to the WCF relay.
   ## 
-  let valid = call_594391.validator(path, query, header, formData, body)
-  let scheme = call_594391.pickScheme
+  let valid = call_568624.validator(path, query, header, formData, body)
+  let scheme = call_568624.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594391.url(scheme.get, call_594391.host, call_594391.base,
-                         call_594391.route, valid.getOrDefault("path"),
+  let url = call_568624.url(scheme.get, call_568624.host, call_568624.base,
+                         call_568624.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594391, url, valid)
+  result = hook(call_568624, url, valid)
 
-proc call*(call_594392: Call_WcfrelaysRegenerateKeys_594381; namespaceName: string;
+proc call*(call_568625: Call_WcfrelaysRegenerateKeys_568614; namespaceName: string;
           resourceGroupName: string; apiVersion: string;
           authorizationRuleName: string; subscriptionId: string; relayName: string;
           parameters: JsonNode): Recallable =
@@ -4451,24 +4451,24 @@ proc call*(call_594392: Call_WcfrelaysRegenerateKeys_594381; namespaceName: stri
   ##            : The relay name.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to regenerate authorization rule.
-  var path_594393 = newJObject()
-  var query_594394 = newJObject()
-  var body_594395 = newJObject()
-  add(path_594393, "namespaceName", newJString(namespaceName))
-  add(path_594393, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594394, "api-version", newJString(apiVersion))
-  add(path_594393, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_594393, "subscriptionId", newJString(subscriptionId))
-  add(path_594393, "relayName", newJString(relayName))
+  var path_568626 = newJObject()
+  var query_568627 = newJObject()
+  var body_568628 = newJObject()
+  add(path_568626, "namespaceName", newJString(namespaceName))
+  add(path_568626, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568627, "api-version", newJString(apiVersion))
+  add(path_568626, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_568626, "subscriptionId", newJString(subscriptionId))
+  add(path_568626, "relayName", newJString(relayName))
   if parameters != nil:
-    body_594395 = parameters
-  result = call_594392.call(path_594393, query_594394, nil, nil, body_594395)
+    body_568628 = parameters
+  result = call_568625.call(path_568626, query_568627, nil, nil, body_568628)
 
-var wcfrelaysRegenerateKeys* = Call_WcfrelaysRegenerateKeys_594381(
+var wcfrelaysRegenerateKeys* = Call_WcfrelaysRegenerateKeys_568614(
     name: "wcfrelaysRegenerateKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Relay/namespaces/{namespaceName}/wcfRelays/{relayName}/authorizationRules/{authorizationRuleName}/regenerateKeys",
-    validator: validate_WcfrelaysRegenerateKeys_594382, base: "",
-    url: url_WcfrelaysRegenerateKeys_594383, schemes: {Scheme.Https})
+    validator: validate_WcfrelaysRegenerateKeys_568615, base: "",
+    url: url_WcfrelaysRegenerateKeys_568616, schemes: {Scheme.Https})
 export
   rest
 

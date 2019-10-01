@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: DnsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "dns"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ZonesList_593646 = ref object of OpenApiRestCall_593424
-proc url_ZonesList_593648(protocol: Scheme; host: string; base: string; route: string;
+  Call_ZonesList_567879 = ref object of OpenApiRestCall_567657
+proc url_ZonesList_567881(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +120,7 @@ proc url_ZonesList_593648(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ZonesList_593647(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ZonesList_567880(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the DNS zones in all resource groups in a subscription.
   ## 
@@ -132,11 +132,11 @@ proc validate_ZonesList_593647(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593809 = path.getOrDefault("subscriptionId")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_568042 = path.getOrDefault("subscriptionId")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "subscriptionId", valid_593809
+  if valid_568042 != nil:
+    section.add "subscriptionId", valid_568042
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -146,15 +146,15 @@ proc validate_ZonesList_593647(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593810 = query.getOrDefault("api-version")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  var valid_568043 = query.getOrDefault("api-version")
+  valid_568043 = validateParameter(valid_568043, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "api-version", valid_593810
-  var valid_593811 = query.getOrDefault("$top")
-  valid_593811 = validateParameter(valid_593811, JInt, required = false, default = nil)
-  if valid_593811 != nil:
-    section.add "$top", valid_593811
+  if valid_568043 != nil:
+    section.add "api-version", valid_568043
+  var valid_568044 = query.getOrDefault("$top")
+  valid_568044 = validateParameter(valid_568044, JInt, required = false, default = nil)
+  if valid_568044 != nil:
+    section.add "$top", valid_568044
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -163,20 +163,20 @@ proc validate_ZonesList_593647(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593838: Call_ZonesList_593646; path: JsonNode; query: JsonNode;
+proc call*(call_568071: Call_ZonesList_567879; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the DNS zones in all resource groups in a subscription.
   ## 
-  let valid = call_593838.validator(path, query, header, formData, body)
-  let scheme = call_593838.pickScheme
+  let valid = call_568071.validator(path, query, header, formData, body)
+  let scheme = call_568071.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593838.url(scheme.get, call_593838.host, call_593838.base,
-                         call_593838.route, valid.getOrDefault("path"),
+  let url = call_568071.url(scheme.get, call_568071.host, call_568071.base,
+                         call_568071.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593838, url, valid)
+  result = hook(call_568071, url, valid)
 
-proc call*(call_593909: Call_ZonesList_593646; apiVersion: string;
+proc call*(call_568142: Call_ZonesList_567879; apiVersion: string;
           subscriptionId: string; Top: int = 0): Recallable =
   ## zonesList
   ## Lists the DNS zones in all resource groups in a subscription.
@@ -186,21 +186,21 @@ proc call*(call_593909: Call_ZonesList_593646; apiVersion: string;
   ##                 : The ID of the target subscription.
   ##   Top: int
   ##      : The maximum number of DNS zones to return. If not specified, returns up to 100 zones.
-  var path_593910 = newJObject()
-  var query_593912 = newJObject()
-  add(query_593912, "api-version", newJString(apiVersion))
-  add(path_593910, "subscriptionId", newJString(subscriptionId))
-  add(query_593912, "$top", newJInt(Top))
-  result = call_593909.call(path_593910, query_593912, nil, nil, nil)
+  var path_568143 = newJObject()
+  var query_568145 = newJObject()
+  add(query_568145, "api-version", newJString(apiVersion))
+  add(path_568143, "subscriptionId", newJString(subscriptionId))
+  add(query_568145, "$top", newJInt(Top))
+  result = call_568142.call(path_568143, query_568145, nil, nil, nil)
 
-var zonesList* = Call_ZonesList_593646(name: "zonesList", meth: HttpMethod.HttpGet,
+var zonesList* = Call_ZonesList_567879(name: "zonesList", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/dnszones",
-                                    validator: validate_ZonesList_593647,
-                                    base: "", url: url_ZonesList_593648,
+                                    validator: validate_ZonesList_567880,
+                                    base: "", url: url_ZonesList_567881,
                                     schemes: {Scheme.Https})
 type
-  Call_ZonesListByResourceGroup_593951 = ref object of OpenApiRestCall_593424
-proc url_ZonesListByResourceGroup_593953(protocol: Scheme; host: string;
+  Call_ZonesListByResourceGroup_568184 = ref object of OpenApiRestCall_567657
+proc url_ZonesListByResourceGroup_568186(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -221,7 +221,7 @@ proc url_ZonesListByResourceGroup_593953(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ZonesListByResourceGroup_593952(path: JsonNode; query: JsonNode;
+proc validate_ZonesListByResourceGroup_568185(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the DNS zones within a resource group.
   ## 
@@ -235,16 +235,16 @@ proc validate_ZonesListByResourceGroup_593952(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593954 = path.getOrDefault("resourceGroupName")
-  valid_593954 = validateParameter(valid_593954, JString, required = true,
+  var valid_568187 = path.getOrDefault("resourceGroupName")
+  valid_568187 = validateParameter(valid_568187, JString, required = true,
                                  default = nil)
-  if valid_593954 != nil:
-    section.add "resourceGroupName", valid_593954
-  var valid_593955 = path.getOrDefault("subscriptionId")
-  valid_593955 = validateParameter(valid_593955, JString, required = true,
+  if valid_568187 != nil:
+    section.add "resourceGroupName", valid_568187
+  var valid_568188 = path.getOrDefault("subscriptionId")
+  valid_568188 = validateParameter(valid_568188, JString, required = true,
                                  default = nil)
-  if valid_593955 != nil:
-    section.add "subscriptionId", valid_593955
+  if valid_568188 != nil:
+    section.add "subscriptionId", valid_568188
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -254,15 +254,15 @@ proc validate_ZonesListByResourceGroup_593952(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593956 = query.getOrDefault("api-version")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  var valid_568189 = query.getOrDefault("api-version")
+  valid_568189 = validateParameter(valid_568189, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "api-version", valid_593956
-  var valid_593957 = query.getOrDefault("$top")
-  valid_593957 = validateParameter(valid_593957, JInt, required = false, default = nil)
-  if valid_593957 != nil:
-    section.add "$top", valid_593957
+  if valid_568189 != nil:
+    section.add "api-version", valid_568189
+  var valid_568190 = query.getOrDefault("$top")
+  valid_568190 = validateParameter(valid_568190, JInt, required = false, default = nil)
+  if valid_568190 != nil:
+    section.add "$top", valid_568190
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -271,20 +271,20 @@ proc validate_ZonesListByResourceGroup_593952(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593958: Call_ZonesListByResourceGroup_593951; path: JsonNode;
+proc call*(call_568191: Call_ZonesListByResourceGroup_568184; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the DNS zones within a resource group.
   ## 
-  let valid = call_593958.validator(path, query, header, formData, body)
-  let scheme = call_593958.pickScheme
+  let valid = call_568191.validator(path, query, header, formData, body)
+  let scheme = call_568191.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593958.url(scheme.get, call_593958.host, call_593958.base,
-                         call_593958.route, valid.getOrDefault("path"),
+  let url = call_568191.url(scheme.get, call_568191.host, call_568191.base,
+                         call_568191.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593958, url, valid)
+  result = hook(call_568191, url, valid)
 
-proc call*(call_593959: Call_ZonesListByResourceGroup_593951;
+proc call*(call_568192: Call_ZonesListByResourceGroup_568184;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           Top: int = 0): Recallable =
   ## zonesListByResourceGroup
@@ -297,22 +297,22 @@ proc call*(call_593959: Call_ZonesListByResourceGroup_593951;
   ##                 : The ID of the target subscription.
   ##   Top: int
   ##      : The maximum number of record sets to return. If not specified, returns up to 100 record sets.
-  var path_593960 = newJObject()
-  var query_593961 = newJObject()
-  add(path_593960, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593961, "api-version", newJString(apiVersion))
-  add(path_593960, "subscriptionId", newJString(subscriptionId))
-  add(query_593961, "$top", newJInt(Top))
-  result = call_593959.call(path_593960, query_593961, nil, nil, nil)
+  var path_568193 = newJObject()
+  var query_568194 = newJObject()
+  add(path_568193, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568194, "api-version", newJString(apiVersion))
+  add(path_568193, "subscriptionId", newJString(subscriptionId))
+  add(query_568194, "$top", newJInt(Top))
+  result = call_568192.call(path_568193, query_568194, nil, nil, nil)
 
-var zonesListByResourceGroup* = Call_ZonesListByResourceGroup_593951(
+var zonesListByResourceGroup* = Call_ZonesListByResourceGroup_568184(
     name: "zonesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones",
-    validator: validate_ZonesListByResourceGroup_593952, base: "",
-    url: url_ZonesListByResourceGroup_593953, schemes: {Scheme.Https})
+    validator: validate_ZonesListByResourceGroup_568185, base: "",
+    url: url_ZonesListByResourceGroup_568186, schemes: {Scheme.Https})
 type
-  Call_ZonesCreateOrUpdate_593973 = ref object of OpenApiRestCall_593424
-proc url_ZonesCreateOrUpdate_593975(protocol: Scheme; host: string; base: string;
+  Call_ZonesCreateOrUpdate_568206 = ref object of OpenApiRestCall_567657
+proc url_ZonesCreateOrUpdate_568208(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -334,7 +334,7 @@ proc url_ZonesCreateOrUpdate_593975(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ZonesCreateOrUpdate_593974(path: JsonNode; query: JsonNode;
+proc validate_ZonesCreateOrUpdate_568207(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Creates or updates a DNS zone. Does not modify DNS records within the zone.
@@ -351,21 +351,21 @@ proc validate_ZonesCreateOrUpdate_593974(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594002 = path.getOrDefault("resourceGroupName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_568235 = path.getOrDefault("resourceGroupName")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "resourceGroupName", valid_594002
-  var valid_594003 = path.getOrDefault("subscriptionId")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_568235 != nil:
+    section.add "resourceGroupName", valid_568235
+  var valid_568236 = path.getOrDefault("subscriptionId")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "subscriptionId", valid_594003
-  var valid_594004 = path.getOrDefault("zoneName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  if valid_568236 != nil:
+    section.add "subscriptionId", valid_568236
+  var valid_568237 = path.getOrDefault("zoneName")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "zoneName", valid_594004
+  if valid_568237 != nil:
+    section.add "zoneName", valid_568237
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -373,11 +373,11 @@ proc validate_ZonesCreateOrUpdate_593974(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594005 = query.getOrDefault("api-version")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_568238 = query.getOrDefault("api-version")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "api-version", valid_594005
+  if valid_568238 != nil:
+    section.add "api-version", valid_568238
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
@@ -385,16 +385,16 @@ proc validate_ZonesCreateOrUpdate_593974(path: JsonNode; query: JsonNode;
   ##   If-None-Match: JString
   ##                : Set to '*' to allow a new DNS zone to be created, but to prevent updating an existing zone. Other values will be ignored.
   section = newJObject()
-  var valid_594006 = header.getOrDefault("If-Match")
-  valid_594006 = validateParameter(valid_594006, JString, required = false,
+  var valid_568239 = header.getOrDefault("If-Match")
+  valid_568239 = validateParameter(valid_568239, JString, required = false,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "If-Match", valid_594006
-  var valid_594007 = header.getOrDefault("If-None-Match")
-  valid_594007 = validateParameter(valid_594007, JString, required = false,
+  if valid_568239 != nil:
+    section.add "If-Match", valid_568239
+  var valid_568240 = header.getOrDefault("If-None-Match")
+  valid_568240 = validateParameter(valid_568240, JString, required = false,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "If-None-Match", valid_594007
+  if valid_568240 != nil:
+    section.add "If-None-Match", valid_568240
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -406,20 +406,20 @@ proc validate_ZonesCreateOrUpdate_593974(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594009: Call_ZonesCreateOrUpdate_593973; path: JsonNode;
+proc call*(call_568242: Call_ZonesCreateOrUpdate_568206; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a DNS zone. Does not modify DNS records within the zone.
   ## 
-  let valid = call_594009.validator(path, query, header, formData, body)
-  let scheme = call_594009.pickScheme
+  let valid = call_568242.validator(path, query, header, formData, body)
+  let scheme = call_568242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594009.url(scheme.get, call_594009.host, call_594009.base,
-                         call_594009.route, valid.getOrDefault("path"),
+  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
+                         call_568242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594009, url, valid)
+  result = hook(call_568242, url, valid)
 
-proc call*(call_594010: Call_ZonesCreateOrUpdate_593973; resourceGroupName: string;
+proc call*(call_568243: Call_ZonesCreateOrUpdate_568206; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; zoneName: string;
           parameters: JsonNode): Recallable =
   ## zonesCreateOrUpdate
@@ -434,25 +434,25 @@ proc call*(call_594010: Call_ZonesCreateOrUpdate_593973; resourceGroupName: stri
   ##           : The name of the DNS zone (without a terminating dot).
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the CreateOrUpdate operation.
-  var path_594011 = newJObject()
-  var query_594012 = newJObject()
-  var body_594013 = newJObject()
-  add(path_594011, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594012, "api-version", newJString(apiVersion))
-  add(path_594011, "subscriptionId", newJString(subscriptionId))
-  add(path_594011, "zoneName", newJString(zoneName))
+  var path_568244 = newJObject()
+  var query_568245 = newJObject()
+  var body_568246 = newJObject()
+  add(path_568244, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568245, "api-version", newJString(apiVersion))
+  add(path_568244, "subscriptionId", newJString(subscriptionId))
+  add(path_568244, "zoneName", newJString(zoneName))
   if parameters != nil:
-    body_594013 = parameters
-  result = call_594010.call(path_594011, query_594012, nil, nil, body_594013)
+    body_568246 = parameters
+  result = call_568243.call(path_568244, query_568245, nil, nil, body_568246)
 
-var zonesCreateOrUpdate* = Call_ZonesCreateOrUpdate_593973(
+var zonesCreateOrUpdate* = Call_ZonesCreateOrUpdate_568206(
     name: "zonesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}",
-    validator: validate_ZonesCreateOrUpdate_593974, base: "",
-    url: url_ZonesCreateOrUpdate_593975, schemes: {Scheme.Https})
+    validator: validate_ZonesCreateOrUpdate_568207, base: "",
+    url: url_ZonesCreateOrUpdate_568208, schemes: {Scheme.Https})
 type
-  Call_ZonesGet_593962 = ref object of OpenApiRestCall_593424
-proc url_ZonesGet_593964(protocol: Scheme; host: string; base: string; route: string;
+  Call_ZonesGet_568195 = ref object of OpenApiRestCall_567657
+proc url_ZonesGet_568197(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -474,7 +474,7 @@ proc url_ZonesGet_593964(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ZonesGet_593963(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ZonesGet_568196(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a DNS zone. Retrieves the zone properties, but not the record sets within the zone.
   ## 
@@ -490,21 +490,21 @@ proc validate_ZonesGet_593963(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593965 = path.getOrDefault("resourceGroupName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_568198 = path.getOrDefault("resourceGroupName")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "resourceGroupName", valid_593965
-  var valid_593966 = path.getOrDefault("subscriptionId")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_568198 != nil:
+    section.add "resourceGroupName", valid_568198
+  var valid_568199 = path.getOrDefault("subscriptionId")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "subscriptionId", valid_593966
-  var valid_593967 = path.getOrDefault("zoneName")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_568199 != nil:
+    section.add "subscriptionId", valid_568199
+  var valid_568200 = path.getOrDefault("zoneName")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "zoneName", valid_593967
+  if valid_568200 != nil:
+    section.add "zoneName", valid_568200
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -512,11 +512,11 @@ proc validate_ZonesGet_593963(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593968 = query.getOrDefault("api-version")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  var valid_568201 = query.getOrDefault("api-version")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "api-version", valid_593968
+  if valid_568201 != nil:
+    section.add "api-version", valid_568201
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -525,20 +525,20 @@ proc validate_ZonesGet_593963(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593969: Call_ZonesGet_593962; path: JsonNode; query: JsonNode;
+proc call*(call_568202: Call_ZonesGet_568195; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a DNS zone. Retrieves the zone properties, but not the record sets within the zone.
   ## 
-  let valid = call_593969.validator(path, query, header, formData, body)
-  let scheme = call_593969.pickScheme
+  let valid = call_568202.validator(path, query, header, formData, body)
+  let scheme = call_568202.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593969.url(scheme.get, call_593969.host, call_593969.base,
-                         call_593969.route, valid.getOrDefault("path"),
+  let url = call_568202.url(scheme.get, call_568202.host, call_568202.base,
+                         call_568202.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593969, url, valid)
+  result = hook(call_568202, url, valid)
 
-proc call*(call_593970: Call_ZonesGet_593962; resourceGroupName: string;
+proc call*(call_568203: Call_ZonesGet_568195; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; zoneName: string): Recallable =
   ## zonesGet
   ## Gets a DNS zone. Retrieves the zone properties, but not the record sets within the zone.
@@ -550,22 +550,22 @@ proc call*(call_593970: Call_ZonesGet_593962; resourceGroupName: string;
   ##                 : The ID of the target subscription.
   ##   zoneName: string (required)
   ##           : The name of the DNS zone (without a terminating dot).
-  var path_593971 = newJObject()
-  var query_593972 = newJObject()
-  add(path_593971, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593972, "api-version", newJString(apiVersion))
-  add(path_593971, "subscriptionId", newJString(subscriptionId))
-  add(path_593971, "zoneName", newJString(zoneName))
-  result = call_593970.call(path_593971, query_593972, nil, nil, nil)
+  var path_568204 = newJObject()
+  var query_568205 = newJObject()
+  add(path_568204, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568205, "api-version", newJString(apiVersion))
+  add(path_568204, "subscriptionId", newJString(subscriptionId))
+  add(path_568204, "zoneName", newJString(zoneName))
+  result = call_568203.call(path_568204, query_568205, nil, nil, nil)
 
-var zonesGet* = Call_ZonesGet_593962(name: "zonesGet", meth: HttpMethod.HttpGet,
+var zonesGet* = Call_ZonesGet_568195(name: "zonesGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}",
-                                  validator: validate_ZonesGet_593963, base: "",
-                                  url: url_ZonesGet_593964,
+                                  validator: validate_ZonesGet_568196, base: "",
+                                  url: url_ZonesGet_568197,
                                   schemes: {Scheme.Https})
 type
-  Call_ZonesDelete_594014 = ref object of OpenApiRestCall_593424
-proc url_ZonesDelete_594016(protocol: Scheme; host: string; base: string;
+  Call_ZonesDelete_568247 = ref object of OpenApiRestCall_567657
+proc url_ZonesDelete_568249(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -587,7 +587,7 @@ proc url_ZonesDelete_594016(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ZonesDelete_594015(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ZonesDelete_568248(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a DNS zone. WARNING: All DNS records in the zone will also be deleted. This operation cannot be undone.
   ## 
@@ -603,21 +603,21 @@ proc validate_ZonesDelete_594015(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594017 = path.getOrDefault("resourceGroupName")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  var valid_568250 = path.getOrDefault("resourceGroupName")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "resourceGroupName", valid_594017
-  var valid_594018 = path.getOrDefault("subscriptionId")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  if valid_568250 != nil:
+    section.add "resourceGroupName", valid_568250
+  var valid_568251 = path.getOrDefault("subscriptionId")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "subscriptionId", valid_594018
-  var valid_594019 = path.getOrDefault("zoneName")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  if valid_568251 != nil:
+    section.add "subscriptionId", valid_568251
+  var valid_568252 = path.getOrDefault("zoneName")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "zoneName", valid_594019
+  if valid_568252 != nil:
+    section.add "zoneName", valid_568252
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -625,41 +625,41 @@ proc validate_ZonesDelete_594015(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594020 = query.getOrDefault("api-version")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  var valid_568253 = query.getOrDefault("api-version")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "api-version", valid_594020
+  if valid_568253 != nil:
+    section.add "api-version", valid_568253
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : The etag of the DNS zone. Omit this value to always delete the current zone. Specify the last-seen etag value to prevent accidentally deleting any concurrent changes.
   section = newJObject()
-  var valid_594021 = header.getOrDefault("If-Match")
-  valid_594021 = validateParameter(valid_594021, JString, required = false,
+  var valid_568254 = header.getOrDefault("If-Match")
+  valid_568254 = validateParameter(valid_568254, JString, required = false,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "If-Match", valid_594021
+  if valid_568254 != nil:
+    section.add "If-Match", valid_568254
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594022: Call_ZonesDelete_594014; path: JsonNode; query: JsonNode;
+proc call*(call_568255: Call_ZonesDelete_568247; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a DNS zone. WARNING: All DNS records in the zone will also be deleted. This operation cannot be undone.
   ## 
-  let valid = call_594022.validator(path, query, header, formData, body)
-  let scheme = call_594022.pickScheme
+  let valid = call_568255.validator(path, query, header, formData, body)
+  let scheme = call_568255.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594022.url(scheme.get, call_594022.host, call_594022.base,
-                         call_594022.route, valid.getOrDefault("path"),
+  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
+                         call_568255.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594022, url, valid)
+  result = hook(call_568255, url, valid)
 
-proc call*(call_594023: Call_ZonesDelete_594014; resourceGroupName: string;
+proc call*(call_568256: Call_ZonesDelete_568247; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; zoneName: string): Recallable =
   ## zonesDelete
   ## Deletes a DNS zone. WARNING: All DNS records in the zone will also be deleted. This operation cannot be undone.
@@ -671,23 +671,23 @@ proc call*(call_594023: Call_ZonesDelete_594014; resourceGroupName: string;
   ##                 : The ID of the target subscription.
   ##   zoneName: string (required)
   ##           : The name of the DNS zone (without a terminating dot).
-  var path_594024 = newJObject()
-  var query_594025 = newJObject()
-  add(path_594024, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594025, "api-version", newJString(apiVersion))
-  add(path_594024, "subscriptionId", newJString(subscriptionId))
-  add(path_594024, "zoneName", newJString(zoneName))
-  result = call_594023.call(path_594024, query_594025, nil, nil, nil)
+  var path_568257 = newJObject()
+  var query_568258 = newJObject()
+  add(path_568257, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568258, "api-version", newJString(apiVersion))
+  add(path_568257, "subscriptionId", newJString(subscriptionId))
+  add(path_568257, "zoneName", newJString(zoneName))
+  result = call_568256.call(path_568257, query_568258, nil, nil, nil)
 
-var zonesDelete* = Call_ZonesDelete_594014(name: "zonesDelete",
+var zonesDelete* = Call_ZonesDelete_568247(name: "zonesDelete",
                                         meth: HttpMethod.HttpDelete,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}",
-                                        validator: validate_ZonesDelete_594015,
-                                        base: "", url: url_ZonesDelete_594016,
+                                        validator: validate_ZonesDelete_568248,
+                                        base: "", url: url_ZonesDelete_568249,
                                         schemes: {Scheme.Https})
 type
-  Call_RecordSetsListByDnsZone_594026 = ref object of OpenApiRestCall_593424
-proc url_RecordSetsListByDnsZone_594028(protocol: Scheme; host: string; base: string;
+  Call_RecordSetsListByDnsZone_568259 = ref object of OpenApiRestCall_567657
+proc url_RecordSetsListByDnsZone_568261(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -711,7 +711,7 @@ proc url_RecordSetsListByDnsZone_594028(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecordSetsListByDnsZone_594027(path: JsonNode; query: JsonNode;
+proc validate_RecordSetsListByDnsZone_568260(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all record sets in a DNS zone.
   ## 
@@ -727,21 +727,21 @@ proc validate_RecordSetsListByDnsZone_594027(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594029 = path.getOrDefault("resourceGroupName")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_568262 = path.getOrDefault("resourceGroupName")
+  valid_568262 = validateParameter(valid_568262, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "resourceGroupName", valid_594029
-  var valid_594030 = path.getOrDefault("subscriptionId")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  if valid_568262 != nil:
+    section.add "resourceGroupName", valid_568262
+  var valid_568263 = path.getOrDefault("subscriptionId")
+  valid_568263 = validateParameter(valid_568263, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "subscriptionId", valid_594030
-  var valid_594031 = path.getOrDefault("zoneName")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  if valid_568263 != nil:
+    section.add "subscriptionId", valid_568263
+  var valid_568264 = path.getOrDefault("zoneName")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "zoneName", valid_594031
+  if valid_568264 != nil:
+    section.add "zoneName", valid_568264
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -753,20 +753,20 @@ proc validate_RecordSetsListByDnsZone_594027(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594032 = query.getOrDefault("api-version")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  var valid_568265 = query.getOrDefault("api-version")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "api-version", valid_594032
-  var valid_594033 = query.getOrDefault("$recordsetnamesuffix")
-  valid_594033 = validateParameter(valid_594033, JString, required = false,
+  if valid_568265 != nil:
+    section.add "api-version", valid_568265
+  var valid_568266 = query.getOrDefault("$recordsetnamesuffix")
+  valid_568266 = validateParameter(valid_568266, JString, required = false,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "$recordsetnamesuffix", valid_594033
-  var valid_594034 = query.getOrDefault("$top")
-  valid_594034 = validateParameter(valid_594034, JInt, required = false, default = nil)
-  if valid_594034 != nil:
-    section.add "$top", valid_594034
+  if valid_568266 != nil:
+    section.add "$recordsetnamesuffix", valid_568266
+  var valid_568267 = query.getOrDefault("$top")
+  valid_568267 = validateParameter(valid_568267, JInt, required = false, default = nil)
+  if valid_568267 != nil:
+    section.add "$top", valid_568267
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -775,20 +775,20 @@ proc validate_RecordSetsListByDnsZone_594027(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594035: Call_RecordSetsListByDnsZone_594026; path: JsonNode;
+proc call*(call_568268: Call_RecordSetsListByDnsZone_568259; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all record sets in a DNS zone.
   ## 
-  let valid = call_594035.validator(path, query, header, formData, body)
-  let scheme = call_594035.pickScheme
+  let valid = call_568268.validator(path, query, header, formData, body)
+  let scheme = call_568268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594035.url(scheme.get, call_594035.host, call_594035.base,
-                         call_594035.route, valid.getOrDefault("path"),
+  let url = call_568268.url(scheme.get, call_568268.host, call_568268.base,
+                         call_568268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594035, url, valid)
+  result = hook(call_568268, url, valid)
 
-proc call*(call_594036: Call_RecordSetsListByDnsZone_594026;
+proc call*(call_568269: Call_RecordSetsListByDnsZone_568259;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           zoneName: string; Recordsetnamesuffix: string = ""; Top: int = 0): Recallable =
   ## recordSetsListByDnsZone
@@ -805,24 +805,24 @@ proc call*(call_594036: Call_RecordSetsListByDnsZone_594026;
   ##      : The maximum number of record sets to return. If not specified, returns up to 100 record sets.
   ##   zoneName: string (required)
   ##           : The name of the DNS zone (without a terminating dot).
-  var path_594037 = newJObject()
-  var query_594038 = newJObject()
-  add(path_594037, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594038, "api-version", newJString(apiVersion))
-  add(path_594037, "subscriptionId", newJString(subscriptionId))
-  add(query_594038, "$recordsetnamesuffix", newJString(Recordsetnamesuffix))
-  add(query_594038, "$top", newJInt(Top))
-  add(path_594037, "zoneName", newJString(zoneName))
-  result = call_594036.call(path_594037, query_594038, nil, nil, nil)
+  var path_568270 = newJObject()
+  var query_568271 = newJObject()
+  add(path_568270, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568271, "api-version", newJString(apiVersion))
+  add(path_568270, "subscriptionId", newJString(subscriptionId))
+  add(query_568271, "$recordsetnamesuffix", newJString(Recordsetnamesuffix))
+  add(query_568271, "$top", newJInt(Top))
+  add(path_568270, "zoneName", newJString(zoneName))
+  result = call_568269.call(path_568270, query_568271, nil, nil, nil)
 
-var recordSetsListByDnsZone* = Call_RecordSetsListByDnsZone_594026(
+var recordSetsListByDnsZone* = Call_RecordSetsListByDnsZone_568259(
     name: "recordSetsListByDnsZone", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}/recordsets",
-    validator: validate_RecordSetsListByDnsZone_594027, base: "",
-    url: url_RecordSetsListByDnsZone_594028, schemes: {Scheme.Https})
+    validator: validate_RecordSetsListByDnsZone_568260, base: "",
+    url: url_RecordSetsListByDnsZone_568261, schemes: {Scheme.Https})
 type
-  Call_RecordSetsListByType_594039 = ref object of OpenApiRestCall_593424
-proc url_RecordSetsListByType_594041(protocol: Scheme; host: string; base: string;
+  Call_RecordSetsListByType_568272 = ref object of OpenApiRestCall_567657
+proc url_RecordSetsListByType_568274(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -847,7 +847,7 @@ proc url_RecordSetsListByType_594041(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecordSetsListByType_594040(path: JsonNode; query: JsonNode;
+proc validate_RecordSetsListByType_568273(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the record sets of a specified type in a DNS zone.
   ## 
@@ -865,26 +865,26 @@ proc validate_RecordSetsListByType_594040(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594042 = path.getOrDefault("resourceGroupName")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  var valid_568275 = path.getOrDefault("resourceGroupName")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "resourceGroupName", valid_594042
-  var valid_594056 = path.getOrDefault("recordType")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  if valid_568275 != nil:
+    section.add "resourceGroupName", valid_568275
+  var valid_568289 = path.getOrDefault("recordType")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = newJString("A"))
-  if valid_594056 != nil:
-    section.add "recordType", valid_594056
-  var valid_594057 = path.getOrDefault("subscriptionId")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  if valid_568289 != nil:
+    section.add "recordType", valid_568289
+  var valid_568290 = path.getOrDefault("subscriptionId")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "subscriptionId", valid_594057
-  var valid_594058 = path.getOrDefault("zoneName")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  if valid_568290 != nil:
+    section.add "subscriptionId", valid_568290
+  var valid_568291 = path.getOrDefault("zoneName")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "zoneName", valid_594058
+  if valid_568291 != nil:
+    section.add "zoneName", valid_568291
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -896,20 +896,20 @@ proc validate_RecordSetsListByType_594040(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594059 = query.getOrDefault("api-version")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  var valid_568292 = query.getOrDefault("api-version")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "api-version", valid_594059
-  var valid_594060 = query.getOrDefault("$recordsetnamesuffix")
-  valid_594060 = validateParameter(valid_594060, JString, required = false,
+  if valid_568292 != nil:
+    section.add "api-version", valid_568292
+  var valid_568293 = query.getOrDefault("$recordsetnamesuffix")
+  valid_568293 = validateParameter(valid_568293, JString, required = false,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "$recordsetnamesuffix", valid_594060
-  var valid_594061 = query.getOrDefault("$top")
-  valid_594061 = validateParameter(valid_594061, JInt, required = false, default = nil)
-  if valid_594061 != nil:
-    section.add "$top", valid_594061
+  if valid_568293 != nil:
+    section.add "$recordsetnamesuffix", valid_568293
+  var valid_568294 = query.getOrDefault("$top")
+  valid_568294 = validateParameter(valid_568294, JInt, required = false, default = nil)
+  if valid_568294 != nil:
+    section.add "$top", valid_568294
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -918,20 +918,20 @@ proc validate_RecordSetsListByType_594040(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594062: Call_RecordSetsListByType_594039; path: JsonNode;
+proc call*(call_568295: Call_RecordSetsListByType_568272; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the record sets of a specified type in a DNS zone.
   ## 
-  let valid = call_594062.validator(path, query, header, formData, body)
-  let scheme = call_594062.pickScheme
+  let valid = call_568295.validator(path, query, header, formData, body)
+  let scheme = call_568295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594062.url(scheme.get, call_594062.host, call_594062.base,
-                         call_594062.route, valid.getOrDefault("path"),
+  let url = call_568295.url(scheme.get, call_568295.host, call_568295.base,
+                         call_568295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594062, url, valid)
+  result = hook(call_568295, url, valid)
 
-proc call*(call_594063: Call_RecordSetsListByType_594039;
+proc call*(call_568296: Call_RecordSetsListByType_568272;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           zoneName: string; recordType: string = "A";
           Recordsetnamesuffix: string = ""; Top: int = 0): Recallable =
@@ -951,25 +951,25 @@ proc call*(call_594063: Call_RecordSetsListByType_594039;
   ##      : The maximum number of record sets to return. If not specified, returns up to 100 record sets.
   ##   zoneName: string (required)
   ##           : The name of the DNS zone (without a terminating dot).
-  var path_594064 = newJObject()
-  var query_594065 = newJObject()
-  add(path_594064, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594065, "api-version", newJString(apiVersion))
-  add(path_594064, "recordType", newJString(recordType))
-  add(path_594064, "subscriptionId", newJString(subscriptionId))
-  add(query_594065, "$recordsetnamesuffix", newJString(Recordsetnamesuffix))
-  add(query_594065, "$top", newJInt(Top))
-  add(path_594064, "zoneName", newJString(zoneName))
-  result = call_594063.call(path_594064, query_594065, nil, nil, nil)
+  var path_568297 = newJObject()
+  var query_568298 = newJObject()
+  add(path_568297, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568298, "api-version", newJString(apiVersion))
+  add(path_568297, "recordType", newJString(recordType))
+  add(path_568297, "subscriptionId", newJString(subscriptionId))
+  add(query_568298, "$recordsetnamesuffix", newJString(Recordsetnamesuffix))
+  add(query_568298, "$top", newJInt(Top))
+  add(path_568297, "zoneName", newJString(zoneName))
+  result = call_568296.call(path_568297, query_568298, nil, nil, nil)
 
-var recordSetsListByType* = Call_RecordSetsListByType_594039(
+var recordSetsListByType* = Call_RecordSetsListByType_568272(
     name: "recordSetsListByType", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}/{recordType}",
-    validator: validate_RecordSetsListByType_594040, base: "",
-    url: url_RecordSetsListByType_594041, schemes: {Scheme.Https})
+    validator: validate_RecordSetsListByType_568273, base: "",
+    url: url_RecordSetsListByType_568274, schemes: {Scheme.Https})
 type
-  Call_RecordSetsCreateOrUpdate_594079 = ref object of OpenApiRestCall_593424
-proc url_RecordSetsCreateOrUpdate_594081(protocol: Scheme; host: string;
+  Call_RecordSetsCreateOrUpdate_568312 = ref object of OpenApiRestCall_567657
+proc url_RecordSetsCreateOrUpdate_568314(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -999,7 +999,7 @@ proc url_RecordSetsCreateOrUpdate_594081(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecordSetsCreateOrUpdate_594080(path: JsonNode; query: JsonNode;
+proc validate_RecordSetsCreateOrUpdate_568313(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a record set within a DNS zone.
   ## 
@@ -1019,31 +1019,31 @@ proc validate_RecordSetsCreateOrUpdate_594080(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594082 = path.getOrDefault("resourceGroupName")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  var valid_568315 = path.getOrDefault("resourceGroupName")
+  valid_568315 = validateParameter(valid_568315, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "resourceGroupName", valid_594082
-  var valid_594083 = path.getOrDefault("recordType")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
+  if valid_568315 != nil:
+    section.add "resourceGroupName", valid_568315
+  var valid_568316 = path.getOrDefault("recordType")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = newJString("A"))
-  if valid_594083 != nil:
-    section.add "recordType", valid_594083
-  var valid_594084 = path.getOrDefault("subscriptionId")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  if valid_568316 != nil:
+    section.add "recordType", valid_568316
+  var valid_568317 = path.getOrDefault("subscriptionId")
+  valid_568317 = validateParameter(valid_568317, JString, required = true,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "subscriptionId", valid_594084
-  var valid_594085 = path.getOrDefault("zoneName")
-  valid_594085 = validateParameter(valid_594085, JString, required = true,
+  if valid_568317 != nil:
+    section.add "subscriptionId", valid_568317
+  var valid_568318 = path.getOrDefault("zoneName")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594085 != nil:
-    section.add "zoneName", valid_594085
-  var valid_594086 = path.getOrDefault("relativeRecordSetName")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  if valid_568318 != nil:
+    section.add "zoneName", valid_568318
+  var valid_568319 = path.getOrDefault("relativeRecordSetName")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "relativeRecordSetName", valid_594086
+  if valid_568319 != nil:
+    section.add "relativeRecordSetName", valid_568319
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1051,11 +1051,11 @@ proc validate_RecordSetsCreateOrUpdate_594080(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594087 = query.getOrDefault("api-version")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  var valid_568320 = query.getOrDefault("api-version")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "api-version", valid_594087
+  if valid_568320 != nil:
+    section.add "api-version", valid_568320
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
@@ -1063,16 +1063,16 @@ proc validate_RecordSetsCreateOrUpdate_594080(path: JsonNode; query: JsonNode;
   ##   If-None-Match: JString
   ##                : Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will be ignored.
   section = newJObject()
-  var valid_594088 = header.getOrDefault("If-Match")
-  valid_594088 = validateParameter(valid_594088, JString, required = false,
+  var valid_568321 = header.getOrDefault("If-Match")
+  valid_568321 = validateParameter(valid_568321, JString, required = false,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "If-Match", valid_594088
-  var valid_594089 = header.getOrDefault("If-None-Match")
-  valid_594089 = validateParameter(valid_594089, JString, required = false,
+  if valid_568321 != nil:
+    section.add "If-Match", valid_568321
+  var valid_568322 = header.getOrDefault("If-None-Match")
+  valid_568322 = validateParameter(valid_568322, JString, required = false,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "If-None-Match", valid_594089
+  if valid_568322 != nil:
+    section.add "If-None-Match", valid_568322
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1084,20 +1084,20 @@ proc validate_RecordSetsCreateOrUpdate_594080(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594091: Call_RecordSetsCreateOrUpdate_594079; path: JsonNode;
+proc call*(call_568324: Call_RecordSetsCreateOrUpdate_568312; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a record set within a DNS zone.
   ## 
-  let valid = call_594091.validator(path, query, header, formData, body)
-  let scheme = call_594091.pickScheme
+  let valid = call_568324.validator(path, query, header, formData, body)
+  let scheme = call_568324.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594091.url(scheme.get, call_594091.host, call_594091.base,
-                         call_594091.route, valid.getOrDefault("path"),
+  let url = call_568324.url(scheme.get, call_568324.host, call_568324.base,
+                         call_568324.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594091, url, valid)
+  result = hook(call_568324, url, valid)
 
-proc call*(call_594092: Call_RecordSetsCreateOrUpdate_594079;
+proc call*(call_568325: Call_RecordSetsCreateOrUpdate_568312;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           zoneName: string; parameters: JsonNode; relativeRecordSetName: string;
           recordType: string = "A"): Recallable =
@@ -1117,27 +1117,27 @@ proc call*(call_594092: Call_RecordSetsCreateOrUpdate_594079;
   ##             : Parameters supplied to the CreateOrUpdate operation.
   ##   relativeRecordSetName: string (required)
   ##                        : The name of the record set, relative to the name of the zone.
-  var path_594093 = newJObject()
-  var query_594094 = newJObject()
-  var body_594095 = newJObject()
-  add(path_594093, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594094, "api-version", newJString(apiVersion))
-  add(path_594093, "recordType", newJString(recordType))
-  add(path_594093, "subscriptionId", newJString(subscriptionId))
-  add(path_594093, "zoneName", newJString(zoneName))
+  var path_568326 = newJObject()
+  var query_568327 = newJObject()
+  var body_568328 = newJObject()
+  add(path_568326, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568327, "api-version", newJString(apiVersion))
+  add(path_568326, "recordType", newJString(recordType))
+  add(path_568326, "subscriptionId", newJString(subscriptionId))
+  add(path_568326, "zoneName", newJString(zoneName))
   if parameters != nil:
-    body_594095 = parameters
-  add(path_594093, "relativeRecordSetName", newJString(relativeRecordSetName))
-  result = call_594092.call(path_594093, query_594094, nil, nil, body_594095)
+    body_568328 = parameters
+  add(path_568326, "relativeRecordSetName", newJString(relativeRecordSetName))
+  result = call_568325.call(path_568326, query_568327, nil, nil, body_568328)
 
-var recordSetsCreateOrUpdate* = Call_RecordSetsCreateOrUpdate_594079(
+var recordSetsCreateOrUpdate* = Call_RecordSetsCreateOrUpdate_568312(
     name: "recordSetsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}/{recordType}/{relativeRecordSetName}",
-    validator: validate_RecordSetsCreateOrUpdate_594080, base: "",
-    url: url_RecordSetsCreateOrUpdate_594081, schemes: {Scheme.Https})
+    validator: validate_RecordSetsCreateOrUpdate_568313, base: "",
+    url: url_RecordSetsCreateOrUpdate_568314, schemes: {Scheme.Https})
 type
-  Call_RecordSetsGet_594066 = ref object of OpenApiRestCall_593424
-proc url_RecordSetsGet_594068(protocol: Scheme; host: string; base: string;
+  Call_RecordSetsGet_568299 = ref object of OpenApiRestCall_567657
+proc url_RecordSetsGet_568301(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1166,7 +1166,7 @@ proc url_RecordSetsGet_594068(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecordSetsGet_594067(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RecordSetsGet_568300(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a record set.
   ## 
@@ -1186,31 +1186,31 @@ proc validate_RecordSetsGet_594067(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594069 = path.getOrDefault("resourceGroupName")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  var valid_568302 = path.getOrDefault("resourceGroupName")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "resourceGroupName", valid_594069
-  var valid_594070 = path.getOrDefault("recordType")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  if valid_568302 != nil:
+    section.add "resourceGroupName", valid_568302
+  var valid_568303 = path.getOrDefault("recordType")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = newJString("A"))
-  if valid_594070 != nil:
-    section.add "recordType", valid_594070
-  var valid_594071 = path.getOrDefault("subscriptionId")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  if valid_568303 != nil:
+    section.add "recordType", valid_568303
+  var valid_568304 = path.getOrDefault("subscriptionId")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "subscriptionId", valid_594071
-  var valid_594072 = path.getOrDefault("zoneName")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  if valid_568304 != nil:
+    section.add "subscriptionId", valid_568304
+  var valid_568305 = path.getOrDefault("zoneName")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "zoneName", valid_594072
-  var valid_594073 = path.getOrDefault("relativeRecordSetName")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  if valid_568305 != nil:
+    section.add "zoneName", valid_568305
+  var valid_568306 = path.getOrDefault("relativeRecordSetName")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "relativeRecordSetName", valid_594073
+  if valid_568306 != nil:
+    section.add "relativeRecordSetName", valid_568306
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1218,11 +1218,11 @@ proc validate_RecordSetsGet_594067(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594074 = query.getOrDefault("api-version")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  var valid_568307 = query.getOrDefault("api-version")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "api-version", valid_594074
+  if valid_568307 != nil:
+    section.add "api-version", valid_568307
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1231,20 +1231,20 @@ proc validate_RecordSetsGet_594067(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594075: Call_RecordSetsGet_594066; path: JsonNode; query: JsonNode;
+proc call*(call_568308: Call_RecordSetsGet_568299; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a record set.
   ## 
-  let valid = call_594075.validator(path, query, header, formData, body)
-  let scheme = call_594075.pickScheme
+  let valid = call_568308.validator(path, query, header, formData, body)
+  let scheme = call_568308.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594075.url(scheme.get, call_594075.host, call_594075.base,
-                         call_594075.route, valid.getOrDefault("path"),
+  let url = call_568308.url(scheme.get, call_568308.host, call_568308.base,
+                         call_568308.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594075, url, valid)
+  result = hook(call_568308, url, valid)
 
-proc call*(call_594076: Call_RecordSetsGet_594066; resourceGroupName: string;
+proc call*(call_568309: Call_RecordSetsGet_568299; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; zoneName: string;
           relativeRecordSetName: string; recordType: string = "A"): Recallable =
   ## recordSetsGet
@@ -1261,23 +1261,23 @@ proc call*(call_594076: Call_RecordSetsGet_594066; resourceGroupName: string;
   ##           : The name of the DNS zone (without a terminating dot).
   ##   relativeRecordSetName: string (required)
   ##                        : The name of the record set, relative to the name of the zone.
-  var path_594077 = newJObject()
-  var query_594078 = newJObject()
-  add(path_594077, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594078, "api-version", newJString(apiVersion))
-  add(path_594077, "recordType", newJString(recordType))
-  add(path_594077, "subscriptionId", newJString(subscriptionId))
-  add(path_594077, "zoneName", newJString(zoneName))
-  add(path_594077, "relativeRecordSetName", newJString(relativeRecordSetName))
-  result = call_594076.call(path_594077, query_594078, nil, nil, nil)
+  var path_568310 = newJObject()
+  var query_568311 = newJObject()
+  add(path_568310, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568311, "api-version", newJString(apiVersion))
+  add(path_568310, "recordType", newJString(recordType))
+  add(path_568310, "subscriptionId", newJString(subscriptionId))
+  add(path_568310, "zoneName", newJString(zoneName))
+  add(path_568310, "relativeRecordSetName", newJString(relativeRecordSetName))
+  result = call_568309.call(path_568310, query_568311, nil, nil, nil)
 
-var recordSetsGet* = Call_RecordSetsGet_594066(name: "recordSetsGet",
+var recordSetsGet* = Call_RecordSetsGet_568299(name: "recordSetsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}/{recordType}/{relativeRecordSetName}",
-    validator: validate_RecordSetsGet_594067, base: "", url: url_RecordSetsGet_594068,
+    validator: validate_RecordSetsGet_568300, base: "", url: url_RecordSetsGet_568301,
     schemes: {Scheme.Https})
 type
-  Call_RecordSetsUpdate_594110 = ref object of OpenApiRestCall_593424
-proc url_RecordSetsUpdate_594112(protocol: Scheme; host: string; base: string;
+  Call_RecordSetsUpdate_568343 = ref object of OpenApiRestCall_567657
+proc url_RecordSetsUpdate_568345(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1306,7 +1306,7 @@ proc url_RecordSetsUpdate_594112(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecordSetsUpdate_594111(path: JsonNode; query: JsonNode;
+proc validate_RecordSetsUpdate_568344(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Updates a record set within a DNS zone.
@@ -1327,31 +1327,31 @@ proc validate_RecordSetsUpdate_594111(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594113 = path.getOrDefault("resourceGroupName")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  var valid_568346 = path.getOrDefault("resourceGroupName")
+  valid_568346 = validateParameter(valid_568346, JString, required = true,
                                  default = nil)
-  if valid_594113 != nil:
-    section.add "resourceGroupName", valid_594113
-  var valid_594114 = path.getOrDefault("recordType")
-  valid_594114 = validateParameter(valid_594114, JString, required = true,
+  if valid_568346 != nil:
+    section.add "resourceGroupName", valid_568346
+  var valid_568347 = path.getOrDefault("recordType")
+  valid_568347 = validateParameter(valid_568347, JString, required = true,
                                  default = newJString("A"))
-  if valid_594114 != nil:
-    section.add "recordType", valid_594114
-  var valid_594115 = path.getOrDefault("subscriptionId")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  if valid_568347 != nil:
+    section.add "recordType", valid_568347
+  var valid_568348 = path.getOrDefault("subscriptionId")
+  valid_568348 = validateParameter(valid_568348, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "subscriptionId", valid_594115
-  var valid_594116 = path.getOrDefault("zoneName")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_568348 != nil:
+    section.add "subscriptionId", valid_568348
+  var valid_568349 = path.getOrDefault("zoneName")
+  valid_568349 = validateParameter(valid_568349, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "zoneName", valid_594116
-  var valid_594117 = path.getOrDefault("relativeRecordSetName")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  if valid_568349 != nil:
+    section.add "zoneName", valid_568349
+  var valid_568350 = path.getOrDefault("relativeRecordSetName")
+  valid_568350 = validateParameter(valid_568350, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "relativeRecordSetName", valid_594117
+  if valid_568350 != nil:
+    section.add "relativeRecordSetName", valid_568350
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1359,21 +1359,21 @@ proc validate_RecordSetsUpdate_594111(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594118 = query.getOrDefault("api-version")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  var valid_568351 = query.getOrDefault("api-version")
+  valid_568351 = validateParameter(valid_568351, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "api-version", valid_594118
+  if valid_568351 != nil:
+    section.add "api-version", valid_568351
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : The etag of the record set. Omit this value to always overwrite the current record set. Specify the last-seen etag value to prevent accidentally overwriting concurrent changes.
   section = newJObject()
-  var valid_594119 = header.getOrDefault("If-Match")
-  valid_594119 = validateParameter(valid_594119, JString, required = false,
+  var valid_568352 = header.getOrDefault("If-Match")
+  valid_568352 = validateParameter(valid_568352, JString, required = false,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "If-Match", valid_594119
+  if valid_568352 != nil:
+    section.add "If-Match", valid_568352
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1385,20 +1385,20 @@ proc validate_RecordSetsUpdate_594111(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594121: Call_RecordSetsUpdate_594110; path: JsonNode;
+proc call*(call_568354: Call_RecordSetsUpdate_568343; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a record set within a DNS zone.
   ## 
-  let valid = call_594121.validator(path, query, header, formData, body)
-  let scheme = call_594121.pickScheme
+  let valid = call_568354.validator(path, query, header, formData, body)
+  let scheme = call_568354.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594121.url(scheme.get, call_594121.host, call_594121.base,
-                         call_594121.route, valid.getOrDefault("path"),
+  let url = call_568354.url(scheme.get, call_568354.host, call_568354.base,
+                         call_568354.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594121, url, valid)
+  result = hook(call_568354, url, valid)
 
-proc call*(call_594122: Call_RecordSetsUpdate_594110; resourceGroupName: string;
+proc call*(call_568355: Call_RecordSetsUpdate_568343; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; zoneName: string;
           parameters: JsonNode; relativeRecordSetName: string;
           recordType: string = "A"): Recallable =
@@ -1418,26 +1418,26 @@ proc call*(call_594122: Call_RecordSetsUpdate_594110; resourceGroupName: string;
   ##             : Parameters supplied to the Update operation.
   ##   relativeRecordSetName: string (required)
   ##                        : The name of the record set, relative to the name of the zone.
-  var path_594123 = newJObject()
-  var query_594124 = newJObject()
-  var body_594125 = newJObject()
-  add(path_594123, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594124, "api-version", newJString(apiVersion))
-  add(path_594123, "recordType", newJString(recordType))
-  add(path_594123, "subscriptionId", newJString(subscriptionId))
-  add(path_594123, "zoneName", newJString(zoneName))
+  var path_568356 = newJObject()
+  var query_568357 = newJObject()
+  var body_568358 = newJObject()
+  add(path_568356, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568357, "api-version", newJString(apiVersion))
+  add(path_568356, "recordType", newJString(recordType))
+  add(path_568356, "subscriptionId", newJString(subscriptionId))
+  add(path_568356, "zoneName", newJString(zoneName))
   if parameters != nil:
-    body_594125 = parameters
-  add(path_594123, "relativeRecordSetName", newJString(relativeRecordSetName))
-  result = call_594122.call(path_594123, query_594124, nil, nil, body_594125)
+    body_568358 = parameters
+  add(path_568356, "relativeRecordSetName", newJString(relativeRecordSetName))
+  result = call_568355.call(path_568356, query_568357, nil, nil, body_568358)
 
-var recordSetsUpdate* = Call_RecordSetsUpdate_594110(name: "recordSetsUpdate",
+var recordSetsUpdate* = Call_RecordSetsUpdate_568343(name: "recordSetsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}/{recordType}/{relativeRecordSetName}",
-    validator: validate_RecordSetsUpdate_594111, base: "",
-    url: url_RecordSetsUpdate_594112, schemes: {Scheme.Https})
+    validator: validate_RecordSetsUpdate_568344, base: "",
+    url: url_RecordSetsUpdate_568345, schemes: {Scheme.Https})
 type
-  Call_RecordSetsDelete_594096 = ref object of OpenApiRestCall_593424
-proc url_RecordSetsDelete_594098(protocol: Scheme; host: string; base: string;
+  Call_RecordSetsDelete_568329 = ref object of OpenApiRestCall_567657
+proc url_RecordSetsDelete_568331(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1466,7 +1466,7 @@ proc url_RecordSetsDelete_594098(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecordSetsDelete_594097(path: JsonNode; query: JsonNode;
+proc validate_RecordSetsDelete_568330(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes a record set from a DNS zone. This operation cannot be undone.
@@ -1487,31 +1487,31 @@ proc validate_RecordSetsDelete_594097(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594099 = path.getOrDefault("resourceGroupName")
-  valid_594099 = validateParameter(valid_594099, JString, required = true,
+  var valid_568332 = path.getOrDefault("resourceGroupName")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = nil)
-  if valid_594099 != nil:
-    section.add "resourceGroupName", valid_594099
-  var valid_594100 = path.getOrDefault("recordType")
-  valid_594100 = validateParameter(valid_594100, JString, required = true,
+  if valid_568332 != nil:
+    section.add "resourceGroupName", valid_568332
+  var valid_568333 = path.getOrDefault("recordType")
+  valid_568333 = validateParameter(valid_568333, JString, required = true,
                                  default = newJString("A"))
-  if valid_594100 != nil:
-    section.add "recordType", valid_594100
-  var valid_594101 = path.getOrDefault("subscriptionId")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  if valid_568333 != nil:
+    section.add "recordType", valid_568333
+  var valid_568334 = path.getOrDefault("subscriptionId")
+  valid_568334 = validateParameter(valid_568334, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "subscriptionId", valid_594101
-  var valid_594102 = path.getOrDefault("zoneName")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  if valid_568334 != nil:
+    section.add "subscriptionId", valid_568334
+  var valid_568335 = path.getOrDefault("zoneName")
+  valid_568335 = validateParameter(valid_568335, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "zoneName", valid_594102
-  var valid_594103 = path.getOrDefault("relativeRecordSetName")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  if valid_568335 != nil:
+    section.add "zoneName", valid_568335
+  var valid_568336 = path.getOrDefault("relativeRecordSetName")
+  valid_568336 = validateParameter(valid_568336, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "relativeRecordSetName", valid_594103
+  if valid_568336 != nil:
+    section.add "relativeRecordSetName", valid_568336
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1519,41 +1519,41 @@ proc validate_RecordSetsDelete_594097(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594104 = query.getOrDefault("api-version")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  var valid_568337 = query.getOrDefault("api-version")
+  valid_568337 = validateParameter(valid_568337, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "api-version", valid_594104
+  if valid_568337 != nil:
+    section.add "api-version", valid_568337
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : The etag of the record set. Omit this value to always delete the current record set. Specify the last-seen etag value to prevent accidentally deleting any concurrent changes.
   section = newJObject()
-  var valid_594105 = header.getOrDefault("If-Match")
-  valid_594105 = validateParameter(valid_594105, JString, required = false,
+  var valid_568338 = header.getOrDefault("If-Match")
+  valid_568338 = validateParameter(valid_568338, JString, required = false,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "If-Match", valid_594105
+  if valid_568338 != nil:
+    section.add "If-Match", valid_568338
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594106: Call_RecordSetsDelete_594096; path: JsonNode;
+proc call*(call_568339: Call_RecordSetsDelete_568329; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a record set from a DNS zone. This operation cannot be undone.
   ## 
-  let valid = call_594106.validator(path, query, header, formData, body)
-  let scheme = call_594106.pickScheme
+  let valid = call_568339.validator(path, query, header, formData, body)
+  let scheme = call_568339.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594106.url(scheme.get, call_594106.host, call_594106.base,
-                         call_594106.route, valid.getOrDefault("path"),
+  let url = call_568339.url(scheme.get, call_568339.host, call_568339.base,
+                         call_568339.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594106, url, valid)
+  result = hook(call_568339, url, valid)
 
-proc call*(call_594107: Call_RecordSetsDelete_594096; resourceGroupName: string;
+proc call*(call_568340: Call_RecordSetsDelete_568329; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; zoneName: string;
           relativeRecordSetName: string; recordType: string = "A"): Recallable =
   ## recordSetsDelete
@@ -1570,20 +1570,20 @@ proc call*(call_594107: Call_RecordSetsDelete_594096; resourceGroupName: string;
   ##           : The name of the DNS zone (without a terminating dot).
   ##   relativeRecordSetName: string (required)
   ##                        : The name of the record set, relative to the name of the zone.
-  var path_594108 = newJObject()
-  var query_594109 = newJObject()
-  add(path_594108, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594109, "api-version", newJString(apiVersion))
-  add(path_594108, "recordType", newJString(recordType))
-  add(path_594108, "subscriptionId", newJString(subscriptionId))
-  add(path_594108, "zoneName", newJString(zoneName))
-  add(path_594108, "relativeRecordSetName", newJString(relativeRecordSetName))
-  result = call_594107.call(path_594108, query_594109, nil, nil, nil)
+  var path_568341 = newJObject()
+  var query_568342 = newJObject()
+  add(path_568341, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568342, "api-version", newJString(apiVersion))
+  add(path_568341, "recordType", newJString(recordType))
+  add(path_568341, "subscriptionId", newJString(subscriptionId))
+  add(path_568341, "zoneName", newJString(zoneName))
+  add(path_568341, "relativeRecordSetName", newJString(relativeRecordSetName))
+  result = call_568340.call(path_568341, query_568342, nil, nil, nil)
 
-var recordSetsDelete* = Call_RecordSetsDelete_594096(name: "recordSetsDelete",
+var recordSetsDelete* = Call_RecordSetsDelete_568329(name: "recordSetsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}/{recordType}/{relativeRecordSetName}",
-    validator: validate_RecordSetsDelete_594097, base: "",
-    url: url_RecordSetsDelete_594098, schemes: {Scheme.Https})
+    validator: validate_RecordSetsDelete_568330, base: "",
+    url: url_RecordSetsDelete_568331, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-dataWarehouseUserActivities"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DataWarehouseUserActivitiesGet_593646 = ref object of OpenApiRestCall_593424
-proc url_DataWarehouseUserActivitiesGet_593648(protocol: Scheme; host: string;
+  Call_DataWarehouseUserActivitiesGet_567879 = ref object of OpenApiRestCall_567657
+proc url_DataWarehouseUserActivitiesGet_567881(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -133,7 +133,7 @@ proc url_DataWarehouseUserActivitiesGet_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataWarehouseUserActivitiesGet_593647(path: JsonNode;
+proc validate_DataWarehouseUserActivitiesGet_567880(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the user activities of a data warehouse which includes running and suspended queries
   ## 
@@ -153,31 +153,31 @@ proc validate_DataWarehouseUserActivitiesGet_593647(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593821 = path.getOrDefault("resourceGroupName")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("resourceGroupName")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "resourceGroupName", valid_593821
-  var valid_593822 = path.getOrDefault("serverName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_568054 != nil:
+    section.add "resourceGroupName", valid_568054
+  var valid_568055 = path.getOrDefault("serverName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "serverName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "serverName", valid_568055
+  var valid_568056 = path.getOrDefault("subscriptionId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
-  var valid_593824 = path.getOrDefault("databaseName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_568056 != nil:
+    section.add "subscriptionId", valid_568056
+  var valid_568057 = path.getOrDefault("databaseName")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "databaseName", valid_593824
-  var valid_593838 = path.getOrDefault("dataWarehouseUserActivityName")
-  valid_593838 = validateParameter(valid_593838, JString, required = true,
+  if valid_568057 != nil:
+    section.add "databaseName", valid_568057
+  var valid_568071 = path.getOrDefault("dataWarehouseUserActivityName")
+  valid_568071 = validateParameter(valid_568071, JString, required = true,
                                  default = newJString("current"))
-  if valid_593838 != nil:
-    section.add "dataWarehouseUserActivityName", valid_593838
+  if valid_568071 != nil:
+    section.add "dataWarehouseUserActivityName", valid_568071
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -185,11 +185,11 @@ proc validate_DataWarehouseUserActivitiesGet_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593839 = query.getOrDefault("api-version")
-  valid_593839 = validateParameter(valid_593839, JString, required = true,
+  var valid_568072 = query.getOrDefault("api-version")
+  valid_568072 = validateParameter(valid_568072, JString, required = true,
                                  default = nil)
-  if valid_593839 != nil:
-    section.add "api-version", valid_593839
+  if valid_568072 != nil:
+    section.add "api-version", valid_568072
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -198,20 +198,20 @@ proc validate_DataWarehouseUserActivitiesGet_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593862: Call_DataWarehouseUserActivitiesGet_593646; path: JsonNode;
+proc call*(call_568095: Call_DataWarehouseUserActivitiesGet_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the user activities of a data warehouse which includes running and suspended queries
   ## 
-  let valid = call_593862.validator(path, query, header, formData, body)
-  let scheme = call_593862.pickScheme
+  let valid = call_568095.validator(path, query, header, formData, body)
+  let scheme = call_568095.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593862.url(scheme.get, call_593862.host, call_593862.base,
-                         call_593862.route, valid.getOrDefault("path"),
+  let url = call_568095.url(scheme.get, call_568095.host, call_568095.base,
+                         call_568095.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593862, url, valid)
+  result = hook(call_568095, url, valid)
 
-proc call*(call_593933: Call_DataWarehouseUserActivitiesGet_593646;
+proc call*(call_568166: Call_DataWarehouseUserActivitiesGet_567879;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string;
           dataWarehouseUserActivityName: string = "current"): Recallable =
@@ -229,22 +229,22 @@ proc call*(call_593933: Call_DataWarehouseUserActivitiesGet_593646;
   ##               : The name of the database.
   ##   dataWarehouseUserActivityName: string (required)
   ##                                : The activity name of the data warehouse. 
-  var path_593934 = newJObject()
-  var query_593936 = newJObject()
-  add(path_593934, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593936, "api-version", newJString(apiVersion))
-  add(path_593934, "serverName", newJString(serverName))
-  add(path_593934, "subscriptionId", newJString(subscriptionId))
-  add(path_593934, "databaseName", newJString(databaseName))
-  add(path_593934, "dataWarehouseUserActivityName",
+  var path_568167 = newJObject()
+  var query_568169 = newJObject()
+  add(path_568167, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568169, "api-version", newJString(apiVersion))
+  add(path_568167, "serverName", newJString(serverName))
+  add(path_568167, "subscriptionId", newJString(subscriptionId))
+  add(path_568167, "databaseName", newJString(databaseName))
+  add(path_568167, "dataWarehouseUserActivityName",
       newJString(dataWarehouseUserActivityName))
-  result = call_593933.call(path_593934, query_593936, nil, nil, nil)
+  result = call_568166.call(path_568167, query_568169, nil, nil, nil)
 
-var dataWarehouseUserActivitiesGet* = Call_DataWarehouseUserActivitiesGet_593646(
+var dataWarehouseUserActivitiesGet* = Call_DataWarehouseUserActivitiesGet_567879(
     name: "dataWarehouseUserActivitiesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/dataWarehouseUserActivities/{dataWarehouseUserActivityName}",
-    validator: validate_DataWarehouseUserActivitiesGet_593647, base: "",
-    url: url_DataWarehouseUserActivitiesGet_593648, schemes: {Scheme.Https})
+    validator: validate_DataWarehouseUserActivitiesGet_567880, base: "",
+    url: url_DataWarehouseUserActivitiesGet_567881, schemes: {Scheme.Https})
 export
   rest
 

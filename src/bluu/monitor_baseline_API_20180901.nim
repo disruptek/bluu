@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: MonitorManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "monitor-baseline_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BaselineGet_593647 = ref object of OpenApiRestCall_593425
-proc url_BaselineGet_593649(protocol: Scheme; host: string; base: string;
+  Call_BaselineGet_567880 = ref object of OpenApiRestCall_567658
+proc url_BaselineGet_567882(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +120,7 @@ proc url_BaselineGet_593649(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BaselineGet_593648(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BaselineGet_567881(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## **Gets the baseline values for a resource**.
   ## 
@@ -134,11 +134,11 @@ proc validate_BaselineGet_593648(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceUri` field"
-  var valid_593823 = path.getOrDefault("resourceUri")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_568056 = path.getOrDefault("resourceUri")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "resourceUri", valid_593823
+  if valid_568056 != nil:
+    section.add "resourceUri", valid_568056
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -162,51 +162,51 @@ proc validate_BaselineGet_593648(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593824 = query.getOrDefault("api-version")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  var valid_568057 = query.getOrDefault("api-version")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "api-version", valid_593824
-  var valid_593825 = query.getOrDefault("metricnames")
-  valid_593825 = validateParameter(valid_593825, JString, required = false,
+  if valid_568057 != nil:
+    section.add "api-version", valid_568057
+  var valid_568058 = query.getOrDefault("metricnames")
+  valid_568058 = validateParameter(valid_568058, JString, required = false,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "metricnames", valid_593825
-  var valid_593826 = query.getOrDefault("metricnamespace")
-  valid_593826 = validateParameter(valid_593826, JString, required = false,
+  if valid_568058 != nil:
+    section.add "metricnames", valid_568058
+  var valid_568059 = query.getOrDefault("metricnamespace")
+  valid_568059 = validateParameter(valid_568059, JString, required = false,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "metricnamespace", valid_593826
-  var valid_593827 = query.getOrDefault("timespan")
-  valid_593827 = validateParameter(valid_593827, JString, required = false,
+  if valid_568059 != nil:
+    section.add "metricnamespace", valid_568059
+  var valid_568060 = query.getOrDefault("timespan")
+  valid_568060 = validateParameter(valid_568060, JString, required = false,
                                  default = nil)
-  if valid_593827 != nil:
-    section.add "timespan", valid_593827
-  var valid_593841 = query.getOrDefault("resultType")
-  valid_593841 = validateParameter(valid_593841, JString, required = false,
+  if valid_568060 != nil:
+    section.add "timespan", valid_568060
+  var valid_568074 = query.getOrDefault("resultType")
+  valid_568074 = validateParameter(valid_568074, JString, required = false,
                                  default = newJString("Data"))
-  if valid_593841 != nil:
-    section.add "resultType", valid_593841
-  var valid_593842 = query.getOrDefault("sensitivities")
-  valid_593842 = validateParameter(valid_593842, JString, required = false,
+  if valid_568074 != nil:
+    section.add "resultType", valid_568074
+  var valid_568075 = query.getOrDefault("sensitivities")
+  valid_568075 = validateParameter(valid_568075, JString, required = false,
                                  default = nil)
-  if valid_593842 != nil:
-    section.add "sensitivities", valid_593842
-  var valid_593843 = query.getOrDefault("interval")
-  valid_593843 = validateParameter(valid_593843, JString, required = false,
+  if valid_568075 != nil:
+    section.add "sensitivities", valid_568075
+  var valid_568076 = query.getOrDefault("interval")
+  valid_568076 = validateParameter(valid_568076, JString, required = false,
                                  default = nil)
-  if valid_593843 != nil:
-    section.add "interval", valid_593843
-  var valid_593844 = query.getOrDefault("aggregation")
-  valid_593844 = validateParameter(valid_593844, JString, required = false,
+  if valid_568076 != nil:
+    section.add "interval", valid_568076
+  var valid_568077 = query.getOrDefault("aggregation")
+  valid_568077 = validateParameter(valid_568077, JString, required = false,
                                  default = nil)
-  if valid_593844 != nil:
-    section.add "aggregation", valid_593844
-  var valid_593845 = query.getOrDefault("$filter")
-  valid_593845 = validateParameter(valid_593845, JString, required = false,
+  if valid_568077 != nil:
+    section.add "aggregation", valid_568077
+  var valid_568078 = query.getOrDefault("$filter")
+  valid_568078 = validateParameter(valid_568078, JString, required = false,
                                  default = nil)
-  if valid_593845 != nil:
-    section.add "$filter", valid_593845
+  if valid_568078 != nil:
+    section.add "$filter", valid_568078
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -215,20 +215,20 @@ proc validate_BaselineGet_593648(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593868: Call_BaselineGet_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568101: Call_BaselineGet_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## **Gets the baseline values for a resource**.
   ## 
-  let valid = call_593868.validator(path, query, header, formData, body)
-  let scheme = call_593868.pickScheme
+  let valid = call_568101.validator(path, query, header, formData, body)
+  let scheme = call_568101.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593868.url(scheme.get, call_593868.host, call_593868.base,
-                         call_593868.route, valid.getOrDefault("path"),
+  let url = call_568101.url(scheme.get, call_568101.host, call_568101.base,
+                         call_568101.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593868, url, valid)
+  result = hook(call_568101, url, valid)
 
-proc call*(call_593939: Call_BaselineGet_593647; apiVersion: string;
+proc call*(call_568172: Call_BaselineGet_567880; apiVersion: string;
           resourceUri: string; metricnames: string = ""; metricnamespace: string = "";
           timespan: string = ""; resultType: string = "Data";
           sensitivities: string = ""; interval: string = ""; aggregation: string = "";
@@ -257,29 +257,29 @@ proc call*(call_593939: Call_BaselineGet_593647; apiVersion: string;
   ##              : The aggregation type of the metric to retrieve the baseline for.
   ##   Filter: string
   ##         : The **$filter** is used to describe a set of dimensions with their concrete values which produce a specific metric's time series, in which a baseline is requested for.
-  var path_593940 = newJObject()
-  var query_593942 = newJObject()
-  add(query_593942, "api-version", newJString(apiVersion))
-  add(query_593942, "metricnames", newJString(metricnames))
-  add(query_593942, "metricnamespace", newJString(metricnamespace))
-  add(query_593942, "timespan", newJString(timespan))
-  add(query_593942, "resultType", newJString(resultType))
-  add(query_593942, "sensitivities", newJString(sensitivities))
-  add(query_593942, "interval", newJString(interval))
-  add(path_593940, "resourceUri", newJString(resourceUri))
-  add(query_593942, "aggregation", newJString(aggregation))
-  add(query_593942, "$filter", newJString(Filter))
-  result = call_593939.call(path_593940, query_593942, nil, nil, nil)
+  var path_568173 = newJObject()
+  var query_568175 = newJObject()
+  add(query_568175, "api-version", newJString(apiVersion))
+  add(query_568175, "metricnames", newJString(metricnames))
+  add(query_568175, "metricnamespace", newJString(metricnamespace))
+  add(query_568175, "timespan", newJString(timespan))
+  add(query_568175, "resultType", newJString(resultType))
+  add(query_568175, "sensitivities", newJString(sensitivities))
+  add(query_568175, "interval", newJString(interval))
+  add(path_568173, "resourceUri", newJString(resourceUri))
+  add(query_568175, "aggregation", newJString(aggregation))
+  add(query_568175, "$filter", newJString(Filter))
+  result = call_568172.call(path_568173, query_568175, nil, nil, nil)
 
-var baselineGet* = Call_BaselineGet_593647(name: "baselineGet",
+var baselineGet* = Call_BaselineGet_567880(name: "baselineGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/{resourceUri}/providers/microsoft.insights/baseline",
-                                        validator: validate_BaselineGet_593648,
-                                        base: "", url: url_BaselineGet_593649,
+                                        validator: validate_BaselineGet_567881,
+                                        base: "", url: url_BaselineGet_567882,
                                         schemes: {Scheme.Https})
 type
-  Call_MetricBaselineGet_593981 = ref object of OpenApiRestCall_593425
-proc url_MetricBaselineGet_593983(protocol: Scheme; host: string; base: string;
+  Call_MetricBaselineGet_568214 = ref object of OpenApiRestCall_567658
+proc url_MetricBaselineGet_568216(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -297,7 +297,7 @@ proc url_MetricBaselineGet_593983(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricBaselineGet_593982(path: JsonNode; query: JsonNode;
+proc validate_MetricBaselineGet_568215(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## **Gets the baseline values for a specific metric**.
@@ -314,16 +314,16 @@ proc validate_MetricBaselineGet_593982(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `metricName` field"
-  var valid_593984 = path.getOrDefault("metricName")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568217 = path.getOrDefault("metricName")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "metricName", valid_593984
-  var valid_593985 = path.getOrDefault("resourceUri")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  if valid_568217 != nil:
+    section.add "metricName", valid_568217
+  var valid_568218 = path.getOrDefault("resourceUri")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "resourceUri", valid_593985
+  if valid_568218 != nil:
+    section.add "resourceUri", valid_568218
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -345,46 +345,46 @@ proc validate_MetricBaselineGet_593982(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593986 = query.getOrDefault("api-version")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  var valid_568219 = query.getOrDefault("api-version")
+  valid_568219 = validateParameter(valid_568219, JString, required = true,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "api-version", valid_593986
-  var valid_593987 = query.getOrDefault("metricnamespace")
-  valid_593987 = validateParameter(valid_593987, JString, required = false,
+  if valid_568219 != nil:
+    section.add "api-version", valid_568219
+  var valid_568220 = query.getOrDefault("metricnamespace")
+  valid_568220 = validateParameter(valid_568220, JString, required = false,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "metricnamespace", valid_593987
-  var valid_593988 = query.getOrDefault("timespan")
-  valid_593988 = validateParameter(valid_593988, JString, required = false,
+  if valid_568220 != nil:
+    section.add "metricnamespace", valid_568220
+  var valid_568221 = query.getOrDefault("timespan")
+  valid_568221 = validateParameter(valid_568221, JString, required = false,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "timespan", valid_593988
-  var valid_593989 = query.getOrDefault("resultType")
-  valid_593989 = validateParameter(valid_593989, JString, required = false,
+  if valid_568221 != nil:
+    section.add "timespan", valid_568221
+  var valid_568222 = query.getOrDefault("resultType")
+  valid_568222 = validateParameter(valid_568222, JString, required = false,
                                  default = newJString("Data"))
-  if valid_593989 != nil:
-    section.add "resultType", valid_593989
-  var valid_593990 = query.getOrDefault("sensitivities")
-  valid_593990 = validateParameter(valid_593990, JString, required = false,
+  if valid_568222 != nil:
+    section.add "resultType", valid_568222
+  var valid_568223 = query.getOrDefault("sensitivities")
+  valid_568223 = validateParameter(valid_568223, JString, required = false,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "sensitivities", valid_593990
-  var valid_593991 = query.getOrDefault("interval")
-  valid_593991 = validateParameter(valid_593991, JString, required = false,
+  if valid_568223 != nil:
+    section.add "sensitivities", valid_568223
+  var valid_568224 = query.getOrDefault("interval")
+  valid_568224 = validateParameter(valid_568224, JString, required = false,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "interval", valid_593991
-  var valid_593992 = query.getOrDefault("aggregation")
-  valid_593992 = validateParameter(valid_593992, JString, required = false,
+  if valid_568224 != nil:
+    section.add "interval", valid_568224
+  var valid_568225 = query.getOrDefault("aggregation")
+  valid_568225 = validateParameter(valid_568225, JString, required = false,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "aggregation", valid_593992
-  var valid_593993 = query.getOrDefault("$filter")
-  valid_593993 = validateParameter(valid_593993, JString, required = false,
+  if valid_568225 != nil:
+    section.add "aggregation", valid_568225
+  var valid_568226 = query.getOrDefault("$filter")
+  valid_568226 = validateParameter(valid_568226, JString, required = false,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "$filter", valid_593993
+  if valid_568226 != nil:
+    section.add "$filter", valid_568226
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -393,20 +393,20 @@ proc validate_MetricBaselineGet_593982(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593994: Call_MetricBaselineGet_593981; path: JsonNode;
+proc call*(call_568227: Call_MetricBaselineGet_568214; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## **Gets the baseline values for a specific metric**.
   ## 
-  let valid = call_593994.validator(path, query, header, formData, body)
-  let scheme = call_593994.pickScheme
+  let valid = call_568227.validator(path, query, header, formData, body)
+  let scheme = call_568227.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593994.url(scheme.get, call_593994.host, call_593994.base,
-                         call_593994.route, valid.getOrDefault("path"),
+  let url = call_568227.url(scheme.get, call_568227.host, call_568227.base,
+                         call_568227.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593994, url, valid)
+  result = hook(call_568227, url, valid)
 
-proc call*(call_593995: Call_MetricBaselineGet_593981; apiVersion: string;
+proc call*(call_568228: Call_MetricBaselineGet_568214; apiVersion: string;
           metricName: string; resourceUri: string; metricnamespace: string = "";
           timespan: string = ""; resultType: string = "Data";
           sensitivities: string = ""; interval: string = ""; aggregation: string = "";
@@ -435,25 +435,25 @@ proc call*(call_593995: Call_MetricBaselineGet_593981; apiVersion: string;
   ##              : The aggregation type of the metric to retrieve the baseline for.
   ##   Filter: string
   ##         : The **$filter** is used to describe a set of dimensions with their concrete values which produce a specific metric's time series, in which a baseline is requested for.
-  var path_593996 = newJObject()
-  var query_593997 = newJObject()
-  add(query_593997, "api-version", newJString(apiVersion))
-  add(query_593997, "metricnamespace", newJString(metricnamespace))
-  add(query_593997, "timespan", newJString(timespan))
-  add(query_593997, "resultType", newJString(resultType))
-  add(query_593997, "sensitivities", newJString(sensitivities))
-  add(path_593996, "metricName", newJString(metricName))
-  add(query_593997, "interval", newJString(interval))
-  add(path_593996, "resourceUri", newJString(resourceUri))
-  add(query_593997, "aggregation", newJString(aggregation))
-  add(query_593997, "$filter", newJString(Filter))
-  result = call_593995.call(path_593996, query_593997, nil, nil, nil)
+  var path_568229 = newJObject()
+  var query_568230 = newJObject()
+  add(query_568230, "api-version", newJString(apiVersion))
+  add(query_568230, "metricnamespace", newJString(metricnamespace))
+  add(query_568230, "timespan", newJString(timespan))
+  add(query_568230, "resultType", newJString(resultType))
+  add(query_568230, "sensitivities", newJString(sensitivities))
+  add(path_568229, "metricName", newJString(metricName))
+  add(query_568230, "interval", newJString(interval))
+  add(path_568229, "resourceUri", newJString(resourceUri))
+  add(query_568230, "aggregation", newJString(aggregation))
+  add(query_568230, "$filter", newJString(Filter))
+  result = call_568228.call(path_568229, query_568230, nil, nil, nil)
 
-var metricBaselineGet* = Call_MetricBaselineGet_593981(name: "metricBaselineGet",
+var metricBaselineGet* = Call_MetricBaselineGet_568214(name: "metricBaselineGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/{resourceUri}/providers/microsoft.insights/baseline/{metricName}",
-    validator: validate_MetricBaselineGet_593982, base: "",
-    url: url_MetricBaselineGet_593983, schemes: {Scheme.Https})
+    validator: validate_MetricBaselineGet_568215, base: "",
+    url: url_MetricBaselineGet_568216, schemes: {Scheme.Https})
 export
   rest
 

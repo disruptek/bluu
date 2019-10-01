@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: HanaManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "hanaonazure"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_OperationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
+proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets a list of SAP HANA management operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = query.getOrDefault("api-version")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_568041 != nil:
+    section.add "api-version", valid_568041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593831: Call_OperationsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568064: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of SAP HANA management operations.
   ## 
-  let valid = call_593831.validator(path, query, header, formData, body)
-  let scheme = call_593831.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593831.url(scheme.get, call_593831.host, call_593831.base,
-                         call_593831.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593831, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593902: Call_OperationsList_593647; apiVersion: string): Recallable =
+proc call*(call_568135: Call_OperationsList_567880; apiVersion: string): Recallable =
   ## operationsList
   ## Gets a list of SAP HANA management operations.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var query_593903 = newJObject()
-  add(query_593903, "api-version", newJString(apiVersion))
-  result = call_593902.call(nil, query_593903, nil, nil, nil)
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  result = call_568135.call(nil, query_568136, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593647(name: "operationsList",
+var operationsList* = Call_OperationsList_567880(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.HanaOnAzure/operations",
-    validator: validate_OperationsList_593648, base: "", url: url_OperationsList_593649,
+    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
     schemes: {Scheme.Https})
 type
-  Call_HanaInstancesList_593943 = ref object of OpenApiRestCall_593425
-proc url_HanaInstancesList_593945(protocol: Scheme; host: string; base: string;
+  Call_HanaInstancesList_568176 = ref object of OpenApiRestCall_567658
+proc url_HanaInstancesList_568178(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +185,7 @@ proc url_HanaInstancesList_593945(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HanaInstancesList_593944(path: JsonNode; query: JsonNode;
+proc validate_HanaInstancesList_568177(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets a list of SAP HANA instances in the specified subscription. The operations returns various properties of each SAP HANA on Azure instance.
@@ -198,11 +198,11 @@ proc validate_HanaInstancesList_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_568193 = path.getOrDefault("subscriptionId")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
+  if valid_568193 != nil:
+    section.add "subscriptionId", valid_568193
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -210,11 +210,11 @@ proc validate_HanaInstancesList_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593961 = query.getOrDefault("api-version")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = query.getOrDefault("api-version")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "api-version", valid_593961
+  if valid_568194 != nil:
+    section.add "api-version", valid_568194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -223,20 +223,20 @@ proc validate_HanaInstancesList_593944(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593962: Call_HanaInstancesList_593943; path: JsonNode;
+proc call*(call_568195: Call_HanaInstancesList_568176; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of SAP HANA instances in the specified subscription. The operations returns various properties of each SAP HANA on Azure instance.
   ## 
-  let valid = call_593962.validator(path, query, header, formData, body)
-  let scheme = call_593962.pickScheme
+  let valid = call_568195.validator(path, query, header, formData, body)
+  let scheme = call_568195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593962.url(scheme.get, call_593962.host, call_593962.base,
-                         call_593962.route, valid.getOrDefault("path"),
+  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
+                         call_568195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593962, url, valid)
+  result = hook(call_568195, url, valid)
 
-proc call*(call_593963: Call_HanaInstancesList_593943; apiVersion: string;
+proc call*(call_568196: Call_HanaInstancesList_568176; apiVersion: string;
           subscriptionId: string): Recallable =
   ## hanaInstancesList
   ## Gets a list of SAP HANA instances in the specified subscription. The operations returns various properties of each SAP HANA on Azure instance.
@@ -244,19 +244,19 @@ proc call*(call_593963: Call_HanaInstancesList_593943; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593964 = newJObject()
-  var query_593965 = newJObject()
-  add(query_593965, "api-version", newJString(apiVersion))
-  add(path_593964, "subscriptionId", newJString(subscriptionId))
-  result = call_593963.call(path_593964, query_593965, nil, nil, nil)
+  var path_568197 = newJObject()
+  var query_568198 = newJObject()
+  add(query_568198, "api-version", newJString(apiVersion))
+  add(path_568197, "subscriptionId", newJString(subscriptionId))
+  result = call_568196.call(path_568197, query_568198, nil, nil, nil)
 
-var hanaInstancesList* = Call_HanaInstancesList_593943(name: "hanaInstancesList",
+var hanaInstancesList* = Call_HanaInstancesList_568176(name: "hanaInstancesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.HanaOnAzure/hanaInstances",
-    validator: validate_HanaInstancesList_593944, base: "",
-    url: url_HanaInstancesList_593945, schemes: {Scheme.Https})
+    validator: validate_HanaInstancesList_568177, base: "",
+    url: url_HanaInstancesList_568178, schemes: {Scheme.Https})
 type
-  Call_SapMonitorsList_593966 = ref object of OpenApiRestCall_593425
-proc url_SapMonitorsList_593968(protocol: Scheme; host: string; base: string;
+  Call_SapMonitorsList_568199 = ref object of OpenApiRestCall_567658
+proc url_SapMonitorsList_568201(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -273,7 +273,7 @@ proc url_SapMonitorsList_593968(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SapMonitorsList_593967(path: JsonNode; query: JsonNode;
+proc validate_SapMonitorsList_568200(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets a list of SAP monitors in the specified subscription. The operations returns various properties of each SAP monitor.
@@ -286,11 +286,11 @@ proc validate_SapMonitorsList_593967(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593969 = path.getOrDefault("subscriptionId")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_568202 = path.getOrDefault("subscriptionId")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "subscriptionId", valid_593969
+  if valid_568202 != nil:
+    section.add "subscriptionId", valid_568202
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -298,11 +298,11 @@ proc validate_SapMonitorsList_593967(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593970 = query.getOrDefault("api-version")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  var valid_568203 = query.getOrDefault("api-version")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "api-version", valid_593970
+  if valid_568203 != nil:
+    section.add "api-version", valid_568203
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -311,20 +311,20 @@ proc validate_SapMonitorsList_593967(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593971: Call_SapMonitorsList_593966; path: JsonNode; query: JsonNode;
+proc call*(call_568204: Call_SapMonitorsList_568199; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of SAP monitors in the specified subscription. The operations returns various properties of each SAP monitor.
   ## 
-  let valid = call_593971.validator(path, query, header, formData, body)
-  let scheme = call_593971.pickScheme
+  let valid = call_568204.validator(path, query, header, formData, body)
+  let scheme = call_568204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593971.url(scheme.get, call_593971.host, call_593971.base,
-                         call_593971.route, valid.getOrDefault("path"),
+  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
+                         call_568204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593971, url, valid)
+  result = hook(call_568204, url, valid)
 
-proc call*(call_593972: Call_SapMonitorsList_593966; apiVersion: string;
+proc call*(call_568205: Call_SapMonitorsList_568199; apiVersion: string;
           subscriptionId: string): Recallable =
   ## sapMonitorsList
   ## Gets a list of SAP monitors in the specified subscription. The operations returns various properties of each SAP monitor.
@@ -332,19 +332,19 @@ proc call*(call_593972: Call_SapMonitorsList_593966; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593973 = newJObject()
-  var query_593974 = newJObject()
-  add(query_593974, "api-version", newJString(apiVersion))
-  add(path_593973, "subscriptionId", newJString(subscriptionId))
-  result = call_593972.call(path_593973, query_593974, nil, nil, nil)
+  var path_568206 = newJObject()
+  var query_568207 = newJObject()
+  add(query_568207, "api-version", newJString(apiVersion))
+  add(path_568206, "subscriptionId", newJString(subscriptionId))
+  result = call_568205.call(path_568206, query_568207, nil, nil, nil)
 
-var sapMonitorsList* = Call_SapMonitorsList_593966(name: "sapMonitorsList",
+var sapMonitorsList* = Call_SapMonitorsList_568199(name: "sapMonitorsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.HanaOnAzure/sapMonitors",
-    validator: validate_SapMonitorsList_593967, base: "", url: url_SapMonitorsList_593968,
+    validator: validate_SapMonitorsList_568200, base: "", url: url_SapMonitorsList_568201,
     schemes: {Scheme.Https})
 type
-  Call_HanaInstancesListByResourceGroup_593975 = ref object of OpenApiRestCall_593425
-proc url_HanaInstancesListByResourceGroup_593977(protocol: Scheme; host: string;
+  Call_HanaInstancesListByResourceGroup_568208 = ref object of OpenApiRestCall_567658
+proc url_HanaInstancesListByResourceGroup_568210(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -365,7 +365,7 @@ proc url_HanaInstancesListByResourceGroup_593977(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HanaInstancesListByResourceGroup_593976(path: JsonNode;
+proc validate_HanaInstancesListByResourceGroup_568209(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of SAP HANA instances in the specified subscription and the resource group. The operations returns various properties of each SAP HANA on Azure instance.
   ## 
@@ -379,16 +379,16 @@ proc validate_HanaInstancesListByResourceGroup_593976(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593978 = path.getOrDefault("resourceGroupName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_568211 = path.getOrDefault("resourceGroupName")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "resourceGroupName", valid_593978
-  var valid_593979 = path.getOrDefault("subscriptionId")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_568211 != nil:
+    section.add "resourceGroupName", valid_568211
+  var valid_568212 = path.getOrDefault("subscriptionId")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "subscriptionId", valid_593979
+  if valid_568212 != nil:
+    section.add "subscriptionId", valid_568212
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -396,11 +396,11 @@ proc validate_HanaInstancesListByResourceGroup_593976(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593980 = query.getOrDefault("api-version")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_568213 = query.getOrDefault("api-version")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "api-version", valid_593980
+  if valid_568213 != nil:
+    section.add "api-version", valid_568213
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -409,21 +409,21 @@ proc validate_HanaInstancesListByResourceGroup_593976(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593981: Call_HanaInstancesListByResourceGroup_593975;
+proc call*(call_568214: Call_HanaInstancesListByResourceGroup_568208;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of SAP HANA instances in the specified subscription and the resource group. The operations returns various properties of each SAP HANA on Azure instance.
   ## 
-  let valid = call_593981.validator(path, query, header, formData, body)
-  let scheme = call_593981.pickScheme
+  let valid = call_568214.validator(path, query, header, formData, body)
+  let scheme = call_568214.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593981.url(scheme.get, call_593981.host, call_593981.base,
-                         call_593981.route, valid.getOrDefault("path"),
+  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
+                         call_568214.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593981, url, valid)
+  result = hook(call_568214, url, valid)
 
-proc call*(call_593982: Call_HanaInstancesListByResourceGroup_593975;
+proc call*(call_568215: Call_HanaInstancesListByResourceGroup_568208;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## hanaInstancesListByResourceGroup
   ## Gets a list of SAP HANA instances in the specified subscription and the resource group. The operations returns various properties of each SAP HANA on Azure instance.
@@ -433,21 +433,21 @@ proc call*(call_593982: Call_HanaInstancesListByResourceGroup_593975;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593983 = newJObject()
-  var query_593984 = newJObject()
-  add(path_593983, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593984, "api-version", newJString(apiVersion))
-  add(path_593983, "subscriptionId", newJString(subscriptionId))
-  result = call_593982.call(path_593983, query_593984, nil, nil, nil)
+  var path_568216 = newJObject()
+  var query_568217 = newJObject()
+  add(path_568216, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568217, "api-version", newJString(apiVersion))
+  add(path_568216, "subscriptionId", newJString(subscriptionId))
+  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
 
-var hanaInstancesListByResourceGroup* = Call_HanaInstancesListByResourceGroup_593975(
+var hanaInstancesListByResourceGroup* = Call_HanaInstancesListByResourceGroup_568208(
     name: "hanaInstancesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/hanaInstances",
-    validator: validate_HanaInstancesListByResourceGroup_593976, base: "",
-    url: url_HanaInstancesListByResourceGroup_593977, schemes: {Scheme.Https})
+    validator: validate_HanaInstancesListByResourceGroup_568209, base: "",
+    url: url_HanaInstancesListByResourceGroup_568210, schemes: {Scheme.Https})
 type
-  Call_HanaInstancesCreate_593996 = ref object of OpenApiRestCall_593425
-proc url_HanaInstancesCreate_593998(protocol: Scheme; host: string; base: string;
+  Call_HanaInstancesCreate_568229 = ref object of OpenApiRestCall_567658
+proc url_HanaInstancesCreate_568231(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -471,7 +471,7 @@ proc url_HanaInstancesCreate_593998(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HanaInstancesCreate_593997(path: JsonNode; query: JsonNode;
+proc validate_HanaInstancesCreate_568230(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Creates a SAP HANA instance for the specified subscription, resource group, and instance name.
@@ -488,21 +488,21 @@ proc validate_HanaInstancesCreate_593997(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594016 = path.getOrDefault("resourceGroupName")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_568249 = path.getOrDefault("resourceGroupName")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "resourceGroupName", valid_594016
-  var valid_594017 = path.getOrDefault("hanaInstanceName")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  if valid_568249 != nil:
+    section.add "resourceGroupName", valid_568249
+  var valid_568250 = path.getOrDefault("hanaInstanceName")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "hanaInstanceName", valid_594017
-  var valid_594018 = path.getOrDefault("subscriptionId")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  if valid_568250 != nil:
+    section.add "hanaInstanceName", valid_568250
+  var valid_568251 = path.getOrDefault("subscriptionId")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "subscriptionId", valid_594018
+  if valid_568251 != nil:
+    section.add "subscriptionId", valid_568251
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -510,11 +510,11 @@ proc validate_HanaInstancesCreate_593997(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594019 = query.getOrDefault("api-version")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_568252 = query.getOrDefault("api-version")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "api-version", valid_594019
+  if valid_568252 != nil:
+    section.add "api-version", valid_568252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -528,20 +528,20 @@ proc validate_HanaInstancesCreate_593997(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594021: Call_HanaInstancesCreate_593996; path: JsonNode;
+proc call*(call_568254: Call_HanaInstancesCreate_568229; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a SAP HANA instance for the specified subscription, resource group, and instance name.
   ## 
-  let valid = call_594021.validator(path, query, header, formData, body)
-  let scheme = call_594021.pickScheme
+  let valid = call_568254.validator(path, query, header, formData, body)
+  let scheme = call_568254.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594021.url(scheme.get, call_594021.host, call_594021.base,
-                         call_594021.route, valid.getOrDefault("path"),
+  let url = call_568254.url(scheme.get, call_568254.host, call_568254.base,
+                         call_568254.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594021, url, valid)
+  result = hook(call_568254, url, valid)
 
-proc call*(call_594022: Call_HanaInstancesCreate_593996; resourceGroupName: string;
+proc call*(call_568255: Call_HanaInstancesCreate_568229; resourceGroupName: string;
           apiVersion: string; hanaInstanceName: string;
           hanaInstanceParameter: JsonNode; subscriptionId: string): Recallable =
   ## hanaInstancesCreate
@@ -556,25 +556,25 @@ proc call*(call_594022: Call_HanaInstancesCreate_593996; resourceGroupName: stri
   ##                        : Request body representing a HanaInstance
   ##   subscriptionId: string (required)
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594023 = newJObject()
-  var query_594024 = newJObject()
-  var body_594025 = newJObject()
-  add(path_594023, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594024, "api-version", newJString(apiVersion))
-  add(path_594023, "hanaInstanceName", newJString(hanaInstanceName))
+  var path_568256 = newJObject()
+  var query_568257 = newJObject()
+  var body_568258 = newJObject()
+  add(path_568256, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568257, "api-version", newJString(apiVersion))
+  add(path_568256, "hanaInstanceName", newJString(hanaInstanceName))
   if hanaInstanceParameter != nil:
-    body_594025 = hanaInstanceParameter
-  add(path_594023, "subscriptionId", newJString(subscriptionId))
-  result = call_594022.call(path_594023, query_594024, nil, nil, body_594025)
+    body_568258 = hanaInstanceParameter
+  add(path_568256, "subscriptionId", newJString(subscriptionId))
+  result = call_568255.call(path_568256, query_568257, nil, nil, body_568258)
 
-var hanaInstancesCreate* = Call_HanaInstancesCreate_593996(
+var hanaInstancesCreate* = Call_HanaInstancesCreate_568229(
     name: "hanaInstancesCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/hanaInstances/{hanaInstanceName}",
-    validator: validate_HanaInstancesCreate_593997, base: "",
-    url: url_HanaInstancesCreate_593998, schemes: {Scheme.Https})
+    validator: validate_HanaInstancesCreate_568230, base: "",
+    url: url_HanaInstancesCreate_568231, schemes: {Scheme.Https})
 type
-  Call_HanaInstancesGet_593985 = ref object of OpenApiRestCall_593425
-proc url_HanaInstancesGet_593987(protocol: Scheme; host: string; base: string;
+  Call_HanaInstancesGet_568218 = ref object of OpenApiRestCall_567658
+proc url_HanaInstancesGet_568220(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -598,7 +598,7 @@ proc url_HanaInstancesGet_593987(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HanaInstancesGet_593986(path: JsonNode; query: JsonNode;
+proc validate_HanaInstancesGet_568219(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets properties of a SAP HANA instance for the specified subscription, resource group, and instance name.
@@ -615,21 +615,21 @@ proc validate_HanaInstancesGet_593986(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593988 = path.getOrDefault("resourceGroupName")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_568221 = path.getOrDefault("resourceGroupName")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "resourceGroupName", valid_593988
-  var valid_593989 = path.getOrDefault("hanaInstanceName")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_568221 != nil:
+    section.add "resourceGroupName", valid_568221
+  var valid_568222 = path.getOrDefault("hanaInstanceName")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "hanaInstanceName", valid_593989
-  var valid_593990 = path.getOrDefault("subscriptionId")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  if valid_568222 != nil:
+    section.add "hanaInstanceName", valid_568222
+  var valid_568223 = path.getOrDefault("subscriptionId")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "subscriptionId", valid_593990
+  if valid_568223 != nil:
+    section.add "subscriptionId", valid_568223
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -637,11 +637,11 @@ proc validate_HanaInstancesGet_593986(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593991 = query.getOrDefault("api-version")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_568224 = query.getOrDefault("api-version")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "api-version", valid_593991
+  if valid_568224 != nil:
+    section.add "api-version", valid_568224
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -650,20 +650,20 @@ proc validate_HanaInstancesGet_593986(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593992: Call_HanaInstancesGet_593985; path: JsonNode;
+proc call*(call_568225: Call_HanaInstancesGet_568218; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets properties of a SAP HANA instance for the specified subscription, resource group, and instance name.
   ## 
-  let valid = call_593992.validator(path, query, header, formData, body)
-  let scheme = call_593992.pickScheme
+  let valid = call_568225.validator(path, query, header, formData, body)
+  let scheme = call_568225.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593992.url(scheme.get, call_593992.host, call_593992.base,
-                         call_593992.route, valid.getOrDefault("path"),
+  let url = call_568225.url(scheme.get, call_568225.host, call_568225.base,
+                         call_568225.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593992, url, valid)
+  result = hook(call_568225, url, valid)
 
-proc call*(call_593993: Call_HanaInstancesGet_593985; resourceGroupName: string;
+proc call*(call_568226: Call_HanaInstancesGet_568218; resourceGroupName: string;
           apiVersion: string; hanaInstanceName: string; subscriptionId: string): Recallable =
   ## hanaInstancesGet
   ## Gets properties of a SAP HANA instance for the specified subscription, resource group, and instance name.
@@ -675,21 +675,21 @@ proc call*(call_593993: Call_HanaInstancesGet_593985; resourceGroupName: string;
   ##                   : Name of the SAP HANA on Azure instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593994 = newJObject()
-  var query_593995 = newJObject()
-  add(path_593994, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593995, "api-version", newJString(apiVersion))
-  add(path_593994, "hanaInstanceName", newJString(hanaInstanceName))
-  add(path_593994, "subscriptionId", newJString(subscriptionId))
-  result = call_593993.call(path_593994, query_593995, nil, nil, nil)
+  var path_568227 = newJObject()
+  var query_568228 = newJObject()
+  add(path_568227, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568228, "api-version", newJString(apiVersion))
+  add(path_568227, "hanaInstanceName", newJString(hanaInstanceName))
+  add(path_568227, "subscriptionId", newJString(subscriptionId))
+  result = call_568226.call(path_568227, query_568228, nil, nil, nil)
 
-var hanaInstancesGet* = Call_HanaInstancesGet_593985(name: "hanaInstancesGet",
+var hanaInstancesGet* = Call_HanaInstancesGet_568218(name: "hanaInstancesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/hanaInstances/{hanaInstanceName}",
-    validator: validate_HanaInstancesGet_593986, base: "",
-    url: url_HanaInstancesGet_593987, schemes: {Scheme.Https})
+    validator: validate_HanaInstancesGet_568219, base: "",
+    url: url_HanaInstancesGet_568220, schemes: {Scheme.Https})
 type
-  Call_HanaInstancesUpdate_594037 = ref object of OpenApiRestCall_593425
-proc url_HanaInstancesUpdate_594039(protocol: Scheme; host: string; base: string;
+  Call_HanaInstancesUpdate_568270 = ref object of OpenApiRestCall_567658
+proc url_HanaInstancesUpdate_568272(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -713,7 +713,7 @@ proc url_HanaInstancesUpdate_594039(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HanaInstancesUpdate_594038(path: JsonNode; query: JsonNode;
+proc validate_HanaInstancesUpdate_568271(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Patches the Tags field of a SAP HANA instance for the specified subscription, resource group, and instance name.
@@ -730,21 +730,21 @@ proc validate_HanaInstancesUpdate_594038(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594040 = path.getOrDefault("resourceGroupName")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  var valid_568273 = path.getOrDefault("resourceGroupName")
+  valid_568273 = validateParameter(valid_568273, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "resourceGroupName", valid_594040
-  var valid_594041 = path.getOrDefault("hanaInstanceName")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  if valid_568273 != nil:
+    section.add "resourceGroupName", valid_568273
+  var valid_568274 = path.getOrDefault("hanaInstanceName")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "hanaInstanceName", valid_594041
-  var valid_594042 = path.getOrDefault("subscriptionId")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  if valid_568274 != nil:
+    section.add "hanaInstanceName", valid_568274
+  var valid_568275 = path.getOrDefault("subscriptionId")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "subscriptionId", valid_594042
+  if valid_568275 != nil:
+    section.add "subscriptionId", valid_568275
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -752,11 +752,11 @@ proc validate_HanaInstancesUpdate_594038(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594043 = query.getOrDefault("api-version")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  var valid_568276 = query.getOrDefault("api-version")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "api-version", valid_594043
+  if valid_568276 != nil:
+    section.add "api-version", valid_568276
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -770,20 +770,20 @@ proc validate_HanaInstancesUpdate_594038(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594045: Call_HanaInstancesUpdate_594037; path: JsonNode;
+proc call*(call_568278: Call_HanaInstancesUpdate_568270; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patches the Tags field of a SAP HANA instance for the specified subscription, resource group, and instance name.
   ## 
-  let valid = call_594045.validator(path, query, header, formData, body)
-  let scheme = call_594045.pickScheme
+  let valid = call_568278.validator(path, query, header, formData, body)
+  let scheme = call_568278.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594045.url(scheme.get, call_594045.host, call_594045.base,
-                         call_594045.route, valid.getOrDefault("path"),
+  let url = call_568278.url(scheme.get, call_568278.host, call_568278.base,
+                         call_568278.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594045, url, valid)
+  result = hook(call_568278, url, valid)
 
-proc call*(call_594046: Call_HanaInstancesUpdate_594037; resourceGroupName: string;
+proc call*(call_568279: Call_HanaInstancesUpdate_568270; resourceGroupName: string;
           apiVersion: string; hanaInstanceName: string; tagsParameter: JsonNode;
           subscriptionId: string): Recallable =
   ## hanaInstancesUpdate
@@ -798,25 +798,25 @@ proc call*(call_594046: Call_HanaInstancesUpdate_594037; resourceGroupName: stri
   ##                : Request body that only contains the new Tags field
   ##   subscriptionId: string (required)
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594047 = newJObject()
-  var query_594048 = newJObject()
-  var body_594049 = newJObject()
-  add(path_594047, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594048, "api-version", newJString(apiVersion))
-  add(path_594047, "hanaInstanceName", newJString(hanaInstanceName))
+  var path_568280 = newJObject()
+  var query_568281 = newJObject()
+  var body_568282 = newJObject()
+  add(path_568280, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568281, "api-version", newJString(apiVersion))
+  add(path_568280, "hanaInstanceName", newJString(hanaInstanceName))
   if tagsParameter != nil:
-    body_594049 = tagsParameter
-  add(path_594047, "subscriptionId", newJString(subscriptionId))
-  result = call_594046.call(path_594047, query_594048, nil, nil, body_594049)
+    body_568282 = tagsParameter
+  add(path_568280, "subscriptionId", newJString(subscriptionId))
+  result = call_568279.call(path_568280, query_568281, nil, nil, body_568282)
 
-var hanaInstancesUpdate* = Call_HanaInstancesUpdate_594037(
+var hanaInstancesUpdate* = Call_HanaInstancesUpdate_568270(
     name: "hanaInstancesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/hanaInstances/{hanaInstanceName}",
-    validator: validate_HanaInstancesUpdate_594038, base: "",
-    url: url_HanaInstancesUpdate_594039, schemes: {Scheme.Https})
+    validator: validate_HanaInstancesUpdate_568271, base: "",
+    url: url_HanaInstancesUpdate_568272, schemes: {Scheme.Https})
 type
-  Call_HanaInstancesDelete_594026 = ref object of OpenApiRestCall_593425
-proc url_HanaInstancesDelete_594028(protocol: Scheme; host: string; base: string;
+  Call_HanaInstancesDelete_568259 = ref object of OpenApiRestCall_567658
+proc url_HanaInstancesDelete_568261(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -840,7 +840,7 @@ proc url_HanaInstancesDelete_594028(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HanaInstancesDelete_594027(path: JsonNode; query: JsonNode;
+proc validate_HanaInstancesDelete_568260(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes a SAP HANA instance with the specified subscription, resource group, and instance name.
@@ -857,21 +857,21 @@ proc validate_HanaInstancesDelete_594027(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594029 = path.getOrDefault("resourceGroupName")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_568262 = path.getOrDefault("resourceGroupName")
+  valid_568262 = validateParameter(valid_568262, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "resourceGroupName", valid_594029
-  var valid_594030 = path.getOrDefault("hanaInstanceName")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  if valid_568262 != nil:
+    section.add "resourceGroupName", valid_568262
+  var valid_568263 = path.getOrDefault("hanaInstanceName")
+  valid_568263 = validateParameter(valid_568263, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "hanaInstanceName", valid_594030
-  var valid_594031 = path.getOrDefault("subscriptionId")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  if valid_568263 != nil:
+    section.add "hanaInstanceName", valid_568263
+  var valid_568264 = path.getOrDefault("subscriptionId")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "subscriptionId", valid_594031
+  if valid_568264 != nil:
+    section.add "subscriptionId", valid_568264
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -879,11 +879,11 @@ proc validate_HanaInstancesDelete_594027(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594032 = query.getOrDefault("api-version")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  var valid_568265 = query.getOrDefault("api-version")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "api-version", valid_594032
+  if valid_568265 != nil:
+    section.add "api-version", valid_568265
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -892,20 +892,20 @@ proc validate_HanaInstancesDelete_594027(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594033: Call_HanaInstancesDelete_594026; path: JsonNode;
+proc call*(call_568266: Call_HanaInstancesDelete_568259; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a SAP HANA instance with the specified subscription, resource group, and instance name.
   ## 
-  let valid = call_594033.validator(path, query, header, formData, body)
-  let scheme = call_594033.pickScheme
+  let valid = call_568266.validator(path, query, header, formData, body)
+  let scheme = call_568266.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594033.url(scheme.get, call_594033.host, call_594033.base,
-                         call_594033.route, valid.getOrDefault("path"),
+  let url = call_568266.url(scheme.get, call_568266.host, call_568266.base,
+                         call_568266.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594033, url, valid)
+  result = hook(call_568266, url, valid)
 
-proc call*(call_594034: Call_HanaInstancesDelete_594026; resourceGroupName: string;
+proc call*(call_568267: Call_HanaInstancesDelete_568259; resourceGroupName: string;
           apiVersion: string; hanaInstanceName: string; subscriptionId: string): Recallable =
   ## hanaInstancesDelete
   ## Deletes a SAP HANA instance with the specified subscription, resource group, and instance name.
@@ -917,22 +917,22 @@ proc call*(call_594034: Call_HanaInstancesDelete_594026; resourceGroupName: stri
   ##                   : Name of the SAP HANA on Azure instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594035 = newJObject()
-  var query_594036 = newJObject()
-  add(path_594035, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594036, "api-version", newJString(apiVersion))
-  add(path_594035, "hanaInstanceName", newJString(hanaInstanceName))
-  add(path_594035, "subscriptionId", newJString(subscriptionId))
-  result = call_594034.call(path_594035, query_594036, nil, nil, nil)
+  var path_568268 = newJObject()
+  var query_568269 = newJObject()
+  add(path_568268, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568269, "api-version", newJString(apiVersion))
+  add(path_568268, "hanaInstanceName", newJString(hanaInstanceName))
+  add(path_568268, "subscriptionId", newJString(subscriptionId))
+  result = call_568267.call(path_568268, query_568269, nil, nil, nil)
 
-var hanaInstancesDelete* = Call_HanaInstancesDelete_594026(
+var hanaInstancesDelete* = Call_HanaInstancesDelete_568259(
     name: "hanaInstancesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/hanaInstances/{hanaInstanceName}",
-    validator: validate_HanaInstancesDelete_594027, base: "",
-    url: url_HanaInstancesDelete_594028, schemes: {Scheme.Https})
+    validator: validate_HanaInstancesDelete_568260, base: "",
+    url: url_HanaInstancesDelete_568261, schemes: {Scheme.Https})
 type
-  Call_HanaInstancesRestart_594050 = ref object of OpenApiRestCall_593425
-proc url_HanaInstancesRestart_594052(protocol: Scheme; host: string; base: string;
+  Call_HanaInstancesRestart_568283 = ref object of OpenApiRestCall_567658
+proc url_HanaInstancesRestart_568285(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -957,7 +957,7 @@ proc url_HanaInstancesRestart_594052(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HanaInstancesRestart_594051(path: JsonNode; query: JsonNode;
+proc validate_HanaInstancesRestart_568284(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to restart a SAP HANA instance.
   ## 
@@ -973,21 +973,21 @@ proc validate_HanaInstancesRestart_594051(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594053 = path.getOrDefault("resourceGroupName")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_568286 = path.getOrDefault("resourceGroupName")
+  valid_568286 = validateParameter(valid_568286, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "resourceGroupName", valid_594053
-  var valid_594054 = path.getOrDefault("hanaInstanceName")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  if valid_568286 != nil:
+    section.add "resourceGroupName", valid_568286
+  var valid_568287 = path.getOrDefault("hanaInstanceName")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "hanaInstanceName", valid_594054
-  var valid_594055 = path.getOrDefault("subscriptionId")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  if valid_568287 != nil:
+    section.add "hanaInstanceName", valid_568287
+  var valid_568288 = path.getOrDefault("subscriptionId")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "subscriptionId", valid_594055
+  if valid_568288 != nil:
+    section.add "subscriptionId", valid_568288
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -995,11 +995,11 @@ proc validate_HanaInstancesRestart_594051(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594056 = query.getOrDefault("api-version")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  var valid_568289 = query.getOrDefault("api-version")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "api-version", valid_594056
+  if valid_568289 != nil:
+    section.add "api-version", valid_568289
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1008,20 +1008,20 @@ proc validate_HanaInstancesRestart_594051(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594057: Call_HanaInstancesRestart_594050; path: JsonNode;
+proc call*(call_568290: Call_HanaInstancesRestart_568283; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to restart a SAP HANA instance.
   ## 
-  let valid = call_594057.validator(path, query, header, formData, body)
-  let scheme = call_594057.pickScheme
+  let valid = call_568290.validator(path, query, header, formData, body)
+  let scheme = call_568290.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594057.url(scheme.get, call_594057.host, call_594057.base,
-                         call_594057.route, valid.getOrDefault("path"),
+  let url = call_568290.url(scheme.get, call_568290.host, call_568290.base,
+                         call_568290.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594057, url, valid)
+  result = hook(call_568290, url, valid)
 
-proc call*(call_594058: Call_HanaInstancesRestart_594050;
+proc call*(call_568291: Call_HanaInstancesRestart_568283;
           resourceGroupName: string; apiVersion: string; hanaInstanceName: string;
           subscriptionId: string): Recallable =
   ## hanaInstancesRestart
@@ -1034,22 +1034,22 @@ proc call*(call_594058: Call_HanaInstancesRestart_594050;
   ##                   : Name of the SAP HANA on Azure instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594059 = newJObject()
-  var query_594060 = newJObject()
-  add(path_594059, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594060, "api-version", newJString(apiVersion))
-  add(path_594059, "hanaInstanceName", newJString(hanaInstanceName))
-  add(path_594059, "subscriptionId", newJString(subscriptionId))
-  result = call_594058.call(path_594059, query_594060, nil, nil, nil)
+  var path_568292 = newJObject()
+  var query_568293 = newJObject()
+  add(path_568292, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568293, "api-version", newJString(apiVersion))
+  add(path_568292, "hanaInstanceName", newJString(hanaInstanceName))
+  add(path_568292, "subscriptionId", newJString(subscriptionId))
+  result = call_568291.call(path_568292, query_568293, nil, nil, nil)
 
-var hanaInstancesRestart* = Call_HanaInstancesRestart_594050(
+var hanaInstancesRestart* = Call_HanaInstancesRestart_568283(
     name: "hanaInstancesRestart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/hanaInstances/{hanaInstanceName}/restart",
-    validator: validate_HanaInstancesRestart_594051, base: "",
-    url: url_HanaInstancesRestart_594052, schemes: {Scheme.Https})
+    validator: validate_HanaInstancesRestart_568284, base: "",
+    url: url_HanaInstancesRestart_568285, schemes: {Scheme.Https})
 type
-  Call_HanaInstancesShutdown_594061 = ref object of OpenApiRestCall_593425
-proc url_HanaInstancesShutdown_594063(protocol: Scheme; host: string; base: string;
+  Call_HanaInstancesShutdown_568294 = ref object of OpenApiRestCall_567658
+proc url_HanaInstancesShutdown_568296(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1074,7 +1074,7 @@ proc url_HanaInstancesShutdown_594063(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HanaInstancesShutdown_594062(path: JsonNode; query: JsonNode;
+proc validate_HanaInstancesShutdown_568295(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to shutdown a SAP HANA instance.
   ## 
@@ -1090,21 +1090,21 @@ proc validate_HanaInstancesShutdown_594062(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594064 = path.getOrDefault("resourceGroupName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  var valid_568297 = path.getOrDefault("resourceGroupName")
+  valid_568297 = validateParameter(valid_568297, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "resourceGroupName", valid_594064
-  var valid_594065 = path.getOrDefault("hanaInstanceName")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  if valid_568297 != nil:
+    section.add "resourceGroupName", valid_568297
+  var valid_568298 = path.getOrDefault("hanaInstanceName")
+  valid_568298 = validateParameter(valid_568298, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "hanaInstanceName", valid_594065
-  var valid_594066 = path.getOrDefault("subscriptionId")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  if valid_568298 != nil:
+    section.add "hanaInstanceName", valid_568298
+  var valid_568299 = path.getOrDefault("subscriptionId")
+  valid_568299 = validateParameter(valid_568299, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "subscriptionId", valid_594066
+  if valid_568299 != nil:
+    section.add "subscriptionId", valid_568299
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1112,11 +1112,11 @@ proc validate_HanaInstancesShutdown_594062(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594067 = query.getOrDefault("api-version")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  var valid_568300 = query.getOrDefault("api-version")
+  valid_568300 = validateParameter(valid_568300, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "api-version", valid_594067
+  if valid_568300 != nil:
+    section.add "api-version", valid_568300
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1125,20 +1125,20 @@ proc validate_HanaInstancesShutdown_594062(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594068: Call_HanaInstancesShutdown_594061; path: JsonNode;
+proc call*(call_568301: Call_HanaInstancesShutdown_568294; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to shutdown a SAP HANA instance.
   ## 
-  let valid = call_594068.validator(path, query, header, formData, body)
-  let scheme = call_594068.pickScheme
+  let valid = call_568301.validator(path, query, header, formData, body)
+  let scheme = call_568301.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594068.url(scheme.get, call_594068.host, call_594068.base,
-                         call_594068.route, valid.getOrDefault("path"),
+  let url = call_568301.url(scheme.get, call_568301.host, call_568301.base,
+                         call_568301.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594068, url, valid)
+  result = hook(call_568301, url, valid)
 
-proc call*(call_594069: Call_HanaInstancesShutdown_594061;
+proc call*(call_568302: Call_HanaInstancesShutdown_568294;
           resourceGroupName: string; apiVersion: string; hanaInstanceName: string;
           subscriptionId: string): Recallable =
   ## hanaInstancesShutdown
@@ -1151,22 +1151,22 @@ proc call*(call_594069: Call_HanaInstancesShutdown_594061;
   ##                   : Name of the SAP HANA on Azure instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594070 = newJObject()
-  var query_594071 = newJObject()
-  add(path_594070, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594071, "api-version", newJString(apiVersion))
-  add(path_594070, "hanaInstanceName", newJString(hanaInstanceName))
-  add(path_594070, "subscriptionId", newJString(subscriptionId))
-  result = call_594069.call(path_594070, query_594071, nil, nil, nil)
+  var path_568303 = newJObject()
+  var query_568304 = newJObject()
+  add(path_568303, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568304, "api-version", newJString(apiVersion))
+  add(path_568303, "hanaInstanceName", newJString(hanaInstanceName))
+  add(path_568303, "subscriptionId", newJString(subscriptionId))
+  result = call_568302.call(path_568303, query_568304, nil, nil, nil)
 
-var hanaInstancesShutdown* = Call_HanaInstancesShutdown_594061(
+var hanaInstancesShutdown* = Call_HanaInstancesShutdown_568294(
     name: "hanaInstancesShutdown", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/hanaInstances/{hanaInstanceName}/shutdown",
-    validator: validate_HanaInstancesShutdown_594062, base: "",
-    url: url_HanaInstancesShutdown_594063, schemes: {Scheme.Https})
+    validator: validate_HanaInstancesShutdown_568295, base: "",
+    url: url_HanaInstancesShutdown_568296, schemes: {Scheme.Https})
 type
-  Call_HanaInstancesStart_594072 = ref object of OpenApiRestCall_593425
-proc url_HanaInstancesStart_594074(protocol: Scheme; host: string; base: string;
+  Call_HanaInstancesStart_568305 = ref object of OpenApiRestCall_567658
+proc url_HanaInstancesStart_568307(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1191,7 +1191,7 @@ proc url_HanaInstancesStart_594074(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HanaInstancesStart_594073(path: JsonNode; query: JsonNode;
+proc validate_HanaInstancesStart_568306(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## The operation to start a SAP HANA instance.
@@ -1208,21 +1208,21 @@ proc validate_HanaInstancesStart_594073(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594075 = path.getOrDefault("resourceGroupName")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  var valid_568308 = path.getOrDefault("resourceGroupName")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "resourceGroupName", valid_594075
-  var valid_594076 = path.getOrDefault("hanaInstanceName")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  if valid_568308 != nil:
+    section.add "resourceGroupName", valid_568308
+  var valid_568309 = path.getOrDefault("hanaInstanceName")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "hanaInstanceName", valid_594076
-  var valid_594077 = path.getOrDefault("subscriptionId")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  if valid_568309 != nil:
+    section.add "hanaInstanceName", valid_568309
+  var valid_568310 = path.getOrDefault("subscriptionId")
+  valid_568310 = validateParameter(valid_568310, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "subscriptionId", valid_594077
+  if valid_568310 != nil:
+    section.add "subscriptionId", valid_568310
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1230,11 +1230,11 @@ proc validate_HanaInstancesStart_594073(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594078 = query.getOrDefault("api-version")
-  valid_594078 = validateParameter(valid_594078, JString, required = true,
+  var valid_568311 = query.getOrDefault("api-version")
+  valid_568311 = validateParameter(valid_568311, JString, required = true,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "api-version", valid_594078
+  if valid_568311 != nil:
+    section.add "api-version", valid_568311
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1243,20 +1243,20 @@ proc validate_HanaInstancesStart_594073(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594079: Call_HanaInstancesStart_594072; path: JsonNode;
+proc call*(call_568312: Call_HanaInstancesStart_568305; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to start a SAP HANA instance.
   ## 
-  let valid = call_594079.validator(path, query, header, formData, body)
-  let scheme = call_594079.pickScheme
+  let valid = call_568312.validator(path, query, header, formData, body)
+  let scheme = call_568312.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594079.url(scheme.get, call_594079.host, call_594079.base,
-                         call_594079.route, valid.getOrDefault("path"),
+  let url = call_568312.url(scheme.get, call_568312.host, call_568312.base,
+                         call_568312.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594079, url, valid)
+  result = hook(call_568312, url, valid)
 
-proc call*(call_594080: Call_HanaInstancesStart_594072; resourceGroupName: string;
+proc call*(call_568313: Call_HanaInstancesStart_568305; resourceGroupName: string;
           apiVersion: string; hanaInstanceName: string; subscriptionId: string): Recallable =
   ## hanaInstancesStart
   ## The operation to start a SAP HANA instance.
@@ -1268,22 +1268,22 @@ proc call*(call_594080: Call_HanaInstancesStart_594072; resourceGroupName: strin
   ##                   : Name of the SAP HANA on Azure instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594081 = newJObject()
-  var query_594082 = newJObject()
-  add(path_594081, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594082, "api-version", newJString(apiVersion))
-  add(path_594081, "hanaInstanceName", newJString(hanaInstanceName))
-  add(path_594081, "subscriptionId", newJString(subscriptionId))
-  result = call_594080.call(path_594081, query_594082, nil, nil, nil)
+  var path_568314 = newJObject()
+  var query_568315 = newJObject()
+  add(path_568314, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568315, "api-version", newJString(apiVersion))
+  add(path_568314, "hanaInstanceName", newJString(hanaInstanceName))
+  add(path_568314, "subscriptionId", newJString(subscriptionId))
+  result = call_568313.call(path_568314, query_568315, nil, nil, nil)
 
-var hanaInstancesStart* = Call_HanaInstancesStart_594072(
+var hanaInstancesStart* = Call_HanaInstancesStart_568305(
     name: "hanaInstancesStart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/hanaInstances/{hanaInstanceName}/start",
-    validator: validate_HanaInstancesStart_594073, base: "",
-    url: url_HanaInstancesStart_594074, schemes: {Scheme.Https})
+    validator: validate_HanaInstancesStart_568306, base: "",
+    url: url_HanaInstancesStart_568307, schemes: {Scheme.Https})
 type
-  Call_SapMonitorsCreate_594094 = ref object of OpenApiRestCall_593425
-proc url_SapMonitorsCreate_594096(protocol: Scheme; host: string; base: string;
+  Call_SapMonitorsCreate_568327 = ref object of OpenApiRestCall_567658
+proc url_SapMonitorsCreate_568329(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1306,7 +1306,7 @@ proc url_SapMonitorsCreate_594096(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SapMonitorsCreate_594095(path: JsonNode; query: JsonNode;
+proc validate_SapMonitorsCreate_568328(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Creates a SAP monitor for the specified subscription, resource group, and resource name.
@@ -1323,21 +1323,21 @@ proc validate_SapMonitorsCreate_594095(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594097 = path.getOrDefault("resourceGroupName")
-  valid_594097 = validateParameter(valid_594097, JString, required = true,
+  var valid_568330 = path.getOrDefault("resourceGroupName")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "resourceGroupName", valid_594097
-  var valid_594098 = path.getOrDefault("subscriptionId")
-  valid_594098 = validateParameter(valid_594098, JString, required = true,
+  if valid_568330 != nil:
+    section.add "resourceGroupName", valid_568330
+  var valid_568331 = path.getOrDefault("subscriptionId")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = nil)
-  if valid_594098 != nil:
-    section.add "subscriptionId", valid_594098
-  var valid_594099 = path.getOrDefault("sapMonitorName")
-  valid_594099 = validateParameter(valid_594099, JString, required = true,
+  if valid_568331 != nil:
+    section.add "subscriptionId", valid_568331
+  var valid_568332 = path.getOrDefault("sapMonitorName")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = nil)
-  if valid_594099 != nil:
-    section.add "sapMonitorName", valid_594099
+  if valid_568332 != nil:
+    section.add "sapMonitorName", valid_568332
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1345,11 +1345,11 @@ proc validate_SapMonitorsCreate_594095(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594100 = query.getOrDefault("api-version")
-  valid_594100 = validateParameter(valid_594100, JString, required = true,
+  var valid_568333 = query.getOrDefault("api-version")
+  valid_568333 = validateParameter(valid_568333, JString, required = true,
                                  default = nil)
-  if valid_594100 != nil:
-    section.add "api-version", valid_594100
+  if valid_568333 != nil:
+    section.add "api-version", valid_568333
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1363,20 +1363,20 @@ proc validate_SapMonitorsCreate_594095(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594102: Call_SapMonitorsCreate_594094; path: JsonNode;
+proc call*(call_568335: Call_SapMonitorsCreate_568327; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a SAP monitor for the specified subscription, resource group, and resource name.
   ## 
-  let valid = call_594102.validator(path, query, header, formData, body)
-  let scheme = call_594102.pickScheme
+  let valid = call_568335.validator(path, query, header, formData, body)
+  let scheme = call_568335.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594102.url(scheme.get, call_594102.host, call_594102.base,
-                         call_594102.route, valid.getOrDefault("path"),
+  let url = call_568335.url(scheme.get, call_568335.host, call_568335.base,
+                         call_568335.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594102, url, valid)
+  result = hook(call_568335, url, valid)
 
-proc call*(call_594103: Call_SapMonitorsCreate_594094; resourceGroupName: string;
+proc call*(call_568336: Call_SapMonitorsCreate_568327; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; sapMonitorParameter: JsonNode;
           sapMonitorName: string): Recallable =
   ## sapMonitorsCreate
@@ -1391,24 +1391,24 @@ proc call*(call_594103: Call_SapMonitorsCreate_594094; resourceGroupName: string
   ##                      : Request body representing a SAP Monitor
   ##   sapMonitorName: string (required)
   ##                 : Name of the SAP monitor resource.
-  var path_594104 = newJObject()
-  var query_594105 = newJObject()
-  var body_594106 = newJObject()
-  add(path_594104, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594105, "api-version", newJString(apiVersion))
-  add(path_594104, "subscriptionId", newJString(subscriptionId))
+  var path_568337 = newJObject()
+  var query_568338 = newJObject()
+  var body_568339 = newJObject()
+  add(path_568337, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568338, "api-version", newJString(apiVersion))
+  add(path_568337, "subscriptionId", newJString(subscriptionId))
   if sapMonitorParameter != nil:
-    body_594106 = sapMonitorParameter
-  add(path_594104, "sapMonitorName", newJString(sapMonitorName))
-  result = call_594103.call(path_594104, query_594105, nil, nil, body_594106)
+    body_568339 = sapMonitorParameter
+  add(path_568337, "sapMonitorName", newJString(sapMonitorName))
+  result = call_568336.call(path_568337, query_568338, nil, nil, body_568339)
 
-var sapMonitorsCreate* = Call_SapMonitorsCreate_594094(name: "sapMonitorsCreate",
+var sapMonitorsCreate* = Call_SapMonitorsCreate_568327(name: "sapMonitorsCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/sapMonitors/{sapMonitorName}",
-    validator: validate_SapMonitorsCreate_594095, base: "",
-    url: url_SapMonitorsCreate_594096, schemes: {Scheme.Https})
+    validator: validate_SapMonitorsCreate_568328, base: "",
+    url: url_SapMonitorsCreate_568329, schemes: {Scheme.Https})
 type
-  Call_SapMonitorsGet_594083 = ref object of OpenApiRestCall_593425
-proc url_SapMonitorsGet_594085(protocol: Scheme; host: string; base: string;
+  Call_SapMonitorsGet_568316 = ref object of OpenApiRestCall_567658
+proc url_SapMonitorsGet_568318(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1431,7 +1431,7 @@ proc url_SapMonitorsGet_594085(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SapMonitorsGet_594084(path: JsonNode; query: JsonNode;
+proc validate_SapMonitorsGet_568317(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets properties of a SAP monitor for the specified subscription, resource group, and resource name.
@@ -1448,21 +1448,21 @@ proc validate_SapMonitorsGet_594084(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594086 = path.getOrDefault("resourceGroupName")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  var valid_568319 = path.getOrDefault("resourceGroupName")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "resourceGroupName", valid_594086
-  var valid_594087 = path.getOrDefault("subscriptionId")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  if valid_568319 != nil:
+    section.add "resourceGroupName", valid_568319
+  var valid_568320 = path.getOrDefault("subscriptionId")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "subscriptionId", valid_594087
-  var valid_594088 = path.getOrDefault("sapMonitorName")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  if valid_568320 != nil:
+    section.add "subscriptionId", valid_568320
+  var valid_568321 = path.getOrDefault("sapMonitorName")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "sapMonitorName", valid_594088
+  if valid_568321 != nil:
+    section.add "sapMonitorName", valid_568321
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1470,11 +1470,11 @@ proc validate_SapMonitorsGet_594084(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594089 = query.getOrDefault("api-version")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_568322 = query.getOrDefault("api-version")
+  valid_568322 = validateParameter(valid_568322, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "api-version", valid_594089
+  if valid_568322 != nil:
+    section.add "api-version", valid_568322
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1483,20 +1483,20 @@ proc validate_SapMonitorsGet_594084(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594090: Call_SapMonitorsGet_594083; path: JsonNode; query: JsonNode;
+proc call*(call_568323: Call_SapMonitorsGet_568316; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets properties of a SAP monitor for the specified subscription, resource group, and resource name.
   ## 
-  let valid = call_594090.validator(path, query, header, formData, body)
-  let scheme = call_594090.pickScheme
+  let valid = call_568323.validator(path, query, header, formData, body)
+  let scheme = call_568323.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594090.url(scheme.get, call_594090.host, call_594090.base,
-                         call_594090.route, valid.getOrDefault("path"),
+  let url = call_568323.url(scheme.get, call_568323.host, call_568323.base,
+                         call_568323.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594090, url, valid)
+  result = hook(call_568323, url, valid)
 
-proc call*(call_594091: Call_SapMonitorsGet_594083; resourceGroupName: string;
+proc call*(call_568324: Call_SapMonitorsGet_568316; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; sapMonitorName: string): Recallable =
   ## sapMonitorsGet
   ## Gets properties of a SAP monitor for the specified subscription, resource group, and resource name.
@@ -1508,21 +1508,21 @@ proc call*(call_594091: Call_SapMonitorsGet_594083; resourceGroupName: string;
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   sapMonitorName: string (required)
   ##                 : Name of the SAP monitor resource.
-  var path_594092 = newJObject()
-  var query_594093 = newJObject()
-  add(path_594092, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594093, "api-version", newJString(apiVersion))
-  add(path_594092, "subscriptionId", newJString(subscriptionId))
-  add(path_594092, "sapMonitorName", newJString(sapMonitorName))
-  result = call_594091.call(path_594092, query_594093, nil, nil, nil)
+  var path_568325 = newJObject()
+  var query_568326 = newJObject()
+  add(path_568325, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568326, "api-version", newJString(apiVersion))
+  add(path_568325, "subscriptionId", newJString(subscriptionId))
+  add(path_568325, "sapMonitorName", newJString(sapMonitorName))
+  result = call_568324.call(path_568325, query_568326, nil, nil, nil)
 
-var sapMonitorsGet* = Call_SapMonitorsGet_594083(name: "sapMonitorsGet",
+var sapMonitorsGet* = Call_SapMonitorsGet_568316(name: "sapMonitorsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/sapMonitors/{sapMonitorName}",
-    validator: validate_SapMonitorsGet_594084, base: "", url: url_SapMonitorsGet_594085,
+    validator: validate_SapMonitorsGet_568317, base: "", url: url_SapMonitorsGet_568318,
     schemes: {Scheme.Https})
 type
-  Call_SapMonitorsUpdate_594118 = ref object of OpenApiRestCall_593425
-proc url_SapMonitorsUpdate_594120(protocol: Scheme; host: string; base: string;
+  Call_SapMonitorsUpdate_568351 = ref object of OpenApiRestCall_567658
+proc url_SapMonitorsUpdate_568353(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1545,7 +1545,7 @@ proc url_SapMonitorsUpdate_594120(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SapMonitorsUpdate_594119(path: JsonNode; query: JsonNode;
+proc validate_SapMonitorsUpdate_568352(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Patches the Tags field of a SAP monitor for the specified subscription, resource group, and monitor name.
@@ -1562,21 +1562,21 @@ proc validate_SapMonitorsUpdate_594119(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594121 = path.getOrDefault("resourceGroupName")
-  valid_594121 = validateParameter(valid_594121, JString, required = true,
+  var valid_568354 = path.getOrDefault("resourceGroupName")
+  valid_568354 = validateParameter(valid_568354, JString, required = true,
                                  default = nil)
-  if valid_594121 != nil:
-    section.add "resourceGroupName", valid_594121
-  var valid_594122 = path.getOrDefault("subscriptionId")
-  valid_594122 = validateParameter(valid_594122, JString, required = true,
+  if valid_568354 != nil:
+    section.add "resourceGroupName", valid_568354
+  var valid_568355 = path.getOrDefault("subscriptionId")
+  valid_568355 = validateParameter(valid_568355, JString, required = true,
                                  default = nil)
-  if valid_594122 != nil:
-    section.add "subscriptionId", valid_594122
-  var valid_594123 = path.getOrDefault("sapMonitorName")
-  valid_594123 = validateParameter(valid_594123, JString, required = true,
+  if valid_568355 != nil:
+    section.add "subscriptionId", valid_568355
+  var valid_568356 = path.getOrDefault("sapMonitorName")
+  valid_568356 = validateParameter(valid_568356, JString, required = true,
                                  default = nil)
-  if valid_594123 != nil:
-    section.add "sapMonitorName", valid_594123
+  if valid_568356 != nil:
+    section.add "sapMonitorName", valid_568356
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1584,11 +1584,11 @@ proc validate_SapMonitorsUpdate_594119(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594124 = query.getOrDefault("api-version")
-  valid_594124 = validateParameter(valid_594124, JString, required = true,
+  var valid_568357 = query.getOrDefault("api-version")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = nil)
-  if valid_594124 != nil:
-    section.add "api-version", valid_594124
+  if valid_568357 != nil:
+    section.add "api-version", valid_568357
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1602,20 +1602,20 @@ proc validate_SapMonitorsUpdate_594119(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594126: Call_SapMonitorsUpdate_594118; path: JsonNode;
+proc call*(call_568359: Call_SapMonitorsUpdate_568351; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patches the Tags field of a SAP monitor for the specified subscription, resource group, and monitor name.
   ## 
-  let valid = call_594126.validator(path, query, header, formData, body)
-  let scheme = call_594126.pickScheme
+  let valid = call_568359.validator(path, query, header, formData, body)
+  let scheme = call_568359.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594126.url(scheme.get, call_594126.host, call_594126.base,
-                         call_594126.route, valid.getOrDefault("path"),
+  let url = call_568359.url(scheme.get, call_568359.host, call_568359.base,
+                         call_568359.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594126, url, valid)
+  result = hook(call_568359, url, valid)
 
-proc call*(call_594127: Call_SapMonitorsUpdate_594118; resourceGroupName: string;
+proc call*(call_568360: Call_SapMonitorsUpdate_568351; resourceGroupName: string;
           apiVersion: string; tagsParameter: JsonNode; subscriptionId: string;
           sapMonitorName: string): Recallable =
   ## sapMonitorsUpdate
@@ -1630,24 +1630,24 @@ proc call*(call_594127: Call_SapMonitorsUpdate_594118; resourceGroupName: string
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   sapMonitorName: string (required)
   ##                 : Name of the SAP monitor resource.
-  var path_594128 = newJObject()
-  var query_594129 = newJObject()
-  var body_594130 = newJObject()
-  add(path_594128, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594129, "api-version", newJString(apiVersion))
+  var path_568361 = newJObject()
+  var query_568362 = newJObject()
+  var body_568363 = newJObject()
+  add(path_568361, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568362, "api-version", newJString(apiVersion))
   if tagsParameter != nil:
-    body_594130 = tagsParameter
-  add(path_594128, "subscriptionId", newJString(subscriptionId))
-  add(path_594128, "sapMonitorName", newJString(sapMonitorName))
-  result = call_594127.call(path_594128, query_594129, nil, nil, body_594130)
+    body_568363 = tagsParameter
+  add(path_568361, "subscriptionId", newJString(subscriptionId))
+  add(path_568361, "sapMonitorName", newJString(sapMonitorName))
+  result = call_568360.call(path_568361, query_568362, nil, nil, body_568363)
 
-var sapMonitorsUpdate* = Call_SapMonitorsUpdate_594118(name: "sapMonitorsUpdate",
+var sapMonitorsUpdate* = Call_SapMonitorsUpdate_568351(name: "sapMonitorsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/sapMonitors/{sapMonitorName}",
-    validator: validate_SapMonitorsUpdate_594119, base: "",
-    url: url_SapMonitorsUpdate_594120, schemes: {Scheme.Https})
+    validator: validate_SapMonitorsUpdate_568352, base: "",
+    url: url_SapMonitorsUpdate_568353, schemes: {Scheme.Https})
 type
-  Call_SapMonitorsDelete_594107 = ref object of OpenApiRestCall_593425
-proc url_SapMonitorsDelete_594109(protocol: Scheme; host: string; base: string;
+  Call_SapMonitorsDelete_568340 = ref object of OpenApiRestCall_567658
+proc url_SapMonitorsDelete_568342(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1670,7 +1670,7 @@ proc url_SapMonitorsDelete_594109(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SapMonitorsDelete_594108(path: JsonNode; query: JsonNode;
+proc validate_SapMonitorsDelete_568341(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes a SAP monitor with the specified subscription, resource group, and monitor name.
@@ -1687,21 +1687,21 @@ proc validate_SapMonitorsDelete_594108(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594110 = path.getOrDefault("resourceGroupName")
-  valid_594110 = validateParameter(valid_594110, JString, required = true,
+  var valid_568343 = path.getOrDefault("resourceGroupName")
+  valid_568343 = validateParameter(valid_568343, JString, required = true,
                                  default = nil)
-  if valid_594110 != nil:
-    section.add "resourceGroupName", valid_594110
-  var valid_594111 = path.getOrDefault("subscriptionId")
-  valid_594111 = validateParameter(valid_594111, JString, required = true,
+  if valid_568343 != nil:
+    section.add "resourceGroupName", valid_568343
+  var valid_568344 = path.getOrDefault("subscriptionId")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = nil)
-  if valid_594111 != nil:
-    section.add "subscriptionId", valid_594111
-  var valid_594112 = path.getOrDefault("sapMonitorName")
-  valid_594112 = validateParameter(valid_594112, JString, required = true,
+  if valid_568344 != nil:
+    section.add "subscriptionId", valid_568344
+  var valid_568345 = path.getOrDefault("sapMonitorName")
+  valid_568345 = validateParameter(valid_568345, JString, required = true,
                                  default = nil)
-  if valid_594112 != nil:
-    section.add "sapMonitorName", valid_594112
+  if valid_568345 != nil:
+    section.add "sapMonitorName", valid_568345
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1709,11 +1709,11 @@ proc validate_SapMonitorsDelete_594108(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594113 = query.getOrDefault("api-version")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  var valid_568346 = query.getOrDefault("api-version")
+  valid_568346 = validateParameter(valid_568346, JString, required = true,
                                  default = nil)
-  if valid_594113 != nil:
-    section.add "api-version", valid_594113
+  if valid_568346 != nil:
+    section.add "api-version", valid_568346
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1722,20 +1722,20 @@ proc validate_SapMonitorsDelete_594108(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594114: Call_SapMonitorsDelete_594107; path: JsonNode;
+proc call*(call_568347: Call_SapMonitorsDelete_568340; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a SAP monitor with the specified subscription, resource group, and monitor name.
   ## 
-  let valid = call_594114.validator(path, query, header, formData, body)
-  let scheme = call_594114.pickScheme
+  let valid = call_568347.validator(path, query, header, formData, body)
+  let scheme = call_568347.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594114.url(scheme.get, call_594114.host, call_594114.base,
-                         call_594114.route, valid.getOrDefault("path"),
+  let url = call_568347.url(scheme.get, call_568347.host, call_568347.base,
+                         call_568347.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594114, url, valid)
+  result = hook(call_568347, url, valid)
 
-proc call*(call_594115: Call_SapMonitorsDelete_594107; resourceGroupName: string;
+proc call*(call_568348: Call_SapMonitorsDelete_568340; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; sapMonitorName: string): Recallable =
   ## sapMonitorsDelete
   ## Deletes a SAP monitor with the specified subscription, resource group, and monitor name.
@@ -1747,18 +1747,18 @@ proc call*(call_594115: Call_SapMonitorsDelete_594107; resourceGroupName: string
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   sapMonitorName: string (required)
   ##                 : Name of the SAP monitor resource.
-  var path_594116 = newJObject()
-  var query_594117 = newJObject()
-  add(path_594116, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594117, "api-version", newJString(apiVersion))
-  add(path_594116, "subscriptionId", newJString(subscriptionId))
-  add(path_594116, "sapMonitorName", newJString(sapMonitorName))
-  result = call_594115.call(path_594116, query_594117, nil, nil, nil)
+  var path_568349 = newJObject()
+  var query_568350 = newJObject()
+  add(path_568349, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568350, "api-version", newJString(apiVersion))
+  add(path_568349, "subscriptionId", newJString(subscriptionId))
+  add(path_568349, "sapMonitorName", newJString(sapMonitorName))
+  result = call_568348.call(path_568349, query_568350, nil, nil, nil)
 
-var sapMonitorsDelete* = Call_SapMonitorsDelete_594107(name: "sapMonitorsDelete",
+var sapMonitorsDelete* = Call_SapMonitorsDelete_568340(name: "sapMonitorsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HanaOnAzure/sapMonitors/{sapMonitorName}",
-    validator: validate_SapMonitorsDelete_594108, base: "",
-    url: url_SapMonitorsDelete_594109, schemes: {Scheme.Https})
+    validator: validate_SapMonitorsDelete_568341, base: "",
+    url: url_SapMonitorsDelete_568342, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "security-securityContacts"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SecurityContactsList_593630 = ref object of OpenApiRestCall_593408
-proc url_SecurityContactsList_593632(protocol: Scheme; host: string; base: string;
+  Call_SecurityContactsList_567863 = ref object of OpenApiRestCall_567641
+proc url_SecurityContactsList_567865(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_SecurityContactsList_593632(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecurityContactsList_593631(path: JsonNode; query: JsonNode;
+proc validate_SecurityContactsList_567864(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security contact configurations for the subscription
   ## 
@@ -133,11 +133,11 @@ proc validate_SecurityContactsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593792 = path.getOrDefault("subscriptionId")
-  valid_593792 = validateParameter(valid_593792, JString, required = true,
+  var valid_568025 = path.getOrDefault("subscriptionId")
+  valid_568025 = validateParameter(valid_568025, JString, required = true,
                                  default = nil)
-  if valid_593792 != nil:
-    section.add "subscriptionId", valid_593792
+  if valid_568025 != nil:
+    section.add "subscriptionId", valid_568025
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_SecurityContactsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593793 = query.getOrDefault("api-version")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  var valid_568026 = query.getOrDefault("api-version")
+  valid_568026 = validateParameter(valid_568026, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "api-version", valid_593793
+  if valid_568026 != nil:
+    section.add "api-version", valid_568026
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_SecurityContactsList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593820: Call_SecurityContactsList_593630; path: JsonNode;
+proc call*(call_568053: Call_SecurityContactsList_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Security contact configurations for the subscription
   ## 
-  let valid = call_593820.validator(path, query, header, formData, body)
-  let scheme = call_593820.pickScheme
+  let valid = call_568053.validator(path, query, header, formData, body)
+  let scheme = call_568053.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593820.url(scheme.get, call_593820.host, call_593820.base,
-                         call_593820.route, valid.getOrDefault("path"),
+  let url = call_568053.url(scheme.get, call_568053.host, call_568053.base,
+                         call_568053.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593820, url, valid)
+  result = hook(call_568053, url, valid)
 
-proc call*(call_593891: Call_SecurityContactsList_593630; apiVersion: string;
+proc call*(call_568124: Call_SecurityContactsList_567863; apiVersion: string;
           subscriptionId: string): Recallable =
   ## securityContactsList
   ## Security contact configurations for the subscription
@@ -179,20 +179,20 @@ proc call*(call_593891: Call_SecurityContactsList_593630; apiVersion: string;
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_593892 = newJObject()
-  var query_593894 = newJObject()
-  add(query_593894, "api-version", newJString(apiVersion))
-  add(path_593892, "subscriptionId", newJString(subscriptionId))
-  result = call_593891.call(path_593892, query_593894, nil, nil, nil)
+  var path_568125 = newJObject()
+  var query_568127 = newJObject()
+  add(query_568127, "api-version", newJString(apiVersion))
+  add(path_568125, "subscriptionId", newJString(subscriptionId))
+  result = call_568124.call(path_568125, query_568127, nil, nil, nil)
 
-var securityContactsList* = Call_SecurityContactsList_593630(
+var securityContactsList* = Call_SecurityContactsList_567863(
     name: "securityContactsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/securityContacts",
-    validator: validate_SecurityContactsList_593631, base: "",
-    url: url_SecurityContactsList_593632, schemes: {Scheme.Https})
+    validator: validate_SecurityContactsList_567864, base: "",
+    url: url_SecurityContactsList_567865, schemes: {Scheme.Https})
 type
-  Call_SecurityContactsCreate_593952 = ref object of OpenApiRestCall_593408
-proc url_SecurityContactsCreate_593954(protocol: Scheme; host: string; base: string;
+  Call_SecurityContactsCreate_568185 = ref object of OpenApiRestCall_567641
+proc url_SecurityContactsCreate_568187(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -212,7 +212,7 @@ proc url_SecurityContactsCreate_593954(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecurityContactsCreate_593953(path: JsonNode; query: JsonNode;
+proc validate_SecurityContactsCreate_568186(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security contact configurations for the subscription
   ## 
@@ -226,16 +226,16 @@ proc validate_SecurityContactsCreate_593953(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593955 = path.getOrDefault("subscriptionId")
-  valid_593955 = validateParameter(valid_593955, JString, required = true,
+  var valid_568188 = path.getOrDefault("subscriptionId")
+  valid_568188 = validateParameter(valid_568188, JString, required = true,
                                  default = nil)
-  if valid_593955 != nil:
-    section.add "subscriptionId", valid_593955
-  var valid_593956 = path.getOrDefault("securityContactName")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  if valid_568188 != nil:
+    section.add "subscriptionId", valid_568188
+  var valid_568189 = path.getOrDefault("securityContactName")
+  valid_568189 = validateParameter(valid_568189, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "securityContactName", valid_593956
+  if valid_568189 != nil:
+    section.add "securityContactName", valid_568189
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -243,11 +243,11 @@ proc validate_SecurityContactsCreate_593953(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593957 = query.getOrDefault("api-version")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  var valid_568190 = query.getOrDefault("api-version")
+  valid_568190 = validateParameter(valid_568190, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "api-version", valid_593957
+  if valid_568190 != nil:
+    section.add "api-version", valid_568190
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -261,20 +261,20 @@ proc validate_SecurityContactsCreate_593953(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593959: Call_SecurityContactsCreate_593952; path: JsonNode;
+proc call*(call_568192: Call_SecurityContactsCreate_568185; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Security contact configurations for the subscription
   ## 
-  let valid = call_593959.validator(path, query, header, formData, body)
-  let scheme = call_593959.pickScheme
+  let valid = call_568192.validator(path, query, header, formData, body)
+  let scheme = call_568192.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593959.url(scheme.get, call_593959.host, call_593959.base,
-                         call_593959.route, valid.getOrDefault("path"),
+  let url = call_568192.url(scheme.get, call_568192.host, call_568192.base,
+                         call_568192.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593959, url, valid)
+  result = hook(call_568192, url, valid)
 
-proc call*(call_593960: Call_SecurityContactsCreate_593952; apiVersion: string;
+proc call*(call_568193: Call_SecurityContactsCreate_568185; apiVersion: string;
           subscriptionId: string; securityContactName: string;
           securityContact: JsonNode): Recallable =
   ## securityContactsCreate
@@ -287,24 +287,24 @@ proc call*(call_593960: Call_SecurityContactsCreate_593952; apiVersion: string;
   ##                      : Name of the security contact object
   ##   securityContact: JObject (required)
   ##                  : Security contact object
-  var path_593961 = newJObject()
-  var query_593962 = newJObject()
-  var body_593963 = newJObject()
-  add(query_593962, "api-version", newJString(apiVersion))
-  add(path_593961, "subscriptionId", newJString(subscriptionId))
-  add(path_593961, "securityContactName", newJString(securityContactName))
+  var path_568194 = newJObject()
+  var query_568195 = newJObject()
+  var body_568196 = newJObject()
+  add(query_568195, "api-version", newJString(apiVersion))
+  add(path_568194, "subscriptionId", newJString(subscriptionId))
+  add(path_568194, "securityContactName", newJString(securityContactName))
   if securityContact != nil:
-    body_593963 = securityContact
-  result = call_593960.call(path_593961, query_593962, nil, nil, body_593963)
+    body_568196 = securityContact
+  result = call_568193.call(path_568194, query_568195, nil, nil, body_568196)
 
-var securityContactsCreate* = Call_SecurityContactsCreate_593952(
+var securityContactsCreate* = Call_SecurityContactsCreate_568185(
     name: "securityContactsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/securityContacts/{securityContactName}",
-    validator: validate_SecurityContactsCreate_593953, base: "",
-    url: url_SecurityContactsCreate_593954, schemes: {Scheme.Https})
+    validator: validate_SecurityContactsCreate_568186, base: "",
+    url: url_SecurityContactsCreate_568187, schemes: {Scheme.Https})
 type
-  Call_SecurityContactsGet_593933 = ref object of OpenApiRestCall_593408
-proc url_SecurityContactsGet_593935(protocol: Scheme; host: string; base: string;
+  Call_SecurityContactsGet_568166 = ref object of OpenApiRestCall_567641
+proc url_SecurityContactsGet_568168(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -324,7 +324,7 @@ proc url_SecurityContactsGet_593935(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecurityContactsGet_593934(path: JsonNode; query: JsonNode;
+proc validate_SecurityContactsGet_568167(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Security contact configurations for the subscription
@@ -339,16 +339,16 @@ proc validate_SecurityContactsGet_593934(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593945 = path.getOrDefault("subscriptionId")
-  valid_593945 = validateParameter(valid_593945, JString, required = true,
+  var valid_568178 = path.getOrDefault("subscriptionId")
+  valid_568178 = validateParameter(valid_568178, JString, required = true,
                                  default = nil)
-  if valid_593945 != nil:
-    section.add "subscriptionId", valid_593945
-  var valid_593946 = path.getOrDefault("securityContactName")
-  valid_593946 = validateParameter(valid_593946, JString, required = true,
+  if valid_568178 != nil:
+    section.add "subscriptionId", valid_568178
+  var valid_568179 = path.getOrDefault("securityContactName")
+  valid_568179 = validateParameter(valid_568179, JString, required = true,
                                  default = nil)
-  if valid_593946 != nil:
-    section.add "securityContactName", valid_593946
+  if valid_568179 != nil:
+    section.add "securityContactName", valid_568179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -356,11 +356,11 @@ proc validate_SecurityContactsGet_593934(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593947 = query.getOrDefault("api-version")
-  valid_593947 = validateParameter(valid_593947, JString, required = true,
+  var valid_568180 = query.getOrDefault("api-version")
+  valid_568180 = validateParameter(valid_568180, JString, required = true,
                                  default = nil)
-  if valid_593947 != nil:
-    section.add "api-version", valid_593947
+  if valid_568180 != nil:
+    section.add "api-version", valid_568180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -369,20 +369,20 @@ proc validate_SecurityContactsGet_593934(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593948: Call_SecurityContactsGet_593933; path: JsonNode;
+proc call*(call_568181: Call_SecurityContactsGet_568166; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Security contact configurations for the subscription
   ## 
-  let valid = call_593948.validator(path, query, header, formData, body)
-  let scheme = call_593948.pickScheme
+  let valid = call_568181.validator(path, query, header, formData, body)
+  let scheme = call_568181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593948.url(scheme.get, call_593948.host, call_593948.base,
-                         call_593948.route, valid.getOrDefault("path"),
+  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
+                         call_568181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593948, url, valid)
+  result = hook(call_568181, url, valid)
 
-proc call*(call_593949: Call_SecurityContactsGet_593933; apiVersion: string;
+proc call*(call_568182: Call_SecurityContactsGet_568166; apiVersion: string;
           subscriptionId: string; securityContactName: string): Recallable =
   ## securityContactsGet
   ## Security contact configurations for the subscription
@@ -392,21 +392,21 @@ proc call*(call_593949: Call_SecurityContactsGet_593933; apiVersion: string;
   ##                 : Azure subscription ID
   ##   securityContactName: string (required)
   ##                      : Name of the security contact object
-  var path_593950 = newJObject()
-  var query_593951 = newJObject()
-  add(query_593951, "api-version", newJString(apiVersion))
-  add(path_593950, "subscriptionId", newJString(subscriptionId))
-  add(path_593950, "securityContactName", newJString(securityContactName))
-  result = call_593949.call(path_593950, query_593951, nil, nil, nil)
+  var path_568183 = newJObject()
+  var query_568184 = newJObject()
+  add(query_568184, "api-version", newJString(apiVersion))
+  add(path_568183, "subscriptionId", newJString(subscriptionId))
+  add(path_568183, "securityContactName", newJString(securityContactName))
+  result = call_568182.call(path_568183, query_568184, nil, nil, nil)
 
-var securityContactsGet* = Call_SecurityContactsGet_593933(
+var securityContactsGet* = Call_SecurityContactsGet_568166(
     name: "securityContactsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/securityContacts/{securityContactName}",
-    validator: validate_SecurityContactsGet_593934, base: "",
-    url: url_SecurityContactsGet_593935, schemes: {Scheme.Https})
+    validator: validate_SecurityContactsGet_568167, base: "",
+    url: url_SecurityContactsGet_568168, schemes: {Scheme.Https})
 type
-  Call_SecurityContactsUpdate_593974 = ref object of OpenApiRestCall_593408
-proc url_SecurityContactsUpdate_593976(protocol: Scheme; host: string; base: string;
+  Call_SecurityContactsUpdate_568207 = ref object of OpenApiRestCall_567641
+proc url_SecurityContactsUpdate_568209(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -426,7 +426,7 @@ proc url_SecurityContactsUpdate_593976(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecurityContactsUpdate_593975(path: JsonNode; query: JsonNode;
+proc validate_SecurityContactsUpdate_568208(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security contact configurations for the subscription
   ## 
@@ -440,16 +440,16 @@ proc validate_SecurityContactsUpdate_593975(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593977 = path.getOrDefault("subscriptionId")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  var valid_568210 = path.getOrDefault("subscriptionId")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "subscriptionId", valid_593977
-  var valid_593978 = path.getOrDefault("securityContactName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  if valid_568210 != nil:
+    section.add "subscriptionId", valid_568210
+  var valid_568211 = path.getOrDefault("securityContactName")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "securityContactName", valid_593978
+  if valid_568211 != nil:
+    section.add "securityContactName", valid_568211
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -457,11 +457,11 @@ proc validate_SecurityContactsUpdate_593975(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593979 = query.getOrDefault("api-version")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_568212 = query.getOrDefault("api-version")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "api-version", valid_593979
+  if valid_568212 != nil:
+    section.add "api-version", valid_568212
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -475,20 +475,20 @@ proc validate_SecurityContactsUpdate_593975(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593981: Call_SecurityContactsUpdate_593974; path: JsonNode;
+proc call*(call_568214: Call_SecurityContactsUpdate_568207; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Security contact configurations for the subscription
   ## 
-  let valid = call_593981.validator(path, query, header, formData, body)
-  let scheme = call_593981.pickScheme
+  let valid = call_568214.validator(path, query, header, formData, body)
+  let scheme = call_568214.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593981.url(scheme.get, call_593981.host, call_593981.base,
-                         call_593981.route, valid.getOrDefault("path"),
+  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
+                         call_568214.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593981, url, valid)
+  result = hook(call_568214, url, valid)
 
-proc call*(call_593982: Call_SecurityContactsUpdate_593974; apiVersion: string;
+proc call*(call_568215: Call_SecurityContactsUpdate_568207; apiVersion: string;
           subscriptionId: string; securityContactName: string;
           securityContact: JsonNode): Recallable =
   ## securityContactsUpdate
@@ -501,24 +501,24 @@ proc call*(call_593982: Call_SecurityContactsUpdate_593974; apiVersion: string;
   ##                      : Name of the security contact object
   ##   securityContact: JObject (required)
   ##                  : Security contact object
-  var path_593983 = newJObject()
-  var query_593984 = newJObject()
-  var body_593985 = newJObject()
-  add(query_593984, "api-version", newJString(apiVersion))
-  add(path_593983, "subscriptionId", newJString(subscriptionId))
-  add(path_593983, "securityContactName", newJString(securityContactName))
+  var path_568216 = newJObject()
+  var query_568217 = newJObject()
+  var body_568218 = newJObject()
+  add(query_568217, "api-version", newJString(apiVersion))
+  add(path_568216, "subscriptionId", newJString(subscriptionId))
+  add(path_568216, "securityContactName", newJString(securityContactName))
   if securityContact != nil:
-    body_593985 = securityContact
-  result = call_593982.call(path_593983, query_593984, nil, nil, body_593985)
+    body_568218 = securityContact
+  result = call_568215.call(path_568216, query_568217, nil, nil, body_568218)
 
-var securityContactsUpdate* = Call_SecurityContactsUpdate_593974(
+var securityContactsUpdate* = Call_SecurityContactsUpdate_568207(
     name: "securityContactsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/securityContacts/{securityContactName}",
-    validator: validate_SecurityContactsUpdate_593975, base: "",
-    url: url_SecurityContactsUpdate_593976, schemes: {Scheme.Https})
+    validator: validate_SecurityContactsUpdate_568208, base: "",
+    url: url_SecurityContactsUpdate_568209, schemes: {Scheme.Https})
 type
-  Call_SecurityContactsDelete_593964 = ref object of OpenApiRestCall_593408
-proc url_SecurityContactsDelete_593966(protocol: Scheme; host: string; base: string;
+  Call_SecurityContactsDelete_568197 = ref object of OpenApiRestCall_567641
+proc url_SecurityContactsDelete_568199(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -538,7 +538,7 @@ proc url_SecurityContactsDelete_593966(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecurityContactsDelete_593965(path: JsonNode; query: JsonNode;
+proc validate_SecurityContactsDelete_568198(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security contact configurations for the subscription
   ## 
@@ -552,16 +552,16 @@ proc validate_SecurityContactsDelete_593965(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593967 = path.getOrDefault("subscriptionId")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  var valid_568200 = path.getOrDefault("subscriptionId")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "subscriptionId", valid_593967
-  var valid_593968 = path.getOrDefault("securityContactName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  if valid_568200 != nil:
+    section.add "subscriptionId", valid_568200
+  var valid_568201 = path.getOrDefault("securityContactName")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "securityContactName", valid_593968
+  if valid_568201 != nil:
+    section.add "securityContactName", valid_568201
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -569,11 +569,11 @@ proc validate_SecurityContactsDelete_593965(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593969 = query.getOrDefault("api-version")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_568202 = query.getOrDefault("api-version")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "api-version", valid_593969
+  if valid_568202 != nil:
+    section.add "api-version", valid_568202
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -582,20 +582,20 @@ proc validate_SecurityContactsDelete_593965(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593970: Call_SecurityContactsDelete_593964; path: JsonNode;
+proc call*(call_568203: Call_SecurityContactsDelete_568197; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Security contact configurations for the subscription
   ## 
-  let valid = call_593970.validator(path, query, header, formData, body)
-  let scheme = call_593970.pickScheme
+  let valid = call_568203.validator(path, query, header, formData, body)
+  let scheme = call_568203.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593970.url(scheme.get, call_593970.host, call_593970.base,
-                         call_593970.route, valid.getOrDefault("path"),
+  let url = call_568203.url(scheme.get, call_568203.host, call_568203.base,
+                         call_568203.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593970, url, valid)
+  result = hook(call_568203, url, valid)
 
-proc call*(call_593971: Call_SecurityContactsDelete_593964; apiVersion: string;
+proc call*(call_568204: Call_SecurityContactsDelete_568197; apiVersion: string;
           subscriptionId: string; securityContactName: string): Recallable =
   ## securityContactsDelete
   ## Security contact configurations for the subscription
@@ -605,18 +605,18 @@ proc call*(call_593971: Call_SecurityContactsDelete_593964; apiVersion: string;
   ##                 : Azure subscription ID
   ##   securityContactName: string (required)
   ##                      : Name of the security contact object
-  var path_593972 = newJObject()
-  var query_593973 = newJObject()
-  add(query_593973, "api-version", newJString(apiVersion))
-  add(path_593972, "subscriptionId", newJString(subscriptionId))
-  add(path_593972, "securityContactName", newJString(securityContactName))
-  result = call_593971.call(path_593972, query_593973, nil, nil, nil)
+  var path_568205 = newJObject()
+  var query_568206 = newJObject()
+  add(query_568206, "api-version", newJString(apiVersion))
+  add(path_568205, "subscriptionId", newJString(subscriptionId))
+  add(path_568205, "securityContactName", newJString(securityContactName))
+  result = call_568204.call(path_568205, query_568206, nil, nil, nil)
 
-var securityContactsDelete* = Call_SecurityContactsDelete_593964(
+var securityContactsDelete* = Call_SecurityContactsDelete_568197(
     name: "securityContactsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/securityContacts/{securityContactName}",
-    validator: validate_SecurityContactsDelete_593965, base: "",
-    url: url_SecurityContactsDelete_593966, schemes: {Scheme.Https})
+    validator: validate_SecurityContactsDelete_568198, base: "",
+    url: url_SecurityContactsDelete_568199, schemes: {Scheme.Https})
 export
   rest
 

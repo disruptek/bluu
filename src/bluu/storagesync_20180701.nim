@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Microsoft Storage Sync
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593438 = ref object of OpenApiRestCall
+  OpenApiRestCall_567667 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593438](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567667](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593438): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567667): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "storagesync"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593660 = ref object of OpenApiRestCall_593438
-proc url_OperationsList_593662(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567889 = ref object of OpenApiRestCall_567667
+proc url_OperationsList_567891(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567890(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Storage Sync Rest API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568037 = query.getOrDefault("api-version")
+  valid_568037 = validateParameter(valid_568037, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_568037 != nil:
+    section.add "api-version", valid_568037
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593835: Call_OperationsList_593660; path: JsonNode; query: JsonNode;
+proc call*(call_568064: Call_OperationsList_567889; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Storage Sync Rest API operations.
   ## 
-  let valid = call_593835.validator(path, query, header, formData, body)
-  let scheme = call_593835.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593835.url(scheme.get, call_593835.host, call_593835.base,
-                         call_593835.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593835, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593906: Call_OperationsList_593660; apiVersion: string): Recallable =
+proc call*(call_568135: Call_OperationsList_567889; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Storage Sync Rest API operations.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  var query_593907 = newJObject()
-  add(query_593907, "api-version", newJString(apiVersion))
-  result = call_593906.call(nil, query_593907, nil, nil, nil)
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  result = call_568135.call(nil, query_568136, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593660(name: "operationsList",
+var operationsList* = Call_OperationsList_567889(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.StorageSync/operations",
-    validator: validate_OperationsList_593661, base: "", url: url_OperationsList_593662,
+    validator: validate_OperationsList_567890, base: "", url: url_OperationsList_567891,
     schemes: {Scheme.Https})
 type
-  Call_StorageSyncServicesCheckNameAvailability_593947 = ref object of OpenApiRestCall_593438
-proc url_StorageSyncServicesCheckNameAvailability_593949(protocol: Scheme;
+  Call_StorageSyncServicesCheckNameAvailability_568176 = ref object of OpenApiRestCall_567667
+proc url_StorageSyncServicesCheckNameAvailability_568178(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -188,7 +188,7 @@ proc url_StorageSyncServicesCheckNameAvailability_593949(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageSyncServicesCheckNameAvailability_593948(path: JsonNode;
+proc validate_StorageSyncServicesCheckNameAvailability_568177(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check the give namespace name availability.
   ## 
@@ -202,16 +202,16 @@ proc validate_StorageSyncServicesCheckNameAvailability_593948(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593990 = path.getOrDefault("subscriptionId")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568219 = path.getOrDefault("subscriptionId")
+  valid_568219 = validateParameter(valid_568219, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "subscriptionId", valid_593990
-  var valid_593991 = path.getOrDefault("locationName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_568219 != nil:
+    section.add "subscriptionId", valid_568219
+  var valid_568220 = path.getOrDefault("locationName")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "locationName", valid_593991
+  if valid_568220 != nil:
+    section.add "locationName", valid_568220
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -219,11 +219,11 @@ proc validate_StorageSyncServicesCheckNameAvailability_593948(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593992 = query.getOrDefault("api-version")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568221 = query.getOrDefault("api-version")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "api-version", valid_593992
+  if valid_568221 != nil:
+    section.add "api-version", valid_568221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -237,21 +237,21 @@ proc validate_StorageSyncServicesCheckNameAvailability_593948(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593994: Call_StorageSyncServicesCheckNameAvailability_593947;
+proc call*(call_568223: Call_StorageSyncServicesCheckNameAvailability_568176;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Check the give namespace name availability.
   ## 
-  let valid = call_593994.validator(path, query, header, formData, body)
-  let scheme = call_593994.pickScheme
+  let valid = call_568223.validator(path, query, header, formData, body)
+  let scheme = call_568223.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593994.url(scheme.get, call_593994.host, call_593994.base,
-                         call_593994.route, valid.getOrDefault("path"),
+  let url = call_568223.url(scheme.get, call_568223.host, call_568223.base,
+                         call_568223.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593994, url, valid)
+  result = hook(call_568223, url, valid)
 
-proc call*(call_593995: Call_StorageSyncServicesCheckNameAvailability_593947;
+proc call*(call_568224: Call_StorageSyncServicesCheckNameAvailability_568176;
           apiVersion: string; subscriptionId: string; parameters: JsonNode;
           locationName: string): Recallable =
   ## storageSyncServicesCheckNameAvailability
@@ -264,25 +264,25 @@ proc call*(call_593995: Call_StorageSyncServicesCheckNameAvailability_593947;
   ##             : Parameters to check availability of the given namespace name
   ##   locationName: string (required)
   ##               : The desired region for the name check.
-  var path_593996 = newJObject()
-  var query_593997 = newJObject()
-  var body_593998 = newJObject()
-  add(query_593997, "api-version", newJString(apiVersion))
-  add(path_593996, "subscriptionId", newJString(subscriptionId))
+  var path_568225 = newJObject()
+  var query_568226 = newJObject()
+  var body_568227 = newJObject()
+  add(query_568226, "api-version", newJString(apiVersion))
+  add(path_568225, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593998 = parameters
-  add(path_593996, "locationName", newJString(locationName))
-  result = call_593995.call(path_593996, query_593997, nil, nil, body_593998)
+    body_568227 = parameters
+  add(path_568225, "locationName", newJString(locationName))
+  result = call_568224.call(path_568225, query_568226, nil, nil, body_568227)
 
-var storageSyncServicesCheckNameAvailability* = Call_StorageSyncServicesCheckNameAvailability_593947(
+var storageSyncServicesCheckNameAvailability* = Call_StorageSyncServicesCheckNameAvailability_568176(
     name: "storageSyncServicesCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.StorageSync/locations/{locationName}/checkNameAvailability",
-    validator: validate_StorageSyncServicesCheckNameAvailability_593948, base: "",
-    url: url_StorageSyncServicesCheckNameAvailability_593949,
+    validator: validate_StorageSyncServicesCheckNameAvailability_568177, base: "",
+    url: url_StorageSyncServicesCheckNameAvailability_568178,
     schemes: {Scheme.Https})
 type
-  Call_StorageSyncServicesListBySubscription_593999 = ref object of OpenApiRestCall_593438
-proc url_StorageSyncServicesListBySubscription_594001(protocol: Scheme;
+  Call_StorageSyncServicesListBySubscription_568228 = ref object of OpenApiRestCall_567667
+proc url_StorageSyncServicesListBySubscription_568230(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -299,7 +299,7 @@ proc url_StorageSyncServicesListBySubscription_594001(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageSyncServicesListBySubscription_594000(path: JsonNode;
+proc validate_StorageSyncServicesListBySubscription_568229(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a StorageSyncService list by subscription.
   ## 
@@ -311,11 +311,11 @@ proc validate_StorageSyncServicesListBySubscription_594000(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594002 = path.getOrDefault("subscriptionId")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_568231 = path.getOrDefault("subscriptionId")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "subscriptionId", valid_594002
+  if valid_568231 != nil:
+    section.add "subscriptionId", valid_568231
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -323,11 +323,11 @@ proc validate_StorageSyncServicesListBySubscription_594000(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594003 = query.getOrDefault("api-version")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  var valid_568232 = query.getOrDefault("api-version")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "api-version", valid_594003
+  if valid_568232 != nil:
+    section.add "api-version", valid_568232
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -336,21 +336,21 @@ proc validate_StorageSyncServicesListBySubscription_594000(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594004: Call_StorageSyncServicesListBySubscription_593999;
+proc call*(call_568233: Call_StorageSyncServicesListBySubscription_568228;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a StorageSyncService list by subscription.
   ## 
-  let valid = call_594004.validator(path, query, header, formData, body)
-  let scheme = call_594004.pickScheme
+  let valid = call_568233.validator(path, query, header, formData, body)
+  let scheme = call_568233.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594004.url(scheme.get, call_594004.host, call_594004.base,
-                         call_594004.route, valid.getOrDefault("path"),
+  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
+                         call_568233.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594004, url, valid)
+  result = hook(call_568233, url, valid)
 
-proc call*(call_594005: Call_StorageSyncServicesListBySubscription_593999;
+proc call*(call_568234: Call_StorageSyncServicesListBySubscription_568228;
           apiVersion: string; subscriptionId: string): Recallable =
   ## storageSyncServicesListBySubscription
   ## Get a StorageSyncService list by subscription.
@@ -358,20 +358,20 @@ proc call*(call_594005: Call_StorageSyncServicesListBySubscription_593999;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_594006 = newJObject()
-  var query_594007 = newJObject()
-  add(query_594007, "api-version", newJString(apiVersion))
-  add(path_594006, "subscriptionId", newJString(subscriptionId))
-  result = call_594005.call(path_594006, query_594007, nil, nil, nil)
+  var path_568235 = newJObject()
+  var query_568236 = newJObject()
+  add(query_568236, "api-version", newJString(apiVersion))
+  add(path_568235, "subscriptionId", newJString(subscriptionId))
+  result = call_568234.call(path_568235, query_568236, nil, nil, nil)
 
-var storageSyncServicesListBySubscription* = Call_StorageSyncServicesListBySubscription_593999(
+var storageSyncServicesListBySubscription* = Call_StorageSyncServicesListBySubscription_568228(
     name: "storageSyncServicesListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.StorageSync/storageSyncServices",
-    validator: validate_StorageSyncServicesListBySubscription_594000, base: "",
-    url: url_StorageSyncServicesListBySubscription_594001, schemes: {Scheme.Https})
+    validator: validate_StorageSyncServicesListBySubscription_568229, base: "",
+    url: url_StorageSyncServicesListBySubscription_568230, schemes: {Scheme.Https})
 type
-  Call_StorageSyncServicesListByResourceGroup_594008 = ref object of OpenApiRestCall_593438
-proc url_StorageSyncServicesListByResourceGroup_594010(protocol: Scheme;
+  Call_StorageSyncServicesListByResourceGroup_568237 = ref object of OpenApiRestCall_567667
+proc url_StorageSyncServicesListByResourceGroup_568239(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -392,7 +392,7 @@ proc url_StorageSyncServicesListByResourceGroup_594010(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageSyncServicesListByResourceGroup_594009(path: JsonNode;
+proc validate_StorageSyncServicesListByResourceGroup_568238(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a StorageSyncService list by Resource group name.
   ## 
@@ -406,16 +406,16 @@ proc validate_StorageSyncServicesListByResourceGroup_594009(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594011 = path.getOrDefault("resourceGroupName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_568240 = path.getOrDefault("resourceGroupName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "resourceGroupName", valid_594011
-  var valid_594012 = path.getOrDefault("subscriptionId")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_568240 != nil:
+    section.add "resourceGroupName", valid_568240
+  var valid_568241 = path.getOrDefault("subscriptionId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "subscriptionId", valid_594012
+  if valid_568241 != nil:
+    section.add "subscriptionId", valid_568241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -423,11 +423,11 @@ proc validate_StorageSyncServicesListByResourceGroup_594009(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594013 = query.getOrDefault("api-version")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  var valid_568242 = query.getOrDefault("api-version")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "api-version", valid_594013
+  if valid_568242 != nil:
+    section.add "api-version", valid_568242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -436,21 +436,21 @@ proc validate_StorageSyncServicesListByResourceGroup_594009(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594014: Call_StorageSyncServicesListByResourceGroup_594008;
+proc call*(call_568243: Call_StorageSyncServicesListByResourceGroup_568237;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a StorageSyncService list by Resource group name.
   ## 
-  let valid = call_594014.validator(path, query, header, formData, body)
-  let scheme = call_594014.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594014.url(scheme.get, call_594014.host, call_594014.base,
-                         call_594014.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594014, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594015: Call_StorageSyncServicesListByResourceGroup_594008;
+proc call*(call_568244: Call_StorageSyncServicesListByResourceGroup_568237;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## storageSyncServicesListByResourceGroup
   ## Get a StorageSyncService list by Resource group name.
@@ -460,22 +460,22 @@ proc call*(call_594015: Call_StorageSyncServicesListByResourceGroup_594008;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_594016 = newJObject()
-  var query_594017 = newJObject()
-  add(path_594016, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594017, "api-version", newJString(apiVersion))
-  add(path_594016, "subscriptionId", newJString(subscriptionId))
-  result = call_594015.call(path_594016, query_594017, nil, nil, nil)
+  var path_568245 = newJObject()
+  var query_568246 = newJObject()
+  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568246, "api-version", newJString(apiVersion))
+  add(path_568245, "subscriptionId", newJString(subscriptionId))
+  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
 
-var storageSyncServicesListByResourceGroup* = Call_StorageSyncServicesListByResourceGroup_594008(
+var storageSyncServicesListByResourceGroup* = Call_StorageSyncServicesListByResourceGroup_568237(
     name: "storageSyncServicesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices",
-    validator: validate_StorageSyncServicesListByResourceGroup_594009, base: "",
-    url: url_StorageSyncServicesListByResourceGroup_594010,
+    validator: validate_StorageSyncServicesListByResourceGroup_568238, base: "",
+    url: url_StorageSyncServicesListByResourceGroup_568239,
     schemes: {Scheme.Https})
 type
-  Call_StorageSyncServicesCreate_594029 = ref object of OpenApiRestCall_593438
-proc url_StorageSyncServicesCreate_594031(protocol: Scheme; host: string;
+  Call_StorageSyncServicesCreate_568258 = ref object of OpenApiRestCall_567667
+proc url_StorageSyncServicesCreate_568260(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -499,7 +499,7 @@ proc url_StorageSyncServicesCreate_594031(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageSyncServicesCreate_594030(path: JsonNode; query: JsonNode;
+proc validate_StorageSyncServicesCreate_568259(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new StorageSyncService.
   ## 
@@ -515,21 +515,21 @@ proc validate_StorageSyncServicesCreate_594030(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594032 = path.getOrDefault("resourceGroupName")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  var valid_568261 = path.getOrDefault("resourceGroupName")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "resourceGroupName", valid_594032
-  var valid_594033 = path.getOrDefault("subscriptionId")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  if valid_568261 != nil:
+    section.add "resourceGroupName", valid_568261
+  var valid_568262 = path.getOrDefault("subscriptionId")
+  valid_568262 = validateParameter(valid_568262, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "subscriptionId", valid_594033
-  var valid_594034 = path.getOrDefault("storageSyncServiceName")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  if valid_568262 != nil:
+    section.add "subscriptionId", valid_568262
+  var valid_568263 = path.getOrDefault("storageSyncServiceName")
+  valid_568263 = validateParameter(valid_568263, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "storageSyncServiceName", valid_594034
+  if valid_568263 != nil:
+    section.add "storageSyncServiceName", valid_568263
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -537,11 +537,11 @@ proc validate_StorageSyncServicesCreate_594030(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594035 = query.getOrDefault("api-version")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  var valid_568264 = query.getOrDefault("api-version")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "api-version", valid_594035
+  if valid_568264 != nil:
+    section.add "api-version", valid_568264
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -555,20 +555,20 @@ proc validate_StorageSyncServicesCreate_594030(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594037: Call_StorageSyncServicesCreate_594029; path: JsonNode;
+proc call*(call_568266: Call_StorageSyncServicesCreate_568258; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new StorageSyncService.
   ## 
-  let valid = call_594037.validator(path, query, header, formData, body)
-  let scheme = call_594037.pickScheme
+  let valid = call_568266.validator(path, query, header, formData, body)
+  let scheme = call_568266.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594037.url(scheme.get, call_594037.host, call_594037.base,
-                         call_594037.route, valid.getOrDefault("path"),
+  let url = call_568266.url(scheme.get, call_568266.host, call_568266.base,
+                         call_568266.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594037, url, valid)
+  result = hook(call_568266, url, valid)
 
-proc call*(call_594038: Call_StorageSyncServicesCreate_594029;
+proc call*(call_568267: Call_StorageSyncServicesCreate_568258;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; storageSyncServiceName: string): Recallable =
   ## storageSyncServicesCreate
@@ -583,25 +583,25 @@ proc call*(call_594038: Call_StorageSyncServicesCreate_594029;
   ##             : Storage Sync Service resource name.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594039 = newJObject()
-  var query_594040 = newJObject()
-  var body_594041 = newJObject()
-  add(path_594039, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594040, "api-version", newJString(apiVersion))
-  add(path_594039, "subscriptionId", newJString(subscriptionId))
+  var path_568268 = newJObject()
+  var query_568269 = newJObject()
+  var body_568270 = newJObject()
+  add(path_568268, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568269, "api-version", newJString(apiVersion))
+  add(path_568268, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594041 = parameters
-  add(path_594039, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594038.call(path_594039, query_594040, nil, nil, body_594041)
+    body_568270 = parameters
+  add(path_568268, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568267.call(path_568268, query_568269, nil, nil, body_568270)
 
-var storageSyncServicesCreate* = Call_StorageSyncServicesCreate_594029(
+var storageSyncServicesCreate* = Call_StorageSyncServicesCreate_568258(
     name: "storageSyncServicesCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}",
-    validator: validate_StorageSyncServicesCreate_594030, base: "",
-    url: url_StorageSyncServicesCreate_594031, schemes: {Scheme.Https})
+    validator: validate_StorageSyncServicesCreate_568259, base: "",
+    url: url_StorageSyncServicesCreate_568260, schemes: {Scheme.Https})
 type
-  Call_StorageSyncServicesGet_594018 = ref object of OpenApiRestCall_593438
-proc url_StorageSyncServicesGet_594020(protocol: Scheme; host: string; base: string;
+  Call_StorageSyncServicesGet_568247 = ref object of OpenApiRestCall_567667
+proc url_StorageSyncServicesGet_568249(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -625,7 +625,7 @@ proc url_StorageSyncServicesGet_594020(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageSyncServicesGet_594019(path: JsonNode; query: JsonNode;
+proc validate_StorageSyncServicesGet_568248(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a given StorageSyncService.
   ## 
@@ -641,21 +641,21 @@ proc validate_StorageSyncServicesGet_594019(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594021 = path.getOrDefault("resourceGroupName")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  var valid_568250 = path.getOrDefault("resourceGroupName")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "resourceGroupName", valid_594021
-  var valid_594022 = path.getOrDefault("subscriptionId")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  if valid_568250 != nil:
+    section.add "resourceGroupName", valid_568250
+  var valid_568251 = path.getOrDefault("subscriptionId")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "subscriptionId", valid_594022
-  var valid_594023 = path.getOrDefault("storageSyncServiceName")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  if valid_568251 != nil:
+    section.add "subscriptionId", valid_568251
+  var valid_568252 = path.getOrDefault("storageSyncServiceName")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "storageSyncServiceName", valid_594023
+  if valid_568252 != nil:
+    section.add "storageSyncServiceName", valid_568252
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -663,11 +663,11 @@ proc validate_StorageSyncServicesGet_594019(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594024 = query.getOrDefault("api-version")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_568253 = query.getOrDefault("api-version")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "api-version", valid_594024
+  if valid_568253 != nil:
+    section.add "api-version", valid_568253
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -676,20 +676,20 @@ proc validate_StorageSyncServicesGet_594019(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594025: Call_StorageSyncServicesGet_594018; path: JsonNode;
+proc call*(call_568254: Call_StorageSyncServicesGet_568247; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a given StorageSyncService.
   ## 
-  let valid = call_594025.validator(path, query, header, formData, body)
-  let scheme = call_594025.pickScheme
+  let valid = call_568254.validator(path, query, header, formData, body)
+  let scheme = call_568254.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594025.url(scheme.get, call_594025.host, call_594025.base,
-                         call_594025.route, valid.getOrDefault("path"),
+  let url = call_568254.url(scheme.get, call_568254.host, call_568254.base,
+                         call_568254.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594025, url, valid)
+  result = hook(call_568254, url, valid)
 
-proc call*(call_594026: Call_StorageSyncServicesGet_594018;
+proc call*(call_568255: Call_StorageSyncServicesGet_568247;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           storageSyncServiceName: string): Recallable =
   ## storageSyncServicesGet
@@ -702,22 +702,22 @@ proc call*(call_594026: Call_StorageSyncServicesGet_594018;
   ##                 : The ID of the target subscription.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594027 = newJObject()
-  var query_594028 = newJObject()
-  add(path_594027, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594028, "api-version", newJString(apiVersion))
-  add(path_594027, "subscriptionId", newJString(subscriptionId))
-  add(path_594027, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594026.call(path_594027, query_594028, nil, nil, nil)
+  var path_568256 = newJObject()
+  var query_568257 = newJObject()
+  add(path_568256, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568257, "api-version", newJString(apiVersion))
+  add(path_568256, "subscriptionId", newJString(subscriptionId))
+  add(path_568256, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568255.call(path_568256, query_568257, nil, nil, nil)
 
-var storageSyncServicesGet* = Call_StorageSyncServicesGet_594018(
+var storageSyncServicesGet* = Call_StorageSyncServicesGet_568247(
     name: "storageSyncServicesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}",
-    validator: validate_StorageSyncServicesGet_594019, base: "",
-    url: url_StorageSyncServicesGet_594020, schemes: {Scheme.Https})
+    validator: validate_StorageSyncServicesGet_568248, base: "",
+    url: url_StorageSyncServicesGet_568249, schemes: {Scheme.Https})
 type
-  Call_StorageSyncServicesUpdate_594053 = ref object of OpenApiRestCall_593438
-proc url_StorageSyncServicesUpdate_594055(protocol: Scheme; host: string;
+  Call_StorageSyncServicesUpdate_568282 = ref object of OpenApiRestCall_567667
+proc url_StorageSyncServicesUpdate_568284(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -741,7 +741,7 @@ proc url_StorageSyncServicesUpdate_594055(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageSyncServicesUpdate_594054(path: JsonNode; query: JsonNode;
+proc validate_StorageSyncServicesUpdate_568283(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Patch a given StorageSyncService.
   ## 
@@ -757,21 +757,21 @@ proc validate_StorageSyncServicesUpdate_594054(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594056 = path.getOrDefault("resourceGroupName")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  var valid_568285 = path.getOrDefault("resourceGroupName")
+  valid_568285 = validateParameter(valid_568285, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "resourceGroupName", valid_594056
-  var valid_594057 = path.getOrDefault("subscriptionId")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  if valid_568285 != nil:
+    section.add "resourceGroupName", valid_568285
+  var valid_568286 = path.getOrDefault("subscriptionId")
+  valid_568286 = validateParameter(valid_568286, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "subscriptionId", valid_594057
-  var valid_594058 = path.getOrDefault("storageSyncServiceName")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  if valid_568286 != nil:
+    section.add "subscriptionId", valid_568286
+  var valid_568287 = path.getOrDefault("storageSyncServiceName")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "storageSyncServiceName", valid_594058
+  if valid_568287 != nil:
+    section.add "storageSyncServiceName", valid_568287
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -779,11 +779,11 @@ proc validate_StorageSyncServicesUpdate_594054(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594059 = query.getOrDefault("api-version")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  var valid_568288 = query.getOrDefault("api-version")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "api-version", valid_594059
+  if valid_568288 != nil:
+    section.add "api-version", valid_568288
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -796,20 +796,20 @@ proc validate_StorageSyncServicesUpdate_594054(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594061: Call_StorageSyncServicesUpdate_594053; path: JsonNode;
+proc call*(call_568290: Call_StorageSyncServicesUpdate_568282; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patch a given StorageSyncService.
   ## 
-  let valid = call_594061.validator(path, query, header, formData, body)
-  let scheme = call_594061.pickScheme
+  let valid = call_568290.validator(path, query, header, formData, body)
+  let scheme = call_568290.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594061.url(scheme.get, call_594061.host, call_594061.base,
-                         call_594061.route, valid.getOrDefault("path"),
+  let url = call_568290.url(scheme.get, call_568290.host, call_568290.base,
+                         call_568290.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594061, url, valid)
+  result = hook(call_568290, url, valid)
 
-proc call*(call_594062: Call_StorageSyncServicesUpdate_594053;
+proc call*(call_568291: Call_StorageSyncServicesUpdate_568282;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           storageSyncServiceName: string; parameters: JsonNode = nil): Recallable =
   ## storageSyncServicesUpdate
@@ -824,25 +824,25 @@ proc call*(call_594062: Call_StorageSyncServicesUpdate_594053;
   ##             : Storage Sync Service resource.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594063 = newJObject()
-  var query_594064 = newJObject()
-  var body_594065 = newJObject()
-  add(path_594063, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594064, "api-version", newJString(apiVersion))
-  add(path_594063, "subscriptionId", newJString(subscriptionId))
+  var path_568292 = newJObject()
+  var query_568293 = newJObject()
+  var body_568294 = newJObject()
+  add(path_568292, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568293, "api-version", newJString(apiVersion))
+  add(path_568292, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594065 = parameters
-  add(path_594063, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594062.call(path_594063, query_594064, nil, nil, body_594065)
+    body_568294 = parameters
+  add(path_568292, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568291.call(path_568292, query_568293, nil, nil, body_568294)
 
-var storageSyncServicesUpdate* = Call_StorageSyncServicesUpdate_594053(
+var storageSyncServicesUpdate* = Call_StorageSyncServicesUpdate_568282(
     name: "storageSyncServicesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}",
-    validator: validate_StorageSyncServicesUpdate_594054, base: "",
-    url: url_StorageSyncServicesUpdate_594055, schemes: {Scheme.Https})
+    validator: validate_StorageSyncServicesUpdate_568283, base: "",
+    url: url_StorageSyncServicesUpdate_568284, schemes: {Scheme.Https})
 type
-  Call_StorageSyncServicesDelete_594042 = ref object of OpenApiRestCall_593438
-proc url_StorageSyncServicesDelete_594044(protocol: Scheme; host: string;
+  Call_StorageSyncServicesDelete_568271 = ref object of OpenApiRestCall_567667
+proc url_StorageSyncServicesDelete_568273(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -866,7 +866,7 @@ proc url_StorageSyncServicesDelete_594044(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageSyncServicesDelete_594043(path: JsonNode; query: JsonNode;
+proc validate_StorageSyncServicesDelete_568272(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a given StorageSyncService.
   ## 
@@ -882,21 +882,21 @@ proc validate_StorageSyncServicesDelete_594043(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594045 = path.getOrDefault("resourceGroupName")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  var valid_568274 = path.getOrDefault("resourceGroupName")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "resourceGroupName", valid_594045
-  var valid_594046 = path.getOrDefault("subscriptionId")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  if valid_568274 != nil:
+    section.add "resourceGroupName", valid_568274
+  var valid_568275 = path.getOrDefault("subscriptionId")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "subscriptionId", valid_594046
-  var valid_594047 = path.getOrDefault("storageSyncServiceName")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  if valid_568275 != nil:
+    section.add "subscriptionId", valid_568275
+  var valid_568276 = path.getOrDefault("storageSyncServiceName")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "storageSyncServiceName", valid_594047
+  if valid_568276 != nil:
+    section.add "storageSyncServiceName", valid_568276
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -904,11 +904,11 @@ proc validate_StorageSyncServicesDelete_594043(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594048 = query.getOrDefault("api-version")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  var valid_568277 = query.getOrDefault("api-version")
+  valid_568277 = validateParameter(valid_568277, JString, required = true,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "api-version", valid_594048
+  if valid_568277 != nil:
+    section.add "api-version", valid_568277
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -917,20 +917,20 @@ proc validate_StorageSyncServicesDelete_594043(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594049: Call_StorageSyncServicesDelete_594042; path: JsonNode;
+proc call*(call_568278: Call_StorageSyncServicesDelete_568271; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a given StorageSyncService.
   ## 
-  let valid = call_594049.validator(path, query, header, formData, body)
-  let scheme = call_594049.pickScheme
+  let valid = call_568278.validator(path, query, header, formData, body)
+  let scheme = call_568278.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594049.url(scheme.get, call_594049.host, call_594049.base,
-                         call_594049.route, valid.getOrDefault("path"),
+  let url = call_568278.url(scheme.get, call_568278.host, call_568278.base,
+                         call_568278.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594049, url, valid)
+  result = hook(call_568278, url, valid)
 
-proc call*(call_594050: Call_StorageSyncServicesDelete_594042;
+proc call*(call_568279: Call_StorageSyncServicesDelete_568271;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           storageSyncServiceName: string): Recallable =
   ## storageSyncServicesDelete
@@ -943,22 +943,22 @@ proc call*(call_594050: Call_StorageSyncServicesDelete_594042;
   ##                 : The ID of the target subscription.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594051 = newJObject()
-  var query_594052 = newJObject()
-  add(path_594051, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594052, "api-version", newJString(apiVersion))
-  add(path_594051, "subscriptionId", newJString(subscriptionId))
-  add(path_594051, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594050.call(path_594051, query_594052, nil, nil, nil)
+  var path_568280 = newJObject()
+  var query_568281 = newJObject()
+  add(path_568280, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568281, "api-version", newJString(apiVersion))
+  add(path_568280, "subscriptionId", newJString(subscriptionId))
+  add(path_568280, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568279.call(path_568280, query_568281, nil, nil, nil)
 
-var storageSyncServicesDelete* = Call_StorageSyncServicesDelete_594042(
+var storageSyncServicesDelete* = Call_StorageSyncServicesDelete_568271(
     name: "storageSyncServicesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}",
-    validator: validate_StorageSyncServicesDelete_594043, base: "",
-    url: url_StorageSyncServicesDelete_594044, schemes: {Scheme.Https})
+    validator: validate_StorageSyncServicesDelete_568272, base: "",
+    url: url_StorageSyncServicesDelete_568273, schemes: {Scheme.Https})
 type
-  Call_RegisteredServersListByStorageSyncService_594066 = ref object of OpenApiRestCall_593438
-proc url_RegisteredServersListByStorageSyncService_594068(protocol: Scheme;
+  Call_RegisteredServersListByStorageSyncService_568295 = ref object of OpenApiRestCall_567667
+proc url_RegisteredServersListByStorageSyncService_568297(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -983,7 +983,7 @@ proc url_RegisteredServersListByStorageSyncService_594068(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegisteredServersListByStorageSyncService_594067(path: JsonNode;
+proc validate_RegisteredServersListByStorageSyncService_568296(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a given registered server list.
   ## 
@@ -999,21 +999,21 @@ proc validate_RegisteredServersListByStorageSyncService_594067(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594069 = path.getOrDefault("resourceGroupName")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  var valid_568298 = path.getOrDefault("resourceGroupName")
+  valid_568298 = validateParameter(valid_568298, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "resourceGroupName", valid_594069
-  var valid_594070 = path.getOrDefault("subscriptionId")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  if valid_568298 != nil:
+    section.add "resourceGroupName", valid_568298
+  var valid_568299 = path.getOrDefault("subscriptionId")
+  valid_568299 = validateParameter(valid_568299, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "subscriptionId", valid_594070
-  var valid_594071 = path.getOrDefault("storageSyncServiceName")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  if valid_568299 != nil:
+    section.add "subscriptionId", valid_568299
+  var valid_568300 = path.getOrDefault("storageSyncServiceName")
+  valid_568300 = validateParameter(valid_568300, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "storageSyncServiceName", valid_594071
+  if valid_568300 != nil:
+    section.add "storageSyncServiceName", valid_568300
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1021,11 +1021,11 @@ proc validate_RegisteredServersListByStorageSyncService_594067(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594072 = query.getOrDefault("api-version")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  var valid_568301 = query.getOrDefault("api-version")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "api-version", valid_594072
+  if valid_568301 != nil:
+    section.add "api-version", valid_568301
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1034,21 +1034,21 @@ proc validate_RegisteredServersListByStorageSyncService_594067(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594073: Call_RegisteredServersListByStorageSyncService_594066;
+proc call*(call_568302: Call_RegisteredServersListByStorageSyncService_568295;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a given registered server list.
   ## 
-  let valid = call_594073.validator(path, query, header, formData, body)
-  let scheme = call_594073.pickScheme
+  let valid = call_568302.validator(path, query, header, formData, body)
+  let scheme = call_568302.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594073.url(scheme.get, call_594073.host, call_594073.base,
-                         call_594073.route, valid.getOrDefault("path"),
+  let url = call_568302.url(scheme.get, call_568302.host, call_568302.base,
+                         call_568302.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594073, url, valid)
+  result = hook(call_568302, url, valid)
 
-proc call*(call_594074: Call_RegisteredServersListByStorageSyncService_594066;
+proc call*(call_568303: Call_RegisteredServersListByStorageSyncService_568295;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           storageSyncServiceName: string): Recallable =
   ## registeredServersListByStorageSyncService
@@ -1061,23 +1061,23 @@ proc call*(call_594074: Call_RegisteredServersListByStorageSyncService_594066;
   ##                 : The ID of the target subscription.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594075 = newJObject()
-  var query_594076 = newJObject()
-  add(path_594075, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594076, "api-version", newJString(apiVersion))
-  add(path_594075, "subscriptionId", newJString(subscriptionId))
-  add(path_594075, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594074.call(path_594075, query_594076, nil, nil, nil)
+  var path_568304 = newJObject()
+  var query_568305 = newJObject()
+  add(path_568304, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568305, "api-version", newJString(apiVersion))
+  add(path_568304, "subscriptionId", newJString(subscriptionId))
+  add(path_568304, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568303.call(path_568304, query_568305, nil, nil, nil)
 
-var registeredServersListByStorageSyncService* = Call_RegisteredServersListByStorageSyncService_594066(
+var registeredServersListByStorageSyncService* = Call_RegisteredServersListByStorageSyncService_568295(
     name: "registeredServersListByStorageSyncService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/registeredServers",
-    validator: validate_RegisteredServersListByStorageSyncService_594067,
-    base: "", url: url_RegisteredServersListByStorageSyncService_594068,
+    validator: validate_RegisteredServersListByStorageSyncService_568296,
+    base: "", url: url_RegisteredServersListByStorageSyncService_568297,
     schemes: {Scheme.Https})
 type
-  Call_RegisteredServersCreate_594089 = ref object of OpenApiRestCall_593438
-proc url_RegisteredServersCreate_594091(protocol: Scheme; host: string; base: string;
+  Call_RegisteredServersCreate_568318 = ref object of OpenApiRestCall_567667
+proc url_RegisteredServersCreate_568320(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1105,7 +1105,7 @@ proc url_RegisteredServersCreate_594091(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegisteredServersCreate_594090(path: JsonNode; query: JsonNode;
+proc validate_RegisteredServersCreate_568319(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add a new registered server.
   ## 
@@ -1123,26 +1123,26 @@ proc validate_RegisteredServersCreate_594090(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594092 = path.getOrDefault("resourceGroupName")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  var valid_568321 = path.getOrDefault("resourceGroupName")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "resourceGroupName", valid_594092
-  var valid_594093 = path.getOrDefault("subscriptionId")
-  valid_594093 = validateParameter(valid_594093, JString, required = true,
+  if valid_568321 != nil:
+    section.add "resourceGroupName", valid_568321
+  var valid_568322 = path.getOrDefault("subscriptionId")
+  valid_568322 = validateParameter(valid_568322, JString, required = true,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "subscriptionId", valid_594093
-  var valid_594094 = path.getOrDefault("serverId")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  if valid_568322 != nil:
+    section.add "subscriptionId", valid_568322
+  var valid_568323 = path.getOrDefault("serverId")
+  valid_568323 = validateParameter(valid_568323, JString, required = true,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "serverId", valid_594094
-  var valid_594095 = path.getOrDefault("storageSyncServiceName")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  if valid_568323 != nil:
+    section.add "serverId", valid_568323
+  var valid_568324 = path.getOrDefault("storageSyncServiceName")
+  valid_568324 = validateParameter(valid_568324, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "storageSyncServiceName", valid_594095
+  if valid_568324 != nil:
+    section.add "storageSyncServiceName", valid_568324
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1150,11 +1150,11 @@ proc validate_RegisteredServersCreate_594090(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594096 = query.getOrDefault("api-version")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
+  var valid_568325 = query.getOrDefault("api-version")
+  valid_568325 = validateParameter(valid_568325, JString, required = true,
                                  default = nil)
-  if valid_594096 != nil:
-    section.add "api-version", valid_594096
+  if valid_568325 != nil:
+    section.add "api-version", valid_568325
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1168,20 +1168,20 @@ proc validate_RegisteredServersCreate_594090(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594098: Call_RegisteredServersCreate_594089; path: JsonNode;
+proc call*(call_568327: Call_RegisteredServersCreate_568318; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add a new registered server.
   ## 
-  let valid = call_594098.validator(path, query, header, formData, body)
-  let scheme = call_594098.pickScheme
+  let valid = call_568327.validator(path, query, header, formData, body)
+  let scheme = call_568327.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594098.url(scheme.get, call_594098.host, call_594098.base,
-                         call_594098.route, valid.getOrDefault("path"),
+  let url = call_568327.url(scheme.get, call_568327.host, call_568327.base,
+                         call_568327.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594098, url, valid)
+  result = hook(call_568327, url, valid)
 
-proc call*(call_594099: Call_RegisteredServersCreate_594089;
+proc call*(call_568328: Call_RegisteredServersCreate_568318;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serverId: string; parameters: JsonNode; storageSyncServiceName: string): Recallable =
   ## registeredServersCreate
@@ -1198,26 +1198,26 @@ proc call*(call_594099: Call_RegisteredServersCreate_594089;
   ##             : Body of Registered Server object.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594100 = newJObject()
-  var query_594101 = newJObject()
-  var body_594102 = newJObject()
-  add(path_594100, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594101, "api-version", newJString(apiVersion))
-  add(path_594100, "subscriptionId", newJString(subscriptionId))
-  add(path_594100, "serverId", newJString(serverId))
+  var path_568329 = newJObject()
+  var query_568330 = newJObject()
+  var body_568331 = newJObject()
+  add(path_568329, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568330, "api-version", newJString(apiVersion))
+  add(path_568329, "subscriptionId", newJString(subscriptionId))
+  add(path_568329, "serverId", newJString(serverId))
   if parameters != nil:
-    body_594102 = parameters
-  add(path_594100, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594099.call(path_594100, query_594101, nil, nil, body_594102)
+    body_568331 = parameters
+  add(path_568329, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568328.call(path_568329, query_568330, nil, nil, body_568331)
 
-var registeredServersCreate* = Call_RegisteredServersCreate_594089(
+var registeredServersCreate* = Call_RegisteredServersCreate_568318(
     name: "registeredServersCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/registeredServers/{serverId}",
-    validator: validate_RegisteredServersCreate_594090, base: "",
-    url: url_RegisteredServersCreate_594091, schemes: {Scheme.Https})
+    validator: validate_RegisteredServersCreate_568319, base: "",
+    url: url_RegisteredServersCreate_568320, schemes: {Scheme.Https})
 type
-  Call_RegisteredServersGet_594077 = ref object of OpenApiRestCall_593438
-proc url_RegisteredServersGet_594079(protocol: Scheme; host: string; base: string;
+  Call_RegisteredServersGet_568306 = ref object of OpenApiRestCall_567667
+proc url_RegisteredServersGet_568308(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1244,7 +1244,7 @@ proc url_RegisteredServersGet_594079(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegisteredServersGet_594078(path: JsonNode; query: JsonNode;
+proc validate_RegisteredServersGet_568307(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a given registered server.
   ## 
@@ -1262,26 +1262,26 @@ proc validate_RegisteredServersGet_594078(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594080 = path.getOrDefault("resourceGroupName")
-  valid_594080 = validateParameter(valid_594080, JString, required = true,
+  var valid_568309 = path.getOrDefault("resourceGroupName")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "resourceGroupName", valid_594080
-  var valid_594081 = path.getOrDefault("subscriptionId")
-  valid_594081 = validateParameter(valid_594081, JString, required = true,
+  if valid_568309 != nil:
+    section.add "resourceGroupName", valid_568309
+  var valid_568310 = path.getOrDefault("subscriptionId")
+  valid_568310 = validateParameter(valid_568310, JString, required = true,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "subscriptionId", valid_594081
-  var valid_594082 = path.getOrDefault("serverId")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  if valid_568310 != nil:
+    section.add "subscriptionId", valid_568310
+  var valid_568311 = path.getOrDefault("serverId")
+  valid_568311 = validateParameter(valid_568311, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "serverId", valid_594082
-  var valid_594083 = path.getOrDefault("storageSyncServiceName")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
+  if valid_568311 != nil:
+    section.add "serverId", valid_568311
+  var valid_568312 = path.getOrDefault("storageSyncServiceName")
+  valid_568312 = validateParameter(valid_568312, JString, required = true,
                                  default = nil)
-  if valid_594083 != nil:
-    section.add "storageSyncServiceName", valid_594083
+  if valid_568312 != nil:
+    section.add "storageSyncServiceName", valid_568312
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1289,11 +1289,11 @@ proc validate_RegisteredServersGet_594078(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594084 = query.getOrDefault("api-version")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  var valid_568313 = query.getOrDefault("api-version")
+  valid_568313 = validateParameter(valid_568313, JString, required = true,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "api-version", valid_594084
+  if valid_568313 != nil:
+    section.add "api-version", valid_568313
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1302,20 +1302,20 @@ proc validate_RegisteredServersGet_594078(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594085: Call_RegisteredServersGet_594077; path: JsonNode;
+proc call*(call_568314: Call_RegisteredServersGet_568306; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a given registered server.
   ## 
-  let valid = call_594085.validator(path, query, header, formData, body)
-  let scheme = call_594085.pickScheme
+  let valid = call_568314.validator(path, query, header, formData, body)
+  let scheme = call_568314.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594085.url(scheme.get, call_594085.host, call_594085.base,
-                         call_594085.route, valid.getOrDefault("path"),
+  let url = call_568314.url(scheme.get, call_568314.host, call_568314.base,
+                         call_568314.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594085, url, valid)
+  result = hook(call_568314, url, valid)
 
-proc call*(call_594086: Call_RegisteredServersGet_594077;
+proc call*(call_568315: Call_RegisteredServersGet_568306;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serverId: string; storageSyncServiceName: string): Recallable =
   ## registeredServersGet
@@ -1330,23 +1330,23 @@ proc call*(call_594086: Call_RegisteredServersGet_594077;
   ##           : GUID identifying the on-premises server.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594087 = newJObject()
-  var query_594088 = newJObject()
-  add(path_594087, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594088, "api-version", newJString(apiVersion))
-  add(path_594087, "subscriptionId", newJString(subscriptionId))
-  add(path_594087, "serverId", newJString(serverId))
-  add(path_594087, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594086.call(path_594087, query_594088, nil, nil, nil)
+  var path_568316 = newJObject()
+  var query_568317 = newJObject()
+  add(path_568316, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568317, "api-version", newJString(apiVersion))
+  add(path_568316, "subscriptionId", newJString(subscriptionId))
+  add(path_568316, "serverId", newJString(serverId))
+  add(path_568316, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568315.call(path_568316, query_568317, nil, nil, nil)
 
-var registeredServersGet* = Call_RegisteredServersGet_594077(
+var registeredServersGet* = Call_RegisteredServersGet_568306(
     name: "registeredServersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/registeredServers/{serverId}",
-    validator: validate_RegisteredServersGet_594078, base: "",
-    url: url_RegisteredServersGet_594079, schemes: {Scheme.Https})
+    validator: validate_RegisteredServersGet_568307, base: "",
+    url: url_RegisteredServersGet_568308, schemes: {Scheme.Https})
 type
-  Call_RegisteredServersDelete_594103 = ref object of OpenApiRestCall_593438
-proc url_RegisteredServersDelete_594105(protocol: Scheme; host: string; base: string;
+  Call_RegisteredServersDelete_568332 = ref object of OpenApiRestCall_567667
+proc url_RegisteredServersDelete_568334(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1374,7 +1374,7 @@ proc url_RegisteredServersDelete_594105(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegisteredServersDelete_594104(path: JsonNode; query: JsonNode;
+proc validate_RegisteredServersDelete_568333(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the given registered server.
   ## 
@@ -1392,26 +1392,26 @@ proc validate_RegisteredServersDelete_594104(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594106 = path.getOrDefault("resourceGroupName")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  var valid_568335 = path.getOrDefault("resourceGroupName")
+  valid_568335 = validateParameter(valid_568335, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "resourceGroupName", valid_594106
-  var valid_594107 = path.getOrDefault("subscriptionId")
-  valid_594107 = validateParameter(valid_594107, JString, required = true,
+  if valid_568335 != nil:
+    section.add "resourceGroupName", valid_568335
+  var valid_568336 = path.getOrDefault("subscriptionId")
+  valid_568336 = validateParameter(valid_568336, JString, required = true,
                                  default = nil)
-  if valid_594107 != nil:
-    section.add "subscriptionId", valid_594107
-  var valid_594108 = path.getOrDefault("serverId")
-  valid_594108 = validateParameter(valid_594108, JString, required = true,
+  if valid_568336 != nil:
+    section.add "subscriptionId", valid_568336
+  var valid_568337 = path.getOrDefault("serverId")
+  valid_568337 = validateParameter(valid_568337, JString, required = true,
                                  default = nil)
-  if valid_594108 != nil:
-    section.add "serverId", valid_594108
-  var valid_594109 = path.getOrDefault("storageSyncServiceName")
-  valid_594109 = validateParameter(valid_594109, JString, required = true,
+  if valid_568337 != nil:
+    section.add "serverId", valid_568337
+  var valid_568338 = path.getOrDefault("storageSyncServiceName")
+  valid_568338 = validateParameter(valid_568338, JString, required = true,
                                  default = nil)
-  if valid_594109 != nil:
-    section.add "storageSyncServiceName", valid_594109
+  if valid_568338 != nil:
+    section.add "storageSyncServiceName", valid_568338
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1419,11 +1419,11 @@ proc validate_RegisteredServersDelete_594104(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594110 = query.getOrDefault("api-version")
-  valid_594110 = validateParameter(valid_594110, JString, required = true,
+  var valid_568339 = query.getOrDefault("api-version")
+  valid_568339 = validateParameter(valid_568339, JString, required = true,
                                  default = nil)
-  if valid_594110 != nil:
-    section.add "api-version", valid_594110
+  if valid_568339 != nil:
+    section.add "api-version", valid_568339
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1432,20 +1432,20 @@ proc validate_RegisteredServersDelete_594104(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594111: Call_RegisteredServersDelete_594103; path: JsonNode;
+proc call*(call_568340: Call_RegisteredServersDelete_568332; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the given registered server.
   ## 
-  let valid = call_594111.validator(path, query, header, formData, body)
-  let scheme = call_594111.pickScheme
+  let valid = call_568340.validator(path, query, header, formData, body)
+  let scheme = call_568340.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594111.url(scheme.get, call_594111.host, call_594111.base,
-                         call_594111.route, valid.getOrDefault("path"),
+  let url = call_568340.url(scheme.get, call_568340.host, call_568340.base,
+                         call_568340.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594111, url, valid)
+  result = hook(call_568340, url, valid)
 
-proc call*(call_594112: Call_RegisteredServersDelete_594103;
+proc call*(call_568341: Call_RegisteredServersDelete_568332;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serverId: string; storageSyncServiceName: string): Recallable =
   ## registeredServersDelete
@@ -1460,23 +1460,23 @@ proc call*(call_594112: Call_RegisteredServersDelete_594103;
   ##           : GUID identifying the on-premises server.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594113 = newJObject()
-  var query_594114 = newJObject()
-  add(path_594113, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594114, "api-version", newJString(apiVersion))
-  add(path_594113, "subscriptionId", newJString(subscriptionId))
-  add(path_594113, "serverId", newJString(serverId))
-  add(path_594113, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594112.call(path_594113, query_594114, nil, nil, nil)
+  var path_568342 = newJObject()
+  var query_568343 = newJObject()
+  add(path_568342, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568343, "api-version", newJString(apiVersion))
+  add(path_568342, "subscriptionId", newJString(subscriptionId))
+  add(path_568342, "serverId", newJString(serverId))
+  add(path_568342, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568341.call(path_568342, query_568343, nil, nil, nil)
 
-var registeredServersDelete* = Call_RegisteredServersDelete_594103(
+var registeredServersDelete* = Call_RegisteredServersDelete_568332(
     name: "registeredServersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/registeredServers/{serverId}",
-    validator: validate_RegisteredServersDelete_594104, base: "",
-    url: url_RegisteredServersDelete_594105, schemes: {Scheme.Https})
+    validator: validate_RegisteredServersDelete_568333, base: "",
+    url: url_RegisteredServersDelete_568334, schemes: {Scheme.Https})
 type
-  Call_RegisteredServersTriggerRollover_594115 = ref object of OpenApiRestCall_593438
-proc url_RegisteredServersTriggerRollover_594117(protocol: Scheme; host: string;
+  Call_RegisteredServersTriggerRollover_568344 = ref object of OpenApiRestCall_567667
+proc url_RegisteredServersTriggerRollover_568346(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1504,7 +1504,7 @@ proc url_RegisteredServersTriggerRollover_594117(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegisteredServersTriggerRollover_594116(path: JsonNode;
+proc validate_RegisteredServersTriggerRollover_568345(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Triggers Server certificate rollover.
   ## 
@@ -1522,26 +1522,26 @@ proc validate_RegisteredServersTriggerRollover_594116(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594118 = path.getOrDefault("resourceGroupName")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  var valid_568347 = path.getOrDefault("resourceGroupName")
+  valid_568347 = validateParameter(valid_568347, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "resourceGroupName", valid_594118
-  var valid_594119 = path.getOrDefault("subscriptionId")
-  valid_594119 = validateParameter(valid_594119, JString, required = true,
+  if valid_568347 != nil:
+    section.add "resourceGroupName", valid_568347
+  var valid_568348 = path.getOrDefault("subscriptionId")
+  valid_568348 = validateParameter(valid_568348, JString, required = true,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "subscriptionId", valid_594119
-  var valid_594120 = path.getOrDefault("serverId")
-  valid_594120 = validateParameter(valid_594120, JString, required = true,
+  if valid_568348 != nil:
+    section.add "subscriptionId", valid_568348
+  var valid_568349 = path.getOrDefault("serverId")
+  valid_568349 = validateParameter(valid_568349, JString, required = true,
                                  default = nil)
-  if valid_594120 != nil:
-    section.add "serverId", valid_594120
-  var valid_594121 = path.getOrDefault("storageSyncServiceName")
-  valid_594121 = validateParameter(valid_594121, JString, required = true,
+  if valid_568349 != nil:
+    section.add "serverId", valid_568349
+  var valid_568350 = path.getOrDefault("storageSyncServiceName")
+  valid_568350 = validateParameter(valid_568350, JString, required = true,
                                  default = nil)
-  if valid_594121 != nil:
-    section.add "storageSyncServiceName", valid_594121
+  if valid_568350 != nil:
+    section.add "storageSyncServiceName", valid_568350
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1549,11 +1549,11 @@ proc validate_RegisteredServersTriggerRollover_594116(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594122 = query.getOrDefault("api-version")
-  valid_594122 = validateParameter(valid_594122, JString, required = true,
+  var valid_568351 = query.getOrDefault("api-version")
+  valid_568351 = validateParameter(valid_568351, JString, required = true,
                                  default = nil)
-  if valid_594122 != nil:
-    section.add "api-version", valid_594122
+  if valid_568351 != nil:
+    section.add "api-version", valid_568351
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1567,21 +1567,21 @@ proc validate_RegisteredServersTriggerRollover_594116(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594124: Call_RegisteredServersTriggerRollover_594115;
+proc call*(call_568353: Call_RegisteredServersTriggerRollover_568344;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Triggers Server certificate rollover.
   ## 
-  let valid = call_594124.validator(path, query, header, formData, body)
-  let scheme = call_594124.pickScheme
+  let valid = call_568353.validator(path, query, header, formData, body)
+  let scheme = call_568353.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594124.url(scheme.get, call_594124.host, call_594124.base,
-                         call_594124.route, valid.getOrDefault("path"),
+  let url = call_568353.url(scheme.get, call_568353.host, call_568353.base,
+                         call_568353.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594124, url, valid)
+  result = hook(call_568353, url, valid)
 
-proc call*(call_594125: Call_RegisteredServersTriggerRollover_594115;
+proc call*(call_568354: Call_RegisteredServersTriggerRollover_568344;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serverId: string; parameters: JsonNode; storageSyncServiceName: string): Recallable =
   ## registeredServersTriggerRollover
@@ -1598,26 +1598,26 @@ proc call*(call_594125: Call_RegisteredServersTriggerRollover_594115;
   ##             : Body of Trigger Rollover request.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594126 = newJObject()
-  var query_594127 = newJObject()
-  var body_594128 = newJObject()
-  add(path_594126, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594127, "api-version", newJString(apiVersion))
-  add(path_594126, "subscriptionId", newJString(subscriptionId))
-  add(path_594126, "serverId", newJString(serverId))
+  var path_568355 = newJObject()
+  var query_568356 = newJObject()
+  var body_568357 = newJObject()
+  add(path_568355, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568356, "api-version", newJString(apiVersion))
+  add(path_568355, "subscriptionId", newJString(subscriptionId))
+  add(path_568355, "serverId", newJString(serverId))
   if parameters != nil:
-    body_594128 = parameters
-  add(path_594126, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594125.call(path_594126, query_594127, nil, nil, body_594128)
+    body_568357 = parameters
+  add(path_568355, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568354.call(path_568355, query_568356, nil, nil, body_568357)
 
-var registeredServersTriggerRollover* = Call_RegisteredServersTriggerRollover_594115(
+var registeredServersTriggerRollover* = Call_RegisteredServersTriggerRollover_568344(
     name: "registeredServersTriggerRollover", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/registeredServers/{serverId}/triggerRollover",
-    validator: validate_RegisteredServersTriggerRollover_594116, base: "",
-    url: url_RegisteredServersTriggerRollover_594117, schemes: {Scheme.Https})
+    validator: validate_RegisteredServersTriggerRollover_568345, base: "",
+    url: url_RegisteredServersTriggerRollover_568346, schemes: {Scheme.Https})
 type
-  Call_SyncGroupsListByStorageSyncService_594129 = ref object of OpenApiRestCall_593438
-proc url_SyncGroupsListByStorageSyncService_594131(protocol: Scheme; host: string;
+  Call_SyncGroupsListByStorageSyncService_568358 = ref object of OpenApiRestCall_567667
+proc url_SyncGroupsListByStorageSyncService_568360(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1642,7 +1642,7 @@ proc url_SyncGroupsListByStorageSyncService_594131(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncGroupsListByStorageSyncService_594130(path: JsonNode;
+proc validate_SyncGroupsListByStorageSyncService_568359(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a SyncGroup List.
   ## 
@@ -1658,21 +1658,21 @@ proc validate_SyncGroupsListByStorageSyncService_594130(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594132 = path.getOrDefault("resourceGroupName")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  var valid_568361 = path.getOrDefault("resourceGroupName")
+  valid_568361 = validateParameter(valid_568361, JString, required = true,
                                  default = nil)
-  if valid_594132 != nil:
-    section.add "resourceGroupName", valid_594132
-  var valid_594133 = path.getOrDefault("subscriptionId")
-  valid_594133 = validateParameter(valid_594133, JString, required = true,
+  if valid_568361 != nil:
+    section.add "resourceGroupName", valid_568361
+  var valid_568362 = path.getOrDefault("subscriptionId")
+  valid_568362 = validateParameter(valid_568362, JString, required = true,
                                  default = nil)
-  if valid_594133 != nil:
-    section.add "subscriptionId", valid_594133
-  var valid_594134 = path.getOrDefault("storageSyncServiceName")
-  valid_594134 = validateParameter(valid_594134, JString, required = true,
+  if valid_568362 != nil:
+    section.add "subscriptionId", valid_568362
+  var valid_568363 = path.getOrDefault("storageSyncServiceName")
+  valid_568363 = validateParameter(valid_568363, JString, required = true,
                                  default = nil)
-  if valid_594134 != nil:
-    section.add "storageSyncServiceName", valid_594134
+  if valid_568363 != nil:
+    section.add "storageSyncServiceName", valid_568363
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1680,11 +1680,11 @@ proc validate_SyncGroupsListByStorageSyncService_594130(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594135 = query.getOrDefault("api-version")
-  valid_594135 = validateParameter(valid_594135, JString, required = true,
+  var valid_568364 = query.getOrDefault("api-version")
+  valid_568364 = validateParameter(valid_568364, JString, required = true,
                                  default = nil)
-  if valid_594135 != nil:
-    section.add "api-version", valid_594135
+  if valid_568364 != nil:
+    section.add "api-version", valid_568364
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1693,21 +1693,21 @@ proc validate_SyncGroupsListByStorageSyncService_594130(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594136: Call_SyncGroupsListByStorageSyncService_594129;
+proc call*(call_568365: Call_SyncGroupsListByStorageSyncService_568358;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a SyncGroup List.
   ## 
-  let valid = call_594136.validator(path, query, header, formData, body)
-  let scheme = call_594136.pickScheme
+  let valid = call_568365.validator(path, query, header, formData, body)
+  let scheme = call_568365.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594136.url(scheme.get, call_594136.host, call_594136.base,
-                         call_594136.route, valid.getOrDefault("path"),
+  let url = call_568365.url(scheme.get, call_568365.host, call_568365.base,
+                         call_568365.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594136, url, valid)
+  result = hook(call_568365, url, valid)
 
-proc call*(call_594137: Call_SyncGroupsListByStorageSyncService_594129;
+proc call*(call_568366: Call_SyncGroupsListByStorageSyncService_568358;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           storageSyncServiceName: string): Recallable =
   ## syncGroupsListByStorageSyncService
@@ -1720,22 +1720,22 @@ proc call*(call_594137: Call_SyncGroupsListByStorageSyncService_594129;
   ##                 : The ID of the target subscription.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594138 = newJObject()
-  var query_594139 = newJObject()
-  add(path_594138, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594139, "api-version", newJString(apiVersion))
-  add(path_594138, "subscriptionId", newJString(subscriptionId))
-  add(path_594138, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594137.call(path_594138, query_594139, nil, nil, nil)
+  var path_568367 = newJObject()
+  var query_568368 = newJObject()
+  add(path_568367, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568368, "api-version", newJString(apiVersion))
+  add(path_568367, "subscriptionId", newJString(subscriptionId))
+  add(path_568367, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568366.call(path_568367, query_568368, nil, nil, nil)
 
-var syncGroupsListByStorageSyncService* = Call_SyncGroupsListByStorageSyncService_594129(
+var syncGroupsListByStorageSyncService* = Call_SyncGroupsListByStorageSyncService_568358(
     name: "syncGroupsListByStorageSyncService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups",
-    validator: validate_SyncGroupsListByStorageSyncService_594130, base: "",
-    url: url_SyncGroupsListByStorageSyncService_594131, schemes: {Scheme.Https})
+    validator: validate_SyncGroupsListByStorageSyncService_568359, base: "",
+    url: url_SyncGroupsListByStorageSyncService_568360, schemes: {Scheme.Https})
 type
-  Call_SyncGroupsCreate_594152 = ref object of OpenApiRestCall_593438
-proc url_SyncGroupsCreate_594154(protocol: Scheme; host: string; base: string;
+  Call_SyncGroupsCreate_568381 = ref object of OpenApiRestCall_567667
+proc url_SyncGroupsCreate_568383(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1762,7 +1762,7 @@ proc url_SyncGroupsCreate_594154(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncGroupsCreate_594153(path: JsonNode; query: JsonNode;
+proc validate_SyncGroupsCreate_568382(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Create a new SyncGroup.
@@ -1781,26 +1781,26 @@ proc validate_SyncGroupsCreate_594153(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594155 = path.getOrDefault("resourceGroupName")
-  valid_594155 = validateParameter(valid_594155, JString, required = true,
+  var valid_568384 = path.getOrDefault("resourceGroupName")
+  valid_568384 = validateParameter(valid_568384, JString, required = true,
                                  default = nil)
-  if valid_594155 != nil:
-    section.add "resourceGroupName", valid_594155
-  var valid_594156 = path.getOrDefault("subscriptionId")
-  valid_594156 = validateParameter(valid_594156, JString, required = true,
+  if valid_568384 != nil:
+    section.add "resourceGroupName", valid_568384
+  var valid_568385 = path.getOrDefault("subscriptionId")
+  valid_568385 = validateParameter(valid_568385, JString, required = true,
                                  default = nil)
-  if valid_594156 != nil:
-    section.add "subscriptionId", valid_594156
-  var valid_594157 = path.getOrDefault("syncGroupName")
-  valid_594157 = validateParameter(valid_594157, JString, required = true,
+  if valid_568385 != nil:
+    section.add "subscriptionId", valid_568385
+  var valid_568386 = path.getOrDefault("syncGroupName")
+  valid_568386 = validateParameter(valid_568386, JString, required = true,
                                  default = nil)
-  if valid_594157 != nil:
-    section.add "syncGroupName", valid_594157
-  var valid_594158 = path.getOrDefault("storageSyncServiceName")
-  valid_594158 = validateParameter(valid_594158, JString, required = true,
+  if valid_568386 != nil:
+    section.add "syncGroupName", valid_568386
+  var valid_568387 = path.getOrDefault("storageSyncServiceName")
+  valid_568387 = validateParameter(valid_568387, JString, required = true,
                                  default = nil)
-  if valid_594158 != nil:
-    section.add "storageSyncServiceName", valid_594158
+  if valid_568387 != nil:
+    section.add "storageSyncServiceName", valid_568387
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1808,11 +1808,11 @@ proc validate_SyncGroupsCreate_594153(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594159 = query.getOrDefault("api-version")
-  valid_594159 = validateParameter(valid_594159, JString, required = true,
+  var valid_568388 = query.getOrDefault("api-version")
+  valid_568388 = validateParameter(valid_568388, JString, required = true,
                                  default = nil)
-  if valid_594159 != nil:
-    section.add "api-version", valid_594159
+  if valid_568388 != nil:
+    section.add "api-version", valid_568388
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1826,20 +1826,20 @@ proc validate_SyncGroupsCreate_594153(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594161: Call_SyncGroupsCreate_594152; path: JsonNode;
+proc call*(call_568390: Call_SyncGroupsCreate_568381; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new SyncGroup.
   ## 
-  let valid = call_594161.validator(path, query, header, formData, body)
-  let scheme = call_594161.pickScheme
+  let valid = call_568390.validator(path, query, header, formData, body)
+  let scheme = call_568390.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594161.url(scheme.get, call_594161.host, call_594161.base,
-                         call_594161.route, valid.getOrDefault("path"),
+  let url = call_568390.url(scheme.get, call_568390.host, call_568390.base,
+                         call_568390.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594161, url, valid)
+  result = hook(call_568390, url, valid)
 
-proc call*(call_594162: Call_SyncGroupsCreate_594152; resourceGroupName: string;
+proc call*(call_568391: Call_SyncGroupsCreate_568381; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; syncGroupName: string;
           parameters: JsonNode; storageSyncServiceName: string): Recallable =
   ## syncGroupsCreate
@@ -1856,25 +1856,25 @@ proc call*(call_594162: Call_SyncGroupsCreate_594152; resourceGroupName: string;
   ##             : Sync Group Body
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594163 = newJObject()
-  var query_594164 = newJObject()
-  var body_594165 = newJObject()
-  add(path_594163, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594164, "api-version", newJString(apiVersion))
-  add(path_594163, "subscriptionId", newJString(subscriptionId))
-  add(path_594163, "syncGroupName", newJString(syncGroupName))
+  var path_568392 = newJObject()
+  var query_568393 = newJObject()
+  var body_568394 = newJObject()
+  add(path_568392, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568393, "api-version", newJString(apiVersion))
+  add(path_568392, "subscriptionId", newJString(subscriptionId))
+  add(path_568392, "syncGroupName", newJString(syncGroupName))
   if parameters != nil:
-    body_594165 = parameters
-  add(path_594163, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594162.call(path_594163, query_594164, nil, nil, body_594165)
+    body_568394 = parameters
+  add(path_568392, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568391.call(path_568392, query_568393, nil, nil, body_568394)
 
-var syncGroupsCreate* = Call_SyncGroupsCreate_594152(name: "syncGroupsCreate",
+var syncGroupsCreate* = Call_SyncGroupsCreate_568381(name: "syncGroupsCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}",
-    validator: validate_SyncGroupsCreate_594153, base: "",
-    url: url_SyncGroupsCreate_594154, schemes: {Scheme.Https})
+    validator: validate_SyncGroupsCreate_568382, base: "",
+    url: url_SyncGroupsCreate_568383, schemes: {Scheme.Https})
 type
-  Call_SyncGroupsGet_594140 = ref object of OpenApiRestCall_593438
-proc url_SyncGroupsGet_594142(protocol: Scheme; host: string; base: string;
+  Call_SyncGroupsGet_568369 = ref object of OpenApiRestCall_567667
+proc url_SyncGroupsGet_568371(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1901,7 +1901,7 @@ proc url_SyncGroupsGet_594142(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncGroupsGet_594141(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SyncGroupsGet_568370(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a given SyncGroup.
   ## 
@@ -1919,26 +1919,26 @@ proc validate_SyncGroupsGet_594141(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594143 = path.getOrDefault("resourceGroupName")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+  var valid_568372 = path.getOrDefault("resourceGroupName")
+  valid_568372 = validateParameter(valid_568372, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "resourceGroupName", valid_594143
-  var valid_594144 = path.getOrDefault("subscriptionId")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  if valid_568372 != nil:
+    section.add "resourceGroupName", valid_568372
+  var valid_568373 = path.getOrDefault("subscriptionId")
+  valid_568373 = validateParameter(valid_568373, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "subscriptionId", valid_594144
-  var valid_594145 = path.getOrDefault("syncGroupName")
-  valid_594145 = validateParameter(valid_594145, JString, required = true,
+  if valid_568373 != nil:
+    section.add "subscriptionId", valid_568373
+  var valid_568374 = path.getOrDefault("syncGroupName")
+  valid_568374 = validateParameter(valid_568374, JString, required = true,
                                  default = nil)
-  if valid_594145 != nil:
-    section.add "syncGroupName", valid_594145
-  var valid_594146 = path.getOrDefault("storageSyncServiceName")
-  valid_594146 = validateParameter(valid_594146, JString, required = true,
+  if valid_568374 != nil:
+    section.add "syncGroupName", valid_568374
+  var valid_568375 = path.getOrDefault("storageSyncServiceName")
+  valid_568375 = validateParameter(valid_568375, JString, required = true,
                                  default = nil)
-  if valid_594146 != nil:
-    section.add "storageSyncServiceName", valid_594146
+  if valid_568375 != nil:
+    section.add "storageSyncServiceName", valid_568375
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1946,11 +1946,11 @@ proc validate_SyncGroupsGet_594141(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594147 = query.getOrDefault("api-version")
-  valid_594147 = validateParameter(valid_594147, JString, required = true,
+  var valid_568376 = query.getOrDefault("api-version")
+  valid_568376 = validateParameter(valid_568376, JString, required = true,
                                  default = nil)
-  if valid_594147 != nil:
-    section.add "api-version", valid_594147
+  if valid_568376 != nil:
+    section.add "api-version", valid_568376
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1959,20 +1959,20 @@ proc validate_SyncGroupsGet_594141(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594148: Call_SyncGroupsGet_594140; path: JsonNode; query: JsonNode;
+proc call*(call_568377: Call_SyncGroupsGet_568369; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a given SyncGroup.
   ## 
-  let valid = call_594148.validator(path, query, header, formData, body)
-  let scheme = call_594148.pickScheme
+  let valid = call_568377.validator(path, query, header, formData, body)
+  let scheme = call_568377.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594148.url(scheme.get, call_594148.host, call_594148.base,
-                         call_594148.route, valid.getOrDefault("path"),
+  let url = call_568377.url(scheme.get, call_568377.host, call_568377.base,
+                         call_568377.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594148, url, valid)
+  result = hook(call_568377, url, valid)
 
-proc call*(call_594149: Call_SyncGroupsGet_594140; resourceGroupName: string;
+proc call*(call_568378: Call_SyncGroupsGet_568369; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; syncGroupName: string;
           storageSyncServiceName: string): Recallable =
   ## syncGroupsGet
@@ -1987,22 +1987,22 @@ proc call*(call_594149: Call_SyncGroupsGet_594140; resourceGroupName: string;
   ##                : Name of Sync Group resource.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594150 = newJObject()
-  var query_594151 = newJObject()
-  add(path_594150, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594151, "api-version", newJString(apiVersion))
-  add(path_594150, "subscriptionId", newJString(subscriptionId))
-  add(path_594150, "syncGroupName", newJString(syncGroupName))
-  add(path_594150, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594149.call(path_594150, query_594151, nil, nil, nil)
+  var path_568379 = newJObject()
+  var query_568380 = newJObject()
+  add(path_568379, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568380, "api-version", newJString(apiVersion))
+  add(path_568379, "subscriptionId", newJString(subscriptionId))
+  add(path_568379, "syncGroupName", newJString(syncGroupName))
+  add(path_568379, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568378.call(path_568379, query_568380, nil, nil, nil)
 
-var syncGroupsGet* = Call_SyncGroupsGet_594140(name: "syncGroupsGet",
+var syncGroupsGet* = Call_SyncGroupsGet_568369(name: "syncGroupsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}",
-    validator: validate_SyncGroupsGet_594141, base: "", url: url_SyncGroupsGet_594142,
+    validator: validate_SyncGroupsGet_568370, base: "", url: url_SyncGroupsGet_568371,
     schemes: {Scheme.Https})
 type
-  Call_SyncGroupsDelete_594166 = ref object of OpenApiRestCall_593438
-proc url_SyncGroupsDelete_594168(protocol: Scheme; host: string; base: string;
+  Call_SyncGroupsDelete_568395 = ref object of OpenApiRestCall_567667
+proc url_SyncGroupsDelete_568397(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2029,7 +2029,7 @@ proc url_SyncGroupsDelete_594168(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncGroupsDelete_594167(path: JsonNode; query: JsonNode;
+proc validate_SyncGroupsDelete_568396(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Delete a given SyncGroup.
@@ -2048,26 +2048,26 @@ proc validate_SyncGroupsDelete_594167(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594169 = path.getOrDefault("resourceGroupName")
-  valid_594169 = validateParameter(valid_594169, JString, required = true,
+  var valid_568398 = path.getOrDefault("resourceGroupName")
+  valid_568398 = validateParameter(valid_568398, JString, required = true,
                                  default = nil)
-  if valid_594169 != nil:
-    section.add "resourceGroupName", valid_594169
-  var valid_594170 = path.getOrDefault("subscriptionId")
-  valid_594170 = validateParameter(valid_594170, JString, required = true,
+  if valid_568398 != nil:
+    section.add "resourceGroupName", valid_568398
+  var valid_568399 = path.getOrDefault("subscriptionId")
+  valid_568399 = validateParameter(valid_568399, JString, required = true,
                                  default = nil)
-  if valid_594170 != nil:
-    section.add "subscriptionId", valid_594170
-  var valid_594171 = path.getOrDefault("syncGroupName")
-  valid_594171 = validateParameter(valid_594171, JString, required = true,
+  if valid_568399 != nil:
+    section.add "subscriptionId", valid_568399
+  var valid_568400 = path.getOrDefault("syncGroupName")
+  valid_568400 = validateParameter(valid_568400, JString, required = true,
                                  default = nil)
-  if valid_594171 != nil:
-    section.add "syncGroupName", valid_594171
-  var valid_594172 = path.getOrDefault("storageSyncServiceName")
-  valid_594172 = validateParameter(valid_594172, JString, required = true,
+  if valid_568400 != nil:
+    section.add "syncGroupName", valid_568400
+  var valid_568401 = path.getOrDefault("storageSyncServiceName")
+  valid_568401 = validateParameter(valid_568401, JString, required = true,
                                  default = nil)
-  if valid_594172 != nil:
-    section.add "storageSyncServiceName", valid_594172
+  if valid_568401 != nil:
+    section.add "storageSyncServiceName", valid_568401
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2075,11 +2075,11 @@ proc validate_SyncGroupsDelete_594167(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594173 = query.getOrDefault("api-version")
-  valid_594173 = validateParameter(valid_594173, JString, required = true,
+  var valid_568402 = query.getOrDefault("api-version")
+  valid_568402 = validateParameter(valid_568402, JString, required = true,
                                  default = nil)
-  if valid_594173 != nil:
-    section.add "api-version", valid_594173
+  if valid_568402 != nil:
+    section.add "api-version", valid_568402
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2088,20 +2088,20 @@ proc validate_SyncGroupsDelete_594167(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594174: Call_SyncGroupsDelete_594166; path: JsonNode;
+proc call*(call_568403: Call_SyncGroupsDelete_568395; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a given SyncGroup.
   ## 
-  let valid = call_594174.validator(path, query, header, formData, body)
-  let scheme = call_594174.pickScheme
+  let valid = call_568403.validator(path, query, header, formData, body)
+  let scheme = call_568403.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594174.url(scheme.get, call_594174.host, call_594174.base,
-                         call_594174.route, valid.getOrDefault("path"),
+  let url = call_568403.url(scheme.get, call_568403.host, call_568403.base,
+                         call_568403.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594174, url, valid)
+  result = hook(call_568403, url, valid)
 
-proc call*(call_594175: Call_SyncGroupsDelete_594166; resourceGroupName: string;
+proc call*(call_568404: Call_SyncGroupsDelete_568395; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; syncGroupName: string;
           storageSyncServiceName: string): Recallable =
   ## syncGroupsDelete
@@ -2116,22 +2116,22 @@ proc call*(call_594175: Call_SyncGroupsDelete_594166; resourceGroupName: string;
   ##                : Name of Sync Group resource.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594176 = newJObject()
-  var query_594177 = newJObject()
-  add(path_594176, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594177, "api-version", newJString(apiVersion))
-  add(path_594176, "subscriptionId", newJString(subscriptionId))
-  add(path_594176, "syncGroupName", newJString(syncGroupName))
-  add(path_594176, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594175.call(path_594176, query_594177, nil, nil, nil)
+  var path_568405 = newJObject()
+  var query_568406 = newJObject()
+  add(path_568405, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568406, "api-version", newJString(apiVersion))
+  add(path_568405, "subscriptionId", newJString(subscriptionId))
+  add(path_568405, "syncGroupName", newJString(syncGroupName))
+  add(path_568405, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568404.call(path_568405, query_568406, nil, nil, nil)
 
-var syncGroupsDelete* = Call_SyncGroupsDelete_594166(name: "syncGroupsDelete",
+var syncGroupsDelete* = Call_SyncGroupsDelete_568395(name: "syncGroupsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}",
-    validator: validate_SyncGroupsDelete_594167, base: "",
-    url: url_SyncGroupsDelete_594168, schemes: {Scheme.Https})
+    validator: validate_SyncGroupsDelete_568396, base: "",
+    url: url_SyncGroupsDelete_568397, schemes: {Scheme.Https})
 type
-  Call_CloudEndpointsListBySyncGroup_594178 = ref object of OpenApiRestCall_593438
-proc url_CloudEndpointsListBySyncGroup_594180(protocol: Scheme; host: string;
+  Call_CloudEndpointsListBySyncGroup_568407 = ref object of OpenApiRestCall_567667
+proc url_CloudEndpointsListBySyncGroup_568409(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2159,7 +2159,7 @@ proc url_CloudEndpointsListBySyncGroup_594180(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CloudEndpointsListBySyncGroup_594179(path: JsonNode; query: JsonNode;
+proc validate_CloudEndpointsListBySyncGroup_568408(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a CloudEndpoint List.
   ## 
@@ -2177,26 +2177,26 @@ proc validate_CloudEndpointsListBySyncGroup_594179(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594181 = path.getOrDefault("resourceGroupName")
-  valid_594181 = validateParameter(valid_594181, JString, required = true,
+  var valid_568410 = path.getOrDefault("resourceGroupName")
+  valid_568410 = validateParameter(valid_568410, JString, required = true,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "resourceGroupName", valid_594181
-  var valid_594182 = path.getOrDefault("subscriptionId")
-  valid_594182 = validateParameter(valid_594182, JString, required = true,
+  if valid_568410 != nil:
+    section.add "resourceGroupName", valid_568410
+  var valid_568411 = path.getOrDefault("subscriptionId")
+  valid_568411 = validateParameter(valid_568411, JString, required = true,
                                  default = nil)
-  if valid_594182 != nil:
-    section.add "subscriptionId", valid_594182
-  var valid_594183 = path.getOrDefault("syncGroupName")
-  valid_594183 = validateParameter(valid_594183, JString, required = true,
+  if valid_568411 != nil:
+    section.add "subscriptionId", valid_568411
+  var valid_568412 = path.getOrDefault("syncGroupName")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594183 != nil:
-    section.add "syncGroupName", valid_594183
-  var valid_594184 = path.getOrDefault("storageSyncServiceName")
-  valid_594184 = validateParameter(valid_594184, JString, required = true,
+  if valid_568412 != nil:
+    section.add "syncGroupName", valid_568412
+  var valid_568413 = path.getOrDefault("storageSyncServiceName")
+  valid_568413 = validateParameter(valid_568413, JString, required = true,
                                  default = nil)
-  if valid_594184 != nil:
-    section.add "storageSyncServiceName", valid_594184
+  if valid_568413 != nil:
+    section.add "storageSyncServiceName", valid_568413
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2204,11 +2204,11 @@ proc validate_CloudEndpointsListBySyncGroup_594179(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594185 = query.getOrDefault("api-version")
-  valid_594185 = validateParameter(valid_594185, JString, required = true,
+  var valid_568414 = query.getOrDefault("api-version")
+  valid_568414 = validateParameter(valid_568414, JString, required = true,
                                  default = nil)
-  if valid_594185 != nil:
-    section.add "api-version", valid_594185
+  if valid_568414 != nil:
+    section.add "api-version", valid_568414
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2217,20 +2217,20 @@ proc validate_CloudEndpointsListBySyncGroup_594179(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594186: Call_CloudEndpointsListBySyncGroup_594178; path: JsonNode;
+proc call*(call_568415: Call_CloudEndpointsListBySyncGroup_568407; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a CloudEndpoint List.
   ## 
-  let valid = call_594186.validator(path, query, header, formData, body)
-  let scheme = call_594186.pickScheme
+  let valid = call_568415.validator(path, query, header, formData, body)
+  let scheme = call_568415.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594186.url(scheme.get, call_594186.host, call_594186.base,
-                         call_594186.route, valid.getOrDefault("path"),
+  let url = call_568415.url(scheme.get, call_568415.host, call_568415.base,
+                         call_568415.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594186, url, valid)
+  result = hook(call_568415, url, valid)
 
-proc call*(call_594187: Call_CloudEndpointsListBySyncGroup_594178;
+proc call*(call_568416: Call_CloudEndpointsListBySyncGroup_568407;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           syncGroupName: string; storageSyncServiceName: string): Recallable =
   ## cloudEndpointsListBySyncGroup
@@ -2245,23 +2245,23 @@ proc call*(call_594187: Call_CloudEndpointsListBySyncGroup_594178;
   ##                : Name of Sync Group resource.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594188 = newJObject()
-  var query_594189 = newJObject()
-  add(path_594188, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594189, "api-version", newJString(apiVersion))
-  add(path_594188, "subscriptionId", newJString(subscriptionId))
-  add(path_594188, "syncGroupName", newJString(syncGroupName))
-  add(path_594188, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594187.call(path_594188, query_594189, nil, nil, nil)
+  var path_568417 = newJObject()
+  var query_568418 = newJObject()
+  add(path_568417, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568418, "api-version", newJString(apiVersion))
+  add(path_568417, "subscriptionId", newJString(subscriptionId))
+  add(path_568417, "syncGroupName", newJString(syncGroupName))
+  add(path_568417, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568416.call(path_568417, query_568418, nil, nil, nil)
 
-var cloudEndpointsListBySyncGroup* = Call_CloudEndpointsListBySyncGroup_594178(
+var cloudEndpointsListBySyncGroup* = Call_CloudEndpointsListBySyncGroup_568407(
     name: "cloudEndpointsListBySyncGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/cloudEndpoints",
-    validator: validate_CloudEndpointsListBySyncGroup_594179, base: "",
-    url: url_CloudEndpointsListBySyncGroup_594180, schemes: {Scheme.Https})
+    validator: validate_CloudEndpointsListBySyncGroup_568408, base: "",
+    url: url_CloudEndpointsListBySyncGroup_568409, schemes: {Scheme.Https})
 type
-  Call_CloudEndpointsCreate_594203 = ref object of OpenApiRestCall_593438
-proc url_CloudEndpointsCreate_594205(protocol: Scheme; host: string; base: string;
+  Call_CloudEndpointsCreate_568432 = ref object of OpenApiRestCall_567667
+proc url_CloudEndpointsCreate_568434(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2292,7 +2292,7 @@ proc url_CloudEndpointsCreate_594205(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CloudEndpointsCreate_594204(path: JsonNode; query: JsonNode;
+proc validate_CloudEndpointsCreate_568433(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new CloudEndpoint.
   ## 
@@ -2312,31 +2312,31 @@ proc validate_CloudEndpointsCreate_594204(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594206 = path.getOrDefault("resourceGroupName")
-  valid_594206 = validateParameter(valid_594206, JString, required = true,
+  var valid_568435 = path.getOrDefault("resourceGroupName")
+  valid_568435 = validateParameter(valid_568435, JString, required = true,
                                  default = nil)
-  if valid_594206 != nil:
-    section.add "resourceGroupName", valid_594206
-  var valid_594207 = path.getOrDefault("subscriptionId")
-  valid_594207 = validateParameter(valid_594207, JString, required = true,
+  if valid_568435 != nil:
+    section.add "resourceGroupName", valid_568435
+  var valid_568436 = path.getOrDefault("subscriptionId")
+  valid_568436 = validateParameter(valid_568436, JString, required = true,
                                  default = nil)
-  if valid_594207 != nil:
-    section.add "subscriptionId", valid_594207
-  var valid_594208 = path.getOrDefault("syncGroupName")
-  valid_594208 = validateParameter(valid_594208, JString, required = true,
+  if valid_568436 != nil:
+    section.add "subscriptionId", valid_568436
+  var valid_568437 = path.getOrDefault("syncGroupName")
+  valid_568437 = validateParameter(valid_568437, JString, required = true,
                                  default = nil)
-  if valid_594208 != nil:
-    section.add "syncGroupName", valid_594208
-  var valid_594209 = path.getOrDefault("cloudEndpointName")
-  valid_594209 = validateParameter(valid_594209, JString, required = true,
+  if valid_568437 != nil:
+    section.add "syncGroupName", valid_568437
+  var valid_568438 = path.getOrDefault("cloudEndpointName")
+  valid_568438 = validateParameter(valid_568438, JString, required = true,
                                  default = nil)
-  if valid_594209 != nil:
-    section.add "cloudEndpointName", valid_594209
-  var valid_594210 = path.getOrDefault("storageSyncServiceName")
-  valid_594210 = validateParameter(valid_594210, JString, required = true,
+  if valid_568438 != nil:
+    section.add "cloudEndpointName", valid_568438
+  var valid_568439 = path.getOrDefault("storageSyncServiceName")
+  valid_568439 = validateParameter(valid_568439, JString, required = true,
                                  default = nil)
-  if valid_594210 != nil:
-    section.add "storageSyncServiceName", valid_594210
+  if valid_568439 != nil:
+    section.add "storageSyncServiceName", valid_568439
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2344,11 +2344,11 @@ proc validate_CloudEndpointsCreate_594204(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594211 = query.getOrDefault("api-version")
-  valid_594211 = validateParameter(valid_594211, JString, required = true,
+  var valid_568440 = query.getOrDefault("api-version")
+  valid_568440 = validateParameter(valid_568440, JString, required = true,
                                  default = nil)
-  if valid_594211 != nil:
-    section.add "api-version", valid_594211
+  if valid_568440 != nil:
+    section.add "api-version", valid_568440
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2362,20 +2362,20 @@ proc validate_CloudEndpointsCreate_594204(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594213: Call_CloudEndpointsCreate_594203; path: JsonNode;
+proc call*(call_568442: Call_CloudEndpointsCreate_568432; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new CloudEndpoint.
   ## 
-  let valid = call_594213.validator(path, query, header, formData, body)
-  let scheme = call_594213.pickScheme
+  let valid = call_568442.validator(path, query, header, formData, body)
+  let scheme = call_568442.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594213.url(scheme.get, call_594213.host, call_594213.base,
-                         call_594213.route, valid.getOrDefault("path"),
+  let url = call_568442.url(scheme.get, call_568442.host, call_568442.base,
+                         call_568442.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594213, url, valid)
+  result = hook(call_568442, url, valid)
 
-proc call*(call_594214: Call_CloudEndpointsCreate_594203;
+proc call*(call_568443: Call_CloudEndpointsCreate_568432;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           syncGroupName: string; cloudEndpointName: string; parameters: JsonNode;
           storageSyncServiceName: string): Recallable =
@@ -2395,27 +2395,27 @@ proc call*(call_594214: Call_CloudEndpointsCreate_594203;
   ##             : Body of Cloud Endpoint resource.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594215 = newJObject()
-  var query_594216 = newJObject()
-  var body_594217 = newJObject()
-  add(path_594215, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594216, "api-version", newJString(apiVersion))
-  add(path_594215, "subscriptionId", newJString(subscriptionId))
-  add(path_594215, "syncGroupName", newJString(syncGroupName))
-  add(path_594215, "cloudEndpointName", newJString(cloudEndpointName))
+  var path_568444 = newJObject()
+  var query_568445 = newJObject()
+  var body_568446 = newJObject()
+  add(path_568444, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568445, "api-version", newJString(apiVersion))
+  add(path_568444, "subscriptionId", newJString(subscriptionId))
+  add(path_568444, "syncGroupName", newJString(syncGroupName))
+  add(path_568444, "cloudEndpointName", newJString(cloudEndpointName))
   if parameters != nil:
-    body_594217 = parameters
-  add(path_594215, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594214.call(path_594215, query_594216, nil, nil, body_594217)
+    body_568446 = parameters
+  add(path_568444, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568443.call(path_568444, query_568445, nil, nil, body_568446)
 
-var cloudEndpointsCreate* = Call_CloudEndpointsCreate_594203(
+var cloudEndpointsCreate* = Call_CloudEndpointsCreate_568432(
     name: "cloudEndpointsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/cloudEndpoints/{cloudEndpointName}",
-    validator: validate_CloudEndpointsCreate_594204, base: "",
-    url: url_CloudEndpointsCreate_594205, schemes: {Scheme.Https})
+    validator: validate_CloudEndpointsCreate_568433, base: "",
+    url: url_CloudEndpointsCreate_568434, schemes: {Scheme.Https})
 type
-  Call_CloudEndpointsGet_594190 = ref object of OpenApiRestCall_593438
-proc url_CloudEndpointsGet_594192(protocol: Scheme; host: string; base: string;
+  Call_CloudEndpointsGet_568419 = ref object of OpenApiRestCall_567667
+proc url_CloudEndpointsGet_568421(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2446,7 +2446,7 @@ proc url_CloudEndpointsGet_594192(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CloudEndpointsGet_594191(path: JsonNode; query: JsonNode;
+proc validate_CloudEndpointsGet_568420(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get a given CloudEndpoint.
@@ -2467,31 +2467,31 @@ proc validate_CloudEndpointsGet_594191(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594193 = path.getOrDefault("resourceGroupName")
-  valid_594193 = validateParameter(valid_594193, JString, required = true,
+  var valid_568422 = path.getOrDefault("resourceGroupName")
+  valid_568422 = validateParameter(valid_568422, JString, required = true,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "resourceGroupName", valid_594193
-  var valid_594194 = path.getOrDefault("subscriptionId")
-  valid_594194 = validateParameter(valid_594194, JString, required = true,
+  if valid_568422 != nil:
+    section.add "resourceGroupName", valid_568422
+  var valid_568423 = path.getOrDefault("subscriptionId")
+  valid_568423 = validateParameter(valid_568423, JString, required = true,
                                  default = nil)
-  if valid_594194 != nil:
-    section.add "subscriptionId", valid_594194
-  var valid_594195 = path.getOrDefault("syncGroupName")
-  valid_594195 = validateParameter(valid_594195, JString, required = true,
+  if valid_568423 != nil:
+    section.add "subscriptionId", valid_568423
+  var valid_568424 = path.getOrDefault("syncGroupName")
+  valid_568424 = validateParameter(valid_568424, JString, required = true,
                                  default = nil)
-  if valid_594195 != nil:
-    section.add "syncGroupName", valid_594195
-  var valid_594196 = path.getOrDefault("cloudEndpointName")
-  valid_594196 = validateParameter(valid_594196, JString, required = true,
+  if valid_568424 != nil:
+    section.add "syncGroupName", valid_568424
+  var valid_568425 = path.getOrDefault("cloudEndpointName")
+  valid_568425 = validateParameter(valid_568425, JString, required = true,
                                  default = nil)
-  if valid_594196 != nil:
-    section.add "cloudEndpointName", valid_594196
-  var valid_594197 = path.getOrDefault("storageSyncServiceName")
-  valid_594197 = validateParameter(valid_594197, JString, required = true,
+  if valid_568425 != nil:
+    section.add "cloudEndpointName", valid_568425
+  var valid_568426 = path.getOrDefault("storageSyncServiceName")
+  valid_568426 = validateParameter(valid_568426, JString, required = true,
                                  default = nil)
-  if valid_594197 != nil:
-    section.add "storageSyncServiceName", valid_594197
+  if valid_568426 != nil:
+    section.add "storageSyncServiceName", valid_568426
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2499,11 +2499,11 @@ proc validate_CloudEndpointsGet_594191(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594198 = query.getOrDefault("api-version")
-  valid_594198 = validateParameter(valid_594198, JString, required = true,
+  var valid_568427 = query.getOrDefault("api-version")
+  valid_568427 = validateParameter(valid_568427, JString, required = true,
                                  default = nil)
-  if valid_594198 != nil:
-    section.add "api-version", valid_594198
+  if valid_568427 != nil:
+    section.add "api-version", valid_568427
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2512,20 +2512,20 @@ proc validate_CloudEndpointsGet_594191(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594199: Call_CloudEndpointsGet_594190; path: JsonNode;
+proc call*(call_568428: Call_CloudEndpointsGet_568419; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a given CloudEndpoint.
   ## 
-  let valid = call_594199.validator(path, query, header, formData, body)
-  let scheme = call_594199.pickScheme
+  let valid = call_568428.validator(path, query, header, formData, body)
+  let scheme = call_568428.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594199.url(scheme.get, call_594199.host, call_594199.base,
-                         call_594199.route, valid.getOrDefault("path"),
+  let url = call_568428.url(scheme.get, call_568428.host, call_568428.base,
+                         call_568428.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594199, url, valid)
+  result = hook(call_568428, url, valid)
 
-proc call*(call_594200: Call_CloudEndpointsGet_594190; resourceGroupName: string;
+proc call*(call_568429: Call_CloudEndpointsGet_568419; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; syncGroupName: string;
           cloudEndpointName: string; storageSyncServiceName: string): Recallable =
   ## cloudEndpointsGet
@@ -2542,23 +2542,23 @@ proc call*(call_594200: Call_CloudEndpointsGet_594190; resourceGroupName: string
   ##                    : Name of Cloud Endpoint object.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594201 = newJObject()
-  var query_594202 = newJObject()
-  add(path_594201, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594202, "api-version", newJString(apiVersion))
-  add(path_594201, "subscriptionId", newJString(subscriptionId))
-  add(path_594201, "syncGroupName", newJString(syncGroupName))
-  add(path_594201, "cloudEndpointName", newJString(cloudEndpointName))
-  add(path_594201, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594200.call(path_594201, query_594202, nil, nil, nil)
+  var path_568430 = newJObject()
+  var query_568431 = newJObject()
+  add(path_568430, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568431, "api-version", newJString(apiVersion))
+  add(path_568430, "subscriptionId", newJString(subscriptionId))
+  add(path_568430, "syncGroupName", newJString(syncGroupName))
+  add(path_568430, "cloudEndpointName", newJString(cloudEndpointName))
+  add(path_568430, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568429.call(path_568430, query_568431, nil, nil, nil)
 
-var cloudEndpointsGet* = Call_CloudEndpointsGet_594190(name: "cloudEndpointsGet",
+var cloudEndpointsGet* = Call_CloudEndpointsGet_568419(name: "cloudEndpointsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/cloudEndpoints/{cloudEndpointName}",
-    validator: validate_CloudEndpointsGet_594191, base: "",
-    url: url_CloudEndpointsGet_594192, schemes: {Scheme.Https})
+    validator: validate_CloudEndpointsGet_568420, base: "",
+    url: url_CloudEndpointsGet_568421, schemes: {Scheme.Https})
 type
-  Call_CloudEndpointsDelete_594218 = ref object of OpenApiRestCall_593438
-proc url_CloudEndpointsDelete_594220(protocol: Scheme; host: string; base: string;
+  Call_CloudEndpointsDelete_568447 = ref object of OpenApiRestCall_567667
+proc url_CloudEndpointsDelete_568449(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2589,7 +2589,7 @@ proc url_CloudEndpointsDelete_594220(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CloudEndpointsDelete_594219(path: JsonNode; query: JsonNode;
+proc validate_CloudEndpointsDelete_568448(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a given CloudEndpoint.
   ## 
@@ -2609,31 +2609,31 @@ proc validate_CloudEndpointsDelete_594219(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594221 = path.getOrDefault("resourceGroupName")
-  valid_594221 = validateParameter(valid_594221, JString, required = true,
+  var valid_568450 = path.getOrDefault("resourceGroupName")
+  valid_568450 = validateParameter(valid_568450, JString, required = true,
                                  default = nil)
-  if valid_594221 != nil:
-    section.add "resourceGroupName", valid_594221
-  var valid_594222 = path.getOrDefault("subscriptionId")
-  valid_594222 = validateParameter(valid_594222, JString, required = true,
+  if valid_568450 != nil:
+    section.add "resourceGroupName", valid_568450
+  var valid_568451 = path.getOrDefault("subscriptionId")
+  valid_568451 = validateParameter(valid_568451, JString, required = true,
                                  default = nil)
-  if valid_594222 != nil:
-    section.add "subscriptionId", valid_594222
-  var valid_594223 = path.getOrDefault("syncGroupName")
-  valid_594223 = validateParameter(valid_594223, JString, required = true,
+  if valid_568451 != nil:
+    section.add "subscriptionId", valid_568451
+  var valid_568452 = path.getOrDefault("syncGroupName")
+  valid_568452 = validateParameter(valid_568452, JString, required = true,
                                  default = nil)
-  if valid_594223 != nil:
-    section.add "syncGroupName", valid_594223
-  var valid_594224 = path.getOrDefault("cloudEndpointName")
-  valid_594224 = validateParameter(valid_594224, JString, required = true,
+  if valid_568452 != nil:
+    section.add "syncGroupName", valid_568452
+  var valid_568453 = path.getOrDefault("cloudEndpointName")
+  valid_568453 = validateParameter(valid_568453, JString, required = true,
                                  default = nil)
-  if valid_594224 != nil:
-    section.add "cloudEndpointName", valid_594224
-  var valid_594225 = path.getOrDefault("storageSyncServiceName")
-  valid_594225 = validateParameter(valid_594225, JString, required = true,
+  if valid_568453 != nil:
+    section.add "cloudEndpointName", valid_568453
+  var valid_568454 = path.getOrDefault("storageSyncServiceName")
+  valid_568454 = validateParameter(valid_568454, JString, required = true,
                                  default = nil)
-  if valid_594225 != nil:
-    section.add "storageSyncServiceName", valid_594225
+  if valid_568454 != nil:
+    section.add "storageSyncServiceName", valid_568454
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2641,11 +2641,11 @@ proc validate_CloudEndpointsDelete_594219(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594226 = query.getOrDefault("api-version")
-  valid_594226 = validateParameter(valid_594226, JString, required = true,
+  var valid_568455 = query.getOrDefault("api-version")
+  valid_568455 = validateParameter(valid_568455, JString, required = true,
                                  default = nil)
-  if valid_594226 != nil:
-    section.add "api-version", valid_594226
+  if valid_568455 != nil:
+    section.add "api-version", valid_568455
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2654,20 +2654,20 @@ proc validate_CloudEndpointsDelete_594219(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594227: Call_CloudEndpointsDelete_594218; path: JsonNode;
+proc call*(call_568456: Call_CloudEndpointsDelete_568447; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a given CloudEndpoint.
   ## 
-  let valid = call_594227.validator(path, query, header, formData, body)
-  let scheme = call_594227.pickScheme
+  let valid = call_568456.validator(path, query, header, formData, body)
+  let scheme = call_568456.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594227.url(scheme.get, call_594227.host, call_594227.base,
-                         call_594227.route, valid.getOrDefault("path"),
+  let url = call_568456.url(scheme.get, call_568456.host, call_568456.base,
+                         call_568456.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594227, url, valid)
+  result = hook(call_568456, url, valid)
 
-proc call*(call_594228: Call_CloudEndpointsDelete_594218;
+proc call*(call_568457: Call_CloudEndpointsDelete_568447;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           syncGroupName: string; cloudEndpointName: string;
           storageSyncServiceName: string): Recallable =
@@ -2685,24 +2685,24 @@ proc call*(call_594228: Call_CloudEndpointsDelete_594218;
   ##                    : Name of Cloud Endpoint object.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594229 = newJObject()
-  var query_594230 = newJObject()
-  add(path_594229, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594230, "api-version", newJString(apiVersion))
-  add(path_594229, "subscriptionId", newJString(subscriptionId))
-  add(path_594229, "syncGroupName", newJString(syncGroupName))
-  add(path_594229, "cloudEndpointName", newJString(cloudEndpointName))
-  add(path_594229, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594228.call(path_594229, query_594230, nil, nil, nil)
+  var path_568458 = newJObject()
+  var query_568459 = newJObject()
+  add(path_568458, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568459, "api-version", newJString(apiVersion))
+  add(path_568458, "subscriptionId", newJString(subscriptionId))
+  add(path_568458, "syncGroupName", newJString(syncGroupName))
+  add(path_568458, "cloudEndpointName", newJString(cloudEndpointName))
+  add(path_568458, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568457.call(path_568458, query_568459, nil, nil, nil)
 
-var cloudEndpointsDelete* = Call_CloudEndpointsDelete_594218(
+var cloudEndpointsDelete* = Call_CloudEndpointsDelete_568447(
     name: "cloudEndpointsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/cloudEndpoints/{cloudEndpointName}",
-    validator: validate_CloudEndpointsDelete_594219, base: "",
-    url: url_CloudEndpointsDelete_594220, schemes: {Scheme.Https})
+    validator: validate_CloudEndpointsDelete_568448, base: "",
+    url: url_CloudEndpointsDelete_568449, schemes: {Scheme.Https})
 type
-  Call_CloudEndpointsPostBackup_594231 = ref object of OpenApiRestCall_593438
-proc url_CloudEndpointsPostBackup_594233(protocol: Scheme; host: string;
+  Call_CloudEndpointsPostBackup_568460 = ref object of OpenApiRestCall_567667
+proc url_CloudEndpointsPostBackup_568462(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2735,7 +2735,7 @@ proc url_CloudEndpointsPostBackup_594233(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CloudEndpointsPostBackup_594232(path: JsonNode; query: JsonNode;
+proc validate_CloudEndpointsPostBackup_568461(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Post Backup a given CloudEndpoint.
   ## 
@@ -2755,31 +2755,31 @@ proc validate_CloudEndpointsPostBackup_594232(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594234 = path.getOrDefault("resourceGroupName")
-  valid_594234 = validateParameter(valid_594234, JString, required = true,
+  var valid_568463 = path.getOrDefault("resourceGroupName")
+  valid_568463 = validateParameter(valid_568463, JString, required = true,
                                  default = nil)
-  if valid_594234 != nil:
-    section.add "resourceGroupName", valid_594234
-  var valid_594235 = path.getOrDefault("subscriptionId")
-  valid_594235 = validateParameter(valid_594235, JString, required = true,
+  if valid_568463 != nil:
+    section.add "resourceGroupName", valid_568463
+  var valid_568464 = path.getOrDefault("subscriptionId")
+  valid_568464 = validateParameter(valid_568464, JString, required = true,
                                  default = nil)
-  if valid_594235 != nil:
-    section.add "subscriptionId", valid_594235
-  var valid_594236 = path.getOrDefault("syncGroupName")
-  valid_594236 = validateParameter(valid_594236, JString, required = true,
+  if valid_568464 != nil:
+    section.add "subscriptionId", valid_568464
+  var valid_568465 = path.getOrDefault("syncGroupName")
+  valid_568465 = validateParameter(valid_568465, JString, required = true,
                                  default = nil)
-  if valid_594236 != nil:
-    section.add "syncGroupName", valid_594236
-  var valid_594237 = path.getOrDefault("cloudEndpointName")
-  valid_594237 = validateParameter(valid_594237, JString, required = true,
+  if valid_568465 != nil:
+    section.add "syncGroupName", valid_568465
+  var valid_568466 = path.getOrDefault("cloudEndpointName")
+  valid_568466 = validateParameter(valid_568466, JString, required = true,
                                  default = nil)
-  if valid_594237 != nil:
-    section.add "cloudEndpointName", valid_594237
-  var valid_594238 = path.getOrDefault("storageSyncServiceName")
-  valid_594238 = validateParameter(valid_594238, JString, required = true,
+  if valid_568466 != nil:
+    section.add "cloudEndpointName", valid_568466
+  var valid_568467 = path.getOrDefault("storageSyncServiceName")
+  valid_568467 = validateParameter(valid_568467, JString, required = true,
                                  default = nil)
-  if valid_594238 != nil:
-    section.add "storageSyncServiceName", valid_594238
+  if valid_568467 != nil:
+    section.add "storageSyncServiceName", valid_568467
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2787,11 +2787,11 @@ proc validate_CloudEndpointsPostBackup_594232(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594239 = query.getOrDefault("api-version")
-  valid_594239 = validateParameter(valid_594239, JString, required = true,
+  var valid_568468 = query.getOrDefault("api-version")
+  valid_568468 = validateParameter(valid_568468, JString, required = true,
                                  default = nil)
-  if valid_594239 != nil:
-    section.add "api-version", valid_594239
+  if valid_568468 != nil:
+    section.add "api-version", valid_568468
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2805,20 +2805,20 @@ proc validate_CloudEndpointsPostBackup_594232(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594241: Call_CloudEndpointsPostBackup_594231; path: JsonNode;
+proc call*(call_568470: Call_CloudEndpointsPostBackup_568460; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Post Backup a given CloudEndpoint.
   ## 
-  let valid = call_594241.validator(path, query, header, formData, body)
-  let scheme = call_594241.pickScheme
+  let valid = call_568470.validator(path, query, header, formData, body)
+  let scheme = call_568470.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594241.url(scheme.get, call_594241.host, call_594241.base,
-                         call_594241.route, valid.getOrDefault("path"),
+  let url = call_568470.url(scheme.get, call_568470.host, call_568470.base,
+                         call_568470.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594241, url, valid)
+  result = hook(call_568470, url, valid)
 
-proc call*(call_594242: Call_CloudEndpointsPostBackup_594231;
+proc call*(call_568471: Call_CloudEndpointsPostBackup_568460;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           syncGroupName: string; cloudEndpointName: string; parameters: JsonNode;
           storageSyncServiceName: string): Recallable =
@@ -2838,27 +2838,27 @@ proc call*(call_594242: Call_CloudEndpointsPostBackup_594231;
   ##             : Body of Backup request.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594243 = newJObject()
-  var query_594244 = newJObject()
-  var body_594245 = newJObject()
-  add(path_594243, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594244, "api-version", newJString(apiVersion))
-  add(path_594243, "subscriptionId", newJString(subscriptionId))
-  add(path_594243, "syncGroupName", newJString(syncGroupName))
-  add(path_594243, "cloudEndpointName", newJString(cloudEndpointName))
+  var path_568472 = newJObject()
+  var query_568473 = newJObject()
+  var body_568474 = newJObject()
+  add(path_568472, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568473, "api-version", newJString(apiVersion))
+  add(path_568472, "subscriptionId", newJString(subscriptionId))
+  add(path_568472, "syncGroupName", newJString(syncGroupName))
+  add(path_568472, "cloudEndpointName", newJString(cloudEndpointName))
   if parameters != nil:
-    body_594245 = parameters
-  add(path_594243, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594242.call(path_594243, query_594244, nil, nil, body_594245)
+    body_568474 = parameters
+  add(path_568472, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568471.call(path_568472, query_568473, nil, nil, body_568474)
 
-var cloudEndpointsPostBackup* = Call_CloudEndpointsPostBackup_594231(
+var cloudEndpointsPostBackup* = Call_CloudEndpointsPostBackup_568460(
     name: "cloudEndpointsPostBackup", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/cloudEndpoints/{cloudEndpointName}/postbackup",
-    validator: validate_CloudEndpointsPostBackup_594232, base: "",
-    url: url_CloudEndpointsPostBackup_594233, schemes: {Scheme.Https})
+    validator: validate_CloudEndpointsPostBackup_568461, base: "",
+    url: url_CloudEndpointsPostBackup_568462, schemes: {Scheme.Https})
 type
-  Call_CloudEndpointsPostRestore_594246 = ref object of OpenApiRestCall_593438
-proc url_CloudEndpointsPostRestore_594248(protocol: Scheme; host: string;
+  Call_CloudEndpointsPostRestore_568475 = ref object of OpenApiRestCall_567667
+proc url_CloudEndpointsPostRestore_568477(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2890,7 +2890,7 @@ proc url_CloudEndpointsPostRestore_594248(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CloudEndpointsPostRestore_594247(path: JsonNode; query: JsonNode;
+proc validate_CloudEndpointsPostRestore_568476(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Post Restore a given CloudEndpoint.
   ## 
@@ -2910,31 +2910,31 @@ proc validate_CloudEndpointsPostRestore_594247(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594249 = path.getOrDefault("resourceGroupName")
-  valid_594249 = validateParameter(valid_594249, JString, required = true,
+  var valid_568478 = path.getOrDefault("resourceGroupName")
+  valid_568478 = validateParameter(valid_568478, JString, required = true,
                                  default = nil)
-  if valid_594249 != nil:
-    section.add "resourceGroupName", valid_594249
-  var valid_594250 = path.getOrDefault("subscriptionId")
-  valid_594250 = validateParameter(valid_594250, JString, required = true,
+  if valid_568478 != nil:
+    section.add "resourceGroupName", valid_568478
+  var valid_568479 = path.getOrDefault("subscriptionId")
+  valid_568479 = validateParameter(valid_568479, JString, required = true,
                                  default = nil)
-  if valid_594250 != nil:
-    section.add "subscriptionId", valid_594250
-  var valid_594251 = path.getOrDefault("syncGroupName")
-  valid_594251 = validateParameter(valid_594251, JString, required = true,
+  if valid_568479 != nil:
+    section.add "subscriptionId", valid_568479
+  var valid_568480 = path.getOrDefault("syncGroupName")
+  valid_568480 = validateParameter(valid_568480, JString, required = true,
                                  default = nil)
-  if valid_594251 != nil:
-    section.add "syncGroupName", valid_594251
-  var valid_594252 = path.getOrDefault("cloudEndpointName")
-  valid_594252 = validateParameter(valid_594252, JString, required = true,
+  if valid_568480 != nil:
+    section.add "syncGroupName", valid_568480
+  var valid_568481 = path.getOrDefault("cloudEndpointName")
+  valid_568481 = validateParameter(valid_568481, JString, required = true,
                                  default = nil)
-  if valid_594252 != nil:
-    section.add "cloudEndpointName", valid_594252
-  var valid_594253 = path.getOrDefault("storageSyncServiceName")
-  valid_594253 = validateParameter(valid_594253, JString, required = true,
+  if valid_568481 != nil:
+    section.add "cloudEndpointName", valid_568481
+  var valid_568482 = path.getOrDefault("storageSyncServiceName")
+  valid_568482 = validateParameter(valid_568482, JString, required = true,
                                  default = nil)
-  if valid_594253 != nil:
-    section.add "storageSyncServiceName", valid_594253
+  if valid_568482 != nil:
+    section.add "storageSyncServiceName", valid_568482
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2942,11 +2942,11 @@ proc validate_CloudEndpointsPostRestore_594247(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594254 = query.getOrDefault("api-version")
-  valid_594254 = validateParameter(valid_594254, JString, required = true,
+  var valid_568483 = query.getOrDefault("api-version")
+  valid_568483 = validateParameter(valid_568483, JString, required = true,
                                  default = nil)
-  if valid_594254 != nil:
-    section.add "api-version", valid_594254
+  if valid_568483 != nil:
+    section.add "api-version", valid_568483
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2960,20 +2960,20 @@ proc validate_CloudEndpointsPostRestore_594247(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594256: Call_CloudEndpointsPostRestore_594246; path: JsonNode;
+proc call*(call_568485: Call_CloudEndpointsPostRestore_568475; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Post Restore a given CloudEndpoint.
   ## 
-  let valid = call_594256.validator(path, query, header, formData, body)
-  let scheme = call_594256.pickScheme
+  let valid = call_568485.validator(path, query, header, formData, body)
+  let scheme = call_568485.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594256.url(scheme.get, call_594256.host, call_594256.base,
-                         call_594256.route, valid.getOrDefault("path"),
+  let url = call_568485.url(scheme.get, call_568485.host, call_568485.base,
+                         call_568485.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594256, url, valid)
+  result = hook(call_568485, url, valid)
 
-proc call*(call_594257: Call_CloudEndpointsPostRestore_594246;
+proc call*(call_568486: Call_CloudEndpointsPostRestore_568475;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           syncGroupName: string; cloudEndpointName: string; parameters: JsonNode;
           storageSyncServiceName: string): Recallable =
@@ -2993,27 +2993,27 @@ proc call*(call_594257: Call_CloudEndpointsPostRestore_594246;
   ##             : Body of Cloud Endpoint object.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594258 = newJObject()
-  var query_594259 = newJObject()
-  var body_594260 = newJObject()
-  add(path_594258, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594259, "api-version", newJString(apiVersion))
-  add(path_594258, "subscriptionId", newJString(subscriptionId))
-  add(path_594258, "syncGroupName", newJString(syncGroupName))
-  add(path_594258, "cloudEndpointName", newJString(cloudEndpointName))
+  var path_568487 = newJObject()
+  var query_568488 = newJObject()
+  var body_568489 = newJObject()
+  add(path_568487, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568488, "api-version", newJString(apiVersion))
+  add(path_568487, "subscriptionId", newJString(subscriptionId))
+  add(path_568487, "syncGroupName", newJString(syncGroupName))
+  add(path_568487, "cloudEndpointName", newJString(cloudEndpointName))
   if parameters != nil:
-    body_594260 = parameters
-  add(path_594258, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594257.call(path_594258, query_594259, nil, nil, body_594260)
+    body_568489 = parameters
+  add(path_568487, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568486.call(path_568487, query_568488, nil, nil, body_568489)
 
-var cloudEndpointsPostRestore* = Call_CloudEndpointsPostRestore_594246(
+var cloudEndpointsPostRestore* = Call_CloudEndpointsPostRestore_568475(
     name: "cloudEndpointsPostRestore", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/cloudEndpoints/{cloudEndpointName}/postrestore",
-    validator: validate_CloudEndpointsPostRestore_594247, base: "",
-    url: url_CloudEndpointsPostRestore_594248, schemes: {Scheme.Https})
+    validator: validate_CloudEndpointsPostRestore_568476, base: "",
+    url: url_CloudEndpointsPostRestore_568477, schemes: {Scheme.Https})
 type
-  Call_CloudEndpointsPreBackup_594261 = ref object of OpenApiRestCall_593438
-proc url_CloudEndpointsPreBackup_594263(protocol: Scheme; host: string; base: string;
+  Call_CloudEndpointsPreBackup_568490 = ref object of OpenApiRestCall_567667
+proc url_CloudEndpointsPreBackup_568492(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3046,7 +3046,7 @@ proc url_CloudEndpointsPreBackup_594263(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CloudEndpointsPreBackup_594262(path: JsonNode; query: JsonNode;
+proc validate_CloudEndpointsPreBackup_568491(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Pre Backup a given CloudEndpoint.
   ## 
@@ -3066,31 +3066,31 @@ proc validate_CloudEndpointsPreBackup_594262(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594264 = path.getOrDefault("resourceGroupName")
-  valid_594264 = validateParameter(valid_594264, JString, required = true,
+  var valid_568493 = path.getOrDefault("resourceGroupName")
+  valid_568493 = validateParameter(valid_568493, JString, required = true,
                                  default = nil)
-  if valid_594264 != nil:
-    section.add "resourceGroupName", valid_594264
-  var valid_594265 = path.getOrDefault("subscriptionId")
-  valid_594265 = validateParameter(valid_594265, JString, required = true,
+  if valid_568493 != nil:
+    section.add "resourceGroupName", valid_568493
+  var valid_568494 = path.getOrDefault("subscriptionId")
+  valid_568494 = validateParameter(valid_568494, JString, required = true,
                                  default = nil)
-  if valid_594265 != nil:
-    section.add "subscriptionId", valid_594265
-  var valid_594266 = path.getOrDefault("syncGroupName")
-  valid_594266 = validateParameter(valid_594266, JString, required = true,
+  if valid_568494 != nil:
+    section.add "subscriptionId", valid_568494
+  var valid_568495 = path.getOrDefault("syncGroupName")
+  valid_568495 = validateParameter(valid_568495, JString, required = true,
                                  default = nil)
-  if valid_594266 != nil:
-    section.add "syncGroupName", valid_594266
-  var valid_594267 = path.getOrDefault("cloudEndpointName")
-  valid_594267 = validateParameter(valid_594267, JString, required = true,
+  if valid_568495 != nil:
+    section.add "syncGroupName", valid_568495
+  var valid_568496 = path.getOrDefault("cloudEndpointName")
+  valid_568496 = validateParameter(valid_568496, JString, required = true,
                                  default = nil)
-  if valid_594267 != nil:
-    section.add "cloudEndpointName", valid_594267
-  var valid_594268 = path.getOrDefault("storageSyncServiceName")
-  valid_594268 = validateParameter(valid_594268, JString, required = true,
+  if valid_568496 != nil:
+    section.add "cloudEndpointName", valid_568496
+  var valid_568497 = path.getOrDefault("storageSyncServiceName")
+  valid_568497 = validateParameter(valid_568497, JString, required = true,
                                  default = nil)
-  if valid_594268 != nil:
-    section.add "storageSyncServiceName", valid_594268
+  if valid_568497 != nil:
+    section.add "storageSyncServiceName", valid_568497
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3098,11 +3098,11 @@ proc validate_CloudEndpointsPreBackup_594262(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594269 = query.getOrDefault("api-version")
-  valid_594269 = validateParameter(valid_594269, JString, required = true,
+  var valid_568498 = query.getOrDefault("api-version")
+  valid_568498 = validateParameter(valid_568498, JString, required = true,
                                  default = nil)
-  if valid_594269 != nil:
-    section.add "api-version", valid_594269
+  if valid_568498 != nil:
+    section.add "api-version", valid_568498
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3116,20 +3116,20 @@ proc validate_CloudEndpointsPreBackup_594262(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594271: Call_CloudEndpointsPreBackup_594261; path: JsonNode;
+proc call*(call_568500: Call_CloudEndpointsPreBackup_568490; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Pre Backup a given CloudEndpoint.
   ## 
-  let valid = call_594271.validator(path, query, header, formData, body)
-  let scheme = call_594271.pickScheme
+  let valid = call_568500.validator(path, query, header, formData, body)
+  let scheme = call_568500.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594271.url(scheme.get, call_594271.host, call_594271.base,
-                         call_594271.route, valid.getOrDefault("path"),
+  let url = call_568500.url(scheme.get, call_568500.host, call_568500.base,
+                         call_568500.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594271, url, valid)
+  result = hook(call_568500, url, valid)
 
-proc call*(call_594272: Call_CloudEndpointsPreBackup_594261;
+proc call*(call_568501: Call_CloudEndpointsPreBackup_568490;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           syncGroupName: string; cloudEndpointName: string; parameters: JsonNode;
           storageSyncServiceName: string): Recallable =
@@ -3149,27 +3149,27 @@ proc call*(call_594272: Call_CloudEndpointsPreBackup_594261;
   ##             : Body of Backup request.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594273 = newJObject()
-  var query_594274 = newJObject()
-  var body_594275 = newJObject()
-  add(path_594273, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594274, "api-version", newJString(apiVersion))
-  add(path_594273, "subscriptionId", newJString(subscriptionId))
-  add(path_594273, "syncGroupName", newJString(syncGroupName))
-  add(path_594273, "cloudEndpointName", newJString(cloudEndpointName))
+  var path_568502 = newJObject()
+  var query_568503 = newJObject()
+  var body_568504 = newJObject()
+  add(path_568502, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568503, "api-version", newJString(apiVersion))
+  add(path_568502, "subscriptionId", newJString(subscriptionId))
+  add(path_568502, "syncGroupName", newJString(syncGroupName))
+  add(path_568502, "cloudEndpointName", newJString(cloudEndpointName))
   if parameters != nil:
-    body_594275 = parameters
-  add(path_594273, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594272.call(path_594273, query_594274, nil, nil, body_594275)
+    body_568504 = parameters
+  add(path_568502, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568501.call(path_568502, query_568503, nil, nil, body_568504)
 
-var cloudEndpointsPreBackup* = Call_CloudEndpointsPreBackup_594261(
+var cloudEndpointsPreBackup* = Call_CloudEndpointsPreBackup_568490(
     name: "cloudEndpointsPreBackup", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/cloudEndpoints/{cloudEndpointName}/prebackup",
-    validator: validate_CloudEndpointsPreBackup_594262, base: "",
-    url: url_CloudEndpointsPreBackup_594263, schemes: {Scheme.Https})
+    validator: validate_CloudEndpointsPreBackup_568491, base: "",
+    url: url_CloudEndpointsPreBackup_568492, schemes: {Scheme.Https})
 type
-  Call_CloudEndpointsPreRestore_594276 = ref object of OpenApiRestCall_593438
-proc url_CloudEndpointsPreRestore_594278(protocol: Scheme; host: string;
+  Call_CloudEndpointsPreRestore_568505 = ref object of OpenApiRestCall_567667
+proc url_CloudEndpointsPreRestore_568507(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3202,7 +3202,7 @@ proc url_CloudEndpointsPreRestore_594278(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CloudEndpointsPreRestore_594277(path: JsonNode; query: JsonNode;
+proc validate_CloudEndpointsPreRestore_568506(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Pre Restore a given CloudEndpoint.
   ## 
@@ -3222,31 +3222,31 @@ proc validate_CloudEndpointsPreRestore_594277(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594279 = path.getOrDefault("resourceGroupName")
-  valid_594279 = validateParameter(valid_594279, JString, required = true,
+  var valid_568508 = path.getOrDefault("resourceGroupName")
+  valid_568508 = validateParameter(valid_568508, JString, required = true,
                                  default = nil)
-  if valid_594279 != nil:
-    section.add "resourceGroupName", valid_594279
-  var valid_594280 = path.getOrDefault("subscriptionId")
-  valid_594280 = validateParameter(valid_594280, JString, required = true,
+  if valid_568508 != nil:
+    section.add "resourceGroupName", valid_568508
+  var valid_568509 = path.getOrDefault("subscriptionId")
+  valid_568509 = validateParameter(valid_568509, JString, required = true,
                                  default = nil)
-  if valid_594280 != nil:
-    section.add "subscriptionId", valid_594280
-  var valid_594281 = path.getOrDefault("syncGroupName")
-  valid_594281 = validateParameter(valid_594281, JString, required = true,
+  if valid_568509 != nil:
+    section.add "subscriptionId", valid_568509
+  var valid_568510 = path.getOrDefault("syncGroupName")
+  valid_568510 = validateParameter(valid_568510, JString, required = true,
                                  default = nil)
-  if valid_594281 != nil:
-    section.add "syncGroupName", valid_594281
-  var valid_594282 = path.getOrDefault("cloudEndpointName")
-  valid_594282 = validateParameter(valid_594282, JString, required = true,
+  if valid_568510 != nil:
+    section.add "syncGroupName", valid_568510
+  var valid_568511 = path.getOrDefault("cloudEndpointName")
+  valid_568511 = validateParameter(valid_568511, JString, required = true,
                                  default = nil)
-  if valid_594282 != nil:
-    section.add "cloudEndpointName", valid_594282
-  var valid_594283 = path.getOrDefault("storageSyncServiceName")
-  valid_594283 = validateParameter(valid_594283, JString, required = true,
+  if valid_568511 != nil:
+    section.add "cloudEndpointName", valid_568511
+  var valid_568512 = path.getOrDefault("storageSyncServiceName")
+  valid_568512 = validateParameter(valid_568512, JString, required = true,
                                  default = nil)
-  if valid_594283 != nil:
-    section.add "storageSyncServiceName", valid_594283
+  if valid_568512 != nil:
+    section.add "storageSyncServiceName", valid_568512
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3254,11 +3254,11 @@ proc validate_CloudEndpointsPreRestore_594277(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594284 = query.getOrDefault("api-version")
-  valid_594284 = validateParameter(valid_594284, JString, required = true,
+  var valid_568513 = query.getOrDefault("api-version")
+  valid_568513 = validateParameter(valid_568513, JString, required = true,
                                  default = nil)
-  if valid_594284 != nil:
-    section.add "api-version", valid_594284
+  if valid_568513 != nil:
+    section.add "api-version", valid_568513
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3272,20 +3272,20 @@ proc validate_CloudEndpointsPreRestore_594277(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594286: Call_CloudEndpointsPreRestore_594276; path: JsonNode;
+proc call*(call_568515: Call_CloudEndpointsPreRestore_568505; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Pre Restore a given CloudEndpoint.
   ## 
-  let valid = call_594286.validator(path, query, header, formData, body)
-  let scheme = call_594286.pickScheme
+  let valid = call_568515.validator(path, query, header, formData, body)
+  let scheme = call_568515.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594286.url(scheme.get, call_594286.host, call_594286.base,
-                         call_594286.route, valid.getOrDefault("path"),
+  let url = call_568515.url(scheme.get, call_568515.host, call_568515.base,
+                         call_568515.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594286, url, valid)
+  result = hook(call_568515, url, valid)
 
-proc call*(call_594287: Call_CloudEndpointsPreRestore_594276;
+proc call*(call_568516: Call_CloudEndpointsPreRestore_568505;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           syncGroupName: string; cloudEndpointName: string; parameters: JsonNode;
           storageSyncServiceName: string): Recallable =
@@ -3305,27 +3305,27 @@ proc call*(call_594287: Call_CloudEndpointsPreRestore_594276;
   ##             : Body of Cloud Endpoint object.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594288 = newJObject()
-  var query_594289 = newJObject()
-  var body_594290 = newJObject()
-  add(path_594288, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594289, "api-version", newJString(apiVersion))
-  add(path_594288, "subscriptionId", newJString(subscriptionId))
-  add(path_594288, "syncGroupName", newJString(syncGroupName))
-  add(path_594288, "cloudEndpointName", newJString(cloudEndpointName))
+  var path_568517 = newJObject()
+  var query_568518 = newJObject()
+  var body_568519 = newJObject()
+  add(path_568517, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568518, "api-version", newJString(apiVersion))
+  add(path_568517, "subscriptionId", newJString(subscriptionId))
+  add(path_568517, "syncGroupName", newJString(syncGroupName))
+  add(path_568517, "cloudEndpointName", newJString(cloudEndpointName))
   if parameters != nil:
-    body_594290 = parameters
-  add(path_594288, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594287.call(path_594288, query_594289, nil, nil, body_594290)
+    body_568519 = parameters
+  add(path_568517, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568516.call(path_568517, query_568518, nil, nil, body_568519)
 
-var cloudEndpointsPreRestore* = Call_CloudEndpointsPreRestore_594276(
+var cloudEndpointsPreRestore* = Call_CloudEndpointsPreRestore_568505(
     name: "cloudEndpointsPreRestore", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/cloudEndpoints/{cloudEndpointName}/prerestore",
-    validator: validate_CloudEndpointsPreRestore_594277, base: "",
-    url: url_CloudEndpointsPreRestore_594278, schemes: {Scheme.Https})
+    validator: validate_CloudEndpointsPreRestore_568506, base: "",
+    url: url_CloudEndpointsPreRestore_568507, schemes: {Scheme.Https})
 type
-  Call_CloudEndpointsRestoreheartbeat_594291 = ref object of OpenApiRestCall_593438
-proc url_CloudEndpointsRestoreheartbeat_594293(protocol: Scheme; host: string;
+  Call_CloudEndpointsRestoreheartbeat_568520 = ref object of OpenApiRestCall_567667
+proc url_CloudEndpointsRestoreheartbeat_568522(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3357,7 +3357,7 @@ proc url_CloudEndpointsRestoreheartbeat_594293(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CloudEndpointsRestoreheartbeat_594292(path: JsonNode;
+proc validate_CloudEndpointsRestoreheartbeat_568521(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Restore Heartbeat a given CloudEndpoint.
   ## 
@@ -3377,31 +3377,31 @@ proc validate_CloudEndpointsRestoreheartbeat_594292(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594294 = path.getOrDefault("resourceGroupName")
-  valid_594294 = validateParameter(valid_594294, JString, required = true,
+  var valid_568523 = path.getOrDefault("resourceGroupName")
+  valid_568523 = validateParameter(valid_568523, JString, required = true,
                                  default = nil)
-  if valid_594294 != nil:
-    section.add "resourceGroupName", valid_594294
-  var valid_594295 = path.getOrDefault("subscriptionId")
-  valid_594295 = validateParameter(valid_594295, JString, required = true,
+  if valid_568523 != nil:
+    section.add "resourceGroupName", valid_568523
+  var valid_568524 = path.getOrDefault("subscriptionId")
+  valid_568524 = validateParameter(valid_568524, JString, required = true,
                                  default = nil)
-  if valid_594295 != nil:
-    section.add "subscriptionId", valid_594295
-  var valid_594296 = path.getOrDefault("syncGroupName")
-  valid_594296 = validateParameter(valid_594296, JString, required = true,
+  if valid_568524 != nil:
+    section.add "subscriptionId", valid_568524
+  var valid_568525 = path.getOrDefault("syncGroupName")
+  valid_568525 = validateParameter(valid_568525, JString, required = true,
                                  default = nil)
-  if valid_594296 != nil:
-    section.add "syncGroupName", valid_594296
-  var valid_594297 = path.getOrDefault("cloudEndpointName")
-  valid_594297 = validateParameter(valid_594297, JString, required = true,
+  if valid_568525 != nil:
+    section.add "syncGroupName", valid_568525
+  var valid_568526 = path.getOrDefault("cloudEndpointName")
+  valid_568526 = validateParameter(valid_568526, JString, required = true,
                                  default = nil)
-  if valid_594297 != nil:
-    section.add "cloudEndpointName", valid_594297
-  var valid_594298 = path.getOrDefault("storageSyncServiceName")
-  valid_594298 = validateParameter(valid_594298, JString, required = true,
+  if valid_568526 != nil:
+    section.add "cloudEndpointName", valid_568526
+  var valid_568527 = path.getOrDefault("storageSyncServiceName")
+  valid_568527 = validateParameter(valid_568527, JString, required = true,
                                  default = nil)
-  if valid_594298 != nil:
-    section.add "storageSyncServiceName", valid_594298
+  if valid_568527 != nil:
+    section.add "storageSyncServiceName", valid_568527
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3409,11 +3409,11 @@ proc validate_CloudEndpointsRestoreheartbeat_594292(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594299 = query.getOrDefault("api-version")
-  valid_594299 = validateParameter(valid_594299, JString, required = true,
+  var valid_568528 = query.getOrDefault("api-version")
+  valid_568528 = validateParameter(valid_568528, JString, required = true,
                                  default = nil)
-  if valid_594299 != nil:
-    section.add "api-version", valid_594299
+  if valid_568528 != nil:
+    section.add "api-version", valid_568528
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3422,20 +3422,20 @@ proc validate_CloudEndpointsRestoreheartbeat_594292(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594300: Call_CloudEndpointsRestoreheartbeat_594291; path: JsonNode;
+proc call*(call_568529: Call_CloudEndpointsRestoreheartbeat_568520; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restore Heartbeat a given CloudEndpoint.
   ## 
-  let valid = call_594300.validator(path, query, header, formData, body)
-  let scheme = call_594300.pickScheme
+  let valid = call_568529.validator(path, query, header, formData, body)
+  let scheme = call_568529.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594300.url(scheme.get, call_594300.host, call_594300.base,
-                         call_594300.route, valid.getOrDefault("path"),
+  let url = call_568529.url(scheme.get, call_568529.host, call_568529.base,
+                         call_568529.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594300, url, valid)
+  result = hook(call_568529, url, valid)
 
-proc call*(call_594301: Call_CloudEndpointsRestoreheartbeat_594291;
+proc call*(call_568530: Call_CloudEndpointsRestoreheartbeat_568520;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           syncGroupName: string; cloudEndpointName: string;
           storageSyncServiceName: string): Recallable =
@@ -3453,24 +3453,24 @@ proc call*(call_594301: Call_CloudEndpointsRestoreheartbeat_594291;
   ##                    : Name of Cloud Endpoint object.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594302 = newJObject()
-  var query_594303 = newJObject()
-  add(path_594302, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594303, "api-version", newJString(apiVersion))
-  add(path_594302, "subscriptionId", newJString(subscriptionId))
-  add(path_594302, "syncGroupName", newJString(syncGroupName))
-  add(path_594302, "cloudEndpointName", newJString(cloudEndpointName))
-  add(path_594302, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594301.call(path_594302, query_594303, nil, nil, nil)
+  var path_568531 = newJObject()
+  var query_568532 = newJObject()
+  add(path_568531, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568532, "api-version", newJString(apiVersion))
+  add(path_568531, "subscriptionId", newJString(subscriptionId))
+  add(path_568531, "syncGroupName", newJString(syncGroupName))
+  add(path_568531, "cloudEndpointName", newJString(cloudEndpointName))
+  add(path_568531, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568530.call(path_568531, query_568532, nil, nil, nil)
 
-var cloudEndpointsRestoreheartbeat* = Call_CloudEndpointsRestoreheartbeat_594291(
+var cloudEndpointsRestoreheartbeat* = Call_CloudEndpointsRestoreheartbeat_568520(
     name: "cloudEndpointsRestoreheartbeat", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/cloudEndpoints/{cloudEndpointName}/restoreheartbeat",
-    validator: validate_CloudEndpointsRestoreheartbeat_594292, base: "",
-    url: url_CloudEndpointsRestoreheartbeat_594293, schemes: {Scheme.Https})
+    validator: validate_CloudEndpointsRestoreheartbeat_568521, base: "",
+    url: url_CloudEndpointsRestoreheartbeat_568522, schemes: {Scheme.Https})
 type
-  Call_ServerEndpointsListBySyncGroup_594304 = ref object of OpenApiRestCall_593438
-proc url_ServerEndpointsListBySyncGroup_594306(protocol: Scheme; host: string;
+  Call_ServerEndpointsListBySyncGroup_568533 = ref object of OpenApiRestCall_567667
+proc url_ServerEndpointsListBySyncGroup_568535(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3498,7 +3498,7 @@ proc url_ServerEndpointsListBySyncGroup_594306(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerEndpointsListBySyncGroup_594305(path: JsonNode;
+proc validate_ServerEndpointsListBySyncGroup_568534(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a ServerEndpoint list.
   ## 
@@ -3516,26 +3516,26 @@ proc validate_ServerEndpointsListBySyncGroup_594305(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594307 = path.getOrDefault("resourceGroupName")
-  valid_594307 = validateParameter(valid_594307, JString, required = true,
+  var valid_568536 = path.getOrDefault("resourceGroupName")
+  valid_568536 = validateParameter(valid_568536, JString, required = true,
                                  default = nil)
-  if valid_594307 != nil:
-    section.add "resourceGroupName", valid_594307
-  var valid_594308 = path.getOrDefault("subscriptionId")
-  valid_594308 = validateParameter(valid_594308, JString, required = true,
+  if valid_568536 != nil:
+    section.add "resourceGroupName", valid_568536
+  var valid_568537 = path.getOrDefault("subscriptionId")
+  valid_568537 = validateParameter(valid_568537, JString, required = true,
                                  default = nil)
-  if valid_594308 != nil:
-    section.add "subscriptionId", valid_594308
-  var valid_594309 = path.getOrDefault("syncGroupName")
-  valid_594309 = validateParameter(valid_594309, JString, required = true,
+  if valid_568537 != nil:
+    section.add "subscriptionId", valid_568537
+  var valid_568538 = path.getOrDefault("syncGroupName")
+  valid_568538 = validateParameter(valid_568538, JString, required = true,
                                  default = nil)
-  if valid_594309 != nil:
-    section.add "syncGroupName", valid_594309
-  var valid_594310 = path.getOrDefault("storageSyncServiceName")
-  valid_594310 = validateParameter(valid_594310, JString, required = true,
+  if valid_568538 != nil:
+    section.add "syncGroupName", valid_568538
+  var valid_568539 = path.getOrDefault("storageSyncServiceName")
+  valid_568539 = validateParameter(valid_568539, JString, required = true,
                                  default = nil)
-  if valid_594310 != nil:
-    section.add "storageSyncServiceName", valid_594310
+  if valid_568539 != nil:
+    section.add "storageSyncServiceName", valid_568539
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3543,11 +3543,11 @@ proc validate_ServerEndpointsListBySyncGroup_594305(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594311 = query.getOrDefault("api-version")
-  valid_594311 = validateParameter(valid_594311, JString, required = true,
+  var valid_568540 = query.getOrDefault("api-version")
+  valid_568540 = validateParameter(valid_568540, JString, required = true,
                                  default = nil)
-  if valid_594311 != nil:
-    section.add "api-version", valid_594311
+  if valid_568540 != nil:
+    section.add "api-version", valid_568540
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3556,20 +3556,20 @@ proc validate_ServerEndpointsListBySyncGroup_594305(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594312: Call_ServerEndpointsListBySyncGroup_594304; path: JsonNode;
+proc call*(call_568541: Call_ServerEndpointsListBySyncGroup_568533; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a ServerEndpoint list.
   ## 
-  let valid = call_594312.validator(path, query, header, formData, body)
-  let scheme = call_594312.pickScheme
+  let valid = call_568541.validator(path, query, header, formData, body)
+  let scheme = call_568541.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594312.url(scheme.get, call_594312.host, call_594312.base,
-                         call_594312.route, valid.getOrDefault("path"),
+  let url = call_568541.url(scheme.get, call_568541.host, call_568541.base,
+                         call_568541.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594312, url, valid)
+  result = hook(call_568541, url, valid)
 
-proc call*(call_594313: Call_ServerEndpointsListBySyncGroup_594304;
+proc call*(call_568542: Call_ServerEndpointsListBySyncGroup_568533;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           syncGroupName: string; storageSyncServiceName: string): Recallable =
   ## serverEndpointsListBySyncGroup
@@ -3584,23 +3584,23 @@ proc call*(call_594313: Call_ServerEndpointsListBySyncGroup_594304;
   ##                : Name of Sync Group resource.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594314 = newJObject()
-  var query_594315 = newJObject()
-  add(path_594314, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594315, "api-version", newJString(apiVersion))
-  add(path_594314, "subscriptionId", newJString(subscriptionId))
-  add(path_594314, "syncGroupName", newJString(syncGroupName))
-  add(path_594314, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594313.call(path_594314, query_594315, nil, nil, nil)
+  var path_568543 = newJObject()
+  var query_568544 = newJObject()
+  add(path_568543, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568544, "api-version", newJString(apiVersion))
+  add(path_568543, "subscriptionId", newJString(subscriptionId))
+  add(path_568543, "syncGroupName", newJString(syncGroupName))
+  add(path_568543, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568542.call(path_568543, query_568544, nil, nil, nil)
 
-var serverEndpointsListBySyncGroup* = Call_ServerEndpointsListBySyncGroup_594304(
+var serverEndpointsListBySyncGroup* = Call_ServerEndpointsListBySyncGroup_568533(
     name: "serverEndpointsListBySyncGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/serverEndpoints",
-    validator: validate_ServerEndpointsListBySyncGroup_594305, base: "",
-    url: url_ServerEndpointsListBySyncGroup_594306, schemes: {Scheme.Https})
+    validator: validate_ServerEndpointsListBySyncGroup_568534, base: "",
+    url: url_ServerEndpointsListBySyncGroup_568535, schemes: {Scheme.Https})
 type
-  Call_ServerEndpointsCreate_594329 = ref object of OpenApiRestCall_593438
-proc url_ServerEndpointsCreate_594331(protocol: Scheme; host: string; base: string;
+  Call_ServerEndpointsCreate_568558 = ref object of OpenApiRestCall_567667
+proc url_ServerEndpointsCreate_568560(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3631,7 +3631,7 @@ proc url_ServerEndpointsCreate_594331(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerEndpointsCreate_594330(path: JsonNode; query: JsonNode;
+proc validate_ServerEndpointsCreate_568559(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new ServerEndpoint.
   ## 
@@ -3651,31 +3651,31 @@ proc validate_ServerEndpointsCreate_594330(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `serverEndpointName` field"
-  var valid_594332 = path.getOrDefault("serverEndpointName")
-  valid_594332 = validateParameter(valid_594332, JString, required = true,
+  var valid_568561 = path.getOrDefault("serverEndpointName")
+  valid_568561 = validateParameter(valid_568561, JString, required = true,
                                  default = nil)
-  if valid_594332 != nil:
-    section.add "serverEndpointName", valid_594332
-  var valid_594333 = path.getOrDefault("resourceGroupName")
-  valid_594333 = validateParameter(valid_594333, JString, required = true,
+  if valid_568561 != nil:
+    section.add "serverEndpointName", valid_568561
+  var valid_568562 = path.getOrDefault("resourceGroupName")
+  valid_568562 = validateParameter(valid_568562, JString, required = true,
                                  default = nil)
-  if valid_594333 != nil:
-    section.add "resourceGroupName", valid_594333
-  var valid_594334 = path.getOrDefault("subscriptionId")
-  valid_594334 = validateParameter(valid_594334, JString, required = true,
+  if valid_568562 != nil:
+    section.add "resourceGroupName", valid_568562
+  var valid_568563 = path.getOrDefault("subscriptionId")
+  valid_568563 = validateParameter(valid_568563, JString, required = true,
                                  default = nil)
-  if valid_594334 != nil:
-    section.add "subscriptionId", valid_594334
-  var valid_594335 = path.getOrDefault("syncGroupName")
-  valid_594335 = validateParameter(valid_594335, JString, required = true,
+  if valid_568563 != nil:
+    section.add "subscriptionId", valid_568563
+  var valid_568564 = path.getOrDefault("syncGroupName")
+  valid_568564 = validateParameter(valid_568564, JString, required = true,
                                  default = nil)
-  if valid_594335 != nil:
-    section.add "syncGroupName", valid_594335
-  var valid_594336 = path.getOrDefault("storageSyncServiceName")
-  valid_594336 = validateParameter(valid_594336, JString, required = true,
+  if valid_568564 != nil:
+    section.add "syncGroupName", valid_568564
+  var valid_568565 = path.getOrDefault("storageSyncServiceName")
+  valid_568565 = validateParameter(valid_568565, JString, required = true,
                                  default = nil)
-  if valid_594336 != nil:
-    section.add "storageSyncServiceName", valid_594336
+  if valid_568565 != nil:
+    section.add "storageSyncServiceName", valid_568565
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3683,11 +3683,11 @@ proc validate_ServerEndpointsCreate_594330(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594337 = query.getOrDefault("api-version")
-  valid_594337 = validateParameter(valid_594337, JString, required = true,
+  var valid_568566 = query.getOrDefault("api-version")
+  valid_568566 = validateParameter(valid_568566, JString, required = true,
                                  default = nil)
-  if valid_594337 != nil:
-    section.add "api-version", valid_594337
+  if valid_568566 != nil:
+    section.add "api-version", valid_568566
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3701,20 +3701,20 @@ proc validate_ServerEndpointsCreate_594330(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594339: Call_ServerEndpointsCreate_594329; path: JsonNode;
+proc call*(call_568568: Call_ServerEndpointsCreate_568558; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new ServerEndpoint.
   ## 
-  let valid = call_594339.validator(path, query, header, formData, body)
-  let scheme = call_594339.pickScheme
+  let valid = call_568568.validator(path, query, header, formData, body)
+  let scheme = call_568568.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594339.url(scheme.get, call_594339.host, call_594339.base,
-                         call_594339.route, valid.getOrDefault("path"),
+  let url = call_568568.url(scheme.get, call_568568.host, call_568568.base,
+                         call_568568.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594339, url, valid)
+  result = hook(call_568568, url, valid)
 
-proc call*(call_594340: Call_ServerEndpointsCreate_594329;
+proc call*(call_568569: Call_ServerEndpointsCreate_568558;
           serverEndpointName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; syncGroupName: string; parameters: JsonNode;
           storageSyncServiceName: string): Recallable =
@@ -3734,27 +3734,27 @@ proc call*(call_594340: Call_ServerEndpointsCreate_594329;
   ##             : Body of Server Endpoint object.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594341 = newJObject()
-  var query_594342 = newJObject()
-  var body_594343 = newJObject()
-  add(path_594341, "serverEndpointName", newJString(serverEndpointName))
-  add(path_594341, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594342, "api-version", newJString(apiVersion))
-  add(path_594341, "subscriptionId", newJString(subscriptionId))
-  add(path_594341, "syncGroupName", newJString(syncGroupName))
+  var path_568570 = newJObject()
+  var query_568571 = newJObject()
+  var body_568572 = newJObject()
+  add(path_568570, "serverEndpointName", newJString(serverEndpointName))
+  add(path_568570, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568571, "api-version", newJString(apiVersion))
+  add(path_568570, "subscriptionId", newJString(subscriptionId))
+  add(path_568570, "syncGroupName", newJString(syncGroupName))
   if parameters != nil:
-    body_594343 = parameters
-  add(path_594341, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594340.call(path_594341, query_594342, nil, nil, body_594343)
+    body_568572 = parameters
+  add(path_568570, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568569.call(path_568570, query_568571, nil, nil, body_568572)
 
-var serverEndpointsCreate* = Call_ServerEndpointsCreate_594329(
+var serverEndpointsCreate* = Call_ServerEndpointsCreate_568558(
     name: "serverEndpointsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/serverEndpoints/{serverEndpointName}",
-    validator: validate_ServerEndpointsCreate_594330, base: "",
-    url: url_ServerEndpointsCreate_594331, schemes: {Scheme.Https})
+    validator: validate_ServerEndpointsCreate_568559, base: "",
+    url: url_ServerEndpointsCreate_568560, schemes: {Scheme.Https})
 type
-  Call_ServerEndpointsGet_594316 = ref object of OpenApiRestCall_593438
-proc url_ServerEndpointsGet_594318(protocol: Scheme; host: string; base: string;
+  Call_ServerEndpointsGet_568545 = ref object of OpenApiRestCall_567667
+proc url_ServerEndpointsGet_568547(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3785,7 +3785,7 @@ proc url_ServerEndpointsGet_594318(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerEndpointsGet_594317(path: JsonNode; query: JsonNode;
+proc validate_ServerEndpointsGet_568546(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get a ServerEndpoint.
@@ -3806,31 +3806,31 @@ proc validate_ServerEndpointsGet_594317(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `serverEndpointName` field"
-  var valid_594319 = path.getOrDefault("serverEndpointName")
-  valid_594319 = validateParameter(valid_594319, JString, required = true,
+  var valid_568548 = path.getOrDefault("serverEndpointName")
+  valid_568548 = validateParameter(valid_568548, JString, required = true,
                                  default = nil)
-  if valid_594319 != nil:
-    section.add "serverEndpointName", valid_594319
-  var valid_594320 = path.getOrDefault("resourceGroupName")
-  valid_594320 = validateParameter(valid_594320, JString, required = true,
+  if valid_568548 != nil:
+    section.add "serverEndpointName", valid_568548
+  var valid_568549 = path.getOrDefault("resourceGroupName")
+  valid_568549 = validateParameter(valid_568549, JString, required = true,
                                  default = nil)
-  if valid_594320 != nil:
-    section.add "resourceGroupName", valid_594320
-  var valid_594321 = path.getOrDefault("subscriptionId")
-  valid_594321 = validateParameter(valid_594321, JString, required = true,
+  if valid_568549 != nil:
+    section.add "resourceGroupName", valid_568549
+  var valid_568550 = path.getOrDefault("subscriptionId")
+  valid_568550 = validateParameter(valid_568550, JString, required = true,
                                  default = nil)
-  if valid_594321 != nil:
-    section.add "subscriptionId", valid_594321
-  var valid_594322 = path.getOrDefault("syncGroupName")
-  valid_594322 = validateParameter(valid_594322, JString, required = true,
+  if valid_568550 != nil:
+    section.add "subscriptionId", valid_568550
+  var valid_568551 = path.getOrDefault("syncGroupName")
+  valid_568551 = validateParameter(valid_568551, JString, required = true,
                                  default = nil)
-  if valid_594322 != nil:
-    section.add "syncGroupName", valid_594322
-  var valid_594323 = path.getOrDefault("storageSyncServiceName")
-  valid_594323 = validateParameter(valid_594323, JString, required = true,
+  if valid_568551 != nil:
+    section.add "syncGroupName", valid_568551
+  var valid_568552 = path.getOrDefault("storageSyncServiceName")
+  valid_568552 = validateParameter(valid_568552, JString, required = true,
                                  default = nil)
-  if valid_594323 != nil:
-    section.add "storageSyncServiceName", valid_594323
+  if valid_568552 != nil:
+    section.add "storageSyncServiceName", valid_568552
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3838,11 +3838,11 @@ proc validate_ServerEndpointsGet_594317(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594324 = query.getOrDefault("api-version")
-  valid_594324 = validateParameter(valid_594324, JString, required = true,
+  var valid_568553 = query.getOrDefault("api-version")
+  valid_568553 = validateParameter(valid_568553, JString, required = true,
                                  default = nil)
-  if valid_594324 != nil:
-    section.add "api-version", valid_594324
+  if valid_568553 != nil:
+    section.add "api-version", valid_568553
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3851,20 +3851,20 @@ proc validate_ServerEndpointsGet_594317(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594325: Call_ServerEndpointsGet_594316; path: JsonNode;
+proc call*(call_568554: Call_ServerEndpointsGet_568545; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a ServerEndpoint.
   ## 
-  let valid = call_594325.validator(path, query, header, formData, body)
-  let scheme = call_594325.pickScheme
+  let valid = call_568554.validator(path, query, header, formData, body)
+  let scheme = call_568554.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594325.url(scheme.get, call_594325.host, call_594325.base,
-                         call_594325.route, valid.getOrDefault("path"),
+  let url = call_568554.url(scheme.get, call_568554.host, call_568554.base,
+                         call_568554.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594325, url, valid)
+  result = hook(call_568554, url, valid)
 
-proc call*(call_594326: Call_ServerEndpointsGet_594316; serverEndpointName: string;
+proc call*(call_568555: Call_ServerEndpointsGet_568545; serverEndpointName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           syncGroupName: string; storageSyncServiceName: string): Recallable =
   ## serverEndpointsGet
@@ -3881,24 +3881,24 @@ proc call*(call_594326: Call_ServerEndpointsGet_594316; serverEndpointName: stri
   ##                : Name of Sync Group resource.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594327 = newJObject()
-  var query_594328 = newJObject()
-  add(path_594327, "serverEndpointName", newJString(serverEndpointName))
-  add(path_594327, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594328, "api-version", newJString(apiVersion))
-  add(path_594327, "subscriptionId", newJString(subscriptionId))
-  add(path_594327, "syncGroupName", newJString(syncGroupName))
-  add(path_594327, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594326.call(path_594327, query_594328, nil, nil, nil)
+  var path_568556 = newJObject()
+  var query_568557 = newJObject()
+  add(path_568556, "serverEndpointName", newJString(serverEndpointName))
+  add(path_568556, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568557, "api-version", newJString(apiVersion))
+  add(path_568556, "subscriptionId", newJString(subscriptionId))
+  add(path_568556, "syncGroupName", newJString(syncGroupName))
+  add(path_568556, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568555.call(path_568556, query_568557, nil, nil, nil)
 
-var serverEndpointsGet* = Call_ServerEndpointsGet_594316(
+var serverEndpointsGet* = Call_ServerEndpointsGet_568545(
     name: "serverEndpointsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/serverEndpoints/{serverEndpointName}",
-    validator: validate_ServerEndpointsGet_594317, base: "",
-    url: url_ServerEndpointsGet_594318, schemes: {Scheme.Https})
+    validator: validate_ServerEndpointsGet_568546, base: "",
+    url: url_ServerEndpointsGet_568547, schemes: {Scheme.Https})
 type
-  Call_ServerEndpointsUpdate_594357 = ref object of OpenApiRestCall_593438
-proc url_ServerEndpointsUpdate_594359(protocol: Scheme; host: string; base: string;
+  Call_ServerEndpointsUpdate_568586 = ref object of OpenApiRestCall_567667
+proc url_ServerEndpointsUpdate_568588(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3929,7 +3929,7 @@ proc url_ServerEndpointsUpdate_594359(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerEndpointsUpdate_594358(path: JsonNode; query: JsonNode;
+proc validate_ServerEndpointsUpdate_568587(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Patch a given ServerEndpoint.
   ## 
@@ -3949,31 +3949,31 @@ proc validate_ServerEndpointsUpdate_594358(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `serverEndpointName` field"
-  var valid_594360 = path.getOrDefault("serverEndpointName")
-  valid_594360 = validateParameter(valid_594360, JString, required = true,
+  var valid_568589 = path.getOrDefault("serverEndpointName")
+  valid_568589 = validateParameter(valid_568589, JString, required = true,
                                  default = nil)
-  if valid_594360 != nil:
-    section.add "serverEndpointName", valid_594360
-  var valid_594361 = path.getOrDefault("resourceGroupName")
-  valid_594361 = validateParameter(valid_594361, JString, required = true,
+  if valid_568589 != nil:
+    section.add "serverEndpointName", valid_568589
+  var valid_568590 = path.getOrDefault("resourceGroupName")
+  valid_568590 = validateParameter(valid_568590, JString, required = true,
                                  default = nil)
-  if valid_594361 != nil:
-    section.add "resourceGroupName", valid_594361
-  var valid_594362 = path.getOrDefault("subscriptionId")
-  valid_594362 = validateParameter(valid_594362, JString, required = true,
+  if valid_568590 != nil:
+    section.add "resourceGroupName", valid_568590
+  var valid_568591 = path.getOrDefault("subscriptionId")
+  valid_568591 = validateParameter(valid_568591, JString, required = true,
                                  default = nil)
-  if valid_594362 != nil:
-    section.add "subscriptionId", valid_594362
-  var valid_594363 = path.getOrDefault("syncGroupName")
-  valid_594363 = validateParameter(valid_594363, JString, required = true,
+  if valid_568591 != nil:
+    section.add "subscriptionId", valid_568591
+  var valid_568592 = path.getOrDefault("syncGroupName")
+  valid_568592 = validateParameter(valid_568592, JString, required = true,
                                  default = nil)
-  if valid_594363 != nil:
-    section.add "syncGroupName", valid_594363
-  var valid_594364 = path.getOrDefault("storageSyncServiceName")
-  valid_594364 = validateParameter(valid_594364, JString, required = true,
+  if valid_568592 != nil:
+    section.add "syncGroupName", valid_568592
+  var valid_568593 = path.getOrDefault("storageSyncServiceName")
+  valid_568593 = validateParameter(valid_568593, JString, required = true,
                                  default = nil)
-  if valid_594364 != nil:
-    section.add "storageSyncServiceName", valid_594364
+  if valid_568593 != nil:
+    section.add "storageSyncServiceName", valid_568593
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3981,11 +3981,11 @@ proc validate_ServerEndpointsUpdate_594358(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594365 = query.getOrDefault("api-version")
-  valid_594365 = validateParameter(valid_594365, JString, required = true,
+  var valid_568594 = query.getOrDefault("api-version")
+  valid_568594 = validateParameter(valid_568594, JString, required = true,
                                  default = nil)
-  if valid_594365 != nil:
-    section.add "api-version", valid_594365
+  if valid_568594 != nil:
+    section.add "api-version", valid_568594
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3998,20 +3998,20 @@ proc validate_ServerEndpointsUpdate_594358(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594367: Call_ServerEndpointsUpdate_594357; path: JsonNode;
+proc call*(call_568596: Call_ServerEndpointsUpdate_568586; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patch a given ServerEndpoint.
   ## 
-  let valid = call_594367.validator(path, query, header, formData, body)
-  let scheme = call_594367.pickScheme
+  let valid = call_568596.validator(path, query, header, formData, body)
+  let scheme = call_568596.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594367.url(scheme.get, call_594367.host, call_594367.base,
-                         call_594367.route, valid.getOrDefault("path"),
+  let url = call_568596.url(scheme.get, call_568596.host, call_568596.base,
+                         call_568596.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594367, url, valid)
+  result = hook(call_568596, url, valid)
 
-proc call*(call_594368: Call_ServerEndpointsUpdate_594357;
+proc call*(call_568597: Call_ServerEndpointsUpdate_568586;
           serverEndpointName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; syncGroupName: string;
           storageSyncServiceName: string; parameters: JsonNode = nil): Recallable =
@@ -4031,27 +4031,27 @@ proc call*(call_594368: Call_ServerEndpointsUpdate_594357;
   ##             : Any of the properties applicable in PUT request.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594369 = newJObject()
-  var query_594370 = newJObject()
-  var body_594371 = newJObject()
-  add(path_594369, "serverEndpointName", newJString(serverEndpointName))
-  add(path_594369, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594370, "api-version", newJString(apiVersion))
-  add(path_594369, "subscriptionId", newJString(subscriptionId))
-  add(path_594369, "syncGroupName", newJString(syncGroupName))
+  var path_568598 = newJObject()
+  var query_568599 = newJObject()
+  var body_568600 = newJObject()
+  add(path_568598, "serverEndpointName", newJString(serverEndpointName))
+  add(path_568598, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568599, "api-version", newJString(apiVersion))
+  add(path_568598, "subscriptionId", newJString(subscriptionId))
+  add(path_568598, "syncGroupName", newJString(syncGroupName))
   if parameters != nil:
-    body_594371 = parameters
-  add(path_594369, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594368.call(path_594369, query_594370, nil, nil, body_594371)
+    body_568600 = parameters
+  add(path_568598, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568597.call(path_568598, query_568599, nil, nil, body_568600)
 
-var serverEndpointsUpdate* = Call_ServerEndpointsUpdate_594357(
+var serverEndpointsUpdate* = Call_ServerEndpointsUpdate_568586(
     name: "serverEndpointsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/serverEndpoints/{serverEndpointName}",
-    validator: validate_ServerEndpointsUpdate_594358, base: "",
-    url: url_ServerEndpointsUpdate_594359, schemes: {Scheme.Https})
+    validator: validate_ServerEndpointsUpdate_568587, base: "",
+    url: url_ServerEndpointsUpdate_568588, schemes: {Scheme.Https})
 type
-  Call_ServerEndpointsDelete_594344 = ref object of OpenApiRestCall_593438
-proc url_ServerEndpointsDelete_594346(protocol: Scheme; host: string; base: string;
+  Call_ServerEndpointsDelete_568573 = ref object of OpenApiRestCall_567667
+proc url_ServerEndpointsDelete_568575(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4082,7 +4082,7 @@ proc url_ServerEndpointsDelete_594346(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerEndpointsDelete_594345(path: JsonNode; query: JsonNode;
+proc validate_ServerEndpointsDelete_568574(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a given ServerEndpoint.
   ## 
@@ -4102,31 +4102,31 @@ proc validate_ServerEndpointsDelete_594345(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `serverEndpointName` field"
-  var valid_594347 = path.getOrDefault("serverEndpointName")
-  valid_594347 = validateParameter(valid_594347, JString, required = true,
+  var valid_568576 = path.getOrDefault("serverEndpointName")
+  valid_568576 = validateParameter(valid_568576, JString, required = true,
                                  default = nil)
-  if valid_594347 != nil:
-    section.add "serverEndpointName", valid_594347
-  var valid_594348 = path.getOrDefault("resourceGroupName")
-  valid_594348 = validateParameter(valid_594348, JString, required = true,
+  if valid_568576 != nil:
+    section.add "serverEndpointName", valid_568576
+  var valid_568577 = path.getOrDefault("resourceGroupName")
+  valid_568577 = validateParameter(valid_568577, JString, required = true,
                                  default = nil)
-  if valid_594348 != nil:
-    section.add "resourceGroupName", valid_594348
-  var valid_594349 = path.getOrDefault("subscriptionId")
-  valid_594349 = validateParameter(valid_594349, JString, required = true,
+  if valid_568577 != nil:
+    section.add "resourceGroupName", valid_568577
+  var valid_568578 = path.getOrDefault("subscriptionId")
+  valid_568578 = validateParameter(valid_568578, JString, required = true,
                                  default = nil)
-  if valid_594349 != nil:
-    section.add "subscriptionId", valid_594349
-  var valid_594350 = path.getOrDefault("syncGroupName")
-  valid_594350 = validateParameter(valid_594350, JString, required = true,
+  if valid_568578 != nil:
+    section.add "subscriptionId", valid_568578
+  var valid_568579 = path.getOrDefault("syncGroupName")
+  valid_568579 = validateParameter(valid_568579, JString, required = true,
                                  default = nil)
-  if valid_594350 != nil:
-    section.add "syncGroupName", valid_594350
-  var valid_594351 = path.getOrDefault("storageSyncServiceName")
-  valid_594351 = validateParameter(valid_594351, JString, required = true,
+  if valid_568579 != nil:
+    section.add "syncGroupName", valid_568579
+  var valid_568580 = path.getOrDefault("storageSyncServiceName")
+  valid_568580 = validateParameter(valid_568580, JString, required = true,
                                  default = nil)
-  if valid_594351 != nil:
-    section.add "storageSyncServiceName", valid_594351
+  if valid_568580 != nil:
+    section.add "storageSyncServiceName", valid_568580
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4134,11 +4134,11 @@ proc validate_ServerEndpointsDelete_594345(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594352 = query.getOrDefault("api-version")
-  valid_594352 = validateParameter(valid_594352, JString, required = true,
+  var valid_568581 = query.getOrDefault("api-version")
+  valid_568581 = validateParameter(valid_568581, JString, required = true,
                                  default = nil)
-  if valid_594352 != nil:
-    section.add "api-version", valid_594352
+  if valid_568581 != nil:
+    section.add "api-version", valid_568581
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4147,20 +4147,20 @@ proc validate_ServerEndpointsDelete_594345(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594353: Call_ServerEndpointsDelete_594344; path: JsonNode;
+proc call*(call_568582: Call_ServerEndpointsDelete_568573; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a given ServerEndpoint.
   ## 
-  let valid = call_594353.validator(path, query, header, formData, body)
-  let scheme = call_594353.pickScheme
+  let valid = call_568582.validator(path, query, header, formData, body)
+  let scheme = call_568582.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594353.url(scheme.get, call_594353.host, call_594353.base,
-                         call_594353.route, valid.getOrDefault("path"),
+  let url = call_568582.url(scheme.get, call_568582.host, call_568582.base,
+                         call_568582.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594353, url, valid)
+  result = hook(call_568582, url, valid)
 
-proc call*(call_594354: Call_ServerEndpointsDelete_594344;
+proc call*(call_568583: Call_ServerEndpointsDelete_568573;
           serverEndpointName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; syncGroupName: string;
           storageSyncServiceName: string): Recallable =
@@ -4178,24 +4178,24 @@ proc call*(call_594354: Call_ServerEndpointsDelete_594344;
   ##                : Name of Sync Group resource.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594355 = newJObject()
-  var query_594356 = newJObject()
-  add(path_594355, "serverEndpointName", newJString(serverEndpointName))
-  add(path_594355, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594356, "api-version", newJString(apiVersion))
-  add(path_594355, "subscriptionId", newJString(subscriptionId))
-  add(path_594355, "syncGroupName", newJString(syncGroupName))
-  add(path_594355, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594354.call(path_594355, query_594356, nil, nil, nil)
+  var path_568584 = newJObject()
+  var query_568585 = newJObject()
+  add(path_568584, "serverEndpointName", newJString(serverEndpointName))
+  add(path_568584, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568585, "api-version", newJString(apiVersion))
+  add(path_568584, "subscriptionId", newJString(subscriptionId))
+  add(path_568584, "syncGroupName", newJString(syncGroupName))
+  add(path_568584, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568583.call(path_568584, query_568585, nil, nil, nil)
 
-var serverEndpointsDelete* = Call_ServerEndpointsDelete_594344(
+var serverEndpointsDelete* = Call_ServerEndpointsDelete_568573(
     name: "serverEndpointsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/serverEndpoints/{serverEndpointName}",
-    validator: validate_ServerEndpointsDelete_594345, base: "",
-    url: url_ServerEndpointsDelete_594346, schemes: {Scheme.Https})
+    validator: validate_ServerEndpointsDelete_568574, base: "",
+    url: url_ServerEndpointsDelete_568575, schemes: {Scheme.Https})
 type
-  Call_ServerEndpointsRecallAction_594372 = ref object of OpenApiRestCall_593438
-proc url_ServerEndpointsRecallAction_594374(protocol: Scheme; host: string;
+  Call_ServerEndpointsRecallAction_568601 = ref object of OpenApiRestCall_567667
+proc url_ServerEndpointsRecallAction_568603(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4227,7 +4227,7 @@ proc url_ServerEndpointsRecallAction_594374(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerEndpointsRecallAction_594373(path: JsonNode; query: JsonNode;
+proc validate_ServerEndpointsRecallAction_568602(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Recall a server endpoint.
   ## 
@@ -4247,31 +4247,31 @@ proc validate_ServerEndpointsRecallAction_594373(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `serverEndpointName` field"
-  var valid_594375 = path.getOrDefault("serverEndpointName")
-  valid_594375 = validateParameter(valid_594375, JString, required = true,
+  var valid_568604 = path.getOrDefault("serverEndpointName")
+  valid_568604 = validateParameter(valid_568604, JString, required = true,
                                  default = nil)
-  if valid_594375 != nil:
-    section.add "serverEndpointName", valid_594375
-  var valid_594376 = path.getOrDefault("resourceGroupName")
-  valid_594376 = validateParameter(valid_594376, JString, required = true,
+  if valid_568604 != nil:
+    section.add "serverEndpointName", valid_568604
+  var valid_568605 = path.getOrDefault("resourceGroupName")
+  valid_568605 = validateParameter(valid_568605, JString, required = true,
                                  default = nil)
-  if valid_594376 != nil:
-    section.add "resourceGroupName", valid_594376
-  var valid_594377 = path.getOrDefault("subscriptionId")
-  valid_594377 = validateParameter(valid_594377, JString, required = true,
+  if valid_568605 != nil:
+    section.add "resourceGroupName", valid_568605
+  var valid_568606 = path.getOrDefault("subscriptionId")
+  valid_568606 = validateParameter(valid_568606, JString, required = true,
                                  default = nil)
-  if valid_594377 != nil:
-    section.add "subscriptionId", valid_594377
-  var valid_594378 = path.getOrDefault("syncGroupName")
-  valid_594378 = validateParameter(valid_594378, JString, required = true,
+  if valid_568606 != nil:
+    section.add "subscriptionId", valid_568606
+  var valid_568607 = path.getOrDefault("syncGroupName")
+  valid_568607 = validateParameter(valid_568607, JString, required = true,
                                  default = nil)
-  if valid_594378 != nil:
-    section.add "syncGroupName", valid_594378
-  var valid_594379 = path.getOrDefault("storageSyncServiceName")
-  valid_594379 = validateParameter(valid_594379, JString, required = true,
+  if valid_568607 != nil:
+    section.add "syncGroupName", valid_568607
+  var valid_568608 = path.getOrDefault("storageSyncServiceName")
+  valid_568608 = validateParameter(valid_568608, JString, required = true,
                                  default = nil)
-  if valid_594379 != nil:
-    section.add "storageSyncServiceName", valid_594379
+  if valid_568608 != nil:
+    section.add "storageSyncServiceName", valid_568608
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4279,11 +4279,11 @@ proc validate_ServerEndpointsRecallAction_594373(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594380 = query.getOrDefault("api-version")
-  valid_594380 = validateParameter(valid_594380, JString, required = true,
+  var valid_568609 = query.getOrDefault("api-version")
+  valid_568609 = validateParameter(valid_568609, JString, required = true,
                                  default = nil)
-  if valid_594380 != nil:
-    section.add "api-version", valid_594380
+  if valid_568609 != nil:
+    section.add "api-version", valid_568609
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4297,20 +4297,20 @@ proc validate_ServerEndpointsRecallAction_594373(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594382: Call_ServerEndpointsRecallAction_594372; path: JsonNode;
+proc call*(call_568611: Call_ServerEndpointsRecallAction_568601; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Recall a server endpoint.
   ## 
-  let valid = call_594382.validator(path, query, header, formData, body)
-  let scheme = call_594382.pickScheme
+  let valid = call_568611.validator(path, query, header, formData, body)
+  let scheme = call_568611.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594382.url(scheme.get, call_594382.host, call_594382.base,
-                         call_594382.route, valid.getOrDefault("path"),
+  let url = call_568611.url(scheme.get, call_568611.host, call_568611.base,
+                         call_568611.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594382, url, valid)
+  result = hook(call_568611, url, valid)
 
-proc call*(call_594383: Call_ServerEndpointsRecallAction_594372;
+proc call*(call_568612: Call_ServerEndpointsRecallAction_568601;
           serverEndpointName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; syncGroupName: string; parameters: JsonNode;
           storageSyncServiceName: string): Recallable =
@@ -4330,27 +4330,27 @@ proc call*(call_594383: Call_ServerEndpointsRecallAction_594372;
   ##             : Body of Recall Action object.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594384 = newJObject()
-  var query_594385 = newJObject()
-  var body_594386 = newJObject()
-  add(path_594384, "serverEndpointName", newJString(serverEndpointName))
-  add(path_594384, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594385, "api-version", newJString(apiVersion))
-  add(path_594384, "subscriptionId", newJString(subscriptionId))
-  add(path_594384, "syncGroupName", newJString(syncGroupName))
+  var path_568613 = newJObject()
+  var query_568614 = newJObject()
+  var body_568615 = newJObject()
+  add(path_568613, "serverEndpointName", newJString(serverEndpointName))
+  add(path_568613, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568614, "api-version", newJString(apiVersion))
+  add(path_568613, "subscriptionId", newJString(subscriptionId))
+  add(path_568613, "syncGroupName", newJString(syncGroupName))
   if parameters != nil:
-    body_594386 = parameters
-  add(path_594384, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594383.call(path_594384, query_594385, nil, nil, body_594386)
+    body_568615 = parameters
+  add(path_568613, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568612.call(path_568613, query_568614, nil, nil, body_568615)
 
-var serverEndpointsRecallAction* = Call_ServerEndpointsRecallAction_594372(
+var serverEndpointsRecallAction* = Call_ServerEndpointsRecallAction_568601(
     name: "serverEndpointsRecallAction", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/serverEndpoints/{serverEndpointName}/recallAction",
-    validator: validate_ServerEndpointsRecallAction_594373, base: "",
-    url: url_ServerEndpointsRecallAction_594374, schemes: {Scheme.Https})
+    validator: validate_ServerEndpointsRecallAction_568602, base: "",
+    url: url_ServerEndpointsRecallAction_568603, schemes: {Scheme.Https})
 type
-  Call_WorkflowsListByStorageSyncService_594387 = ref object of OpenApiRestCall_593438
-proc url_WorkflowsListByStorageSyncService_594389(protocol: Scheme; host: string;
+  Call_WorkflowsListByStorageSyncService_568616 = ref object of OpenApiRestCall_567667
+proc url_WorkflowsListByStorageSyncService_568618(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4375,7 +4375,7 @@ proc url_WorkflowsListByStorageSyncService_594389(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkflowsListByStorageSyncService_594388(path: JsonNode;
+proc validate_WorkflowsListByStorageSyncService_568617(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a Workflow List
   ## 
@@ -4391,21 +4391,21 @@ proc validate_WorkflowsListByStorageSyncService_594388(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594390 = path.getOrDefault("resourceGroupName")
-  valid_594390 = validateParameter(valid_594390, JString, required = true,
+  var valid_568619 = path.getOrDefault("resourceGroupName")
+  valid_568619 = validateParameter(valid_568619, JString, required = true,
                                  default = nil)
-  if valid_594390 != nil:
-    section.add "resourceGroupName", valid_594390
-  var valid_594391 = path.getOrDefault("subscriptionId")
-  valid_594391 = validateParameter(valid_594391, JString, required = true,
+  if valid_568619 != nil:
+    section.add "resourceGroupName", valid_568619
+  var valid_568620 = path.getOrDefault("subscriptionId")
+  valid_568620 = validateParameter(valid_568620, JString, required = true,
                                  default = nil)
-  if valid_594391 != nil:
-    section.add "subscriptionId", valid_594391
-  var valid_594392 = path.getOrDefault("storageSyncServiceName")
-  valid_594392 = validateParameter(valid_594392, JString, required = true,
+  if valid_568620 != nil:
+    section.add "subscriptionId", valid_568620
+  var valid_568621 = path.getOrDefault("storageSyncServiceName")
+  valid_568621 = validateParameter(valid_568621, JString, required = true,
                                  default = nil)
-  if valid_594392 != nil:
-    section.add "storageSyncServiceName", valid_594392
+  if valid_568621 != nil:
+    section.add "storageSyncServiceName", valid_568621
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4413,11 +4413,11 @@ proc validate_WorkflowsListByStorageSyncService_594388(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594393 = query.getOrDefault("api-version")
-  valid_594393 = validateParameter(valid_594393, JString, required = true,
+  var valid_568622 = query.getOrDefault("api-version")
+  valid_568622 = validateParameter(valid_568622, JString, required = true,
                                  default = nil)
-  if valid_594393 != nil:
-    section.add "api-version", valid_594393
+  if valid_568622 != nil:
+    section.add "api-version", valid_568622
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4426,21 +4426,21 @@ proc validate_WorkflowsListByStorageSyncService_594388(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594394: Call_WorkflowsListByStorageSyncService_594387;
+proc call*(call_568623: Call_WorkflowsListByStorageSyncService_568616;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a Workflow List
   ## 
-  let valid = call_594394.validator(path, query, header, formData, body)
-  let scheme = call_594394.pickScheme
+  let valid = call_568623.validator(path, query, header, formData, body)
+  let scheme = call_568623.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594394.url(scheme.get, call_594394.host, call_594394.base,
-                         call_594394.route, valid.getOrDefault("path"),
+  let url = call_568623.url(scheme.get, call_568623.host, call_568623.base,
+                         call_568623.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594394, url, valid)
+  result = hook(call_568623, url, valid)
 
-proc call*(call_594395: Call_WorkflowsListByStorageSyncService_594387;
+proc call*(call_568624: Call_WorkflowsListByStorageSyncService_568616;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           storageSyncServiceName: string): Recallable =
   ## workflowsListByStorageSyncService
@@ -4453,22 +4453,22 @@ proc call*(call_594395: Call_WorkflowsListByStorageSyncService_594387;
   ##                 : The ID of the target subscription.
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594396 = newJObject()
-  var query_594397 = newJObject()
-  add(path_594396, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594397, "api-version", newJString(apiVersion))
-  add(path_594396, "subscriptionId", newJString(subscriptionId))
-  add(path_594396, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594395.call(path_594396, query_594397, nil, nil, nil)
+  var path_568625 = newJObject()
+  var query_568626 = newJObject()
+  add(path_568625, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568626, "api-version", newJString(apiVersion))
+  add(path_568625, "subscriptionId", newJString(subscriptionId))
+  add(path_568625, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568624.call(path_568625, query_568626, nil, nil, nil)
 
-var workflowsListByStorageSyncService* = Call_WorkflowsListByStorageSyncService_594387(
+var workflowsListByStorageSyncService* = Call_WorkflowsListByStorageSyncService_568616(
     name: "workflowsListByStorageSyncService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/workflows",
-    validator: validate_WorkflowsListByStorageSyncService_594388, base: "",
-    url: url_WorkflowsListByStorageSyncService_594389, schemes: {Scheme.Https})
+    validator: validate_WorkflowsListByStorageSyncService_568617, base: "",
+    url: url_WorkflowsListByStorageSyncService_568618, schemes: {Scheme.Https})
 type
-  Call_WorkflowsGet_594398 = ref object of OpenApiRestCall_593438
-proc url_WorkflowsGet_594400(protocol: Scheme; host: string; base: string;
+  Call_WorkflowsGet_568627 = ref object of OpenApiRestCall_567667
+proc url_WorkflowsGet_568629(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4495,7 +4495,7 @@ proc url_WorkflowsGet_594400(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkflowsGet_594399(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WorkflowsGet_568628(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get Workflows resource
   ## 
@@ -4513,26 +4513,26 @@ proc validate_WorkflowsGet_594399(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594401 = path.getOrDefault("resourceGroupName")
-  valid_594401 = validateParameter(valid_594401, JString, required = true,
+  var valid_568630 = path.getOrDefault("resourceGroupName")
+  valid_568630 = validateParameter(valid_568630, JString, required = true,
                                  default = nil)
-  if valid_594401 != nil:
-    section.add "resourceGroupName", valid_594401
-  var valid_594402 = path.getOrDefault("subscriptionId")
-  valid_594402 = validateParameter(valid_594402, JString, required = true,
+  if valid_568630 != nil:
+    section.add "resourceGroupName", valid_568630
+  var valid_568631 = path.getOrDefault("subscriptionId")
+  valid_568631 = validateParameter(valid_568631, JString, required = true,
                                  default = nil)
-  if valid_594402 != nil:
-    section.add "subscriptionId", valid_594402
-  var valid_594403 = path.getOrDefault("workflowId")
-  valid_594403 = validateParameter(valid_594403, JString, required = true,
+  if valid_568631 != nil:
+    section.add "subscriptionId", valid_568631
+  var valid_568632 = path.getOrDefault("workflowId")
+  valid_568632 = validateParameter(valid_568632, JString, required = true,
                                  default = nil)
-  if valid_594403 != nil:
-    section.add "workflowId", valid_594403
-  var valid_594404 = path.getOrDefault("storageSyncServiceName")
-  valid_594404 = validateParameter(valid_594404, JString, required = true,
+  if valid_568632 != nil:
+    section.add "workflowId", valid_568632
+  var valid_568633 = path.getOrDefault("storageSyncServiceName")
+  valid_568633 = validateParameter(valid_568633, JString, required = true,
                                  default = nil)
-  if valid_594404 != nil:
-    section.add "storageSyncServiceName", valid_594404
+  if valid_568633 != nil:
+    section.add "storageSyncServiceName", valid_568633
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4540,11 +4540,11 @@ proc validate_WorkflowsGet_594399(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594405 = query.getOrDefault("api-version")
-  valid_594405 = validateParameter(valid_594405, JString, required = true,
+  var valid_568634 = query.getOrDefault("api-version")
+  valid_568634 = validateParameter(valid_568634, JString, required = true,
                                  default = nil)
-  if valid_594405 != nil:
-    section.add "api-version", valid_594405
+  if valid_568634 != nil:
+    section.add "api-version", valid_568634
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4553,20 +4553,20 @@ proc validate_WorkflowsGet_594399(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594406: Call_WorkflowsGet_594398; path: JsonNode; query: JsonNode;
+proc call*(call_568635: Call_WorkflowsGet_568627; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get Workflows resource
   ## 
-  let valid = call_594406.validator(path, query, header, formData, body)
-  let scheme = call_594406.pickScheme
+  let valid = call_568635.validator(path, query, header, formData, body)
+  let scheme = call_568635.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594406.url(scheme.get, call_594406.host, call_594406.base,
-                         call_594406.route, valid.getOrDefault("path"),
+  let url = call_568635.url(scheme.get, call_568635.host, call_568635.base,
+                         call_568635.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594406, url, valid)
+  result = hook(call_568635, url, valid)
 
-proc call*(call_594407: Call_WorkflowsGet_594398; resourceGroupName: string;
+proc call*(call_568636: Call_WorkflowsGet_568627; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; workflowId: string;
           storageSyncServiceName: string): Recallable =
   ## workflowsGet
@@ -4581,22 +4581,22 @@ proc call*(call_594407: Call_WorkflowsGet_594398; resourceGroupName: string;
   ##             : workflow Id
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594408 = newJObject()
-  var query_594409 = newJObject()
-  add(path_594408, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594409, "api-version", newJString(apiVersion))
-  add(path_594408, "subscriptionId", newJString(subscriptionId))
-  add(path_594408, "workflowId", newJString(workflowId))
-  add(path_594408, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594407.call(path_594408, query_594409, nil, nil, nil)
+  var path_568637 = newJObject()
+  var query_568638 = newJObject()
+  add(path_568637, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568638, "api-version", newJString(apiVersion))
+  add(path_568637, "subscriptionId", newJString(subscriptionId))
+  add(path_568637, "workflowId", newJString(workflowId))
+  add(path_568637, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568636.call(path_568637, query_568638, nil, nil, nil)
 
-var workflowsGet* = Call_WorkflowsGet_594398(name: "workflowsGet",
+var workflowsGet* = Call_WorkflowsGet_568627(name: "workflowsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/workflows/{workflowId}",
-    validator: validate_WorkflowsGet_594399, base: "", url: url_WorkflowsGet_594400,
+    validator: validate_WorkflowsGet_568628, base: "", url: url_WorkflowsGet_568629,
     schemes: {Scheme.Https})
 type
-  Call_WorkflowsAbort_594410 = ref object of OpenApiRestCall_593438
-proc url_WorkflowsAbort_594412(protocol: Scheme; host: string; base: string;
+  Call_WorkflowsAbort_568639 = ref object of OpenApiRestCall_567667
+proc url_WorkflowsAbort_568641(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4624,7 +4624,7 @@ proc url_WorkflowsAbort_594412(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkflowsAbort_594411(path: JsonNode; query: JsonNode;
+proc validate_WorkflowsAbort_568640(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Abort the given workflow.
@@ -4643,26 +4643,26 @@ proc validate_WorkflowsAbort_594411(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594413 = path.getOrDefault("resourceGroupName")
-  valid_594413 = validateParameter(valid_594413, JString, required = true,
+  var valid_568642 = path.getOrDefault("resourceGroupName")
+  valid_568642 = validateParameter(valid_568642, JString, required = true,
                                  default = nil)
-  if valid_594413 != nil:
-    section.add "resourceGroupName", valid_594413
-  var valid_594414 = path.getOrDefault("subscriptionId")
-  valid_594414 = validateParameter(valid_594414, JString, required = true,
+  if valid_568642 != nil:
+    section.add "resourceGroupName", valid_568642
+  var valid_568643 = path.getOrDefault("subscriptionId")
+  valid_568643 = validateParameter(valid_568643, JString, required = true,
                                  default = nil)
-  if valid_594414 != nil:
-    section.add "subscriptionId", valid_594414
-  var valid_594415 = path.getOrDefault("workflowId")
-  valid_594415 = validateParameter(valid_594415, JString, required = true,
+  if valid_568643 != nil:
+    section.add "subscriptionId", valid_568643
+  var valid_568644 = path.getOrDefault("workflowId")
+  valid_568644 = validateParameter(valid_568644, JString, required = true,
                                  default = nil)
-  if valid_594415 != nil:
-    section.add "workflowId", valid_594415
-  var valid_594416 = path.getOrDefault("storageSyncServiceName")
-  valid_594416 = validateParameter(valid_594416, JString, required = true,
+  if valid_568644 != nil:
+    section.add "workflowId", valid_568644
+  var valid_568645 = path.getOrDefault("storageSyncServiceName")
+  valid_568645 = validateParameter(valid_568645, JString, required = true,
                                  default = nil)
-  if valid_594416 != nil:
-    section.add "storageSyncServiceName", valid_594416
+  if valid_568645 != nil:
+    section.add "storageSyncServiceName", valid_568645
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4670,11 +4670,11 @@ proc validate_WorkflowsAbort_594411(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594417 = query.getOrDefault("api-version")
-  valid_594417 = validateParameter(valid_594417, JString, required = true,
+  var valid_568646 = query.getOrDefault("api-version")
+  valid_568646 = validateParameter(valid_568646, JString, required = true,
                                  default = nil)
-  if valid_594417 != nil:
-    section.add "api-version", valid_594417
+  if valid_568646 != nil:
+    section.add "api-version", valid_568646
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4683,20 +4683,20 @@ proc validate_WorkflowsAbort_594411(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594418: Call_WorkflowsAbort_594410; path: JsonNode; query: JsonNode;
+proc call*(call_568647: Call_WorkflowsAbort_568639; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Abort the given workflow.
   ## 
-  let valid = call_594418.validator(path, query, header, formData, body)
-  let scheme = call_594418.pickScheme
+  let valid = call_568647.validator(path, query, header, formData, body)
+  let scheme = call_568647.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594418.url(scheme.get, call_594418.host, call_594418.base,
-                         call_594418.route, valid.getOrDefault("path"),
+  let url = call_568647.url(scheme.get, call_568647.host, call_568647.base,
+                         call_568647.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594418, url, valid)
+  result = hook(call_568647, url, valid)
 
-proc call*(call_594419: Call_WorkflowsAbort_594410; resourceGroupName: string;
+proc call*(call_568648: Call_WorkflowsAbort_568639; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; workflowId: string;
           storageSyncServiceName: string): Recallable =
   ## workflowsAbort
@@ -4711,18 +4711,18 @@ proc call*(call_594419: Call_WorkflowsAbort_594410; resourceGroupName: string;
   ##             : workflow Id
   ##   storageSyncServiceName: string (required)
   ##                         : Name of Storage Sync Service resource.
-  var path_594420 = newJObject()
-  var query_594421 = newJObject()
-  add(path_594420, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594421, "api-version", newJString(apiVersion))
-  add(path_594420, "subscriptionId", newJString(subscriptionId))
-  add(path_594420, "workflowId", newJString(workflowId))
-  add(path_594420, "storageSyncServiceName", newJString(storageSyncServiceName))
-  result = call_594419.call(path_594420, query_594421, nil, nil, nil)
+  var path_568649 = newJObject()
+  var query_568650 = newJObject()
+  add(path_568649, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568650, "api-version", newJString(apiVersion))
+  add(path_568649, "subscriptionId", newJString(subscriptionId))
+  add(path_568649, "workflowId", newJString(workflowId))
+  add(path_568649, "storageSyncServiceName", newJString(storageSyncServiceName))
+  result = call_568648.call(path_568649, query_568650, nil, nil, nil)
 
-var workflowsAbort* = Call_WorkflowsAbort_594410(name: "workflowsAbort",
+var workflowsAbort* = Call_WorkflowsAbort_568639(name: "workflowsAbort",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/workflows/{workflowId}/abort",
-    validator: validate_WorkflowsAbort_594411, base: "", url: url_WorkflowsAbort_594412,
+    validator: validate_WorkflowsAbort_568640, base: "", url: url_WorkflowsAbort_568641,
     schemes: {Scheme.Https})
 export
   rest

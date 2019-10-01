@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: InfrastructureInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_574458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-ServiceHealth"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServiceHealthsList_593647 = ref object of OpenApiRestCall_593425
-proc url_ServiceHealthsList_593649(protocol: Scheme; host: string; base: string;
+  Call_ServiceHealthsList_574680 = ref object of OpenApiRestCall_574458
+proc url_ServiceHealthsList_574682(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_ServiceHealthsList_593649(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceHealthsList_593648(path: JsonNode; query: JsonNode;
+proc validate_ServiceHealthsList_574681(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Returns the list of all resource provider health states.
@@ -144,21 +144,21 @@ proc validate_ServiceHealthsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593810 = path.getOrDefault("resourceGroupName")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  var valid_574843 = path.getOrDefault("resourceGroupName")
+  valid_574843 = validateParameter(valid_574843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "resourceGroupName", valid_593810
-  var valid_593811 = path.getOrDefault("subscriptionId")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_574843 != nil:
+    section.add "resourceGroupName", valid_574843
+  var valid_574844 = path.getOrDefault("subscriptionId")
+  valid_574844 = validateParameter(valid_574844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "subscriptionId", valid_593811
-  var valid_593812 = path.getOrDefault("location")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  if valid_574844 != nil:
+    section.add "subscriptionId", valid_574844
+  var valid_574845 = path.getOrDefault("location")
+  valid_574845 = validateParameter(valid_574845, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "location", valid_593812
+  if valid_574845 != nil:
+    section.add "location", valid_574845
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -168,16 +168,16 @@ proc validate_ServiceHealthsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593826 = query.getOrDefault("api-version")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  var valid_574859 = query.getOrDefault("api-version")
+  valid_574859 = validateParameter(valid_574859, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593826 != nil:
-    section.add "api-version", valid_593826
-  var valid_593827 = query.getOrDefault("$filter")
-  valid_593827 = validateParameter(valid_593827, JString, required = false,
+  if valid_574859 != nil:
+    section.add "api-version", valid_574859
+  var valid_574860 = query.getOrDefault("$filter")
+  valid_574860 = validateParameter(valid_574860, JString, required = false,
                                  default = nil)
-  if valid_593827 != nil:
-    section.add "$filter", valid_593827
+  if valid_574860 != nil:
+    section.add "$filter", valid_574860
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -186,20 +186,20 @@ proc validate_ServiceHealthsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593854: Call_ServiceHealthsList_593647; path: JsonNode;
+proc call*(call_574887: Call_ServiceHealthsList_574680; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of all resource provider health states.
   ## 
-  let valid = call_593854.validator(path, query, header, formData, body)
-  let scheme = call_593854.pickScheme
+  let valid = call_574887.validator(path, query, header, formData, body)
+  let scheme = call_574887.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593854.url(scheme.get, call_593854.host, call_593854.base,
-                         call_593854.route, valid.getOrDefault("path"),
+  let url = call_574887.url(scheme.get, call_574887.host, call_574887.base,
+                         call_574887.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593854, url, valid)
+  result = hook(call_574887, url, valid)
 
-proc call*(call_593925: Call_ServiceHealthsList_593647; resourceGroupName: string;
+proc call*(call_574958: Call_ServiceHealthsList_574680; resourceGroupName: string;
           subscriptionId: string; location: string;
           apiVersion: string = "2016-05-01"; Filter: string = ""): Recallable =
   ## serviceHealthsList
@@ -214,23 +214,23 @@ proc call*(call_593925: Call_ServiceHealthsList_593647; resourceGroupName: strin
   ##           : Name of the region
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_593926 = newJObject()
-  var query_593928 = newJObject()
-  add(path_593926, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593928, "api-version", newJString(apiVersion))
-  add(path_593926, "subscriptionId", newJString(subscriptionId))
-  add(path_593926, "location", newJString(location))
-  add(query_593928, "$filter", newJString(Filter))
-  result = call_593925.call(path_593926, query_593928, nil, nil, nil)
+  var path_574959 = newJObject()
+  var query_574961 = newJObject()
+  add(path_574959, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574961, "api-version", newJString(apiVersion))
+  add(path_574959, "subscriptionId", newJString(subscriptionId))
+  add(path_574959, "location", newJString(location))
+  add(query_574961, "$filter", newJString(Filter))
+  result = call_574958.call(path_574959, query_574961, nil, nil, nil)
 
-var serviceHealthsList* = Call_ServiceHealthsList_593647(
+var serviceHealthsList* = Call_ServiceHealthsList_574680(
     name: "serviceHealthsList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.InfrastructureInsights.Admin/regionHealths/{location}/serviceHealths",
-    validator: validate_ServiceHealthsList_593648, base: "",
-    url: url_ServiceHealthsList_593649, schemes: {Scheme.Https})
+    validator: validate_ServiceHealthsList_574681, base: "",
+    url: url_ServiceHealthsList_574682, schemes: {Scheme.Https})
 type
-  Call_ServiceHealthsGet_593967 = ref object of OpenApiRestCall_593425
-proc url_ServiceHealthsGet_593969(protocol: Scheme; host: string; base: string;
+  Call_ServiceHealthsGet_575000 = ref object of OpenApiRestCall_574458
+proc url_ServiceHealthsGet_575002(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -255,7 +255,7 @@ proc url_ServiceHealthsGet_593969(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceHealthsGet_593968(path: JsonNode; query: JsonNode;
+proc validate_ServiceHealthsGet_575001(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Returns the requested service health object.
@@ -274,26 +274,26 @@ proc validate_ServiceHealthsGet_593968(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593979 = path.getOrDefault("resourceGroupName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_575012 = path.getOrDefault("resourceGroupName")
+  valid_575012 = validateParameter(valid_575012, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "resourceGroupName", valid_593979
-  var valid_593980 = path.getOrDefault("subscriptionId")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_575012 != nil:
+    section.add "resourceGroupName", valid_575012
+  var valid_575013 = path.getOrDefault("subscriptionId")
+  valid_575013 = validateParameter(valid_575013, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "subscriptionId", valid_593980
-  var valid_593981 = path.getOrDefault("serviceHealth")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_575013 != nil:
+    section.add "subscriptionId", valid_575013
+  var valid_575014 = path.getOrDefault("serviceHealth")
+  valid_575014 = validateParameter(valid_575014, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "serviceHealth", valid_593981
-  var valid_593982 = path.getOrDefault("location")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_575014 != nil:
+    section.add "serviceHealth", valid_575014
+  var valid_575015 = path.getOrDefault("location")
+  valid_575015 = validateParameter(valid_575015, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "location", valid_593982
+  if valid_575015 != nil:
+    section.add "location", valid_575015
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -301,11 +301,11 @@ proc validate_ServiceHealthsGet_593968(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_575016 = query.getOrDefault("api-version")
+  valid_575016 = validateParameter(valid_575016, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_575016 != nil:
+    section.add "api-version", valid_575016
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -314,20 +314,20 @@ proc validate_ServiceHealthsGet_593968(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_ServiceHealthsGet_593967; path: JsonNode;
+proc call*(call_575017: Call_ServiceHealthsGet_575000; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the requested service health object.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_575017.validator(path, query, header, formData, body)
+  let scheme = call_575017.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_575017.url(scheme.get, call_575017.host, call_575017.base,
+                         call_575017.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_575017, url, valid)
 
-proc call*(call_593985: Call_ServiceHealthsGet_593967; resourceGroupName: string;
+proc call*(call_575018: Call_ServiceHealthsGet_575000; resourceGroupName: string;
           subscriptionId: string; serviceHealth: string; location: string;
           apiVersion: string = "2016-05-01"): Recallable =
   ## serviceHealthsGet
@@ -342,19 +342,19 @@ proc call*(call_593985: Call_ServiceHealthsGet_593967; resourceGroupName: string
   ##                : Service Health name.
   ##   location: string (required)
   ##           : Name of the region
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  add(path_593986, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
-  add(path_593986, "serviceHealth", newJString(serviceHealth))
-  add(path_593986, "location", newJString(location))
-  result = call_593985.call(path_593986, query_593987, nil, nil, nil)
+  var path_575019 = newJObject()
+  var query_575020 = newJObject()
+  add(path_575019, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575020, "api-version", newJString(apiVersion))
+  add(path_575019, "subscriptionId", newJString(subscriptionId))
+  add(path_575019, "serviceHealth", newJString(serviceHealth))
+  add(path_575019, "location", newJString(location))
+  result = call_575018.call(path_575019, query_575020, nil, nil, nil)
 
-var serviceHealthsGet* = Call_ServiceHealthsGet_593967(name: "serviceHealthsGet",
+var serviceHealthsGet* = Call_ServiceHealthsGet_575000(name: "serviceHealthsGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.InfrastructureInsights.Admin/regionHealths/{location}/serviceHealths/{serviceHealth}",
-    validator: validate_ServiceHealthsGet_593968, base: "",
-    url: url_ServiceHealthsGet_593969, schemes: {Scheme.Https})
+    validator: validate_ServiceHealthsGet_575001, base: "",
+    url: url_ServiceHealthsGet_575002, schemes: {Scheme.Https})
 export
   rest
 

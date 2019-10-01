@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SubscriptionsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_574441 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574441](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574441): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-OfferDelegation"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OfferDelegationsList_593630 = ref object of OpenApiRestCall_593408
-proc url_OfferDelegationsList_593632(protocol: Scheme; host: string; base: string;
+  Call_OfferDelegationsList_574663 = ref object of OpenApiRestCall_574441
+proc url_OfferDelegationsList_574665(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +128,7 @@ proc url_OfferDelegationsList_593632(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OfferDelegationsList_593631(path: JsonNode; query: JsonNode;
+proc validate_OfferDelegationsList_574664(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the list of offer delegations.
   ## 
@@ -144,21 +144,21 @@ proc validate_OfferDelegationsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593792 = path.getOrDefault("resourceGroupName")
-  valid_593792 = validateParameter(valid_593792, JString, required = true,
+  var valid_574825 = path.getOrDefault("resourceGroupName")
+  valid_574825 = validateParameter(valid_574825, JString, required = true,
                                  default = nil)
-  if valid_593792 != nil:
-    section.add "resourceGroupName", valid_593792
-  var valid_593793 = path.getOrDefault("subscriptionId")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  if valid_574825 != nil:
+    section.add "resourceGroupName", valid_574825
+  var valid_574826 = path.getOrDefault("subscriptionId")
+  valid_574826 = validateParameter(valid_574826, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "subscriptionId", valid_593793
-  var valid_593794 = path.getOrDefault("offer")
-  valid_593794 = validateParameter(valid_593794, JString, required = true,
+  if valid_574826 != nil:
+    section.add "subscriptionId", valid_574826
+  var valid_574827 = path.getOrDefault("offer")
+  valid_574827 = validateParameter(valid_574827, JString, required = true,
                                  default = nil)
-  if valid_593794 != nil:
-    section.add "offer", valid_593794
+  if valid_574827 != nil:
+    section.add "offer", valid_574827
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -166,11 +166,11 @@ proc validate_OfferDelegationsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_574841 = query.getOrDefault("api-version")
+  valid_574841 = validateParameter(valid_574841, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_574841 != nil:
+    section.add "api-version", valid_574841
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -179,20 +179,20 @@ proc validate_OfferDelegationsList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593835: Call_OfferDelegationsList_593630; path: JsonNode;
+proc call*(call_574868: Call_OfferDelegationsList_574663; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the list of offer delegations.
   ## 
-  let valid = call_593835.validator(path, query, header, formData, body)
-  let scheme = call_593835.pickScheme
+  let valid = call_574868.validator(path, query, header, formData, body)
+  let scheme = call_574868.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593835.url(scheme.get, call_593835.host, call_593835.base,
-                         call_593835.route, valid.getOrDefault("path"),
+  let url = call_574868.url(scheme.get, call_574868.host, call_574868.base,
+                         call_574868.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593835, url, valid)
+  result = hook(call_574868, url, valid)
 
-proc call*(call_593906: Call_OfferDelegationsList_593630;
+proc call*(call_574939: Call_OfferDelegationsList_574663;
           resourceGroupName: string; subscriptionId: string; offer: string;
           apiVersion: string = "2015-11-01"): Recallable =
   ## offerDelegationsList
@@ -205,22 +205,22 @@ proc call*(call_593906: Call_OfferDelegationsList_593630;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   offer: string (required)
   ##        : Name of an offer.
-  var path_593907 = newJObject()
-  var query_593909 = newJObject()
-  add(path_593907, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593909, "api-version", newJString(apiVersion))
-  add(path_593907, "subscriptionId", newJString(subscriptionId))
-  add(path_593907, "offer", newJString(offer))
-  result = call_593906.call(path_593907, query_593909, nil, nil, nil)
+  var path_574940 = newJObject()
+  var query_574942 = newJObject()
+  add(path_574940, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574942, "api-version", newJString(apiVersion))
+  add(path_574940, "subscriptionId", newJString(subscriptionId))
+  add(path_574940, "offer", newJString(offer))
+  result = call_574939.call(path_574940, query_574942, nil, nil, nil)
 
-var offerDelegationsList* = Call_OfferDelegationsList_593630(
+var offerDelegationsList* = Call_OfferDelegationsList_574663(
     name: "offerDelegationsList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Subscriptions.Admin/offers/{offer}/offerDelegations",
-    validator: validate_OfferDelegationsList_593631, base: "",
-    url: url_OfferDelegationsList_593632, schemes: {Scheme.Https})
+    validator: validate_OfferDelegationsList_574664, base: "",
+    url: url_OfferDelegationsList_574665, schemes: {Scheme.Https})
 type
-  Call_OfferDelegationsCreateOrUpdate_593969 = ref object of OpenApiRestCall_593408
-proc url_OfferDelegationsCreateOrUpdate_593971(protocol: Scheme; host: string;
+  Call_OfferDelegationsCreateOrUpdate_575002 = ref object of OpenApiRestCall_574441
+proc url_OfferDelegationsCreateOrUpdate_575004(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -247,7 +247,7 @@ proc url_OfferDelegationsCreateOrUpdate_593971(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OfferDelegationsCreateOrUpdate_593970(path: JsonNode;
+proc validate_OfferDelegationsCreateOrUpdate_575003(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update the offer delegation.
   ## 
@@ -265,26 +265,26 @@ proc validate_OfferDelegationsCreateOrUpdate_593970(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593972 = path.getOrDefault("resourceGroupName")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_575005 = path.getOrDefault("resourceGroupName")
+  valid_575005 = validateParameter(valid_575005, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "resourceGroupName", valid_593972
-  var valid_593973 = path.getOrDefault("subscriptionId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  if valid_575005 != nil:
+    section.add "resourceGroupName", valid_575005
+  var valid_575006 = path.getOrDefault("subscriptionId")
+  valid_575006 = validateParameter(valid_575006, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "subscriptionId", valid_593973
-  var valid_593974 = path.getOrDefault("offerDelegationName")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  if valid_575006 != nil:
+    section.add "subscriptionId", valid_575006
+  var valid_575007 = path.getOrDefault("offerDelegationName")
+  valid_575007 = validateParameter(valid_575007, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "offerDelegationName", valid_593974
-  var valid_593975 = path.getOrDefault("offer")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  if valid_575007 != nil:
+    section.add "offerDelegationName", valid_575007
+  var valid_575008 = path.getOrDefault("offer")
+  valid_575008 = validateParameter(valid_575008, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "offer", valid_593975
+  if valid_575008 != nil:
+    section.add "offer", valid_575008
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -292,11 +292,11 @@ proc validate_OfferDelegationsCreateOrUpdate_593970(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593976 = query.getOrDefault("api-version")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_575009 = query.getOrDefault("api-version")
+  valid_575009 = validateParameter(valid_575009, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_593976 != nil:
-    section.add "api-version", valid_593976
+  if valid_575009 != nil:
+    section.add "api-version", valid_575009
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -310,20 +310,20 @@ proc validate_OfferDelegationsCreateOrUpdate_593970(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593978: Call_OfferDelegationsCreateOrUpdate_593969; path: JsonNode;
+proc call*(call_575011: Call_OfferDelegationsCreateOrUpdate_575002; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update the offer delegation.
   ## 
-  let valid = call_593978.validator(path, query, header, formData, body)
-  let scheme = call_593978.pickScheme
+  let valid = call_575011.validator(path, query, header, formData, body)
+  let scheme = call_575011.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593978.url(scheme.get, call_593978.host, call_593978.base,
-                         call_593978.route, valid.getOrDefault("path"),
+  let url = call_575011.url(scheme.get, call_575011.host, call_575011.base,
+                         call_575011.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593978, url, valid)
+  result = hook(call_575011, url, valid)
 
-proc call*(call_593979: Call_OfferDelegationsCreateOrUpdate_593969;
+proc call*(call_575012: Call_OfferDelegationsCreateOrUpdate_575002;
           resourceGroupName: string; newOfferDelegation: JsonNode;
           subscriptionId: string; offerDelegationName: string; offer: string;
           apiVersion: string = "2015-11-01"): Recallable =
@@ -341,26 +341,26 @@ proc call*(call_593979: Call_OfferDelegationsCreateOrUpdate_593969;
   ##                      : Name of a offer delegation.
   ##   offer: string (required)
   ##        : Name of an offer.
-  var path_593980 = newJObject()
-  var query_593981 = newJObject()
-  var body_593982 = newJObject()
-  add(path_593980, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593981, "api-version", newJString(apiVersion))
+  var path_575013 = newJObject()
+  var query_575014 = newJObject()
+  var body_575015 = newJObject()
+  add(path_575013, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575014, "api-version", newJString(apiVersion))
   if newOfferDelegation != nil:
-    body_593982 = newOfferDelegation
-  add(path_593980, "subscriptionId", newJString(subscriptionId))
-  add(path_593980, "offerDelegationName", newJString(offerDelegationName))
-  add(path_593980, "offer", newJString(offer))
-  result = call_593979.call(path_593980, query_593981, nil, nil, body_593982)
+    body_575015 = newOfferDelegation
+  add(path_575013, "subscriptionId", newJString(subscriptionId))
+  add(path_575013, "offerDelegationName", newJString(offerDelegationName))
+  add(path_575013, "offer", newJString(offer))
+  result = call_575012.call(path_575013, query_575014, nil, nil, body_575015)
 
-var offerDelegationsCreateOrUpdate* = Call_OfferDelegationsCreateOrUpdate_593969(
+var offerDelegationsCreateOrUpdate* = Call_OfferDelegationsCreateOrUpdate_575002(
     name: "offerDelegationsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Subscriptions.Admin/offers/{offer}/offerDelegations/{offerDelegationName}",
-    validator: validate_OfferDelegationsCreateOrUpdate_593970, base: "",
-    url: url_OfferDelegationsCreateOrUpdate_593971, schemes: {Scheme.Https})
+    validator: validate_OfferDelegationsCreateOrUpdate_575003, base: "",
+    url: url_OfferDelegationsCreateOrUpdate_575004, schemes: {Scheme.Https})
 type
-  Call_OfferDelegationsGet_593948 = ref object of OpenApiRestCall_593408
-proc url_OfferDelegationsGet_593950(protocol: Scheme; host: string; base: string;
+  Call_OfferDelegationsGet_574981 = ref object of OpenApiRestCall_574441
+proc url_OfferDelegationsGet_574983(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -387,7 +387,7 @@ proc url_OfferDelegationsGet_593950(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OfferDelegationsGet_593949(path: JsonNode; query: JsonNode;
+proc validate_OfferDelegationsGet_574982(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get the specified offer delegation.
@@ -406,26 +406,26 @@ proc validate_OfferDelegationsGet_593949(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593960 = path.getOrDefault("resourceGroupName")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_574993 = path.getOrDefault("resourceGroupName")
+  valid_574993 = validateParameter(valid_574993, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "resourceGroupName", valid_593960
-  var valid_593961 = path.getOrDefault("subscriptionId")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  if valid_574993 != nil:
+    section.add "resourceGroupName", valid_574993
+  var valid_574994 = path.getOrDefault("subscriptionId")
+  valid_574994 = validateParameter(valid_574994, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "subscriptionId", valid_593961
-  var valid_593962 = path.getOrDefault("offerDelegationName")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_574994 != nil:
+    section.add "subscriptionId", valid_574994
+  var valid_574995 = path.getOrDefault("offerDelegationName")
+  valid_574995 = validateParameter(valid_574995, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "offerDelegationName", valid_593962
-  var valid_593963 = path.getOrDefault("offer")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_574995 != nil:
+    section.add "offerDelegationName", valid_574995
+  var valid_574996 = path.getOrDefault("offer")
+  valid_574996 = validateParameter(valid_574996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "offer", valid_593963
+  if valid_574996 != nil:
+    section.add "offer", valid_574996
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -433,11 +433,11 @@ proc validate_OfferDelegationsGet_593949(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593964 = query.getOrDefault("api-version")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_574997 = query.getOrDefault("api-version")
+  valid_574997 = validateParameter(valid_574997, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_593964 != nil:
-    section.add "api-version", valid_593964
+  if valid_574997 != nil:
+    section.add "api-version", valid_574997
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -446,20 +446,20 @@ proc validate_OfferDelegationsGet_593949(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593965: Call_OfferDelegationsGet_593948; path: JsonNode;
+proc call*(call_574998: Call_OfferDelegationsGet_574981; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the specified offer delegation.
   ## 
-  let valid = call_593965.validator(path, query, header, formData, body)
-  let scheme = call_593965.pickScheme
+  let valid = call_574998.validator(path, query, header, formData, body)
+  let scheme = call_574998.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593965.url(scheme.get, call_593965.host, call_593965.base,
-                         call_593965.route, valid.getOrDefault("path"),
+  let url = call_574998.url(scheme.get, call_574998.host, call_574998.base,
+                         call_574998.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593965, url, valid)
+  result = hook(call_574998, url, valid)
 
-proc call*(call_593966: Call_OfferDelegationsGet_593948; resourceGroupName: string;
+proc call*(call_574999: Call_OfferDelegationsGet_574981; resourceGroupName: string;
           subscriptionId: string; offerDelegationName: string; offer: string;
           apiVersion: string = "2015-11-01"): Recallable =
   ## offerDelegationsGet
@@ -474,23 +474,23 @@ proc call*(call_593966: Call_OfferDelegationsGet_593948; resourceGroupName: stri
   ##                      : Name of a offer delegation.
   ##   offer: string (required)
   ##        : Name of an offer.
-  var path_593967 = newJObject()
-  var query_593968 = newJObject()
-  add(path_593967, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593968, "api-version", newJString(apiVersion))
-  add(path_593967, "subscriptionId", newJString(subscriptionId))
-  add(path_593967, "offerDelegationName", newJString(offerDelegationName))
-  add(path_593967, "offer", newJString(offer))
-  result = call_593966.call(path_593967, query_593968, nil, nil, nil)
+  var path_575000 = newJObject()
+  var query_575001 = newJObject()
+  add(path_575000, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575001, "api-version", newJString(apiVersion))
+  add(path_575000, "subscriptionId", newJString(subscriptionId))
+  add(path_575000, "offerDelegationName", newJString(offerDelegationName))
+  add(path_575000, "offer", newJString(offer))
+  result = call_574999.call(path_575000, query_575001, nil, nil, nil)
 
-var offerDelegationsGet* = Call_OfferDelegationsGet_593948(
+var offerDelegationsGet* = Call_OfferDelegationsGet_574981(
     name: "offerDelegationsGet", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Subscriptions.Admin/offers/{offer}/offerDelegations/{offerDelegationName}",
-    validator: validate_OfferDelegationsGet_593949, base: "",
-    url: url_OfferDelegationsGet_593950, schemes: {Scheme.Https})
+    validator: validate_OfferDelegationsGet_574982, base: "",
+    url: url_OfferDelegationsGet_574983, schemes: {Scheme.Https})
 type
-  Call_OfferDelegationsDelete_593983 = ref object of OpenApiRestCall_593408
-proc url_OfferDelegationsDelete_593985(protocol: Scheme; host: string; base: string;
+  Call_OfferDelegationsDelete_575016 = ref object of OpenApiRestCall_574441
+proc url_OfferDelegationsDelete_575018(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -517,7 +517,7 @@ proc url_OfferDelegationsDelete_593985(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OfferDelegationsDelete_593984(path: JsonNode; query: JsonNode;
+proc validate_OfferDelegationsDelete_575017(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the specified offer delegation.
   ## 
@@ -535,26 +535,26 @@ proc validate_OfferDelegationsDelete_593984(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593986 = path.getOrDefault("resourceGroupName")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  var valid_575019 = path.getOrDefault("resourceGroupName")
+  valid_575019 = validateParameter(valid_575019, JString, required = true,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "resourceGroupName", valid_593986
-  var valid_593987 = path.getOrDefault("subscriptionId")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+  if valid_575019 != nil:
+    section.add "resourceGroupName", valid_575019
+  var valid_575020 = path.getOrDefault("subscriptionId")
+  valid_575020 = validateParameter(valid_575020, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "subscriptionId", valid_593987
-  var valid_593988 = path.getOrDefault("offerDelegationName")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  if valid_575020 != nil:
+    section.add "subscriptionId", valid_575020
+  var valid_575021 = path.getOrDefault("offerDelegationName")
+  valid_575021 = validateParameter(valid_575021, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "offerDelegationName", valid_593988
-  var valid_593989 = path.getOrDefault("offer")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_575021 != nil:
+    section.add "offerDelegationName", valid_575021
+  var valid_575022 = path.getOrDefault("offer")
+  valid_575022 = validateParameter(valid_575022, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "offer", valid_593989
+  if valid_575022 != nil:
+    section.add "offer", valid_575022
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -562,11 +562,11 @@ proc validate_OfferDelegationsDelete_593984(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593990 = query.getOrDefault("api-version")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_575023 = query.getOrDefault("api-version")
+  valid_575023 = validateParameter(valid_575023, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_593990 != nil:
-    section.add "api-version", valid_593990
+  if valid_575023 != nil:
+    section.add "api-version", valid_575023
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -575,20 +575,20 @@ proc validate_OfferDelegationsDelete_593984(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593991: Call_OfferDelegationsDelete_593983; path: JsonNode;
+proc call*(call_575024: Call_OfferDelegationsDelete_575016; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the specified offer delegation.
   ## 
-  let valid = call_593991.validator(path, query, header, formData, body)
-  let scheme = call_593991.pickScheme
+  let valid = call_575024.validator(path, query, header, formData, body)
+  let scheme = call_575024.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593991.url(scheme.get, call_593991.host, call_593991.base,
-                         call_593991.route, valid.getOrDefault("path"),
+  let url = call_575024.url(scheme.get, call_575024.host, call_575024.base,
+                         call_575024.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593991, url, valid)
+  result = hook(call_575024, url, valid)
 
-proc call*(call_593992: Call_OfferDelegationsDelete_593983;
+proc call*(call_575025: Call_OfferDelegationsDelete_575016;
           resourceGroupName: string; subscriptionId: string;
           offerDelegationName: string; offer: string;
           apiVersion: string = "2015-11-01"): Recallable =
@@ -604,20 +604,20 @@ proc call*(call_593992: Call_OfferDelegationsDelete_593983;
   ##                      : Name of a offer delegation.
   ##   offer: string (required)
   ##        : Name of an offer.
-  var path_593993 = newJObject()
-  var query_593994 = newJObject()
-  add(path_593993, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593994, "api-version", newJString(apiVersion))
-  add(path_593993, "subscriptionId", newJString(subscriptionId))
-  add(path_593993, "offerDelegationName", newJString(offerDelegationName))
-  add(path_593993, "offer", newJString(offer))
-  result = call_593992.call(path_593993, query_593994, nil, nil, nil)
+  var path_575026 = newJObject()
+  var query_575027 = newJObject()
+  add(path_575026, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575027, "api-version", newJString(apiVersion))
+  add(path_575026, "subscriptionId", newJString(subscriptionId))
+  add(path_575026, "offerDelegationName", newJString(offerDelegationName))
+  add(path_575026, "offer", newJString(offer))
+  result = call_575025.call(path_575026, query_575027, nil, nil, nil)
 
-var offerDelegationsDelete* = Call_OfferDelegationsDelete_593983(
+var offerDelegationsDelete* = Call_OfferDelegationsDelete_575016(
     name: "offerDelegationsDelete", meth: HttpMethod.HttpDelete,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Subscriptions.Admin/offers/{offer}/offerDelegations/{offerDelegationName}",
-    validator: validate_OfferDelegationsDelete_593984, base: "",
-    url: url_OfferDelegationsDelete_593985, schemes: {Scheme.Https})
+    validator: validate_OfferDelegationsDelete_575017, base: "",
+    url: url_OfferDelegationsDelete_575018, schemes: {Scheme.Https})
 export
   rest
 

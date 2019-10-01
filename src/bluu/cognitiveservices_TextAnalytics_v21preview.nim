@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Text Analytics Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "cognitiveservices-TextAnalytics"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_Entities_593647 = ref object of OpenApiRestCall_593425
-proc url_Entities_593649(protocol: Scheme; host: string; base: string; route: string;
+  Call_Entities_567880 = ref object of OpenApiRestCall_567658
+proc url_Entities_567882(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_Entities_593648(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_Entities_567881(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## The API returns a list of recognized entities in a given document. To get even more information on each recognized entity we recommend using the Bing Entity Search API by querying for the recognized entities names. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/text-analytics-supported-languages">Supported languages in Text Analytics API</a> for the list of enabled languages.The API returns a list of known entities and general named entities ("Person", "Location", "Organization" etc) in a given document. Known entities are returned with Wikipedia Id and Wikipedia link, and also Bing Id which can be used in Bing Entity Search API. General named entities are returned with entity types. If a general named entity is also a known entity, then all information regarding it (Wikipedia Id, Bing Id, entity type etc) will be returned. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/how-tos/text-analytics-how-to-entity-linking#supported-types-for-named-entity-recognition">Supported Entity Types in Text Analytics API</a> for the list of supported Entity Types. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/text-analytics-supported-languages">Supported languages in Text Analytics API</a> for the list of enabled languages.
   ## 
@@ -133,44 +133,44 @@ proc validate_Entities_593648(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593831: Call_Entities_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568064: Call_Entities_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The API returns a list of recognized entities in a given document. To get even more information on each recognized entity we recommend using the Bing Entity Search API by querying for the recognized entities names. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/text-analytics-supported-languages">Supported languages in Text Analytics API</a> for the list of enabled languages.The API returns a list of known entities and general named entities ("Person", "Location", "Organization" etc) in a given document. Known entities are returned with Wikipedia Id and Wikipedia link, and also Bing Id which can be used in Bing Entity Search API. General named entities are returned with entity types. If a general named entity is also a known entity, then all information regarding it (Wikipedia Id, Bing Id, entity type etc) will be returned. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/how-tos/text-analytics-how-to-entity-linking#supported-types-for-named-entity-recognition">Supported Entity Types in Text Analytics API</a> for the list of supported Entity Types. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/text-analytics-supported-languages">Supported languages in Text Analytics API</a> for the list of enabled languages.
   ## 
-  let valid = call_593831.validator(path, query, header, formData, body)
-  let scheme = call_593831.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593831.url(scheme.get, call_593831.host, call_593831.base,
-                         call_593831.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593831, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593902: Call_Entities_593647; input: JsonNode): Recallable =
+proc call*(call_568135: Call_Entities_567880; input: JsonNode): Recallable =
   ## entities
   ## The API returns a list of recognized entities in a given document. To get even more information on each recognized entity we recommend using the Bing Entity Search API by querying for the recognized entities names. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/text-analytics-supported-languages">Supported languages in Text Analytics API</a> for the list of enabled languages.The API returns a list of known entities and general named entities ("Person", "Location", "Organization" etc) in a given document. Known entities are returned with Wikipedia Id and Wikipedia link, and also Bing Id which can be used in Bing Entity Search API. General named entities are returned with entity types. If a general named entity is also a known entity, then all information regarding it (Wikipedia Id, Bing Id, entity type etc) will be returned. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/how-tos/text-analytics-how-to-entity-linking#supported-types-for-named-entity-recognition">Supported Entity Types in Text Analytics API</a> for the list of supported Entity Types. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/text-analytics-supported-languages">Supported languages in Text Analytics API</a> for the list of enabled languages.
   ##   input: JObject (required)
   ##        : Collection of documents to analyze.
-  var body_593903 = newJObject()
+  var body_568136 = newJObject()
   if input != nil:
-    body_593903 = input
-  result = call_593902.call(nil, nil, nil, nil, body_593903)
+    body_568136 = input
+  result = call_568135.call(nil, nil, nil, nil, body_568136)
 
-var entities* = Call_Entities_593647(name: "entities", meth: HttpMethod.HttpPost,
+var entities* = Call_Entities_567880(name: "entities", meth: HttpMethod.HttpPost,
                                   host: "azure.local", route: "/entities",
-                                  validator: validate_Entities_593648, base: "",
-                                  url: url_Entities_593649,
+                                  validator: validate_Entities_567881, base: "",
+                                  url: url_Entities_567882,
                                   schemes: {Scheme.Https})
 type
-  Call_KeyPhrases_593942 = ref object of OpenApiRestCall_593425
-proc url_KeyPhrases_593944(protocol: Scheme; host: string; base: string; route: string;
+  Call_KeyPhrases_568175 = ref object of OpenApiRestCall_567658
+proc url_KeyPhrases_568177(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_KeyPhrases_593943(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_KeyPhrases_568176(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by key phrase extraction.
   ## 
@@ -192,45 +192,45 @@ proc validate_KeyPhrases_593943(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593946: Call_KeyPhrases_593942; path: JsonNode; query: JsonNode;
+proc call*(call_568179: Call_KeyPhrases_568175; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by key phrase extraction.
   ## 
-  let valid = call_593946.validator(path, query, header, formData, body)
-  let scheme = call_593946.pickScheme
+  let valid = call_568179.validator(path, query, header, formData, body)
+  let scheme = call_568179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593946.url(scheme.get, call_593946.host, call_593946.base,
-                         call_593946.route, valid.getOrDefault("path"),
+  let url = call_568179.url(scheme.get, call_568179.host, call_568179.base,
+                         call_568179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593946, url, valid)
+  result = hook(call_568179, url, valid)
 
-proc call*(call_593947: Call_KeyPhrases_593942; input: JsonNode): Recallable =
+proc call*(call_568180: Call_KeyPhrases_568175; input: JsonNode): Recallable =
   ## keyPhrases
   ## See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by key phrase extraction.
   ##   input: JObject (required)
   ##        : Collection of documents to analyze. Documents can now contain a language field to indicate the text language
-  var body_593948 = newJObject()
+  var body_568181 = newJObject()
   if input != nil:
-    body_593948 = input
-  result = call_593947.call(nil, nil, nil, nil, body_593948)
+    body_568181 = input
+  result = call_568180.call(nil, nil, nil, nil, body_568181)
 
-var keyPhrases* = Call_KeyPhrases_593942(name: "keyPhrases",
+var keyPhrases* = Call_KeyPhrases_568175(name: "keyPhrases",
                                       meth: HttpMethod.HttpPost,
                                       host: "azure.local", route: "/keyPhrases",
-                                      validator: validate_KeyPhrases_593943,
-                                      base: "", url: url_KeyPhrases_593944,
+                                      validator: validate_KeyPhrases_568176,
+                                      base: "", url: url_KeyPhrases_568177,
                                       schemes: {Scheme.Https})
 type
-  Call_DetectLanguage_593949 = ref object of OpenApiRestCall_593425
-proc url_DetectLanguage_593951(protocol: Scheme; host: string; base: string;
+  Call_DetectLanguage_568182 = ref object of OpenApiRestCall_567658
+proc url_DetectLanguage_568184(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DetectLanguage_593950(path: JsonNode; query: JsonNode;
+proc validate_DetectLanguage_568183(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Scores close to 1 indicate 100% certainty that the identified language is true. A total of 120 languages are supported.
@@ -253,43 +253,43 @@ proc validate_DetectLanguage_593950(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593953: Call_DetectLanguage_593949; path: JsonNode; query: JsonNode;
+proc call*(call_568186: Call_DetectLanguage_568182; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Scores close to 1 indicate 100% certainty that the identified language is true. A total of 120 languages are supported.
   ## 
-  let valid = call_593953.validator(path, query, header, formData, body)
-  let scheme = call_593953.pickScheme
+  let valid = call_568186.validator(path, query, header, formData, body)
+  let scheme = call_568186.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593953.url(scheme.get, call_593953.host, call_593953.base,
-                         call_593953.route, valid.getOrDefault("path"),
+  let url = call_568186.url(scheme.get, call_568186.host, call_568186.base,
+                         call_568186.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593953, url, valid)
+  result = hook(call_568186, url, valid)
 
-proc call*(call_593954: Call_DetectLanguage_593949; input: JsonNode): Recallable =
+proc call*(call_568187: Call_DetectLanguage_568182; input: JsonNode): Recallable =
   ## detectLanguage
   ## Scores close to 1 indicate 100% certainty that the identified language is true. A total of 120 languages are supported.
   ##   input: JObject (required)
   ##        : Collection of documents to analyze.
-  var body_593955 = newJObject()
+  var body_568188 = newJObject()
   if input != nil:
-    body_593955 = input
-  result = call_593954.call(nil, nil, nil, nil, body_593955)
+    body_568188 = input
+  result = call_568187.call(nil, nil, nil, nil, body_568188)
 
-var detectLanguage* = Call_DetectLanguage_593949(name: "detectLanguage",
+var detectLanguage* = Call_DetectLanguage_568182(name: "detectLanguage",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/languages",
-    validator: validate_DetectLanguage_593950, base: "", url: url_DetectLanguage_593951,
+    validator: validate_DetectLanguage_568183, base: "", url: url_DetectLanguage_568184,
     schemes: {Scheme.Https})
 type
-  Call_Sentiment_593956 = ref object of OpenApiRestCall_593425
-proc url_Sentiment_593958(protocol: Scheme; host: string; base: string; route: string;
+  Call_Sentiment_568189 = ref object of OpenApiRestCall_567658
+proc url_Sentiment_568191(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_Sentiment_593957(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_Sentiment_568190(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment. A score of 0.5 indicates the lack of sentiment (e.g. a factoid statement). See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by sentiment analysis.
   ## 
@@ -311,33 +311,33 @@ proc validate_Sentiment_593957(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593960: Call_Sentiment_593956; path: JsonNode; query: JsonNode;
+proc call*(call_568193: Call_Sentiment_568189; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment. A score of 0.5 indicates the lack of sentiment (e.g. a factoid statement). See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by sentiment analysis.
   ## 
-  let valid = call_593960.validator(path, query, header, formData, body)
-  let scheme = call_593960.pickScheme
+  let valid = call_568193.validator(path, query, header, formData, body)
+  let scheme = call_568193.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593960.url(scheme.get, call_593960.host, call_593960.base,
-                         call_593960.route, valid.getOrDefault("path"),
+  let url = call_568193.url(scheme.get, call_568193.host, call_568193.base,
+                         call_568193.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593960, url, valid)
+  result = hook(call_568193, url, valid)
 
-proc call*(call_593961: Call_Sentiment_593956; input: JsonNode): Recallable =
+proc call*(call_568194: Call_Sentiment_568189; input: JsonNode): Recallable =
   ## sentiment
   ## Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment. A score of 0.5 indicates the lack of sentiment (e.g. a factoid statement). See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by sentiment analysis.
   ##   input: JObject (required)
   ##        : Collection of documents to analyze.
-  var body_593962 = newJObject()
+  var body_568195 = newJObject()
   if input != nil:
-    body_593962 = input
-  result = call_593961.call(nil, nil, nil, nil, body_593962)
+    body_568195 = input
+  result = call_568194.call(nil, nil, nil, nil, body_568195)
 
-var sentiment* = Call_Sentiment_593956(name: "sentiment", meth: HttpMethod.HttpPost,
+var sentiment* = Call_Sentiment_568189(name: "sentiment", meth: HttpMethod.HttpPost,
                                     host: "azure.local", route: "/sentiment",
-                                    validator: validate_Sentiment_593957,
-                                    base: "", url: url_Sentiment_593958,
+                                    validator: validate_Sentiment_568190,
+                                    base: "", url: url_Sentiment_568191,
                                     schemes: {Scheme.Https})
 export
   rest

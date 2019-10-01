@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SearchManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "search"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServicesList_593630 = ref object of OpenApiRestCall_593408
-proc url_ServicesList_593632(protocol: Scheme; host: string; base: string;
+  Call_ServicesList_567863 = ref object of OpenApiRestCall_567641
+proc url_ServicesList_567865(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +124,7 @@ proc url_ServicesList_593632(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesList_593631(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServicesList_567864(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of all Search services in the given resource group.
   ## 
@@ -139,16 +139,16 @@ proc validate_ServicesList_593631(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593805 = path.getOrDefault("resourceGroupName")
-  valid_593805 = validateParameter(valid_593805, JString, required = true,
+  var valid_568038 = path.getOrDefault("resourceGroupName")
+  valid_568038 = validateParameter(valid_568038, JString, required = true,
                                  default = nil)
-  if valid_593805 != nil:
-    section.add "resourceGroupName", valid_593805
-  var valid_593806 = path.getOrDefault("subscriptionId")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  if valid_568038 != nil:
+    section.add "resourceGroupName", valid_568038
+  var valid_568039 = path.getOrDefault("subscriptionId")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "subscriptionId", valid_593806
+  if valid_568039 != nil:
+    section.add "subscriptionId", valid_568039
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -156,11 +156,11 @@ proc validate_ServicesList_593631(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_568040 = query.getOrDefault("api-version")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_568040 != nil:
+    section.add "api-version", valid_568040
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -169,21 +169,21 @@ proc validate_ServicesList_593631(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593830: Call_ServicesList_593630; path: JsonNode; query: JsonNode;
+proc call*(call_568063: Call_ServicesList_567863; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all Search services in the given resource group.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn832688.aspx
-  let valid = call_593830.validator(path, query, header, formData, body)
-  let scheme = call_593830.pickScheme
+  let valid = call_568063.validator(path, query, header, formData, body)
+  let scheme = call_568063.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593830.url(scheme.get, call_593830.host, call_593830.base,
-                         call_593830.route, valid.getOrDefault("path"),
+  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
+                         call_568063.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593830, url, valid)
+  result = hook(call_568063, url, valid)
 
-proc call*(call_593901: Call_ServicesList_593630; resourceGroupName: string;
+proc call*(call_568134: Call_ServicesList_567863; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## servicesList
   ## Returns a list of all Search services in the given resource group.
@@ -194,20 +194,20 @@ proc call*(call_593901: Call_ServicesList_593630; resourceGroupName: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593902 = newJObject()
-  var query_593904 = newJObject()
-  add(path_593902, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593904, "api-version", newJString(apiVersion))
-  add(path_593902, "subscriptionId", newJString(subscriptionId))
-  result = call_593901.call(path_593902, query_593904, nil, nil, nil)
+  var path_568135 = newJObject()
+  var query_568137 = newJObject()
+  add(path_568135, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568137, "api-version", newJString(apiVersion))
+  add(path_568135, "subscriptionId", newJString(subscriptionId))
+  result = call_568134.call(path_568135, query_568137, nil, nil, nil)
 
-var servicesList* = Call_ServicesList_593630(name: "servicesList",
+var servicesList* = Call_ServicesList_567863(name: "servicesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices",
-    validator: validate_ServicesList_593631, base: "", url: url_ServicesList_593632,
+    validator: validate_ServicesList_567864, base: "", url: url_ServicesList_567865,
     schemes: {Scheme.Https})
 type
-  Call_ServicesCreateOrUpdate_593943 = ref object of OpenApiRestCall_593408
-proc url_ServicesCreateOrUpdate_593945(protocol: Scheme; host: string; base: string;
+  Call_ServicesCreateOrUpdate_568176 = ref object of OpenApiRestCall_567641
+proc url_ServicesCreateOrUpdate_568178(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -230,7 +230,7 @@ proc url_ServicesCreateOrUpdate_593945(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesCreateOrUpdate_593944(path: JsonNode; query: JsonNode;
+proc validate_ServicesCreateOrUpdate_568177(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a Search service in the given resource group. If the Search service already exists, all properties will be updated with the given values.
   ## 
@@ -247,21 +247,21 @@ proc validate_ServicesCreateOrUpdate_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593963 = path.getOrDefault("resourceGroupName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = path.getOrDefault("resourceGroupName")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "resourceGroupName", valid_593963
-  var valid_593964 = path.getOrDefault("subscriptionId")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_568196 != nil:
+    section.add "resourceGroupName", valid_568196
+  var valid_568197 = path.getOrDefault("subscriptionId")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "subscriptionId", valid_593964
-  var valid_593965 = path.getOrDefault("serviceName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "subscriptionId", valid_568197
+  var valid_568198 = path.getOrDefault("serviceName")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "serviceName", valid_593965
+  if valid_568198 != nil:
+    section.add "serviceName", valid_568198
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -269,11 +269,11 @@ proc validate_ServicesCreateOrUpdate_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593966 = query.getOrDefault("api-version")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_568199 = query.getOrDefault("api-version")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "api-version", valid_593966
+  if valid_568199 != nil:
+    section.add "api-version", valid_568199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -287,21 +287,21 @@ proc validate_ServicesCreateOrUpdate_593944(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_ServicesCreateOrUpdate_593943; path: JsonNode;
+proc call*(call_568201: Call_ServicesCreateOrUpdate_568176; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a Search service in the given resource group. If the Search service already exists, all properties will be updated with the given values.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn832687.aspx
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_568201.validator(path, query, header, formData, body)
+  let scheme = call_568201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
+                         call_568201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_568201, url, valid)
 
-proc call*(call_593969: Call_ServicesCreateOrUpdate_593943;
+proc call*(call_568202: Call_ServicesCreateOrUpdate_568176;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; serviceName: string): Recallable =
   ## servicesCreateOrUpdate
@@ -317,25 +317,25 @@ proc call*(call_593969: Call_ServicesCreateOrUpdate_593943;
   ##             : The properties to set or update on the Search service.
   ##   serviceName: string (required)
   ##              : The name of the Search service to create or update.
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  var body_593972 = newJObject()
-  add(path_593970, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(path_593970, "subscriptionId", newJString(subscriptionId))
+  var path_568203 = newJObject()
+  var query_568204 = newJObject()
+  var body_568205 = newJObject()
+  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568204, "api-version", newJString(apiVersion))
+  add(path_568203, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593972 = parameters
-  add(path_593970, "serviceName", newJString(serviceName))
-  result = call_593969.call(path_593970, query_593971, nil, nil, body_593972)
+    body_568205 = parameters
+  add(path_568203, "serviceName", newJString(serviceName))
+  result = call_568202.call(path_568203, query_568204, nil, nil, body_568205)
 
-var servicesCreateOrUpdate* = Call_ServicesCreateOrUpdate_593943(
+var servicesCreateOrUpdate* = Call_ServicesCreateOrUpdate_568176(
     name: "servicesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{serviceName}",
-    validator: validate_ServicesCreateOrUpdate_593944, base: "",
-    url: url_ServicesCreateOrUpdate_593945, schemes: {Scheme.Https})
+    validator: validate_ServicesCreateOrUpdate_568177, base: "",
+    url: url_ServicesCreateOrUpdate_568178, schemes: {Scheme.Https})
 type
-  Call_ServicesDelete_593973 = ref object of OpenApiRestCall_593408
-proc url_ServicesDelete_593975(protocol: Scheme; host: string; base: string;
+  Call_ServicesDelete_568206 = ref object of OpenApiRestCall_567641
+proc url_ServicesDelete_568208(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -358,7 +358,7 @@ proc url_ServicesDelete_593975(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesDelete_593974(path: JsonNode; query: JsonNode;
+proc validate_ServicesDelete_568207(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes a Search service in the given resource group, along with its associated resources.
@@ -376,21 +376,21 @@ proc validate_ServicesDelete_593974(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593976 = path.getOrDefault("resourceGroupName")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_568209 = path.getOrDefault("resourceGroupName")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "resourceGroupName", valid_593976
-  var valid_593977 = path.getOrDefault("subscriptionId")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_568209 != nil:
+    section.add "resourceGroupName", valid_568209
+  var valid_568210 = path.getOrDefault("subscriptionId")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "subscriptionId", valid_593977
-  var valid_593978 = path.getOrDefault("serviceName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  if valid_568210 != nil:
+    section.add "subscriptionId", valid_568210
+  var valid_568211 = path.getOrDefault("serviceName")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "serviceName", valid_593978
+  if valid_568211 != nil:
+    section.add "serviceName", valid_568211
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -398,11 +398,11 @@ proc validate_ServicesDelete_593974(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593979 = query.getOrDefault("api-version")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_568212 = query.getOrDefault("api-version")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "api-version", valid_593979
+  if valid_568212 != nil:
+    section.add "api-version", valid_568212
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -411,21 +411,21 @@ proc validate_ServicesDelete_593974(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593980: Call_ServicesDelete_593973; path: JsonNode; query: JsonNode;
+proc call*(call_568213: Call_ServicesDelete_568206; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Search service in the given resource group, along with its associated resources.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn832692.aspx
-  let valid = call_593980.validator(path, query, header, formData, body)
-  let scheme = call_593980.pickScheme
+  let valid = call_568213.validator(path, query, header, formData, body)
+  let scheme = call_568213.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593980.url(scheme.get, call_593980.host, call_593980.base,
-                         call_593980.route, valid.getOrDefault("path"),
+  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
+                         call_568213.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593980, url, valid)
+  result = hook(call_568213, url, valid)
 
-proc call*(call_593981: Call_ServicesDelete_593973; resourceGroupName: string;
+proc call*(call_568214: Call_ServicesDelete_568206; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; serviceName: string): Recallable =
   ## servicesDelete
   ## Deletes a Search service in the given resource group, along with its associated resources.
@@ -438,21 +438,21 @@ proc call*(call_593981: Call_ServicesDelete_593973; resourceGroupName: string;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the Search service to delete.
-  var path_593982 = newJObject()
-  var query_593983 = newJObject()
-  add(path_593982, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593983, "api-version", newJString(apiVersion))
-  add(path_593982, "subscriptionId", newJString(subscriptionId))
-  add(path_593982, "serviceName", newJString(serviceName))
-  result = call_593981.call(path_593982, query_593983, nil, nil, nil)
+  var path_568215 = newJObject()
+  var query_568216 = newJObject()
+  add(path_568215, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568216, "api-version", newJString(apiVersion))
+  add(path_568215, "subscriptionId", newJString(subscriptionId))
+  add(path_568215, "serviceName", newJString(serviceName))
+  result = call_568214.call(path_568215, query_568216, nil, nil, nil)
 
-var servicesDelete* = Call_ServicesDelete_593973(name: "servicesDelete",
+var servicesDelete* = Call_ServicesDelete_568206(name: "servicesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{serviceName}",
-    validator: validate_ServicesDelete_593974, base: "", url: url_ServicesDelete_593975,
+    validator: validate_ServicesDelete_568207, base: "", url: url_ServicesDelete_568208,
     schemes: {Scheme.Https})
 type
-  Call_AdminKeysList_593984 = ref object of OpenApiRestCall_593408
-proc url_AdminKeysList_593986(protocol: Scheme; host: string; base: string;
+  Call_AdminKeysList_568217 = ref object of OpenApiRestCall_567641
+proc url_AdminKeysList_568219(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -476,7 +476,7 @@ proc url_AdminKeysList_593986(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AdminKeysList_593985(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AdminKeysList_568218(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the primary and secondary API keys for the given Azure Search service.
   ## 
@@ -493,21 +493,21 @@ proc validate_AdminKeysList_593985(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593987 = path.getOrDefault("resourceGroupName")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+  var valid_568220 = path.getOrDefault("resourceGroupName")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "resourceGroupName", valid_593987
-  var valid_593988 = path.getOrDefault("subscriptionId")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  if valid_568220 != nil:
+    section.add "resourceGroupName", valid_568220
+  var valid_568221 = path.getOrDefault("subscriptionId")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "subscriptionId", valid_593988
-  var valid_593989 = path.getOrDefault("serviceName")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_568221 != nil:
+    section.add "subscriptionId", valid_568221
+  var valid_568222 = path.getOrDefault("serviceName")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "serviceName", valid_593989
+  if valid_568222 != nil:
+    section.add "serviceName", valid_568222
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -515,11 +515,11 @@ proc validate_AdminKeysList_593985(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593990 = query.getOrDefault("api-version")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568223 = query.getOrDefault("api-version")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "api-version", valid_593990
+  if valid_568223 != nil:
+    section.add "api-version", valid_568223
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -528,21 +528,21 @@ proc validate_AdminKeysList_593985(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593991: Call_AdminKeysList_593984; path: JsonNode; query: JsonNode;
+proc call*(call_568224: Call_AdminKeysList_568217; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the primary and secondary API keys for the given Azure Search service.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn832685.aspx
-  let valid = call_593991.validator(path, query, header, formData, body)
-  let scheme = call_593991.pickScheme
+  let valid = call_568224.validator(path, query, header, formData, body)
+  let scheme = call_568224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593991.url(scheme.get, call_593991.host, call_593991.base,
-                         call_593991.route, valid.getOrDefault("path"),
+  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
+                         call_568224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593991, url, valid)
+  result = hook(call_568224, url, valid)
 
-proc call*(call_593992: Call_AdminKeysList_593984; resourceGroupName: string;
+proc call*(call_568225: Call_AdminKeysList_568217; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; serviceName: string): Recallable =
   ## adminKeysList
   ## Returns the primary and secondary API keys for the given Azure Search service.
@@ -555,21 +555,21 @@ proc call*(call_593992: Call_AdminKeysList_593984; resourceGroupName: string;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the Search service for which to list admin keys.
-  var path_593993 = newJObject()
-  var query_593994 = newJObject()
-  add(path_593993, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593994, "api-version", newJString(apiVersion))
-  add(path_593993, "subscriptionId", newJString(subscriptionId))
-  add(path_593993, "serviceName", newJString(serviceName))
-  result = call_593992.call(path_593993, query_593994, nil, nil, nil)
+  var path_568226 = newJObject()
+  var query_568227 = newJObject()
+  add(path_568226, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568227, "api-version", newJString(apiVersion))
+  add(path_568226, "subscriptionId", newJString(subscriptionId))
+  add(path_568226, "serviceName", newJString(serviceName))
+  result = call_568225.call(path_568226, query_568227, nil, nil, nil)
 
-var adminKeysList* = Call_AdminKeysList_593984(name: "adminKeysList",
+var adminKeysList* = Call_AdminKeysList_568217(name: "adminKeysList",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{serviceName}/listAdminKeys",
-    validator: validate_AdminKeysList_593985, base: "", url: url_AdminKeysList_593986,
+    validator: validate_AdminKeysList_568218, base: "", url: url_AdminKeysList_568219,
     schemes: {Scheme.Https})
 type
-  Call_QueryKeysList_593995 = ref object of OpenApiRestCall_593408
-proc url_QueryKeysList_593997(protocol: Scheme; host: string; base: string;
+  Call_QueryKeysList_568228 = ref object of OpenApiRestCall_567641
+proc url_QueryKeysList_568230(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -593,7 +593,7 @@ proc url_QueryKeysList_593997(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryKeysList_593996(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QueryKeysList_568229(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the list of query API keys for the given Azure Search service.
   ## 
@@ -610,21 +610,21 @@ proc validate_QueryKeysList_593996(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593998 = path.getOrDefault("resourceGroupName")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  var valid_568231 = path.getOrDefault("resourceGroupName")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "resourceGroupName", valid_593998
-  var valid_593999 = path.getOrDefault("subscriptionId")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  if valid_568231 != nil:
+    section.add "resourceGroupName", valid_568231
+  var valid_568232 = path.getOrDefault("subscriptionId")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "subscriptionId", valid_593999
-  var valid_594000 = path.getOrDefault("serviceName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  if valid_568232 != nil:
+    section.add "subscriptionId", valid_568232
+  var valid_568233 = path.getOrDefault("serviceName")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "serviceName", valid_594000
+  if valid_568233 != nil:
+    section.add "serviceName", valid_568233
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -632,11 +632,11 @@ proc validate_QueryKeysList_593996(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594001 = query.getOrDefault("api-version")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568234 = query.getOrDefault("api-version")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "api-version", valid_594001
+  if valid_568234 != nil:
+    section.add "api-version", valid_568234
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -645,21 +645,21 @@ proc validate_QueryKeysList_593996(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594002: Call_QueryKeysList_593995; path: JsonNode; query: JsonNode;
+proc call*(call_568235: Call_QueryKeysList_568228; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of query API keys for the given Azure Search service.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn832701.aspx
-  let valid = call_594002.validator(path, query, header, formData, body)
-  let scheme = call_594002.pickScheme
+  let valid = call_568235.validator(path, query, header, formData, body)
+  let scheme = call_568235.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594002.url(scheme.get, call_594002.host, call_594002.base,
-                         call_594002.route, valid.getOrDefault("path"),
+  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
+                         call_568235.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594002, url, valid)
+  result = hook(call_568235, url, valid)
 
-proc call*(call_594003: Call_QueryKeysList_593995; resourceGroupName: string;
+proc call*(call_568236: Call_QueryKeysList_568228; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; serviceName: string): Recallable =
   ## queryKeysList
   ## Returns the list of query API keys for the given Azure Search service.
@@ -672,17 +672,17 @@ proc call*(call_594003: Call_QueryKeysList_593995; resourceGroupName: string;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the Search service for which to list query keys.
-  var path_594004 = newJObject()
-  var query_594005 = newJObject()
-  add(path_594004, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594005, "api-version", newJString(apiVersion))
-  add(path_594004, "subscriptionId", newJString(subscriptionId))
-  add(path_594004, "serviceName", newJString(serviceName))
-  result = call_594003.call(path_594004, query_594005, nil, nil, nil)
+  var path_568237 = newJObject()
+  var query_568238 = newJObject()
+  add(path_568237, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568238, "api-version", newJString(apiVersion))
+  add(path_568237, "subscriptionId", newJString(subscriptionId))
+  add(path_568237, "serviceName", newJString(serviceName))
+  result = call_568236.call(path_568237, query_568238, nil, nil, nil)
 
-var queryKeysList* = Call_QueryKeysList_593995(name: "queryKeysList",
+var queryKeysList* = Call_QueryKeysList_568228(name: "queryKeysList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{serviceName}/listQueryKeys",
-    validator: validate_QueryKeysList_593996, base: "", url: url_QueryKeysList_593997,
+    validator: validate_QueryKeysList_568229, base: "", url: url_QueryKeysList_568230,
     schemes: {Scheme.Https})
 export
   rest

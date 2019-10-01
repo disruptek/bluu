@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "security-topologies"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_TopologyListByHomeRegion_593646 = ref object of OpenApiRestCall_593424
-proc url_TopologyListByHomeRegion_593648(protocol: Scheme; host: string;
+  Call_TopologyListByHomeRegion_567879 = ref object of OpenApiRestCall_567657
+proc url_TopologyListByHomeRegion_567881(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -124,7 +124,7 @@ proc url_TopologyListByHomeRegion_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopologyListByHomeRegion_593647(path: JsonNode; query: JsonNode;
+proc validate_TopologyListByHomeRegion_567880(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list that allows to build a topology view of a subscription and location.
   ## 
@@ -138,16 +138,16 @@ proc validate_TopologyListByHomeRegion_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `ascLocation` field"
-  var valid_593808 = path.getOrDefault("ascLocation")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = path.getOrDefault("ascLocation")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "ascLocation", valid_593808
-  var valid_593809 = path.getOrDefault("subscriptionId")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  if valid_568041 != nil:
+    section.add "ascLocation", valid_568041
+  var valid_568042 = path.getOrDefault("subscriptionId")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "subscriptionId", valid_593809
+  if valid_568042 != nil:
+    section.add "subscriptionId", valid_568042
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -155,11 +155,11 @@ proc validate_TopologyListByHomeRegion_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593810 = query.getOrDefault("api-version")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  var valid_568043 = query.getOrDefault("api-version")
+  valid_568043 = validateParameter(valid_568043, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "api-version", valid_593810
+  if valid_568043 != nil:
+    section.add "api-version", valid_568043
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -168,20 +168,20 @@ proc validate_TopologyListByHomeRegion_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593837: Call_TopologyListByHomeRegion_593646; path: JsonNode;
+proc call*(call_568070: Call_TopologyListByHomeRegion_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list that allows to build a topology view of a subscription and location.
   ## 
-  let valid = call_593837.validator(path, query, header, formData, body)
-  let scheme = call_593837.pickScheme
+  let valid = call_568070.validator(path, query, header, formData, body)
+  let scheme = call_568070.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593837.url(scheme.get, call_593837.host, call_593837.base,
-                         call_593837.route, valid.getOrDefault("path"),
+  let url = call_568070.url(scheme.get, call_568070.host, call_568070.base,
+                         call_568070.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593837, url, valid)
+  result = hook(call_568070, url, valid)
 
-proc call*(call_593908: Call_TopologyListByHomeRegion_593646; apiVersion: string;
+proc call*(call_568141: Call_TopologyListByHomeRegion_567879; apiVersion: string;
           ascLocation: string; subscriptionId: string): Recallable =
   ## topologyListByHomeRegion
   ## Gets a list that allows to build a topology view of a subscription and location.
@@ -191,21 +191,21 @@ proc call*(call_593908: Call_TopologyListByHomeRegion_593646; apiVersion: string
   ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_593909 = newJObject()
-  var query_593911 = newJObject()
-  add(query_593911, "api-version", newJString(apiVersion))
-  add(path_593909, "ascLocation", newJString(ascLocation))
-  add(path_593909, "subscriptionId", newJString(subscriptionId))
-  result = call_593908.call(path_593909, query_593911, nil, nil, nil)
+  var path_568142 = newJObject()
+  var query_568144 = newJObject()
+  add(query_568144, "api-version", newJString(apiVersion))
+  add(path_568142, "ascLocation", newJString(ascLocation))
+  add(path_568142, "subscriptionId", newJString(subscriptionId))
+  result = call_568141.call(path_568142, query_568144, nil, nil, nil)
 
-var topologyListByHomeRegion* = Call_TopologyListByHomeRegion_593646(
+var topologyListByHomeRegion* = Call_TopologyListByHomeRegion_567879(
     name: "topologyListByHomeRegion", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/topologies",
-    validator: validate_TopologyListByHomeRegion_593647, base: "",
-    url: url_TopologyListByHomeRegion_593648, schemes: {Scheme.Https})
+    validator: validate_TopologyListByHomeRegion_567880, base: "",
+    url: url_TopologyListByHomeRegion_567881, schemes: {Scheme.Https})
 type
-  Call_TopologyList_593950 = ref object of OpenApiRestCall_593424
-proc url_TopologyList_593952(protocol: Scheme; host: string; base: string;
+  Call_TopologyList_568183 = ref object of OpenApiRestCall_567657
+proc url_TopologyList_568185(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -221,7 +221,7 @@ proc url_TopologyList_593952(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopologyList_593951(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TopologyList_568184(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list that allows to build a topology view of a subscription.
   ## 
@@ -233,11 +233,11 @@ proc validate_TopologyList_593951(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593953 = path.getOrDefault("subscriptionId")
-  valid_593953 = validateParameter(valid_593953, JString, required = true,
+  var valid_568186 = path.getOrDefault("subscriptionId")
+  valid_568186 = validateParameter(valid_568186, JString, required = true,
                                  default = nil)
-  if valid_593953 != nil:
-    section.add "subscriptionId", valid_593953
+  if valid_568186 != nil:
+    section.add "subscriptionId", valid_568186
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -245,11 +245,11 @@ proc validate_TopologyList_593951(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593954 = query.getOrDefault("api-version")
-  valid_593954 = validateParameter(valid_593954, JString, required = true,
+  var valid_568187 = query.getOrDefault("api-version")
+  valid_568187 = validateParameter(valid_568187, JString, required = true,
                                  default = nil)
-  if valid_593954 != nil:
-    section.add "api-version", valid_593954
+  if valid_568187 != nil:
+    section.add "api-version", valid_568187
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -258,20 +258,20 @@ proc validate_TopologyList_593951(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593955: Call_TopologyList_593950; path: JsonNode; query: JsonNode;
+proc call*(call_568188: Call_TopologyList_568183; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list that allows to build a topology view of a subscription.
   ## 
-  let valid = call_593955.validator(path, query, header, formData, body)
-  let scheme = call_593955.pickScheme
+  let valid = call_568188.validator(path, query, header, formData, body)
+  let scheme = call_568188.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593955.url(scheme.get, call_593955.host, call_593955.base,
-                         call_593955.route, valid.getOrDefault("path"),
+  let url = call_568188.url(scheme.get, call_568188.host, call_568188.base,
+                         call_568188.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593955, url, valid)
+  result = hook(call_568188, url, valid)
 
-proc call*(call_593956: Call_TopologyList_593950; apiVersion: string;
+proc call*(call_568189: Call_TopologyList_568183; apiVersion: string;
           subscriptionId: string): Recallable =
   ## topologyList
   ## Gets a list that allows to build a topology view of a subscription.
@@ -279,19 +279,19 @@ proc call*(call_593956: Call_TopologyList_593950; apiVersion: string;
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_593957 = newJObject()
-  var query_593958 = newJObject()
-  add(query_593958, "api-version", newJString(apiVersion))
-  add(path_593957, "subscriptionId", newJString(subscriptionId))
-  result = call_593956.call(path_593957, query_593958, nil, nil, nil)
+  var path_568190 = newJObject()
+  var query_568191 = newJObject()
+  add(query_568191, "api-version", newJString(apiVersion))
+  add(path_568190, "subscriptionId", newJString(subscriptionId))
+  result = call_568189.call(path_568190, query_568191, nil, nil, nil)
 
-var topologyList* = Call_TopologyList_593950(name: "topologyList",
+var topologyList* = Call_TopologyList_568183(name: "topologyList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/topologies",
-    validator: validate_TopologyList_593951, base: "", url: url_TopologyList_593952,
+    validator: validate_TopologyList_568184, base: "", url: url_TopologyList_568185,
     schemes: {Scheme.Https})
 type
-  Call_TopologyGet_593959 = ref object of OpenApiRestCall_593424
-proc url_TopologyGet_593961(protocol: Scheme; host: string; base: string;
+  Call_TopologyGet_568192 = ref object of OpenApiRestCall_567657
+proc url_TopologyGet_568194(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -317,7 +317,7 @@ proc url_TopologyGet_593961(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopologyGet_593960(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TopologyGet_568193(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a specific topology component.
   ## 
@@ -335,26 +335,26 @@ proc validate_TopologyGet_593960(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593971 = path.getOrDefault("resourceGroupName")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568204 = path.getOrDefault("resourceGroupName")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "resourceGroupName", valid_593971
-  var valid_593972 = path.getOrDefault("ascLocation")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  if valid_568204 != nil:
+    section.add "resourceGroupName", valid_568204
+  var valid_568205 = path.getOrDefault("ascLocation")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "ascLocation", valid_593972
-  var valid_593973 = path.getOrDefault("subscriptionId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  if valid_568205 != nil:
+    section.add "ascLocation", valid_568205
+  var valid_568206 = path.getOrDefault("subscriptionId")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "subscriptionId", valid_593973
-  var valid_593974 = path.getOrDefault("topologyResourceName")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  if valid_568206 != nil:
+    section.add "subscriptionId", valid_568206
+  var valid_568207 = path.getOrDefault("topologyResourceName")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "topologyResourceName", valid_593974
+  if valid_568207 != nil:
+    section.add "topologyResourceName", valid_568207
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -362,11 +362,11 @@ proc validate_TopologyGet_593960(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593975 = query.getOrDefault("api-version")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_568208 = query.getOrDefault("api-version")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "api-version", valid_593975
+  if valid_568208 != nil:
+    section.add "api-version", valid_568208
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -375,20 +375,20 @@ proc validate_TopologyGet_593960(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593976: Call_TopologyGet_593959; path: JsonNode; query: JsonNode;
+proc call*(call_568209: Call_TopologyGet_568192; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a specific topology component.
   ## 
-  let valid = call_593976.validator(path, query, header, formData, body)
-  let scheme = call_593976.pickScheme
+  let valid = call_568209.validator(path, query, header, formData, body)
+  let scheme = call_568209.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593976.url(scheme.get, call_593976.host, call_593976.base,
-                         call_593976.route, valid.getOrDefault("path"),
+  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
+                         call_568209.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593976, url, valid)
+  result = hook(call_568209, url, valid)
 
-proc call*(call_593977: Call_TopologyGet_593959; resourceGroupName: string;
+proc call*(call_568210: Call_TopologyGet_568192; resourceGroupName: string;
           apiVersion: string; ascLocation: string; subscriptionId: string;
           topologyResourceName: string): Recallable =
   ## topologyGet
@@ -403,20 +403,20 @@ proc call*(call_593977: Call_TopologyGet_593959; resourceGroupName: string;
   ##                 : Azure subscription ID
   ##   topologyResourceName: string (required)
   ##                       : Name of a topology resources collection.
-  var path_593978 = newJObject()
-  var query_593979 = newJObject()
-  add(path_593978, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593979, "api-version", newJString(apiVersion))
-  add(path_593978, "ascLocation", newJString(ascLocation))
-  add(path_593978, "subscriptionId", newJString(subscriptionId))
-  add(path_593978, "topologyResourceName", newJString(topologyResourceName))
-  result = call_593977.call(path_593978, query_593979, nil, nil, nil)
+  var path_568211 = newJObject()
+  var query_568212 = newJObject()
+  add(path_568211, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568212, "api-version", newJString(apiVersion))
+  add(path_568211, "ascLocation", newJString(ascLocation))
+  add(path_568211, "subscriptionId", newJString(subscriptionId))
+  add(path_568211, "topologyResourceName", newJString(topologyResourceName))
+  result = call_568210.call(path_568211, query_568212, nil, nil, nil)
 
-var topologyGet* = Call_TopologyGet_593959(name: "topologyGet",
+var topologyGet* = Call_TopologyGet_568192(name: "topologyGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/topologies/{topologyResourceName}",
-                                        validator: validate_TopologyGet_593960,
-                                        base: "", url: url_TopologyGet_593961,
+                                        validator: validate_TopologyGet_568193,
+                                        base: "", url: url_TopologyGet_568194,
                                         schemes: {Scheme.Https})
 export
   rest

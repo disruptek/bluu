@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: AutomationManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_596457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "automation-connectionType"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ConnectionTypeListByAutomationAccount_593646 = ref object of OpenApiRestCall_593424
-proc url_ConnectionTypeListByAutomationAccount_593648(protocol: Scheme;
+  Call_ConnectionTypeListByAutomationAccount_596679 = ref object of OpenApiRestCall_596457
+proc url_ConnectionTypeListByAutomationAccount_596681(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +129,7 @@ proc url_ConnectionTypeListByAutomationAccount_593648(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionTypeListByAutomationAccount_593647(path: JsonNode;
+proc validate_ConnectionTypeListByAutomationAccount_596680(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of connection types.
   ## 
@@ -145,21 +145,21 @@ proc validate_ConnectionTypeListByAutomationAccount_593647(path: JsonNode;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593808 = path.getOrDefault("automationAccountName")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_596841 = path.getOrDefault("automationAccountName")
+  valid_596841 = validateParameter(valid_596841, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "automationAccountName", valid_593808
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  if valid_596841 != nil:
+    section.add "automationAccountName", valid_596841
+  var valid_596842 = path.getOrDefault("resourceGroupName")
+  valid_596842 = validateParameter(valid_596842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_596842 != nil:
+    section.add "resourceGroupName", valid_596842
+  var valid_596843 = path.getOrDefault("subscriptionId")
+  valid_596843 = validateParameter(valid_596843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
+  if valid_596843 != nil:
+    section.add "subscriptionId", valid_596843
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -167,11 +167,11 @@ proc validate_ConnectionTypeListByAutomationAccount_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593811 = query.getOrDefault("api-version")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  var valid_596844 = query.getOrDefault("api-version")
+  valid_596844 = validateParameter(valid_596844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "api-version", valid_593811
+  if valid_596844 != nil:
+    section.add "api-version", valid_596844
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -180,22 +180,22 @@ proc validate_ConnectionTypeListByAutomationAccount_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593838: Call_ConnectionTypeListByAutomationAccount_593646;
+proc call*(call_596871: Call_ConnectionTypeListByAutomationAccount_596679;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve a list of connection types.
   ## 
   ## http://aka.ms/azureautomationsdk/connectiontypeoperations
-  let valid = call_593838.validator(path, query, header, formData, body)
-  let scheme = call_593838.pickScheme
+  let valid = call_596871.validator(path, query, header, formData, body)
+  let scheme = call_596871.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593838.url(scheme.get, call_593838.host, call_593838.base,
-                         call_593838.route, valid.getOrDefault("path"),
+  let url = call_596871.url(scheme.get, call_596871.host, call_596871.base,
+                         call_596871.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593838, url, valid)
+  result = hook(call_596871, url, valid)
 
-proc call*(call_593909: Call_ConnectionTypeListByAutomationAccount_593646;
+proc call*(call_596942: Call_ConnectionTypeListByAutomationAccount_596679;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## connectionTypeListByAutomationAccount
@@ -209,22 +209,22 @@ proc call*(call_593909: Call_ConnectionTypeListByAutomationAccount_593646;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593910 = newJObject()
-  var query_593912 = newJObject()
-  add(path_593910, "automationAccountName", newJString(automationAccountName))
-  add(path_593910, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593912, "api-version", newJString(apiVersion))
-  add(path_593910, "subscriptionId", newJString(subscriptionId))
-  result = call_593909.call(path_593910, query_593912, nil, nil, nil)
+  var path_596943 = newJObject()
+  var query_596945 = newJObject()
+  add(path_596943, "automationAccountName", newJString(automationAccountName))
+  add(path_596943, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596945, "api-version", newJString(apiVersion))
+  add(path_596943, "subscriptionId", newJString(subscriptionId))
+  result = call_596942.call(path_596943, query_596945, nil, nil, nil)
 
-var connectionTypeListByAutomationAccount* = Call_ConnectionTypeListByAutomationAccount_593646(
+var connectionTypeListByAutomationAccount* = Call_ConnectionTypeListByAutomationAccount_596679(
     name: "connectionTypeListByAutomationAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/connectionTypes",
-    validator: validate_ConnectionTypeListByAutomationAccount_593647, base: "",
-    url: url_ConnectionTypeListByAutomationAccount_593648, schemes: {Scheme.Https})
+    validator: validate_ConnectionTypeListByAutomationAccount_596680, base: "",
+    url: url_ConnectionTypeListByAutomationAccount_596681, schemes: {Scheme.Https})
 type
-  Call_ConnectionTypeCreateOrUpdate_593963 = ref object of OpenApiRestCall_593424
-proc url_ConnectionTypeCreateOrUpdate_593965(protocol: Scheme; host: string;
+  Call_ConnectionTypeCreateOrUpdate_596996 = ref object of OpenApiRestCall_596457
+proc url_ConnectionTypeCreateOrUpdate_596998(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -252,7 +252,7 @@ proc url_ConnectionTypeCreateOrUpdate_593965(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionTypeCreateOrUpdate_593964(path: JsonNode; query: JsonNode;
+proc validate_ConnectionTypeCreateOrUpdate_596997(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a connection type.
   ## 
@@ -270,26 +270,26 @@ proc validate_ConnectionTypeCreateOrUpdate_593964(path: JsonNode; query: JsonNod
   ##                     : The parameters supplied to the create or update connection type operation.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593992 = path.getOrDefault("automationAccountName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_597025 = path.getOrDefault("automationAccountName")
+  valid_597025 = validateParameter(valid_597025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "automationAccountName", valid_593992
-  var valid_593993 = path.getOrDefault("resourceGroupName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_597025 != nil:
+    section.add "automationAccountName", valid_597025
+  var valid_597026 = path.getOrDefault("resourceGroupName")
+  valid_597026 = validateParameter(valid_597026, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "resourceGroupName", valid_593993
-  var valid_593994 = path.getOrDefault("subscriptionId")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_597026 != nil:
+    section.add "resourceGroupName", valid_597026
+  var valid_597027 = path.getOrDefault("subscriptionId")
+  valid_597027 = validateParameter(valid_597027, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "subscriptionId", valid_593994
-  var valid_593995 = path.getOrDefault("connectionTypeName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_597027 != nil:
+    section.add "subscriptionId", valid_597027
+  var valid_597028 = path.getOrDefault("connectionTypeName")
+  valid_597028 = validateParameter(valid_597028, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "connectionTypeName", valid_593995
+  if valid_597028 != nil:
+    section.add "connectionTypeName", valid_597028
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -297,11 +297,11 @@ proc validate_ConnectionTypeCreateOrUpdate_593964(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593996 = query.getOrDefault("api-version")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_597029 = query.getOrDefault("api-version")
+  valid_597029 = validateParameter(valid_597029, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "api-version", valid_593996
+  if valid_597029 != nil:
+    section.add "api-version", valid_597029
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -315,21 +315,21 @@ proc validate_ConnectionTypeCreateOrUpdate_593964(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593998: Call_ConnectionTypeCreateOrUpdate_593963; path: JsonNode;
+proc call*(call_597031: Call_ConnectionTypeCreateOrUpdate_596996; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a connection type.
   ## 
   ## http://aka.ms/azureautomationsdk/connectiontypeoperations
-  let valid = call_593998.validator(path, query, header, formData, body)
-  let scheme = call_593998.pickScheme
+  let valid = call_597031.validator(path, query, header, formData, body)
+  let scheme = call_597031.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593998.url(scheme.get, call_593998.host, call_593998.base,
-                         call_593998.route, valid.getOrDefault("path"),
+  let url = call_597031.url(scheme.get, call_597031.host, call_597031.base,
+                         call_597031.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593998, url, valid)
+  result = hook(call_597031, url, valid)
 
-proc call*(call_593999: Call_ConnectionTypeCreateOrUpdate_593963;
+proc call*(call_597032: Call_ConnectionTypeCreateOrUpdate_596996;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; parameters: JsonNode;
           connectionTypeName: string): Recallable =
@@ -348,26 +348,26 @@ proc call*(call_593999: Call_ConnectionTypeCreateOrUpdate_593963;
   ##             : The parameters supplied to the create or update connection type operation.
   ##   connectionTypeName: string (required)
   ##                     : The parameters supplied to the create or update connection type operation.
-  var path_594000 = newJObject()
-  var query_594001 = newJObject()
-  var body_594002 = newJObject()
-  add(path_594000, "automationAccountName", newJString(automationAccountName))
-  add(path_594000, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594001, "api-version", newJString(apiVersion))
-  add(path_594000, "subscriptionId", newJString(subscriptionId))
+  var path_597033 = newJObject()
+  var query_597034 = newJObject()
+  var body_597035 = newJObject()
+  add(path_597033, "automationAccountName", newJString(automationAccountName))
+  add(path_597033, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597034, "api-version", newJString(apiVersion))
+  add(path_597033, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594002 = parameters
-  add(path_594000, "connectionTypeName", newJString(connectionTypeName))
-  result = call_593999.call(path_594000, query_594001, nil, nil, body_594002)
+    body_597035 = parameters
+  add(path_597033, "connectionTypeName", newJString(connectionTypeName))
+  result = call_597032.call(path_597033, query_597034, nil, nil, body_597035)
 
-var connectionTypeCreateOrUpdate* = Call_ConnectionTypeCreateOrUpdate_593963(
+var connectionTypeCreateOrUpdate* = Call_ConnectionTypeCreateOrUpdate_596996(
     name: "connectionTypeCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/connectionTypes/{connectionTypeName}",
-    validator: validate_ConnectionTypeCreateOrUpdate_593964, base: "",
-    url: url_ConnectionTypeCreateOrUpdate_593965, schemes: {Scheme.Https})
+    validator: validate_ConnectionTypeCreateOrUpdate_596997, base: "",
+    url: url_ConnectionTypeCreateOrUpdate_596998, schemes: {Scheme.Https})
 type
-  Call_ConnectionTypeGet_593951 = ref object of OpenApiRestCall_593424
-proc url_ConnectionTypeGet_593953(protocol: Scheme; host: string; base: string;
+  Call_ConnectionTypeGet_596984 = ref object of OpenApiRestCall_596457
+proc url_ConnectionTypeGet_596986(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -395,7 +395,7 @@ proc url_ConnectionTypeGet_593953(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionTypeGet_593952(path: JsonNode; query: JsonNode;
+proc validate_ConnectionTypeGet_596985(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Retrieve the connection type identified by connection type name.
@@ -414,26 +414,26 @@ proc validate_ConnectionTypeGet_593952(path: JsonNode; query: JsonNode;
   ##                     : The name of connection type.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593954 = path.getOrDefault("automationAccountName")
-  valid_593954 = validateParameter(valid_593954, JString, required = true,
+  var valid_596987 = path.getOrDefault("automationAccountName")
+  valid_596987 = validateParameter(valid_596987, JString, required = true,
                                  default = nil)
-  if valid_593954 != nil:
-    section.add "automationAccountName", valid_593954
-  var valid_593955 = path.getOrDefault("resourceGroupName")
-  valid_593955 = validateParameter(valid_593955, JString, required = true,
+  if valid_596987 != nil:
+    section.add "automationAccountName", valid_596987
+  var valid_596988 = path.getOrDefault("resourceGroupName")
+  valid_596988 = validateParameter(valid_596988, JString, required = true,
                                  default = nil)
-  if valid_593955 != nil:
-    section.add "resourceGroupName", valid_593955
-  var valid_593956 = path.getOrDefault("subscriptionId")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  if valid_596988 != nil:
+    section.add "resourceGroupName", valid_596988
+  var valid_596989 = path.getOrDefault("subscriptionId")
+  valid_596989 = validateParameter(valid_596989, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "subscriptionId", valid_593956
-  var valid_593957 = path.getOrDefault("connectionTypeName")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  if valid_596989 != nil:
+    section.add "subscriptionId", valid_596989
+  var valid_596990 = path.getOrDefault("connectionTypeName")
+  valid_596990 = validateParameter(valid_596990, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "connectionTypeName", valid_593957
+  if valid_596990 != nil:
+    section.add "connectionTypeName", valid_596990
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -441,11 +441,11 @@ proc validate_ConnectionTypeGet_593952(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593958 = query.getOrDefault("api-version")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  var valid_596991 = query.getOrDefault("api-version")
+  valid_596991 = validateParameter(valid_596991, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "api-version", valid_593958
+  if valid_596991 != nil:
+    section.add "api-version", valid_596991
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -454,21 +454,21 @@ proc validate_ConnectionTypeGet_593952(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593959: Call_ConnectionTypeGet_593951; path: JsonNode;
+proc call*(call_596992: Call_ConnectionTypeGet_596984; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the connection type identified by connection type name.
   ## 
   ## http://aka.ms/azureautomationsdk/connectiontypeoperations
-  let valid = call_593959.validator(path, query, header, formData, body)
-  let scheme = call_593959.pickScheme
+  let valid = call_596992.validator(path, query, header, formData, body)
+  let scheme = call_596992.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593959.url(scheme.get, call_593959.host, call_593959.base,
-                         call_593959.route, valid.getOrDefault("path"),
+  let url = call_596992.url(scheme.get, call_596992.host, call_596992.base,
+                         call_596992.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593959, url, valid)
+  result = hook(call_596992, url, valid)
 
-proc call*(call_593960: Call_ConnectionTypeGet_593951;
+proc call*(call_596993: Call_ConnectionTypeGet_596984;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; connectionTypeName: string): Recallable =
   ## connectionTypeGet
@@ -484,22 +484,22 @@ proc call*(call_593960: Call_ConnectionTypeGet_593951;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   connectionTypeName: string (required)
   ##                     : The name of connection type.
-  var path_593961 = newJObject()
-  var query_593962 = newJObject()
-  add(path_593961, "automationAccountName", newJString(automationAccountName))
-  add(path_593961, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593962, "api-version", newJString(apiVersion))
-  add(path_593961, "subscriptionId", newJString(subscriptionId))
-  add(path_593961, "connectionTypeName", newJString(connectionTypeName))
-  result = call_593960.call(path_593961, query_593962, nil, nil, nil)
+  var path_596994 = newJObject()
+  var query_596995 = newJObject()
+  add(path_596994, "automationAccountName", newJString(automationAccountName))
+  add(path_596994, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596995, "api-version", newJString(apiVersion))
+  add(path_596994, "subscriptionId", newJString(subscriptionId))
+  add(path_596994, "connectionTypeName", newJString(connectionTypeName))
+  result = call_596993.call(path_596994, query_596995, nil, nil, nil)
 
-var connectionTypeGet* = Call_ConnectionTypeGet_593951(name: "connectionTypeGet",
+var connectionTypeGet* = Call_ConnectionTypeGet_596984(name: "connectionTypeGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/connectionTypes/{connectionTypeName}",
-    validator: validate_ConnectionTypeGet_593952, base: "",
-    url: url_ConnectionTypeGet_593953, schemes: {Scheme.Https})
+    validator: validate_ConnectionTypeGet_596985, base: "",
+    url: url_ConnectionTypeGet_596986, schemes: {Scheme.Https})
 type
-  Call_ConnectionTypeDelete_594003 = ref object of OpenApiRestCall_593424
-proc url_ConnectionTypeDelete_594005(protocol: Scheme; host: string; base: string;
+  Call_ConnectionTypeDelete_597036 = ref object of OpenApiRestCall_596457
+proc url_ConnectionTypeDelete_597038(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -527,7 +527,7 @@ proc url_ConnectionTypeDelete_594005(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionTypeDelete_594004(path: JsonNode; query: JsonNode;
+proc validate_ConnectionTypeDelete_597037(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the connection type.
   ## 
@@ -545,26 +545,26 @@ proc validate_ConnectionTypeDelete_594004(path: JsonNode; query: JsonNode;
   ##                     : The name of connection type.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594006 = path.getOrDefault("automationAccountName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_597039 = path.getOrDefault("automationAccountName")
+  valid_597039 = validateParameter(valid_597039, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "automationAccountName", valid_594006
-  var valid_594007 = path.getOrDefault("resourceGroupName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_597039 != nil:
+    section.add "automationAccountName", valid_597039
+  var valid_597040 = path.getOrDefault("resourceGroupName")
+  valid_597040 = validateParameter(valid_597040, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "resourceGroupName", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_597040 != nil:
+    section.add "resourceGroupName", valid_597040
+  var valid_597041 = path.getOrDefault("subscriptionId")
+  valid_597041 = validateParameter(valid_597041, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
-  var valid_594009 = path.getOrDefault("connectionTypeName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_597041 != nil:
+    section.add "subscriptionId", valid_597041
+  var valid_597042 = path.getOrDefault("connectionTypeName")
+  valid_597042 = validateParameter(valid_597042, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "connectionTypeName", valid_594009
+  if valid_597042 != nil:
+    section.add "connectionTypeName", valid_597042
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -572,11 +572,11 @@ proc validate_ConnectionTypeDelete_594004(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594010 = query.getOrDefault("api-version")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  var valid_597043 = query.getOrDefault("api-version")
+  valid_597043 = validateParameter(valid_597043, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "api-version", valid_594010
+  if valid_597043 != nil:
+    section.add "api-version", valid_597043
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -585,21 +585,21 @@ proc validate_ConnectionTypeDelete_594004(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594011: Call_ConnectionTypeDelete_594003; path: JsonNode;
+proc call*(call_597044: Call_ConnectionTypeDelete_597036; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the connection type.
   ## 
   ## http://aka.ms/azureautomationsdk/connectiontypeoperations
-  let valid = call_594011.validator(path, query, header, formData, body)
-  let scheme = call_594011.pickScheme
+  let valid = call_597044.validator(path, query, header, formData, body)
+  let scheme = call_597044.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594011.url(scheme.get, call_594011.host, call_594011.base,
-                         call_594011.route, valid.getOrDefault("path"),
+  let url = call_597044.url(scheme.get, call_597044.host, call_597044.base,
+                         call_597044.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594011, url, valid)
+  result = hook(call_597044, url, valid)
 
-proc call*(call_594012: Call_ConnectionTypeDelete_594003;
+proc call*(call_597045: Call_ConnectionTypeDelete_597036;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; connectionTypeName: string): Recallable =
   ## connectionTypeDelete
@@ -615,20 +615,20 @@ proc call*(call_594012: Call_ConnectionTypeDelete_594003;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   connectionTypeName: string (required)
   ##                     : The name of connection type.
-  var path_594013 = newJObject()
-  var query_594014 = newJObject()
-  add(path_594013, "automationAccountName", newJString(automationAccountName))
-  add(path_594013, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594014, "api-version", newJString(apiVersion))
-  add(path_594013, "subscriptionId", newJString(subscriptionId))
-  add(path_594013, "connectionTypeName", newJString(connectionTypeName))
-  result = call_594012.call(path_594013, query_594014, nil, nil, nil)
+  var path_597046 = newJObject()
+  var query_597047 = newJObject()
+  add(path_597046, "automationAccountName", newJString(automationAccountName))
+  add(path_597046, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597047, "api-version", newJString(apiVersion))
+  add(path_597046, "subscriptionId", newJString(subscriptionId))
+  add(path_597046, "connectionTypeName", newJString(connectionTypeName))
+  result = call_597045.call(path_597046, query_597047, nil, nil, nil)
 
-var connectionTypeDelete* = Call_ConnectionTypeDelete_594003(
+var connectionTypeDelete* = Call_ConnectionTypeDelete_597036(
     name: "connectionTypeDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/connectionTypes/{connectionTypeName}",
-    validator: validate_ConnectionTypeDelete_594004, base: "",
-    url: url_ConnectionTypeDelete_594005, schemes: {Scheme.Https})
+    validator: validate_ConnectionTypeDelete_597037, base: "",
+    url: url_ConnectionTypeDelete_597038, schemes: {Scheme.Https})
 export
   rest
 

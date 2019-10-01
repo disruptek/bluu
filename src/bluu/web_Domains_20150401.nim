@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Domains API Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "web-Domains"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DomainsCheckAvailability_593646 = ref object of OpenApiRestCall_593424
-proc url_DomainsCheckAvailability_593648(protocol: Scheme; host: string;
+  Call_DomainsCheckAvailability_567879 = ref object of OpenApiRestCall_567657
+proc url_DomainsCheckAvailability_567881(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -121,7 +121,7 @@ proc url_DomainsCheckAvailability_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsCheckAvailability_593647(path: JsonNode; query: JsonNode;
+proc validate_DomainsCheckAvailability_567880(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check if a domain is available for registration.
   ## 
@@ -133,11 +133,11 @@ proc validate_DomainsCheckAvailability_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593821 = path.getOrDefault("subscriptionId")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("subscriptionId")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "subscriptionId", valid_593821
+  if valid_568054 != nil:
+    section.add "subscriptionId", valid_568054
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_DomainsCheckAvailability_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593822 = query.getOrDefault("api-version")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = query.getOrDefault("api-version")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "api-version", valid_593822
+  if valid_568055 != nil:
+    section.add "api-version", valid_568055
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -163,20 +163,20 @@ proc validate_DomainsCheckAvailability_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593846: Call_DomainsCheckAvailability_593646; path: JsonNode;
+proc call*(call_568079: Call_DomainsCheckAvailability_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Check if a domain is available for registration.
   ## 
-  let valid = call_593846.validator(path, query, header, formData, body)
-  let scheme = call_593846.pickScheme
+  let valid = call_568079.validator(path, query, header, formData, body)
+  let scheme = call_568079.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593846.url(scheme.get, call_593846.host, call_593846.base,
-                         call_593846.route, valid.getOrDefault("path"),
+  let url = call_568079.url(scheme.get, call_568079.host, call_568079.base,
+                         call_568079.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593846, url, valid)
+  result = hook(call_568079, url, valid)
 
-proc call*(call_593917: Call_DomainsCheckAvailability_593646; apiVersion: string;
+proc call*(call_568150: Call_DomainsCheckAvailability_567879; apiVersion: string;
           subscriptionId: string; identifier: JsonNode): Recallable =
   ## domainsCheckAvailability
   ## Check if a domain is available for registration.
@@ -186,23 +186,23 @@ proc call*(call_593917: Call_DomainsCheckAvailability_593646; apiVersion: string
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   identifier: JObject (required)
   ##             : Name of the domain.
-  var path_593918 = newJObject()
-  var query_593920 = newJObject()
-  var body_593921 = newJObject()
-  add(query_593920, "api-version", newJString(apiVersion))
-  add(path_593918, "subscriptionId", newJString(subscriptionId))
+  var path_568151 = newJObject()
+  var query_568153 = newJObject()
+  var body_568154 = newJObject()
+  add(query_568153, "api-version", newJString(apiVersion))
+  add(path_568151, "subscriptionId", newJString(subscriptionId))
   if identifier != nil:
-    body_593921 = identifier
-  result = call_593917.call(path_593918, query_593920, nil, nil, body_593921)
+    body_568154 = identifier
+  result = call_568150.call(path_568151, query_568153, nil, nil, body_568154)
 
-var domainsCheckAvailability* = Call_DomainsCheckAvailability_593646(
+var domainsCheckAvailability* = Call_DomainsCheckAvailability_567879(
     name: "domainsCheckAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DomainRegistration/checkDomainAvailability",
-    validator: validate_DomainsCheckAvailability_593647, base: "",
-    url: url_DomainsCheckAvailability_593648, schemes: {Scheme.Https})
+    validator: validate_DomainsCheckAvailability_567880, base: "",
+    url: url_DomainsCheckAvailability_567881, schemes: {Scheme.Https})
 type
-  Call_DomainsList_593960 = ref object of OpenApiRestCall_593424
-proc url_DomainsList_593962(protocol: Scheme; host: string; base: string;
+  Call_DomainsList_568193 = ref object of OpenApiRestCall_567657
+proc url_DomainsList_568195(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -219,7 +219,7 @@ proc url_DomainsList_593962(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsList_593961(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DomainsList_568194(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all domains in a subscription.
   ## 
@@ -231,11 +231,11 @@ proc validate_DomainsList_593961(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593963 = path.getOrDefault("subscriptionId")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = path.getOrDefault("subscriptionId")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "subscriptionId", valid_593963
+  if valid_568196 != nil:
+    section.add "subscriptionId", valid_568196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -243,11 +243,11 @@ proc validate_DomainsList_593961(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593964 = query.getOrDefault("api-version")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_568197 = query.getOrDefault("api-version")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "api-version", valid_593964
+  if valid_568197 != nil:
+    section.add "api-version", valid_568197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -256,20 +256,20 @@ proc validate_DomainsList_593961(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593965: Call_DomainsList_593960; path: JsonNode; query: JsonNode;
+proc call*(call_568198: Call_DomainsList_568193; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all domains in a subscription.
   ## 
-  let valid = call_593965.validator(path, query, header, formData, body)
-  let scheme = call_593965.pickScheme
+  let valid = call_568198.validator(path, query, header, formData, body)
+  let scheme = call_568198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593965.url(scheme.get, call_593965.host, call_593965.base,
-                         call_593965.route, valid.getOrDefault("path"),
+  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
+                         call_568198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593965, url, valid)
+  result = hook(call_568198, url, valid)
 
-proc call*(call_593966: Call_DomainsList_593960; apiVersion: string;
+proc call*(call_568199: Call_DomainsList_568193; apiVersion: string;
           subscriptionId: string): Recallable =
   ## domainsList
   ## Get all domains in a subscription.
@@ -277,21 +277,21 @@ proc call*(call_593966: Call_DomainsList_593960; apiVersion: string;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_593967 = newJObject()
-  var query_593968 = newJObject()
-  add(query_593968, "api-version", newJString(apiVersion))
-  add(path_593967, "subscriptionId", newJString(subscriptionId))
-  result = call_593966.call(path_593967, query_593968, nil, nil, nil)
+  var path_568200 = newJObject()
+  var query_568201 = newJObject()
+  add(query_568201, "api-version", newJString(apiVersion))
+  add(path_568200, "subscriptionId", newJString(subscriptionId))
+  result = call_568199.call(path_568200, query_568201, nil, nil, nil)
 
-var domainsList* = Call_DomainsList_593960(name: "domainsList",
+var domainsList* = Call_DomainsList_568193(name: "domainsList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DomainRegistration/domains",
-                                        validator: validate_DomainsList_593961,
-                                        base: "", url: url_DomainsList_593962,
+                                        validator: validate_DomainsList_568194,
+                                        base: "", url: url_DomainsList_568195,
                                         schemes: {Scheme.Https})
 type
-  Call_DomainsGetControlCenterSsoRequest_593969 = ref object of OpenApiRestCall_593424
-proc url_DomainsGetControlCenterSsoRequest_593971(protocol: Scheme; host: string;
+  Call_DomainsGetControlCenterSsoRequest_568202 = ref object of OpenApiRestCall_567657
+proc url_DomainsGetControlCenterSsoRequest_568204(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -308,7 +308,7 @@ proc url_DomainsGetControlCenterSsoRequest_593971(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsGetControlCenterSsoRequest_593970(path: JsonNode;
+proc validate_DomainsGetControlCenterSsoRequest_568203(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Generate a single sign-on request for the domain management portal.
   ## 
@@ -320,11 +320,11 @@ proc validate_DomainsGetControlCenterSsoRequest_593970(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593972 = path.getOrDefault("subscriptionId")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_568205 = path.getOrDefault("subscriptionId")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "subscriptionId", valid_593972
+  if valid_568205 != nil:
+    section.add "subscriptionId", valid_568205
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -332,11 +332,11 @@ proc validate_DomainsGetControlCenterSsoRequest_593970(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593973 = query.getOrDefault("api-version")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568206 = query.getOrDefault("api-version")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "api-version", valid_593973
+  if valid_568206 != nil:
+    section.add "api-version", valid_568206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -345,21 +345,21 @@ proc validate_DomainsGetControlCenterSsoRequest_593970(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593974: Call_DomainsGetControlCenterSsoRequest_593969;
+proc call*(call_568207: Call_DomainsGetControlCenterSsoRequest_568202;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Generate a single sign-on request for the domain management portal.
   ## 
-  let valid = call_593974.validator(path, query, header, formData, body)
-  let scheme = call_593974.pickScheme
+  let valid = call_568207.validator(path, query, header, formData, body)
+  let scheme = call_568207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593974.url(scheme.get, call_593974.host, call_593974.base,
-                         call_593974.route, valid.getOrDefault("path"),
+  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
+                         call_568207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593974, url, valid)
+  result = hook(call_568207, url, valid)
 
-proc call*(call_593975: Call_DomainsGetControlCenterSsoRequest_593969;
+proc call*(call_568208: Call_DomainsGetControlCenterSsoRequest_568202;
           apiVersion: string; subscriptionId: string): Recallable =
   ## domainsGetControlCenterSsoRequest
   ## Generate a single sign-on request for the domain management portal.
@@ -367,20 +367,20 @@ proc call*(call_593975: Call_DomainsGetControlCenterSsoRequest_593969;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_593976 = newJObject()
-  var query_593977 = newJObject()
-  add(query_593977, "api-version", newJString(apiVersion))
-  add(path_593976, "subscriptionId", newJString(subscriptionId))
-  result = call_593975.call(path_593976, query_593977, nil, nil, nil)
+  var path_568209 = newJObject()
+  var query_568210 = newJObject()
+  add(query_568210, "api-version", newJString(apiVersion))
+  add(path_568209, "subscriptionId", newJString(subscriptionId))
+  result = call_568208.call(path_568209, query_568210, nil, nil, nil)
 
-var domainsGetControlCenterSsoRequest* = Call_DomainsGetControlCenterSsoRequest_593969(
+var domainsGetControlCenterSsoRequest* = Call_DomainsGetControlCenterSsoRequest_568202(
     name: "domainsGetControlCenterSsoRequest", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DomainRegistration/generateSsoRequest",
-    validator: validate_DomainsGetControlCenterSsoRequest_593970, base: "",
-    url: url_DomainsGetControlCenterSsoRequest_593971, schemes: {Scheme.Https})
+    validator: validate_DomainsGetControlCenterSsoRequest_568203, base: "",
+    url: url_DomainsGetControlCenterSsoRequest_568204, schemes: {Scheme.Https})
 type
-  Call_DomainsListRecommendations_593978 = ref object of OpenApiRestCall_593424
-proc url_DomainsListRecommendations_593980(protocol: Scheme; host: string;
+  Call_DomainsListRecommendations_568211 = ref object of OpenApiRestCall_567657
+proc url_DomainsListRecommendations_568213(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -396,7 +396,7 @@ proc url_DomainsListRecommendations_593980(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsListRecommendations_593979(path: JsonNode; query: JsonNode;
+proc validate_DomainsListRecommendations_568212(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get domain name recommendations based on keywords.
   ## 
@@ -408,11 +408,11 @@ proc validate_DomainsListRecommendations_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593981 = path.getOrDefault("subscriptionId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = path.getOrDefault("subscriptionId")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "subscriptionId", valid_593981
+  if valid_568214 != nil:
+    section.add "subscriptionId", valid_568214
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -420,11 +420,11 @@ proc validate_DomainsListRecommendations_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593982 = query.getOrDefault("api-version")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568215 = query.getOrDefault("api-version")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "api-version", valid_593982
+  if valid_568215 != nil:
+    section.add "api-version", valid_568215
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -438,20 +438,20 @@ proc validate_DomainsListRecommendations_593979(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_DomainsListRecommendations_593978; path: JsonNode;
+proc call*(call_568217: Call_DomainsListRecommendations_568211; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get domain name recommendations based on keywords.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_568217.validator(path, query, header, formData, body)
+  let scheme = call_568217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
+                         call_568217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_568217, url, valid)
 
-proc call*(call_593985: Call_DomainsListRecommendations_593978; apiVersion: string;
+proc call*(call_568218: Call_DomainsListRecommendations_568211; apiVersion: string;
           subscriptionId: string; parameters: JsonNode): Recallable =
   ## domainsListRecommendations
   ## Get domain name recommendations based on keywords.
@@ -461,23 +461,23 @@ proc call*(call_593985: Call_DomainsListRecommendations_593978; apiVersion: stri
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   parameters: JObject (required)
   ##             : Search parameters for domain name recommendations.
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  var body_593988 = newJObject()
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
+  var path_568219 = newJObject()
+  var query_568220 = newJObject()
+  var body_568221 = newJObject()
+  add(query_568220, "api-version", newJString(apiVersion))
+  add(path_568219, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593988 = parameters
-  result = call_593985.call(path_593986, query_593987, nil, nil, body_593988)
+    body_568221 = parameters
+  result = call_568218.call(path_568219, query_568220, nil, nil, body_568221)
 
-var domainsListRecommendations* = Call_DomainsListRecommendations_593978(
+var domainsListRecommendations* = Call_DomainsListRecommendations_568211(
     name: "domainsListRecommendations", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DomainRegistration/listDomainRecommendations",
-    validator: validate_DomainsListRecommendations_593979, base: "",
-    url: url_DomainsListRecommendations_593980, schemes: {Scheme.Https})
+    validator: validate_DomainsListRecommendations_568212, base: "",
+    url: url_DomainsListRecommendations_568213, schemes: {Scheme.Https})
 type
-  Call_DomainsListByResourceGroup_593989 = ref object of OpenApiRestCall_593424
-proc url_DomainsListByResourceGroup_593991(protocol: Scheme; host: string;
+  Call_DomainsListByResourceGroup_568222 = ref object of OpenApiRestCall_567657
+proc url_DomainsListByResourceGroup_568224(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -498,7 +498,7 @@ proc url_DomainsListByResourceGroup_593991(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsListByResourceGroup_593990(path: JsonNode; query: JsonNode;
+proc validate_DomainsListByResourceGroup_568223(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all domains in a resource group.
   ## 
@@ -512,16 +512,16 @@ proc validate_DomainsListByResourceGroup_593990(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593992 = path.getOrDefault("resourceGroupName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568225 = path.getOrDefault("resourceGroupName")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "resourceGroupName", valid_593992
-  var valid_593993 = path.getOrDefault("subscriptionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "resourceGroupName", valid_568225
+  var valid_568226 = path.getOrDefault("subscriptionId")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "subscriptionId", valid_593993
+  if valid_568226 != nil:
+    section.add "subscriptionId", valid_568226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -529,11 +529,11 @@ proc validate_DomainsListByResourceGroup_593990(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568227 = query.getOrDefault("api-version")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
+  if valid_568227 != nil:
+    section.add "api-version", valid_568227
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -542,20 +542,20 @@ proc validate_DomainsListByResourceGroup_593990(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593995: Call_DomainsListByResourceGroup_593989; path: JsonNode;
+proc call*(call_568228: Call_DomainsListByResourceGroup_568222; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all domains in a resource group.
   ## 
-  let valid = call_593995.validator(path, query, header, formData, body)
-  let scheme = call_593995.pickScheme
+  let valid = call_568228.validator(path, query, header, formData, body)
+  let scheme = call_568228.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593995.url(scheme.get, call_593995.host, call_593995.base,
-                         call_593995.route, valid.getOrDefault("path"),
+  let url = call_568228.url(scheme.get, call_568228.host, call_568228.base,
+                         call_568228.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593995, url, valid)
+  result = hook(call_568228, url, valid)
 
-proc call*(call_593996: Call_DomainsListByResourceGroup_593989;
+proc call*(call_568229: Call_DomainsListByResourceGroup_568222;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## domainsListByResourceGroup
   ## Get all domains in a resource group.
@@ -565,21 +565,21 @@ proc call*(call_593996: Call_DomainsListByResourceGroup_593989;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_593997 = newJObject()
-  var query_593998 = newJObject()
-  add(path_593997, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593998, "api-version", newJString(apiVersion))
-  add(path_593997, "subscriptionId", newJString(subscriptionId))
-  result = call_593996.call(path_593997, query_593998, nil, nil, nil)
+  var path_568230 = newJObject()
+  var query_568231 = newJObject()
+  add(path_568230, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568231, "api-version", newJString(apiVersion))
+  add(path_568230, "subscriptionId", newJString(subscriptionId))
+  result = call_568229.call(path_568230, query_568231, nil, nil, nil)
 
-var domainsListByResourceGroup* = Call_DomainsListByResourceGroup_593989(
+var domainsListByResourceGroup* = Call_DomainsListByResourceGroup_568222(
     name: "domainsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains",
-    validator: validate_DomainsListByResourceGroup_593990, base: "",
-    url: url_DomainsListByResourceGroup_593991, schemes: {Scheme.Https})
+    validator: validate_DomainsListByResourceGroup_568223, base: "",
+    url: url_DomainsListByResourceGroup_568224, schemes: {Scheme.Https})
 type
-  Call_DomainsCreateOrUpdate_594010 = ref object of OpenApiRestCall_593424
-proc url_DomainsCreateOrUpdate_594012(protocol: Scheme; host: string; base: string;
+  Call_DomainsCreateOrUpdate_568243 = ref object of OpenApiRestCall_567657
+proc url_DomainsCreateOrUpdate_568245(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -602,7 +602,7 @@ proc url_DomainsCreateOrUpdate_594012(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsCreateOrUpdate_594011(path: JsonNode; query: JsonNode;
+proc validate_DomainsCreateOrUpdate_568244(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a domain.
   ## 
@@ -618,21 +618,21 @@ proc validate_DomainsCreateOrUpdate_594011(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594013 = path.getOrDefault("resourceGroupName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  var valid_568246 = path.getOrDefault("resourceGroupName")
+  valid_568246 = validateParameter(valid_568246, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "resourceGroupName", valid_594013
-  var valid_594014 = path.getOrDefault("subscriptionId")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_568246 != nil:
+    section.add "resourceGroupName", valid_568246
+  var valid_568247 = path.getOrDefault("subscriptionId")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "subscriptionId", valid_594014
-  var valid_594015 = path.getOrDefault("domainName")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_568247 != nil:
+    section.add "subscriptionId", valid_568247
+  var valid_568248 = path.getOrDefault("domainName")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "domainName", valid_594015
+  if valid_568248 != nil:
+    section.add "domainName", valid_568248
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -640,11 +640,11 @@ proc validate_DomainsCreateOrUpdate_594011(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594016 = query.getOrDefault("api-version")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_568249 = query.getOrDefault("api-version")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "api-version", valid_594016
+  if valid_568249 != nil:
+    section.add "api-version", valid_568249
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -658,20 +658,20 @@ proc validate_DomainsCreateOrUpdate_594011(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_DomainsCreateOrUpdate_594010; path: JsonNode;
+proc call*(call_568251: Call_DomainsCreateOrUpdate_568243; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a domain.
   ## 
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_568251.validator(path, query, header, formData, body)
+  let scheme = call_568251.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_568251.url(scheme.get, call_568251.host, call_568251.base,
+                         call_568251.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_568251, url, valid)
 
-proc call*(call_594019: Call_DomainsCreateOrUpdate_594010;
+proc call*(call_568252: Call_DomainsCreateOrUpdate_568243;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           domain: JsonNode; domainName: string): Recallable =
   ## domainsCreateOrUpdate
@@ -686,25 +686,25 @@ proc call*(call_594019: Call_DomainsCreateOrUpdate_594010;
   ##         : Domain registration information.
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_594020 = newJObject()
-  var query_594021 = newJObject()
-  var body_594022 = newJObject()
-  add(path_594020, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594021, "api-version", newJString(apiVersion))
-  add(path_594020, "subscriptionId", newJString(subscriptionId))
+  var path_568253 = newJObject()
+  var query_568254 = newJObject()
+  var body_568255 = newJObject()
+  add(path_568253, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568254, "api-version", newJString(apiVersion))
+  add(path_568253, "subscriptionId", newJString(subscriptionId))
   if domain != nil:
-    body_594022 = domain
-  add(path_594020, "domainName", newJString(domainName))
-  result = call_594019.call(path_594020, query_594021, nil, nil, body_594022)
+    body_568255 = domain
+  add(path_568253, "domainName", newJString(domainName))
+  result = call_568252.call(path_568253, query_568254, nil, nil, body_568255)
 
-var domainsCreateOrUpdate* = Call_DomainsCreateOrUpdate_594010(
+var domainsCreateOrUpdate* = Call_DomainsCreateOrUpdate_568243(
     name: "domainsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}",
-    validator: validate_DomainsCreateOrUpdate_594011, base: "",
-    url: url_DomainsCreateOrUpdate_594012, schemes: {Scheme.Https})
+    validator: validate_DomainsCreateOrUpdate_568244, base: "",
+    url: url_DomainsCreateOrUpdate_568245, schemes: {Scheme.Https})
 type
-  Call_DomainsGet_593999 = ref object of OpenApiRestCall_593424
-proc url_DomainsGet_594001(protocol: Scheme; host: string; base: string; route: string;
+  Call_DomainsGet_568232 = ref object of OpenApiRestCall_567657
+proc url_DomainsGet_568234(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -727,7 +727,7 @@ proc url_DomainsGet_594001(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsGet_594000(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DomainsGet_568233(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a domain.
   ## 
@@ -743,21 +743,21 @@ proc validate_DomainsGet_594000(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594002 = path.getOrDefault("resourceGroupName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_568235 = path.getOrDefault("resourceGroupName")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "resourceGroupName", valid_594002
-  var valid_594003 = path.getOrDefault("subscriptionId")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_568235 != nil:
+    section.add "resourceGroupName", valid_568235
+  var valid_568236 = path.getOrDefault("subscriptionId")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "subscriptionId", valid_594003
-  var valid_594004 = path.getOrDefault("domainName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  if valid_568236 != nil:
+    section.add "subscriptionId", valid_568236
+  var valid_568237 = path.getOrDefault("domainName")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "domainName", valid_594004
+  if valid_568237 != nil:
+    section.add "domainName", valid_568237
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -765,11 +765,11 @@ proc validate_DomainsGet_594000(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594005 = query.getOrDefault("api-version")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_568238 = query.getOrDefault("api-version")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "api-version", valid_594005
+  if valid_568238 != nil:
+    section.add "api-version", valid_568238
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -778,20 +778,20 @@ proc validate_DomainsGet_594000(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594006: Call_DomainsGet_593999; path: JsonNode; query: JsonNode;
+proc call*(call_568239: Call_DomainsGet_568232; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a domain.
   ## 
-  let valid = call_594006.validator(path, query, header, formData, body)
-  let scheme = call_594006.pickScheme
+  let valid = call_568239.validator(path, query, header, formData, body)
+  let scheme = call_568239.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594006.url(scheme.get, call_594006.host, call_594006.base,
-                         call_594006.route, valid.getOrDefault("path"),
+  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
+                         call_568239.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594006, url, valid)
+  result = hook(call_568239, url, valid)
 
-proc call*(call_594007: Call_DomainsGet_593999; resourceGroupName: string;
+proc call*(call_568240: Call_DomainsGet_568232; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; domainName: string): Recallable =
   ## domainsGet
   ## Get a domain.
@@ -803,23 +803,23 @@ proc call*(call_594007: Call_DomainsGet_593999; resourceGroupName: string;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_594008 = newJObject()
-  var query_594009 = newJObject()
-  add(path_594008, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594009, "api-version", newJString(apiVersion))
-  add(path_594008, "subscriptionId", newJString(subscriptionId))
-  add(path_594008, "domainName", newJString(domainName))
-  result = call_594007.call(path_594008, query_594009, nil, nil, nil)
+  var path_568241 = newJObject()
+  var query_568242 = newJObject()
+  add(path_568241, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568242, "api-version", newJString(apiVersion))
+  add(path_568241, "subscriptionId", newJString(subscriptionId))
+  add(path_568241, "domainName", newJString(domainName))
+  result = call_568240.call(path_568241, query_568242, nil, nil, nil)
 
-var domainsGet* = Call_DomainsGet_593999(name: "domainsGet",
+var domainsGet* = Call_DomainsGet_568232(name: "domainsGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}",
-                                      validator: validate_DomainsGet_594000,
-                                      base: "", url: url_DomainsGet_594001,
+                                      validator: validate_DomainsGet_568233,
+                                      base: "", url: url_DomainsGet_568234,
                                       schemes: {Scheme.Https})
 type
-  Call_DomainsUpdate_594035 = ref object of OpenApiRestCall_593424
-proc url_DomainsUpdate_594037(protocol: Scheme; host: string; base: string;
+  Call_DomainsUpdate_568268 = ref object of OpenApiRestCall_567657
+proc url_DomainsUpdate_568270(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -842,7 +842,7 @@ proc url_DomainsUpdate_594037(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsUpdate_594036(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DomainsUpdate_568269(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a domain.
   ## 
@@ -858,21 +858,21 @@ proc validate_DomainsUpdate_594036(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594038 = path.getOrDefault("resourceGroupName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  var valid_568271 = path.getOrDefault("resourceGroupName")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "resourceGroupName", valid_594038
-  var valid_594039 = path.getOrDefault("subscriptionId")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_568271 != nil:
+    section.add "resourceGroupName", valid_568271
+  var valid_568272 = path.getOrDefault("subscriptionId")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "subscriptionId", valid_594039
-  var valid_594040 = path.getOrDefault("domainName")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_568272 != nil:
+    section.add "subscriptionId", valid_568272
+  var valid_568273 = path.getOrDefault("domainName")
+  valid_568273 = validateParameter(valid_568273, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "domainName", valid_594040
+  if valid_568273 != nil:
+    section.add "domainName", valid_568273
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -880,11 +880,11 @@ proc validate_DomainsUpdate_594036(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594041 = query.getOrDefault("api-version")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_568274 = query.getOrDefault("api-version")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "api-version", valid_594041
+  if valid_568274 != nil:
+    section.add "api-version", valid_568274
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -898,20 +898,20 @@ proc validate_DomainsUpdate_594036(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594043: Call_DomainsUpdate_594035; path: JsonNode; query: JsonNode;
+proc call*(call_568276: Call_DomainsUpdate_568268; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a domain.
   ## 
-  let valid = call_594043.validator(path, query, header, formData, body)
-  let scheme = call_594043.pickScheme
+  let valid = call_568276.validator(path, query, header, formData, body)
+  let scheme = call_568276.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594043.url(scheme.get, call_594043.host, call_594043.base,
-                         call_594043.route, valid.getOrDefault("path"),
+  let url = call_568276.url(scheme.get, call_568276.host, call_568276.base,
+                         call_568276.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594043, url, valid)
+  result = hook(call_568276, url, valid)
 
-proc call*(call_594044: Call_DomainsUpdate_594035; resourceGroupName: string;
+proc call*(call_568277: Call_DomainsUpdate_568268; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; domain: JsonNode;
           domainName: string): Recallable =
   ## domainsUpdate
@@ -926,24 +926,24 @@ proc call*(call_594044: Call_DomainsUpdate_594035; resourceGroupName: string;
   ##         : Domain registration information.
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_594045 = newJObject()
-  var query_594046 = newJObject()
-  var body_594047 = newJObject()
-  add(path_594045, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594046, "api-version", newJString(apiVersion))
-  add(path_594045, "subscriptionId", newJString(subscriptionId))
+  var path_568278 = newJObject()
+  var query_568279 = newJObject()
+  var body_568280 = newJObject()
+  add(path_568278, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568279, "api-version", newJString(apiVersion))
+  add(path_568278, "subscriptionId", newJString(subscriptionId))
   if domain != nil:
-    body_594047 = domain
-  add(path_594045, "domainName", newJString(domainName))
-  result = call_594044.call(path_594045, query_594046, nil, nil, body_594047)
+    body_568280 = domain
+  add(path_568278, "domainName", newJString(domainName))
+  result = call_568277.call(path_568278, query_568279, nil, nil, body_568280)
 
-var domainsUpdate* = Call_DomainsUpdate_594035(name: "domainsUpdate",
+var domainsUpdate* = Call_DomainsUpdate_568268(name: "domainsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}",
-    validator: validate_DomainsUpdate_594036, base: "", url: url_DomainsUpdate_594037,
+    validator: validate_DomainsUpdate_568269, base: "", url: url_DomainsUpdate_568270,
     schemes: {Scheme.Https})
 type
-  Call_DomainsDelete_594023 = ref object of OpenApiRestCall_593424
-proc url_DomainsDelete_594025(protocol: Scheme; host: string; base: string;
+  Call_DomainsDelete_568256 = ref object of OpenApiRestCall_567657
+proc url_DomainsDelete_568258(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -966,7 +966,7 @@ proc url_DomainsDelete_594025(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsDelete_594024(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DomainsDelete_568257(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a domain.
   ## 
@@ -982,21 +982,21 @@ proc validate_DomainsDelete_594024(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594026 = path.getOrDefault("resourceGroupName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_568259 = path.getOrDefault("resourceGroupName")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "resourceGroupName", valid_594026
-  var valid_594027 = path.getOrDefault("subscriptionId")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_568259 != nil:
+    section.add "resourceGroupName", valid_568259
+  var valid_568260 = path.getOrDefault("subscriptionId")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "subscriptionId", valid_594027
-  var valid_594028 = path.getOrDefault("domainName")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  if valid_568260 != nil:
+    section.add "subscriptionId", valid_568260
+  var valid_568261 = path.getOrDefault("domainName")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "domainName", valid_594028
+  if valid_568261 != nil:
+    section.add "domainName", valid_568261
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1006,15 +1006,15 @@ proc validate_DomainsDelete_594024(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594029 = query.getOrDefault("api-version")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_568262 = query.getOrDefault("api-version")
+  valid_568262 = validateParameter(valid_568262, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "api-version", valid_594029
-  var valid_594030 = query.getOrDefault("forceHardDeleteDomain")
-  valid_594030 = validateParameter(valid_594030, JBool, required = false, default = nil)
-  if valid_594030 != nil:
-    section.add "forceHardDeleteDomain", valid_594030
+  if valid_568262 != nil:
+    section.add "api-version", valid_568262
+  var valid_568263 = query.getOrDefault("forceHardDeleteDomain")
+  valid_568263 = validateParameter(valid_568263, JBool, required = false, default = nil)
+  if valid_568263 != nil:
+    section.add "forceHardDeleteDomain", valid_568263
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1023,20 +1023,20 @@ proc validate_DomainsDelete_594024(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594031: Call_DomainsDelete_594023; path: JsonNode; query: JsonNode;
+proc call*(call_568264: Call_DomainsDelete_568256; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a domain.
   ## 
-  let valid = call_594031.validator(path, query, header, formData, body)
-  let scheme = call_594031.pickScheme
+  let valid = call_568264.validator(path, query, header, formData, body)
+  let scheme = call_568264.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594031.url(scheme.get, call_594031.host, call_594031.base,
-                         call_594031.route, valid.getOrDefault("path"),
+  let url = call_568264.url(scheme.get, call_568264.host, call_568264.base,
+                         call_568264.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594031, url, valid)
+  result = hook(call_568264, url, valid)
 
-proc call*(call_594032: Call_DomainsDelete_594023; resourceGroupName: string;
+proc call*(call_568265: Call_DomainsDelete_568256; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; domainName: string;
           forceHardDeleteDomain: bool = false): Recallable =
   ## domainsDelete
@@ -1051,22 +1051,22 @@ proc call*(call_594032: Call_DomainsDelete_594023; resourceGroupName: string;
   ##             : Name of the domain.
   ##   forceHardDeleteDomain: bool
   ##                        : Specify <code>true</code> to delete the domain immediately. The default is <code>false</code> which deletes the domain after 24 hours.
-  var path_594033 = newJObject()
-  var query_594034 = newJObject()
-  add(path_594033, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594034, "api-version", newJString(apiVersion))
-  add(path_594033, "subscriptionId", newJString(subscriptionId))
-  add(path_594033, "domainName", newJString(domainName))
-  add(query_594034, "forceHardDeleteDomain", newJBool(forceHardDeleteDomain))
-  result = call_594032.call(path_594033, query_594034, nil, nil, nil)
+  var path_568266 = newJObject()
+  var query_568267 = newJObject()
+  add(path_568266, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568267, "api-version", newJString(apiVersion))
+  add(path_568266, "subscriptionId", newJString(subscriptionId))
+  add(path_568266, "domainName", newJString(domainName))
+  add(query_568267, "forceHardDeleteDomain", newJBool(forceHardDeleteDomain))
+  result = call_568265.call(path_568266, query_568267, nil, nil, nil)
 
-var domainsDelete* = Call_DomainsDelete_594023(name: "domainsDelete",
+var domainsDelete* = Call_DomainsDelete_568256(name: "domainsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}",
-    validator: validate_DomainsDelete_594024, base: "", url: url_DomainsDelete_594025,
+    validator: validate_DomainsDelete_568257, base: "", url: url_DomainsDelete_568258,
     schemes: {Scheme.Https})
 type
-  Call_DomainsListOwnershipIdentifiers_594048 = ref object of OpenApiRestCall_593424
-proc url_DomainsListOwnershipIdentifiers_594050(protocol: Scheme; host: string;
+  Call_DomainsListOwnershipIdentifiers_568281 = ref object of OpenApiRestCall_567657
+proc url_DomainsListOwnershipIdentifiers_568283(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1090,7 +1090,7 @@ proc url_DomainsListOwnershipIdentifiers_594050(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsListOwnershipIdentifiers_594049(path: JsonNode;
+proc validate_DomainsListOwnershipIdentifiers_568282(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists domain ownership identifiers.
   ## 
@@ -1106,21 +1106,21 @@ proc validate_DomainsListOwnershipIdentifiers_594049(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594051 = path.getOrDefault("resourceGroupName")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  var valid_568284 = path.getOrDefault("resourceGroupName")
+  valid_568284 = validateParameter(valid_568284, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "resourceGroupName", valid_594051
-  var valid_594052 = path.getOrDefault("subscriptionId")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_568284 != nil:
+    section.add "resourceGroupName", valid_568284
+  var valid_568285 = path.getOrDefault("subscriptionId")
+  valid_568285 = validateParameter(valid_568285, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "subscriptionId", valid_594052
-  var valid_594053 = path.getOrDefault("domainName")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  if valid_568285 != nil:
+    section.add "subscriptionId", valid_568285
+  var valid_568286 = path.getOrDefault("domainName")
+  valid_568286 = validateParameter(valid_568286, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "domainName", valid_594053
+  if valid_568286 != nil:
+    section.add "domainName", valid_568286
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1128,11 +1128,11 @@ proc validate_DomainsListOwnershipIdentifiers_594049(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594054 = query.getOrDefault("api-version")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  var valid_568287 = query.getOrDefault("api-version")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "api-version", valid_594054
+  if valid_568287 != nil:
+    section.add "api-version", valid_568287
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1141,21 +1141,21 @@ proc validate_DomainsListOwnershipIdentifiers_594049(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594055: Call_DomainsListOwnershipIdentifiers_594048;
+proc call*(call_568288: Call_DomainsListOwnershipIdentifiers_568281;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists domain ownership identifiers.
   ## 
-  let valid = call_594055.validator(path, query, header, formData, body)
-  let scheme = call_594055.pickScheme
+  let valid = call_568288.validator(path, query, header, formData, body)
+  let scheme = call_568288.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594055.url(scheme.get, call_594055.host, call_594055.base,
-                         call_594055.route, valid.getOrDefault("path"),
+  let url = call_568288.url(scheme.get, call_568288.host, call_568288.base,
+                         call_568288.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594055, url, valid)
+  result = hook(call_568288, url, valid)
 
-proc call*(call_594056: Call_DomainsListOwnershipIdentifiers_594048;
+proc call*(call_568289: Call_DomainsListOwnershipIdentifiers_568281;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           domainName: string): Recallable =
   ## domainsListOwnershipIdentifiers
@@ -1168,22 +1168,22 @@ proc call*(call_594056: Call_DomainsListOwnershipIdentifiers_594048;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   domainName: string (required)
   ##             : Name of domain.
-  var path_594057 = newJObject()
-  var query_594058 = newJObject()
-  add(path_594057, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594058, "api-version", newJString(apiVersion))
-  add(path_594057, "subscriptionId", newJString(subscriptionId))
-  add(path_594057, "domainName", newJString(domainName))
-  result = call_594056.call(path_594057, query_594058, nil, nil, nil)
+  var path_568290 = newJObject()
+  var query_568291 = newJObject()
+  add(path_568290, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568291, "api-version", newJString(apiVersion))
+  add(path_568290, "subscriptionId", newJString(subscriptionId))
+  add(path_568290, "domainName", newJString(domainName))
+  result = call_568289.call(path_568290, query_568291, nil, nil, nil)
 
-var domainsListOwnershipIdentifiers* = Call_DomainsListOwnershipIdentifiers_594048(
+var domainsListOwnershipIdentifiers* = Call_DomainsListOwnershipIdentifiers_568281(
     name: "domainsListOwnershipIdentifiers", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}/domainOwnershipIdentifiers",
-    validator: validate_DomainsListOwnershipIdentifiers_594049, base: "",
-    url: url_DomainsListOwnershipIdentifiers_594050, schemes: {Scheme.Https})
+    validator: validate_DomainsListOwnershipIdentifiers_568282, base: "",
+    url: url_DomainsListOwnershipIdentifiers_568283, schemes: {Scheme.Https})
 type
-  Call_DomainsCreateOrUpdateOwnershipIdentifier_594071 = ref object of OpenApiRestCall_593424
-proc url_DomainsCreateOrUpdateOwnershipIdentifier_594073(protocol: Scheme;
+  Call_DomainsCreateOrUpdateOwnershipIdentifier_568304 = ref object of OpenApiRestCall_567657
+proc url_DomainsCreateOrUpdateOwnershipIdentifier_568306(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1209,7 +1209,7 @@ proc url_DomainsCreateOrUpdateOwnershipIdentifier_594073(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsCreateOrUpdateOwnershipIdentifier_594072(path: JsonNode;
+proc validate_DomainsCreateOrUpdateOwnershipIdentifier_568305(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates an ownership identifier for a domain or updates identifier details for an existing identifer
   ## 
@@ -1227,26 +1227,26 @@ proc validate_DomainsCreateOrUpdateOwnershipIdentifier_594072(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594074 = path.getOrDefault("resourceGroupName")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  var valid_568307 = path.getOrDefault("resourceGroupName")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "resourceGroupName", valid_594074
-  var valid_594075 = path.getOrDefault("name")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  if valid_568307 != nil:
+    section.add "resourceGroupName", valid_568307
+  var valid_568308 = path.getOrDefault("name")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "name", valid_594075
-  var valid_594076 = path.getOrDefault("subscriptionId")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  if valid_568308 != nil:
+    section.add "name", valid_568308
+  var valid_568309 = path.getOrDefault("subscriptionId")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "subscriptionId", valid_594076
-  var valid_594077 = path.getOrDefault("domainName")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  if valid_568309 != nil:
+    section.add "subscriptionId", valid_568309
+  var valid_568310 = path.getOrDefault("domainName")
+  valid_568310 = validateParameter(valid_568310, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "domainName", valid_594077
+  if valid_568310 != nil:
+    section.add "domainName", valid_568310
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1254,11 +1254,11 @@ proc validate_DomainsCreateOrUpdateOwnershipIdentifier_594072(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594078 = query.getOrDefault("api-version")
-  valid_594078 = validateParameter(valid_594078, JString, required = true,
+  var valid_568311 = query.getOrDefault("api-version")
+  valid_568311 = validateParameter(valid_568311, JString, required = true,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "api-version", valid_594078
+  if valid_568311 != nil:
+    section.add "api-version", valid_568311
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1272,21 +1272,21 @@ proc validate_DomainsCreateOrUpdateOwnershipIdentifier_594072(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594080: Call_DomainsCreateOrUpdateOwnershipIdentifier_594071;
+proc call*(call_568313: Call_DomainsCreateOrUpdateOwnershipIdentifier_568304;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates an ownership identifier for a domain or updates identifier details for an existing identifer
   ## 
-  let valid = call_594080.validator(path, query, header, formData, body)
-  let scheme = call_594080.pickScheme
+  let valid = call_568313.validator(path, query, header, formData, body)
+  let scheme = call_568313.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594080.url(scheme.get, call_594080.host, call_594080.base,
-                         call_594080.route, valid.getOrDefault("path"),
+  let url = call_568313.url(scheme.get, call_568313.host, call_568313.base,
+                         call_568313.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594080, url, valid)
+  result = hook(call_568313, url, valid)
 
-proc call*(call_594081: Call_DomainsCreateOrUpdateOwnershipIdentifier_594071;
+proc call*(call_568314: Call_DomainsCreateOrUpdateOwnershipIdentifier_568304;
           resourceGroupName: string; apiVersion: string; name: string;
           domainOwnershipIdentifier: JsonNode; subscriptionId: string;
           domainName: string): Recallable =
@@ -1304,27 +1304,27 @@ proc call*(call_594081: Call_DomainsCreateOrUpdateOwnershipIdentifier_594071;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   domainName: string (required)
   ##             : Name of domain.
-  var path_594082 = newJObject()
-  var query_594083 = newJObject()
-  var body_594084 = newJObject()
-  add(path_594082, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594083, "api-version", newJString(apiVersion))
-  add(path_594082, "name", newJString(name))
+  var path_568315 = newJObject()
+  var query_568316 = newJObject()
+  var body_568317 = newJObject()
+  add(path_568315, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568316, "api-version", newJString(apiVersion))
+  add(path_568315, "name", newJString(name))
   if domainOwnershipIdentifier != nil:
-    body_594084 = domainOwnershipIdentifier
-  add(path_594082, "subscriptionId", newJString(subscriptionId))
-  add(path_594082, "domainName", newJString(domainName))
-  result = call_594081.call(path_594082, query_594083, nil, nil, body_594084)
+    body_568317 = domainOwnershipIdentifier
+  add(path_568315, "subscriptionId", newJString(subscriptionId))
+  add(path_568315, "domainName", newJString(domainName))
+  result = call_568314.call(path_568315, query_568316, nil, nil, body_568317)
 
-var domainsCreateOrUpdateOwnershipIdentifier* = Call_DomainsCreateOrUpdateOwnershipIdentifier_594071(
+var domainsCreateOrUpdateOwnershipIdentifier* = Call_DomainsCreateOrUpdateOwnershipIdentifier_568304(
     name: "domainsCreateOrUpdateOwnershipIdentifier", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}/domainOwnershipIdentifiers/{name}",
-    validator: validate_DomainsCreateOrUpdateOwnershipIdentifier_594072, base: "",
-    url: url_DomainsCreateOrUpdateOwnershipIdentifier_594073,
+    validator: validate_DomainsCreateOrUpdateOwnershipIdentifier_568305, base: "",
+    url: url_DomainsCreateOrUpdateOwnershipIdentifier_568306,
     schemes: {Scheme.Https})
 type
-  Call_DomainsGetOwnershipIdentifier_594059 = ref object of OpenApiRestCall_593424
-proc url_DomainsGetOwnershipIdentifier_594061(protocol: Scheme; host: string;
+  Call_DomainsGetOwnershipIdentifier_568292 = ref object of OpenApiRestCall_567657
+proc url_DomainsGetOwnershipIdentifier_568294(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1350,7 +1350,7 @@ proc url_DomainsGetOwnershipIdentifier_594061(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsGetOwnershipIdentifier_594060(path: JsonNode; query: JsonNode;
+proc validate_DomainsGetOwnershipIdentifier_568293(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get ownership identifier for domain
   ## 
@@ -1368,26 +1368,26 @@ proc validate_DomainsGetOwnershipIdentifier_594060(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594062 = path.getOrDefault("resourceGroupName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  var valid_568295 = path.getOrDefault("resourceGroupName")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "resourceGroupName", valid_594062
-  var valid_594063 = path.getOrDefault("name")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  if valid_568295 != nil:
+    section.add "resourceGroupName", valid_568295
+  var valid_568296 = path.getOrDefault("name")
+  valid_568296 = validateParameter(valid_568296, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "name", valid_594063
-  var valid_594064 = path.getOrDefault("subscriptionId")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_568296 != nil:
+    section.add "name", valid_568296
+  var valid_568297 = path.getOrDefault("subscriptionId")
+  valid_568297 = validateParameter(valid_568297, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "subscriptionId", valid_594064
-  var valid_594065 = path.getOrDefault("domainName")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  if valid_568297 != nil:
+    section.add "subscriptionId", valid_568297
+  var valid_568298 = path.getOrDefault("domainName")
+  valid_568298 = validateParameter(valid_568298, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "domainName", valid_594065
+  if valid_568298 != nil:
+    section.add "domainName", valid_568298
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1395,11 +1395,11 @@ proc validate_DomainsGetOwnershipIdentifier_594060(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594066 = query.getOrDefault("api-version")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  var valid_568299 = query.getOrDefault("api-version")
+  valid_568299 = validateParameter(valid_568299, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "api-version", valid_594066
+  if valid_568299 != nil:
+    section.add "api-version", valid_568299
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1408,20 +1408,20 @@ proc validate_DomainsGetOwnershipIdentifier_594060(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594067: Call_DomainsGetOwnershipIdentifier_594059; path: JsonNode;
+proc call*(call_568300: Call_DomainsGetOwnershipIdentifier_568292; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get ownership identifier for domain
   ## 
-  let valid = call_594067.validator(path, query, header, formData, body)
-  let scheme = call_594067.pickScheme
+  let valid = call_568300.validator(path, query, header, formData, body)
+  let scheme = call_568300.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594067.url(scheme.get, call_594067.host, call_594067.base,
-                         call_594067.route, valid.getOrDefault("path"),
+  let url = call_568300.url(scheme.get, call_568300.host, call_568300.base,
+                         call_568300.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594067, url, valid)
+  result = hook(call_568300, url, valid)
 
-proc call*(call_594068: Call_DomainsGetOwnershipIdentifier_594059;
+proc call*(call_568301: Call_DomainsGetOwnershipIdentifier_568292;
           resourceGroupName: string; apiVersion: string; name: string;
           subscriptionId: string; domainName: string): Recallable =
   ## domainsGetOwnershipIdentifier
@@ -1436,23 +1436,23 @@ proc call*(call_594068: Call_DomainsGetOwnershipIdentifier_594059;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   domainName: string (required)
   ##             : Name of domain.
-  var path_594069 = newJObject()
-  var query_594070 = newJObject()
-  add(path_594069, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594070, "api-version", newJString(apiVersion))
-  add(path_594069, "name", newJString(name))
-  add(path_594069, "subscriptionId", newJString(subscriptionId))
-  add(path_594069, "domainName", newJString(domainName))
-  result = call_594068.call(path_594069, query_594070, nil, nil, nil)
+  var path_568302 = newJObject()
+  var query_568303 = newJObject()
+  add(path_568302, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568303, "api-version", newJString(apiVersion))
+  add(path_568302, "name", newJString(name))
+  add(path_568302, "subscriptionId", newJString(subscriptionId))
+  add(path_568302, "domainName", newJString(domainName))
+  result = call_568301.call(path_568302, query_568303, nil, nil, nil)
 
-var domainsGetOwnershipIdentifier* = Call_DomainsGetOwnershipIdentifier_594059(
+var domainsGetOwnershipIdentifier* = Call_DomainsGetOwnershipIdentifier_568292(
     name: "domainsGetOwnershipIdentifier", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}/domainOwnershipIdentifiers/{name}",
-    validator: validate_DomainsGetOwnershipIdentifier_594060, base: "",
-    url: url_DomainsGetOwnershipIdentifier_594061, schemes: {Scheme.Https})
+    validator: validate_DomainsGetOwnershipIdentifier_568293, base: "",
+    url: url_DomainsGetOwnershipIdentifier_568294, schemes: {Scheme.Https})
 type
-  Call_DomainsUpdateOwnershipIdentifier_594097 = ref object of OpenApiRestCall_593424
-proc url_DomainsUpdateOwnershipIdentifier_594099(protocol: Scheme; host: string;
+  Call_DomainsUpdateOwnershipIdentifier_568330 = ref object of OpenApiRestCall_567657
+proc url_DomainsUpdateOwnershipIdentifier_568332(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1478,7 +1478,7 @@ proc url_DomainsUpdateOwnershipIdentifier_594099(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsUpdateOwnershipIdentifier_594098(path: JsonNode;
+proc validate_DomainsUpdateOwnershipIdentifier_568331(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates an ownership identifier for a domain or updates identifier details for an existing identifer
   ## 
@@ -1496,26 +1496,26 @@ proc validate_DomainsUpdateOwnershipIdentifier_594098(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594100 = path.getOrDefault("resourceGroupName")
-  valid_594100 = validateParameter(valid_594100, JString, required = true,
+  var valid_568333 = path.getOrDefault("resourceGroupName")
+  valid_568333 = validateParameter(valid_568333, JString, required = true,
                                  default = nil)
-  if valid_594100 != nil:
-    section.add "resourceGroupName", valid_594100
-  var valid_594101 = path.getOrDefault("name")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  if valid_568333 != nil:
+    section.add "resourceGroupName", valid_568333
+  var valid_568334 = path.getOrDefault("name")
+  valid_568334 = validateParameter(valid_568334, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "name", valid_594101
-  var valid_594102 = path.getOrDefault("subscriptionId")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  if valid_568334 != nil:
+    section.add "name", valid_568334
+  var valid_568335 = path.getOrDefault("subscriptionId")
+  valid_568335 = validateParameter(valid_568335, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "subscriptionId", valid_594102
-  var valid_594103 = path.getOrDefault("domainName")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  if valid_568335 != nil:
+    section.add "subscriptionId", valid_568335
+  var valid_568336 = path.getOrDefault("domainName")
+  valid_568336 = validateParameter(valid_568336, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "domainName", valid_594103
+  if valid_568336 != nil:
+    section.add "domainName", valid_568336
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1523,11 +1523,11 @@ proc validate_DomainsUpdateOwnershipIdentifier_594098(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594104 = query.getOrDefault("api-version")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  var valid_568337 = query.getOrDefault("api-version")
+  valid_568337 = validateParameter(valid_568337, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "api-version", valid_594104
+  if valid_568337 != nil:
+    section.add "api-version", valid_568337
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1541,21 +1541,21 @@ proc validate_DomainsUpdateOwnershipIdentifier_594098(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594106: Call_DomainsUpdateOwnershipIdentifier_594097;
+proc call*(call_568339: Call_DomainsUpdateOwnershipIdentifier_568330;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates an ownership identifier for a domain or updates identifier details for an existing identifer
   ## 
-  let valid = call_594106.validator(path, query, header, formData, body)
-  let scheme = call_594106.pickScheme
+  let valid = call_568339.validator(path, query, header, formData, body)
+  let scheme = call_568339.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594106.url(scheme.get, call_594106.host, call_594106.base,
-                         call_594106.route, valid.getOrDefault("path"),
+  let url = call_568339.url(scheme.get, call_568339.host, call_568339.base,
+                         call_568339.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594106, url, valid)
+  result = hook(call_568339, url, valid)
 
-proc call*(call_594107: Call_DomainsUpdateOwnershipIdentifier_594097;
+proc call*(call_568340: Call_DomainsUpdateOwnershipIdentifier_568330;
           resourceGroupName: string; apiVersion: string; name: string;
           domainOwnershipIdentifier: JsonNode; subscriptionId: string;
           domainName: string): Recallable =
@@ -1573,26 +1573,26 @@ proc call*(call_594107: Call_DomainsUpdateOwnershipIdentifier_594097;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   domainName: string (required)
   ##             : Name of domain.
-  var path_594108 = newJObject()
-  var query_594109 = newJObject()
-  var body_594110 = newJObject()
-  add(path_594108, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594109, "api-version", newJString(apiVersion))
-  add(path_594108, "name", newJString(name))
+  var path_568341 = newJObject()
+  var query_568342 = newJObject()
+  var body_568343 = newJObject()
+  add(path_568341, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568342, "api-version", newJString(apiVersion))
+  add(path_568341, "name", newJString(name))
   if domainOwnershipIdentifier != nil:
-    body_594110 = domainOwnershipIdentifier
-  add(path_594108, "subscriptionId", newJString(subscriptionId))
-  add(path_594108, "domainName", newJString(domainName))
-  result = call_594107.call(path_594108, query_594109, nil, nil, body_594110)
+    body_568343 = domainOwnershipIdentifier
+  add(path_568341, "subscriptionId", newJString(subscriptionId))
+  add(path_568341, "domainName", newJString(domainName))
+  result = call_568340.call(path_568341, query_568342, nil, nil, body_568343)
 
-var domainsUpdateOwnershipIdentifier* = Call_DomainsUpdateOwnershipIdentifier_594097(
+var domainsUpdateOwnershipIdentifier* = Call_DomainsUpdateOwnershipIdentifier_568330(
     name: "domainsUpdateOwnershipIdentifier", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}/domainOwnershipIdentifiers/{name}",
-    validator: validate_DomainsUpdateOwnershipIdentifier_594098, base: "",
-    url: url_DomainsUpdateOwnershipIdentifier_594099, schemes: {Scheme.Https})
+    validator: validate_DomainsUpdateOwnershipIdentifier_568331, base: "",
+    url: url_DomainsUpdateOwnershipIdentifier_568332, schemes: {Scheme.Https})
 type
-  Call_DomainsDeleteOwnershipIdentifier_594085 = ref object of OpenApiRestCall_593424
-proc url_DomainsDeleteOwnershipIdentifier_594087(protocol: Scheme; host: string;
+  Call_DomainsDeleteOwnershipIdentifier_568318 = ref object of OpenApiRestCall_567657
+proc url_DomainsDeleteOwnershipIdentifier_568320(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1618,7 +1618,7 @@ proc url_DomainsDeleteOwnershipIdentifier_594087(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsDeleteOwnershipIdentifier_594086(path: JsonNode;
+proc validate_DomainsDeleteOwnershipIdentifier_568319(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete ownership identifier for domain
   ## 
@@ -1636,26 +1636,26 @@ proc validate_DomainsDeleteOwnershipIdentifier_594086(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594088 = path.getOrDefault("resourceGroupName")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  var valid_568321 = path.getOrDefault("resourceGroupName")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "resourceGroupName", valid_594088
-  var valid_594089 = path.getOrDefault("name")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  if valid_568321 != nil:
+    section.add "resourceGroupName", valid_568321
+  var valid_568322 = path.getOrDefault("name")
+  valid_568322 = validateParameter(valid_568322, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "name", valid_594089
-  var valid_594090 = path.getOrDefault("subscriptionId")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  if valid_568322 != nil:
+    section.add "name", valid_568322
+  var valid_568323 = path.getOrDefault("subscriptionId")
+  valid_568323 = validateParameter(valid_568323, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "subscriptionId", valid_594090
-  var valid_594091 = path.getOrDefault("domainName")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  if valid_568323 != nil:
+    section.add "subscriptionId", valid_568323
+  var valid_568324 = path.getOrDefault("domainName")
+  valid_568324 = validateParameter(valid_568324, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "domainName", valid_594091
+  if valid_568324 != nil:
+    section.add "domainName", valid_568324
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1663,11 +1663,11 @@ proc validate_DomainsDeleteOwnershipIdentifier_594086(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594092 = query.getOrDefault("api-version")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  var valid_568325 = query.getOrDefault("api-version")
+  valid_568325 = validateParameter(valid_568325, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "api-version", valid_594092
+  if valid_568325 != nil:
+    section.add "api-version", valid_568325
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1676,21 +1676,21 @@ proc validate_DomainsDeleteOwnershipIdentifier_594086(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594093: Call_DomainsDeleteOwnershipIdentifier_594085;
+proc call*(call_568326: Call_DomainsDeleteOwnershipIdentifier_568318;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete ownership identifier for domain
   ## 
-  let valid = call_594093.validator(path, query, header, formData, body)
-  let scheme = call_594093.pickScheme
+  let valid = call_568326.validator(path, query, header, formData, body)
+  let scheme = call_568326.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594093.url(scheme.get, call_594093.host, call_594093.base,
-                         call_594093.route, valid.getOrDefault("path"),
+  let url = call_568326.url(scheme.get, call_568326.host, call_568326.base,
+                         call_568326.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594093, url, valid)
+  result = hook(call_568326, url, valid)
 
-proc call*(call_594094: Call_DomainsDeleteOwnershipIdentifier_594085;
+proc call*(call_568327: Call_DomainsDeleteOwnershipIdentifier_568318;
           resourceGroupName: string; apiVersion: string; name: string;
           subscriptionId: string; domainName: string): Recallable =
   ## domainsDeleteOwnershipIdentifier
@@ -1705,23 +1705,23 @@ proc call*(call_594094: Call_DomainsDeleteOwnershipIdentifier_594085;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   domainName: string (required)
   ##             : Name of domain.
-  var path_594095 = newJObject()
-  var query_594096 = newJObject()
-  add(path_594095, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594096, "api-version", newJString(apiVersion))
-  add(path_594095, "name", newJString(name))
-  add(path_594095, "subscriptionId", newJString(subscriptionId))
-  add(path_594095, "domainName", newJString(domainName))
-  result = call_594094.call(path_594095, query_594096, nil, nil, nil)
+  var path_568328 = newJObject()
+  var query_568329 = newJObject()
+  add(path_568328, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568329, "api-version", newJString(apiVersion))
+  add(path_568328, "name", newJString(name))
+  add(path_568328, "subscriptionId", newJString(subscriptionId))
+  add(path_568328, "domainName", newJString(domainName))
+  result = call_568327.call(path_568328, query_568329, nil, nil, nil)
 
-var domainsDeleteOwnershipIdentifier* = Call_DomainsDeleteOwnershipIdentifier_594085(
+var domainsDeleteOwnershipIdentifier* = Call_DomainsDeleteOwnershipIdentifier_568318(
     name: "domainsDeleteOwnershipIdentifier", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}/domainOwnershipIdentifiers/{name}",
-    validator: validate_DomainsDeleteOwnershipIdentifier_594086, base: "",
-    url: url_DomainsDeleteOwnershipIdentifier_594087, schemes: {Scheme.Https})
+    validator: validate_DomainsDeleteOwnershipIdentifier_568319, base: "",
+    url: url_DomainsDeleteOwnershipIdentifier_568320, schemes: {Scheme.Https})
 type
-  Call_DomainsRenew_594111 = ref object of OpenApiRestCall_593424
-proc url_DomainsRenew_594113(protocol: Scheme; host: string; base: string;
+  Call_DomainsRenew_568344 = ref object of OpenApiRestCall_567657
+proc url_DomainsRenew_568346(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1745,7 +1745,7 @@ proc url_DomainsRenew_594113(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsRenew_594112(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DomainsRenew_568345(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Renew a domain.
   ## 
@@ -1761,21 +1761,21 @@ proc validate_DomainsRenew_594112(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594114 = path.getOrDefault("resourceGroupName")
-  valid_594114 = validateParameter(valid_594114, JString, required = true,
+  var valid_568347 = path.getOrDefault("resourceGroupName")
+  valid_568347 = validateParameter(valid_568347, JString, required = true,
                                  default = nil)
-  if valid_594114 != nil:
-    section.add "resourceGroupName", valid_594114
-  var valid_594115 = path.getOrDefault("subscriptionId")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  if valid_568347 != nil:
+    section.add "resourceGroupName", valid_568347
+  var valid_568348 = path.getOrDefault("subscriptionId")
+  valid_568348 = validateParameter(valid_568348, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "subscriptionId", valid_594115
-  var valid_594116 = path.getOrDefault("domainName")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_568348 != nil:
+    section.add "subscriptionId", valid_568348
+  var valid_568349 = path.getOrDefault("domainName")
+  valid_568349 = validateParameter(valid_568349, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "domainName", valid_594116
+  if valid_568349 != nil:
+    section.add "domainName", valid_568349
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1783,11 +1783,11 @@ proc validate_DomainsRenew_594112(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594117 = query.getOrDefault("api-version")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  var valid_568350 = query.getOrDefault("api-version")
+  valid_568350 = validateParameter(valid_568350, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "api-version", valid_594117
+  if valid_568350 != nil:
+    section.add "api-version", valid_568350
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1796,20 +1796,20 @@ proc validate_DomainsRenew_594112(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594118: Call_DomainsRenew_594111; path: JsonNode; query: JsonNode;
+proc call*(call_568351: Call_DomainsRenew_568344; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Renew a domain.
   ## 
-  let valid = call_594118.validator(path, query, header, formData, body)
-  let scheme = call_594118.pickScheme
+  let valid = call_568351.validator(path, query, header, formData, body)
+  let scheme = call_568351.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594118.url(scheme.get, call_594118.host, call_594118.base,
-                         call_594118.route, valid.getOrDefault("path"),
+  let url = call_568351.url(scheme.get, call_568351.host, call_568351.base,
+                         call_568351.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594118, url, valid)
+  result = hook(call_568351, url, valid)
 
-proc call*(call_594119: Call_DomainsRenew_594111; resourceGroupName: string;
+proc call*(call_568352: Call_DomainsRenew_568344; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; domainName: string): Recallable =
   ## domainsRenew
   ## Renew a domain.
@@ -1821,17 +1821,17 @@ proc call*(call_594119: Call_DomainsRenew_594111; resourceGroupName: string;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_594120 = newJObject()
-  var query_594121 = newJObject()
-  add(path_594120, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594121, "api-version", newJString(apiVersion))
-  add(path_594120, "subscriptionId", newJString(subscriptionId))
-  add(path_594120, "domainName", newJString(domainName))
-  result = call_594119.call(path_594120, query_594121, nil, nil, nil)
+  var path_568353 = newJObject()
+  var query_568354 = newJObject()
+  add(path_568353, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568354, "api-version", newJString(apiVersion))
+  add(path_568353, "subscriptionId", newJString(subscriptionId))
+  add(path_568353, "domainName", newJString(domainName))
+  result = call_568352.call(path_568353, query_568354, nil, nil, nil)
 
-var domainsRenew* = Call_DomainsRenew_594111(name: "domainsRenew",
+var domainsRenew* = Call_DomainsRenew_568344(name: "domainsRenew",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DomainRegistration/domains/{domainName}/renew",
-    validator: validate_DomainsRenew_594112, base: "", url: url_DomainsRenew_594113,
+    validator: validate_DomainsRenew_568345, base: "", url: url_DomainsRenew_568346,
     schemes: {Scheme.Https})
 export
   rest

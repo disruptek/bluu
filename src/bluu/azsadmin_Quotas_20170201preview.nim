@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: KeyVaultManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_574442 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574442](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574442): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-Quotas"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_QuotasList_593631 = ref object of OpenApiRestCall_593409
-proc url_QuotasList_593633(protocol: Scheme; host: string; base: string; route: string;
+  Call_QuotasList_574664 = ref object of OpenApiRestCall_574442
+proc url_QuotasList_574666(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +124,7 @@ proc url_QuotasList_593633(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotasList_593632(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QuotasList_574665(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a list of all quota objects for KeyVault at a location.
   ## 
@@ -138,16 +138,16 @@ proc validate_QuotasList_593632(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593793 = path.getOrDefault("subscriptionId")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  var valid_574826 = path.getOrDefault("subscriptionId")
+  valid_574826 = validateParameter(valid_574826, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "subscriptionId", valid_593793
-  var valid_593794 = path.getOrDefault("location")
-  valid_593794 = validateParameter(valid_593794, JString, required = true,
+  if valid_574826 != nil:
+    section.add "subscriptionId", valid_574826
+  var valid_574827 = path.getOrDefault("location")
+  valid_574827 = validateParameter(valid_574827, JString, required = true,
                                  default = nil)
-  if valid_593794 != nil:
-    section.add "location", valid_593794
+  if valid_574827 != nil:
+    section.add "location", valid_574827
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -155,11 +155,11 @@ proc validate_QuotasList_593632(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_574841 = query.getOrDefault("api-version")
+  valid_574841 = validateParameter(valid_574841, JString, required = true,
                                  default = newJString("2017-02-01-preview"))
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_574841 != nil:
+    section.add "api-version", valid_574841
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -168,20 +168,20 @@ proc validate_QuotasList_593632(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593835: Call_QuotasList_593631; path: JsonNode; query: JsonNode;
+proc call*(call_574868: Call_QuotasList_574664; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a list of all quota objects for KeyVault at a location.
   ## 
-  let valid = call_593835.validator(path, query, header, formData, body)
-  let scheme = call_593835.pickScheme
+  let valid = call_574868.validator(path, query, header, formData, body)
+  let scheme = call_574868.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593835.url(scheme.get, call_593835.host, call_593835.base,
-                         call_593835.route, valid.getOrDefault("path"),
+  let url = call_574868.url(scheme.get, call_574868.host, call_574868.base,
+                         call_574868.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593835, url, valid)
+  result = hook(call_574868, url, valid)
 
-proc call*(call_593906: Call_QuotasList_593631; subscriptionId: string;
+proc call*(call_574939: Call_QuotasList_574664; subscriptionId: string;
           location: string; apiVersion: string = "2017-02-01-preview"): Recallable =
   ## quotasList
   ## Get a list of all quota objects for KeyVault at a location.
@@ -191,17 +191,17 @@ proc call*(call_593906: Call_QuotasList_593631; subscriptionId: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The location of the quota.
-  var path_593907 = newJObject()
-  var query_593909 = newJObject()
-  add(query_593909, "api-version", newJString(apiVersion))
-  add(path_593907, "subscriptionId", newJString(subscriptionId))
-  add(path_593907, "location", newJString(location))
-  result = call_593906.call(path_593907, query_593909, nil, nil, nil)
+  var path_574940 = newJObject()
+  var query_574942 = newJObject()
+  add(query_574942, "api-version", newJString(apiVersion))
+  add(path_574940, "subscriptionId", newJString(subscriptionId))
+  add(path_574940, "location", newJString(location))
+  result = call_574939.call(path_574940, query_574942, nil, nil, nil)
 
-var quotasList* = Call_QuotasList_593631(name: "quotasList",
+var quotasList* = Call_QuotasList_574664(name: "quotasList",
                                       meth: HttpMethod.HttpGet, host: "management.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.KeyVault.Admin/locations/{location}/quotas",
-                                      validator: validate_QuotasList_593632,
-                                      base: "", url: url_QuotasList_593633,
+                                      validator: validate_QuotasList_574665,
+                                      base: "", url: url_QuotasList_574666,
                                       schemes: {Scheme.Https})
 export
   rest

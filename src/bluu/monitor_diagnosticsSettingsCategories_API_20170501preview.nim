@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: MonitorManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "monitor-diagnosticsSettingsCategories_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DiagnosticSettingsCategoryList_593630 = ref object of OpenApiRestCall_593408
-proc url_DiagnosticSettingsCategoryList_593632(protocol: Scheme; host: string;
+  Call_DiagnosticSettingsCategoryList_567863 = ref object of OpenApiRestCall_567641
+proc url_DiagnosticSettingsCategoryList_567865(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_DiagnosticSettingsCategoryList_593632(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DiagnosticSettingsCategoryList_593631(path: JsonNode;
+proc validate_DiagnosticSettingsCategoryList_567864(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the diagnostic settings categories for the specified resource.
   ## 
@@ -133,11 +133,11 @@ proc validate_DiagnosticSettingsCategoryList_593631(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceUri` field"
-  var valid_593805 = path.getOrDefault("resourceUri")
-  valid_593805 = validateParameter(valid_593805, JString, required = true,
+  var valid_568038 = path.getOrDefault("resourceUri")
+  valid_568038 = validateParameter(valid_568038, JString, required = true,
                                  default = nil)
-  if valid_593805 != nil:
-    section.add "resourceUri", valid_593805
+  if valid_568038 != nil:
+    section.add "resourceUri", valid_568038
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_DiagnosticSettingsCategoryList_593631(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593806 = query.getOrDefault("api-version")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_568039 = query.getOrDefault("api-version")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "api-version", valid_593806
+  if valid_568039 != nil:
+    section.add "api-version", valid_568039
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_DiagnosticSettingsCategoryList_593631(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593829: Call_DiagnosticSettingsCategoryList_593630; path: JsonNode;
+proc call*(call_568062: Call_DiagnosticSettingsCategoryList_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the diagnostic settings categories for the specified resource.
   ## 
-  let valid = call_593829.validator(path, query, header, formData, body)
-  let scheme = call_593829.pickScheme
+  let valid = call_568062.validator(path, query, header, formData, body)
+  let scheme = call_568062.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593829.url(scheme.get, call_593829.host, call_593829.base,
-                         call_593829.route, valid.getOrDefault("path"),
+  let url = call_568062.url(scheme.get, call_568062.host, call_568062.base,
+                         call_568062.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593829, url, valid)
+  result = hook(call_568062, url, valid)
 
-proc call*(call_593900: Call_DiagnosticSettingsCategoryList_593630;
+proc call*(call_568133: Call_DiagnosticSettingsCategoryList_567863;
           apiVersion: string; resourceUri: string): Recallable =
   ## diagnosticSettingsCategoryList
   ## Lists the diagnostic settings categories for the specified resource.
@@ -179,20 +179,20 @@ proc call*(call_593900: Call_DiagnosticSettingsCategoryList_593630;
   ##             : Client Api Version.
   ##   resourceUri: string (required)
   ##              : The identifier of the resource.
-  var path_593901 = newJObject()
-  var query_593903 = newJObject()
-  add(query_593903, "api-version", newJString(apiVersion))
-  add(path_593901, "resourceUri", newJString(resourceUri))
-  result = call_593900.call(path_593901, query_593903, nil, nil, nil)
+  var path_568134 = newJObject()
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  add(path_568134, "resourceUri", newJString(resourceUri))
+  result = call_568133.call(path_568134, query_568136, nil, nil, nil)
 
-var diagnosticSettingsCategoryList* = Call_DiagnosticSettingsCategoryList_593630(
+var diagnosticSettingsCategoryList* = Call_DiagnosticSettingsCategoryList_567863(
     name: "diagnosticSettingsCategoryList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{resourceUri}/providers/microsoft.insights/diagnosticSettingsCategories",
-    validator: validate_DiagnosticSettingsCategoryList_593631, base: "",
-    url: url_DiagnosticSettingsCategoryList_593632, schemes: {Scheme.Https})
+    validator: validate_DiagnosticSettingsCategoryList_567864, base: "",
+    url: url_DiagnosticSettingsCategoryList_567865, schemes: {Scheme.Https})
 type
-  Call_DiagnosticSettingsCategoryGet_593942 = ref object of OpenApiRestCall_593408
-proc url_DiagnosticSettingsCategoryGet_593944(protocol: Scheme; host: string;
+  Call_DiagnosticSettingsCategoryGet_568175 = ref object of OpenApiRestCall_567641
+proc url_DiagnosticSettingsCategoryGet_568177(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,7 +211,7 @@ proc url_DiagnosticSettingsCategoryGet_593944(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DiagnosticSettingsCategoryGet_593943(path: JsonNode; query: JsonNode;
+proc validate_DiagnosticSettingsCategoryGet_568176(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the diagnostic settings category for the specified resource.
   ## 
@@ -224,16 +224,16 @@ proc validate_DiagnosticSettingsCategoryGet_593943(path: JsonNode; query: JsonNo
   ##              : The identifier of the resource.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_593945 = path.getOrDefault("name")
-  valid_593945 = validateParameter(valid_593945, JString, required = true,
+  var valid_568178 = path.getOrDefault("name")
+  valid_568178 = validateParameter(valid_568178, JString, required = true,
                                  default = nil)
-  if valid_593945 != nil:
-    section.add "name", valid_593945
-  var valid_593946 = path.getOrDefault("resourceUri")
-  valid_593946 = validateParameter(valid_593946, JString, required = true,
+  if valid_568178 != nil:
+    section.add "name", valid_568178
+  var valid_568179 = path.getOrDefault("resourceUri")
+  valid_568179 = validateParameter(valid_568179, JString, required = true,
                                  default = nil)
-  if valid_593946 != nil:
-    section.add "resourceUri", valid_593946
+  if valid_568179 != nil:
+    section.add "resourceUri", valid_568179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -241,11 +241,11 @@ proc validate_DiagnosticSettingsCategoryGet_593943(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593947 = query.getOrDefault("api-version")
-  valid_593947 = validateParameter(valid_593947, JString, required = true,
+  var valid_568180 = query.getOrDefault("api-version")
+  valid_568180 = validateParameter(valid_568180, JString, required = true,
                                  default = nil)
-  if valid_593947 != nil:
-    section.add "api-version", valid_593947
+  if valid_568180 != nil:
+    section.add "api-version", valid_568180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -254,20 +254,20 @@ proc validate_DiagnosticSettingsCategoryGet_593943(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593948: Call_DiagnosticSettingsCategoryGet_593942; path: JsonNode;
+proc call*(call_568181: Call_DiagnosticSettingsCategoryGet_568175; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the diagnostic settings category for the specified resource.
   ## 
-  let valid = call_593948.validator(path, query, header, formData, body)
-  let scheme = call_593948.pickScheme
+  let valid = call_568181.validator(path, query, header, formData, body)
+  let scheme = call_568181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593948.url(scheme.get, call_593948.host, call_593948.base,
-                         call_593948.route, valid.getOrDefault("path"),
+  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
+                         call_568181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593948, url, valid)
+  result = hook(call_568181, url, valid)
 
-proc call*(call_593949: Call_DiagnosticSettingsCategoryGet_593942;
+proc call*(call_568182: Call_DiagnosticSettingsCategoryGet_568175;
           apiVersion: string; name: string; resourceUri: string): Recallable =
   ## diagnosticSettingsCategoryGet
   ## Gets the diagnostic settings category for the specified resource.
@@ -277,18 +277,18 @@ proc call*(call_593949: Call_DiagnosticSettingsCategoryGet_593942;
   ##       : The name of the diagnostic setting.
   ##   resourceUri: string (required)
   ##              : The identifier of the resource.
-  var path_593950 = newJObject()
-  var query_593951 = newJObject()
-  add(query_593951, "api-version", newJString(apiVersion))
-  add(path_593950, "name", newJString(name))
-  add(path_593950, "resourceUri", newJString(resourceUri))
-  result = call_593949.call(path_593950, query_593951, nil, nil, nil)
+  var path_568183 = newJObject()
+  var query_568184 = newJObject()
+  add(query_568184, "api-version", newJString(apiVersion))
+  add(path_568183, "name", newJString(name))
+  add(path_568183, "resourceUri", newJString(resourceUri))
+  result = call_568182.call(path_568183, query_568184, nil, nil, nil)
 
-var diagnosticSettingsCategoryGet* = Call_DiagnosticSettingsCategoryGet_593942(
+var diagnosticSettingsCategoryGet* = Call_DiagnosticSettingsCategoryGet_568175(
     name: "diagnosticSettingsCategoryGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{resourceUri}/providers/microsoft.insights/diagnosticSettingsCategories/{name}",
-    validator: validate_DiagnosticSettingsCategoryGet_593943, base: "",
-    url: url_DiagnosticSettingsCategoryGet_593944, schemes: {Scheme.Https})
+    validator: validate_DiagnosticSettingsCategoryGet_568176, base: "",
+    url: url_DiagnosticSettingsCategoryGet_568177, schemes: {Scheme.Https})
 export
   rest
 

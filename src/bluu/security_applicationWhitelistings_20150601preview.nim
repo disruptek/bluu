@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "security-applicationWhitelistings"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AdaptiveApplicationControlsList_593646 = ref object of OpenApiRestCall_593424
-proc url_AdaptiveApplicationControlsList_593648(protocol: Scheme; host: string;
+  Call_AdaptiveApplicationControlsList_567879 = ref object of OpenApiRestCall_567657
+proc url_AdaptiveApplicationControlsList_567881(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_AdaptiveApplicationControlsList_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AdaptiveApplicationControlsList_593647(path: JsonNode;
+proc validate_AdaptiveApplicationControlsList_567880(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of application control VM/server groups for the subscription.
   ## 
@@ -133,11 +133,11 @@ proc validate_AdaptiveApplicationControlsList_593647(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593821 = path.getOrDefault("subscriptionId")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("subscriptionId")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "subscriptionId", valid_593821
+  if valid_568054 != nil:
+    section.add "subscriptionId", valid_568054
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -149,19 +149,19 @@ proc validate_AdaptiveApplicationControlsList_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593822 = query.getOrDefault("api-version")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = query.getOrDefault("api-version")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "api-version", valid_593822
-  var valid_593823 = query.getOrDefault("summary")
-  valid_593823 = validateParameter(valid_593823, JBool, required = false, default = nil)
-  if valid_593823 != nil:
-    section.add "summary", valid_593823
-  var valid_593824 = query.getOrDefault("includePathRecommendations")
-  valid_593824 = validateParameter(valid_593824, JBool, required = false, default = nil)
-  if valid_593824 != nil:
-    section.add "includePathRecommendations", valid_593824
+  if valid_568055 != nil:
+    section.add "api-version", valid_568055
+  var valid_568056 = query.getOrDefault("summary")
+  valid_568056 = validateParameter(valid_568056, JBool, required = false, default = nil)
+  if valid_568056 != nil:
+    section.add "summary", valid_568056
+  var valid_568057 = query.getOrDefault("includePathRecommendations")
+  valid_568057 = validateParameter(valid_568057, JBool, required = false, default = nil)
+  if valid_568057 != nil:
+    section.add "includePathRecommendations", valid_568057
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -170,21 +170,21 @@ proc validate_AdaptiveApplicationControlsList_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593847: Call_AdaptiveApplicationControlsList_593646;
+proc call*(call_568080: Call_AdaptiveApplicationControlsList_567879;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of application control VM/server groups for the subscription.
   ## 
-  let valid = call_593847.validator(path, query, header, formData, body)
-  let scheme = call_593847.pickScheme
+  let valid = call_568080.validator(path, query, header, formData, body)
+  let scheme = call_568080.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593847.url(scheme.get, call_593847.host, call_593847.base,
-                         call_593847.route, valid.getOrDefault("path"),
+  let url = call_568080.url(scheme.get, call_568080.host, call_568080.base,
+                         call_568080.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593847, url, valid)
+  result = hook(call_568080, url, valid)
 
-proc call*(call_593918: Call_AdaptiveApplicationControlsList_593646;
+proc call*(call_568151: Call_AdaptiveApplicationControlsList_567879;
           apiVersion: string; subscriptionId: string; summary: bool = false;
           includePathRecommendations: bool = false): Recallable =
   ## adaptiveApplicationControlsList
@@ -197,23 +197,23 @@ proc call*(call_593918: Call_AdaptiveApplicationControlsList_593646;
   ##          : Return output in a summarized form
   ##   includePathRecommendations: bool
   ##                             : Include the policy rules
-  var path_593919 = newJObject()
-  var query_593921 = newJObject()
-  add(query_593921, "api-version", newJString(apiVersion))
-  add(path_593919, "subscriptionId", newJString(subscriptionId))
-  add(query_593921, "summary", newJBool(summary))
-  add(query_593921, "includePathRecommendations",
+  var path_568152 = newJObject()
+  var query_568154 = newJObject()
+  add(query_568154, "api-version", newJString(apiVersion))
+  add(path_568152, "subscriptionId", newJString(subscriptionId))
+  add(query_568154, "summary", newJBool(summary))
+  add(query_568154, "includePathRecommendations",
       newJBool(includePathRecommendations))
-  result = call_593918.call(path_593919, query_593921, nil, nil, nil)
+  result = call_568151.call(path_568152, query_568154, nil, nil, nil)
 
-var adaptiveApplicationControlsList* = Call_AdaptiveApplicationControlsList_593646(
+var adaptiveApplicationControlsList* = Call_AdaptiveApplicationControlsList_567879(
     name: "adaptiveApplicationControlsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/applicationWhitelistings",
-    validator: validate_AdaptiveApplicationControlsList_593647, base: "",
-    url: url_AdaptiveApplicationControlsList_593648, schemes: {Scheme.Https})
+    validator: validate_AdaptiveApplicationControlsList_567880, base: "",
+    url: url_AdaptiveApplicationControlsList_567881, schemes: {Scheme.Https})
 type
-  Call_AdaptiveApplicationControlsPut_593971 = ref object of OpenApiRestCall_593424
-proc url_AdaptiveApplicationControlsPut_593973(protocol: Scheme; host: string;
+  Call_AdaptiveApplicationControlsPut_568204 = ref object of OpenApiRestCall_567657
+proc url_AdaptiveApplicationControlsPut_568206(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -234,7 +234,7 @@ proc url_AdaptiveApplicationControlsPut_593973(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AdaptiveApplicationControlsPut_593972(path: JsonNode;
+proc validate_AdaptiveApplicationControlsPut_568205(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update an application control VM/server group
   ## 
@@ -250,21 +250,21 @@ proc validate_AdaptiveApplicationControlsPut_593972(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `ascLocation` field"
-  var valid_593974 = path.getOrDefault("ascLocation")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_568207 = path.getOrDefault("ascLocation")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "ascLocation", valid_593974
-  var valid_593975 = path.getOrDefault("subscriptionId")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  if valid_568207 != nil:
+    section.add "ascLocation", valid_568207
+  var valid_568208 = path.getOrDefault("subscriptionId")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "subscriptionId", valid_593975
-  var valid_593976 = path.getOrDefault("groupName")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  if valid_568208 != nil:
+    section.add "subscriptionId", valid_568208
+  var valid_568209 = path.getOrDefault("groupName")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "groupName", valid_593976
+  if valid_568209 != nil:
+    section.add "groupName", valid_568209
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -272,11 +272,11 @@ proc validate_AdaptiveApplicationControlsPut_593972(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593977 = query.getOrDefault("api-version")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  var valid_568210 = query.getOrDefault("api-version")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "api-version", valid_593977
+  if valid_568210 != nil:
+    section.add "api-version", valid_568210
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -290,20 +290,20 @@ proc validate_AdaptiveApplicationControlsPut_593972(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593979: Call_AdaptiveApplicationControlsPut_593971; path: JsonNode;
+proc call*(call_568212: Call_AdaptiveApplicationControlsPut_568204; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update an application control VM/server group
   ## 
-  let valid = call_593979.validator(path, query, header, formData, body)
-  let scheme = call_593979.pickScheme
+  let valid = call_568212.validator(path, query, header, formData, body)
+  let scheme = call_568212.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593979.url(scheme.get, call_593979.host, call_593979.base,
-                         call_593979.route, valid.getOrDefault("path"),
+  let url = call_568212.url(scheme.get, call_568212.host, call_568212.base,
+                         call_568212.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593979, url, valid)
+  result = hook(call_568212, url, valid)
 
-proc call*(call_593980: Call_AdaptiveApplicationControlsPut_593971;
+proc call*(call_568213: Call_AdaptiveApplicationControlsPut_568204;
           apiVersion: string; ascLocation: string; subscriptionId: string;
           groupName: string; body: JsonNode): Recallable =
   ## adaptiveApplicationControlsPut
@@ -318,25 +318,25 @@ proc call*(call_593980: Call_AdaptiveApplicationControlsPut_593971;
   ##            : Name of an application control VM/server group
   ##   body: JObject (required)
   ##       : The updated VM/server group data
-  var path_593981 = newJObject()
-  var query_593982 = newJObject()
-  var body_593983 = newJObject()
-  add(query_593982, "api-version", newJString(apiVersion))
-  add(path_593981, "ascLocation", newJString(ascLocation))
-  add(path_593981, "subscriptionId", newJString(subscriptionId))
-  add(path_593981, "groupName", newJString(groupName))
+  var path_568214 = newJObject()
+  var query_568215 = newJObject()
+  var body_568216 = newJObject()
+  add(query_568215, "api-version", newJString(apiVersion))
+  add(path_568214, "ascLocation", newJString(ascLocation))
+  add(path_568214, "subscriptionId", newJString(subscriptionId))
+  add(path_568214, "groupName", newJString(groupName))
   if body != nil:
-    body_593983 = body
-  result = call_593980.call(path_593981, query_593982, nil, nil, body_593983)
+    body_568216 = body
+  result = call_568213.call(path_568214, query_568215, nil, nil, body_568216)
 
-var adaptiveApplicationControlsPut* = Call_AdaptiveApplicationControlsPut_593971(
+var adaptiveApplicationControlsPut* = Call_AdaptiveApplicationControlsPut_568204(
     name: "adaptiveApplicationControlsPut", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/applicationWhitelistings/{groupName}",
-    validator: validate_AdaptiveApplicationControlsPut_593972, base: "",
-    url: url_AdaptiveApplicationControlsPut_593973, schemes: {Scheme.Https})
+    validator: validate_AdaptiveApplicationControlsPut_568205, base: "",
+    url: url_AdaptiveApplicationControlsPut_568206, schemes: {Scheme.Https})
 type
-  Call_AdaptiveApplicationControlsGet_593960 = ref object of OpenApiRestCall_593424
-proc url_AdaptiveApplicationControlsGet_593962(protocol: Scheme; host: string;
+  Call_AdaptiveApplicationControlsGet_568193 = ref object of OpenApiRestCall_567657
+proc url_AdaptiveApplicationControlsGet_568195(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -357,7 +357,7 @@ proc url_AdaptiveApplicationControlsGet_593962(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AdaptiveApplicationControlsGet_593961(path: JsonNode;
+proc validate_AdaptiveApplicationControlsGet_568194(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an application control VM/server group.
   ## 
@@ -373,21 +373,21 @@ proc validate_AdaptiveApplicationControlsGet_593961(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `ascLocation` field"
-  var valid_593963 = path.getOrDefault("ascLocation")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = path.getOrDefault("ascLocation")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "ascLocation", valid_593963
-  var valid_593964 = path.getOrDefault("subscriptionId")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_568196 != nil:
+    section.add "ascLocation", valid_568196
+  var valid_568197 = path.getOrDefault("subscriptionId")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "subscriptionId", valid_593964
-  var valid_593965 = path.getOrDefault("groupName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "subscriptionId", valid_568197
+  var valid_568198 = path.getOrDefault("groupName")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "groupName", valid_593965
+  if valid_568198 != nil:
+    section.add "groupName", valid_568198
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -395,11 +395,11 @@ proc validate_AdaptiveApplicationControlsGet_593961(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593966 = query.getOrDefault("api-version")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_568199 = query.getOrDefault("api-version")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "api-version", valid_593966
+  if valid_568199 != nil:
+    section.add "api-version", valid_568199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -408,20 +408,20 @@ proc validate_AdaptiveApplicationControlsGet_593961(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593967: Call_AdaptiveApplicationControlsGet_593960; path: JsonNode;
+proc call*(call_568200: Call_AdaptiveApplicationControlsGet_568193; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an application control VM/server group.
   ## 
-  let valid = call_593967.validator(path, query, header, formData, body)
-  let scheme = call_593967.pickScheme
+  let valid = call_568200.validator(path, query, header, formData, body)
+  let scheme = call_568200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593967.url(scheme.get, call_593967.host, call_593967.base,
-                         call_593967.route, valid.getOrDefault("path"),
+  let url = call_568200.url(scheme.get, call_568200.host, call_568200.base,
+                         call_568200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593967, url, valid)
+  result = hook(call_568200, url, valid)
 
-proc call*(call_593968: Call_AdaptiveApplicationControlsGet_593960;
+proc call*(call_568201: Call_AdaptiveApplicationControlsGet_568193;
           apiVersion: string; ascLocation: string; subscriptionId: string;
           groupName: string): Recallable =
   ## adaptiveApplicationControlsGet
@@ -434,19 +434,19 @@ proc call*(call_593968: Call_AdaptiveApplicationControlsGet_593960;
   ##                 : Azure subscription ID
   ##   groupName: string (required)
   ##            : Name of an application control VM/server group
-  var path_593969 = newJObject()
-  var query_593970 = newJObject()
-  add(query_593970, "api-version", newJString(apiVersion))
-  add(path_593969, "ascLocation", newJString(ascLocation))
-  add(path_593969, "subscriptionId", newJString(subscriptionId))
-  add(path_593969, "groupName", newJString(groupName))
-  result = call_593968.call(path_593969, query_593970, nil, nil, nil)
+  var path_568202 = newJObject()
+  var query_568203 = newJObject()
+  add(query_568203, "api-version", newJString(apiVersion))
+  add(path_568202, "ascLocation", newJString(ascLocation))
+  add(path_568202, "subscriptionId", newJString(subscriptionId))
+  add(path_568202, "groupName", newJString(groupName))
+  result = call_568201.call(path_568202, query_568203, nil, nil, nil)
 
-var adaptiveApplicationControlsGet* = Call_AdaptiveApplicationControlsGet_593960(
+var adaptiveApplicationControlsGet* = Call_AdaptiveApplicationControlsGet_568193(
     name: "adaptiveApplicationControlsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/applicationWhitelistings/{groupName}",
-    validator: validate_AdaptiveApplicationControlsGet_593961, base: "",
-    url: url_AdaptiveApplicationControlsGet_593962, schemes: {Scheme.Https})
+    validator: validate_AdaptiveApplicationControlsGet_568194, base: "",
+    url: url_AdaptiveApplicationControlsGet_568195, schemes: {Scheme.Https})
 export
   rest
 

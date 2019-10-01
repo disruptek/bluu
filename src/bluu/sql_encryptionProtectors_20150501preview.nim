@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-encryptionProtectors"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_EncryptionProtectorsListByServer_593630 = ref object of OpenApiRestCall_593408
-proc url_EncryptionProtectorsListByServer_593632(protocol: Scheme; host: string;
+  Call_EncryptionProtectorsListByServer_567863 = ref object of OpenApiRestCall_567641
+proc url_EncryptionProtectorsListByServer_567865(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_EncryptionProtectorsListByServer_593632(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EncryptionProtectorsListByServer_593631(path: JsonNode;
+proc validate_EncryptionProtectorsListByServer_567864(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of server encryption protectors
   ## 
@@ -143,21 +143,21 @@ proc validate_EncryptionProtectorsListByServer_593631(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593805 = path.getOrDefault("resourceGroupName")
-  valid_593805 = validateParameter(valid_593805, JString, required = true,
+  var valid_568038 = path.getOrDefault("resourceGroupName")
+  valid_568038 = validateParameter(valid_568038, JString, required = true,
                                  default = nil)
-  if valid_593805 != nil:
-    section.add "resourceGroupName", valid_593805
-  var valid_593806 = path.getOrDefault("serverName")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  if valid_568038 != nil:
+    section.add "resourceGroupName", valid_568038
+  var valid_568039 = path.getOrDefault("serverName")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "serverName", valid_593806
-  var valid_593807 = path.getOrDefault("subscriptionId")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  if valid_568039 != nil:
+    section.add "serverName", valid_568039
+  var valid_568040 = path.getOrDefault("subscriptionId")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "subscriptionId", valid_593807
+  if valid_568040 != nil:
+    section.add "subscriptionId", valid_568040
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +165,11 @@ proc validate_EncryptionProtectorsListByServer_593631(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = query.getOrDefault("api-version")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_568041 != nil:
+    section.add "api-version", valid_568041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,21 +178,21 @@ proc validate_EncryptionProtectorsListByServer_593631(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593831: Call_EncryptionProtectorsListByServer_593630;
+proc call*(call_568064: Call_EncryptionProtectorsListByServer_567863;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of server encryption protectors
   ## 
-  let valid = call_593831.validator(path, query, header, formData, body)
-  let scheme = call_593831.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593831.url(scheme.get, call_593831.host, call_593831.base,
-                         call_593831.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593831, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593902: Call_EncryptionProtectorsListByServer_593630;
+proc call*(call_568135: Call_EncryptionProtectorsListByServer_567863;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string): Recallable =
   ## encryptionProtectorsListByServer
@@ -205,22 +205,22 @@ proc call*(call_593902: Call_EncryptionProtectorsListByServer_593630;
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_593903 = newJObject()
-  var query_593905 = newJObject()
-  add(path_593903, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593905, "api-version", newJString(apiVersion))
-  add(path_593903, "serverName", newJString(serverName))
-  add(path_593903, "subscriptionId", newJString(subscriptionId))
-  result = call_593902.call(path_593903, query_593905, nil, nil, nil)
+  var path_568136 = newJObject()
+  var query_568138 = newJObject()
+  add(path_568136, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568138, "api-version", newJString(apiVersion))
+  add(path_568136, "serverName", newJString(serverName))
+  add(path_568136, "subscriptionId", newJString(subscriptionId))
+  result = call_568135.call(path_568136, query_568138, nil, nil, nil)
 
-var encryptionProtectorsListByServer* = Call_EncryptionProtectorsListByServer_593630(
+var encryptionProtectorsListByServer* = Call_EncryptionProtectorsListByServer_567863(
     name: "encryptionProtectorsListByServer", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector",
-    validator: validate_EncryptionProtectorsListByServer_593631, base: "",
-    url: url_EncryptionProtectorsListByServer_593632, schemes: {Scheme.Https})
+    validator: validate_EncryptionProtectorsListByServer_567864, base: "",
+    url: url_EncryptionProtectorsListByServer_567865, schemes: {Scheme.Https})
 type
-  Call_EncryptionProtectorsCreateOrUpdate_593969 = ref object of OpenApiRestCall_593408
-proc url_EncryptionProtectorsCreateOrUpdate_593971(protocol: Scheme; host: string;
+  Call_EncryptionProtectorsCreateOrUpdate_568202 = ref object of OpenApiRestCall_567641
+proc url_EncryptionProtectorsCreateOrUpdate_568204(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -246,7 +246,7 @@ proc url_EncryptionProtectorsCreateOrUpdate_593971(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EncryptionProtectorsCreateOrUpdate_593970(path: JsonNode;
+proc validate_EncryptionProtectorsCreateOrUpdate_568203(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing encryption protector.
   ## 
@@ -264,26 +264,26 @@ proc validate_EncryptionProtectorsCreateOrUpdate_593970(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593972 = path.getOrDefault("resourceGroupName")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_568205 = path.getOrDefault("resourceGroupName")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "resourceGroupName", valid_593972
-  var valid_593973 = path.getOrDefault("serverName")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  if valid_568205 != nil:
+    section.add "resourceGroupName", valid_568205
+  var valid_568206 = path.getOrDefault("serverName")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "serverName", valid_593973
-  var valid_593974 = path.getOrDefault("subscriptionId")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  if valid_568206 != nil:
+    section.add "serverName", valid_568206
+  var valid_568207 = path.getOrDefault("subscriptionId")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "subscriptionId", valid_593974
-  var valid_593975 = path.getOrDefault("encryptionProtectorName")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  if valid_568207 != nil:
+    section.add "subscriptionId", valid_568207
+  var valid_568208 = path.getOrDefault("encryptionProtectorName")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = newJString("current"))
-  if valid_593975 != nil:
-    section.add "encryptionProtectorName", valid_593975
+  if valid_568208 != nil:
+    section.add "encryptionProtectorName", valid_568208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -291,11 +291,11 @@ proc validate_EncryptionProtectorsCreateOrUpdate_593970(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593976 = query.getOrDefault("api-version")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_568209 = query.getOrDefault("api-version")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "api-version", valid_593976
+  if valid_568209 != nil:
+    section.add "api-version", valid_568209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -309,21 +309,21 @@ proc validate_EncryptionProtectorsCreateOrUpdate_593970(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593978: Call_EncryptionProtectorsCreateOrUpdate_593969;
+proc call*(call_568211: Call_EncryptionProtectorsCreateOrUpdate_568202;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Updates an existing encryption protector.
   ## 
-  let valid = call_593978.validator(path, query, header, formData, body)
-  let scheme = call_593978.pickScheme
+  let valid = call_568211.validator(path, query, header, formData, body)
+  let scheme = call_568211.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593978.url(scheme.get, call_593978.host, call_593978.base,
-                         call_593978.route, valid.getOrDefault("path"),
+  let url = call_568211.url(scheme.get, call_568211.host, call_568211.base,
+                         call_568211.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593978, url, valid)
+  result = hook(call_568211, url, valid)
 
-proc call*(call_593979: Call_EncryptionProtectorsCreateOrUpdate_593969;
+proc call*(call_568212: Call_EncryptionProtectorsCreateOrUpdate_568202;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; parameters: JsonNode;
           encryptionProtectorName: string = "current"): Recallable =
@@ -341,26 +341,26 @@ proc call*(call_593979: Call_EncryptionProtectorsCreateOrUpdate_593969;
   ##             : The requested encryption protector resource state.
   ##   encryptionProtectorName: string (required)
   ##                          : The name of the encryption protector to be updated.
-  var path_593980 = newJObject()
-  var query_593981 = newJObject()
-  var body_593982 = newJObject()
-  add(path_593980, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593981, "api-version", newJString(apiVersion))
-  add(path_593980, "serverName", newJString(serverName))
-  add(path_593980, "subscriptionId", newJString(subscriptionId))
+  var path_568213 = newJObject()
+  var query_568214 = newJObject()
+  var body_568215 = newJObject()
+  add(path_568213, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568214, "api-version", newJString(apiVersion))
+  add(path_568213, "serverName", newJString(serverName))
+  add(path_568213, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593982 = parameters
-  add(path_593980, "encryptionProtectorName", newJString(encryptionProtectorName))
-  result = call_593979.call(path_593980, query_593981, nil, nil, body_593982)
+    body_568215 = parameters
+  add(path_568213, "encryptionProtectorName", newJString(encryptionProtectorName))
+  result = call_568212.call(path_568213, query_568214, nil, nil, body_568215)
 
-var encryptionProtectorsCreateOrUpdate* = Call_EncryptionProtectorsCreateOrUpdate_593969(
+var encryptionProtectorsCreateOrUpdate* = Call_EncryptionProtectorsCreateOrUpdate_568202(
     name: "encryptionProtectorsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector/{encryptionProtectorName}",
-    validator: validate_EncryptionProtectorsCreateOrUpdate_593970, base: "",
-    url: url_EncryptionProtectorsCreateOrUpdate_593971, schemes: {Scheme.Https})
+    validator: validate_EncryptionProtectorsCreateOrUpdate_568203, base: "",
+    url: url_EncryptionProtectorsCreateOrUpdate_568204, schemes: {Scheme.Https})
 type
-  Call_EncryptionProtectorsGet_593944 = ref object of OpenApiRestCall_593408
-proc url_EncryptionProtectorsGet_593946(protocol: Scheme; host: string; base: string;
+  Call_EncryptionProtectorsGet_568177 = ref object of OpenApiRestCall_567641
+proc url_EncryptionProtectorsGet_568179(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -387,7 +387,7 @@ proc url_EncryptionProtectorsGet_593946(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EncryptionProtectorsGet_593945(path: JsonNode; query: JsonNode;
+proc validate_EncryptionProtectorsGet_568178(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a server encryption protector.
   ## 
@@ -405,26 +405,26 @@ proc validate_EncryptionProtectorsGet_593945(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593947 = path.getOrDefault("resourceGroupName")
-  valid_593947 = validateParameter(valid_593947, JString, required = true,
+  var valid_568180 = path.getOrDefault("resourceGroupName")
+  valid_568180 = validateParameter(valid_568180, JString, required = true,
                                  default = nil)
-  if valid_593947 != nil:
-    section.add "resourceGroupName", valid_593947
-  var valid_593948 = path.getOrDefault("serverName")
-  valid_593948 = validateParameter(valid_593948, JString, required = true,
+  if valid_568180 != nil:
+    section.add "resourceGroupName", valid_568180
+  var valid_568181 = path.getOrDefault("serverName")
+  valid_568181 = validateParameter(valid_568181, JString, required = true,
                                  default = nil)
-  if valid_593948 != nil:
-    section.add "serverName", valid_593948
-  var valid_593949 = path.getOrDefault("subscriptionId")
-  valid_593949 = validateParameter(valid_593949, JString, required = true,
+  if valid_568181 != nil:
+    section.add "serverName", valid_568181
+  var valid_568182 = path.getOrDefault("subscriptionId")
+  valid_568182 = validateParameter(valid_568182, JString, required = true,
                                  default = nil)
-  if valid_593949 != nil:
-    section.add "subscriptionId", valid_593949
-  var valid_593963 = path.getOrDefault("encryptionProtectorName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_568182 != nil:
+    section.add "subscriptionId", valid_568182
+  var valid_568196 = path.getOrDefault("encryptionProtectorName")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = newJString("current"))
-  if valid_593963 != nil:
-    section.add "encryptionProtectorName", valid_593963
+  if valid_568196 != nil:
+    section.add "encryptionProtectorName", valid_568196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -432,11 +432,11 @@ proc validate_EncryptionProtectorsGet_593945(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593964 = query.getOrDefault("api-version")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_568197 = query.getOrDefault("api-version")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "api-version", valid_593964
+  if valid_568197 != nil:
+    section.add "api-version", valid_568197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -445,20 +445,20 @@ proc validate_EncryptionProtectorsGet_593945(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593965: Call_EncryptionProtectorsGet_593944; path: JsonNode;
+proc call*(call_568198: Call_EncryptionProtectorsGet_568177; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a server encryption protector.
   ## 
-  let valid = call_593965.validator(path, query, header, formData, body)
-  let scheme = call_593965.pickScheme
+  let valid = call_568198.validator(path, query, header, formData, body)
+  let scheme = call_568198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593965.url(scheme.get, call_593965.host, call_593965.base,
-                         call_593965.route, valid.getOrDefault("path"),
+  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
+                         call_568198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593965, url, valid)
+  result = hook(call_568198, url, valid)
 
-proc call*(call_593966: Call_EncryptionProtectorsGet_593944;
+proc call*(call_568199: Call_EncryptionProtectorsGet_568177;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; encryptionProtectorName: string = "current"): Recallable =
   ## encryptionProtectorsGet
@@ -473,23 +473,23 @@ proc call*(call_593966: Call_EncryptionProtectorsGet_593944;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   encryptionProtectorName: string (required)
   ##                          : The name of the encryption protector to be retrieved.
-  var path_593967 = newJObject()
-  var query_593968 = newJObject()
-  add(path_593967, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593968, "api-version", newJString(apiVersion))
-  add(path_593967, "serverName", newJString(serverName))
-  add(path_593967, "subscriptionId", newJString(subscriptionId))
-  add(path_593967, "encryptionProtectorName", newJString(encryptionProtectorName))
-  result = call_593966.call(path_593967, query_593968, nil, nil, nil)
+  var path_568200 = newJObject()
+  var query_568201 = newJObject()
+  add(path_568200, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568201, "api-version", newJString(apiVersion))
+  add(path_568200, "serverName", newJString(serverName))
+  add(path_568200, "subscriptionId", newJString(subscriptionId))
+  add(path_568200, "encryptionProtectorName", newJString(encryptionProtectorName))
+  result = call_568199.call(path_568200, query_568201, nil, nil, nil)
 
-var encryptionProtectorsGet* = Call_EncryptionProtectorsGet_593944(
+var encryptionProtectorsGet* = Call_EncryptionProtectorsGet_568177(
     name: "encryptionProtectorsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector/{encryptionProtectorName}",
-    validator: validate_EncryptionProtectorsGet_593945, base: "",
-    url: url_EncryptionProtectorsGet_593946, schemes: {Scheme.Https})
+    validator: validate_EncryptionProtectorsGet_568178, base: "",
+    url: url_EncryptionProtectorsGet_568179, schemes: {Scheme.Https})
 type
-  Call_EncryptionProtectorsRevalidate_593983 = ref object of OpenApiRestCall_593408
-proc url_EncryptionProtectorsRevalidate_593985(protocol: Scheme; host: string;
+  Call_EncryptionProtectorsRevalidate_568216 = ref object of OpenApiRestCall_567641
+proc url_EncryptionProtectorsRevalidate_568218(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -516,7 +516,7 @@ proc url_EncryptionProtectorsRevalidate_593985(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EncryptionProtectorsRevalidate_593984(path: JsonNode;
+proc validate_EncryptionProtectorsRevalidate_568217(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Revalidates an existing encryption protector.
   ## 
@@ -534,26 +534,26 @@ proc validate_EncryptionProtectorsRevalidate_593984(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593986 = path.getOrDefault("resourceGroupName")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  var valid_568219 = path.getOrDefault("resourceGroupName")
+  valid_568219 = validateParameter(valid_568219, JString, required = true,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "resourceGroupName", valid_593986
-  var valid_593987 = path.getOrDefault("serverName")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+  if valid_568219 != nil:
+    section.add "resourceGroupName", valid_568219
+  var valid_568220 = path.getOrDefault("serverName")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "serverName", valid_593987
-  var valid_593988 = path.getOrDefault("subscriptionId")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  if valid_568220 != nil:
+    section.add "serverName", valid_568220
+  var valid_568221 = path.getOrDefault("subscriptionId")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "subscriptionId", valid_593988
-  var valid_593989 = path.getOrDefault("encryptionProtectorName")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_568221 != nil:
+    section.add "subscriptionId", valid_568221
+  var valid_568222 = path.getOrDefault("encryptionProtectorName")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = newJString("current"))
-  if valid_593989 != nil:
-    section.add "encryptionProtectorName", valid_593989
+  if valid_568222 != nil:
+    section.add "encryptionProtectorName", valid_568222
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -561,11 +561,11 @@ proc validate_EncryptionProtectorsRevalidate_593984(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593990 = query.getOrDefault("api-version")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568223 = query.getOrDefault("api-version")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "api-version", valid_593990
+  if valid_568223 != nil:
+    section.add "api-version", valid_568223
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -574,20 +574,20 @@ proc validate_EncryptionProtectorsRevalidate_593984(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593991: Call_EncryptionProtectorsRevalidate_593983; path: JsonNode;
+proc call*(call_568224: Call_EncryptionProtectorsRevalidate_568216; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Revalidates an existing encryption protector.
   ## 
-  let valid = call_593991.validator(path, query, header, formData, body)
-  let scheme = call_593991.pickScheme
+  let valid = call_568224.validator(path, query, header, formData, body)
+  let scheme = call_568224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593991.url(scheme.get, call_593991.host, call_593991.base,
-                         call_593991.route, valid.getOrDefault("path"),
+  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
+                         call_568224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593991, url, valid)
+  result = hook(call_568224, url, valid)
 
-proc call*(call_593992: Call_EncryptionProtectorsRevalidate_593983;
+proc call*(call_568225: Call_EncryptionProtectorsRevalidate_568216;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; encryptionProtectorName: string = "current"): Recallable =
   ## encryptionProtectorsRevalidate
@@ -602,20 +602,20 @@ proc call*(call_593992: Call_EncryptionProtectorsRevalidate_593983;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   encryptionProtectorName: string (required)
   ##                          : The name of the encryption protector to be updated.
-  var path_593993 = newJObject()
-  var query_593994 = newJObject()
-  add(path_593993, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593994, "api-version", newJString(apiVersion))
-  add(path_593993, "serverName", newJString(serverName))
-  add(path_593993, "subscriptionId", newJString(subscriptionId))
-  add(path_593993, "encryptionProtectorName", newJString(encryptionProtectorName))
-  result = call_593992.call(path_593993, query_593994, nil, nil, nil)
+  var path_568226 = newJObject()
+  var query_568227 = newJObject()
+  add(path_568226, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568227, "api-version", newJString(apiVersion))
+  add(path_568226, "serverName", newJString(serverName))
+  add(path_568226, "subscriptionId", newJString(subscriptionId))
+  add(path_568226, "encryptionProtectorName", newJString(encryptionProtectorName))
+  result = call_568225.call(path_568226, query_568227, nil, nil, nil)
 
-var encryptionProtectorsRevalidate* = Call_EncryptionProtectorsRevalidate_593983(
+var encryptionProtectorsRevalidate* = Call_EncryptionProtectorsRevalidate_568216(
     name: "encryptionProtectorsRevalidate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/encryptionProtector/{encryptionProtectorName}/revalidate",
-    validator: validate_EncryptionProtectorsRevalidate_593984, base: "",
-    url: url_EncryptionProtectorsRevalidate_593985, schemes: {Scheme.Https})
+    validator: validate_EncryptionProtectorsRevalidate_568217, base: "",
+    url: url_EncryptionProtectorsRevalidate_568218, schemes: {Scheme.Https})
 export
   rest
 

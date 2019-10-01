@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_596458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "applicationinsights-webTestLocations_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_WebTestLocationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_WebTestLocationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_WebTestLocationsList_596680 = ref object of OpenApiRestCall_596458
+proc url_WebTestLocationsList_596682(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_WebTestLocationsList_593649(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebTestLocationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_WebTestLocationsList_596681(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of web test locations available to this Application Insights component.
   ## 
@@ -143,21 +143,21 @@ proc validate_WebTestLocationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_596855 = path.getOrDefault("resourceGroupName")
+  valid_596855 = validateParameter(valid_596855, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_596855 != nil:
+    section.add "resourceGroupName", valid_596855
+  var valid_596856 = path.getOrDefault("subscriptionId")
+  valid_596856 = validateParameter(valid_596856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
-  var valid_593824 = path.getOrDefault("resourceName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_596856 != nil:
+    section.add "subscriptionId", valid_596856
+  var valid_596857 = path.getOrDefault("resourceName")
+  valid_596857 = validateParameter(valid_596857, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "resourceName", valid_593824
+  if valid_596857 != nil:
+    section.add "resourceName", valid_596857
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +165,11 @@ proc validate_WebTestLocationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_596858 = query.getOrDefault("api-version")
+  valid_596858 = validateParameter(valid_596858, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
+  if valid_596858 != nil:
+    section.add "api-version", valid_596858
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,20 +178,20 @@ proc validate_WebTestLocationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593848: Call_WebTestLocationsList_593647; path: JsonNode;
+proc call*(call_596881: Call_WebTestLocationsList_596680; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of web test locations available to this Application Insights component.
   ## 
-  let valid = call_593848.validator(path, query, header, formData, body)
-  let scheme = call_593848.pickScheme
+  let valid = call_596881.validator(path, query, header, formData, body)
+  let scheme = call_596881.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593848.url(scheme.get, call_593848.host, call_593848.base,
-                         call_593848.route, valid.getOrDefault("path"),
+  let url = call_596881.url(scheme.get, call_596881.host, call_596881.base,
+                         call_596881.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593848, url, valid)
+  result = hook(call_596881, url, valid)
 
-proc call*(call_593919: Call_WebTestLocationsList_593647;
+proc call*(call_596952: Call_WebTestLocationsList_596680;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## webTestLocationsList
@@ -204,19 +204,19 @@ proc call*(call_593919: Call_WebTestLocationsList_593647;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593920 = newJObject()
-  var query_593922 = newJObject()
-  add(path_593920, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593922, "api-version", newJString(apiVersion))
-  add(path_593920, "subscriptionId", newJString(subscriptionId))
-  add(path_593920, "resourceName", newJString(resourceName))
-  result = call_593919.call(path_593920, query_593922, nil, nil, nil)
+  var path_596953 = newJObject()
+  var query_596955 = newJObject()
+  add(path_596953, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596955, "api-version", newJString(apiVersion))
+  add(path_596953, "subscriptionId", newJString(subscriptionId))
+  add(path_596953, "resourceName", newJString(resourceName))
+  result = call_596952.call(path_596953, query_596955, nil, nil, nil)
 
-var webTestLocationsList* = Call_WebTestLocationsList_593647(
+var webTestLocationsList* = Call_WebTestLocationsList_596680(
     name: "webTestLocationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/syntheticmonitorlocations",
-    validator: validate_WebTestLocationsList_593648, base: "",
-    url: url_WebTestLocationsList_593649, schemes: {Scheme.Https})
+    validator: validate_WebTestLocationsList_596681, base: "",
+    url: url_WebTestLocationsList_596682, schemes: {Scheme.Https})
 export
   rest
 

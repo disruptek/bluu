@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Application Insights Data Plane
@@ -27,15 +27,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593438 = ref object of OpenApiRestCall
+  OpenApiRestCall_596467 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593438](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596467](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593438): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596467): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -72,7 +72,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -80,7 +80,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -105,8 +105,8 @@ const
   macServiceName = "applicationinsights-swagger"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_EventsGetOdataMetadata_593660 = ref object of OpenApiRestCall_593438
-proc url_EventsGetOdataMetadata_593662(protocol: Scheme; host: string; base: string;
+  Call_EventsGetOdataMetadata_596689 = ref object of OpenApiRestCall_596467
+proc url_EventsGetOdataMetadata_596691(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +129,7 @@ proc url_EventsGetOdataMetadata_593662(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventsGetOdataMetadata_593661(path: JsonNode; query: JsonNode;
+proc validate_EventsGetOdataMetadata_596690(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets OData EDMX metadata describing the event data model
   ## 
@@ -145,21 +145,21 @@ proc validate_EventsGetOdataMetadata_593661(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593835 = path.getOrDefault("resourceGroupName")
-  valid_593835 = validateParameter(valid_593835, JString, required = true,
+  var valid_596864 = path.getOrDefault("resourceGroupName")
+  valid_596864 = validateParameter(valid_596864, JString, required = true,
                                  default = nil)
-  if valid_593835 != nil:
-    section.add "resourceGroupName", valid_593835
-  var valid_593836 = path.getOrDefault("applicationName")
-  valid_593836 = validateParameter(valid_593836, JString, required = true,
+  if valid_596864 != nil:
+    section.add "resourceGroupName", valid_596864
+  var valid_596865 = path.getOrDefault("applicationName")
+  valid_596865 = validateParameter(valid_596865, JString, required = true,
                                  default = nil)
-  if valid_593836 != nil:
-    section.add "applicationName", valid_593836
-  var valid_593837 = path.getOrDefault("subscriptionId")
-  valid_593837 = validateParameter(valid_593837, JString, required = true,
+  if valid_596865 != nil:
+    section.add "applicationName", valid_596865
+  var valid_596866 = path.getOrDefault("subscriptionId")
+  valid_596866 = validateParameter(valid_596866, JString, required = true,
                                  default = nil)
-  if valid_593837 != nil:
-    section.add "subscriptionId", valid_593837
+  if valid_596866 != nil:
+    section.add "subscriptionId", valid_596866
   result.add "path", section
   ## parameters in `query` object:
   ##   apiVersion: JString (required)
@@ -167,11 +167,11 @@ proc validate_EventsGetOdataMetadata_593661(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `apiVersion` field"
-  var valid_593838 = query.getOrDefault("apiVersion")
-  valid_593838 = validateParameter(valid_593838, JString, required = true,
+  var valid_596867 = query.getOrDefault("apiVersion")
+  valid_596867 = validateParameter(valid_596867, JString, required = true,
                                  default = nil)
-  if valid_593838 != nil:
-    section.add "apiVersion", valid_593838
+  if valid_596867 != nil:
+    section.add "apiVersion", valid_596867
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -180,20 +180,20 @@ proc validate_EventsGetOdataMetadata_593661(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593861: Call_EventsGetOdataMetadata_593660; path: JsonNode;
+proc call*(call_596890: Call_EventsGetOdataMetadata_596689; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets OData EDMX metadata describing the event data model
   ## 
-  let valid = call_593861.validator(path, query, header, formData, body)
-  let scheme = call_593861.pickScheme
+  let valid = call_596890.validator(path, query, header, formData, body)
+  let scheme = call_596890.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593861.url(scheme.get, call_593861.host, call_593861.base,
-                         call_593861.route, valid.getOrDefault("path"),
+  let url = call_596890.url(scheme.get, call_596890.host, call_596890.base,
+                         call_596890.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593861, url, valid)
+  result = hook(call_596890, url, valid)
 
-proc call*(call_593932: Call_EventsGetOdataMetadata_593660;
+proc call*(call_596961: Call_EventsGetOdataMetadata_596689;
           resourceGroupName: string; applicationName: string;
           subscriptionId: string; apiVersion: string): Recallable =
   ## eventsGetOdataMetadata
@@ -206,22 +206,22 @@ proc call*(call_593932: Call_EventsGetOdataMetadata_593660;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var path_593933 = newJObject()
-  var query_593935 = newJObject()
-  add(path_593933, "resourceGroupName", newJString(resourceGroupName))
-  add(path_593933, "applicationName", newJString(applicationName))
-  add(path_593933, "subscriptionId", newJString(subscriptionId))
-  add(query_593935, "apiVersion", newJString(apiVersion))
-  result = call_593932.call(path_593933, query_593935, nil, nil, nil)
+  var path_596962 = newJObject()
+  var query_596964 = newJObject()
+  add(path_596962, "resourceGroupName", newJString(resourceGroupName))
+  add(path_596962, "applicationName", newJString(applicationName))
+  add(path_596962, "subscriptionId", newJString(subscriptionId))
+  add(query_596964, "apiVersion", newJString(apiVersion))
+  result = call_596961.call(path_596962, query_596964, nil, nil, nil)
 
-var eventsGetOdataMetadata* = Call_EventsGetOdataMetadata_593660(
+var eventsGetOdataMetadata* = Call_EventsGetOdataMetadata_596689(
     name: "eventsGetOdataMetadata", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Insights/components/{applicationName}/events/$metadata",
-    validator: validate_EventsGetOdataMetadata_593661, base: "",
-    url: url_EventsGetOdataMetadata_593662, schemes: {Scheme.Https})
+    validator: validate_EventsGetOdataMetadata_596690, base: "",
+    url: url_EventsGetOdataMetadata_596691, schemes: {Scheme.Https})
 type
-  Call_EventsGetByType_593974 = ref object of OpenApiRestCall_593438
-proc url_EventsGetByType_593976(protocol: Scheme; host: string; base: string;
+  Call_EventsGetByType_597003 = ref object of OpenApiRestCall_596467
+proc url_EventsGetByType_597005(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -246,7 +246,7 @@ proc url_EventsGetByType_593976(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventsGetByType_593975(path: JsonNode; query: JsonNode;
+proc validate_EventsGetByType_597004(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Executes an OData query for events
@@ -265,26 +265,26 @@ proc validate_EventsGetByType_593975(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593978 = path.getOrDefault("resourceGroupName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_597007 = path.getOrDefault("resourceGroupName")
+  valid_597007 = validateParameter(valid_597007, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "resourceGroupName", valid_593978
-  var valid_593979 = path.getOrDefault("applicationName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_597007 != nil:
+    section.add "resourceGroupName", valid_597007
+  var valid_597008 = path.getOrDefault("applicationName")
+  valid_597008 = validateParameter(valid_597008, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "applicationName", valid_593979
-  var valid_593980 = path.getOrDefault("subscriptionId")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_597008 != nil:
+    section.add "applicationName", valid_597008
+  var valid_597009 = path.getOrDefault("subscriptionId")
+  valid_597009 = validateParameter(valid_597009, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "subscriptionId", valid_593980
-  var valid_593994 = path.getOrDefault("eventType")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_597009 != nil:
+    section.add "subscriptionId", valid_597009
+  var valid_597023 = path.getOrDefault("eventType")
+  valid_597023 = validateParameter(valid_597023, JString, required = true,
                                  default = newJString("$all"))
-  if valid_593994 != nil:
-    section.add "eventType", valid_593994
+  if valid_597023 != nil:
+    section.add "eventType", valid_597023
   result.add "path", section
   ## parameters in `query` object:
   ##   $orderby: JString
@@ -310,60 +310,60 @@ proc validate_EventsGetByType_593975(path: JsonNode; query: JsonNode;
   ##   apiVersion: JString (required)
   ##             : Client API version.
   section = newJObject()
-  var valid_593995 = query.getOrDefault("$orderby")
-  valid_593995 = validateParameter(valid_593995, JString, required = false,
+  var valid_597024 = query.getOrDefault("$orderby")
+  valid_597024 = validateParameter(valid_597024, JString, required = false,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "$orderby", valid_593995
-  var valid_593996 = query.getOrDefault("timespan")
-  valid_593996 = validateParameter(valid_593996, JString, required = false,
+  if valid_597024 != nil:
+    section.add "$orderby", valid_597024
+  var valid_597025 = query.getOrDefault("timespan")
+  valid_597025 = validateParameter(valid_597025, JString, required = false,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "timespan", valid_593996
-  var valid_593997 = query.getOrDefault("$top")
-  valid_593997 = validateParameter(valid_593997, JInt, required = false, default = nil)
-  if valid_593997 != nil:
-    section.add "$top", valid_593997
-  var valid_593998 = query.getOrDefault("$select")
-  valid_593998 = validateParameter(valid_593998, JString, required = false,
+  if valid_597025 != nil:
+    section.add "timespan", valid_597025
+  var valid_597026 = query.getOrDefault("$top")
+  valid_597026 = validateParameter(valid_597026, JInt, required = false, default = nil)
+  if valid_597026 != nil:
+    section.add "$top", valid_597026
+  var valid_597027 = query.getOrDefault("$select")
+  valid_597027 = validateParameter(valid_597027, JString, required = false,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "$select", valid_593998
-  var valid_593999 = query.getOrDefault("$skip")
-  valid_593999 = validateParameter(valid_593999, JInt, required = false, default = nil)
-  if valid_593999 != nil:
-    section.add "$skip", valid_593999
-  var valid_594000 = query.getOrDefault("$count")
-  valid_594000 = validateParameter(valid_594000, JBool, required = false, default = nil)
-  if valid_594000 != nil:
-    section.add "$count", valid_594000
-  var valid_594001 = query.getOrDefault("$search")
-  valid_594001 = validateParameter(valid_594001, JString, required = false,
+  if valid_597027 != nil:
+    section.add "$select", valid_597027
+  var valid_597028 = query.getOrDefault("$skip")
+  valid_597028 = validateParameter(valid_597028, JInt, required = false, default = nil)
+  if valid_597028 != nil:
+    section.add "$skip", valid_597028
+  var valid_597029 = query.getOrDefault("$count")
+  valid_597029 = validateParameter(valid_597029, JBool, required = false, default = nil)
+  if valid_597029 != nil:
+    section.add "$count", valid_597029
+  var valid_597030 = query.getOrDefault("$search")
+  valid_597030 = validateParameter(valid_597030, JString, required = false,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "$search", valid_594001
-  var valid_594002 = query.getOrDefault("$format")
-  valid_594002 = validateParameter(valid_594002, JString, required = false,
+  if valid_597030 != nil:
+    section.add "$search", valid_597030
+  var valid_597031 = query.getOrDefault("$format")
+  valid_597031 = validateParameter(valid_597031, JString, required = false,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "$format", valid_594002
-  var valid_594003 = query.getOrDefault("$apply")
-  valid_594003 = validateParameter(valid_594003, JString, required = false,
+  if valid_597031 != nil:
+    section.add "$format", valid_597031
+  var valid_597032 = query.getOrDefault("$apply")
+  valid_597032 = validateParameter(valid_597032, JString, required = false,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "$apply", valid_594003
-  var valid_594004 = query.getOrDefault("$filter")
-  valid_594004 = validateParameter(valid_594004, JString, required = false,
+  if valid_597032 != nil:
+    section.add "$apply", valid_597032
+  var valid_597033 = query.getOrDefault("$filter")
+  valid_597033 = validateParameter(valid_597033, JString, required = false,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "$filter", valid_594004
+  if valid_597033 != nil:
+    section.add "$filter", valid_597033
   assert query != nil,
         "query argument is necessary due to required `apiVersion` field"
-  var valid_594005 = query.getOrDefault("apiVersion")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_597034 = query.getOrDefault("apiVersion")
+  valid_597034 = validateParameter(valid_597034, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "apiVersion", valid_594005
+  if valid_597034 != nil:
+    section.add "apiVersion", valid_597034
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -372,20 +372,20 @@ proc validate_EventsGetByType_593975(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594006: Call_EventsGetByType_593974; path: JsonNode; query: JsonNode;
+proc call*(call_597035: Call_EventsGetByType_597003; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Executes an OData query for events
   ## 
-  let valid = call_594006.validator(path, query, header, formData, body)
-  let scheme = call_594006.pickScheme
+  let valid = call_597035.validator(path, query, header, formData, body)
+  let scheme = call_597035.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594006.url(scheme.get, call_594006.host, call_594006.base,
-                         call_594006.route, valid.getOrDefault("path"),
+  let url = call_597035.url(scheme.get, call_597035.host, call_597035.base,
+                         call_597035.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594006, url, valid)
+  result = hook(call_597035, url, valid)
 
-proc call*(call_594007: Call_EventsGetByType_593974; resourceGroupName: string;
+proc call*(call_597036: Call_EventsGetByType_597003; resourceGroupName: string;
           applicationName: string; subscriptionId: string; apiVersion: string;
           Orderby: string = ""; timespan: string = ""; eventType: string = "$all";
           Top: int = 0; Select: string = ""; Skip: int = 0; Count: bool = false;
@@ -422,32 +422,32 @@ proc call*(call_594007: Call_EventsGetByType_593974; resourceGroupName: string;
   ##         : An expression used to filter the returned events
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var path_594008 = newJObject()
-  var query_594009 = newJObject()
-  add(query_594009, "$orderby", newJString(Orderby))
-  add(path_594008, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594008, "applicationName", newJString(applicationName))
-  add(query_594009, "timespan", newJString(timespan))
-  add(path_594008, "subscriptionId", newJString(subscriptionId))
-  add(path_594008, "eventType", newJString(eventType))
-  add(query_594009, "$top", newJInt(Top))
-  add(query_594009, "$select", newJString(Select))
-  add(query_594009, "$skip", newJInt(Skip))
-  add(query_594009, "$count", newJBool(Count))
-  add(query_594009, "$search", newJString(Search))
-  add(query_594009, "$format", newJString(Format))
-  add(query_594009, "$apply", newJString(Apply))
-  add(query_594009, "$filter", newJString(Filter))
-  add(query_594009, "apiVersion", newJString(apiVersion))
-  result = call_594007.call(path_594008, query_594009, nil, nil, nil)
+  var path_597037 = newJObject()
+  var query_597038 = newJObject()
+  add(query_597038, "$orderby", newJString(Orderby))
+  add(path_597037, "resourceGroupName", newJString(resourceGroupName))
+  add(path_597037, "applicationName", newJString(applicationName))
+  add(query_597038, "timespan", newJString(timespan))
+  add(path_597037, "subscriptionId", newJString(subscriptionId))
+  add(path_597037, "eventType", newJString(eventType))
+  add(query_597038, "$top", newJInt(Top))
+  add(query_597038, "$select", newJString(Select))
+  add(query_597038, "$skip", newJInt(Skip))
+  add(query_597038, "$count", newJBool(Count))
+  add(query_597038, "$search", newJString(Search))
+  add(query_597038, "$format", newJString(Format))
+  add(query_597038, "$apply", newJString(Apply))
+  add(query_597038, "$filter", newJString(Filter))
+  add(query_597038, "apiVersion", newJString(apiVersion))
+  result = call_597036.call(path_597037, query_597038, nil, nil, nil)
 
-var eventsGetByType* = Call_EventsGetByType_593974(name: "eventsGetByType",
+var eventsGetByType* = Call_EventsGetByType_597003(name: "eventsGetByType",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Insights/components/{applicationName}/events/{eventType}",
-    validator: validate_EventsGetByType_593975, base: "", url: url_EventsGetByType_593976,
+    validator: validate_EventsGetByType_597004, base: "", url: url_EventsGetByType_597005,
     schemes: {Scheme.Https})
 type
-  Call_EventsGet_594010 = ref object of OpenApiRestCall_593438
-proc url_EventsGet_594012(protocol: Scheme; host: string; base: string; route: string;
+  Call_EventsGet_597039 = ref object of OpenApiRestCall_596467
+proc url_EventsGet_597041(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -475,7 +475,7 @@ proc url_EventsGet_594012(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventsGet_594011(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EventsGet_597040(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the data for a single event
   ## 
@@ -495,31 +495,31 @@ proc validate_EventsGet_594011(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594013 = path.getOrDefault("resourceGroupName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  var valid_597042 = path.getOrDefault("resourceGroupName")
+  valid_597042 = validateParameter(valid_597042, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "resourceGroupName", valid_594013
-  var valid_594014 = path.getOrDefault("applicationName")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_597042 != nil:
+    section.add "resourceGroupName", valid_597042
+  var valid_597043 = path.getOrDefault("applicationName")
+  valid_597043 = validateParameter(valid_597043, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "applicationName", valid_594014
-  var valid_594015 = path.getOrDefault("subscriptionId")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_597043 != nil:
+    section.add "applicationName", valid_597043
+  var valid_597044 = path.getOrDefault("subscriptionId")
+  valid_597044 = validateParameter(valid_597044, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "subscriptionId", valid_594015
-  var valid_594016 = path.getOrDefault("eventType")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_597044 != nil:
+    section.add "subscriptionId", valid_597044
+  var valid_597045 = path.getOrDefault("eventType")
+  valid_597045 = validateParameter(valid_597045, JString, required = true,
                                  default = newJString("$all"))
-  if valid_594016 != nil:
-    section.add "eventType", valid_594016
-  var valid_594017 = path.getOrDefault("eventId")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  if valid_597045 != nil:
+    section.add "eventType", valid_597045
+  var valid_597046 = path.getOrDefault("eventId")
+  valid_597046 = validateParameter(valid_597046, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "eventId", valid_594017
+  if valid_597046 != nil:
+    section.add "eventId", valid_597046
   result.add "path", section
   ## parameters in `query` object:
   ##   timespan: JString
@@ -527,18 +527,18 @@ proc validate_EventsGet_594011(path: JsonNode; query: JsonNode; header: JsonNode
   ##   apiVersion: JString (required)
   ##             : Client API version.
   section = newJObject()
-  var valid_594018 = query.getOrDefault("timespan")
-  valid_594018 = validateParameter(valid_594018, JString, required = false,
+  var valid_597047 = query.getOrDefault("timespan")
+  valid_597047 = validateParameter(valid_597047, JString, required = false,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "timespan", valid_594018
+  if valid_597047 != nil:
+    section.add "timespan", valid_597047
   assert query != nil,
         "query argument is necessary due to required `apiVersion` field"
-  var valid_594019 = query.getOrDefault("apiVersion")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_597048 = query.getOrDefault("apiVersion")
+  valid_597048 = validateParameter(valid_597048, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "apiVersion", valid_594019
+  if valid_597048 != nil:
+    section.add "apiVersion", valid_597048
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -547,20 +547,20 @@ proc validate_EventsGet_594011(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594020: Call_EventsGet_594010; path: JsonNode; query: JsonNode;
+proc call*(call_597049: Call_EventsGet_597039; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the data for a single event
   ## 
-  let valid = call_594020.validator(path, query, header, formData, body)
-  let scheme = call_594020.pickScheme
+  let valid = call_597049.validator(path, query, header, formData, body)
+  let scheme = call_597049.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594020.url(scheme.get, call_594020.host, call_594020.base,
-                         call_594020.route, valid.getOrDefault("path"),
+  let url = call_597049.url(scheme.get, call_597049.host, call_597049.base,
+                         call_597049.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594020, url, valid)
+  result = hook(call_597049, url, valid)
 
-proc call*(call_594021: Call_EventsGet_594010; resourceGroupName: string;
+proc call*(call_597050: Call_EventsGet_597039; resourceGroupName: string;
           applicationName: string; subscriptionId: string; eventId: string;
           apiVersion: string; timespan: string = ""; eventType: string = "$all"): Recallable =
   ## eventsGet
@@ -579,25 +579,25 @@ proc call*(call_594021: Call_EventsGet_594010; resourceGroupName: string;
   ##          : ID of event.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var path_594022 = newJObject()
-  var query_594023 = newJObject()
-  add(path_594022, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594022, "applicationName", newJString(applicationName))
-  add(query_594023, "timespan", newJString(timespan))
-  add(path_594022, "subscriptionId", newJString(subscriptionId))
-  add(path_594022, "eventType", newJString(eventType))
-  add(path_594022, "eventId", newJString(eventId))
-  add(query_594023, "apiVersion", newJString(apiVersion))
-  result = call_594021.call(path_594022, query_594023, nil, nil, nil)
+  var path_597051 = newJObject()
+  var query_597052 = newJObject()
+  add(path_597051, "resourceGroupName", newJString(resourceGroupName))
+  add(path_597051, "applicationName", newJString(applicationName))
+  add(query_597052, "timespan", newJString(timespan))
+  add(path_597051, "subscriptionId", newJString(subscriptionId))
+  add(path_597051, "eventType", newJString(eventType))
+  add(path_597051, "eventId", newJString(eventId))
+  add(query_597052, "apiVersion", newJString(apiVersion))
+  result = call_597050.call(path_597051, query_597052, nil, nil, nil)
 
-var eventsGet* = Call_EventsGet_594010(name: "eventsGet", meth: HttpMethod.HttpGet,
+var eventsGet* = Call_EventsGet_597039(name: "eventsGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Insights/components/{applicationName}/events/{eventType}/{eventId}",
-                                    validator: validate_EventsGet_594011,
-                                    base: "", url: url_EventsGet_594012,
+                                    validator: validate_EventsGet_597040,
+                                    base: "", url: url_EventsGet_597041,
                                     schemes: {Scheme.Https})
 type
-  Call_MetricsGetMetadata_594024 = ref object of OpenApiRestCall_593438
-proc url_MetricsGetMetadata_594026(protocol: Scheme; host: string; base: string;
+  Call_MetricsGetMetadata_597053 = ref object of OpenApiRestCall_596467
+proc url_MetricsGetMetadata_597055(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -620,7 +620,7 @@ proc url_MetricsGetMetadata_594026(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricsGetMetadata_594025(path: JsonNode; query: JsonNode;
+proc validate_MetricsGetMetadata_597054(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets metadata describing the available metrics
@@ -637,21 +637,21 @@ proc validate_MetricsGetMetadata_594025(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594027 = path.getOrDefault("resourceGroupName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  var valid_597056 = path.getOrDefault("resourceGroupName")
+  valid_597056 = validateParameter(valid_597056, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "resourceGroupName", valid_594027
-  var valid_594028 = path.getOrDefault("applicationName")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  if valid_597056 != nil:
+    section.add "resourceGroupName", valid_597056
+  var valid_597057 = path.getOrDefault("applicationName")
+  valid_597057 = validateParameter(valid_597057, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "applicationName", valid_594028
-  var valid_594029 = path.getOrDefault("subscriptionId")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  if valid_597057 != nil:
+    section.add "applicationName", valid_597057
+  var valid_597058 = path.getOrDefault("subscriptionId")
+  valid_597058 = validateParameter(valid_597058, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "subscriptionId", valid_594029
+  if valid_597058 != nil:
+    section.add "subscriptionId", valid_597058
   result.add "path", section
   ## parameters in `query` object:
   ##   apiVersion: JString (required)
@@ -659,11 +659,11 @@ proc validate_MetricsGetMetadata_594025(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `apiVersion` field"
-  var valid_594030 = query.getOrDefault("apiVersion")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  var valid_597059 = query.getOrDefault("apiVersion")
+  valid_597059 = validateParameter(valid_597059, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "apiVersion", valid_594030
+  if valid_597059 != nil:
+    section.add "apiVersion", valid_597059
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -672,20 +672,20 @@ proc validate_MetricsGetMetadata_594025(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594031: Call_MetricsGetMetadata_594024; path: JsonNode;
+proc call*(call_597060: Call_MetricsGetMetadata_597053; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets metadata describing the available metrics
   ## 
-  let valid = call_594031.validator(path, query, header, formData, body)
-  let scheme = call_594031.pickScheme
+  let valid = call_597060.validator(path, query, header, formData, body)
+  let scheme = call_597060.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594031.url(scheme.get, call_594031.host, call_594031.base,
-                         call_594031.route, valid.getOrDefault("path"),
+  let url = call_597060.url(scheme.get, call_597060.host, call_597060.base,
+                         call_597060.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594031, url, valid)
+  result = hook(call_597060, url, valid)
 
-proc call*(call_594032: Call_MetricsGetMetadata_594024; resourceGroupName: string;
+proc call*(call_597061: Call_MetricsGetMetadata_597053; resourceGroupName: string;
           applicationName: string; subscriptionId: string; apiVersion: string): Recallable =
   ## metricsGetMetadata
   ## Gets metadata describing the available metrics
@@ -697,22 +697,22 @@ proc call*(call_594032: Call_MetricsGetMetadata_594024; resourceGroupName: strin
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var path_594033 = newJObject()
-  var query_594034 = newJObject()
-  add(path_594033, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594033, "applicationName", newJString(applicationName))
-  add(path_594033, "subscriptionId", newJString(subscriptionId))
-  add(query_594034, "apiVersion", newJString(apiVersion))
-  result = call_594032.call(path_594033, query_594034, nil, nil, nil)
+  var path_597062 = newJObject()
+  var query_597063 = newJObject()
+  add(path_597062, "resourceGroupName", newJString(resourceGroupName))
+  add(path_597062, "applicationName", newJString(applicationName))
+  add(path_597062, "subscriptionId", newJString(subscriptionId))
+  add(query_597063, "apiVersion", newJString(apiVersion))
+  result = call_597061.call(path_597062, query_597063, nil, nil, nil)
 
-var metricsGetMetadata* = Call_MetricsGetMetadata_594024(
+var metricsGetMetadata* = Call_MetricsGetMetadata_597053(
     name: "metricsGetMetadata", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Insights/components/{applicationName}/metrics/metadata",
-    validator: validate_MetricsGetMetadata_594025, base: "",
-    url: url_MetricsGetMetadata_594026, schemes: {Scheme.Https})
+    validator: validate_MetricsGetMetadata_597054, base: "",
+    url: url_MetricsGetMetadata_597055, schemes: {Scheme.Https})
 type
-  Call_MetricsGet_594035 = ref object of OpenApiRestCall_593438
-proc url_MetricsGet_594037(protocol: Scheme; host: string; base: string; route: string;
+  Call_MetricsGet_597064 = ref object of OpenApiRestCall_596467
+proc url_MetricsGet_597066(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -737,7 +737,7 @@ proc url_MetricsGet_594037(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricsGet_594036(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_MetricsGet_597065(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets metric values for a single metric
   ## 
@@ -755,26 +755,26 @@ proc validate_MetricsGet_594036(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594038 = path.getOrDefault("resourceGroupName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  var valid_597067 = path.getOrDefault("resourceGroupName")
+  valid_597067 = validateParameter(valid_597067, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "resourceGroupName", valid_594038
-  var valid_594039 = path.getOrDefault("applicationName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_597067 != nil:
+    section.add "resourceGroupName", valid_597067
+  var valid_597068 = path.getOrDefault("applicationName")
+  valid_597068 = validateParameter(valid_597068, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "applicationName", valid_594039
-  var valid_594040 = path.getOrDefault("metricId")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_597068 != nil:
+    section.add "applicationName", valid_597068
+  var valid_597069 = path.getOrDefault("metricId")
+  valid_597069 = validateParameter(valid_597069, JString, required = true,
                                  default = newJString("requests/count"))
-  if valid_594040 != nil:
-    section.add "metricId", valid_594040
-  var valid_594041 = path.getOrDefault("subscriptionId")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  if valid_597069 != nil:
+    section.add "metricId", valid_597069
+  var valid_597070 = path.getOrDefault("subscriptionId")
+  valid_597070 = validateParameter(valid_597070, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "subscriptionId", valid_594041
+  if valid_597070 != nil:
+    section.add "subscriptionId", valid_597070
   result.add "path", section
   ## parameters in `query` object:
   ##   segment: JArray
@@ -794,47 +794,47 @@ proc validate_MetricsGet_594036(path: JsonNode; query: JsonNode; header: JsonNod
   ##   apiVersion: JString (required)
   ##             : Client API version.
   section = newJObject()
-  var valid_594042 = query.getOrDefault("segment")
-  valid_594042 = validateParameter(valid_594042, JArray, required = false,
+  var valid_597071 = query.getOrDefault("segment")
+  valid_597071 = validateParameter(valid_597071, JArray, required = false,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "segment", valid_594042
-  var valid_594043 = query.getOrDefault("orderby")
-  valid_594043 = validateParameter(valid_594043, JString, required = false,
+  if valid_597071 != nil:
+    section.add "segment", valid_597071
+  var valid_597072 = query.getOrDefault("orderby")
+  valid_597072 = validateParameter(valid_597072, JString, required = false,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "orderby", valid_594043
-  var valid_594044 = query.getOrDefault("timespan")
-  valid_594044 = validateParameter(valid_594044, JString, required = false,
+  if valid_597072 != nil:
+    section.add "orderby", valid_597072
+  var valid_597073 = query.getOrDefault("timespan")
+  valid_597073 = validateParameter(valid_597073, JString, required = false,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "timespan", valid_594044
-  var valid_594045 = query.getOrDefault("top")
-  valid_594045 = validateParameter(valid_594045, JInt, required = false, default = nil)
-  if valid_594045 != nil:
-    section.add "top", valid_594045
-  var valid_594046 = query.getOrDefault("interval")
-  valid_594046 = validateParameter(valid_594046, JString, required = false,
+  if valid_597073 != nil:
+    section.add "timespan", valid_597073
+  var valid_597074 = query.getOrDefault("top")
+  valid_597074 = validateParameter(valid_597074, JInt, required = false, default = nil)
+  if valid_597074 != nil:
+    section.add "top", valid_597074
+  var valid_597075 = query.getOrDefault("interval")
+  valid_597075 = validateParameter(valid_597075, JString, required = false,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "interval", valid_594046
-  var valid_594047 = query.getOrDefault("aggregation")
-  valid_594047 = validateParameter(valid_594047, JArray, required = false,
+  if valid_597075 != nil:
+    section.add "interval", valid_597075
+  var valid_597076 = query.getOrDefault("aggregation")
+  valid_597076 = validateParameter(valid_597076, JArray, required = false,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "aggregation", valid_594047
-  var valid_594048 = query.getOrDefault("filter")
-  valid_594048 = validateParameter(valid_594048, JString, required = false,
+  if valid_597076 != nil:
+    section.add "aggregation", valid_597076
+  var valid_597077 = query.getOrDefault("filter")
+  valid_597077 = validateParameter(valid_597077, JString, required = false,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "filter", valid_594048
+  if valid_597077 != nil:
+    section.add "filter", valid_597077
   assert query != nil,
         "query argument is necessary due to required `apiVersion` field"
-  var valid_594049 = query.getOrDefault("apiVersion")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  var valid_597078 = query.getOrDefault("apiVersion")
+  valid_597078 = validateParameter(valid_597078, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "apiVersion", valid_594049
+  if valid_597078 != nil:
+    section.add "apiVersion", valid_597078
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -843,20 +843,20 @@ proc validate_MetricsGet_594036(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594050: Call_MetricsGet_594035; path: JsonNode; query: JsonNode;
+proc call*(call_597079: Call_MetricsGet_597064; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets metric values for a single metric
   ## 
-  let valid = call_594050.validator(path, query, header, formData, body)
-  let scheme = call_594050.pickScheme
+  let valid = call_597079.validator(path, query, header, formData, body)
+  let scheme = call_597079.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594050.url(scheme.get, call_594050.host, call_594050.base,
-                         call_594050.route, valid.getOrDefault("path"),
+  let url = call_597079.url(scheme.get, call_597079.host, call_597079.base,
+                         call_597079.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594050, url, valid)
+  result = hook(call_597079, url, valid)
 
-proc call*(call_594051: Call_MetricsGet_594035; resourceGroupName: string;
+proc call*(call_597080: Call_MetricsGet_597064; resourceGroupName: string;
           applicationName: string; subscriptionId: string; apiVersion: string;
           metricId: string = "requests/count"; segment: JsonNode = nil;
           orderby: string = ""; timespan: string = ""; top: int = 0; interval: string = "";
@@ -887,33 +887,33 @@ proc call*(call_594051: Call_MetricsGet_594035; resourceGroupName: string;
   ##         : An expression used to filter the results.  This value should be a valid OData filter expression where the keys of each clause should be applicable dimensions for the metric you are retrieving.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var path_594052 = newJObject()
-  var query_594053 = newJObject()
-  add(path_594052, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594052, "applicationName", newJString(applicationName))
-  add(path_594052, "metricId", newJString(metricId))
+  var path_597081 = newJObject()
+  var query_597082 = newJObject()
+  add(path_597081, "resourceGroupName", newJString(resourceGroupName))
+  add(path_597081, "applicationName", newJString(applicationName))
+  add(path_597081, "metricId", newJString(metricId))
   if segment != nil:
-    query_594053.add "segment", segment
-  add(query_594053, "orderby", newJString(orderby))
-  add(query_594053, "timespan", newJString(timespan))
-  add(path_594052, "subscriptionId", newJString(subscriptionId))
-  add(query_594053, "top", newJInt(top))
-  add(query_594053, "interval", newJString(interval))
+    query_597082.add "segment", segment
+  add(query_597082, "orderby", newJString(orderby))
+  add(query_597082, "timespan", newJString(timespan))
+  add(path_597081, "subscriptionId", newJString(subscriptionId))
+  add(query_597082, "top", newJInt(top))
+  add(query_597082, "interval", newJString(interval))
   if aggregation != nil:
-    query_594053.add "aggregation", aggregation
-  add(query_594053, "filter", newJString(filter))
-  add(query_594053, "apiVersion", newJString(apiVersion))
-  result = call_594051.call(path_594052, query_594053, nil, nil, nil)
+    query_597082.add "aggregation", aggregation
+  add(query_597082, "filter", newJString(filter))
+  add(query_597082, "apiVersion", newJString(apiVersion))
+  result = call_597080.call(path_597081, query_597082, nil, nil, nil)
 
-var metricsGet* = Call_MetricsGet_594035(name: "metricsGet",
+var metricsGet* = Call_MetricsGet_597064(name: "metricsGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Insights/components/{applicationName}/metrics/{metricId}",
-                                      validator: validate_MetricsGet_594036,
-                                      base: "", url: url_MetricsGet_594037,
+                                      validator: validate_MetricsGet_597065,
+                                      base: "", url: url_MetricsGet_597066,
                                       schemes: {Scheme.Https})
 type
-  Call_QueryExecute_594067 = ref object of OpenApiRestCall_593438
-proc url_QueryExecute_594069(protocol: Scheme; host: string; base: string;
+  Call_QueryExecute_597096 = ref object of OpenApiRestCall_596467
+proc url_QueryExecute_597098(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -936,7 +936,7 @@ proc url_QueryExecute_594069(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryExecute_594068(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QueryExecute_597097(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Executes an Analytics query for data. [Here](https://dev.applicationinsights.io/documentation/Using-the-API/Query) is an example for using POST with an Analytics query.
   ## 
@@ -952,21 +952,21 @@ proc validate_QueryExecute_594068(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594070 = path.getOrDefault("resourceGroupName")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  var valid_597099 = path.getOrDefault("resourceGroupName")
+  valid_597099 = validateParameter(valid_597099, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "resourceGroupName", valid_594070
-  var valid_594071 = path.getOrDefault("applicationName")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  if valid_597099 != nil:
+    section.add "resourceGroupName", valid_597099
+  var valid_597100 = path.getOrDefault("applicationName")
+  valid_597100 = validateParameter(valid_597100, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "applicationName", valid_594071
-  var valid_594072 = path.getOrDefault("subscriptionId")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  if valid_597100 != nil:
+    section.add "applicationName", valid_597100
+  var valid_597101 = path.getOrDefault("subscriptionId")
+  valid_597101 = validateParameter(valid_597101, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "subscriptionId", valid_594072
+  if valid_597101 != nil:
+    section.add "subscriptionId", valid_597101
   result.add "path", section
   ## parameters in `query` object:
   ##   apiVersion: JString (required)
@@ -974,11 +974,11 @@ proc validate_QueryExecute_594068(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `apiVersion` field"
-  var valid_594073 = query.getOrDefault("apiVersion")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  var valid_597102 = query.getOrDefault("apiVersion")
+  valid_597102 = validateParameter(valid_597102, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "apiVersion", valid_594073
+  if valid_597102 != nil:
+    section.add "apiVersion", valid_597102
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -993,20 +993,20 @@ proc validate_QueryExecute_594068(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594075: Call_QueryExecute_594067; path: JsonNode; query: JsonNode;
+proc call*(call_597104: Call_QueryExecute_597096; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Executes an Analytics query for data. [Here](https://dev.applicationinsights.io/documentation/Using-the-API/Query) is an example for using POST with an Analytics query.
   ## 
-  let valid = call_594075.validator(path, query, header, formData, body)
-  let scheme = call_594075.pickScheme
+  let valid = call_597104.validator(path, query, header, formData, body)
+  let scheme = call_597104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594075.url(scheme.get, call_594075.host, call_594075.base,
-                         call_594075.route, valid.getOrDefault("path"),
+  let url = call_597104.url(scheme.get, call_597104.host, call_597104.base,
+                         call_597104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594075, url, valid)
+  result = hook(call_597104, url, valid)
 
-proc call*(call_594076: Call_QueryExecute_594067; resourceGroupName: string;
+proc call*(call_597105: Call_QueryExecute_597096; resourceGroupName: string;
           applicationName: string; subscriptionId: string; body: JsonNode;
           apiVersion: string): Recallable =
   ## queryExecute
@@ -1022,24 +1022,24 @@ proc call*(call_594076: Call_QueryExecute_594067; resourceGroupName: string;
   ## syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var path_594077 = newJObject()
-  var query_594078 = newJObject()
-  var body_594079 = newJObject()
-  add(path_594077, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594077, "applicationName", newJString(applicationName))
-  add(path_594077, "subscriptionId", newJString(subscriptionId))
+  var path_597106 = newJObject()
+  var query_597107 = newJObject()
+  var body_597108 = newJObject()
+  add(path_597106, "resourceGroupName", newJString(resourceGroupName))
+  add(path_597106, "applicationName", newJString(applicationName))
+  add(path_597106, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_594079 = body
-  add(query_594078, "apiVersion", newJString(apiVersion))
-  result = call_594076.call(path_594077, query_594078, nil, nil, body_594079)
+    body_597108 = body
+  add(query_597107, "apiVersion", newJString(apiVersion))
+  result = call_597105.call(path_597106, query_597107, nil, nil, body_597108)
 
-var queryExecute* = Call_QueryExecute_594067(name: "queryExecute",
+var queryExecute* = Call_QueryExecute_597096(name: "queryExecute",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Insights/components/{applicationName}/query",
-    validator: validate_QueryExecute_594068, base: "", url: url_QueryExecute_594069,
+    validator: validate_QueryExecute_597097, base: "", url: url_QueryExecute_597098,
     schemes: {Scheme.Https})
 type
-  Call_QueryGet_594054 = ref object of OpenApiRestCall_593438
-proc url_QueryGet_594056(protocol: Scheme; host: string; base: string; route: string;
+  Call_QueryGet_597083 = ref object of OpenApiRestCall_596467
+proc url_QueryGet_597085(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1062,7 +1062,7 @@ proc url_QueryGet_594056(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryGet_594055(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QueryGet_597084(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Executes an Analytics query for data
   ## 
@@ -1078,21 +1078,21 @@ proc validate_QueryGet_594055(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594057 = path.getOrDefault("resourceGroupName")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  var valid_597086 = path.getOrDefault("resourceGroupName")
+  valid_597086 = validateParameter(valid_597086, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "resourceGroupName", valid_594057
-  var valid_594058 = path.getOrDefault("applicationName")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  if valid_597086 != nil:
+    section.add "resourceGroupName", valid_597086
+  var valid_597087 = path.getOrDefault("applicationName")
+  valid_597087 = validateParameter(valid_597087, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "applicationName", valid_594058
-  var valid_594059 = path.getOrDefault("subscriptionId")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  if valid_597087 != nil:
+    section.add "applicationName", valid_597087
+  var valid_597088 = path.getOrDefault("subscriptionId")
+  valid_597088 = validateParameter(valid_597088, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "subscriptionId", valid_594059
+  if valid_597088 != nil:
+    section.add "subscriptionId", valid_597088
   result.add "path", section
   ## parameters in `query` object:
   ##   query: JString (required)
@@ -1104,21 +1104,21 @@ proc validate_QueryGet_594055(path: JsonNode; query: JsonNode; header: JsonNode;
   ##             : Client API version.
   section = newJObject()
   assert query != nil, "query argument is necessary due to required `query` field"
-  var valid_594060 = query.getOrDefault("query")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  var valid_597089 = query.getOrDefault("query")
+  valid_597089 = validateParameter(valid_597089, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "query", valid_594060
-  var valid_594061 = query.getOrDefault("timespan")
-  valid_594061 = validateParameter(valid_594061, JString, required = false,
+  if valid_597089 != nil:
+    section.add "query", valid_597089
+  var valid_597090 = query.getOrDefault("timespan")
+  valid_597090 = validateParameter(valid_597090, JString, required = false,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "timespan", valid_594061
-  var valid_594062 = query.getOrDefault("apiVersion")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  if valid_597090 != nil:
+    section.add "timespan", valid_597090
+  var valid_597091 = query.getOrDefault("apiVersion")
+  valid_597091 = validateParameter(valid_597091, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "apiVersion", valid_594062
+  if valid_597091 != nil:
+    section.add "apiVersion", valid_597091
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1127,20 +1127,20 @@ proc validate_QueryGet_594055(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594063: Call_QueryGet_594054; path: JsonNode; query: JsonNode;
+proc call*(call_597092: Call_QueryGet_597083; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Executes an Analytics query for data
   ## 
-  let valid = call_594063.validator(path, query, header, formData, body)
-  let scheme = call_594063.pickScheme
+  let valid = call_597092.validator(path, query, header, formData, body)
+  let scheme = call_597092.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594063.url(scheme.get, call_594063.host, call_594063.base,
-                         call_594063.route, valid.getOrDefault("path"),
+  let url = call_597092.url(scheme.get, call_597092.host, call_597092.base,
+                         call_597092.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594063, url, valid)
+  result = hook(call_597092, url, valid)
 
-proc call*(call_594064: Call_QueryGet_594054; resourceGroupName: string;
+proc call*(call_597093: Call_QueryGet_597083; resourceGroupName: string;
           applicationName: string; query: string; subscriptionId: string;
           apiVersion: string; timespan: string = ""): Recallable =
   ## queryGet
@@ -1158,20 +1158,20 @@ proc call*(call_594064: Call_QueryGet_594054; resourceGroupName: string;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var path_594065 = newJObject()
-  var query_594066 = newJObject()
-  add(path_594065, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594065, "applicationName", newJString(applicationName))
-  add(query_594066, "query", newJString(query))
-  add(query_594066, "timespan", newJString(timespan))
-  add(path_594065, "subscriptionId", newJString(subscriptionId))
-  add(query_594066, "apiVersion", newJString(apiVersion))
-  result = call_594064.call(path_594065, query_594066, nil, nil, nil)
+  var path_597094 = newJObject()
+  var query_597095 = newJObject()
+  add(path_597094, "resourceGroupName", newJString(resourceGroupName))
+  add(path_597094, "applicationName", newJString(applicationName))
+  add(query_597095, "query", newJString(query))
+  add(query_597095, "timespan", newJString(timespan))
+  add(path_597094, "subscriptionId", newJString(subscriptionId))
+  add(query_597095, "apiVersion", newJString(apiVersion))
+  result = call_597093.call(path_597094, query_597095, nil, nil, nil)
 
-var queryGet* = Call_QueryGet_594054(name: "queryGet", meth: HttpMethod.HttpGet,
+var queryGet* = Call_QueryGet_597083(name: "queryGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Insights/components/{applicationName}/query",
-                                  validator: validate_QueryGet_594055, base: "",
-                                  url: url_QueryGet_594056,
+                                  validator: validate_QueryGet_597084, base: "",
+                                  url: url_QueryGet_597085,
                                   schemes: {Scheme.Https})
 export
   rest

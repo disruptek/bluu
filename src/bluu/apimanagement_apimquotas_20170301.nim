@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_596458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "apimanagement-apimquotas"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_QuotaByCounterKeysList_593647 = ref object of OpenApiRestCall_593425
-proc url_QuotaByCounterKeysList_593649(protocol: Scheme; host: string; base: string;
+  Call_QuotaByCounterKeysList_596680 = ref object of OpenApiRestCall_596458
+proc url_QuotaByCounterKeysList_596682(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -119,7 +119,7 @@ proc url_QuotaByCounterKeysList_593649(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotaByCounterKeysList_593648(path: JsonNode; query: JsonNode;
+proc validate_QuotaByCounterKeysList_596681(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of current quota counter periods associated with the counter-key configured in the policy on the specified service instance. The api does not support paging yet.
   ## 
@@ -133,11 +133,11 @@ proc validate_QuotaByCounterKeysList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `quotaCounterKey` field"
-  var valid_593822 = path.getOrDefault("quotaCounterKey")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_596855 = path.getOrDefault("quotaCounterKey")
+  valid_596855 = validateParameter(valid_596855, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "quotaCounterKey", valid_593822
+  if valid_596855 != nil:
+    section.add "quotaCounterKey", valid_596855
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_QuotaByCounterKeysList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593823 = query.getOrDefault("api-version")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_596856 = query.getOrDefault("api-version")
+  valid_596856 = validateParameter(valid_596856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "api-version", valid_593823
+  if valid_596856 != nil:
+    section.add "api-version", valid_596856
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,22 +158,22 @@ proc validate_QuotaByCounterKeysList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593846: Call_QuotaByCounterKeysList_593647; path: JsonNode;
+proc call*(call_596879: Call_QuotaByCounterKeysList_596680; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of current quota counter periods associated with the counter-key configured in the policy on the specified service instance. The api does not support paging yet.
   ## 
   ## Document describing how to configure the quota policies.
   ## https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-product-with-rules#a-namepolicies-ato-configure-call-rate-limit-and-quota-policies
-  let valid = call_593846.validator(path, query, header, formData, body)
-  let scheme = call_593846.pickScheme
+  let valid = call_596879.validator(path, query, header, formData, body)
+  let scheme = call_596879.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593846.url(scheme.get, call_593846.host, call_593846.base,
-                         call_593846.route, valid.getOrDefault("path"),
+  let url = call_596879.url(scheme.get, call_596879.host, call_596879.base,
+                         call_596879.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593846, url, valid)
+  result = hook(call_596879, url, valid)
 
-proc call*(call_593917: Call_QuotaByCounterKeysList_593647;
+proc call*(call_596950: Call_QuotaByCounterKeysList_596680;
           quotaCounterKey: string; apiVersion: string): Recallable =
   ## quotaByCounterKeysList
   ## Lists a collection of current quota counter periods associated with the counter-key configured in the policy on the specified service instance. The api does not support paging yet.
@@ -183,20 +183,20 @@ proc call*(call_593917: Call_QuotaByCounterKeysList_593647;
   ##                  : Quota counter key identifier.This is the result of expression defined in counter-key attribute of the quota-by-key policy.For Example, if you specify counter-key="boo" in the policy, then it’s accessible by "boo" counter key. But if it’s defined as counter-key="@("b"+"a")" then it will be accessible by "ba" key
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  var path_593918 = newJObject()
-  var query_593920 = newJObject()
-  add(path_593918, "quotaCounterKey", newJString(quotaCounterKey))
-  add(query_593920, "api-version", newJString(apiVersion))
-  result = call_593917.call(path_593918, query_593920, nil, nil, nil)
+  var path_596951 = newJObject()
+  var query_596953 = newJObject()
+  add(path_596951, "quotaCounterKey", newJString(quotaCounterKey))
+  add(query_596953, "api-version", newJString(apiVersion))
+  result = call_596950.call(path_596951, query_596953, nil, nil, nil)
 
-var quotaByCounterKeysList* = Call_QuotaByCounterKeysList_593647(
+var quotaByCounterKeysList* = Call_QuotaByCounterKeysList_596680(
     name: "quotaByCounterKeysList", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/quotas/{quotaCounterKey}",
-    validator: validate_QuotaByCounterKeysList_593648, base: "",
-    url: url_QuotaByCounterKeysList_593649, schemes: {Scheme.Https})
+    validator: validate_QuotaByCounterKeysList_596681, base: "",
+    url: url_QuotaByCounterKeysList_596682, schemes: {Scheme.Https})
 type
-  Call_QuotaByCounterKeysUpdate_593959 = ref object of OpenApiRestCall_593425
-proc url_QuotaByCounterKeysUpdate_593961(protocol: Scheme; host: string;
+  Call_QuotaByCounterKeysUpdate_596992 = ref object of OpenApiRestCall_596458
+proc url_QuotaByCounterKeysUpdate_596994(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -212,7 +212,7 @@ proc url_QuotaByCounterKeysUpdate_593961(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotaByCounterKeysUpdate_593960(path: JsonNode; query: JsonNode;
+proc validate_QuotaByCounterKeysUpdate_596993(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates all the quota counter values specified with the existing quota counter key to a value in the specified service instance. This should be used for reset of the quota counter values.
   ## 
@@ -224,11 +224,11 @@ proc validate_QuotaByCounterKeysUpdate_593960(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `quotaCounterKey` field"
-  var valid_593979 = path.getOrDefault("quotaCounterKey")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_597012 = path.getOrDefault("quotaCounterKey")
+  valid_597012 = validateParameter(valid_597012, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "quotaCounterKey", valid_593979
+  if valid_597012 != nil:
+    section.add "quotaCounterKey", valid_597012
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -236,11 +236,11 @@ proc validate_QuotaByCounterKeysUpdate_593960(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593980 = query.getOrDefault("api-version")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_597013 = query.getOrDefault("api-version")
+  valid_597013 = validateParameter(valid_597013, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "api-version", valid_593980
+  if valid_597013 != nil:
+    section.add "api-version", valid_597013
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -254,20 +254,20 @@ proc validate_QuotaByCounterKeysUpdate_593960(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593982: Call_QuotaByCounterKeysUpdate_593959; path: JsonNode;
+proc call*(call_597015: Call_QuotaByCounterKeysUpdate_596992; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates all the quota counter values specified with the existing quota counter key to a value in the specified service instance. This should be used for reset of the quota counter values.
   ## 
-  let valid = call_593982.validator(path, query, header, formData, body)
-  let scheme = call_593982.pickScheme
+  let valid = call_597015.validator(path, query, header, formData, body)
+  let scheme = call_597015.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593982.url(scheme.get, call_593982.host, call_593982.base,
-                         call_593982.route, valid.getOrDefault("path"),
+  let url = call_597015.url(scheme.get, call_597015.host, call_597015.base,
+                         call_597015.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593982, url, valid)
+  result = hook(call_597015, url, valid)
 
-proc call*(call_593983: Call_QuotaByCounterKeysUpdate_593959;
+proc call*(call_597016: Call_QuotaByCounterKeysUpdate_596992;
           quotaCounterKey: string; apiVersion: string; parameters: JsonNode): Recallable =
   ## quotaByCounterKeysUpdate
   ## Updates all the quota counter values specified with the existing quota counter key to a value in the specified service instance. This should be used for reset of the quota counter values.
@@ -277,23 +277,23 @@ proc call*(call_593983: Call_QuotaByCounterKeysUpdate_593959;
   ##             : Version of the API to be used with the client request.
   ##   parameters: JObject (required)
   ##             : The value of the quota counter to be applied to all quota counter periods.
-  var path_593984 = newJObject()
-  var query_593985 = newJObject()
-  var body_593986 = newJObject()
-  add(path_593984, "quotaCounterKey", newJString(quotaCounterKey))
-  add(query_593985, "api-version", newJString(apiVersion))
+  var path_597017 = newJObject()
+  var query_597018 = newJObject()
+  var body_597019 = newJObject()
+  add(path_597017, "quotaCounterKey", newJString(quotaCounterKey))
+  add(query_597018, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_593986 = parameters
-  result = call_593983.call(path_593984, query_593985, nil, nil, body_593986)
+    body_597019 = parameters
+  result = call_597016.call(path_597017, query_597018, nil, nil, body_597019)
 
-var quotaByCounterKeysUpdate* = Call_QuotaByCounterKeysUpdate_593959(
+var quotaByCounterKeysUpdate* = Call_QuotaByCounterKeysUpdate_596992(
     name: "quotaByCounterKeysUpdate", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/quotas/{quotaCounterKey}",
-    validator: validate_QuotaByCounterKeysUpdate_593960, base: "",
-    url: url_QuotaByCounterKeysUpdate_593961, schemes: {Scheme.Https})
+    validator: validate_QuotaByCounterKeysUpdate_596993, base: "",
+    url: url_QuotaByCounterKeysUpdate_596994, schemes: {Scheme.Https})
 type
-  Call_QuotaByPeriodKeysGet_593987 = ref object of OpenApiRestCall_593425
-proc url_QuotaByPeriodKeysGet_593989(protocol: Scheme; host: string; base: string;
+  Call_QuotaByPeriodKeysGet_597020 = ref object of OpenApiRestCall_596458
+proc url_QuotaByPeriodKeysGet_597022(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -311,7 +311,7 @@ proc url_QuotaByPeriodKeysGet_593989(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotaByPeriodKeysGet_593988(path: JsonNode; query: JsonNode;
+proc validate_QuotaByPeriodKeysGet_597021(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the value of the quota counter associated with the counter-key in the policy for the specific period in service instance.
   ## 
@@ -327,16 +327,16 @@ proc validate_QuotaByPeriodKeysGet_593988(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `quotaCounterKey` field"
-  var valid_593990 = path.getOrDefault("quotaCounterKey")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_597023 = path.getOrDefault("quotaCounterKey")
+  valid_597023 = validateParameter(valid_597023, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "quotaCounterKey", valid_593990
-  var valid_593991 = path.getOrDefault("quotaPeriodKey")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_597023 != nil:
+    section.add "quotaCounterKey", valid_597023
+  var valid_597024 = path.getOrDefault("quotaPeriodKey")
+  valid_597024 = validateParameter(valid_597024, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "quotaPeriodKey", valid_593991
+  if valid_597024 != nil:
+    section.add "quotaPeriodKey", valid_597024
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -344,11 +344,11 @@ proc validate_QuotaByPeriodKeysGet_593988(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593992 = query.getOrDefault("api-version")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_597025 = query.getOrDefault("api-version")
+  valid_597025 = validateParameter(valid_597025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "api-version", valid_593992
+  if valid_597025 != nil:
+    section.add "api-version", valid_597025
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -357,22 +357,22 @@ proc validate_QuotaByPeriodKeysGet_593988(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593993: Call_QuotaByPeriodKeysGet_593987; path: JsonNode;
+proc call*(call_597026: Call_QuotaByPeriodKeysGet_597020; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the value of the quota counter associated with the counter-key in the policy for the specific period in service instance.
   ## 
   ## Document describing how to configure the quota policies.
   ## https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-product-with-rules#a-namepolicies-ato-configure-call-rate-limit-and-quota-policies
-  let valid = call_593993.validator(path, query, header, formData, body)
-  let scheme = call_593993.pickScheme
+  let valid = call_597026.validator(path, query, header, formData, body)
+  let scheme = call_597026.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593993.url(scheme.get, call_593993.host, call_593993.base,
-                         call_593993.route, valid.getOrDefault("path"),
+  let url = call_597026.url(scheme.get, call_597026.host, call_597026.base,
+                         call_597026.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593993, url, valid)
+  result = hook(call_597026, url, valid)
 
-proc call*(call_593994: Call_QuotaByPeriodKeysGet_593987; quotaCounterKey: string;
+proc call*(call_597027: Call_QuotaByPeriodKeysGet_597020; quotaCounterKey: string;
           apiVersion: string; quotaPeriodKey: string): Recallable =
   ## quotaByPeriodKeysGet
   ## Gets the value of the quota counter associated with the counter-key in the policy for the specific period in service instance.
@@ -384,21 +384,21 @@ proc call*(call_593994: Call_QuotaByPeriodKeysGet_593987; quotaCounterKey: strin
   ##             : Version of the API to be used with the client request.
   ##   quotaPeriodKey: string (required)
   ##                 : Quota period key identifier.
-  var path_593995 = newJObject()
-  var query_593996 = newJObject()
-  add(path_593995, "quotaCounterKey", newJString(quotaCounterKey))
-  add(query_593996, "api-version", newJString(apiVersion))
-  add(path_593995, "quotaPeriodKey", newJString(quotaPeriodKey))
-  result = call_593994.call(path_593995, query_593996, nil, nil, nil)
+  var path_597028 = newJObject()
+  var query_597029 = newJObject()
+  add(path_597028, "quotaCounterKey", newJString(quotaCounterKey))
+  add(query_597029, "api-version", newJString(apiVersion))
+  add(path_597028, "quotaPeriodKey", newJString(quotaPeriodKey))
+  result = call_597027.call(path_597028, query_597029, nil, nil, nil)
 
-var quotaByPeriodKeysGet* = Call_QuotaByPeriodKeysGet_593987(
+var quotaByPeriodKeysGet* = Call_QuotaByPeriodKeysGet_597020(
     name: "quotaByPeriodKeysGet", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/quotas/{quotaCounterKey}/{quotaPeriodKey}",
-    validator: validate_QuotaByPeriodKeysGet_593988, base: "",
-    url: url_QuotaByPeriodKeysGet_593989, schemes: {Scheme.Https})
+    validator: validate_QuotaByPeriodKeysGet_597021, base: "",
+    url: url_QuotaByPeriodKeysGet_597022, schemes: {Scheme.Https})
 type
-  Call_QuotaByPeriodKeysUpdate_593997 = ref object of OpenApiRestCall_593425
-proc url_QuotaByPeriodKeysUpdate_593999(protocol: Scheme; host: string; base: string;
+  Call_QuotaByPeriodKeysUpdate_597030 = ref object of OpenApiRestCall_596458
+proc url_QuotaByPeriodKeysUpdate_597032(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -417,7 +417,7 @@ proc url_QuotaByPeriodKeysUpdate_593999(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotaByPeriodKeysUpdate_593998(path: JsonNode; query: JsonNode;
+proc validate_QuotaByPeriodKeysUpdate_597031(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing quota counter value in the specified service instance.
   ## 
@@ -431,16 +431,16 @@ proc validate_QuotaByPeriodKeysUpdate_593998(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `quotaCounterKey` field"
-  var valid_594000 = path.getOrDefault("quotaCounterKey")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_597033 = path.getOrDefault("quotaCounterKey")
+  valid_597033 = validateParameter(valid_597033, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "quotaCounterKey", valid_594000
-  var valid_594001 = path.getOrDefault("quotaPeriodKey")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_597033 != nil:
+    section.add "quotaCounterKey", valid_597033
+  var valid_597034 = path.getOrDefault("quotaPeriodKey")
+  valid_597034 = validateParameter(valid_597034, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "quotaPeriodKey", valid_594001
+  if valid_597034 != nil:
+    section.add "quotaPeriodKey", valid_597034
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -448,11 +448,11 @@ proc validate_QuotaByPeriodKeysUpdate_593998(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594002 = query.getOrDefault("api-version")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_597035 = query.getOrDefault("api-version")
+  valid_597035 = validateParameter(valid_597035, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "api-version", valid_594002
+  if valid_597035 != nil:
+    section.add "api-version", valid_597035
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -466,20 +466,20 @@ proc validate_QuotaByPeriodKeysUpdate_593998(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594004: Call_QuotaByPeriodKeysUpdate_593997; path: JsonNode;
+proc call*(call_597037: Call_QuotaByPeriodKeysUpdate_597030; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing quota counter value in the specified service instance.
   ## 
-  let valid = call_594004.validator(path, query, header, formData, body)
-  let scheme = call_594004.pickScheme
+  let valid = call_597037.validator(path, query, header, formData, body)
+  let scheme = call_597037.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594004.url(scheme.get, call_594004.host, call_594004.base,
-                         call_594004.route, valid.getOrDefault("path"),
+  let url = call_597037.url(scheme.get, call_597037.host, call_597037.base,
+                         call_597037.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594004, url, valid)
+  result = hook(call_597037, url, valid)
 
-proc call*(call_594005: Call_QuotaByPeriodKeysUpdate_593997;
+proc call*(call_597038: Call_QuotaByPeriodKeysUpdate_597030;
           quotaCounterKey: string; apiVersion: string; quotaPeriodKey: string;
           parameters: JsonNode): Recallable =
   ## quotaByPeriodKeysUpdate
@@ -492,21 +492,21 @@ proc call*(call_594005: Call_QuotaByPeriodKeysUpdate_593997;
   ##                 : Quota period key identifier.
   ##   parameters: JObject (required)
   ##             : The value of the Quota counter to be applied on the specified period.
-  var path_594006 = newJObject()
-  var query_594007 = newJObject()
-  var body_594008 = newJObject()
-  add(path_594006, "quotaCounterKey", newJString(quotaCounterKey))
-  add(query_594007, "api-version", newJString(apiVersion))
-  add(path_594006, "quotaPeriodKey", newJString(quotaPeriodKey))
+  var path_597039 = newJObject()
+  var query_597040 = newJObject()
+  var body_597041 = newJObject()
+  add(path_597039, "quotaCounterKey", newJString(quotaCounterKey))
+  add(query_597040, "api-version", newJString(apiVersion))
+  add(path_597039, "quotaPeriodKey", newJString(quotaPeriodKey))
   if parameters != nil:
-    body_594008 = parameters
-  result = call_594005.call(path_594006, query_594007, nil, nil, body_594008)
+    body_597041 = parameters
+  result = call_597038.call(path_597039, query_597040, nil, nil, body_597041)
 
-var quotaByPeriodKeysUpdate* = Call_QuotaByPeriodKeysUpdate_593997(
+var quotaByPeriodKeysUpdate* = Call_QuotaByPeriodKeysUpdate_597030(
     name: "quotaByPeriodKeysUpdate", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/quotas/{quotaCounterKey}/{quotaPeriodKey}",
-    validator: validate_QuotaByPeriodKeysUpdate_593998, base: "",
-    url: url_QuotaByPeriodKeysUpdate_593999, schemes: {Scheme.Https})
+    validator: validate_QuotaByPeriodKeysUpdate_597031, base: "",
+    url: url_QuotaByPeriodKeysUpdate_597032, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ComputeDiskAdminManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_574458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-Disks"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DisksList_593647 = ref object of OpenApiRestCall_593425
-proc url_DisksList_593649(protocol: Scheme; host: string; base: string; route: string;
+  Call_DisksList_574680 = ref object of OpenApiRestCall_574458
+proc url_DisksList_574682(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +124,7 @@ proc url_DisksList_593649(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksList_593648(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksList_574681(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of disks.
   ## 
@@ -138,16 +138,16 @@ proc validate_DisksList_593648(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593809 = path.getOrDefault("subscriptionId")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_574842 = path.getOrDefault("subscriptionId")
+  valid_574842 = validateParameter(valid_574842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "subscriptionId", valid_593809
-  var valid_593810 = path.getOrDefault("location")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_574842 != nil:
+    section.add "subscriptionId", valid_574842
+  var valid_574843 = path.getOrDefault("location")
+  valid_574843 = validateParameter(valid_574843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "location", valid_593810
+  if valid_574843 != nil:
+    section.add "location", valid_574843
   result.add "path", section
   ## parameters in `query` object:
   ##   sharePath: JString
@@ -163,36 +163,36 @@ proc validate_DisksList_593648(path: JsonNode; query: JsonNode; header: JsonNode
   ##   start: JInt
   ##        : The start index of disks in query.
   section = newJObject()
-  var valid_593811 = query.getOrDefault("sharePath")
-  valid_593811 = validateParameter(valid_593811, JString, required = false,
+  var valid_574844 = query.getOrDefault("sharePath")
+  valid_574844 = validateParameter(valid_574844, JString, required = false,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "sharePath", valid_593811
+  if valid_574844 != nil:
+    section.add "sharePath", valid_574844
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_574858 = query.getOrDefault("api-version")
+  valid_574858 = validateParameter(valid_574858, JString, required = true,
                                  default = newJString("2018-07-30-preview"))
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
-  var valid_593826 = query.getOrDefault("userSubscriptionId")
-  valid_593826 = validateParameter(valid_593826, JString, required = false,
+  if valid_574858 != nil:
+    section.add "api-version", valid_574858
+  var valid_574859 = query.getOrDefault("userSubscriptionId")
+  valid_574859 = validateParameter(valid_574859, JString, required = false,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "userSubscriptionId", valid_593826
-  var valid_593827 = query.getOrDefault("status")
-  valid_593827 = validateParameter(valid_593827, JString, required = false,
+  if valid_574859 != nil:
+    section.add "userSubscriptionId", valid_574859
+  var valid_574860 = query.getOrDefault("status")
+  valid_574860 = validateParameter(valid_574860, JString, required = false,
                                  default = nil)
-  if valid_593827 != nil:
-    section.add "status", valid_593827
-  var valid_593828 = query.getOrDefault("count")
-  valid_593828 = validateParameter(valid_593828, JInt, required = false, default = nil)
-  if valid_593828 != nil:
-    section.add "count", valid_593828
-  var valid_593829 = query.getOrDefault("start")
-  valid_593829 = validateParameter(valid_593829, JInt, required = false, default = nil)
-  if valid_593829 != nil:
-    section.add "start", valid_593829
+  if valid_574860 != nil:
+    section.add "status", valid_574860
+  var valid_574861 = query.getOrDefault("count")
+  valid_574861 = validateParameter(valid_574861, JInt, required = false, default = nil)
+  if valid_574861 != nil:
+    section.add "count", valid_574861
+  var valid_574862 = query.getOrDefault("start")
+  valid_574862 = validateParameter(valid_574862, JInt, required = false, default = nil)
+  if valid_574862 != nil:
+    section.add "start", valid_574862
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -201,20 +201,20 @@ proc validate_DisksList_593648(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593856: Call_DisksList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_574889: Call_DisksList_574680; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of disks.
   ## 
-  let valid = call_593856.validator(path, query, header, formData, body)
-  let scheme = call_593856.pickScheme
+  let valid = call_574889.validator(path, query, header, formData, body)
+  let scheme = call_574889.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593856.url(scheme.get, call_593856.host, call_593856.base,
-                         call_593856.route, valid.getOrDefault("path"),
+  let url = call_574889.url(scheme.get, call_574889.host, call_574889.base,
+                         call_574889.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593856, url, valid)
+  result = hook(call_574889, url, valid)
 
-proc call*(call_593927: Call_DisksList_593647; subscriptionId: string;
+proc call*(call_574960: Call_DisksList_574680; subscriptionId: string;
           location: string; sharePath: string = "";
           apiVersion: string = "2018-07-30-preview";
           userSubscriptionId: string = ""; status: string = ""; count: int = 0;
@@ -237,25 +237,25 @@ proc call*(call_593927: Call_DisksList_593647; subscriptionId: string;
   ##           : Location of the resource.
   ##   start: int
   ##        : The start index of disks in query.
-  var path_593928 = newJObject()
-  var query_593930 = newJObject()
-  add(query_593930, "sharePath", newJString(sharePath))
-  add(query_593930, "api-version", newJString(apiVersion))
-  add(query_593930, "userSubscriptionId", newJString(userSubscriptionId))
-  add(path_593928, "subscriptionId", newJString(subscriptionId))
-  add(query_593930, "status", newJString(status))
-  add(query_593930, "count", newJInt(count))
-  add(path_593928, "location", newJString(location))
-  add(query_593930, "start", newJInt(start))
-  result = call_593927.call(path_593928, query_593930, nil, nil, nil)
+  var path_574961 = newJObject()
+  var query_574963 = newJObject()
+  add(query_574963, "sharePath", newJString(sharePath))
+  add(query_574963, "api-version", newJString(apiVersion))
+  add(query_574963, "userSubscriptionId", newJString(userSubscriptionId))
+  add(path_574961, "subscriptionId", newJString(subscriptionId))
+  add(query_574963, "status", newJString(status))
+  add(query_574963, "count", newJInt(count))
+  add(path_574961, "location", newJString(location))
+  add(query_574963, "start", newJInt(start))
+  result = call_574960.call(path_574961, query_574963, nil, nil, nil)
 
-var disksList* = Call_DisksList_593647(name: "disksList", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/disks",
-                                    validator: validate_DisksList_593648,
-                                    base: "", url: url_DisksList_593649,
+var disksList* = Call_DisksList_574680(name: "disksList", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/disks",
+                                    validator: validate_DisksList_574681,
+                                    base: "", url: url_DisksList_574682,
                                     schemes: {Scheme.Https})
 type
-  Call_DisksGet_593969 = ref object of OpenApiRestCall_593425
-proc url_DisksGet_593971(protocol: Scheme; host: string; base: string; route: string;
+  Call_DisksGet_575002 = ref object of OpenApiRestCall_574458
+proc url_DisksGet_575004(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -277,7 +277,7 @@ proc url_DisksGet_593971(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksGet_593970(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksGet_575003(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the disk.
   ## 
@@ -293,21 +293,21 @@ proc validate_DisksGet_593970(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593972 = path.getOrDefault("subscriptionId")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_575005 = path.getOrDefault("subscriptionId")
+  valid_575005 = validateParameter(valid_575005, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "subscriptionId", valid_593972
-  var valid_593973 = path.getOrDefault("location")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  if valid_575005 != nil:
+    section.add "subscriptionId", valid_575005
+  var valid_575006 = path.getOrDefault("location")
+  valid_575006 = validateParameter(valid_575006, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "location", valid_593973
-  var valid_593974 = path.getOrDefault("DiskId")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  if valid_575006 != nil:
+    section.add "location", valid_575006
+  var valid_575007 = path.getOrDefault("DiskId")
+  valid_575007 = validateParameter(valid_575007, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "DiskId", valid_593974
+  if valid_575007 != nil:
+    section.add "DiskId", valid_575007
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -315,11 +315,11 @@ proc validate_DisksGet_593970(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593975 = query.getOrDefault("api-version")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_575008 = query.getOrDefault("api-version")
+  valid_575008 = validateParameter(valid_575008, JString, required = true,
                                  default = newJString("2018-07-30-preview"))
-  if valid_593975 != nil:
-    section.add "api-version", valid_593975
+  if valid_575008 != nil:
+    section.add "api-version", valid_575008
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -328,20 +328,20 @@ proc validate_DisksGet_593970(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593976: Call_DisksGet_593969; path: JsonNode; query: JsonNode;
+proc call*(call_575009: Call_DisksGet_575002; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the disk.
   ## 
-  let valid = call_593976.validator(path, query, header, formData, body)
-  let scheme = call_593976.pickScheme
+  let valid = call_575009.validator(path, query, header, formData, body)
+  let scheme = call_575009.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593976.url(scheme.get, call_593976.host, call_593976.base,
-                         call_593976.route, valid.getOrDefault("path"),
+  let url = call_575009.url(scheme.get, call_575009.host, call_575009.base,
+                         call_575009.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593976, url, valid)
+  result = hook(call_575009, url, valid)
 
-proc call*(call_593977: Call_DisksGet_593969; subscriptionId: string;
+proc call*(call_575010: Call_DisksGet_575002; subscriptionId: string;
           location: string; DiskId: string;
           apiVersion: string = "2018-07-30-preview"): Recallable =
   ## disksGet
@@ -354,17 +354,17 @@ proc call*(call_593977: Call_DisksGet_593969; subscriptionId: string;
   ##           : Location of the resource.
   ##   DiskId: string (required)
   ##         : The disk guid as identity.
-  var path_593978 = newJObject()
-  var query_593979 = newJObject()
-  add(query_593979, "api-version", newJString(apiVersion))
-  add(path_593978, "subscriptionId", newJString(subscriptionId))
-  add(path_593978, "location", newJString(location))
-  add(path_593978, "DiskId", newJString(DiskId))
-  result = call_593977.call(path_593978, query_593979, nil, nil, nil)
+  var path_575011 = newJObject()
+  var query_575012 = newJObject()
+  add(query_575012, "api-version", newJString(apiVersion))
+  add(path_575011, "subscriptionId", newJString(subscriptionId))
+  add(path_575011, "location", newJString(location))
+  add(path_575011, "DiskId", newJString(DiskId))
+  result = call_575010.call(path_575011, query_575012, nil, nil, nil)
 
-var disksGet* = Call_DisksGet_593969(name: "disksGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/disks/{DiskId}",
-                                  validator: validate_DisksGet_593970, base: "",
-                                  url: url_DisksGet_593971,
+var disksGet* = Call_DisksGet_575002(name: "disksGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/disks/{DiskId}",
+                                  validator: validate_DisksGet_575003, base: "",
+                                  url: url_DisksGet_575004,
                                   schemes: {Scheme.Https})
 export
   rest

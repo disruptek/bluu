@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: AuthorizationManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_596441 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596441](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596441): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "authorization-authorization-DenyAssignmentGetCalls"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DenyAssignmentsList_593630 = ref object of OpenApiRestCall_593408
-proc url_DenyAssignmentsList_593632(protocol: Scheme; host: string; base: string;
+  Call_DenyAssignmentsList_596663 = ref object of OpenApiRestCall_596441
+proc url_DenyAssignmentsList_596665(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_DenyAssignmentsList_593632(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DenyAssignmentsList_593631(path: JsonNode; query: JsonNode;
+proc validate_DenyAssignmentsList_596664(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets all deny assignments for the subscription.
@@ -134,11 +134,11 @@ proc validate_DenyAssignmentsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593806 = path.getOrDefault("subscriptionId")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_596839 = path.getOrDefault("subscriptionId")
+  valid_596839 = validateParameter(valid_596839, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "subscriptionId", valid_593806
+  if valid_596839 != nil:
+    section.add "subscriptionId", valid_596839
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -148,16 +148,16 @@ proc validate_DenyAssignmentsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_596840 = query.getOrDefault("api-version")
+  valid_596840 = validateParameter(valid_596840, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
-  var valid_593808 = query.getOrDefault("$filter")
-  valid_593808 = validateParameter(valid_593808, JString, required = false,
+  if valid_596840 != nil:
+    section.add "api-version", valid_596840
+  var valid_596841 = query.getOrDefault("$filter")
+  valid_596841 = validateParameter(valid_596841, JString, required = false,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "$filter", valid_593808
+  if valid_596841 != nil:
+    section.add "$filter", valid_596841
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -166,20 +166,20 @@ proc validate_DenyAssignmentsList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593831: Call_DenyAssignmentsList_593630; path: JsonNode;
+proc call*(call_596864: Call_DenyAssignmentsList_596663; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all deny assignments for the subscription.
   ## 
-  let valid = call_593831.validator(path, query, header, formData, body)
-  let scheme = call_593831.pickScheme
+  let valid = call_596864.validator(path, query, header, formData, body)
+  let scheme = call_596864.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593831.url(scheme.get, call_593831.host, call_593831.base,
-                         call_593831.route, valid.getOrDefault("path"),
+  let url = call_596864.url(scheme.get, call_596864.host, call_596864.base,
+                         call_596864.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593831, url, valid)
+  result = hook(call_596864, url, valid)
 
-proc call*(call_593902: Call_DenyAssignmentsList_593630; apiVersion: string;
+proc call*(call_596935: Call_DenyAssignmentsList_596663; apiVersion: string;
           subscriptionId: string; Filter: string = ""): Recallable =
   ## denyAssignmentsList
   ## Gets all deny assignments for the subscription.
@@ -189,21 +189,21 @@ proc call*(call_593902: Call_DenyAssignmentsList_593630; apiVersion: string;
   ##                 : The ID of the target subscription.
   ##   Filter: string
   ##         : The filter to apply on the operation. Use $filter=atScope() to return all deny assignments at or above the scope. Use $filter=denyAssignmentName eq '{name}' to search deny assignments by name at specified scope. Use $filter=principalId eq '{id}' to return all deny assignments at, above and below the scope for the specified principal. Use $filter=gdprExportPrincipalId eq '{id}' to return all deny assignments at, above and below the scope for the specified principal. This filter is different from the principalId filter as it returns not only those deny assignments that contain the specified principal is the Principals list but also those deny assignments that contain the specified principal is the ExcludePrincipals list. Additionally, when gdprExportPrincipalId filter is used, only the deny assignment name and description properties are returned.
-  var path_593903 = newJObject()
-  var query_593905 = newJObject()
-  add(query_593905, "api-version", newJString(apiVersion))
-  add(path_593903, "subscriptionId", newJString(subscriptionId))
-  add(query_593905, "$filter", newJString(Filter))
-  result = call_593902.call(path_593903, query_593905, nil, nil, nil)
+  var path_596936 = newJObject()
+  var query_596938 = newJObject()
+  add(query_596938, "api-version", newJString(apiVersion))
+  add(path_596936, "subscriptionId", newJString(subscriptionId))
+  add(query_596938, "$filter", newJString(Filter))
+  result = call_596935.call(path_596936, query_596938, nil, nil, nil)
 
-var denyAssignmentsList* = Call_DenyAssignmentsList_593630(
+var denyAssignmentsList* = Call_DenyAssignmentsList_596663(
     name: "denyAssignmentsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/denyAssignments",
-    validator: validate_DenyAssignmentsList_593631, base: "",
-    url: url_DenyAssignmentsList_593632, schemes: {Scheme.Https})
+    validator: validate_DenyAssignmentsList_596664, base: "",
+    url: url_DenyAssignmentsList_596665, schemes: {Scheme.Https})
 type
-  Call_DenyAssignmentsListForResourceGroup_593944 = ref object of OpenApiRestCall_593408
-proc url_DenyAssignmentsListForResourceGroup_593946(protocol: Scheme; host: string;
+  Call_DenyAssignmentsListForResourceGroup_596977 = ref object of OpenApiRestCall_596441
+proc url_DenyAssignmentsListForResourceGroup_596979(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -224,7 +224,7 @@ proc url_DenyAssignmentsListForResourceGroup_593946(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DenyAssignmentsListForResourceGroup_593945(path: JsonNode;
+proc validate_DenyAssignmentsListForResourceGroup_596978(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets deny assignments for a resource group.
   ## 
@@ -238,16 +238,16 @@ proc validate_DenyAssignmentsListForResourceGroup_593945(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593947 = path.getOrDefault("resourceGroupName")
-  valid_593947 = validateParameter(valid_593947, JString, required = true,
+  var valid_596980 = path.getOrDefault("resourceGroupName")
+  valid_596980 = validateParameter(valid_596980, JString, required = true,
                                  default = nil)
-  if valid_593947 != nil:
-    section.add "resourceGroupName", valid_593947
-  var valid_593948 = path.getOrDefault("subscriptionId")
-  valid_593948 = validateParameter(valid_593948, JString, required = true,
+  if valid_596980 != nil:
+    section.add "resourceGroupName", valid_596980
+  var valid_596981 = path.getOrDefault("subscriptionId")
+  valid_596981 = validateParameter(valid_596981, JString, required = true,
                                  default = nil)
-  if valid_593948 != nil:
-    section.add "subscriptionId", valid_593948
+  if valid_596981 != nil:
+    section.add "subscriptionId", valid_596981
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -257,16 +257,16 @@ proc validate_DenyAssignmentsListForResourceGroup_593945(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593949 = query.getOrDefault("api-version")
-  valid_593949 = validateParameter(valid_593949, JString, required = true,
+  var valid_596982 = query.getOrDefault("api-version")
+  valid_596982 = validateParameter(valid_596982, JString, required = true,
                                  default = nil)
-  if valid_593949 != nil:
-    section.add "api-version", valid_593949
-  var valid_593950 = query.getOrDefault("$filter")
-  valid_593950 = validateParameter(valid_593950, JString, required = false,
+  if valid_596982 != nil:
+    section.add "api-version", valid_596982
+  var valid_596983 = query.getOrDefault("$filter")
+  valid_596983 = validateParameter(valid_596983, JString, required = false,
                                  default = nil)
-  if valid_593950 != nil:
-    section.add "$filter", valid_593950
+  if valid_596983 != nil:
+    section.add "$filter", valid_596983
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -275,21 +275,21 @@ proc validate_DenyAssignmentsListForResourceGroup_593945(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593951: Call_DenyAssignmentsListForResourceGroup_593944;
+proc call*(call_596984: Call_DenyAssignmentsListForResourceGroup_596977;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets deny assignments for a resource group.
   ## 
-  let valid = call_593951.validator(path, query, header, formData, body)
-  let scheme = call_593951.pickScheme
+  let valid = call_596984.validator(path, query, header, formData, body)
+  let scheme = call_596984.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593951.url(scheme.get, call_593951.host, call_593951.base,
-                         call_593951.route, valid.getOrDefault("path"),
+  let url = call_596984.url(scheme.get, call_596984.host, call_596984.base,
+                         call_596984.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593951, url, valid)
+  result = hook(call_596984, url, valid)
 
-proc call*(call_593952: Call_DenyAssignmentsListForResourceGroup_593944;
+proc call*(call_596985: Call_DenyAssignmentsListForResourceGroup_596977;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           Filter: string = ""): Recallable =
   ## denyAssignmentsListForResourceGroup
@@ -302,22 +302,22 @@ proc call*(call_593952: Call_DenyAssignmentsListForResourceGroup_593944;
   ##                 : The ID of the target subscription.
   ##   Filter: string
   ##         : The filter to apply on the operation. Use $filter=atScope() to return all deny assignments at or above the scope. Use $filter=denyAssignmentName eq '{name}' to search deny assignments by name at specified scope. Use $filter=principalId eq '{id}' to return all deny assignments at, above and below the scope for the specified principal. Use $filter=gdprExportPrincipalId eq '{id}' to return all deny assignments at, above and below the scope for the specified principal. This filter is different from the principalId filter as it returns not only those deny assignments that contain the specified principal is the Principals list but also those deny assignments that contain the specified principal is the ExcludePrincipals list. Additionally, when gdprExportPrincipalId filter is used, only the deny assignment name and description properties are returned.
-  var path_593953 = newJObject()
-  var query_593954 = newJObject()
-  add(path_593953, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593954, "api-version", newJString(apiVersion))
-  add(path_593953, "subscriptionId", newJString(subscriptionId))
-  add(query_593954, "$filter", newJString(Filter))
-  result = call_593952.call(path_593953, query_593954, nil, nil, nil)
+  var path_596986 = newJObject()
+  var query_596987 = newJObject()
+  add(path_596986, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596987, "api-version", newJString(apiVersion))
+  add(path_596986, "subscriptionId", newJString(subscriptionId))
+  add(query_596987, "$filter", newJString(Filter))
+  result = call_596985.call(path_596986, query_596987, nil, nil, nil)
 
-var denyAssignmentsListForResourceGroup* = Call_DenyAssignmentsListForResourceGroup_593944(
+var denyAssignmentsListForResourceGroup* = Call_DenyAssignmentsListForResourceGroup_596977(
     name: "denyAssignmentsListForResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Authorization/denyAssignments",
-    validator: validate_DenyAssignmentsListForResourceGroup_593945, base: "",
-    url: url_DenyAssignmentsListForResourceGroup_593946, schemes: {Scheme.Https})
+    validator: validate_DenyAssignmentsListForResourceGroup_596978, base: "",
+    url: url_DenyAssignmentsListForResourceGroup_596979, schemes: {Scheme.Https})
 type
-  Call_DenyAssignmentsListForResource_593955 = ref object of OpenApiRestCall_593408
-proc url_DenyAssignmentsListForResource_593957(protocol: Scheme; host: string;
+  Call_DenyAssignmentsListForResource_596988 = ref object of OpenApiRestCall_596441
+proc url_DenyAssignmentsListForResource_596990(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -352,7 +352,7 @@ proc url_DenyAssignmentsListForResource_593957(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DenyAssignmentsListForResource_593956(path: JsonNode;
+proc validate_DenyAssignmentsListForResource_596989(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets deny assignments for a resource.
   ## 
@@ -374,36 +374,36 @@ proc validate_DenyAssignmentsListForResource_593956(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceType` field"
-  var valid_593958 = path.getOrDefault("resourceType")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  var valid_596991 = path.getOrDefault("resourceType")
+  valid_596991 = validateParameter(valid_596991, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "resourceType", valid_593958
-  var valid_593959 = path.getOrDefault("resourceGroupName")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_596991 != nil:
+    section.add "resourceType", valid_596991
+  var valid_596992 = path.getOrDefault("resourceGroupName")
+  valid_596992 = validateParameter(valid_596992, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "resourceGroupName", valid_593959
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  if valid_596992 != nil:
+    section.add "resourceGroupName", valid_596992
+  var valid_596993 = path.getOrDefault("subscriptionId")
+  valid_596993 = validateParameter(valid_596993, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
-  var valid_593961 = path.getOrDefault("resourceName")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  if valid_596993 != nil:
+    section.add "subscriptionId", valid_596993
+  var valid_596994 = path.getOrDefault("resourceName")
+  valid_596994 = validateParameter(valid_596994, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "resourceName", valid_593961
-  var valid_593962 = path.getOrDefault("resourceProviderNamespace")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_596994 != nil:
+    section.add "resourceName", valid_596994
+  var valid_596995 = path.getOrDefault("resourceProviderNamespace")
+  valid_596995 = validateParameter(valid_596995, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "resourceProviderNamespace", valid_593962
-  var valid_593963 = path.getOrDefault("parentResourcePath")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_596995 != nil:
+    section.add "resourceProviderNamespace", valid_596995
+  var valid_596996 = path.getOrDefault("parentResourcePath")
+  valid_596996 = validateParameter(valid_596996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "parentResourcePath", valid_593963
+  if valid_596996 != nil:
+    section.add "parentResourcePath", valid_596996
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -413,16 +413,16 @@ proc validate_DenyAssignmentsListForResource_593956(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593964 = query.getOrDefault("api-version")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_596997 = query.getOrDefault("api-version")
+  valid_596997 = validateParameter(valid_596997, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "api-version", valid_593964
-  var valid_593965 = query.getOrDefault("$filter")
-  valid_593965 = validateParameter(valid_593965, JString, required = false,
+  if valid_596997 != nil:
+    section.add "api-version", valid_596997
+  var valid_596998 = query.getOrDefault("$filter")
+  valid_596998 = validateParameter(valid_596998, JString, required = false,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "$filter", valid_593965
+  if valid_596998 != nil:
+    section.add "$filter", valid_596998
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -431,20 +431,20 @@ proc validate_DenyAssignmentsListForResource_593956(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593966: Call_DenyAssignmentsListForResource_593955; path: JsonNode;
+proc call*(call_596999: Call_DenyAssignmentsListForResource_596988; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets deny assignments for a resource.
   ## 
-  let valid = call_593966.validator(path, query, header, formData, body)
-  let scheme = call_593966.pickScheme
+  let valid = call_596999.validator(path, query, header, formData, body)
+  let scheme = call_596999.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593966.url(scheme.get, call_593966.host, call_593966.base,
-                         call_593966.route, valid.getOrDefault("path"),
+  let url = call_596999.url(scheme.get, call_596999.host, call_596999.base,
+                         call_596999.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593966, url, valid)
+  result = hook(call_596999, url, valid)
 
-proc call*(call_593967: Call_DenyAssignmentsListForResource_593955;
+proc call*(call_597000: Call_DenyAssignmentsListForResource_596988;
           resourceType: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; resourceName: string;
           resourceProviderNamespace: string; parentResourcePath: string;
@@ -467,27 +467,27 @@ proc call*(call_593967: Call_DenyAssignmentsListForResource_593955;
   ##                     : The parent resource identity.
   ##   Filter: string
   ##         : The filter to apply on the operation. Use $filter=atScope() to return all deny assignments at or above the scope. Use $filter=denyAssignmentName eq '{name}' to search deny assignments by name at specified scope. Use $filter=principalId eq '{id}' to return all deny assignments at, above and below the scope for the specified principal. Use $filter=gdprExportPrincipalId eq '{id}' to return all deny assignments at, above and below the scope for the specified principal. This filter is different from the principalId filter as it returns not only those deny assignments that contain the specified principal is the Principals list but also those deny assignments that contain the specified principal is the ExcludePrincipals list. Additionally, when gdprExportPrincipalId filter is used, only the deny assignment name and description properties are returned.
-  var path_593968 = newJObject()
-  var query_593969 = newJObject()
-  add(path_593968, "resourceType", newJString(resourceType))
-  add(path_593968, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593969, "api-version", newJString(apiVersion))
-  add(path_593968, "subscriptionId", newJString(subscriptionId))
-  add(path_593968, "resourceName", newJString(resourceName))
-  add(path_593968, "resourceProviderNamespace",
+  var path_597001 = newJObject()
+  var query_597002 = newJObject()
+  add(path_597001, "resourceType", newJString(resourceType))
+  add(path_597001, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597002, "api-version", newJString(apiVersion))
+  add(path_597001, "subscriptionId", newJString(subscriptionId))
+  add(path_597001, "resourceName", newJString(resourceName))
+  add(path_597001, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  add(path_593968, "parentResourcePath", newJString(parentResourcePath))
-  add(query_593969, "$filter", newJString(Filter))
-  result = call_593967.call(path_593968, query_593969, nil, nil, nil)
+  add(path_597001, "parentResourcePath", newJString(parentResourcePath))
+  add(query_597002, "$filter", newJString(Filter))
+  result = call_597000.call(path_597001, query_597002, nil, nil, nil)
 
-var denyAssignmentsListForResource* = Call_DenyAssignmentsListForResource_593955(
+var denyAssignmentsListForResource* = Call_DenyAssignmentsListForResource_596988(
     name: "denyAssignmentsListForResource", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/providers/Microsoft.Authorization/denyAssignments",
-    validator: validate_DenyAssignmentsListForResource_593956, base: "",
-    url: url_DenyAssignmentsListForResource_593957, schemes: {Scheme.Https})
+    validator: validate_DenyAssignmentsListForResource_596989, base: "",
+    url: url_DenyAssignmentsListForResource_596990, schemes: {Scheme.Https})
 type
-  Call_DenyAssignmentsGetById_593970 = ref object of OpenApiRestCall_593408
-proc url_DenyAssignmentsGetById_593972(protocol: Scheme; host: string; base: string;
+  Call_DenyAssignmentsGetById_597003 = ref object of OpenApiRestCall_596441
+proc url_DenyAssignmentsGetById_597005(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -503,7 +503,7 @@ proc url_DenyAssignmentsGetById_593972(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DenyAssignmentsGetById_593971(path: JsonNode; query: JsonNode;
+proc validate_DenyAssignmentsGetById_597004(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a deny assignment by ID.
   ## 
@@ -516,11 +516,11 @@ proc validate_DenyAssignmentsGetById_593971(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `denyAssignmentId` field"
-  var valid_593973 = path.getOrDefault("denyAssignmentId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_597006 = path.getOrDefault("denyAssignmentId")
+  valid_597006 = validateParameter(valid_597006, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "denyAssignmentId", valid_593973
+  if valid_597006 != nil:
+    section.add "denyAssignmentId", valid_597006
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -528,11 +528,11 @@ proc validate_DenyAssignmentsGetById_593971(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593974 = query.getOrDefault("api-version")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_597007 = query.getOrDefault("api-version")
+  valid_597007 = validateParameter(valid_597007, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "api-version", valid_593974
+  if valid_597007 != nil:
+    section.add "api-version", valid_597007
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -541,20 +541,20 @@ proc validate_DenyAssignmentsGetById_593971(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593975: Call_DenyAssignmentsGetById_593970; path: JsonNode;
+proc call*(call_597008: Call_DenyAssignmentsGetById_597003; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a deny assignment by ID.
   ## 
-  let valid = call_593975.validator(path, query, header, formData, body)
-  let scheme = call_593975.pickScheme
+  let valid = call_597008.validator(path, query, header, formData, body)
+  let scheme = call_597008.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593975.url(scheme.get, call_593975.host, call_593975.base,
-                         call_593975.route, valid.getOrDefault("path"),
+  let url = call_597008.url(scheme.get, call_597008.host, call_597008.base,
+                         call_597008.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593975, url, valid)
+  result = hook(call_597008, url, valid)
 
-proc call*(call_593976: Call_DenyAssignmentsGetById_593970; apiVersion: string;
+proc call*(call_597009: Call_DenyAssignmentsGetById_597003; apiVersion: string;
           denyAssignmentId: string): Recallable =
   ## denyAssignmentsGetById
   ## Gets a deny assignment by ID.
@@ -563,20 +563,20 @@ proc call*(call_593976: Call_DenyAssignmentsGetById_593970; apiVersion: string;
   ##   denyAssignmentId: string (required)
   ##                   : The fully qualified deny assignment ID. For example, use the format, 
   ## /subscriptions/{guid}/providers/Microsoft.Authorization/denyAssignments/{denyAssignmentId} for subscription level deny assignments, or /providers/Microsoft.Authorization/denyAssignments/{denyAssignmentId} for tenant level deny assignments.
-  var path_593977 = newJObject()
-  var query_593978 = newJObject()
-  add(query_593978, "api-version", newJString(apiVersion))
-  add(path_593977, "denyAssignmentId", newJString(denyAssignmentId))
-  result = call_593976.call(path_593977, query_593978, nil, nil, nil)
+  var path_597010 = newJObject()
+  var query_597011 = newJObject()
+  add(query_597011, "api-version", newJString(apiVersion))
+  add(path_597010, "denyAssignmentId", newJString(denyAssignmentId))
+  result = call_597009.call(path_597010, query_597011, nil, nil, nil)
 
-var denyAssignmentsGetById* = Call_DenyAssignmentsGetById_593970(
+var denyAssignmentsGetById* = Call_DenyAssignmentsGetById_597003(
     name: "denyAssignmentsGetById", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{denyAssignmentId}",
-    validator: validate_DenyAssignmentsGetById_593971, base: "",
-    url: url_DenyAssignmentsGetById_593972, schemes: {Scheme.Https})
+    validator: validate_DenyAssignmentsGetById_597004, base: "",
+    url: url_DenyAssignmentsGetById_597005, schemes: {Scheme.Https})
 type
-  Call_DenyAssignmentsListForScope_593979 = ref object of OpenApiRestCall_593408
-proc url_DenyAssignmentsListForScope_593981(protocol: Scheme; host: string;
+  Call_DenyAssignmentsListForScope_597012 = ref object of OpenApiRestCall_596441
+proc url_DenyAssignmentsListForScope_597014(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -592,7 +592,7 @@ proc url_DenyAssignmentsListForScope_593981(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DenyAssignmentsListForScope_593980(path: JsonNode; query: JsonNode;
+proc validate_DenyAssignmentsListForScope_597013(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets deny assignments for a scope.
   ## 
@@ -603,11 +603,11 @@ proc validate_DenyAssignmentsListForScope_593980(path: JsonNode; query: JsonNode
   ##        : The scope of the deny assignments.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_593982 = path.getOrDefault("scope")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_597015 = path.getOrDefault("scope")
+  valid_597015 = validateParameter(valid_597015, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "scope", valid_593982
+  if valid_597015 != nil:
+    section.add "scope", valid_597015
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -617,16 +617,16 @@ proc validate_DenyAssignmentsListForScope_593980(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_597016 = query.getOrDefault("api-version")
+  valid_597016 = validateParameter(valid_597016, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
-  var valid_593984 = query.getOrDefault("$filter")
-  valid_593984 = validateParameter(valid_593984, JString, required = false,
+  if valid_597016 != nil:
+    section.add "api-version", valid_597016
+  var valid_597017 = query.getOrDefault("$filter")
+  valid_597017 = validateParameter(valid_597017, JString, required = false,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "$filter", valid_593984
+  if valid_597017 != nil:
+    section.add "$filter", valid_597017
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -635,20 +635,20 @@ proc validate_DenyAssignmentsListForScope_593980(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_DenyAssignmentsListForScope_593979; path: JsonNode;
+proc call*(call_597018: Call_DenyAssignmentsListForScope_597012; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets deny assignments for a scope.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_597018.validator(path, query, header, formData, body)
+  let scheme = call_597018.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_597018.url(scheme.get, call_597018.host, call_597018.base,
+                         call_597018.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_597018, url, valid)
 
-proc call*(call_593986: Call_DenyAssignmentsListForScope_593979;
+proc call*(call_597019: Call_DenyAssignmentsListForScope_597012;
           apiVersion: string; scope: string; Filter: string = ""): Recallable =
   ## denyAssignmentsListForScope
   ## Gets deny assignments for a scope.
@@ -658,22 +658,22 @@ proc call*(call_593986: Call_DenyAssignmentsListForScope_593979;
   ##        : The scope of the deny assignments.
   ##   Filter: string
   ##         : The filter to apply on the operation. Use $filter=atScope() to return all deny assignments at or above the scope. Use $filter=denyAssignmentName eq '{name}' to search deny assignments by name at specified scope. Use $filter=principalId eq '{id}' to return all deny assignments at, above and below the scope for the specified principal. Use $filter=gdprExportPrincipalId eq '{id}' to return all deny assignments at, above and below the scope for the specified principal. This filter is different from the principalId filter as it returns not only those deny assignments that contain the specified principal is the Principals list but also those deny assignments that contain the specified principal is the ExcludePrincipals list. Additionally, when gdprExportPrincipalId filter is used, only the deny assignment name and description properties are returned.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "scope", newJString(scope))
-  add(query_593988, "$filter", newJString(Filter))
-  result = call_593986.call(path_593987, query_593988, nil, nil, nil)
+  var path_597020 = newJObject()
+  var query_597021 = newJObject()
+  add(query_597021, "api-version", newJString(apiVersion))
+  add(path_597020, "scope", newJString(scope))
+  add(query_597021, "$filter", newJString(Filter))
+  result = call_597019.call(path_597020, query_597021, nil, nil, nil)
 
-var denyAssignmentsListForScope* = Call_DenyAssignmentsListForScope_593979(
+var denyAssignmentsListForScope* = Call_DenyAssignmentsListForScope_597012(
     name: "denyAssignmentsListForScope", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Authorization/denyAssignments",
-    validator: validate_DenyAssignmentsListForScope_593980, base: "",
-    url: url_DenyAssignmentsListForScope_593981, schemes: {Scheme.Https})
+    validator: validate_DenyAssignmentsListForScope_597013, base: "",
+    url: url_DenyAssignmentsListForScope_597014, schemes: {Scheme.Https})
 type
-  Call_DenyAssignmentsGet_593989 = ref object of OpenApiRestCall_593408
-proc url_DenyAssignmentsGet_593991(protocol: Scheme; host: string; base: string;
+  Call_DenyAssignmentsGet_597022 = ref object of OpenApiRestCall_596441
+proc url_DenyAssignmentsGet_597024(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -692,7 +692,7 @@ proc url_DenyAssignmentsGet_593991(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DenyAssignmentsGet_593990(path: JsonNode; query: JsonNode;
+proc validate_DenyAssignmentsGet_597023(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get the specified deny assignment.
@@ -707,16 +707,16 @@ proc validate_DenyAssignmentsGet_593990(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `denyAssignmentId` field"
-  var valid_593992 = path.getOrDefault("denyAssignmentId")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_597025 = path.getOrDefault("denyAssignmentId")
+  valid_597025 = validateParameter(valid_597025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "denyAssignmentId", valid_593992
-  var valid_593993 = path.getOrDefault("scope")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_597025 != nil:
+    section.add "denyAssignmentId", valid_597025
+  var valid_597026 = path.getOrDefault("scope")
+  valid_597026 = validateParameter(valid_597026, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "scope", valid_593993
+  if valid_597026 != nil:
+    section.add "scope", valid_597026
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -724,11 +724,11 @@ proc validate_DenyAssignmentsGet_593990(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_597027 = query.getOrDefault("api-version")
+  valid_597027 = validateParameter(valid_597027, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
+  if valid_597027 != nil:
+    section.add "api-version", valid_597027
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -737,20 +737,20 @@ proc validate_DenyAssignmentsGet_593990(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593995: Call_DenyAssignmentsGet_593989; path: JsonNode;
+proc call*(call_597028: Call_DenyAssignmentsGet_597022; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the specified deny assignment.
   ## 
-  let valid = call_593995.validator(path, query, header, formData, body)
-  let scheme = call_593995.pickScheme
+  let valid = call_597028.validator(path, query, header, formData, body)
+  let scheme = call_597028.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593995.url(scheme.get, call_593995.host, call_593995.base,
-                         call_593995.route, valid.getOrDefault("path"),
+  let url = call_597028.url(scheme.get, call_597028.host, call_597028.base,
+                         call_597028.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593995, url, valid)
+  result = hook(call_597028, url, valid)
 
-proc call*(call_593996: Call_DenyAssignmentsGet_593989; apiVersion: string;
+proc call*(call_597029: Call_DenyAssignmentsGet_597022; apiVersion: string;
           denyAssignmentId: string; scope: string): Recallable =
   ## denyAssignmentsGet
   ## Get the specified deny assignment.
@@ -760,18 +760,18 @@ proc call*(call_593996: Call_DenyAssignmentsGet_593989; apiVersion: string;
   ##                   : The ID of the deny assignment to get.
   ##   scope: string (required)
   ##        : The scope of the deny assignment.
-  var path_593997 = newJObject()
-  var query_593998 = newJObject()
-  add(query_593998, "api-version", newJString(apiVersion))
-  add(path_593997, "denyAssignmentId", newJString(denyAssignmentId))
-  add(path_593997, "scope", newJString(scope))
-  result = call_593996.call(path_593997, query_593998, nil, nil, nil)
+  var path_597030 = newJObject()
+  var query_597031 = newJObject()
+  add(query_597031, "api-version", newJString(apiVersion))
+  add(path_597030, "denyAssignmentId", newJString(denyAssignmentId))
+  add(path_597030, "scope", newJString(scope))
+  result = call_597029.call(path_597030, query_597031, nil, nil, nil)
 
-var denyAssignmentsGet* = Call_DenyAssignmentsGet_593989(
+var denyAssignmentsGet* = Call_DenyAssignmentsGet_597022(
     name: "denyAssignmentsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Authorization/denyAssignments/{denyAssignmentId}",
-    validator: validate_DenyAssignmentsGet_593990, base: "",
-    url: url_DenyAssignmentsGet_593991, schemes: {Scheme.Https})
+    validator: validate_DenyAssignmentsGet_597023, base: "",
+    url: url_DenyAssignmentsGet_597024, schemes: {Scheme.Https})
 export
   rest
 

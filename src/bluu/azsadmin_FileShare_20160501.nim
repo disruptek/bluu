@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: FabricAdminClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_574442 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574442](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574442): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-FileShare"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_FileSharesList_593631 = ref object of OpenApiRestCall_593409
-proc url_FileSharesList_593633(protocol: Scheme; host: string; base: string;
+  Call_FileSharesList_574664 = ref object of OpenApiRestCall_574442
+proc url_FileSharesList_574666(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +128,7 @@ proc url_FileSharesList_593633(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSharesList_593632(path: JsonNode; query: JsonNode;
+proc validate_FileSharesList_574665(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Returns a list of all fabric file shares at a certain location.
@@ -145,21 +145,21 @@ proc validate_FileSharesList_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593794 = path.getOrDefault("resourceGroupName")
-  valid_593794 = validateParameter(valid_593794, JString, required = true,
+  var valid_574827 = path.getOrDefault("resourceGroupName")
+  valid_574827 = validateParameter(valid_574827, JString, required = true,
                                  default = nil)
-  if valid_593794 != nil:
-    section.add "resourceGroupName", valid_593794
-  var valid_593795 = path.getOrDefault("subscriptionId")
-  valid_593795 = validateParameter(valid_593795, JString, required = true,
+  if valid_574827 != nil:
+    section.add "resourceGroupName", valid_574827
+  var valid_574828 = path.getOrDefault("subscriptionId")
+  valid_574828 = validateParameter(valid_574828, JString, required = true,
                                  default = nil)
-  if valid_593795 != nil:
-    section.add "subscriptionId", valid_593795
-  var valid_593796 = path.getOrDefault("location")
-  valid_593796 = validateParameter(valid_593796, JString, required = true,
+  if valid_574828 != nil:
+    section.add "subscriptionId", valid_574828
+  var valid_574829 = path.getOrDefault("location")
+  valid_574829 = validateParameter(valid_574829, JString, required = true,
                                  default = nil)
-  if valid_593796 != nil:
-    section.add "location", valid_593796
+  if valid_574829 != nil:
+    section.add "location", valid_574829
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -169,16 +169,16 @@ proc validate_FileSharesList_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593810 = query.getOrDefault("api-version")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  var valid_574843 = query.getOrDefault("api-version")
+  valid_574843 = validateParameter(valid_574843, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593810 != nil:
-    section.add "api-version", valid_593810
-  var valid_593811 = query.getOrDefault("$filter")
-  valid_593811 = validateParameter(valid_593811, JString, required = false,
+  if valid_574843 != nil:
+    section.add "api-version", valid_574843
+  var valid_574844 = query.getOrDefault("$filter")
+  valid_574844 = validateParameter(valid_574844, JString, required = false,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "$filter", valid_593811
+  if valid_574844 != nil:
+    section.add "$filter", valid_574844
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -187,20 +187,20 @@ proc validate_FileSharesList_593632(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593838: Call_FileSharesList_593631; path: JsonNode; query: JsonNode;
+proc call*(call_574871: Call_FileSharesList_574664; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all fabric file shares at a certain location.
   ## 
-  let valid = call_593838.validator(path, query, header, formData, body)
-  let scheme = call_593838.pickScheme
+  let valid = call_574871.validator(path, query, header, formData, body)
+  let scheme = call_574871.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593838.url(scheme.get, call_593838.host, call_593838.base,
-                         call_593838.route, valid.getOrDefault("path"),
+  let url = call_574871.url(scheme.get, call_574871.host, call_574871.base,
+                         call_574871.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593838, url, valid)
+  result = hook(call_574871, url, valid)
 
-proc call*(call_593909: Call_FileSharesList_593631; resourceGroupName: string;
+proc call*(call_574942: Call_FileSharesList_574664; resourceGroupName: string;
           subscriptionId: string; location: string;
           apiVersion: string = "2016-05-01"; Filter: string = ""): Recallable =
   ## fileSharesList
@@ -215,22 +215,22 @@ proc call*(call_593909: Call_FileSharesList_593631; resourceGroupName: string;
   ##           : Location of the resource.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_593910 = newJObject()
-  var query_593912 = newJObject()
-  add(path_593910, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593912, "api-version", newJString(apiVersion))
-  add(path_593910, "subscriptionId", newJString(subscriptionId))
-  add(path_593910, "location", newJString(location))
-  add(query_593912, "$filter", newJString(Filter))
-  result = call_593909.call(path_593910, query_593912, nil, nil, nil)
+  var path_574943 = newJObject()
+  var query_574945 = newJObject()
+  add(path_574943, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574945, "api-version", newJString(apiVersion))
+  add(path_574943, "subscriptionId", newJString(subscriptionId))
+  add(path_574943, "location", newJString(location))
+  add(query_574945, "$filter", newJString(Filter))
+  result = call_574942.call(path_574943, query_574945, nil, nil, nil)
 
-var fileSharesList* = Call_FileSharesList_593631(name: "fileSharesList",
+var fileSharesList* = Call_FileSharesList_574664(name: "fileSharesList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/fileShares",
-    validator: validate_FileSharesList_593632, base: "", url: url_FileSharesList_593633,
+    validator: validate_FileSharesList_574665, base: "", url: url_FileSharesList_574666,
     schemes: {Scheme.Https})
 type
-  Call_FileSharesGet_593951 = ref object of OpenApiRestCall_593409
-proc url_FileSharesGet_593953(protocol: Scheme; host: string; base: string;
+  Call_FileSharesGet_574984 = ref object of OpenApiRestCall_574442
+proc url_FileSharesGet_574986(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -256,7 +256,7 @@ proc url_FileSharesGet_593953(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSharesGet_593952(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FileSharesGet_574985(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the requested fabric file share.
   ## 
@@ -274,26 +274,26 @@ proc validate_FileSharesGet_593952(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593963 = path.getOrDefault("resourceGroupName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_574996 = path.getOrDefault("resourceGroupName")
+  valid_574996 = validateParameter(valid_574996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "resourceGroupName", valid_593963
-  var valid_593964 = path.getOrDefault("subscriptionId")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_574996 != nil:
+    section.add "resourceGroupName", valid_574996
+  var valid_574997 = path.getOrDefault("subscriptionId")
+  valid_574997 = validateParameter(valid_574997, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "subscriptionId", valid_593964
-  var valid_593965 = path.getOrDefault("fileShare")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_574997 != nil:
+    section.add "subscriptionId", valid_574997
+  var valid_574998 = path.getOrDefault("fileShare")
+  valid_574998 = validateParameter(valid_574998, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "fileShare", valid_593965
-  var valid_593966 = path.getOrDefault("location")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_574998 != nil:
+    section.add "fileShare", valid_574998
+  var valid_574999 = path.getOrDefault("location")
+  valid_574999 = validateParameter(valid_574999, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "location", valid_593966
+  if valid_574999 != nil:
+    section.add "location", valid_574999
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -301,11 +301,11 @@ proc validate_FileSharesGet_593952(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593967 = query.getOrDefault("api-version")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  var valid_575000 = query.getOrDefault("api-version")
+  valid_575000 = validateParameter(valid_575000, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593967 != nil:
-    section.add "api-version", valid_593967
+  if valid_575000 != nil:
+    section.add "api-version", valid_575000
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -314,20 +314,20 @@ proc validate_FileSharesGet_593952(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_FileSharesGet_593951; path: JsonNode; query: JsonNode;
+proc call*(call_575001: Call_FileSharesGet_574984; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the requested fabric file share.
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_575001.validator(path, query, header, formData, body)
+  let scheme = call_575001.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_575001.url(scheme.get, call_575001.host, call_575001.base,
+                         call_575001.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_575001, url, valid)
 
-proc call*(call_593969: Call_FileSharesGet_593951; resourceGroupName: string;
+proc call*(call_575002: Call_FileSharesGet_574984; resourceGroupName: string;
           subscriptionId: string; fileShare: string; location: string;
           apiVersion: string = "2016-05-01"): Recallable =
   ## fileSharesGet
@@ -342,18 +342,18 @@ proc call*(call_593969: Call_FileSharesGet_593951; resourceGroupName: string;
   ##            : Fabric file share name.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  add(path_593970, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(path_593970, "subscriptionId", newJString(subscriptionId))
-  add(path_593970, "fileShare", newJString(fileShare))
-  add(path_593970, "location", newJString(location))
-  result = call_593969.call(path_593970, query_593971, nil, nil, nil)
+  var path_575003 = newJObject()
+  var query_575004 = newJObject()
+  add(path_575003, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575004, "api-version", newJString(apiVersion))
+  add(path_575003, "subscriptionId", newJString(subscriptionId))
+  add(path_575003, "fileShare", newJString(fileShare))
+  add(path_575003, "location", newJString(location))
+  result = call_575002.call(path_575003, query_575004, nil, nil, nil)
 
-var fileSharesGet* = Call_FileSharesGet_593951(name: "fileSharesGet",
+var fileSharesGet* = Call_FileSharesGet_574984(name: "fileSharesGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/fileShares/{fileShare}",
-    validator: validate_FileSharesGet_593952, base: "", url: url_FileSharesGet_593953,
+    validator: validate_FileSharesGet_574985, base: "", url: url_FileSharesGet_574986,
     schemes: {Scheme.Https})
 export
   rest

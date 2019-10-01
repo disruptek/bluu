@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Machine Learning Workspaces
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "machinelearningservices-machineLearningServices"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_OperationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
+proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Azure Machine Learning Workspaces REST API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = query.getOrDefault("api-version")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_568041 != nil:
+    section.add "api-version", valid_568041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593831: Call_OperationsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568064: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Azure Machine Learning Workspaces REST API operations.
   ## 
-  let valid = call_593831.validator(path, query, header, formData, body)
-  let scheme = call_593831.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593831.url(scheme.get, call_593831.host, call_593831.base,
-                         call_593831.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593831, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593902: Call_OperationsList_593647; apiVersion: string): Recallable =
+proc call*(call_568135: Call_OperationsList_567880; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Azure Machine Learning Workspaces REST API operations.
   ##   apiVersion: string (required)
   ##             : Version of Azure Machine Learning resource provider API.
-  var query_593903 = newJObject()
-  add(query_593903, "api-version", newJString(apiVersion))
-  result = call_593902.call(nil, query_593903, nil, nil, nil)
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  result = call_568135.call(nil, query_568136, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593647(name: "operationsList",
+var operationsList* = Call_OperationsList_567880(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.MachineLearningServices/operations",
-    validator: validate_OperationsList_593648, base: "", url: url_OperationsList_593649,
+    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
     schemes: {Scheme.Https})
 type
-  Call_WorkspacesListBySubscription_593943 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesListBySubscription_593945(protocol: Scheme; host: string;
+  Call_WorkspacesListBySubscription_568176 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesListBySubscription_568178(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +185,7 @@ proc url_WorkspacesListBySubscription_593945(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesListBySubscription_593944(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesListBySubscription_568177(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the available machine learning workspaces under the specified subscription.
   ## 
@@ -197,11 +197,11 @@ proc validate_WorkspacesListBySubscription_593944(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593961 = path.getOrDefault("subscriptionId")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = path.getOrDefault("subscriptionId")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "subscriptionId", valid_593961
+  if valid_568194 != nil:
+    section.add "subscriptionId", valid_568194
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -211,16 +211,16 @@ proc validate_WorkspacesListBySubscription_593944(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593962 = query.getOrDefault("api-version")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_568195 = query.getOrDefault("api-version")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "api-version", valid_593962
-  var valid_593963 = query.getOrDefault("$skiptoken")
-  valid_593963 = validateParameter(valid_593963, JString, required = false,
+  if valid_568195 != nil:
+    section.add "api-version", valid_568195
+  var valid_568196 = query.getOrDefault("$skiptoken")
+  valid_568196 = validateParameter(valid_568196, JString, required = false,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "$skiptoken", valid_593963
+  if valid_568196 != nil:
+    section.add "$skiptoken", valid_568196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -229,20 +229,20 @@ proc validate_WorkspacesListBySubscription_593944(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593964: Call_WorkspacesListBySubscription_593943; path: JsonNode;
+proc call*(call_568197: Call_WorkspacesListBySubscription_568176; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the available machine learning workspaces under the specified subscription.
   ## 
-  let valid = call_593964.validator(path, query, header, formData, body)
-  let scheme = call_593964.pickScheme
+  let valid = call_568197.validator(path, query, header, formData, body)
+  let scheme = call_568197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593964.url(scheme.get, call_593964.host, call_593964.base,
-                         call_593964.route, valid.getOrDefault("path"),
+  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
+                         call_568197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593964, url, valid)
+  result = hook(call_568197, url, valid)
 
-proc call*(call_593965: Call_WorkspacesListBySubscription_593943;
+proc call*(call_568198: Call_WorkspacesListBySubscription_568176;
           apiVersion: string; subscriptionId: string; Skiptoken: string = ""): Recallable =
   ## workspacesListBySubscription
   ## Lists all the available machine learning workspaces under the specified subscription.
@@ -252,21 +252,21 @@ proc call*(call_593965: Call_WorkspacesListBySubscription_593943;
   ##                 : Azure subscription identifier.
   ##   Skiptoken: string
   ##            : Continuation token for pagination.
-  var path_593966 = newJObject()
-  var query_593967 = newJObject()
-  add(query_593967, "api-version", newJString(apiVersion))
-  add(path_593966, "subscriptionId", newJString(subscriptionId))
-  add(query_593967, "$skiptoken", newJString(Skiptoken))
-  result = call_593965.call(path_593966, query_593967, nil, nil, nil)
+  var path_568199 = newJObject()
+  var query_568200 = newJObject()
+  add(query_568200, "api-version", newJString(apiVersion))
+  add(path_568199, "subscriptionId", newJString(subscriptionId))
+  add(query_568200, "$skiptoken", newJString(Skiptoken))
+  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
 
-var workspacesListBySubscription* = Call_WorkspacesListBySubscription_593943(
+var workspacesListBySubscription* = Call_WorkspacesListBySubscription_568176(
     name: "workspacesListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MachineLearningServices/workspaces",
-    validator: validate_WorkspacesListBySubscription_593944, base: "",
-    url: url_WorkspacesListBySubscription_593945, schemes: {Scheme.Https})
+    validator: validate_WorkspacesListBySubscription_568177, base: "",
+    url: url_WorkspacesListBySubscription_568178, schemes: {Scheme.Https})
 type
-  Call_WorkspacesListByResourceGroup_593968 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesListByResourceGroup_593970(protocol: Scheme; host: string;
+  Call_WorkspacesListByResourceGroup_568201 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesListByResourceGroup_568203(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -287,7 +287,7 @@ proc url_WorkspacesListByResourceGroup_593970(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesListByResourceGroup_593969(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesListByResourceGroup_568202(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the available machine learning workspaces under the specified resource group.
   ## 
@@ -301,16 +301,16 @@ proc validate_WorkspacesListByResourceGroup_593969(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593971 = path.getOrDefault("resourceGroupName")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568204 = path.getOrDefault("resourceGroupName")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "resourceGroupName", valid_593971
-  var valid_593972 = path.getOrDefault("subscriptionId")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  if valid_568204 != nil:
+    section.add "resourceGroupName", valid_568204
+  var valid_568205 = path.getOrDefault("subscriptionId")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "subscriptionId", valid_593972
+  if valid_568205 != nil:
+    section.add "subscriptionId", valid_568205
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -320,16 +320,16 @@ proc validate_WorkspacesListByResourceGroup_593969(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593973 = query.getOrDefault("api-version")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568206 = query.getOrDefault("api-version")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "api-version", valid_593973
-  var valid_593974 = query.getOrDefault("$skiptoken")
-  valid_593974 = validateParameter(valid_593974, JString, required = false,
+  if valid_568206 != nil:
+    section.add "api-version", valid_568206
+  var valid_568207 = query.getOrDefault("$skiptoken")
+  valid_568207 = validateParameter(valid_568207, JString, required = false,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "$skiptoken", valid_593974
+  if valid_568207 != nil:
+    section.add "$skiptoken", valid_568207
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -338,20 +338,20 @@ proc validate_WorkspacesListByResourceGroup_593969(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593975: Call_WorkspacesListByResourceGroup_593968; path: JsonNode;
+proc call*(call_568208: Call_WorkspacesListByResourceGroup_568201; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the available machine learning workspaces under the specified resource group.
   ## 
-  let valid = call_593975.validator(path, query, header, formData, body)
-  let scheme = call_593975.pickScheme
+  let valid = call_568208.validator(path, query, header, formData, body)
+  let scheme = call_568208.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593975.url(scheme.get, call_593975.host, call_593975.base,
-                         call_593975.route, valid.getOrDefault("path"),
+  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
+                         call_568208.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593975, url, valid)
+  result = hook(call_568208, url, valid)
 
-proc call*(call_593976: Call_WorkspacesListByResourceGroup_593968;
+proc call*(call_568209: Call_WorkspacesListByResourceGroup_568201;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           Skiptoken: string = ""): Recallable =
   ## workspacesListByResourceGroup
@@ -364,22 +364,22 @@ proc call*(call_593976: Call_WorkspacesListByResourceGroup_593968;
   ##                 : Azure subscription identifier.
   ##   Skiptoken: string
   ##            : Continuation token for pagination.
-  var path_593977 = newJObject()
-  var query_593978 = newJObject()
-  add(path_593977, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593978, "api-version", newJString(apiVersion))
-  add(path_593977, "subscriptionId", newJString(subscriptionId))
-  add(query_593978, "$skiptoken", newJString(Skiptoken))
-  result = call_593976.call(path_593977, query_593978, nil, nil, nil)
+  var path_568210 = newJObject()
+  var query_568211 = newJObject()
+  add(path_568210, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568211, "api-version", newJString(apiVersion))
+  add(path_568210, "subscriptionId", newJString(subscriptionId))
+  add(query_568211, "$skiptoken", newJString(Skiptoken))
+  result = call_568209.call(path_568210, query_568211, nil, nil, nil)
 
-var workspacesListByResourceGroup* = Call_WorkspacesListByResourceGroup_593968(
+var workspacesListByResourceGroup* = Call_WorkspacesListByResourceGroup_568201(
     name: "workspacesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces",
-    validator: validate_WorkspacesListByResourceGroup_593969, base: "",
-    url: url_WorkspacesListByResourceGroup_593970, schemes: {Scheme.Https})
+    validator: validate_WorkspacesListByResourceGroup_568202, base: "",
+    url: url_WorkspacesListByResourceGroup_568203, schemes: {Scheme.Https})
 type
-  Call_WorkspacesCreateOrUpdate_593990 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesCreateOrUpdate_593992(protocol: Scheme; host: string;
+  Call_WorkspacesCreateOrUpdate_568223 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesCreateOrUpdate_568225(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -403,7 +403,7 @@ proc url_WorkspacesCreateOrUpdate_593992(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesCreateOrUpdate_593991(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesCreateOrUpdate_568224(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a workspace with the specified parameters.
   ## 
@@ -419,21 +419,21 @@ proc validate_WorkspacesCreateOrUpdate_593991(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593993 = path.getOrDefault("resourceGroupName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568226 = path.getOrDefault("resourceGroupName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "resourceGroupName", valid_593993
-  var valid_593994 = path.getOrDefault("subscriptionId")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "resourceGroupName", valid_568226
+  var valid_568227 = path.getOrDefault("subscriptionId")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "subscriptionId", valid_593994
-  var valid_593995 = path.getOrDefault("workspaceName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_568227 != nil:
+    section.add "subscriptionId", valid_568227
+  var valid_568228 = path.getOrDefault("workspaceName")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "workspaceName", valid_593995
+  if valid_568228 != nil:
+    section.add "workspaceName", valid_568228
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -441,11 +441,11 @@ proc validate_WorkspacesCreateOrUpdate_593991(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593996 = query.getOrDefault("api-version")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_568229 = query.getOrDefault("api-version")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "api-version", valid_593996
+  if valid_568229 != nil:
+    section.add "api-version", valid_568229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -459,20 +459,20 @@ proc validate_WorkspacesCreateOrUpdate_593991(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593998: Call_WorkspacesCreateOrUpdate_593990; path: JsonNode;
+proc call*(call_568231: Call_WorkspacesCreateOrUpdate_568223; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a workspace with the specified parameters.
   ## 
-  let valid = call_593998.validator(path, query, header, formData, body)
-  let scheme = call_593998.pickScheme
+  let valid = call_568231.validator(path, query, header, formData, body)
+  let scheme = call_568231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593998.url(scheme.get, call_593998.host, call_593998.base,
-                         call_593998.route, valid.getOrDefault("path"),
+  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
+                         call_568231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593998, url, valid)
+  result = hook(call_568231, url, valid)
 
-proc call*(call_593999: Call_WorkspacesCreateOrUpdate_593990;
+proc call*(call_568232: Call_WorkspacesCreateOrUpdate_568223;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; workspaceName: string): Recallable =
   ## workspacesCreateOrUpdate
@@ -487,25 +487,25 @@ proc call*(call_593999: Call_WorkspacesCreateOrUpdate_593990;
   ##             : The parameters for creating or updating a machine learning workspace.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594000 = newJObject()
-  var query_594001 = newJObject()
-  var body_594002 = newJObject()
-  add(path_594000, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594001, "api-version", newJString(apiVersion))
-  add(path_594000, "subscriptionId", newJString(subscriptionId))
+  var path_568233 = newJObject()
+  var query_568234 = newJObject()
+  var body_568235 = newJObject()
+  add(path_568233, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568234, "api-version", newJString(apiVersion))
+  add(path_568233, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594002 = parameters
-  add(path_594000, "workspaceName", newJString(workspaceName))
-  result = call_593999.call(path_594000, query_594001, nil, nil, body_594002)
+    body_568235 = parameters
+  add(path_568233, "workspaceName", newJString(workspaceName))
+  result = call_568232.call(path_568233, query_568234, nil, nil, body_568235)
 
-var workspacesCreateOrUpdate* = Call_WorkspacesCreateOrUpdate_593990(
+var workspacesCreateOrUpdate* = Call_WorkspacesCreateOrUpdate_568223(
     name: "workspacesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}",
-    validator: validate_WorkspacesCreateOrUpdate_593991, base: "",
-    url: url_WorkspacesCreateOrUpdate_593992, schemes: {Scheme.Https})
+    validator: validate_WorkspacesCreateOrUpdate_568224, base: "",
+    url: url_WorkspacesCreateOrUpdate_568225, schemes: {Scheme.Https})
 type
-  Call_WorkspacesGet_593979 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesGet_593981(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesGet_568212 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesGet_568214(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -528,7 +528,7 @@ proc url_WorkspacesGet_593981(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesGet_593980(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WorkspacesGet_568213(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of the specified machine learning workspace.
   ## 
@@ -544,21 +544,21 @@ proc validate_WorkspacesGet_593980(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593982 = path.getOrDefault("resourceGroupName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568215 = path.getOrDefault("resourceGroupName")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "resourceGroupName", valid_593982
-  var valid_593983 = path.getOrDefault("subscriptionId")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_568215 != nil:
+    section.add "resourceGroupName", valid_568215
+  var valid_568216 = path.getOrDefault("subscriptionId")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "subscriptionId", valid_593983
-  var valid_593984 = path.getOrDefault("workspaceName")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_568216 != nil:
+    section.add "subscriptionId", valid_568216
+  var valid_568217 = path.getOrDefault("workspaceName")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "workspaceName", valid_593984
+  if valid_568217 != nil:
+    section.add "workspaceName", valid_568217
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -566,11 +566,11 @@ proc validate_WorkspacesGet_593980(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568218 = query.getOrDefault("api-version")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_568218 != nil:
+    section.add "api-version", valid_568218
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -579,20 +579,20 @@ proc validate_WorkspacesGet_593980(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593986: Call_WorkspacesGet_593979; path: JsonNode; query: JsonNode;
+proc call*(call_568219: Call_WorkspacesGet_568212; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the specified machine learning workspace.
   ## 
-  let valid = call_593986.validator(path, query, header, formData, body)
-  let scheme = call_593986.pickScheme
+  let valid = call_568219.validator(path, query, header, formData, body)
+  let scheme = call_568219.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593986.url(scheme.get, call_593986.host, call_593986.base,
-                         call_593986.route, valid.getOrDefault("path"),
+  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
+                         call_568219.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593986, url, valid)
+  result = hook(call_568219, url, valid)
 
-proc call*(call_593987: Call_WorkspacesGet_593979; resourceGroupName: string;
+proc call*(call_568220: Call_WorkspacesGet_568212; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; workspaceName: string): Recallable =
   ## workspacesGet
   ## Gets the properties of the specified machine learning workspace.
@@ -604,21 +604,21 @@ proc call*(call_593987: Call_WorkspacesGet_593979; resourceGroupName: string;
   ##                 : Azure subscription identifier.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_593988 = newJObject()
-  var query_593989 = newJObject()
-  add(path_593988, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593989, "api-version", newJString(apiVersion))
-  add(path_593988, "subscriptionId", newJString(subscriptionId))
-  add(path_593988, "workspaceName", newJString(workspaceName))
-  result = call_593987.call(path_593988, query_593989, nil, nil, nil)
+  var path_568221 = newJObject()
+  var query_568222 = newJObject()
+  add(path_568221, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568222, "api-version", newJString(apiVersion))
+  add(path_568221, "subscriptionId", newJString(subscriptionId))
+  add(path_568221, "workspaceName", newJString(workspaceName))
+  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
 
-var workspacesGet* = Call_WorkspacesGet_593979(name: "workspacesGet",
+var workspacesGet* = Call_WorkspacesGet_568212(name: "workspacesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}",
-    validator: validate_WorkspacesGet_593980, base: "", url: url_WorkspacesGet_593981,
+    validator: validate_WorkspacesGet_568213, base: "", url: url_WorkspacesGet_568214,
     schemes: {Scheme.Https})
 type
-  Call_WorkspacesUpdate_594014 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesUpdate_594016(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesUpdate_568247 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesUpdate_568249(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -641,7 +641,7 @@ proc url_WorkspacesUpdate_594016(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesUpdate_594015(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesUpdate_568248(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Updates a machine learning workspace with the specified parameters.
@@ -658,21 +658,21 @@ proc validate_WorkspacesUpdate_594015(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594034 = path.getOrDefault("resourceGroupName")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  var valid_568267 = path.getOrDefault("resourceGroupName")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "resourceGroupName", valid_594034
-  var valid_594035 = path.getOrDefault("subscriptionId")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  if valid_568267 != nil:
+    section.add "resourceGroupName", valid_568267
+  var valid_568268 = path.getOrDefault("subscriptionId")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "subscriptionId", valid_594035
-  var valid_594036 = path.getOrDefault("workspaceName")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  if valid_568268 != nil:
+    section.add "subscriptionId", valid_568268
+  var valid_568269 = path.getOrDefault("workspaceName")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "workspaceName", valid_594036
+  if valid_568269 != nil:
+    section.add "workspaceName", valid_568269
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -680,11 +680,11 @@ proc validate_WorkspacesUpdate_594015(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594037 = query.getOrDefault("api-version")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  var valid_568270 = query.getOrDefault("api-version")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "api-version", valid_594037
+  if valid_568270 != nil:
+    section.add "api-version", valid_568270
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -698,20 +698,20 @@ proc validate_WorkspacesUpdate_594015(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594039: Call_WorkspacesUpdate_594014; path: JsonNode;
+proc call*(call_568272: Call_WorkspacesUpdate_568247; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a machine learning workspace with the specified parameters.
   ## 
-  let valid = call_594039.validator(path, query, header, formData, body)
-  let scheme = call_594039.pickScheme
+  let valid = call_568272.validator(path, query, header, formData, body)
+  let scheme = call_568272.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594039.url(scheme.get, call_594039.host, call_594039.base,
-                         call_594039.route, valid.getOrDefault("path"),
+  let url = call_568272.url(scheme.get, call_568272.host, call_568272.base,
+                         call_568272.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594039, url, valid)
+  result = hook(call_568272, url, valid)
 
-proc call*(call_594040: Call_WorkspacesUpdate_594014; resourceGroupName: string;
+proc call*(call_568273: Call_WorkspacesUpdate_568247; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; parameters: JsonNode;
           workspaceName: string): Recallable =
   ## workspacesUpdate
@@ -726,24 +726,24 @@ proc call*(call_594040: Call_WorkspacesUpdate_594014; resourceGroupName: string;
   ##             : The parameters for updating a machine learning workspace.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594041 = newJObject()
-  var query_594042 = newJObject()
-  var body_594043 = newJObject()
-  add(path_594041, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594042, "api-version", newJString(apiVersion))
-  add(path_594041, "subscriptionId", newJString(subscriptionId))
+  var path_568274 = newJObject()
+  var query_568275 = newJObject()
+  var body_568276 = newJObject()
+  add(path_568274, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568275, "api-version", newJString(apiVersion))
+  add(path_568274, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594043 = parameters
-  add(path_594041, "workspaceName", newJString(workspaceName))
-  result = call_594040.call(path_594041, query_594042, nil, nil, body_594043)
+    body_568276 = parameters
+  add(path_568274, "workspaceName", newJString(workspaceName))
+  result = call_568273.call(path_568274, query_568275, nil, nil, body_568276)
 
-var workspacesUpdate* = Call_WorkspacesUpdate_594014(name: "workspacesUpdate",
+var workspacesUpdate* = Call_WorkspacesUpdate_568247(name: "workspacesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}",
-    validator: validate_WorkspacesUpdate_594015, base: "",
-    url: url_WorkspacesUpdate_594016, schemes: {Scheme.Https})
+    validator: validate_WorkspacesUpdate_568248, base: "",
+    url: url_WorkspacesUpdate_568249, schemes: {Scheme.Https})
 type
-  Call_WorkspacesDelete_594003 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesDelete_594005(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesDelete_568236 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesDelete_568238(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -766,7 +766,7 @@ proc url_WorkspacesDelete_594005(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesDelete_594004(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesDelete_568237(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes a machine learning workspace.
@@ -783,21 +783,21 @@ proc validate_WorkspacesDelete_594004(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594006 = path.getOrDefault("resourceGroupName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_568239 = path.getOrDefault("resourceGroupName")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "resourceGroupName", valid_594006
-  var valid_594007 = path.getOrDefault("subscriptionId")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "resourceGroupName", valid_568239
+  var valid_568240 = path.getOrDefault("subscriptionId")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "subscriptionId", valid_594007
-  var valid_594008 = path.getOrDefault("workspaceName")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568240 != nil:
+    section.add "subscriptionId", valid_568240
+  var valid_568241 = path.getOrDefault("workspaceName")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "workspaceName", valid_594008
+  if valid_568241 != nil:
+    section.add "workspaceName", valid_568241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -805,11 +805,11 @@ proc validate_WorkspacesDelete_594004(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594009 = query.getOrDefault("api-version")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_568242 = query.getOrDefault("api-version")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "api-version", valid_594009
+  if valid_568242 != nil:
+    section.add "api-version", valid_568242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -818,20 +818,20 @@ proc validate_WorkspacesDelete_594004(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594010: Call_WorkspacesDelete_594003; path: JsonNode;
+proc call*(call_568243: Call_WorkspacesDelete_568236; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a machine learning workspace.
   ## 
-  let valid = call_594010.validator(path, query, header, formData, body)
-  let scheme = call_594010.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594010.url(scheme.get, call_594010.host, call_594010.base,
-                         call_594010.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594010, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594011: Call_WorkspacesDelete_594003; resourceGroupName: string;
+proc call*(call_568244: Call_WorkspacesDelete_568236; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; workspaceName: string): Recallable =
   ## workspacesDelete
   ## Deletes a machine learning workspace.
@@ -843,21 +843,21 @@ proc call*(call_594011: Call_WorkspacesDelete_594003; resourceGroupName: string;
   ##                 : Azure subscription identifier.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594012 = newJObject()
-  var query_594013 = newJObject()
-  add(path_594012, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594013, "api-version", newJString(apiVersion))
-  add(path_594012, "subscriptionId", newJString(subscriptionId))
-  add(path_594012, "workspaceName", newJString(workspaceName))
-  result = call_594011.call(path_594012, query_594013, nil, nil, nil)
+  var path_568245 = newJObject()
+  var query_568246 = newJObject()
+  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568246, "api-version", newJString(apiVersion))
+  add(path_568245, "subscriptionId", newJString(subscriptionId))
+  add(path_568245, "workspaceName", newJString(workspaceName))
+  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
 
-var workspacesDelete* = Call_WorkspacesDelete_594003(name: "workspacesDelete",
+var workspacesDelete* = Call_WorkspacesDelete_568236(name: "workspacesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}",
-    validator: validate_WorkspacesDelete_594004, base: "",
-    url: url_WorkspacesDelete_594005, schemes: {Scheme.Https})
+    validator: validate_WorkspacesDelete_568237, base: "",
+    url: url_WorkspacesDelete_568238, schemes: {Scheme.Https})
 type
-  Call_MachineLearningComputeListByWorkspace_594044 = ref object of OpenApiRestCall_593425
-proc url_MachineLearningComputeListByWorkspace_594046(protocol: Scheme;
+  Call_MachineLearningComputeListByWorkspace_568277 = ref object of OpenApiRestCall_567658
+proc url_MachineLearningComputeListByWorkspace_568279(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -881,7 +881,7 @@ proc url_MachineLearningComputeListByWorkspace_594046(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineLearningComputeListByWorkspace_594045(path: JsonNode;
+proc validate_MachineLearningComputeListByWorkspace_568278(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets computes in specified workspace.
   ## 
@@ -897,21 +897,21 @@ proc validate_MachineLearningComputeListByWorkspace_594045(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594047 = path.getOrDefault("resourceGroupName")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  var valid_568280 = path.getOrDefault("resourceGroupName")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "resourceGroupName", valid_594047
-  var valid_594048 = path.getOrDefault("subscriptionId")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  if valid_568280 != nil:
+    section.add "resourceGroupName", valid_568280
+  var valid_568281 = path.getOrDefault("subscriptionId")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "subscriptionId", valid_594048
-  var valid_594049 = path.getOrDefault("workspaceName")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  if valid_568281 != nil:
+    section.add "subscriptionId", valid_568281
+  var valid_568282 = path.getOrDefault("workspaceName")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "workspaceName", valid_594049
+  if valid_568282 != nil:
+    section.add "workspaceName", valid_568282
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -921,16 +921,16 @@ proc validate_MachineLearningComputeListByWorkspace_594045(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594050 = query.getOrDefault("api-version")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  var valid_568283 = query.getOrDefault("api-version")
+  valid_568283 = validateParameter(valid_568283, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "api-version", valid_594050
-  var valid_594051 = query.getOrDefault("$skiptoken")
-  valid_594051 = validateParameter(valid_594051, JString, required = false,
+  if valid_568283 != nil:
+    section.add "api-version", valid_568283
+  var valid_568284 = query.getOrDefault("$skiptoken")
+  valid_568284 = validateParameter(valid_568284, JString, required = false,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "$skiptoken", valid_594051
+  if valid_568284 != nil:
+    section.add "$skiptoken", valid_568284
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -939,21 +939,21 @@ proc validate_MachineLearningComputeListByWorkspace_594045(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594052: Call_MachineLearningComputeListByWorkspace_594044;
+proc call*(call_568285: Call_MachineLearningComputeListByWorkspace_568277;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets computes in specified workspace.
   ## 
-  let valid = call_594052.validator(path, query, header, formData, body)
-  let scheme = call_594052.pickScheme
+  let valid = call_568285.validator(path, query, header, formData, body)
+  let scheme = call_568285.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594052.url(scheme.get, call_594052.host, call_594052.base,
-                         call_594052.route, valid.getOrDefault("path"),
+  let url = call_568285.url(scheme.get, call_568285.host, call_568285.base,
+                         call_568285.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594052, url, valid)
+  result = hook(call_568285, url, valid)
 
-proc call*(call_594053: Call_MachineLearningComputeListByWorkspace_594044;
+proc call*(call_568286: Call_MachineLearningComputeListByWorkspace_568277;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           workspaceName: string; Skiptoken: string = ""): Recallable =
   ## machineLearningComputeListByWorkspace
@@ -968,23 +968,23 @@ proc call*(call_594053: Call_MachineLearningComputeListByWorkspace_594044;
   ##            : Continuation token for pagination.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594054 = newJObject()
-  var query_594055 = newJObject()
-  add(path_594054, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594055, "api-version", newJString(apiVersion))
-  add(path_594054, "subscriptionId", newJString(subscriptionId))
-  add(query_594055, "$skiptoken", newJString(Skiptoken))
-  add(path_594054, "workspaceName", newJString(workspaceName))
-  result = call_594053.call(path_594054, query_594055, nil, nil, nil)
+  var path_568287 = newJObject()
+  var query_568288 = newJObject()
+  add(path_568287, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568288, "api-version", newJString(apiVersion))
+  add(path_568287, "subscriptionId", newJString(subscriptionId))
+  add(query_568288, "$skiptoken", newJString(Skiptoken))
+  add(path_568287, "workspaceName", newJString(workspaceName))
+  result = call_568286.call(path_568287, query_568288, nil, nil, nil)
 
-var machineLearningComputeListByWorkspace* = Call_MachineLearningComputeListByWorkspace_594044(
+var machineLearningComputeListByWorkspace* = Call_MachineLearningComputeListByWorkspace_568277(
     name: "machineLearningComputeListByWorkspace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/computes",
-    validator: validate_MachineLearningComputeListByWorkspace_594045, base: "",
-    url: url_MachineLearningComputeListByWorkspace_594046, schemes: {Scheme.Https})
+    validator: validate_MachineLearningComputeListByWorkspace_568278, base: "",
+    url: url_MachineLearningComputeListByWorkspace_568279, schemes: {Scheme.Https})
 type
-  Call_MachineLearningComputeCreateOrUpdate_594068 = ref object of OpenApiRestCall_593425
-proc url_MachineLearningComputeCreateOrUpdate_594070(protocol: Scheme;
+  Call_MachineLearningComputeCreateOrUpdate_568301 = ref object of OpenApiRestCall_567658
+proc url_MachineLearningComputeCreateOrUpdate_568303(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1010,7 +1010,7 @@ proc url_MachineLearningComputeCreateOrUpdate_594070(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineLearningComputeCreateOrUpdate_594069(path: JsonNode;
+proc validate_MachineLearningComputeCreateOrUpdate_568302(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates compute. This call will overwrite a compute if it exists. This is a nonrecoverable operation. If your intent is to create a new compute, do a GET first to verify that it does not exist yet.
   ## 
@@ -1028,26 +1028,26 @@ proc validate_MachineLearningComputeCreateOrUpdate_594069(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594071 = path.getOrDefault("resourceGroupName")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  var valid_568304 = path.getOrDefault("resourceGroupName")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "resourceGroupName", valid_594071
-  var valid_594072 = path.getOrDefault("subscriptionId")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  if valid_568304 != nil:
+    section.add "resourceGroupName", valid_568304
+  var valid_568305 = path.getOrDefault("subscriptionId")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "subscriptionId", valid_594072
-  var valid_594073 = path.getOrDefault("computeName")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  if valid_568305 != nil:
+    section.add "subscriptionId", valid_568305
+  var valid_568306 = path.getOrDefault("computeName")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "computeName", valid_594073
-  var valid_594074 = path.getOrDefault("workspaceName")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_568306 != nil:
+    section.add "computeName", valid_568306
+  var valid_568307 = path.getOrDefault("workspaceName")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "workspaceName", valid_594074
+  if valid_568307 != nil:
+    section.add "workspaceName", valid_568307
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1055,11 +1055,11 @@ proc validate_MachineLearningComputeCreateOrUpdate_594069(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594075 = query.getOrDefault("api-version")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  var valid_568308 = query.getOrDefault("api-version")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "api-version", valid_594075
+  if valid_568308 != nil:
+    section.add "api-version", valid_568308
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1073,21 +1073,21 @@ proc validate_MachineLearningComputeCreateOrUpdate_594069(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594077: Call_MachineLearningComputeCreateOrUpdate_594068;
+proc call*(call_568310: Call_MachineLearningComputeCreateOrUpdate_568301;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates compute. This call will overwrite a compute if it exists. This is a nonrecoverable operation. If your intent is to create a new compute, do a GET first to verify that it does not exist yet.
   ## 
-  let valid = call_594077.validator(path, query, header, formData, body)
-  let scheme = call_594077.pickScheme
+  let valid = call_568310.validator(path, query, header, formData, body)
+  let scheme = call_568310.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594077.url(scheme.get, call_594077.host, call_594077.base,
-                         call_594077.route, valid.getOrDefault("path"),
+  let url = call_568310.url(scheme.get, call_568310.host, call_568310.base,
+                         call_568310.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594077, url, valid)
+  result = hook(call_568310, url, valid)
 
-proc call*(call_594078: Call_MachineLearningComputeCreateOrUpdate_594068;
+proc call*(call_568311: Call_MachineLearningComputeCreateOrUpdate_568301;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           computeName: string; parameters: JsonNode; workspaceName: string): Recallable =
   ## machineLearningComputeCreateOrUpdate
@@ -1104,26 +1104,26 @@ proc call*(call_594078: Call_MachineLearningComputeCreateOrUpdate_594068;
   ##             : Payload with Machine Learning compute definition.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594079 = newJObject()
-  var query_594080 = newJObject()
-  var body_594081 = newJObject()
-  add(path_594079, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594080, "api-version", newJString(apiVersion))
-  add(path_594079, "subscriptionId", newJString(subscriptionId))
-  add(path_594079, "computeName", newJString(computeName))
+  var path_568312 = newJObject()
+  var query_568313 = newJObject()
+  var body_568314 = newJObject()
+  add(path_568312, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568313, "api-version", newJString(apiVersion))
+  add(path_568312, "subscriptionId", newJString(subscriptionId))
+  add(path_568312, "computeName", newJString(computeName))
   if parameters != nil:
-    body_594081 = parameters
-  add(path_594079, "workspaceName", newJString(workspaceName))
-  result = call_594078.call(path_594079, query_594080, nil, nil, body_594081)
+    body_568314 = parameters
+  add(path_568312, "workspaceName", newJString(workspaceName))
+  result = call_568311.call(path_568312, query_568313, nil, nil, body_568314)
 
-var machineLearningComputeCreateOrUpdate* = Call_MachineLearningComputeCreateOrUpdate_594068(
+var machineLearningComputeCreateOrUpdate* = Call_MachineLearningComputeCreateOrUpdate_568301(
     name: "machineLearningComputeCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/computes/{computeName}",
-    validator: validate_MachineLearningComputeCreateOrUpdate_594069, base: "",
-    url: url_MachineLearningComputeCreateOrUpdate_594070, schemes: {Scheme.Https})
+    validator: validate_MachineLearningComputeCreateOrUpdate_568302, base: "",
+    url: url_MachineLearningComputeCreateOrUpdate_568303, schemes: {Scheme.Https})
 type
-  Call_MachineLearningComputeSystemUpdate_594082 = ref object of OpenApiRestCall_593425
-proc url_MachineLearningComputeSystemUpdate_594084(protocol: Scheme; host: string;
+  Call_MachineLearningComputeSystemUpdate_568315 = ref object of OpenApiRestCall_567658
+proc url_MachineLearningComputeSystemUpdate_568317(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1149,7 +1149,7 @@ proc url_MachineLearningComputeSystemUpdate_594084(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineLearningComputeSystemUpdate_594083(path: JsonNode;
+proc validate_MachineLearningComputeSystemUpdate_568316(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## System Update On Machine Learning compute.
   ## 
@@ -1167,26 +1167,26 @@ proc validate_MachineLearningComputeSystemUpdate_594083(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594085 = path.getOrDefault("resourceGroupName")
-  valid_594085 = validateParameter(valid_594085, JString, required = true,
+  var valid_568318 = path.getOrDefault("resourceGroupName")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594085 != nil:
-    section.add "resourceGroupName", valid_594085
-  var valid_594086 = path.getOrDefault("subscriptionId")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  if valid_568318 != nil:
+    section.add "resourceGroupName", valid_568318
+  var valid_568319 = path.getOrDefault("subscriptionId")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "subscriptionId", valid_594086
-  var valid_594087 = path.getOrDefault("computeName")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  if valid_568319 != nil:
+    section.add "subscriptionId", valid_568319
+  var valid_568320 = path.getOrDefault("computeName")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "computeName", valid_594087
-  var valid_594088 = path.getOrDefault("workspaceName")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  if valid_568320 != nil:
+    section.add "computeName", valid_568320
+  var valid_568321 = path.getOrDefault("workspaceName")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "workspaceName", valid_594088
+  if valid_568321 != nil:
+    section.add "workspaceName", valid_568321
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1194,11 +1194,11 @@ proc validate_MachineLearningComputeSystemUpdate_594083(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594089 = query.getOrDefault("api-version")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_568322 = query.getOrDefault("api-version")
+  valid_568322 = validateParameter(valid_568322, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "api-version", valid_594089
+  if valid_568322 != nil:
+    section.add "api-version", valid_568322
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1207,21 +1207,21 @@ proc validate_MachineLearningComputeSystemUpdate_594083(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594090: Call_MachineLearningComputeSystemUpdate_594082;
+proc call*(call_568323: Call_MachineLearningComputeSystemUpdate_568315;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## System Update On Machine Learning compute.
   ## 
-  let valid = call_594090.validator(path, query, header, formData, body)
-  let scheme = call_594090.pickScheme
+  let valid = call_568323.validator(path, query, header, formData, body)
+  let scheme = call_568323.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594090.url(scheme.get, call_594090.host, call_594090.base,
-                         call_594090.route, valid.getOrDefault("path"),
+  let url = call_568323.url(scheme.get, call_568323.host, call_568323.base,
+                         call_568323.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594090, url, valid)
+  result = hook(call_568323, url, valid)
 
-proc call*(call_594091: Call_MachineLearningComputeSystemUpdate_594082;
+proc call*(call_568324: Call_MachineLearningComputeSystemUpdate_568315;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           computeName: string; workspaceName: string): Recallable =
   ## machineLearningComputeSystemUpdate
@@ -1236,23 +1236,23 @@ proc call*(call_594091: Call_MachineLearningComputeSystemUpdate_594082;
   ##              : Name of the Azure Machine Learning compute.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594092 = newJObject()
-  var query_594093 = newJObject()
-  add(path_594092, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594093, "api-version", newJString(apiVersion))
-  add(path_594092, "subscriptionId", newJString(subscriptionId))
-  add(path_594092, "computeName", newJString(computeName))
-  add(path_594092, "workspaceName", newJString(workspaceName))
-  result = call_594091.call(path_594092, query_594093, nil, nil, nil)
+  var path_568325 = newJObject()
+  var query_568326 = newJObject()
+  add(path_568325, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568326, "api-version", newJString(apiVersion))
+  add(path_568325, "subscriptionId", newJString(subscriptionId))
+  add(path_568325, "computeName", newJString(computeName))
+  add(path_568325, "workspaceName", newJString(workspaceName))
+  result = call_568324.call(path_568325, query_568326, nil, nil, nil)
 
-var machineLearningComputeSystemUpdate* = Call_MachineLearningComputeSystemUpdate_594082(
+var machineLearningComputeSystemUpdate* = Call_MachineLearningComputeSystemUpdate_568315(
     name: "machineLearningComputeSystemUpdate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/computes/{computeName}",
-    validator: validate_MachineLearningComputeSystemUpdate_594083, base: "",
-    url: url_MachineLearningComputeSystemUpdate_594084, schemes: {Scheme.Https})
+    validator: validate_MachineLearningComputeSystemUpdate_568316, base: "",
+    url: url_MachineLearningComputeSystemUpdate_568317, schemes: {Scheme.Https})
 type
-  Call_MachineLearningComputeGet_594056 = ref object of OpenApiRestCall_593425
-proc url_MachineLearningComputeGet_594058(protocol: Scheme; host: string;
+  Call_MachineLearningComputeGet_568289 = ref object of OpenApiRestCall_567658
+proc url_MachineLearningComputeGet_568291(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1278,7 +1278,7 @@ proc url_MachineLearningComputeGet_594058(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineLearningComputeGet_594057(path: JsonNode; query: JsonNode;
+proc validate_MachineLearningComputeGet_568290(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets compute definition by its name. Any secrets (storage keys, service credentials, etc) are not returned - use 'keys' nested resource to get them.
   ## 
@@ -1296,26 +1296,26 @@ proc validate_MachineLearningComputeGet_594057(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594059 = path.getOrDefault("resourceGroupName")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  var valid_568292 = path.getOrDefault("resourceGroupName")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "resourceGroupName", valid_594059
-  var valid_594060 = path.getOrDefault("subscriptionId")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  if valid_568292 != nil:
+    section.add "resourceGroupName", valid_568292
+  var valid_568293 = path.getOrDefault("subscriptionId")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "subscriptionId", valid_594060
-  var valid_594061 = path.getOrDefault("computeName")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  if valid_568293 != nil:
+    section.add "subscriptionId", valid_568293
+  var valid_568294 = path.getOrDefault("computeName")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "computeName", valid_594061
-  var valid_594062 = path.getOrDefault("workspaceName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  if valid_568294 != nil:
+    section.add "computeName", valid_568294
+  var valid_568295 = path.getOrDefault("workspaceName")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "workspaceName", valid_594062
+  if valid_568295 != nil:
+    section.add "workspaceName", valid_568295
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1323,11 +1323,11 @@ proc validate_MachineLearningComputeGet_594057(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594063 = query.getOrDefault("api-version")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  var valid_568296 = query.getOrDefault("api-version")
+  valid_568296 = validateParameter(valid_568296, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "api-version", valid_594063
+  if valid_568296 != nil:
+    section.add "api-version", valid_568296
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1336,20 +1336,20 @@ proc validate_MachineLearningComputeGet_594057(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594064: Call_MachineLearningComputeGet_594056; path: JsonNode;
+proc call*(call_568297: Call_MachineLearningComputeGet_568289; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets compute definition by its name. Any secrets (storage keys, service credentials, etc) are not returned - use 'keys' nested resource to get them.
   ## 
-  let valid = call_594064.validator(path, query, header, formData, body)
-  let scheme = call_594064.pickScheme
+  let valid = call_568297.validator(path, query, header, formData, body)
+  let scheme = call_568297.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594064.url(scheme.get, call_594064.host, call_594064.base,
-                         call_594064.route, valid.getOrDefault("path"),
+  let url = call_568297.url(scheme.get, call_568297.host, call_568297.base,
+                         call_568297.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594064, url, valid)
+  result = hook(call_568297, url, valid)
 
-proc call*(call_594065: Call_MachineLearningComputeGet_594056;
+proc call*(call_568298: Call_MachineLearningComputeGet_568289;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           computeName: string; workspaceName: string): Recallable =
   ## machineLearningComputeGet
@@ -1364,23 +1364,23 @@ proc call*(call_594065: Call_MachineLearningComputeGet_594056;
   ##              : Name of the Azure Machine Learning compute.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594066 = newJObject()
-  var query_594067 = newJObject()
-  add(path_594066, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594067, "api-version", newJString(apiVersion))
-  add(path_594066, "subscriptionId", newJString(subscriptionId))
-  add(path_594066, "computeName", newJString(computeName))
-  add(path_594066, "workspaceName", newJString(workspaceName))
-  result = call_594065.call(path_594066, query_594067, nil, nil, nil)
+  var path_568299 = newJObject()
+  var query_568300 = newJObject()
+  add(path_568299, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568300, "api-version", newJString(apiVersion))
+  add(path_568299, "subscriptionId", newJString(subscriptionId))
+  add(path_568299, "computeName", newJString(computeName))
+  add(path_568299, "workspaceName", newJString(workspaceName))
+  result = call_568298.call(path_568299, query_568300, nil, nil, nil)
 
-var machineLearningComputeGet* = Call_MachineLearningComputeGet_594056(
+var machineLearningComputeGet* = Call_MachineLearningComputeGet_568289(
     name: "machineLearningComputeGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/computes/{computeName}",
-    validator: validate_MachineLearningComputeGet_594057, base: "",
-    url: url_MachineLearningComputeGet_594058, schemes: {Scheme.Https})
+    validator: validate_MachineLearningComputeGet_568290, base: "",
+    url: url_MachineLearningComputeGet_568291, schemes: {Scheme.Https})
 type
-  Call_MachineLearningComputeDelete_594094 = ref object of OpenApiRestCall_593425
-proc url_MachineLearningComputeDelete_594096(protocol: Scheme; host: string;
+  Call_MachineLearningComputeDelete_568327 = ref object of OpenApiRestCall_567658
+proc url_MachineLearningComputeDelete_568329(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1406,7 +1406,7 @@ proc url_MachineLearningComputeDelete_594096(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineLearningComputeDelete_594095(path: JsonNode; query: JsonNode;
+proc validate_MachineLearningComputeDelete_568328(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes specified Machine Learning compute.
   ## 
@@ -1424,26 +1424,26 @@ proc validate_MachineLearningComputeDelete_594095(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594097 = path.getOrDefault("resourceGroupName")
-  valid_594097 = validateParameter(valid_594097, JString, required = true,
+  var valid_568330 = path.getOrDefault("resourceGroupName")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "resourceGroupName", valid_594097
-  var valid_594098 = path.getOrDefault("subscriptionId")
-  valid_594098 = validateParameter(valid_594098, JString, required = true,
+  if valid_568330 != nil:
+    section.add "resourceGroupName", valid_568330
+  var valid_568331 = path.getOrDefault("subscriptionId")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = nil)
-  if valid_594098 != nil:
-    section.add "subscriptionId", valid_594098
-  var valid_594099 = path.getOrDefault("computeName")
-  valid_594099 = validateParameter(valid_594099, JString, required = true,
+  if valid_568331 != nil:
+    section.add "subscriptionId", valid_568331
+  var valid_568332 = path.getOrDefault("computeName")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = nil)
-  if valid_594099 != nil:
-    section.add "computeName", valid_594099
-  var valid_594100 = path.getOrDefault("workspaceName")
-  valid_594100 = validateParameter(valid_594100, JString, required = true,
+  if valid_568332 != nil:
+    section.add "computeName", valid_568332
+  var valid_568333 = path.getOrDefault("workspaceName")
+  valid_568333 = validateParameter(valid_568333, JString, required = true,
                                  default = nil)
-  if valid_594100 != nil:
-    section.add "workspaceName", valid_594100
+  if valid_568333 != nil:
+    section.add "workspaceName", valid_568333
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1451,11 +1451,11 @@ proc validate_MachineLearningComputeDelete_594095(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594101 = query.getOrDefault("api-version")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  var valid_568334 = query.getOrDefault("api-version")
+  valid_568334 = validateParameter(valid_568334, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "api-version", valid_594101
+  if valid_568334 != nil:
+    section.add "api-version", valid_568334
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1464,20 +1464,20 @@ proc validate_MachineLearningComputeDelete_594095(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594102: Call_MachineLearningComputeDelete_594094; path: JsonNode;
+proc call*(call_568335: Call_MachineLearningComputeDelete_568327; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specified Machine Learning compute.
   ## 
-  let valid = call_594102.validator(path, query, header, formData, body)
-  let scheme = call_594102.pickScheme
+  let valid = call_568335.validator(path, query, header, formData, body)
+  let scheme = call_568335.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594102.url(scheme.get, call_594102.host, call_594102.base,
-                         call_594102.route, valid.getOrDefault("path"),
+  let url = call_568335.url(scheme.get, call_568335.host, call_568335.base,
+                         call_568335.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594102, url, valid)
+  result = hook(call_568335, url, valid)
 
-proc call*(call_594103: Call_MachineLearningComputeDelete_594094;
+proc call*(call_568336: Call_MachineLearningComputeDelete_568327;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           computeName: string; workspaceName: string): Recallable =
   ## machineLearningComputeDelete
@@ -1492,23 +1492,23 @@ proc call*(call_594103: Call_MachineLearningComputeDelete_594094;
   ##              : Name of the Azure Machine Learning compute.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594104 = newJObject()
-  var query_594105 = newJObject()
-  add(path_594104, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594105, "api-version", newJString(apiVersion))
-  add(path_594104, "subscriptionId", newJString(subscriptionId))
-  add(path_594104, "computeName", newJString(computeName))
-  add(path_594104, "workspaceName", newJString(workspaceName))
-  result = call_594103.call(path_594104, query_594105, nil, nil, nil)
+  var path_568337 = newJObject()
+  var query_568338 = newJObject()
+  add(path_568337, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568338, "api-version", newJString(apiVersion))
+  add(path_568337, "subscriptionId", newJString(subscriptionId))
+  add(path_568337, "computeName", newJString(computeName))
+  add(path_568337, "workspaceName", newJString(workspaceName))
+  result = call_568336.call(path_568337, query_568338, nil, nil, nil)
 
-var machineLearningComputeDelete* = Call_MachineLearningComputeDelete_594094(
+var machineLearningComputeDelete* = Call_MachineLearningComputeDelete_568327(
     name: "machineLearningComputeDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/computes/{computeName}",
-    validator: validate_MachineLearningComputeDelete_594095, base: "",
-    url: url_MachineLearningComputeDelete_594096, schemes: {Scheme.Https})
+    validator: validate_MachineLearningComputeDelete_568328, base: "",
+    url: url_MachineLearningComputeDelete_568329, schemes: {Scheme.Https})
 type
-  Call_MachineLearningComputeListKeys_594106 = ref object of OpenApiRestCall_593425
-proc url_MachineLearningComputeListKeys_594108(protocol: Scheme; host: string;
+  Call_MachineLearningComputeListKeys_568339 = ref object of OpenApiRestCall_567658
+proc url_MachineLearningComputeListKeys_568341(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1535,7 +1535,7 @@ proc url_MachineLearningComputeListKeys_594108(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachineLearningComputeListKeys_594107(path: JsonNode;
+proc validate_MachineLearningComputeListKeys_568340(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets secrets related to Machine Learning compute (storage keys, service credentials, etc).
   ## 
@@ -1553,26 +1553,26 @@ proc validate_MachineLearningComputeListKeys_594107(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594109 = path.getOrDefault("resourceGroupName")
-  valid_594109 = validateParameter(valid_594109, JString, required = true,
+  var valid_568342 = path.getOrDefault("resourceGroupName")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = nil)
-  if valid_594109 != nil:
-    section.add "resourceGroupName", valid_594109
-  var valid_594110 = path.getOrDefault("subscriptionId")
-  valid_594110 = validateParameter(valid_594110, JString, required = true,
+  if valid_568342 != nil:
+    section.add "resourceGroupName", valid_568342
+  var valid_568343 = path.getOrDefault("subscriptionId")
+  valid_568343 = validateParameter(valid_568343, JString, required = true,
                                  default = nil)
-  if valid_594110 != nil:
-    section.add "subscriptionId", valid_594110
-  var valid_594111 = path.getOrDefault("computeName")
-  valid_594111 = validateParameter(valid_594111, JString, required = true,
+  if valid_568343 != nil:
+    section.add "subscriptionId", valid_568343
+  var valid_568344 = path.getOrDefault("computeName")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = nil)
-  if valid_594111 != nil:
-    section.add "computeName", valid_594111
-  var valid_594112 = path.getOrDefault("workspaceName")
-  valid_594112 = validateParameter(valid_594112, JString, required = true,
+  if valid_568344 != nil:
+    section.add "computeName", valid_568344
+  var valid_568345 = path.getOrDefault("workspaceName")
+  valid_568345 = validateParameter(valid_568345, JString, required = true,
                                  default = nil)
-  if valid_594112 != nil:
-    section.add "workspaceName", valid_594112
+  if valid_568345 != nil:
+    section.add "workspaceName", valid_568345
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1580,11 +1580,11 @@ proc validate_MachineLearningComputeListKeys_594107(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594113 = query.getOrDefault("api-version")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  var valid_568346 = query.getOrDefault("api-version")
+  valid_568346 = validateParameter(valid_568346, JString, required = true,
                                  default = nil)
-  if valid_594113 != nil:
-    section.add "api-version", valid_594113
+  if valid_568346 != nil:
+    section.add "api-version", valid_568346
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1593,20 +1593,20 @@ proc validate_MachineLearningComputeListKeys_594107(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594114: Call_MachineLearningComputeListKeys_594106; path: JsonNode;
+proc call*(call_568347: Call_MachineLearningComputeListKeys_568339; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets secrets related to Machine Learning compute (storage keys, service credentials, etc).
   ## 
-  let valid = call_594114.validator(path, query, header, formData, body)
-  let scheme = call_594114.pickScheme
+  let valid = call_568347.validator(path, query, header, formData, body)
+  let scheme = call_568347.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594114.url(scheme.get, call_594114.host, call_594114.base,
-                         call_594114.route, valid.getOrDefault("path"),
+  let url = call_568347.url(scheme.get, call_568347.host, call_568347.base,
+                         call_568347.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594114, url, valid)
+  result = hook(call_568347, url, valid)
 
-proc call*(call_594115: Call_MachineLearningComputeListKeys_594106;
+proc call*(call_568348: Call_MachineLearningComputeListKeys_568339;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           computeName: string; workspaceName: string): Recallable =
   ## machineLearningComputeListKeys
@@ -1621,23 +1621,23 @@ proc call*(call_594115: Call_MachineLearningComputeListKeys_594106;
   ##              : Name of the Azure Machine Learning compute.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594116 = newJObject()
-  var query_594117 = newJObject()
-  add(path_594116, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594117, "api-version", newJString(apiVersion))
-  add(path_594116, "subscriptionId", newJString(subscriptionId))
-  add(path_594116, "computeName", newJString(computeName))
-  add(path_594116, "workspaceName", newJString(workspaceName))
-  result = call_594115.call(path_594116, query_594117, nil, nil, nil)
+  var path_568349 = newJObject()
+  var query_568350 = newJObject()
+  add(path_568349, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568350, "api-version", newJString(apiVersion))
+  add(path_568349, "subscriptionId", newJString(subscriptionId))
+  add(path_568349, "computeName", newJString(computeName))
+  add(path_568349, "workspaceName", newJString(workspaceName))
+  result = call_568348.call(path_568349, query_568350, nil, nil, nil)
 
-var machineLearningComputeListKeys* = Call_MachineLearningComputeListKeys_594106(
+var machineLearningComputeListKeys* = Call_MachineLearningComputeListKeys_568339(
     name: "machineLearningComputeListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/computes/{computeName}/listKeys",
-    validator: validate_MachineLearningComputeListKeys_594107, base: "",
-    url: url_MachineLearningComputeListKeys_594108, schemes: {Scheme.Https})
+    validator: validate_MachineLearningComputeListKeys_568340, base: "",
+    url: url_MachineLearningComputeListKeys_568341, schemes: {Scheme.Https})
 type
-  Call_WorkspacesListKeys_594118 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesListKeys_594120(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesListKeys_568351 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesListKeys_568353(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1661,7 +1661,7 @@ proc url_WorkspacesListKeys_594120(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesListKeys_594119(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesListKeys_568352(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Lists all the keys associated with this workspace. This includes keys for the storage account, app insights and password for container registry
@@ -1678,21 +1678,21 @@ proc validate_WorkspacesListKeys_594119(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594121 = path.getOrDefault("resourceGroupName")
-  valid_594121 = validateParameter(valid_594121, JString, required = true,
+  var valid_568354 = path.getOrDefault("resourceGroupName")
+  valid_568354 = validateParameter(valid_568354, JString, required = true,
                                  default = nil)
-  if valid_594121 != nil:
-    section.add "resourceGroupName", valid_594121
-  var valid_594122 = path.getOrDefault("subscriptionId")
-  valid_594122 = validateParameter(valid_594122, JString, required = true,
+  if valid_568354 != nil:
+    section.add "resourceGroupName", valid_568354
+  var valid_568355 = path.getOrDefault("subscriptionId")
+  valid_568355 = validateParameter(valid_568355, JString, required = true,
                                  default = nil)
-  if valid_594122 != nil:
-    section.add "subscriptionId", valid_594122
-  var valid_594123 = path.getOrDefault("workspaceName")
-  valid_594123 = validateParameter(valid_594123, JString, required = true,
+  if valid_568355 != nil:
+    section.add "subscriptionId", valid_568355
+  var valid_568356 = path.getOrDefault("workspaceName")
+  valid_568356 = validateParameter(valid_568356, JString, required = true,
                                  default = nil)
-  if valid_594123 != nil:
-    section.add "workspaceName", valid_594123
+  if valid_568356 != nil:
+    section.add "workspaceName", valid_568356
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1700,11 +1700,11 @@ proc validate_WorkspacesListKeys_594119(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594124 = query.getOrDefault("api-version")
-  valid_594124 = validateParameter(valid_594124, JString, required = true,
+  var valid_568357 = query.getOrDefault("api-version")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = nil)
-  if valid_594124 != nil:
-    section.add "api-version", valid_594124
+  if valid_568357 != nil:
+    section.add "api-version", valid_568357
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1713,20 +1713,20 @@ proc validate_WorkspacesListKeys_594119(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594125: Call_WorkspacesListKeys_594118; path: JsonNode;
+proc call*(call_568358: Call_WorkspacesListKeys_568351; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the keys associated with this workspace. This includes keys for the storage account, app insights and password for container registry
   ## 
-  let valid = call_594125.validator(path, query, header, formData, body)
-  let scheme = call_594125.pickScheme
+  let valid = call_568358.validator(path, query, header, formData, body)
+  let scheme = call_568358.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594125.url(scheme.get, call_594125.host, call_594125.base,
-                         call_594125.route, valid.getOrDefault("path"),
+  let url = call_568358.url(scheme.get, call_568358.host, call_568358.base,
+                         call_568358.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594125, url, valid)
+  result = hook(call_568358, url, valid)
 
-proc call*(call_594126: Call_WorkspacesListKeys_594118; resourceGroupName: string;
+proc call*(call_568359: Call_WorkspacesListKeys_568351; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; workspaceName: string): Recallable =
   ## workspacesListKeys
   ## Lists all the keys associated with this workspace. This includes keys for the storage account, app insights and password for container registry
@@ -1738,22 +1738,22 @@ proc call*(call_594126: Call_WorkspacesListKeys_594118; resourceGroupName: strin
   ##                 : Azure subscription identifier.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594127 = newJObject()
-  var query_594128 = newJObject()
-  add(path_594127, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594128, "api-version", newJString(apiVersion))
-  add(path_594127, "subscriptionId", newJString(subscriptionId))
-  add(path_594127, "workspaceName", newJString(workspaceName))
-  result = call_594126.call(path_594127, query_594128, nil, nil, nil)
+  var path_568360 = newJObject()
+  var query_568361 = newJObject()
+  add(path_568360, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568361, "api-version", newJString(apiVersion))
+  add(path_568360, "subscriptionId", newJString(subscriptionId))
+  add(path_568360, "workspaceName", newJString(workspaceName))
+  result = call_568359.call(path_568360, query_568361, nil, nil, nil)
 
-var workspacesListKeys* = Call_WorkspacesListKeys_594118(
+var workspacesListKeys* = Call_WorkspacesListKeys_568351(
     name: "workspacesListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/listKeys",
-    validator: validate_WorkspacesListKeys_594119, base: "",
-    url: url_WorkspacesListKeys_594120, schemes: {Scheme.Https})
+    validator: validate_WorkspacesListKeys_568352, base: "",
+    url: url_WorkspacesListKeys_568353, schemes: {Scheme.Https})
 type
-  Call_WorkspacesResyncKeys_594129 = ref object of OpenApiRestCall_593425
-proc url_WorkspacesResyncKeys_594131(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesResyncKeys_568362 = ref object of OpenApiRestCall_567658
+proc url_WorkspacesResyncKeys_568364(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1777,7 +1777,7 @@ proc url_WorkspacesResyncKeys_594131(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesResyncKeys_594130(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesResyncKeys_568363(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Resync all the keys associated with this workspace. This includes keys for the storage account, app insights and password for container registry
   ## 
@@ -1793,21 +1793,21 @@ proc validate_WorkspacesResyncKeys_594130(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594132 = path.getOrDefault("resourceGroupName")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  var valid_568365 = path.getOrDefault("resourceGroupName")
+  valid_568365 = validateParameter(valid_568365, JString, required = true,
                                  default = nil)
-  if valid_594132 != nil:
-    section.add "resourceGroupName", valid_594132
-  var valid_594133 = path.getOrDefault("subscriptionId")
-  valid_594133 = validateParameter(valid_594133, JString, required = true,
+  if valid_568365 != nil:
+    section.add "resourceGroupName", valid_568365
+  var valid_568366 = path.getOrDefault("subscriptionId")
+  valid_568366 = validateParameter(valid_568366, JString, required = true,
                                  default = nil)
-  if valid_594133 != nil:
-    section.add "subscriptionId", valid_594133
-  var valid_594134 = path.getOrDefault("workspaceName")
-  valid_594134 = validateParameter(valid_594134, JString, required = true,
+  if valid_568366 != nil:
+    section.add "subscriptionId", valid_568366
+  var valid_568367 = path.getOrDefault("workspaceName")
+  valid_568367 = validateParameter(valid_568367, JString, required = true,
                                  default = nil)
-  if valid_594134 != nil:
-    section.add "workspaceName", valid_594134
+  if valid_568367 != nil:
+    section.add "workspaceName", valid_568367
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1815,11 +1815,11 @@ proc validate_WorkspacesResyncKeys_594130(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594135 = query.getOrDefault("api-version")
-  valid_594135 = validateParameter(valid_594135, JString, required = true,
+  var valid_568368 = query.getOrDefault("api-version")
+  valid_568368 = validateParameter(valid_568368, JString, required = true,
                                  default = nil)
-  if valid_594135 != nil:
-    section.add "api-version", valid_594135
+  if valid_568368 != nil:
+    section.add "api-version", valid_568368
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1828,20 +1828,20 @@ proc validate_WorkspacesResyncKeys_594130(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594136: Call_WorkspacesResyncKeys_594129; path: JsonNode;
+proc call*(call_568369: Call_WorkspacesResyncKeys_568362; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resync all the keys associated with this workspace. This includes keys for the storage account, app insights and password for container registry
   ## 
-  let valid = call_594136.validator(path, query, header, formData, body)
-  let scheme = call_594136.pickScheme
+  let valid = call_568369.validator(path, query, header, formData, body)
+  let scheme = call_568369.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594136.url(scheme.get, call_594136.host, call_594136.base,
-                         call_594136.route, valid.getOrDefault("path"),
+  let url = call_568369.url(scheme.get, call_568369.host, call_568369.base,
+                         call_568369.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594136, url, valid)
+  result = hook(call_568369, url, valid)
 
-proc call*(call_594137: Call_WorkspacesResyncKeys_594129;
+proc call*(call_568370: Call_WorkspacesResyncKeys_568362;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           workspaceName: string): Recallable =
   ## workspacesResyncKeys
@@ -1854,19 +1854,19 @@ proc call*(call_594137: Call_WorkspacesResyncKeys_594129;
   ##                 : Azure subscription identifier.
   ##   workspaceName: string (required)
   ##                : Name of Azure Machine Learning workspace.
-  var path_594138 = newJObject()
-  var query_594139 = newJObject()
-  add(path_594138, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594139, "api-version", newJString(apiVersion))
-  add(path_594138, "subscriptionId", newJString(subscriptionId))
-  add(path_594138, "workspaceName", newJString(workspaceName))
-  result = call_594137.call(path_594138, query_594139, nil, nil, nil)
+  var path_568371 = newJObject()
+  var query_568372 = newJObject()
+  add(path_568371, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568372, "api-version", newJString(apiVersion))
+  add(path_568371, "subscriptionId", newJString(subscriptionId))
+  add(path_568371, "workspaceName", newJString(workspaceName))
+  result = call_568370.call(path_568371, query_568372, nil, nil, nil)
 
-var workspacesResyncKeys* = Call_WorkspacesResyncKeys_594129(
+var workspacesResyncKeys* = Call_WorkspacesResyncKeys_568362(
     name: "workspacesResyncKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/resyncKeys",
-    validator: validate_WorkspacesResyncKeys_594130, base: "",
-    url: url_WorkspacesResyncKeys_594131, schemes: {Scheme.Https})
+    validator: validate_WorkspacesResyncKeys_568363, base: "",
+    url: url_WorkspacesResyncKeys_568364, schemes: {Scheme.Https})
 export
   rest
 

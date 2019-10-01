@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database Import/Export spec
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_567642 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-importExport"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DatabasesExport_593631 = ref object of OpenApiRestCall_593409
-proc url_DatabasesExport_593633(protocol: Scheme; host: string; base: string;
+  Call_DatabasesExport_567864 = ref object of OpenApiRestCall_567642
+proc url_DatabasesExport_567866(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,7 +130,7 @@ proc url_DatabasesExport_593633(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesExport_593632(path: JsonNode; query: JsonNode;
+proc validate_DatabasesExport_567865(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Exports a database to a bacpac.
@@ -149,26 +149,26 @@ proc validate_DatabasesExport_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593823 = path.getOrDefault("resourceGroupName")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_568056 = path.getOrDefault("resourceGroupName")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "resourceGroupName", valid_593823
-  var valid_593824 = path.getOrDefault("serverName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_568056 != nil:
+    section.add "resourceGroupName", valid_568056
+  var valid_568057 = path.getOrDefault("serverName")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "serverName", valid_593824
-  var valid_593825 = path.getOrDefault("subscriptionId")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_568057 != nil:
+    section.add "serverName", valid_568057
+  var valid_568058 = path.getOrDefault("subscriptionId")
+  valid_568058 = validateParameter(valid_568058, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "subscriptionId", valid_593825
-  var valid_593826 = path.getOrDefault("databaseName")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  if valid_568058 != nil:
+    section.add "subscriptionId", valid_568058
+  var valid_568059 = path.getOrDefault("databaseName")
+  valid_568059 = validateParameter(valid_568059, JString, required = true,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "databaseName", valid_593826
+  if valid_568059 != nil:
+    section.add "databaseName", valid_568059
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,11 +176,11 @@ proc validate_DatabasesExport_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593827 = query.getOrDefault("api-version")
-  valid_593827 = validateParameter(valid_593827, JString, required = true,
+  var valid_568060 = query.getOrDefault("api-version")
+  valid_568060 = validateParameter(valid_568060, JString, required = true,
                                  default = nil)
-  if valid_593827 != nil:
-    section.add "api-version", valid_593827
+  if valid_568060 != nil:
+    section.add "api-version", valid_568060
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -194,20 +194,20 @@ proc validate_DatabasesExport_593632(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593851: Call_DatabasesExport_593631; path: JsonNode; query: JsonNode;
+proc call*(call_568084: Call_DatabasesExport_567864; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Exports a database to a bacpac.
   ## 
-  let valid = call_593851.validator(path, query, header, formData, body)
-  let scheme = call_593851.pickScheme
+  let valid = call_568084.validator(path, query, header, formData, body)
+  let scheme = call_568084.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593851.url(scheme.get, call_593851.host, call_593851.base,
-                         call_593851.route, valid.getOrDefault("path"),
+  let url = call_568084.url(scheme.get, call_568084.host, call_568084.base,
+                         call_568084.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593851, url, valid)
+  result = hook(call_568084, url, valid)
 
-proc call*(call_593922: Call_DatabasesExport_593631; resourceGroupName: string;
+proc call*(call_568155: Call_DatabasesExport_567864; resourceGroupName: string;
           apiVersion: string; serverName: string; subscriptionId: string;
           databaseName: string; parameters: JsonNode): Recallable =
   ## databasesExport
@@ -224,25 +224,25 @@ proc call*(call_593922: Call_DatabasesExport_593631; resourceGroupName: string;
   ##               : The name of the database to be exported.
   ##   parameters: JObject (required)
   ##             : The required parameters for exporting a database.
-  var path_593923 = newJObject()
-  var query_593925 = newJObject()
-  var body_593926 = newJObject()
-  add(path_593923, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593925, "api-version", newJString(apiVersion))
-  add(path_593923, "serverName", newJString(serverName))
-  add(path_593923, "subscriptionId", newJString(subscriptionId))
-  add(path_593923, "databaseName", newJString(databaseName))
+  var path_568156 = newJObject()
+  var query_568158 = newJObject()
+  var body_568159 = newJObject()
+  add(path_568156, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568158, "api-version", newJString(apiVersion))
+  add(path_568156, "serverName", newJString(serverName))
+  add(path_568156, "subscriptionId", newJString(subscriptionId))
+  add(path_568156, "databaseName", newJString(databaseName))
   if parameters != nil:
-    body_593926 = parameters
-  result = call_593922.call(path_593923, query_593925, nil, nil, body_593926)
+    body_568159 = parameters
+  result = call_568155.call(path_568156, query_568158, nil, nil, body_568159)
 
-var databasesExport* = Call_DatabasesExport_593631(name: "databasesExport",
+var databasesExport* = Call_DatabasesExport_567864(name: "databasesExport",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/export",
-    validator: validate_DatabasesExport_593632, base: "", url: url_DatabasesExport_593633,
+    validator: validate_DatabasesExport_567865, base: "", url: url_DatabasesExport_567866,
     schemes: {Scheme.Https})
 type
-  Call_DatabasesCreateImportOperation_593965 = ref object of OpenApiRestCall_593409
-proc url_DatabasesCreateImportOperation_593967(protocol: Scheme; host: string;
+  Call_DatabasesCreateImportOperation_568198 = ref object of OpenApiRestCall_567642
+proc url_DatabasesCreateImportOperation_568200(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -270,7 +270,7 @@ proc url_DatabasesCreateImportOperation_593967(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesCreateImportOperation_593966(path: JsonNode;
+proc validate_DatabasesCreateImportOperation_568199(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates an import operation that imports a bacpac into an existing database. The existing database must be empty.
   ## 
@@ -290,31 +290,31 @@ proc validate_DatabasesCreateImportOperation_593966(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593968 = path.getOrDefault("resourceGroupName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  var valid_568201 = path.getOrDefault("resourceGroupName")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "resourceGroupName", valid_593968
-  var valid_593982 = path.getOrDefault("extensionName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568201 != nil:
+    section.add "resourceGroupName", valid_568201
+  var valid_568215 = path.getOrDefault("extensionName")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = newJString("import"))
-  if valid_593982 != nil:
-    section.add "extensionName", valid_593982
-  var valid_593983 = path.getOrDefault("serverName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_568215 != nil:
+    section.add "extensionName", valid_568215
+  var valid_568216 = path.getOrDefault("serverName")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "serverName", valid_593983
-  var valid_593984 = path.getOrDefault("subscriptionId")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_568216 != nil:
+    section.add "serverName", valid_568216
+  var valid_568217 = path.getOrDefault("subscriptionId")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "subscriptionId", valid_593984
-  var valid_593985 = path.getOrDefault("databaseName")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  if valid_568217 != nil:
+    section.add "subscriptionId", valid_568217
+  var valid_568218 = path.getOrDefault("databaseName")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "databaseName", valid_593985
+  if valid_568218 != nil:
+    section.add "databaseName", valid_568218
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -322,11 +322,11 @@ proc validate_DatabasesCreateImportOperation_593966(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593986 = query.getOrDefault("api-version")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  var valid_568219 = query.getOrDefault("api-version")
+  valid_568219 = validateParameter(valid_568219, JString, required = true,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "api-version", valid_593986
+  if valid_568219 != nil:
+    section.add "api-version", valid_568219
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -340,20 +340,20 @@ proc validate_DatabasesCreateImportOperation_593966(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593988: Call_DatabasesCreateImportOperation_593965; path: JsonNode;
+proc call*(call_568221: Call_DatabasesCreateImportOperation_568198; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates an import operation that imports a bacpac into an existing database. The existing database must be empty.
   ## 
-  let valid = call_593988.validator(path, query, header, formData, body)
-  let scheme = call_593988.pickScheme
+  let valid = call_568221.validator(path, query, header, formData, body)
+  let scheme = call_568221.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593988.url(scheme.get, call_593988.host, call_593988.base,
-                         call_593988.route, valid.getOrDefault("path"),
+  let url = call_568221.url(scheme.get, call_568221.host, call_568221.base,
+                         call_568221.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593988, url, valid)
+  result = hook(call_568221, url, valid)
 
-proc call*(call_593989: Call_DatabasesCreateImportOperation_593965;
+proc call*(call_568222: Call_DatabasesCreateImportOperation_568198;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string; parameters: JsonNode;
           extensionName: string = "import"): Recallable =
@@ -373,27 +373,27 @@ proc call*(call_593989: Call_DatabasesCreateImportOperation_593965;
   ##               : The name of the database to import into
   ##   parameters: JObject (required)
   ##             : The required parameters for importing a Bacpac into a database.
-  var path_593990 = newJObject()
-  var query_593991 = newJObject()
-  var body_593992 = newJObject()
-  add(path_593990, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593991, "api-version", newJString(apiVersion))
-  add(path_593990, "extensionName", newJString(extensionName))
-  add(path_593990, "serverName", newJString(serverName))
-  add(path_593990, "subscriptionId", newJString(subscriptionId))
-  add(path_593990, "databaseName", newJString(databaseName))
+  var path_568223 = newJObject()
+  var query_568224 = newJObject()
+  var body_568225 = newJObject()
+  add(path_568223, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568224, "api-version", newJString(apiVersion))
+  add(path_568223, "extensionName", newJString(extensionName))
+  add(path_568223, "serverName", newJString(serverName))
+  add(path_568223, "subscriptionId", newJString(subscriptionId))
+  add(path_568223, "databaseName", newJString(databaseName))
   if parameters != nil:
-    body_593992 = parameters
-  result = call_593989.call(path_593990, query_593991, nil, nil, body_593992)
+    body_568225 = parameters
+  result = call_568222.call(path_568223, query_568224, nil, nil, body_568225)
 
-var databasesCreateImportOperation* = Call_DatabasesCreateImportOperation_593965(
+var databasesCreateImportOperation* = Call_DatabasesCreateImportOperation_568198(
     name: "databasesCreateImportOperation", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/extensions/{extensionName}",
-    validator: validate_DatabasesCreateImportOperation_593966, base: "",
-    url: url_DatabasesCreateImportOperation_593967, schemes: {Scheme.Https})
+    validator: validate_DatabasesCreateImportOperation_568199, base: "",
+    url: url_DatabasesCreateImportOperation_568200, schemes: {Scheme.Https})
 type
-  Call_DatabasesImport_593993 = ref object of OpenApiRestCall_593409
-proc url_DatabasesImport_593995(protocol: Scheme; host: string; base: string;
+  Call_DatabasesImport_568226 = ref object of OpenApiRestCall_567642
+proc url_DatabasesImport_568228(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -416,7 +416,7 @@ proc url_DatabasesImport_593995(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesImport_593994(path: JsonNode; query: JsonNode;
+proc validate_DatabasesImport_568227(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Imports a bacpac into a new database. 
@@ -433,21 +433,21 @@ proc validate_DatabasesImport_593994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593996 = path.getOrDefault("resourceGroupName")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_568229 = path.getOrDefault("resourceGroupName")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "resourceGroupName", valid_593996
-  var valid_593997 = path.getOrDefault("serverName")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  if valid_568229 != nil:
+    section.add "resourceGroupName", valid_568229
+  var valid_568230 = path.getOrDefault("serverName")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "serverName", valid_593997
-  var valid_593998 = path.getOrDefault("subscriptionId")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  if valid_568230 != nil:
+    section.add "serverName", valid_568230
+  var valid_568231 = path.getOrDefault("subscriptionId")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "subscriptionId", valid_593998
+  if valid_568231 != nil:
+    section.add "subscriptionId", valid_568231
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -455,11 +455,11 @@ proc validate_DatabasesImport_593994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593999 = query.getOrDefault("api-version")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  var valid_568232 = query.getOrDefault("api-version")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "api-version", valid_593999
+  if valid_568232 != nil:
+    section.add "api-version", valid_568232
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -473,20 +473,20 @@ proc validate_DatabasesImport_593994(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594001: Call_DatabasesImport_593993; path: JsonNode; query: JsonNode;
+proc call*(call_568234: Call_DatabasesImport_568226; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Imports a bacpac into a new database. 
   ## 
-  let valid = call_594001.validator(path, query, header, formData, body)
-  let scheme = call_594001.pickScheme
+  let valid = call_568234.validator(path, query, header, formData, body)
+  let scheme = call_568234.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594001.url(scheme.get, call_594001.host, call_594001.base,
-                         call_594001.route, valid.getOrDefault("path"),
+  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
+                         call_568234.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594001, url, valid)
+  result = hook(call_568234, url, valid)
 
-proc call*(call_594002: Call_DatabasesImport_593993; resourceGroupName: string;
+proc call*(call_568235: Call_DatabasesImport_568226; resourceGroupName: string;
           apiVersion: string; serverName: string; subscriptionId: string;
           parameters: JsonNode): Recallable =
   ## databasesImport
@@ -501,20 +501,20 @@ proc call*(call_594002: Call_DatabasesImport_593993; resourceGroupName: string;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   parameters: JObject (required)
   ##             : The required parameters for importing a Bacpac into a database.
-  var path_594003 = newJObject()
-  var query_594004 = newJObject()
-  var body_594005 = newJObject()
-  add(path_594003, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594004, "api-version", newJString(apiVersion))
-  add(path_594003, "serverName", newJString(serverName))
-  add(path_594003, "subscriptionId", newJString(subscriptionId))
+  var path_568236 = newJObject()
+  var query_568237 = newJObject()
+  var body_568238 = newJObject()
+  add(path_568236, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568237, "api-version", newJString(apiVersion))
+  add(path_568236, "serverName", newJString(serverName))
+  add(path_568236, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594005 = parameters
-  result = call_594002.call(path_594003, query_594004, nil, nil, body_594005)
+    body_568238 = parameters
+  result = call_568235.call(path_568236, query_568237, nil, nil, body_568238)
 
-var databasesImport* = Call_DatabasesImport_593993(name: "databasesImport",
+var databasesImport* = Call_DatabasesImport_568226(name: "databasesImport",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/import",
-    validator: validate_DatabasesImport_593994, base: "", url: url_DatabasesImport_593995,
+    validator: validate_DatabasesImport_568227, base: "", url: url_DatabasesImport_568228,
     schemes: {Scheme.Https})
 export
   rest

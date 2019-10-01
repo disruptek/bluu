@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "security-complianceResults"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ComplianceResultsGet_593630 = ref object of OpenApiRestCall_593408
-proc url_ComplianceResultsGet_593632(protocol: Scheme; host: string; base: string;
+  Call_ComplianceResultsGet_567863 = ref object of OpenApiRestCall_567641
+proc url_ComplianceResultsGet_567865(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -123,7 +123,7 @@ proc url_ComplianceResultsGet_593632(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComplianceResultsGet_593631(path: JsonNode; query: JsonNode;
+proc validate_ComplianceResultsGet_567864(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security Compliance Result
   ## 
@@ -136,16 +136,16 @@ proc validate_ComplianceResultsGet_593631(path: JsonNode; query: JsonNode;
   ##             : The identifier of the resource.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `complianceResultName` field"
-  var valid_593805 = path.getOrDefault("complianceResultName")
-  valid_593805 = validateParameter(valid_593805, JString, required = true,
+  var valid_568038 = path.getOrDefault("complianceResultName")
+  valid_568038 = validateParameter(valid_568038, JString, required = true,
                                  default = nil)
-  if valid_593805 != nil:
-    section.add "complianceResultName", valid_593805
-  var valid_593806 = path.getOrDefault("resourceId")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  if valid_568038 != nil:
+    section.add "complianceResultName", valid_568038
+  var valid_568039 = path.getOrDefault("resourceId")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "resourceId", valid_593806
+  if valid_568039 != nil:
+    section.add "resourceId", valid_568039
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -153,11 +153,11 @@ proc validate_ComplianceResultsGet_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_568040 = query.getOrDefault("api-version")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_568040 != nil:
+    section.add "api-version", valid_568040
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -166,20 +166,20 @@ proc validate_ComplianceResultsGet_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593830: Call_ComplianceResultsGet_593630; path: JsonNode;
+proc call*(call_568063: Call_ComplianceResultsGet_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Security Compliance Result
   ## 
-  let valid = call_593830.validator(path, query, header, formData, body)
-  let scheme = call_593830.pickScheme
+  let valid = call_568063.validator(path, query, header, formData, body)
+  let scheme = call_568063.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593830.url(scheme.get, call_593830.host, call_593830.base,
-                         call_593830.route, valid.getOrDefault("path"),
+  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
+                         call_568063.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593830, url, valid)
+  result = hook(call_568063, url, valid)
 
-proc call*(call_593901: Call_ComplianceResultsGet_593630; apiVersion: string;
+proc call*(call_568134: Call_ComplianceResultsGet_567863; apiVersion: string;
           complianceResultName: string; resourceId: string): Recallable =
   ## complianceResultsGet
   ## Security Compliance Result
@@ -189,21 +189,21 @@ proc call*(call_593901: Call_ComplianceResultsGet_593630; apiVersion: string;
   ##                       : name of the desired assessment compliance result
   ##   resourceId: string (required)
   ##             : The identifier of the resource.
-  var path_593902 = newJObject()
-  var query_593904 = newJObject()
-  add(query_593904, "api-version", newJString(apiVersion))
-  add(path_593902, "complianceResultName", newJString(complianceResultName))
-  add(path_593902, "resourceId", newJString(resourceId))
-  result = call_593901.call(path_593902, query_593904, nil, nil, nil)
+  var path_568135 = newJObject()
+  var query_568137 = newJObject()
+  add(query_568137, "api-version", newJString(apiVersion))
+  add(path_568135, "complianceResultName", newJString(complianceResultName))
+  add(path_568135, "resourceId", newJString(resourceId))
+  result = call_568134.call(path_568135, query_568137, nil, nil, nil)
 
-var complianceResultsGet* = Call_ComplianceResultsGet_593630(
+var complianceResultsGet* = Call_ComplianceResultsGet_567863(
     name: "complianceResultsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.Security/complianceResults/{complianceResultName}",
-    validator: validate_ComplianceResultsGet_593631, base: "",
-    url: url_ComplianceResultsGet_593632, schemes: {Scheme.Https})
+    validator: validate_ComplianceResultsGet_567864, base: "",
+    url: url_ComplianceResultsGet_567865, schemes: {Scheme.Https})
 type
-  Call_ComplianceResultsList_593943 = ref object of OpenApiRestCall_593408
-proc url_ComplianceResultsList_593945(protocol: Scheme; host: string; base: string;
+  Call_ComplianceResultsList_568176 = ref object of OpenApiRestCall_567641
+proc url_ComplianceResultsList_568178(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -219,7 +219,7 @@ proc url_ComplianceResultsList_593945(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComplianceResultsList_593944(path: JsonNode; query: JsonNode;
+proc validate_ComplianceResultsList_568177(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security compliance results in the subscription
   ## 
@@ -230,11 +230,11 @@ proc validate_ComplianceResultsList_593944(path: JsonNode; query: JsonNode;
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_593946 = path.getOrDefault("scope")
-  valid_593946 = validateParameter(valid_593946, JString, required = true,
+  var valid_568179 = path.getOrDefault("scope")
+  valid_568179 = validateParameter(valid_568179, JString, required = true,
                                  default = nil)
-  if valid_593946 != nil:
-    section.add "scope", valid_593946
+  if valid_568179 != nil:
+    section.add "scope", valid_568179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +242,11 @@ proc validate_ComplianceResultsList_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593947 = query.getOrDefault("api-version")
-  valid_593947 = validateParameter(valid_593947, JString, required = true,
+  var valid_568180 = query.getOrDefault("api-version")
+  valid_568180 = validateParameter(valid_568180, JString, required = true,
                                  default = nil)
-  if valid_593947 != nil:
-    section.add "api-version", valid_593947
+  if valid_568180 != nil:
+    section.add "api-version", valid_568180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -255,20 +255,20 @@ proc validate_ComplianceResultsList_593944(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593948: Call_ComplianceResultsList_593943; path: JsonNode;
+proc call*(call_568181: Call_ComplianceResultsList_568176; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Security compliance results in the subscription
   ## 
-  let valid = call_593948.validator(path, query, header, formData, body)
-  let scheme = call_593948.pickScheme
+  let valid = call_568181.validator(path, query, header, formData, body)
+  let scheme = call_568181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593948.url(scheme.get, call_593948.host, call_593948.base,
-                         call_593948.route, valid.getOrDefault("path"),
+  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
+                         call_568181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593948, url, valid)
+  result = hook(call_568181, url, valid)
 
-proc call*(call_593949: Call_ComplianceResultsList_593943; apiVersion: string;
+proc call*(call_568182: Call_ComplianceResultsList_568176; apiVersion: string;
           scope: string): Recallable =
   ## complianceResultsList
   ## Security compliance results in the subscription
@@ -276,18 +276,18 @@ proc call*(call_593949: Call_ComplianceResultsList_593943; apiVersion: string;
   ##             : API version for the operation
   ##   scope: string (required)
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
-  var path_593950 = newJObject()
-  var query_593951 = newJObject()
-  add(query_593951, "api-version", newJString(apiVersion))
-  add(path_593950, "scope", newJString(scope))
-  result = call_593949.call(path_593950, query_593951, nil, nil, nil)
+  var path_568183 = newJObject()
+  var query_568184 = newJObject()
+  add(query_568184, "api-version", newJString(apiVersion))
+  add(path_568183, "scope", newJString(scope))
+  result = call_568182.call(path_568183, query_568184, nil, nil, nil)
 
-var complianceResultsList* = Call_ComplianceResultsList_593943(
+var complianceResultsList* = Call_ComplianceResultsList_568176(
     name: "complianceResultsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Security/complianceResults",
-    validator: validate_ComplianceResultsList_593944, base: "",
-    url: url_ComplianceResultsList_593945, schemes: {Scheme.Https})
+    validator: validate_ComplianceResultsList_568177, base: "",
+    url: url_ComplianceResultsList_568178, schemes: {Scheme.Https})
 export
   rest
 

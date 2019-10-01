@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Alerts Management Service Resource Provider
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_567642 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "alertsmanagement-SmartDetectorAlertRulesApi"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SmartDetectorAlertRulesList_593631 = ref object of OpenApiRestCall_593409
-proc url_SmartDetectorAlertRulesList_593633(protocol: Scheme; host: string;
+  Call_SmartDetectorAlertRulesList_567864 = ref object of OpenApiRestCall_567642
+proc url_SmartDetectorAlertRulesList_567866(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_SmartDetectorAlertRulesList_593633(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SmartDetectorAlertRulesList_593632(path: JsonNode; query: JsonNode;
+proc validate_SmartDetectorAlertRulesList_567865(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the existing Smart Detector alert rules within the subscription.
   ## 
@@ -133,11 +133,11 @@ proc validate_SmartDetectorAlertRulesList_593632(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593806 = path.getOrDefault("subscriptionId")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_568039 = path.getOrDefault("subscriptionId")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "subscriptionId", valid_593806
+  if valid_568039 != nil:
+    section.add "subscriptionId", valid_568039
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_SmartDetectorAlertRulesList_593632(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_568040 = query.getOrDefault("api-version")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_568040 != nil:
+    section.add "api-version", valid_568040
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_SmartDetectorAlertRulesList_593632(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593830: Call_SmartDetectorAlertRulesList_593631; path: JsonNode;
+proc call*(call_568063: Call_SmartDetectorAlertRulesList_567864; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the existing Smart Detector alert rules within the subscription.
   ## 
-  let valid = call_593830.validator(path, query, header, formData, body)
-  let scheme = call_593830.pickScheme
+  let valid = call_568063.validator(path, query, header, formData, body)
+  let scheme = call_568063.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593830.url(scheme.get, call_593830.host, call_593830.base,
-                         call_593830.route, valid.getOrDefault("path"),
+  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
+                         call_568063.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593830, url, valid)
+  result = hook(call_568063, url, valid)
 
-proc call*(call_593901: Call_SmartDetectorAlertRulesList_593631;
+proc call*(call_568134: Call_SmartDetectorAlertRulesList_567864;
           apiVersion: string; subscriptionId: string): Recallable =
   ## smartDetectorAlertRulesList
   ## List all the existing Smart Detector alert rules within the subscription.
@@ -179,20 +179,20 @@ proc call*(call_593901: Call_SmartDetectorAlertRulesList_593631;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription id.
-  var path_593902 = newJObject()
-  var query_593904 = newJObject()
-  add(query_593904, "api-version", newJString(apiVersion))
-  add(path_593902, "subscriptionId", newJString(subscriptionId))
-  result = call_593901.call(path_593902, query_593904, nil, nil, nil)
+  var path_568135 = newJObject()
+  var query_568137 = newJObject()
+  add(query_568137, "api-version", newJString(apiVersion))
+  add(path_568135, "subscriptionId", newJString(subscriptionId))
+  result = call_568134.call(path_568135, query_568137, nil, nil, nil)
 
-var smartDetectorAlertRulesList* = Call_SmartDetectorAlertRulesList_593631(
+var smartDetectorAlertRulesList* = Call_SmartDetectorAlertRulesList_567864(
     name: "smartDetectorAlertRulesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.alertsManagement/smartDetectorAlertRules",
-    validator: validate_SmartDetectorAlertRulesList_593632, base: "",
-    url: url_SmartDetectorAlertRulesList_593633, schemes: {Scheme.Https})
+    validator: validate_SmartDetectorAlertRulesList_567865, base: "",
+    url: url_SmartDetectorAlertRulesList_567866, schemes: {Scheme.Https})
 type
-  Call_SmartDetectorAlertRulesListByResourceGroup_593943 = ref object of OpenApiRestCall_593409
-proc url_SmartDetectorAlertRulesListByResourceGroup_593945(protocol: Scheme;
+  Call_SmartDetectorAlertRulesListByResourceGroup_568176 = ref object of OpenApiRestCall_567642
+proc url_SmartDetectorAlertRulesListByResourceGroup_568178(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -213,7 +213,7 @@ proc url_SmartDetectorAlertRulesListByResourceGroup_593945(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SmartDetectorAlertRulesListByResourceGroup_593944(path: JsonNode;
+proc validate_SmartDetectorAlertRulesListByResourceGroup_568177(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the existing Smart Detector alert rules within the subscription and resource group.
   ## 
@@ -227,16 +227,16 @@ proc validate_SmartDetectorAlertRulesListByResourceGroup_593944(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593946 = path.getOrDefault("resourceGroupName")
-  valid_593946 = validateParameter(valid_593946, JString, required = true,
+  var valid_568179 = path.getOrDefault("resourceGroupName")
+  valid_568179 = validateParameter(valid_568179, JString, required = true,
                                  default = nil)
-  if valid_593946 != nil:
-    section.add "resourceGroupName", valid_593946
-  var valid_593947 = path.getOrDefault("subscriptionId")
-  valid_593947 = validateParameter(valid_593947, JString, required = true,
+  if valid_568179 != nil:
+    section.add "resourceGroupName", valid_568179
+  var valid_568180 = path.getOrDefault("subscriptionId")
+  valid_568180 = validateParameter(valid_568180, JString, required = true,
                                  default = nil)
-  if valid_593947 != nil:
-    section.add "subscriptionId", valid_593947
+  if valid_568180 != nil:
+    section.add "subscriptionId", valid_568180
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -244,11 +244,11 @@ proc validate_SmartDetectorAlertRulesListByResourceGroup_593944(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593948 = query.getOrDefault("api-version")
-  valid_593948 = validateParameter(valid_593948, JString, required = true,
+  var valid_568181 = query.getOrDefault("api-version")
+  valid_568181 = validateParameter(valid_568181, JString, required = true,
                                  default = nil)
-  if valid_593948 != nil:
-    section.add "api-version", valid_593948
+  if valid_568181 != nil:
+    section.add "api-version", valid_568181
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -257,21 +257,21 @@ proc validate_SmartDetectorAlertRulesListByResourceGroup_593944(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593949: Call_SmartDetectorAlertRulesListByResourceGroup_593943;
+proc call*(call_568182: Call_SmartDetectorAlertRulesListByResourceGroup_568176;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all the existing Smart Detector alert rules within the subscription and resource group.
   ## 
-  let valid = call_593949.validator(path, query, header, formData, body)
-  let scheme = call_593949.pickScheme
+  let valid = call_568182.validator(path, query, header, formData, body)
+  let scheme = call_568182.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593949.url(scheme.get, call_593949.host, call_593949.base,
-                         call_593949.route, valid.getOrDefault("path"),
+  let url = call_568182.url(scheme.get, call_568182.host, call_568182.base,
+                         call_568182.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593949, url, valid)
+  result = hook(call_568182, url, valid)
 
-proc call*(call_593950: Call_SmartDetectorAlertRulesListByResourceGroup_593943;
+proc call*(call_568183: Call_SmartDetectorAlertRulesListByResourceGroup_568176;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## smartDetectorAlertRulesListByResourceGroup
   ## List all the existing Smart Detector alert rules within the subscription and resource group.
@@ -281,22 +281,22 @@ proc call*(call_593950: Call_SmartDetectorAlertRulesListByResourceGroup_593943;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription id.
-  var path_593951 = newJObject()
-  var query_593952 = newJObject()
-  add(path_593951, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593952, "api-version", newJString(apiVersion))
-  add(path_593951, "subscriptionId", newJString(subscriptionId))
-  result = call_593950.call(path_593951, query_593952, nil, nil, nil)
+  var path_568184 = newJObject()
+  var query_568185 = newJObject()
+  add(path_568184, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568185, "api-version", newJString(apiVersion))
+  add(path_568184, "subscriptionId", newJString(subscriptionId))
+  result = call_568183.call(path_568184, query_568185, nil, nil, nil)
 
-var smartDetectorAlertRulesListByResourceGroup* = Call_SmartDetectorAlertRulesListByResourceGroup_593943(
+var smartDetectorAlertRulesListByResourceGroup* = Call_SmartDetectorAlertRulesListByResourceGroup_568176(
     name: "smartDetectorAlertRulesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.alertsManagement/smartDetectorAlertRules",
-    validator: validate_SmartDetectorAlertRulesListByResourceGroup_593944,
-    base: "", url: url_SmartDetectorAlertRulesListByResourceGroup_593945,
+    validator: validate_SmartDetectorAlertRulesListByResourceGroup_568177,
+    base: "", url: url_SmartDetectorAlertRulesListByResourceGroup_568178,
     schemes: {Scheme.Https})
 type
-  Call_SmartDetectorAlertRulesCreateOrUpdate_593965 = ref object of OpenApiRestCall_593409
-proc url_SmartDetectorAlertRulesCreateOrUpdate_593967(protocol: Scheme;
+  Call_SmartDetectorAlertRulesCreateOrUpdate_568198 = ref object of OpenApiRestCall_567642
+proc url_SmartDetectorAlertRulesCreateOrUpdate_568200(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -319,7 +319,7 @@ proc url_SmartDetectorAlertRulesCreateOrUpdate_593967(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SmartDetectorAlertRulesCreateOrUpdate_593966(path: JsonNode;
+proc validate_SmartDetectorAlertRulesCreateOrUpdate_568199(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Smart Detector alert rule.
   ## 
@@ -335,21 +335,21 @@ proc validate_SmartDetectorAlertRulesCreateOrUpdate_593966(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593985 = path.getOrDefault("resourceGroupName")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568218 = path.getOrDefault("resourceGroupName")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "resourceGroupName", valid_593985
-  var valid_593986 = path.getOrDefault("subscriptionId")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  if valid_568218 != nil:
+    section.add "resourceGroupName", valid_568218
+  var valid_568219 = path.getOrDefault("subscriptionId")
+  valid_568219 = validateParameter(valid_568219, JString, required = true,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "subscriptionId", valid_593986
-  var valid_593987 = path.getOrDefault("alertRuleName")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+  if valid_568219 != nil:
+    section.add "subscriptionId", valid_568219
+  var valid_568220 = path.getOrDefault("alertRuleName")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "alertRuleName", valid_593987
+  if valid_568220 != nil:
+    section.add "alertRuleName", valid_568220
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +357,11 @@ proc validate_SmartDetectorAlertRulesCreateOrUpdate_593966(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593988 = query.getOrDefault("api-version")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_568221 = query.getOrDefault("api-version")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "api-version", valid_593988
+  if valid_568221 != nil:
+    section.add "api-version", valid_568221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -375,21 +375,21 @@ proc validate_SmartDetectorAlertRulesCreateOrUpdate_593966(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593990: Call_SmartDetectorAlertRulesCreateOrUpdate_593965;
+proc call*(call_568223: Call_SmartDetectorAlertRulesCreateOrUpdate_568198;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a Smart Detector alert rule.
   ## 
-  let valid = call_593990.validator(path, query, header, formData, body)
-  let scheme = call_593990.pickScheme
+  let valid = call_568223.validator(path, query, header, formData, body)
+  let scheme = call_568223.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593990.url(scheme.get, call_593990.host, call_593990.base,
-                         call_593990.route, valid.getOrDefault("path"),
+  let url = call_568223.url(scheme.get, call_568223.host, call_568223.base,
+                         call_568223.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593990, url, valid)
+  result = hook(call_568223, url, valid)
 
-proc call*(call_593991: Call_SmartDetectorAlertRulesCreateOrUpdate_593965;
+proc call*(call_568224: Call_SmartDetectorAlertRulesCreateOrUpdate_568198;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; alertRuleName: string): Recallable =
   ## smartDetectorAlertRulesCreateOrUpdate
@@ -404,25 +404,25 @@ proc call*(call_593991: Call_SmartDetectorAlertRulesCreateOrUpdate_593965;
   ##             : Parameters supplied to the operation.
   ##   alertRuleName: string (required)
   ##                : The name of the alert rule.
-  var path_593992 = newJObject()
-  var query_593993 = newJObject()
-  var body_593994 = newJObject()
-  add(path_593992, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593993, "api-version", newJString(apiVersion))
-  add(path_593992, "subscriptionId", newJString(subscriptionId))
+  var path_568225 = newJObject()
+  var query_568226 = newJObject()
+  var body_568227 = newJObject()
+  add(path_568225, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568226, "api-version", newJString(apiVersion))
+  add(path_568225, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593994 = parameters
-  add(path_593992, "alertRuleName", newJString(alertRuleName))
-  result = call_593991.call(path_593992, query_593993, nil, nil, body_593994)
+    body_568227 = parameters
+  add(path_568225, "alertRuleName", newJString(alertRuleName))
+  result = call_568224.call(path_568225, query_568226, nil, nil, body_568227)
 
-var smartDetectorAlertRulesCreateOrUpdate* = Call_SmartDetectorAlertRulesCreateOrUpdate_593965(
+var smartDetectorAlertRulesCreateOrUpdate* = Call_SmartDetectorAlertRulesCreateOrUpdate_568198(
     name: "smartDetectorAlertRulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.alertsManagement/smartDetectorAlertRules/{alertRuleName}",
-    validator: validate_SmartDetectorAlertRulesCreateOrUpdate_593966, base: "",
-    url: url_SmartDetectorAlertRulesCreateOrUpdate_593967, schemes: {Scheme.Https})
+    validator: validate_SmartDetectorAlertRulesCreateOrUpdate_568199, base: "",
+    url: url_SmartDetectorAlertRulesCreateOrUpdate_568200, schemes: {Scheme.Https})
 type
-  Call_SmartDetectorAlertRulesGet_593953 = ref object of OpenApiRestCall_593409
-proc url_SmartDetectorAlertRulesGet_593955(protocol: Scheme; host: string;
+  Call_SmartDetectorAlertRulesGet_568186 = ref object of OpenApiRestCall_567642
+proc url_SmartDetectorAlertRulesGet_568188(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -445,7 +445,7 @@ proc url_SmartDetectorAlertRulesGet_593955(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SmartDetectorAlertRulesGet_593954(path: JsonNode; query: JsonNode;
+proc validate_SmartDetectorAlertRulesGet_568187(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a specific Smart Detector alert rule.
   ## 
@@ -461,21 +461,21 @@ proc validate_SmartDetectorAlertRulesGet_593954(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593956 = path.getOrDefault("resourceGroupName")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  var valid_568189 = path.getOrDefault("resourceGroupName")
+  valid_568189 = validateParameter(valid_568189, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "resourceGroupName", valid_593956
-  var valid_593957 = path.getOrDefault("subscriptionId")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  if valid_568189 != nil:
+    section.add "resourceGroupName", valid_568189
+  var valid_568190 = path.getOrDefault("subscriptionId")
+  valid_568190 = validateParameter(valid_568190, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "subscriptionId", valid_593957
-  var valid_593958 = path.getOrDefault("alertRuleName")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  if valid_568190 != nil:
+    section.add "subscriptionId", valid_568190
+  var valid_568191 = path.getOrDefault("alertRuleName")
+  valid_568191 = validateParameter(valid_568191, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "alertRuleName", valid_593958
+  if valid_568191 != nil:
+    section.add "alertRuleName", valid_568191
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -485,15 +485,15 @@ proc validate_SmartDetectorAlertRulesGet_593954(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593959 = query.getOrDefault("api-version")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  var valid_568192 = query.getOrDefault("api-version")
+  valid_568192 = validateParameter(valid_568192, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "api-version", valid_593959
-  var valid_593960 = query.getOrDefault("expandDetector")
-  valid_593960 = validateParameter(valid_593960, JBool, required = false, default = nil)
-  if valid_593960 != nil:
-    section.add "expandDetector", valid_593960
+  if valid_568192 != nil:
+    section.add "api-version", valid_568192
+  var valid_568193 = query.getOrDefault("expandDetector")
+  valid_568193 = validateParameter(valid_568193, JBool, required = false, default = nil)
+  if valid_568193 != nil:
+    section.add "expandDetector", valid_568193
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -502,20 +502,20 @@ proc validate_SmartDetectorAlertRulesGet_593954(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593961: Call_SmartDetectorAlertRulesGet_593953; path: JsonNode;
+proc call*(call_568194: Call_SmartDetectorAlertRulesGet_568186; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a specific Smart Detector alert rule.
   ## 
-  let valid = call_593961.validator(path, query, header, formData, body)
-  let scheme = call_593961.pickScheme
+  let valid = call_568194.validator(path, query, header, formData, body)
+  let scheme = call_568194.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593961.url(scheme.get, call_593961.host, call_593961.base,
-                         call_593961.route, valid.getOrDefault("path"),
+  let url = call_568194.url(scheme.get, call_568194.host, call_568194.base,
+                         call_568194.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593961, url, valid)
+  result = hook(call_568194, url, valid)
 
-proc call*(call_593962: Call_SmartDetectorAlertRulesGet_593953;
+proc call*(call_568195: Call_SmartDetectorAlertRulesGet_568186;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           alertRuleName: string; expandDetector: bool = false): Recallable =
   ## smartDetectorAlertRulesGet
@@ -530,23 +530,23 @@ proc call*(call_593962: Call_SmartDetectorAlertRulesGet_593953;
   ##                 : Indicates if Smart Detector should be expanded.
   ##   alertRuleName: string (required)
   ##                : The name of the alert rule.
-  var path_593963 = newJObject()
-  var query_593964 = newJObject()
-  add(path_593963, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593964, "api-version", newJString(apiVersion))
-  add(path_593963, "subscriptionId", newJString(subscriptionId))
-  add(query_593964, "expandDetector", newJBool(expandDetector))
-  add(path_593963, "alertRuleName", newJString(alertRuleName))
-  result = call_593962.call(path_593963, query_593964, nil, nil, nil)
+  var path_568196 = newJObject()
+  var query_568197 = newJObject()
+  add(path_568196, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568197, "api-version", newJString(apiVersion))
+  add(path_568196, "subscriptionId", newJString(subscriptionId))
+  add(query_568197, "expandDetector", newJBool(expandDetector))
+  add(path_568196, "alertRuleName", newJString(alertRuleName))
+  result = call_568195.call(path_568196, query_568197, nil, nil, nil)
 
-var smartDetectorAlertRulesGet* = Call_SmartDetectorAlertRulesGet_593953(
+var smartDetectorAlertRulesGet* = Call_SmartDetectorAlertRulesGet_568186(
     name: "smartDetectorAlertRulesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.alertsManagement/smartDetectorAlertRules/{alertRuleName}",
-    validator: validate_SmartDetectorAlertRulesGet_593954, base: "",
-    url: url_SmartDetectorAlertRulesGet_593955, schemes: {Scheme.Https})
+    validator: validate_SmartDetectorAlertRulesGet_568187, base: "",
+    url: url_SmartDetectorAlertRulesGet_568188, schemes: {Scheme.Https})
 type
-  Call_SmartDetectorAlertRulesDelete_593995 = ref object of OpenApiRestCall_593409
-proc url_SmartDetectorAlertRulesDelete_593997(protocol: Scheme; host: string;
+  Call_SmartDetectorAlertRulesDelete_568228 = ref object of OpenApiRestCall_567642
+proc url_SmartDetectorAlertRulesDelete_568230(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -569,7 +569,7 @@ proc url_SmartDetectorAlertRulesDelete_593997(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SmartDetectorAlertRulesDelete_593996(path: JsonNode; query: JsonNode;
+proc validate_SmartDetectorAlertRulesDelete_568229(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an existing Smart Detector alert rule.
   ## 
@@ -585,21 +585,21 @@ proc validate_SmartDetectorAlertRulesDelete_593996(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593998 = path.getOrDefault("resourceGroupName")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  var valid_568231 = path.getOrDefault("resourceGroupName")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "resourceGroupName", valid_593998
-  var valid_593999 = path.getOrDefault("subscriptionId")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  if valid_568231 != nil:
+    section.add "resourceGroupName", valid_568231
+  var valid_568232 = path.getOrDefault("subscriptionId")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "subscriptionId", valid_593999
-  var valid_594000 = path.getOrDefault("alertRuleName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  if valid_568232 != nil:
+    section.add "subscriptionId", valid_568232
+  var valid_568233 = path.getOrDefault("alertRuleName")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "alertRuleName", valid_594000
+  if valid_568233 != nil:
+    section.add "alertRuleName", valid_568233
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -607,11 +607,11 @@ proc validate_SmartDetectorAlertRulesDelete_593996(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594001 = query.getOrDefault("api-version")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568234 = query.getOrDefault("api-version")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "api-version", valid_594001
+  if valid_568234 != nil:
+    section.add "api-version", valid_568234
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -620,20 +620,20 @@ proc validate_SmartDetectorAlertRulesDelete_593996(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594002: Call_SmartDetectorAlertRulesDelete_593995; path: JsonNode;
+proc call*(call_568235: Call_SmartDetectorAlertRulesDelete_568228; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an existing Smart Detector alert rule.
   ## 
-  let valid = call_594002.validator(path, query, header, formData, body)
-  let scheme = call_594002.pickScheme
+  let valid = call_568235.validator(path, query, header, formData, body)
+  let scheme = call_568235.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594002.url(scheme.get, call_594002.host, call_594002.base,
-                         call_594002.route, valid.getOrDefault("path"),
+  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
+                         call_568235.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594002, url, valid)
+  result = hook(call_568235, url, valid)
 
-proc call*(call_594003: Call_SmartDetectorAlertRulesDelete_593995;
+proc call*(call_568236: Call_SmartDetectorAlertRulesDelete_568228;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           alertRuleName: string): Recallable =
   ## smartDetectorAlertRulesDelete
@@ -646,19 +646,19 @@ proc call*(call_594003: Call_SmartDetectorAlertRulesDelete_593995;
   ##                 : The Azure subscription id.
   ##   alertRuleName: string (required)
   ##                : The name of the alert rule.
-  var path_594004 = newJObject()
-  var query_594005 = newJObject()
-  add(path_594004, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594005, "api-version", newJString(apiVersion))
-  add(path_594004, "subscriptionId", newJString(subscriptionId))
-  add(path_594004, "alertRuleName", newJString(alertRuleName))
-  result = call_594003.call(path_594004, query_594005, nil, nil, nil)
+  var path_568237 = newJObject()
+  var query_568238 = newJObject()
+  add(path_568237, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568238, "api-version", newJString(apiVersion))
+  add(path_568237, "subscriptionId", newJString(subscriptionId))
+  add(path_568237, "alertRuleName", newJString(alertRuleName))
+  result = call_568236.call(path_568237, query_568238, nil, nil, nil)
 
-var smartDetectorAlertRulesDelete* = Call_SmartDetectorAlertRulesDelete_593995(
+var smartDetectorAlertRulesDelete* = Call_SmartDetectorAlertRulesDelete_568228(
     name: "smartDetectorAlertRulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.alertsManagement/smartDetectorAlertRules/{alertRuleName}",
-    validator: validate_SmartDetectorAlertRulesDelete_593996, base: "",
-    url: url_SmartDetectorAlertRulesDelete_593997, schemes: {Scheme.Https})
+    validator: validate_SmartDetectorAlertRulesDelete_568229, base: "",
+    url: url_SmartDetectorAlertRulesDelete_568230, schemes: {Scheme.Https})
 export
   rest
 

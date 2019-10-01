@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "security-tasks"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_TasksListByHomeRegion_593646 = ref object of OpenApiRestCall_593424
-proc url_TasksListByHomeRegion_593648(protocol: Scheme; host: string; base: string;
+  Call_TasksListByHomeRegion_567879 = ref object of OpenApiRestCall_567657
+proc url_TasksListByHomeRegion_567881(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -123,7 +123,7 @@ proc url_TasksListByHomeRegion_593648(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TasksListByHomeRegion_593647(path: JsonNode; query: JsonNode;
+proc validate_TasksListByHomeRegion_567880(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
@@ -137,16 +137,16 @@ proc validate_TasksListByHomeRegion_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `ascLocation` field"
-  var valid_593809 = path.getOrDefault("ascLocation")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_568042 = path.getOrDefault("ascLocation")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "ascLocation", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_568042 != nil:
+    section.add "ascLocation", valid_568042
+  var valid_568043 = path.getOrDefault("subscriptionId")
+  valid_568043 = validateParameter(valid_568043, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
+  if valid_568043 != nil:
+    section.add "subscriptionId", valid_568043
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -156,16 +156,16 @@ proc validate_TasksListByHomeRegion_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593811 = query.getOrDefault("api-version")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  var valid_568044 = query.getOrDefault("api-version")
+  valid_568044 = validateParameter(valid_568044, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "api-version", valid_593811
-  var valid_593812 = query.getOrDefault("$filter")
-  valid_593812 = validateParameter(valid_593812, JString, required = false,
+  if valid_568044 != nil:
+    section.add "api-version", valid_568044
+  var valid_568045 = query.getOrDefault("$filter")
+  valid_568045 = validateParameter(valid_568045, JString, required = false,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "$filter", valid_593812
+  if valid_568045 != nil:
+    section.add "$filter", valid_568045
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -174,20 +174,20 @@ proc validate_TasksListByHomeRegion_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593839: Call_TasksListByHomeRegion_593646; path: JsonNode;
+proc call*(call_568072: Call_TasksListByHomeRegion_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
-  let valid = call_593839.validator(path, query, header, formData, body)
-  let scheme = call_593839.pickScheme
+  let valid = call_568072.validator(path, query, header, formData, body)
+  let scheme = call_568072.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593839.url(scheme.get, call_593839.host, call_593839.base,
-                         call_593839.route, valid.getOrDefault("path"),
+  let url = call_568072.url(scheme.get, call_568072.host, call_568072.base,
+                         call_568072.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593839, url, valid)
+  result = hook(call_568072, url, valid)
 
-proc call*(call_593910: Call_TasksListByHomeRegion_593646; apiVersion: string;
+proc call*(call_568143: Call_TasksListByHomeRegion_567879; apiVersion: string;
           ascLocation: string; subscriptionId: string; Filter: string = ""): Recallable =
   ## tasksListByHomeRegion
   ## Recommended tasks that will help improve the security of the subscription proactively
@@ -199,22 +199,22 @@ proc call*(call_593910: Call_TasksListByHomeRegion_593646; apiVersion: string;
   ##                 : Azure subscription ID
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_593911 = newJObject()
-  var query_593913 = newJObject()
-  add(query_593913, "api-version", newJString(apiVersion))
-  add(path_593911, "ascLocation", newJString(ascLocation))
-  add(path_593911, "subscriptionId", newJString(subscriptionId))
-  add(query_593913, "$filter", newJString(Filter))
-  result = call_593910.call(path_593911, query_593913, nil, nil, nil)
+  var path_568144 = newJObject()
+  var query_568146 = newJObject()
+  add(query_568146, "api-version", newJString(apiVersion))
+  add(path_568144, "ascLocation", newJString(ascLocation))
+  add(path_568144, "subscriptionId", newJString(subscriptionId))
+  add(query_568146, "$filter", newJString(Filter))
+  result = call_568143.call(path_568144, query_568146, nil, nil, nil)
 
-var tasksListByHomeRegion* = Call_TasksListByHomeRegion_593646(
+var tasksListByHomeRegion* = Call_TasksListByHomeRegion_567879(
     name: "tasksListByHomeRegion", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/tasks",
-    validator: validate_TasksListByHomeRegion_593647, base: "",
-    url: url_TasksListByHomeRegion_593648, schemes: {Scheme.Https})
+    validator: validate_TasksListByHomeRegion_567880, base: "",
+    url: url_TasksListByHomeRegion_567881, schemes: {Scheme.Https})
 type
-  Call_TasksGetSubscriptionLevelTask_593952 = ref object of OpenApiRestCall_593424
-proc url_TasksGetSubscriptionLevelTask_593954(protocol: Scheme; host: string;
+  Call_TasksGetSubscriptionLevelTask_568185 = ref object of OpenApiRestCall_567657
+proc url_TasksGetSubscriptionLevelTask_568187(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -235,7 +235,7 @@ proc url_TasksGetSubscriptionLevelTask_593954(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TasksGetSubscriptionLevelTask_593953(path: JsonNode; query: JsonNode;
+proc validate_TasksGetSubscriptionLevelTask_568186(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
@@ -251,21 +251,21 @@ proc validate_TasksGetSubscriptionLevelTask_593953(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `ascLocation` field"
-  var valid_593964 = path.getOrDefault("ascLocation")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_568197 = path.getOrDefault("ascLocation")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "ascLocation", valid_593964
-  var valid_593965 = path.getOrDefault("subscriptionId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "ascLocation", valid_568197
+  var valid_568198 = path.getOrDefault("subscriptionId")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "subscriptionId", valid_593965
-  var valid_593966 = path.getOrDefault("taskName")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_568198 != nil:
+    section.add "subscriptionId", valid_568198
+  var valid_568199 = path.getOrDefault("taskName")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "taskName", valid_593966
+  if valid_568199 != nil:
+    section.add "taskName", valid_568199
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -273,11 +273,11 @@ proc validate_TasksGetSubscriptionLevelTask_593953(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593967 = query.getOrDefault("api-version")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  var valid_568200 = query.getOrDefault("api-version")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "api-version", valid_593967
+  if valid_568200 != nil:
+    section.add "api-version", valid_568200
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -286,20 +286,20 @@ proc validate_TasksGetSubscriptionLevelTask_593953(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_TasksGetSubscriptionLevelTask_593952; path: JsonNode;
+proc call*(call_568201: Call_TasksGetSubscriptionLevelTask_568185; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_568201.validator(path, query, header, formData, body)
+  let scheme = call_568201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
+                         call_568201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_568201, url, valid)
 
-proc call*(call_593969: Call_TasksGetSubscriptionLevelTask_593952;
+proc call*(call_568202: Call_TasksGetSubscriptionLevelTask_568185;
           apiVersion: string; ascLocation: string; subscriptionId: string;
           taskName: string): Recallable =
   ## tasksGetSubscriptionLevelTask
@@ -312,22 +312,22 @@ proc call*(call_593969: Call_TasksGetSubscriptionLevelTask_593952;
   ##                 : Azure subscription ID
   ##   taskName: string (required)
   ##           : Name of the task object, will be a GUID
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(path_593970, "ascLocation", newJString(ascLocation))
-  add(path_593970, "subscriptionId", newJString(subscriptionId))
-  add(path_593970, "taskName", newJString(taskName))
-  result = call_593969.call(path_593970, query_593971, nil, nil, nil)
+  var path_568203 = newJObject()
+  var query_568204 = newJObject()
+  add(query_568204, "api-version", newJString(apiVersion))
+  add(path_568203, "ascLocation", newJString(ascLocation))
+  add(path_568203, "subscriptionId", newJString(subscriptionId))
+  add(path_568203, "taskName", newJString(taskName))
+  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
 
-var tasksGetSubscriptionLevelTask* = Call_TasksGetSubscriptionLevelTask_593952(
+var tasksGetSubscriptionLevelTask* = Call_TasksGetSubscriptionLevelTask_568185(
     name: "tasksGetSubscriptionLevelTask", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/tasks/{taskName}",
-    validator: validate_TasksGetSubscriptionLevelTask_593953, base: "",
-    url: url_TasksGetSubscriptionLevelTask_593954, schemes: {Scheme.Https})
+    validator: validate_TasksGetSubscriptionLevelTask_568186, base: "",
+    url: url_TasksGetSubscriptionLevelTask_568187, schemes: {Scheme.Https})
 type
-  Call_TasksUpdateSubscriptionLevelTaskState_593972 = ref object of OpenApiRestCall_593424
-proc url_TasksUpdateSubscriptionLevelTaskState_593974(protocol: Scheme;
+  Call_TasksUpdateSubscriptionLevelTaskState_568205 = ref object of OpenApiRestCall_567657
+proc url_TasksUpdateSubscriptionLevelTaskState_568207(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -352,7 +352,7 @@ proc url_TasksUpdateSubscriptionLevelTaskState_593974(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TasksUpdateSubscriptionLevelTaskState_593973(path: JsonNode;
+proc validate_TasksUpdateSubscriptionLevelTaskState_568206(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
@@ -370,26 +370,26 @@ proc validate_TasksUpdateSubscriptionLevelTaskState_593973(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `ascLocation` field"
-  var valid_593975 = path.getOrDefault("ascLocation")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_568208 = path.getOrDefault("ascLocation")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "ascLocation", valid_593975
-  var valid_593976 = path.getOrDefault("subscriptionId")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  if valid_568208 != nil:
+    section.add "ascLocation", valid_568208
+  var valid_568209 = path.getOrDefault("subscriptionId")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "subscriptionId", valid_593976
-  var valid_593977 = path.getOrDefault("taskName")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_568209 != nil:
+    section.add "subscriptionId", valid_568209
+  var valid_568210 = path.getOrDefault("taskName")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "taskName", valid_593977
-  var valid_593991 = path.getOrDefault("taskUpdateActionType")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_568210 != nil:
+    section.add "taskName", valid_568210
+  var valid_568224 = path.getOrDefault("taskUpdateActionType")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = newJString("Activate"))
-  if valid_593991 != nil:
-    section.add "taskUpdateActionType", valid_593991
+  if valid_568224 != nil:
+    section.add "taskUpdateActionType", valid_568224
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -397,11 +397,11 @@ proc validate_TasksUpdateSubscriptionLevelTaskState_593973(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593992 = query.getOrDefault("api-version")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568225 = query.getOrDefault("api-version")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "api-version", valid_593992
+  if valid_568225 != nil:
+    section.add "api-version", valid_568225
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -410,21 +410,21 @@ proc validate_TasksUpdateSubscriptionLevelTaskState_593973(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593993: Call_TasksUpdateSubscriptionLevelTaskState_593972;
+proc call*(call_568226: Call_TasksUpdateSubscriptionLevelTaskState_568205;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
-  let valid = call_593993.validator(path, query, header, formData, body)
-  let scheme = call_593993.pickScheme
+  let valid = call_568226.validator(path, query, header, formData, body)
+  let scheme = call_568226.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593993.url(scheme.get, call_593993.host, call_593993.base,
-                         call_593993.route, valid.getOrDefault("path"),
+  let url = call_568226.url(scheme.get, call_568226.host, call_568226.base,
+                         call_568226.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593993, url, valid)
+  result = hook(call_568226, url, valid)
 
-proc call*(call_593994: Call_TasksUpdateSubscriptionLevelTaskState_593972;
+proc call*(call_568227: Call_TasksUpdateSubscriptionLevelTaskState_568205;
           apiVersion: string; ascLocation: string; subscriptionId: string;
           taskName: string; taskUpdateActionType: string = "Activate"): Recallable =
   ## tasksUpdateSubscriptionLevelTaskState
@@ -439,23 +439,23 @@ proc call*(call_593994: Call_TasksUpdateSubscriptionLevelTaskState_593972;
   ##           : Name of the task object, will be a GUID
   ##   taskUpdateActionType: string (required)
   ##                       : Type of the action to do on the task
-  var path_593995 = newJObject()
-  var query_593996 = newJObject()
-  add(query_593996, "api-version", newJString(apiVersion))
-  add(path_593995, "ascLocation", newJString(ascLocation))
-  add(path_593995, "subscriptionId", newJString(subscriptionId))
-  add(path_593995, "taskName", newJString(taskName))
-  add(path_593995, "taskUpdateActionType", newJString(taskUpdateActionType))
-  result = call_593994.call(path_593995, query_593996, nil, nil, nil)
+  var path_568228 = newJObject()
+  var query_568229 = newJObject()
+  add(query_568229, "api-version", newJString(apiVersion))
+  add(path_568228, "ascLocation", newJString(ascLocation))
+  add(path_568228, "subscriptionId", newJString(subscriptionId))
+  add(path_568228, "taskName", newJString(taskName))
+  add(path_568228, "taskUpdateActionType", newJString(taskUpdateActionType))
+  result = call_568227.call(path_568228, query_568229, nil, nil, nil)
 
-var tasksUpdateSubscriptionLevelTaskState* = Call_TasksUpdateSubscriptionLevelTaskState_593972(
+var tasksUpdateSubscriptionLevelTaskState* = Call_TasksUpdateSubscriptionLevelTaskState_568205(
     name: "tasksUpdateSubscriptionLevelTaskState", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/tasks/{taskName}/{taskUpdateActionType}",
-    validator: validate_TasksUpdateSubscriptionLevelTaskState_593973, base: "",
-    url: url_TasksUpdateSubscriptionLevelTaskState_593974, schemes: {Scheme.Https})
+    validator: validate_TasksUpdateSubscriptionLevelTaskState_568206, base: "",
+    url: url_TasksUpdateSubscriptionLevelTaskState_568207, schemes: {Scheme.Https})
 type
-  Call_TasksList_593997 = ref object of OpenApiRestCall_593424
-proc url_TasksList_593999(protocol: Scheme; host: string; base: string; route: string;
+  Call_TasksList_568230 = ref object of OpenApiRestCall_567657
+proc url_TasksList_568232(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -471,7 +471,7 @@ proc url_TasksList_593999(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TasksList_593998(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TasksList_568231(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
@@ -483,11 +483,11 @@ proc validate_TasksList_593998(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594000 = path.getOrDefault("subscriptionId")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_568233 = path.getOrDefault("subscriptionId")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "subscriptionId", valid_594000
+  if valid_568233 != nil:
+    section.add "subscriptionId", valid_568233
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -497,16 +497,16 @@ proc validate_TasksList_593998(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594001 = query.getOrDefault("api-version")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568234 = query.getOrDefault("api-version")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "api-version", valid_594001
-  var valid_594002 = query.getOrDefault("$filter")
-  valid_594002 = validateParameter(valid_594002, JString, required = false,
+  if valid_568234 != nil:
+    section.add "api-version", valid_568234
+  var valid_568235 = query.getOrDefault("$filter")
+  valid_568235 = validateParameter(valid_568235, JString, required = false,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "$filter", valid_594002
+  if valid_568235 != nil:
+    section.add "$filter", valid_568235
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -515,20 +515,20 @@ proc validate_TasksList_593998(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594003: Call_TasksList_593997; path: JsonNode; query: JsonNode;
+proc call*(call_568236: Call_TasksList_568230; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
-  let valid = call_594003.validator(path, query, header, formData, body)
-  let scheme = call_594003.pickScheme
+  let valid = call_568236.validator(path, query, header, formData, body)
+  let scheme = call_568236.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594003.url(scheme.get, call_594003.host, call_594003.base,
-                         call_594003.route, valid.getOrDefault("path"),
+  let url = call_568236.url(scheme.get, call_568236.host, call_568236.base,
+                         call_568236.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594003, url, valid)
+  result = hook(call_568236, url, valid)
 
-proc call*(call_594004: Call_TasksList_593997; apiVersion: string;
+proc call*(call_568237: Call_TasksList_568230; apiVersion: string;
           subscriptionId: string; Filter: string = ""): Recallable =
   ## tasksList
   ## Recommended tasks that will help improve the security of the subscription proactively
@@ -538,21 +538,21 @@ proc call*(call_594004: Call_TasksList_593997; apiVersion: string;
   ##                 : Azure subscription ID
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_594005 = newJObject()
-  var query_594006 = newJObject()
-  add(query_594006, "api-version", newJString(apiVersion))
-  add(path_594005, "subscriptionId", newJString(subscriptionId))
-  add(query_594006, "$filter", newJString(Filter))
-  result = call_594004.call(path_594005, query_594006, nil, nil, nil)
+  var path_568238 = newJObject()
+  var query_568239 = newJObject()
+  add(query_568239, "api-version", newJString(apiVersion))
+  add(path_568238, "subscriptionId", newJString(subscriptionId))
+  add(query_568239, "$filter", newJString(Filter))
+  result = call_568237.call(path_568238, query_568239, nil, nil, nil)
 
-var tasksList* = Call_TasksList_593997(name: "tasksList", meth: HttpMethod.HttpGet,
+var tasksList* = Call_TasksList_568230(name: "tasksList", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/tasks",
-                                    validator: validate_TasksList_593998,
-                                    base: "", url: url_TasksList_593999,
+                                    validator: validate_TasksList_568231,
+                                    base: "", url: url_TasksList_568232,
                                     schemes: {Scheme.Https})
 type
-  Call_TasksListByResourceGroup_594007 = ref object of OpenApiRestCall_593424
-proc url_TasksListByResourceGroup_594009(protocol: Scheme; host: string;
+  Call_TasksListByResourceGroup_568240 = ref object of OpenApiRestCall_567657
+proc url_TasksListByResourceGroup_568242(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -576,7 +576,7 @@ proc url_TasksListByResourceGroup_594009(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TasksListByResourceGroup_594008(path: JsonNode; query: JsonNode;
+proc validate_TasksListByResourceGroup_568241(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
@@ -592,21 +592,21 @@ proc validate_TasksListByResourceGroup_594008(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594010 = path.getOrDefault("resourceGroupName")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  var valid_568243 = path.getOrDefault("resourceGroupName")
+  valid_568243 = validateParameter(valid_568243, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "resourceGroupName", valid_594010
-  var valid_594011 = path.getOrDefault("ascLocation")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  if valid_568243 != nil:
+    section.add "resourceGroupName", valid_568243
+  var valid_568244 = path.getOrDefault("ascLocation")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "ascLocation", valid_594011
-  var valid_594012 = path.getOrDefault("subscriptionId")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_568244 != nil:
+    section.add "ascLocation", valid_568244
+  var valid_568245 = path.getOrDefault("subscriptionId")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "subscriptionId", valid_594012
+  if valid_568245 != nil:
+    section.add "subscriptionId", valid_568245
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -616,16 +616,16 @@ proc validate_TasksListByResourceGroup_594008(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594013 = query.getOrDefault("api-version")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  var valid_568246 = query.getOrDefault("api-version")
+  valid_568246 = validateParameter(valid_568246, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "api-version", valid_594013
-  var valid_594014 = query.getOrDefault("$filter")
-  valid_594014 = validateParameter(valid_594014, JString, required = false,
+  if valid_568246 != nil:
+    section.add "api-version", valid_568246
+  var valid_568247 = query.getOrDefault("$filter")
+  valid_568247 = validateParameter(valid_568247, JString, required = false,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "$filter", valid_594014
+  if valid_568247 != nil:
+    section.add "$filter", valid_568247
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -634,20 +634,20 @@ proc validate_TasksListByResourceGroup_594008(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594015: Call_TasksListByResourceGroup_594007; path: JsonNode;
+proc call*(call_568248: Call_TasksListByResourceGroup_568240; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
-  let valid = call_594015.validator(path, query, header, formData, body)
-  let scheme = call_594015.pickScheme
+  let valid = call_568248.validator(path, query, header, formData, body)
+  let scheme = call_568248.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594015.url(scheme.get, call_594015.host, call_594015.base,
-                         call_594015.route, valid.getOrDefault("path"),
+  let url = call_568248.url(scheme.get, call_568248.host, call_568248.base,
+                         call_568248.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594015, url, valid)
+  result = hook(call_568248, url, valid)
 
-proc call*(call_594016: Call_TasksListByResourceGroup_594007;
+proc call*(call_568249: Call_TasksListByResourceGroup_568240;
           resourceGroupName: string; apiVersion: string; ascLocation: string;
           subscriptionId: string; Filter: string = ""): Recallable =
   ## tasksListByResourceGroup
@@ -662,23 +662,23 @@ proc call*(call_594016: Call_TasksListByResourceGroup_594007;
   ##                 : Azure subscription ID
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_594017 = newJObject()
-  var query_594018 = newJObject()
-  add(path_594017, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594018, "api-version", newJString(apiVersion))
-  add(path_594017, "ascLocation", newJString(ascLocation))
-  add(path_594017, "subscriptionId", newJString(subscriptionId))
-  add(query_594018, "$filter", newJString(Filter))
-  result = call_594016.call(path_594017, query_594018, nil, nil, nil)
+  var path_568250 = newJObject()
+  var query_568251 = newJObject()
+  add(path_568250, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568251, "api-version", newJString(apiVersion))
+  add(path_568250, "ascLocation", newJString(ascLocation))
+  add(path_568250, "subscriptionId", newJString(subscriptionId))
+  add(query_568251, "$filter", newJString(Filter))
+  result = call_568249.call(path_568250, query_568251, nil, nil, nil)
 
-var tasksListByResourceGroup* = Call_TasksListByResourceGroup_594007(
+var tasksListByResourceGroup* = Call_TasksListByResourceGroup_568240(
     name: "tasksListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/tasks",
-    validator: validate_TasksListByResourceGroup_594008, base: "",
-    url: url_TasksListByResourceGroup_594009, schemes: {Scheme.Https})
+    validator: validate_TasksListByResourceGroup_568241, base: "",
+    url: url_TasksListByResourceGroup_568242, schemes: {Scheme.Https})
 type
-  Call_TasksGetResourceGroupLevelTask_594019 = ref object of OpenApiRestCall_593424
-proc url_TasksGetResourceGroupLevelTask_594021(protocol: Scheme; host: string;
+  Call_TasksGetResourceGroupLevelTask_568252 = ref object of OpenApiRestCall_567657
+proc url_TasksGetResourceGroupLevelTask_568254(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -703,7 +703,7 @@ proc url_TasksGetResourceGroupLevelTask_594021(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TasksGetResourceGroupLevelTask_594020(path: JsonNode;
+proc validate_TasksGetResourceGroupLevelTask_568253(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
@@ -721,26 +721,26 @@ proc validate_TasksGetResourceGroupLevelTask_594020(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594022 = path.getOrDefault("resourceGroupName")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  var valid_568255 = path.getOrDefault("resourceGroupName")
+  valid_568255 = validateParameter(valid_568255, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "resourceGroupName", valid_594022
-  var valid_594023 = path.getOrDefault("ascLocation")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  if valid_568255 != nil:
+    section.add "resourceGroupName", valid_568255
+  var valid_568256 = path.getOrDefault("ascLocation")
+  valid_568256 = validateParameter(valid_568256, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "ascLocation", valid_594023
-  var valid_594024 = path.getOrDefault("subscriptionId")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  if valid_568256 != nil:
+    section.add "ascLocation", valid_568256
+  var valid_568257 = path.getOrDefault("subscriptionId")
+  valid_568257 = validateParameter(valid_568257, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "subscriptionId", valid_594024
-  var valid_594025 = path.getOrDefault("taskName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  if valid_568257 != nil:
+    section.add "subscriptionId", valid_568257
+  var valid_568258 = path.getOrDefault("taskName")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "taskName", valid_594025
+  if valid_568258 != nil:
+    section.add "taskName", valid_568258
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -748,11 +748,11 @@ proc validate_TasksGetResourceGroupLevelTask_594020(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594026 = query.getOrDefault("api-version")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_568259 = query.getOrDefault("api-version")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "api-version", valid_594026
+  if valid_568259 != nil:
+    section.add "api-version", valid_568259
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -761,20 +761,20 @@ proc validate_TasksGetResourceGroupLevelTask_594020(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594027: Call_TasksGetResourceGroupLevelTask_594019; path: JsonNode;
+proc call*(call_568260: Call_TasksGetResourceGroupLevelTask_568252; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
-  let valid = call_594027.validator(path, query, header, formData, body)
-  let scheme = call_594027.pickScheme
+  let valid = call_568260.validator(path, query, header, formData, body)
+  let scheme = call_568260.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594027.url(scheme.get, call_594027.host, call_594027.base,
-                         call_594027.route, valid.getOrDefault("path"),
+  let url = call_568260.url(scheme.get, call_568260.host, call_568260.base,
+                         call_568260.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594027, url, valid)
+  result = hook(call_568260, url, valid)
 
-proc call*(call_594028: Call_TasksGetResourceGroupLevelTask_594019;
+proc call*(call_568261: Call_TasksGetResourceGroupLevelTask_568252;
           resourceGroupName: string; apiVersion: string; ascLocation: string;
           subscriptionId: string; taskName: string): Recallable =
   ## tasksGetResourceGroupLevelTask
@@ -789,23 +789,23 @@ proc call*(call_594028: Call_TasksGetResourceGroupLevelTask_594019;
   ##                 : Azure subscription ID
   ##   taskName: string (required)
   ##           : Name of the task object, will be a GUID
-  var path_594029 = newJObject()
-  var query_594030 = newJObject()
-  add(path_594029, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594030, "api-version", newJString(apiVersion))
-  add(path_594029, "ascLocation", newJString(ascLocation))
-  add(path_594029, "subscriptionId", newJString(subscriptionId))
-  add(path_594029, "taskName", newJString(taskName))
-  result = call_594028.call(path_594029, query_594030, nil, nil, nil)
+  var path_568262 = newJObject()
+  var query_568263 = newJObject()
+  add(path_568262, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568263, "api-version", newJString(apiVersion))
+  add(path_568262, "ascLocation", newJString(ascLocation))
+  add(path_568262, "subscriptionId", newJString(subscriptionId))
+  add(path_568262, "taskName", newJString(taskName))
+  result = call_568261.call(path_568262, query_568263, nil, nil, nil)
 
-var tasksGetResourceGroupLevelTask* = Call_TasksGetResourceGroupLevelTask_594019(
+var tasksGetResourceGroupLevelTask* = Call_TasksGetResourceGroupLevelTask_568252(
     name: "tasksGetResourceGroupLevelTask", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/tasks/{taskName}",
-    validator: validate_TasksGetResourceGroupLevelTask_594020, base: "",
-    url: url_TasksGetResourceGroupLevelTask_594021, schemes: {Scheme.Https})
+    validator: validate_TasksGetResourceGroupLevelTask_568253, base: "",
+    url: url_TasksGetResourceGroupLevelTask_568254, schemes: {Scheme.Https})
 type
-  Call_TasksUpdateResourceGroupLevelTaskState_594031 = ref object of OpenApiRestCall_593424
-proc url_TasksUpdateResourceGroupLevelTaskState_594033(protocol: Scheme;
+  Call_TasksUpdateResourceGroupLevelTaskState_568264 = ref object of OpenApiRestCall_567657
+proc url_TasksUpdateResourceGroupLevelTaskState_568266(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -834,7 +834,7 @@ proc url_TasksUpdateResourceGroupLevelTaskState_594033(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TasksUpdateResourceGroupLevelTaskState_594032(path: JsonNode;
+proc validate_TasksUpdateResourceGroupLevelTaskState_568265(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
@@ -854,31 +854,31 @@ proc validate_TasksUpdateResourceGroupLevelTaskState_594032(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594034 = path.getOrDefault("resourceGroupName")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  var valid_568267 = path.getOrDefault("resourceGroupName")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "resourceGroupName", valid_594034
-  var valid_594035 = path.getOrDefault("ascLocation")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  if valid_568267 != nil:
+    section.add "resourceGroupName", valid_568267
+  var valid_568268 = path.getOrDefault("ascLocation")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "ascLocation", valid_594035
-  var valid_594036 = path.getOrDefault("subscriptionId")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  if valid_568268 != nil:
+    section.add "ascLocation", valid_568268
+  var valid_568269 = path.getOrDefault("subscriptionId")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "subscriptionId", valid_594036
-  var valid_594037 = path.getOrDefault("taskName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_568269 != nil:
+    section.add "subscriptionId", valid_568269
+  var valid_568270 = path.getOrDefault("taskName")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "taskName", valid_594037
-  var valid_594038 = path.getOrDefault("taskUpdateActionType")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_568270 != nil:
+    section.add "taskName", valid_568270
+  var valid_568271 = path.getOrDefault("taskUpdateActionType")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = newJString("Activate"))
-  if valid_594038 != nil:
-    section.add "taskUpdateActionType", valid_594038
+  if valid_568271 != nil:
+    section.add "taskUpdateActionType", valid_568271
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -886,11 +886,11 @@ proc validate_TasksUpdateResourceGroupLevelTaskState_594032(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594039 = query.getOrDefault("api-version")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  var valid_568272 = query.getOrDefault("api-version")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "api-version", valid_594039
+  if valid_568272 != nil:
+    section.add "api-version", valid_568272
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -899,21 +899,21 @@ proc validate_TasksUpdateResourceGroupLevelTaskState_594032(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594040: Call_TasksUpdateResourceGroupLevelTaskState_594031;
+proc call*(call_568273: Call_TasksUpdateResourceGroupLevelTaskState_568264;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Recommended tasks that will help improve the security of the subscription proactively
   ## 
-  let valid = call_594040.validator(path, query, header, formData, body)
-  let scheme = call_594040.pickScheme
+  let valid = call_568273.validator(path, query, header, formData, body)
+  let scheme = call_568273.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594040.url(scheme.get, call_594040.host, call_594040.base,
-                         call_594040.route, valid.getOrDefault("path"),
+  let url = call_568273.url(scheme.get, call_568273.host, call_568273.base,
+                         call_568273.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594040, url, valid)
+  result = hook(call_568273, url, valid)
 
-proc call*(call_594041: Call_TasksUpdateResourceGroupLevelTaskState_594031;
+proc call*(call_568274: Call_TasksUpdateResourceGroupLevelTaskState_568264;
           resourceGroupName: string; apiVersion: string; ascLocation: string;
           subscriptionId: string; taskName: string;
           taskUpdateActionType: string = "Activate"): Recallable =
@@ -931,21 +931,21 @@ proc call*(call_594041: Call_TasksUpdateResourceGroupLevelTaskState_594031;
   ##           : Name of the task object, will be a GUID
   ##   taskUpdateActionType: string (required)
   ##                       : Type of the action to do on the task
-  var path_594042 = newJObject()
-  var query_594043 = newJObject()
-  add(path_594042, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594043, "api-version", newJString(apiVersion))
-  add(path_594042, "ascLocation", newJString(ascLocation))
-  add(path_594042, "subscriptionId", newJString(subscriptionId))
-  add(path_594042, "taskName", newJString(taskName))
-  add(path_594042, "taskUpdateActionType", newJString(taskUpdateActionType))
-  result = call_594041.call(path_594042, query_594043, nil, nil, nil)
+  var path_568275 = newJObject()
+  var query_568276 = newJObject()
+  add(path_568275, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568276, "api-version", newJString(apiVersion))
+  add(path_568275, "ascLocation", newJString(ascLocation))
+  add(path_568275, "subscriptionId", newJString(subscriptionId))
+  add(path_568275, "taskName", newJString(taskName))
+  add(path_568275, "taskUpdateActionType", newJString(taskUpdateActionType))
+  result = call_568274.call(path_568275, query_568276, nil, nil, nil)
 
-var tasksUpdateResourceGroupLevelTaskState* = Call_TasksUpdateResourceGroupLevelTaskState_594031(
+var tasksUpdateResourceGroupLevelTaskState* = Call_TasksUpdateResourceGroupLevelTaskState_568264(
     name: "tasksUpdateResourceGroupLevelTaskState", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/tasks/{taskName}/{taskUpdateActionType}",
-    validator: validate_TasksUpdateResourceGroupLevelTaskState_594032, base: "",
-    url: url_TasksUpdateResourceGroupLevelTaskState_594033,
+    validator: validate_TasksUpdateResourceGroupLevelTaskState_568265, base: "",
+    url: url_TasksUpdateResourceGroupLevelTaskState_568266,
     schemes: {Scheme.Https})
 export
   rest

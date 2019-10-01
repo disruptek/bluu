@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Content Moderator Client
@@ -29,15 +29,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -74,7 +74,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -82,7 +82,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -107,15 +107,15 @@ const
   macServiceName = "cognitiveservices-ContentModerator"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ListManagementImageListsCreate_593884 = ref object of OpenApiRestCall_593425
-proc url_ListManagementImageListsCreate_593886(protocol: Scheme; host: string;
+  Call_ListManagementImageListsCreate_568117 = ref object of OpenApiRestCall_567658
+proc url_ListManagementImageListsCreate_568119(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ListManagementImageListsCreate_593885(path: JsonNode;
+proc validate_ListManagementImageListsCreate_568118(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates an image list.
   ## 
@@ -131,11 +131,11 @@ proc validate_ListManagementImageListsCreate_593885(path: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Content-Type` field"
-  var valid_593942 = header.getOrDefault("Content-Type")
-  valid_593942 = validateParameter(valid_593942, JString, required = true,
+  var valid_568175 = header.getOrDefault("Content-Type")
+  valid_568175 = validateParameter(valid_568175, JString, required = true,
                                  default = nil)
-  if valid_593942 != nil:
-    section.add "Content-Type", valid_593942
+  if valid_568175 != nil:
+    section.add "Content-Type", valid_568175
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -147,44 +147,44 @@ proc validate_ListManagementImageListsCreate_593885(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593944: Call_ListManagementImageListsCreate_593884; path: JsonNode;
+proc call*(call_568177: Call_ListManagementImageListsCreate_568117; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates an image list.
   ## 
-  let valid = call_593944.validator(path, query, header, formData, body)
-  let scheme = call_593944.pickScheme
+  let valid = call_568177.validator(path, query, header, formData, body)
+  let scheme = call_568177.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593944.url(scheme.get, call_593944.host, call_593944.base,
-                         call_593944.route, valid.getOrDefault("path"),
+  let url = call_568177.url(scheme.get, call_568177.host, call_568177.base,
+                         call_568177.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593944, url, valid)
+  result = hook(call_568177, url, valid)
 
-proc call*(call_593945: Call_ListManagementImageListsCreate_593884; body: JsonNode): Recallable =
+proc call*(call_568178: Call_ListManagementImageListsCreate_568117; body: JsonNode): Recallable =
   ## listManagementImageListsCreate
   ## Creates an image list.
   ##   body: JObject (required)
   ##       : Schema of the body.
-  var body_593946 = newJObject()
+  var body_568179 = newJObject()
   if body != nil:
-    body_593946 = body
-  result = call_593945.call(nil, nil, nil, nil, body_593946)
+    body_568179 = body
+  result = call_568178.call(nil, nil, nil, nil, body_568179)
 
-var listManagementImageListsCreate* = Call_ListManagementImageListsCreate_593884(
+var listManagementImageListsCreate* = Call_ListManagementImageListsCreate_568117(
     name: "listManagementImageListsCreate", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/contentmoderator/lists/v1.0/imagelists",
-    validator: validate_ListManagementImageListsCreate_593885, base: "",
-    url: url_ListManagementImageListsCreate_593886, schemes: {Scheme.Https})
+    validator: validate_ListManagementImageListsCreate_568118, base: "",
+    url: url_ListManagementImageListsCreate_568119, schemes: {Scheme.Https})
 type
-  Call_ListManagementImageListsGetAllImageLists_593647 = ref object of OpenApiRestCall_593425
-proc url_ListManagementImageListsGetAllImageLists_593649(protocol: Scheme;
+  Call_ListManagementImageListsGetAllImageLists_567880 = ref object of OpenApiRestCall_567658
+proc url_ListManagementImageListsGetAllImageLists_567882(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ListManagementImageListsGetAllImageLists_593648(path: JsonNode;
+proc validate_ListManagementImageListsGetAllImageLists_567881(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the Image Lists.
   ## 
@@ -201,34 +201,34 @@ proc validate_ListManagementImageListsGetAllImageLists_593648(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593762: Call_ListManagementImageListsGetAllImageLists_593647;
+proc call*(call_567995: Call_ListManagementImageListsGetAllImageLists_567880;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all the Image Lists.
   ## 
-  let valid = call_593762.validator(path, query, header, formData, body)
-  let scheme = call_593762.pickScheme
+  let valid = call_567995.validator(path, query, header, formData, body)
+  let scheme = call_567995.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593762.url(scheme.get, call_593762.host, call_593762.base,
-                         call_593762.route, valid.getOrDefault("path"),
+  let url = call_567995.url(scheme.get, call_567995.host, call_567995.base,
+                         call_567995.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593762, url, valid)
+  result = hook(call_567995, url, valid)
 
-proc call*(call_593846: Call_ListManagementImageListsGetAllImageLists_593647): Recallable =
+proc call*(call_568079: Call_ListManagementImageListsGetAllImageLists_567880): Recallable =
   ## listManagementImageListsGetAllImageLists
   ## Gets all the Image Lists.
-  result = call_593846.call(nil, nil, nil, nil, nil)
+  result = call_568079.call(nil, nil, nil, nil, nil)
 
-var listManagementImageListsGetAllImageLists* = Call_ListManagementImageListsGetAllImageLists_593647(
+var listManagementImageListsGetAllImageLists* = Call_ListManagementImageListsGetAllImageLists_567880(
     name: "listManagementImageListsGetAllImageLists", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/contentmoderator/lists/v1.0/imagelists",
-    validator: validate_ListManagementImageListsGetAllImageLists_593648, base: "",
-    url: url_ListManagementImageListsGetAllImageLists_593649,
+    validator: validate_ListManagementImageListsGetAllImageLists_567881, base: "",
+    url: url_ListManagementImageListsGetAllImageLists_567882,
     schemes: {Scheme.Https})
 type
-  Call_ListManagementImageListsUpdate_593970 = ref object of OpenApiRestCall_593425
-proc url_ListManagementImageListsUpdate_593972(protocol: Scheme; host: string;
+  Call_ListManagementImageListsUpdate_568203 = ref object of OpenApiRestCall_567658
+proc url_ListManagementImageListsUpdate_568205(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -244,7 +244,7 @@ proc url_ListManagementImageListsUpdate_593972(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementImageListsUpdate_593971(path: JsonNode;
+proc validate_ListManagementImageListsUpdate_568204(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an image list with list Id equal to list Id passed.
   ## 
@@ -255,11 +255,11 @@ proc validate_ListManagementImageListsUpdate_593971(path: JsonNode;
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_593973 = path.getOrDefault("listId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568206 = path.getOrDefault("listId")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "listId", valid_593973
+  if valid_568206 != nil:
+    section.add "listId", valid_568206
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -269,11 +269,11 @@ proc validate_ListManagementImageListsUpdate_593971(path: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Content-Type` field"
-  var valid_593974 = header.getOrDefault("Content-Type")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_568207 = header.getOrDefault("Content-Type")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "Content-Type", valid_593974
+  if valid_568207 != nil:
+    section.add "Content-Type", valid_568207
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -285,20 +285,20 @@ proc validate_ListManagementImageListsUpdate_593971(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593976: Call_ListManagementImageListsUpdate_593970; path: JsonNode;
+proc call*(call_568209: Call_ListManagementImageListsUpdate_568203; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an image list with list Id equal to list Id passed.
   ## 
-  let valid = call_593976.validator(path, query, header, formData, body)
-  let scheme = call_593976.pickScheme
+  let valid = call_568209.validator(path, query, header, formData, body)
+  let scheme = call_568209.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593976.url(scheme.get, call_593976.host, call_593976.base,
-                         call_593976.route, valid.getOrDefault("path"),
+  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
+                         call_568209.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593976, url, valid)
+  result = hook(call_568209, url, valid)
 
-proc call*(call_593977: Call_ListManagementImageListsUpdate_593970; listId: string;
+proc call*(call_568210: Call_ListManagementImageListsUpdate_568203; listId: string;
           body: JsonNode): Recallable =
   ## listManagementImageListsUpdate
   ## Updates an image list with list Id equal to list Id passed.
@@ -306,22 +306,22 @@ proc call*(call_593977: Call_ListManagementImageListsUpdate_593970; listId: stri
   ##         : List Id of the image list.
   ##   body: JObject (required)
   ##       : Schema of the body.
-  var path_593978 = newJObject()
-  var body_593979 = newJObject()
-  add(path_593978, "listId", newJString(listId))
+  var path_568211 = newJObject()
+  var body_568212 = newJObject()
+  add(path_568211, "listId", newJString(listId))
   if body != nil:
-    body_593979 = body
-  result = call_593977.call(path_593978, nil, nil, nil, body_593979)
+    body_568212 = body
+  result = call_568210.call(path_568211, nil, nil, nil, body_568212)
 
-var listManagementImageListsUpdate* = Call_ListManagementImageListsUpdate_593970(
+var listManagementImageListsUpdate* = Call_ListManagementImageListsUpdate_568203(
     name: "listManagementImageListsUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/imagelists/{listId}",
-    validator: validate_ListManagementImageListsUpdate_593971, base: "",
-    url: url_ListManagementImageListsUpdate_593972, schemes: {Scheme.Https})
+    validator: validate_ListManagementImageListsUpdate_568204, base: "",
+    url: url_ListManagementImageListsUpdate_568205, schemes: {Scheme.Https})
 type
-  Call_ListManagementImageListsGetDetails_593948 = ref object of OpenApiRestCall_593425
-proc url_ListManagementImageListsGetDetails_593950(protocol: Scheme; host: string;
+  Call_ListManagementImageListsGetDetails_568181 = ref object of OpenApiRestCall_567658
+proc url_ListManagementImageListsGetDetails_568183(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -337,7 +337,7 @@ proc url_ListManagementImageListsGetDetails_593950(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementImageListsGetDetails_593949(path: JsonNode;
+proc validate_ListManagementImageListsGetDetails_568182(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the details of the image list with list Id equal to list Id passed.
   ## 
@@ -348,11 +348,11 @@ proc validate_ListManagementImageListsGetDetails_593949(path: JsonNode;
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_593965 = path.getOrDefault("listId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_568198 = path.getOrDefault("listId")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "listId", valid_593965
+  if valid_568198 != nil:
+    section.add "listId", valid_568198
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -363,39 +363,39 @@ proc validate_ListManagementImageListsGetDetails_593949(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593966: Call_ListManagementImageListsGetDetails_593948;
+proc call*(call_568199: Call_ListManagementImageListsGetDetails_568181;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns the details of the image list with list Id equal to list Id passed.
   ## 
-  let valid = call_593966.validator(path, query, header, formData, body)
-  let scheme = call_593966.pickScheme
+  let valid = call_568199.validator(path, query, header, formData, body)
+  let scheme = call_568199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593966.url(scheme.get, call_593966.host, call_593966.base,
-                         call_593966.route, valid.getOrDefault("path"),
+  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
+                         call_568199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593966, url, valid)
+  result = hook(call_568199, url, valid)
 
-proc call*(call_593967: Call_ListManagementImageListsGetDetails_593948;
+proc call*(call_568200: Call_ListManagementImageListsGetDetails_568181;
           listId: string): Recallable =
   ## listManagementImageListsGetDetails
   ## Returns the details of the image list with list Id equal to list Id passed.
   ##   listId: string (required)
   ##         : List Id of the image list.
-  var path_593968 = newJObject()
-  add(path_593968, "listId", newJString(listId))
-  result = call_593967.call(path_593968, nil, nil, nil, nil)
+  var path_568201 = newJObject()
+  add(path_568201, "listId", newJString(listId))
+  result = call_568200.call(path_568201, nil, nil, nil, nil)
 
-var listManagementImageListsGetDetails* = Call_ListManagementImageListsGetDetails_593948(
+var listManagementImageListsGetDetails* = Call_ListManagementImageListsGetDetails_568181(
     name: "listManagementImageListsGetDetails", meth: HttpMethod.HttpGet,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/imagelists/{listId}",
-    validator: validate_ListManagementImageListsGetDetails_593949, base: "",
-    url: url_ListManagementImageListsGetDetails_593950, schemes: {Scheme.Https})
+    validator: validate_ListManagementImageListsGetDetails_568182, base: "",
+    url: url_ListManagementImageListsGetDetails_568183, schemes: {Scheme.Https})
 type
-  Call_ListManagementImageListsDelete_593980 = ref object of OpenApiRestCall_593425
-proc url_ListManagementImageListsDelete_593982(protocol: Scheme; host: string;
+  Call_ListManagementImageListsDelete_568213 = ref object of OpenApiRestCall_567658
+proc url_ListManagementImageListsDelete_568215(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -411,7 +411,7 @@ proc url_ListManagementImageListsDelete_593982(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementImageListsDelete_593981(path: JsonNode;
+proc validate_ListManagementImageListsDelete_568214(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes image list with the list Id equal to list Id passed.
   ## 
@@ -422,11 +422,11 @@ proc validate_ListManagementImageListsDelete_593981(path: JsonNode;
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_593983 = path.getOrDefault("listId")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = path.getOrDefault("listId")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "listId", valid_593983
+  if valid_568216 != nil:
+    section.add "listId", valid_568216
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -437,37 +437,37 @@ proc validate_ListManagementImageListsDelete_593981(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_ListManagementImageListsDelete_593980; path: JsonNode;
+proc call*(call_568217: Call_ListManagementImageListsDelete_568213; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes image list with the list Id equal to list Id passed.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_568217.validator(path, query, header, formData, body)
+  let scheme = call_568217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
+                         call_568217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_568217, url, valid)
 
-proc call*(call_593985: Call_ListManagementImageListsDelete_593980; listId: string): Recallable =
+proc call*(call_568218: Call_ListManagementImageListsDelete_568213; listId: string): Recallable =
   ## listManagementImageListsDelete
   ## Deletes image list with the list Id equal to list Id passed.
   ##   listId: string (required)
   ##         : List Id of the image list.
-  var path_593986 = newJObject()
-  add(path_593986, "listId", newJString(listId))
-  result = call_593985.call(path_593986, nil, nil, nil, nil)
+  var path_568219 = newJObject()
+  add(path_568219, "listId", newJString(listId))
+  result = call_568218.call(path_568219, nil, nil, nil, nil)
 
-var listManagementImageListsDelete* = Call_ListManagementImageListsDelete_593980(
+var listManagementImageListsDelete* = Call_ListManagementImageListsDelete_568213(
     name: "listManagementImageListsDelete", meth: HttpMethod.HttpDelete,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/imagelists/{listId}",
-    validator: validate_ListManagementImageListsDelete_593981, base: "",
-    url: url_ListManagementImageListsDelete_593982, schemes: {Scheme.Https})
+    validator: validate_ListManagementImageListsDelete_568214, base: "",
+    url: url_ListManagementImageListsDelete_568215, schemes: {Scheme.Https})
 type
-  Call_ListManagementImageListsRefreshIndex_593987 = ref object of OpenApiRestCall_593425
-proc url_ListManagementImageListsRefreshIndex_593989(protocol: Scheme;
+  Call_ListManagementImageListsRefreshIndex_568220 = ref object of OpenApiRestCall_567658
+proc url_ListManagementImageListsRefreshIndex_568222(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -484,7 +484,7 @@ proc url_ListManagementImageListsRefreshIndex_593989(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementImageListsRefreshIndex_593988(path: JsonNode;
+proc validate_ListManagementImageListsRefreshIndex_568221(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Refreshes the index of the list with list Id equal to list Id passed.
   ## 
@@ -495,11 +495,11 @@ proc validate_ListManagementImageListsRefreshIndex_593988(path: JsonNode;
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_593990 = path.getOrDefault("listId")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568223 = path.getOrDefault("listId")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "listId", valid_593990
+  if valid_568223 != nil:
+    section.add "listId", valid_568223
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -510,39 +510,39 @@ proc validate_ListManagementImageListsRefreshIndex_593988(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593991: Call_ListManagementImageListsRefreshIndex_593987;
+proc call*(call_568224: Call_ListManagementImageListsRefreshIndex_568220;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Refreshes the index of the list with list Id equal to list Id passed.
   ## 
-  let valid = call_593991.validator(path, query, header, formData, body)
-  let scheme = call_593991.pickScheme
+  let valid = call_568224.validator(path, query, header, formData, body)
+  let scheme = call_568224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593991.url(scheme.get, call_593991.host, call_593991.base,
-                         call_593991.route, valid.getOrDefault("path"),
+  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
+                         call_568224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593991, url, valid)
+  result = hook(call_568224, url, valid)
 
-proc call*(call_593992: Call_ListManagementImageListsRefreshIndex_593987;
+proc call*(call_568225: Call_ListManagementImageListsRefreshIndex_568220;
           listId: string): Recallable =
   ## listManagementImageListsRefreshIndex
   ## Refreshes the index of the list with list Id equal to list Id passed.
   ##   listId: string (required)
   ##         : List Id of the image list.
-  var path_593993 = newJObject()
-  add(path_593993, "listId", newJString(listId))
-  result = call_593992.call(path_593993, nil, nil, nil, nil)
+  var path_568226 = newJObject()
+  add(path_568226, "listId", newJString(listId))
+  result = call_568225.call(path_568226, nil, nil, nil, nil)
 
-var listManagementImageListsRefreshIndex* = Call_ListManagementImageListsRefreshIndex_593987(
+var listManagementImageListsRefreshIndex* = Call_ListManagementImageListsRefreshIndex_568220(
     name: "listManagementImageListsRefreshIndex", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/imagelists/{listId}/RefreshIndex",
-    validator: validate_ListManagementImageListsRefreshIndex_593988, base: "",
-    url: url_ListManagementImageListsRefreshIndex_593989, schemes: {Scheme.Https})
+    validator: validate_ListManagementImageListsRefreshIndex_568221, base: "",
+    url: url_ListManagementImageListsRefreshIndex_568222, schemes: {Scheme.Https})
 type
-  Call_ListManagementImageAddImage_594001 = ref object of OpenApiRestCall_593425
-proc url_ListManagementImageAddImage_594003(protocol: Scheme; host: string;
+  Call_ListManagementImageAddImage_568234 = ref object of OpenApiRestCall_567658
+proc url_ListManagementImageAddImage_568236(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -559,7 +559,7 @@ proc url_ListManagementImageAddImage_594003(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementImageAddImage_594002(path: JsonNode; query: JsonNode;
+proc validate_ListManagementImageAddImage_568235(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add an image to the list with list Id equal to list Id passed.
   ## 
@@ -570,11 +570,11 @@ proc validate_ListManagementImageAddImage_594002(path: JsonNode; query: JsonNode
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594004 = path.getOrDefault("listId")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = path.getOrDefault("listId")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "listId", valid_594004
+  if valid_568237 != nil:
+    section.add "listId", valid_568237
   result.add "path", section
   ## parameters in `query` object:
   ##   tag: JInt
@@ -582,15 +582,15 @@ proc validate_ListManagementImageAddImage_594002(path: JsonNode; query: JsonNode
   ##   label: JString
   ##        : The image label.
   section = newJObject()
-  var valid_594005 = query.getOrDefault("tag")
-  valid_594005 = validateParameter(valid_594005, JInt, required = false, default = nil)
-  if valid_594005 != nil:
-    section.add "tag", valid_594005
-  var valid_594006 = query.getOrDefault("label")
-  valid_594006 = validateParameter(valid_594006, JString, required = false,
+  var valid_568238 = query.getOrDefault("tag")
+  valid_568238 = validateParameter(valid_568238, JInt, required = false, default = nil)
+  if valid_568238 != nil:
+    section.add "tag", valid_568238
+  var valid_568239 = query.getOrDefault("label")
+  valid_568239 = validateParameter(valid_568239, JString, required = false,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "label", valid_594006
+  if valid_568239 != nil:
+    section.add "label", valid_568239
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -599,20 +599,20 @@ proc validate_ListManagementImageAddImage_594002(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594007: Call_ListManagementImageAddImage_594001; path: JsonNode;
+proc call*(call_568240: Call_ListManagementImageAddImage_568234; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add an image to the list with list Id equal to list Id passed.
   ## 
-  let valid = call_594007.validator(path, query, header, formData, body)
-  let scheme = call_594007.pickScheme
+  let valid = call_568240.validator(path, query, header, formData, body)
+  let scheme = call_568240.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594007.url(scheme.get, call_594007.host, call_594007.base,
-                         call_594007.route, valid.getOrDefault("path"),
+  let url = call_568240.url(scheme.get, call_568240.host, call_568240.base,
+                         call_568240.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594007, url, valid)
+  result = hook(call_568240, url, valid)
 
-proc call*(call_594008: Call_ListManagementImageAddImage_594001; listId: string;
+proc call*(call_568241: Call_ListManagementImageAddImage_568234; listId: string;
           tag: int = 0; label: string = ""): Recallable =
   ## listManagementImageAddImage
   ## Add an image to the list with list Id equal to list Id passed.
@@ -622,22 +622,22 @@ proc call*(call_594008: Call_ListManagementImageAddImage_594001; listId: string;
   ##        : The image label.
   ##   listId: string (required)
   ##         : List Id of the image list.
-  var path_594009 = newJObject()
-  var query_594010 = newJObject()
-  add(query_594010, "tag", newJInt(tag))
-  add(query_594010, "label", newJString(label))
-  add(path_594009, "listId", newJString(listId))
-  result = call_594008.call(path_594009, query_594010, nil, nil, nil)
+  var path_568242 = newJObject()
+  var query_568243 = newJObject()
+  add(query_568243, "tag", newJInt(tag))
+  add(query_568243, "label", newJString(label))
+  add(path_568242, "listId", newJString(listId))
+  result = call_568241.call(path_568242, query_568243, nil, nil, nil)
 
-var listManagementImageAddImage* = Call_ListManagementImageAddImage_594001(
+var listManagementImageAddImage* = Call_ListManagementImageAddImage_568234(
     name: "listManagementImageAddImage", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/imagelists/{listId}/images",
-    validator: validate_ListManagementImageAddImage_594002, base: "",
-    url: url_ListManagementImageAddImage_594003, schemes: {Scheme.Https})
+    validator: validate_ListManagementImageAddImage_568235, base: "",
+    url: url_ListManagementImageAddImage_568236, schemes: {Scheme.Https})
 type
-  Call_ListManagementImageGetAllImageIds_593994 = ref object of OpenApiRestCall_593425
-proc url_ListManagementImageGetAllImageIds_593996(protocol: Scheme; host: string;
+  Call_ListManagementImageGetAllImageIds_568227 = ref object of OpenApiRestCall_567658
+proc url_ListManagementImageGetAllImageIds_568229(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -654,7 +654,7 @@ proc url_ListManagementImageGetAllImageIds_593996(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementImageGetAllImageIds_593995(path: JsonNode;
+proc validate_ListManagementImageGetAllImageIds_568228(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all image Ids from the list with list Id equal to list Id passed.
   ## 
@@ -665,11 +665,11 @@ proc validate_ListManagementImageGetAllImageIds_593995(path: JsonNode;
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_593997 = path.getOrDefault("listId")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  var valid_568230 = path.getOrDefault("listId")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "listId", valid_593997
+  if valid_568230 != nil:
+    section.add "listId", valid_568230
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -680,39 +680,39 @@ proc validate_ListManagementImageGetAllImageIds_593995(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593998: Call_ListManagementImageGetAllImageIds_593994;
+proc call*(call_568231: Call_ListManagementImageGetAllImageIds_568227;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all image Ids from the list with list Id equal to list Id passed.
   ## 
-  let valid = call_593998.validator(path, query, header, formData, body)
-  let scheme = call_593998.pickScheme
+  let valid = call_568231.validator(path, query, header, formData, body)
+  let scheme = call_568231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593998.url(scheme.get, call_593998.host, call_593998.base,
-                         call_593998.route, valid.getOrDefault("path"),
+  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
+                         call_568231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593998, url, valid)
+  result = hook(call_568231, url, valid)
 
-proc call*(call_593999: Call_ListManagementImageGetAllImageIds_593994;
+proc call*(call_568232: Call_ListManagementImageGetAllImageIds_568227;
           listId: string): Recallable =
   ## listManagementImageGetAllImageIds
   ## Gets all image Ids from the list with list Id equal to list Id passed.
   ##   listId: string (required)
   ##         : List Id of the image list.
-  var path_594000 = newJObject()
-  add(path_594000, "listId", newJString(listId))
-  result = call_593999.call(path_594000, nil, nil, nil, nil)
+  var path_568233 = newJObject()
+  add(path_568233, "listId", newJString(listId))
+  result = call_568232.call(path_568233, nil, nil, nil, nil)
 
-var listManagementImageGetAllImageIds* = Call_ListManagementImageGetAllImageIds_593994(
+var listManagementImageGetAllImageIds* = Call_ListManagementImageGetAllImageIds_568227(
     name: "listManagementImageGetAllImageIds", meth: HttpMethod.HttpGet,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/imagelists/{listId}/images",
-    validator: validate_ListManagementImageGetAllImageIds_593995, base: "",
-    url: url_ListManagementImageGetAllImageIds_593996, schemes: {Scheme.Https})
+    validator: validate_ListManagementImageGetAllImageIds_568228, base: "",
+    url: url_ListManagementImageGetAllImageIds_568229, schemes: {Scheme.Https})
 type
-  Call_ListManagementImageDeleteAllImages_594011 = ref object of OpenApiRestCall_593425
-proc url_ListManagementImageDeleteAllImages_594013(protocol: Scheme; host: string;
+  Call_ListManagementImageDeleteAllImages_568244 = ref object of OpenApiRestCall_567658
+proc url_ListManagementImageDeleteAllImages_568246(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -729,7 +729,7 @@ proc url_ListManagementImageDeleteAllImages_594013(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementImageDeleteAllImages_594012(path: JsonNode;
+proc validate_ListManagementImageDeleteAllImages_568245(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes all images from the list with list Id equal to list Id passed.
   ## 
@@ -740,11 +740,11 @@ proc validate_ListManagementImageDeleteAllImages_594012(path: JsonNode;
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594014 = path.getOrDefault("listId")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_568247 = path.getOrDefault("listId")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "listId", valid_594014
+  if valid_568247 != nil:
+    section.add "listId", valid_568247
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -755,39 +755,39 @@ proc validate_ListManagementImageDeleteAllImages_594012(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594015: Call_ListManagementImageDeleteAllImages_594011;
+proc call*(call_568248: Call_ListManagementImageDeleteAllImages_568244;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes all images from the list with list Id equal to list Id passed.
   ## 
-  let valid = call_594015.validator(path, query, header, formData, body)
-  let scheme = call_594015.pickScheme
+  let valid = call_568248.validator(path, query, header, formData, body)
+  let scheme = call_568248.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594015.url(scheme.get, call_594015.host, call_594015.base,
-                         call_594015.route, valid.getOrDefault("path"),
+  let url = call_568248.url(scheme.get, call_568248.host, call_568248.base,
+                         call_568248.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594015, url, valid)
+  result = hook(call_568248, url, valid)
 
-proc call*(call_594016: Call_ListManagementImageDeleteAllImages_594011;
+proc call*(call_568249: Call_ListManagementImageDeleteAllImages_568244;
           listId: string): Recallable =
   ## listManagementImageDeleteAllImages
   ## Deletes all images from the list with list Id equal to list Id passed.
   ##   listId: string (required)
   ##         : List Id of the image list.
-  var path_594017 = newJObject()
-  add(path_594017, "listId", newJString(listId))
-  result = call_594016.call(path_594017, nil, nil, nil, nil)
+  var path_568250 = newJObject()
+  add(path_568250, "listId", newJString(listId))
+  result = call_568249.call(path_568250, nil, nil, nil, nil)
 
-var listManagementImageDeleteAllImages* = Call_ListManagementImageDeleteAllImages_594011(
+var listManagementImageDeleteAllImages* = Call_ListManagementImageDeleteAllImages_568244(
     name: "listManagementImageDeleteAllImages", meth: HttpMethod.HttpDelete,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/imagelists/{listId}/images",
-    validator: validate_ListManagementImageDeleteAllImages_594012, base: "",
-    url: url_ListManagementImageDeleteAllImages_594013, schemes: {Scheme.Https})
+    validator: validate_ListManagementImageDeleteAllImages_568245, base: "",
+    url: url_ListManagementImageDeleteAllImages_568246, schemes: {Scheme.Https})
 type
-  Call_ListManagementImageDeleteImage_594018 = ref object of OpenApiRestCall_593425
-proc url_ListManagementImageDeleteImage_594020(protocol: Scheme; host: string;
+  Call_ListManagementImageDeleteImage_568251 = ref object of OpenApiRestCall_567658
+proc url_ListManagementImageDeleteImage_568253(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -806,7 +806,7 @@ proc url_ListManagementImageDeleteImage_594020(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementImageDeleteImage_594019(path: JsonNode;
+proc validate_ListManagementImageDeleteImage_568252(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an image from the list with list Id and image Id passed.
   ## 
@@ -819,16 +819,16 @@ proc validate_ListManagementImageDeleteImage_594019(path: JsonNode;
   ##          : Id of the image.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594021 = path.getOrDefault("listId")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  var valid_568254 = path.getOrDefault("listId")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "listId", valid_594021
-  var valid_594022 = path.getOrDefault("ImageId")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  if valid_568254 != nil:
+    section.add "listId", valid_568254
+  var valid_568255 = path.getOrDefault("ImageId")
+  valid_568255 = validateParameter(valid_568255, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "ImageId", valid_594022
+  if valid_568255 != nil:
+    section.add "ImageId", valid_568255
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -839,20 +839,20 @@ proc validate_ListManagementImageDeleteImage_594019(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594023: Call_ListManagementImageDeleteImage_594018; path: JsonNode;
+proc call*(call_568256: Call_ListManagementImageDeleteImage_568251; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an image from the list with list Id and image Id passed.
   ## 
-  let valid = call_594023.validator(path, query, header, formData, body)
-  let scheme = call_594023.pickScheme
+  let valid = call_568256.validator(path, query, header, formData, body)
+  let scheme = call_568256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594023.url(scheme.get, call_594023.host, call_594023.base,
-                         call_594023.route, valid.getOrDefault("path"),
+  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
+                         call_568256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594023, url, valid)
+  result = hook(call_568256, url, valid)
 
-proc call*(call_594024: Call_ListManagementImageDeleteImage_594018; listId: string;
+proc call*(call_568257: Call_ListManagementImageDeleteImage_568251; listId: string;
           ImageId: string): Recallable =
   ## listManagementImageDeleteImage
   ## Deletes an image from the list with list Id and image Id passed.
@@ -860,27 +860,27 @@ proc call*(call_594024: Call_ListManagementImageDeleteImage_594018; listId: stri
   ##         : List Id of the image list.
   ##   ImageId: string (required)
   ##          : Id of the image.
-  var path_594025 = newJObject()
-  add(path_594025, "listId", newJString(listId))
-  add(path_594025, "ImageId", newJString(ImageId))
-  result = call_594024.call(path_594025, nil, nil, nil, nil)
+  var path_568258 = newJObject()
+  add(path_568258, "listId", newJString(listId))
+  add(path_568258, "ImageId", newJString(ImageId))
+  result = call_568257.call(path_568258, nil, nil, nil, nil)
 
-var listManagementImageDeleteImage* = Call_ListManagementImageDeleteImage_594018(
+var listManagementImageDeleteImage* = Call_ListManagementImageDeleteImage_568251(
     name: "listManagementImageDeleteImage", meth: HttpMethod.HttpDelete,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/imagelists/{listId}/images/{ImageId}",
-    validator: validate_ListManagementImageDeleteImage_594019, base: "",
-    url: url_ListManagementImageDeleteImage_594020, schemes: {Scheme.Https})
+    validator: validate_ListManagementImageDeleteImage_568252, base: "",
+    url: url_ListManagementImageDeleteImage_568253, schemes: {Scheme.Https})
 type
-  Call_ListManagementTermListsCreate_594031 = ref object of OpenApiRestCall_593425
-proc url_ListManagementTermListsCreate_594033(protocol: Scheme; host: string;
+  Call_ListManagementTermListsCreate_568264 = ref object of OpenApiRestCall_567658
+proc url_ListManagementTermListsCreate_568266(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ListManagementTermListsCreate_594032(path: JsonNode; query: JsonNode;
+proc validate_ListManagementTermListsCreate_568265(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a Term List
   ## 
@@ -896,11 +896,11 @@ proc validate_ListManagementTermListsCreate_594032(path: JsonNode; query: JsonNo
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Content-Type` field"
-  var valid_594034 = header.getOrDefault("Content-Type")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  var valid_568267 = header.getOrDefault("Content-Type")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "Content-Type", valid_594034
+  if valid_568267 != nil:
+    section.add "Content-Type", valid_568267
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -912,44 +912,44 @@ proc validate_ListManagementTermListsCreate_594032(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594036: Call_ListManagementTermListsCreate_594031; path: JsonNode;
+proc call*(call_568269: Call_ListManagementTermListsCreate_568264; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Term List
   ## 
-  let valid = call_594036.validator(path, query, header, formData, body)
-  let scheme = call_594036.pickScheme
+  let valid = call_568269.validator(path, query, header, formData, body)
+  let scheme = call_568269.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594036.url(scheme.get, call_594036.host, call_594036.base,
-                         call_594036.route, valid.getOrDefault("path"),
+  let url = call_568269.url(scheme.get, call_568269.host, call_568269.base,
+                         call_568269.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594036, url, valid)
+  result = hook(call_568269, url, valid)
 
-proc call*(call_594037: Call_ListManagementTermListsCreate_594031; body: JsonNode): Recallable =
+proc call*(call_568270: Call_ListManagementTermListsCreate_568264; body: JsonNode): Recallable =
   ## listManagementTermListsCreate
   ## Creates a Term List
   ##   body: JObject (required)
   ##       : Schema of the body.
-  var body_594038 = newJObject()
+  var body_568271 = newJObject()
   if body != nil:
-    body_594038 = body
-  result = call_594037.call(nil, nil, nil, nil, body_594038)
+    body_568271 = body
+  result = call_568270.call(nil, nil, nil, nil, body_568271)
 
-var listManagementTermListsCreate* = Call_ListManagementTermListsCreate_594031(
+var listManagementTermListsCreate* = Call_ListManagementTermListsCreate_568264(
     name: "listManagementTermListsCreate", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/contentmoderator/lists/v1.0/termlists",
-    validator: validate_ListManagementTermListsCreate_594032, base: "",
-    url: url_ListManagementTermListsCreate_594033, schemes: {Scheme.Https})
+    validator: validate_ListManagementTermListsCreate_568265, base: "",
+    url: url_ListManagementTermListsCreate_568266, schemes: {Scheme.Https})
 type
-  Call_ListManagementTermListsGetAllTermLists_594026 = ref object of OpenApiRestCall_593425
-proc url_ListManagementTermListsGetAllTermLists_594028(protocol: Scheme;
+  Call_ListManagementTermListsGetAllTermLists_568259 = ref object of OpenApiRestCall_567658
+proc url_ListManagementTermListsGetAllTermLists_568261(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ListManagementTermListsGetAllTermLists_594027(path: JsonNode;
+proc validate_ListManagementTermListsGetAllTermLists_568260(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## gets all the Term Lists
   ## 
@@ -966,34 +966,34 @@ proc validate_ListManagementTermListsGetAllTermLists_594027(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594029: Call_ListManagementTermListsGetAllTermLists_594026;
+proc call*(call_568262: Call_ListManagementTermListsGetAllTermLists_568259;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## gets all the Term Lists
   ## 
-  let valid = call_594029.validator(path, query, header, formData, body)
-  let scheme = call_594029.pickScheme
+  let valid = call_568262.validator(path, query, header, formData, body)
+  let scheme = call_568262.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594029.url(scheme.get, call_594029.host, call_594029.base,
-                         call_594029.route, valid.getOrDefault("path"),
+  let url = call_568262.url(scheme.get, call_568262.host, call_568262.base,
+                         call_568262.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594029, url, valid)
+  result = hook(call_568262, url, valid)
 
-proc call*(call_594030: Call_ListManagementTermListsGetAllTermLists_594026): Recallable =
+proc call*(call_568263: Call_ListManagementTermListsGetAllTermLists_568259): Recallable =
   ## listManagementTermListsGetAllTermLists
   ## gets all the Term Lists
-  result = call_594030.call(nil, nil, nil, nil, nil)
+  result = call_568263.call(nil, nil, nil, nil, nil)
 
-var listManagementTermListsGetAllTermLists* = Call_ListManagementTermListsGetAllTermLists_594026(
+var listManagementTermListsGetAllTermLists* = Call_ListManagementTermListsGetAllTermLists_568259(
     name: "listManagementTermListsGetAllTermLists", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/contentmoderator/lists/v1.0/termlists",
-    validator: validate_ListManagementTermListsGetAllTermLists_594027, base: "",
-    url: url_ListManagementTermListsGetAllTermLists_594028,
+    validator: validate_ListManagementTermListsGetAllTermLists_568260, base: "",
+    url: url_ListManagementTermListsGetAllTermLists_568261,
     schemes: {Scheme.Https})
 type
-  Call_ListManagementTermListsUpdate_594046 = ref object of OpenApiRestCall_593425
-proc url_ListManagementTermListsUpdate_594048(protocol: Scheme; host: string;
+  Call_ListManagementTermListsUpdate_568279 = ref object of OpenApiRestCall_567658
+proc url_ListManagementTermListsUpdate_568281(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1009,7 +1009,7 @@ proc url_ListManagementTermListsUpdate_594048(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementTermListsUpdate_594047(path: JsonNode; query: JsonNode;
+proc validate_ListManagementTermListsUpdate_568280(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an Term List.
   ## 
@@ -1020,11 +1020,11 @@ proc validate_ListManagementTermListsUpdate_594047(path: JsonNode; query: JsonNo
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594049 = path.getOrDefault("listId")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  var valid_568282 = path.getOrDefault("listId")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "listId", valid_594049
+  if valid_568282 != nil:
+    section.add "listId", valid_568282
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1034,11 +1034,11 @@ proc validate_ListManagementTermListsUpdate_594047(path: JsonNode; query: JsonNo
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Content-Type` field"
-  var valid_594050 = header.getOrDefault("Content-Type")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  var valid_568283 = header.getOrDefault("Content-Type")
+  valid_568283 = validateParameter(valid_568283, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "Content-Type", valid_594050
+  if valid_568283 != nil:
+    section.add "Content-Type", valid_568283
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1050,20 +1050,20 @@ proc validate_ListManagementTermListsUpdate_594047(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594052: Call_ListManagementTermListsUpdate_594046; path: JsonNode;
+proc call*(call_568285: Call_ListManagementTermListsUpdate_568279; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an Term List.
   ## 
-  let valid = call_594052.validator(path, query, header, formData, body)
-  let scheme = call_594052.pickScheme
+  let valid = call_568285.validator(path, query, header, formData, body)
+  let scheme = call_568285.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594052.url(scheme.get, call_594052.host, call_594052.base,
-                         call_594052.route, valid.getOrDefault("path"),
+  let url = call_568285.url(scheme.get, call_568285.host, call_568285.base,
+                         call_568285.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594052, url, valid)
+  result = hook(call_568285, url, valid)
 
-proc call*(call_594053: Call_ListManagementTermListsUpdate_594046; listId: string;
+proc call*(call_568286: Call_ListManagementTermListsUpdate_568279; listId: string;
           body: JsonNode): Recallable =
   ## listManagementTermListsUpdate
   ## Updates an Term List.
@@ -1071,21 +1071,21 @@ proc call*(call_594053: Call_ListManagementTermListsUpdate_594046; listId: strin
   ##         : List Id of the image list.
   ##   body: JObject (required)
   ##       : Schema of the body.
-  var path_594054 = newJObject()
-  var body_594055 = newJObject()
-  add(path_594054, "listId", newJString(listId))
+  var path_568287 = newJObject()
+  var body_568288 = newJObject()
+  add(path_568287, "listId", newJString(listId))
   if body != nil:
-    body_594055 = body
-  result = call_594053.call(path_594054, nil, nil, nil, body_594055)
+    body_568288 = body
+  result = call_568286.call(path_568287, nil, nil, nil, body_568288)
 
-var listManagementTermListsUpdate* = Call_ListManagementTermListsUpdate_594046(
+var listManagementTermListsUpdate* = Call_ListManagementTermListsUpdate_568279(
     name: "listManagementTermListsUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/contentmoderator/lists/v1.0/termlists/{listId}",
-    validator: validate_ListManagementTermListsUpdate_594047, base: "",
-    url: url_ListManagementTermListsUpdate_594048, schemes: {Scheme.Https})
+    validator: validate_ListManagementTermListsUpdate_568280, base: "",
+    url: url_ListManagementTermListsUpdate_568281, schemes: {Scheme.Https})
 type
-  Call_ListManagementTermListsGetDetails_594039 = ref object of OpenApiRestCall_593425
-proc url_ListManagementTermListsGetDetails_594041(protocol: Scheme; host: string;
+  Call_ListManagementTermListsGetDetails_568272 = ref object of OpenApiRestCall_567658
+proc url_ListManagementTermListsGetDetails_568274(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1101,7 +1101,7 @@ proc url_ListManagementTermListsGetDetails_594041(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementTermListsGetDetails_594040(path: JsonNode;
+proc validate_ListManagementTermListsGetDetails_568273(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns list Id details of the term list with list Id equal to list Id passed.
   ## 
@@ -1112,11 +1112,11 @@ proc validate_ListManagementTermListsGetDetails_594040(path: JsonNode;
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594042 = path.getOrDefault("listId")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  var valid_568275 = path.getOrDefault("listId")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "listId", valid_594042
+  if valid_568275 != nil:
+    section.add "listId", valid_568275
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1127,38 +1127,38 @@ proc validate_ListManagementTermListsGetDetails_594040(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594043: Call_ListManagementTermListsGetDetails_594039;
+proc call*(call_568276: Call_ListManagementTermListsGetDetails_568272;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns list Id details of the term list with list Id equal to list Id passed.
   ## 
-  let valid = call_594043.validator(path, query, header, formData, body)
-  let scheme = call_594043.pickScheme
+  let valid = call_568276.validator(path, query, header, formData, body)
+  let scheme = call_568276.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594043.url(scheme.get, call_594043.host, call_594043.base,
-                         call_594043.route, valid.getOrDefault("path"),
+  let url = call_568276.url(scheme.get, call_568276.host, call_568276.base,
+                         call_568276.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594043, url, valid)
+  result = hook(call_568276, url, valid)
 
-proc call*(call_594044: Call_ListManagementTermListsGetDetails_594039;
+proc call*(call_568277: Call_ListManagementTermListsGetDetails_568272;
           listId: string): Recallable =
   ## listManagementTermListsGetDetails
   ## Returns list Id details of the term list with list Id equal to list Id passed.
   ##   listId: string (required)
   ##         : List Id of the image list.
-  var path_594045 = newJObject()
-  add(path_594045, "listId", newJString(listId))
-  result = call_594044.call(path_594045, nil, nil, nil, nil)
+  var path_568278 = newJObject()
+  add(path_568278, "listId", newJString(listId))
+  result = call_568277.call(path_568278, nil, nil, nil, nil)
 
-var listManagementTermListsGetDetails* = Call_ListManagementTermListsGetDetails_594039(
+var listManagementTermListsGetDetails* = Call_ListManagementTermListsGetDetails_568272(
     name: "listManagementTermListsGetDetails", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/contentmoderator/lists/v1.0/termlists/{listId}",
-    validator: validate_ListManagementTermListsGetDetails_594040, base: "",
-    url: url_ListManagementTermListsGetDetails_594041, schemes: {Scheme.Https})
+    validator: validate_ListManagementTermListsGetDetails_568273, base: "",
+    url: url_ListManagementTermListsGetDetails_568274, schemes: {Scheme.Https})
 type
-  Call_ListManagementTermListsDelete_594056 = ref object of OpenApiRestCall_593425
-proc url_ListManagementTermListsDelete_594058(protocol: Scheme; host: string;
+  Call_ListManagementTermListsDelete_568289 = ref object of OpenApiRestCall_567658
+proc url_ListManagementTermListsDelete_568291(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1174,7 +1174,7 @@ proc url_ListManagementTermListsDelete_594058(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementTermListsDelete_594057(path: JsonNode; query: JsonNode;
+proc validate_ListManagementTermListsDelete_568290(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes term list with the list Id equal to list Id passed.
   ## 
@@ -1185,11 +1185,11 @@ proc validate_ListManagementTermListsDelete_594057(path: JsonNode; query: JsonNo
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594059 = path.getOrDefault("listId")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  var valid_568292 = path.getOrDefault("listId")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "listId", valid_594059
+  if valid_568292 != nil:
+    section.add "listId", valid_568292
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1200,36 +1200,36 @@ proc validate_ListManagementTermListsDelete_594057(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594060: Call_ListManagementTermListsDelete_594056; path: JsonNode;
+proc call*(call_568293: Call_ListManagementTermListsDelete_568289; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes term list with the list Id equal to list Id passed.
   ## 
-  let valid = call_594060.validator(path, query, header, formData, body)
-  let scheme = call_594060.pickScheme
+  let valid = call_568293.validator(path, query, header, formData, body)
+  let scheme = call_568293.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594060.url(scheme.get, call_594060.host, call_594060.base,
-                         call_594060.route, valid.getOrDefault("path"),
+  let url = call_568293.url(scheme.get, call_568293.host, call_568293.base,
+                         call_568293.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594060, url, valid)
+  result = hook(call_568293, url, valid)
 
-proc call*(call_594061: Call_ListManagementTermListsDelete_594056; listId: string): Recallable =
+proc call*(call_568294: Call_ListManagementTermListsDelete_568289; listId: string): Recallable =
   ## listManagementTermListsDelete
   ## Deletes term list with the list Id equal to list Id passed.
   ##   listId: string (required)
   ##         : List Id of the image list.
-  var path_594062 = newJObject()
-  add(path_594062, "listId", newJString(listId))
-  result = call_594061.call(path_594062, nil, nil, nil, nil)
+  var path_568295 = newJObject()
+  add(path_568295, "listId", newJString(listId))
+  result = call_568294.call(path_568295, nil, nil, nil, nil)
 
-var listManagementTermListsDelete* = Call_ListManagementTermListsDelete_594056(
+var listManagementTermListsDelete* = Call_ListManagementTermListsDelete_568289(
     name: "listManagementTermListsDelete", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/contentmoderator/lists/v1.0/termlists/{listId}",
-    validator: validate_ListManagementTermListsDelete_594057, base: "",
-    url: url_ListManagementTermListsDelete_594058, schemes: {Scheme.Https})
+    validator: validate_ListManagementTermListsDelete_568290, base: "",
+    url: url_ListManagementTermListsDelete_568291, schemes: {Scheme.Https})
 type
-  Call_ListManagementTermListsRefreshIndex_594063 = ref object of OpenApiRestCall_593425
-proc url_ListManagementTermListsRefreshIndex_594065(protocol: Scheme; host: string;
+  Call_ListManagementTermListsRefreshIndex_568296 = ref object of OpenApiRestCall_567658
+proc url_ListManagementTermListsRefreshIndex_568298(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1246,7 +1246,7 @@ proc url_ListManagementTermListsRefreshIndex_594065(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementTermListsRefreshIndex_594064(path: JsonNode;
+proc validate_ListManagementTermListsRefreshIndex_568297(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Refreshes the index of the list with list Id equal to list ID passed.
   ## 
@@ -1257,11 +1257,11 @@ proc validate_ListManagementTermListsRefreshIndex_594064(path: JsonNode;
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594066 = path.getOrDefault("listId")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  var valid_568299 = path.getOrDefault("listId")
+  valid_568299 = validateParameter(valid_568299, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "listId", valid_594066
+  if valid_568299 != nil:
+    section.add "listId", valid_568299
   result.add "path", section
   ## parameters in `query` object:
   ##   language: JString (required)
@@ -1269,11 +1269,11 @@ proc validate_ListManagementTermListsRefreshIndex_594064(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `language` field"
-  var valid_594067 = query.getOrDefault("language")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  var valid_568300 = query.getOrDefault("language")
+  valid_568300 = validateParameter(valid_568300, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "language", valid_594067
+  if valid_568300 != nil:
+    section.add "language", valid_568300
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1282,21 +1282,21 @@ proc validate_ListManagementTermListsRefreshIndex_594064(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594068: Call_ListManagementTermListsRefreshIndex_594063;
+proc call*(call_568301: Call_ListManagementTermListsRefreshIndex_568296;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Refreshes the index of the list with list Id equal to list ID passed.
   ## 
-  let valid = call_594068.validator(path, query, header, formData, body)
-  let scheme = call_594068.pickScheme
+  let valid = call_568301.validator(path, query, header, formData, body)
+  let scheme = call_568301.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594068.url(scheme.get, call_594068.host, call_594068.base,
-                         call_594068.route, valid.getOrDefault("path"),
+  let url = call_568301.url(scheme.get, call_568301.host, call_568301.base,
+                         call_568301.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594068, url, valid)
+  result = hook(call_568301, url, valid)
 
-proc call*(call_594069: Call_ListManagementTermListsRefreshIndex_594063;
+proc call*(call_568302: Call_ListManagementTermListsRefreshIndex_568296;
           language: string; listId: string): Recallable =
   ## listManagementTermListsRefreshIndex
   ## Refreshes the index of the list with list Id equal to list ID passed.
@@ -1304,21 +1304,21 @@ proc call*(call_594069: Call_ListManagementTermListsRefreshIndex_594063;
   ##           : Language of the terms.
   ##   listId: string (required)
   ##         : List Id of the image list.
-  var path_594070 = newJObject()
-  var query_594071 = newJObject()
-  add(query_594071, "language", newJString(language))
-  add(path_594070, "listId", newJString(listId))
-  result = call_594069.call(path_594070, query_594071, nil, nil, nil)
+  var path_568303 = newJObject()
+  var query_568304 = newJObject()
+  add(query_568304, "language", newJString(language))
+  add(path_568303, "listId", newJString(listId))
+  result = call_568302.call(path_568303, query_568304, nil, nil, nil)
 
-var listManagementTermListsRefreshIndex* = Call_ListManagementTermListsRefreshIndex_594063(
+var listManagementTermListsRefreshIndex* = Call_ListManagementTermListsRefreshIndex_568296(
     name: "listManagementTermListsRefreshIndex", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/termlists/{listId}/RefreshIndex",
-    validator: validate_ListManagementTermListsRefreshIndex_594064, base: "",
-    url: url_ListManagementTermListsRefreshIndex_594065, schemes: {Scheme.Https})
+    validator: validate_ListManagementTermListsRefreshIndex_568297, base: "",
+    url: url_ListManagementTermListsRefreshIndex_568298, schemes: {Scheme.Https})
 type
-  Call_ListManagementTermGetAllTerms_594072 = ref object of OpenApiRestCall_593425
-proc url_ListManagementTermGetAllTerms_594074(protocol: Scheme; host: string;
+  Call_ListManagementTermGetAllTerms_568305 = ref object of OpenApiRestCall_567658
+proc url_ListManagementTermGetAllTerms_568307(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1335,7 +1335,7 @@ proc url_ListManagementTermGetAllTerms_594074(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementTermGetAllTerms_594073(path: JsonNode; query: JsonNode;
+proc validate_ListManagementTermGetAllTerms_568306(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all terms from the list with list Id equal to the list Id passed.
   ## 
@@ -1346,11 +1346,11 @@ proc validate_ListManagementTermGetAllTerms_594073(path: JsonNode; query: JsonNo
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594075 = path.getOrDefault("listId")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  var valid_568308 = path.getOrDefault("listId")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "listId", valid_594075
+  if valid_568308 != nil:
+    section.add "listId", valid_568308
   result.add "path", section
   ## parameters in `query` object:
   ##   language: JString (required)
@@ -1362,19 +1362,19 @@ proc validate_ListManagementTermGetAllTerms_594073(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `language` field"
-  var valid_594076 = query.getOrDefault("language")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  var valid_568309 = query.getOrDefault("language")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "language", valid_594076
-  var valid_594077 = query.getOrDefault("offset")
-  valid_594077 = validateParameter(valid_594077, JInt, required = false, default = nil)
-  if valid_594077 != nil:
-    section.add "offset", valid_594077
-  var valid_594078 = query.getOrDefault("limit")
-  valid_594078 = validateParameter(valid_594078, JInt, required = false, default = nil)
-  if valid_594078 != nil:
-    section.add "limit", valid_594078
+  if valid_568309 != nil:
+    section.add "language", valid_568309
+  var valid_568310 = query.getOrDefault("offset")
+  valid_568310 = validateParameter(valid_568310, JInt, required = false, default = nil)
+  if valid_568310 != nil:
+    section.add "offset", valid_568310
+  var valid_568311 = query.getOrDefault("limit")
+  valid_568311 = validateParameter(valid_568311, JInt, required = false, default = nil)
+  if valid_568311 != nil:
+    section.add "limit", valid_568311
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1383,20 +1383,20 @@ proc validate_ListManagementTermGetAllTerms_594073(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594079: Call_ListManagementTermGetAllTerms_594072; path: JsonNode;
+proc call*(call_568312: Call_ListManagementTermGetAllTerms_568305; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all terms from the list with list Id equal to the list Id passed.
   ## 
-  let valid = call_594079.validator(path, query, header, formData, body)
-  let scheme = call_594079.pickScheme
+  let valid = call_568312.validator(path, query, header, formData, body)
+  let scheme = call_568312.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594079.url(scheme.get, call_594079.host, call_594079.base,
-                         call_594079.route, valid.getOrDefault("path"),
+  let url = call_568312.url(scheme.get, call_568312.host, call_568312.base,
+                         call_568312.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594079, url, valid)
+  result = hook(call_568312, url, valid)
 
-proc call*(call_594080: Call_ListManagementTermGetAllTerms_594072;
+proc call*(call_568313: Call_ListManagementTermGetAllTerms_568305;
           language: string; listId: string; offset: int = 0; limit: int = 0): Recallable =
   ## listManagementTermGetAllTerms
   ## Gets all terms from the list with list Id equal to the list Id passed.
@@ -1408,23 +1408,23 @@ proc call*(call_594080: Call_ListManagementTermGetAllTerms_594072;
   ##         : List Id of the image list.
   ##   limit: int
   ##        : The max limit.
-  var path_594081 = newJObject()
-  var query_594082 = newJObject()
-  add(query_594082, "language", newJString(language))
-  add(query_594082, "offset", newJInt(offset))
-  add(path_594081, "listId", newJString(listId))
-  add(query_594082, "limit", newJInt(limit))
-  result = call_594080.call(path_594081, query_594082, nil, nil, nil)
+  var path_568314 = newJObject()
+  var query_568315 = newJObject()
+  add(query_568315, "language", newJString(language))
+  add(query_568315, "offset", newJInt(offset))
+  add(path_568314, "listId", newJString(listId))
+  add(query_568315, "limit", newJInt(limit))
+  result = call_568313.call(path_568314, query_568315, nil, nil, nil)
 
-var listManagementTermGetAllTerms* = Call_ListManagementTermGetAllTerms_594072(
+var listManagementTermGetAllTerms* = Call_ListManagementTermGetAllTerms_568305(
     name: "listManagementTermGetAllTerms", meth: HttpMethod.HttpGet,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/termlists/{listId}/terms",
-    validator: validate_ListManagementTermGetAllTerms_594073, base: "",
-    url: url_ListManagementTermGetAllTerms_594074, schemes: {Scheme.Https})
+    validator: validate_ListManagementTermGetAllTerms_568306, base: "",
+    url: url_ListManagementTermGetAllTerms_568307, schemes: {Scheme.Https})
 type
-  Call_ListManagementTermDeleteAllTerms_594083 = ref object of OpenApiRestCall_593425
-proc url_ListManagementTermDeleteAllTerms_594085(protocol: Scheme; host: string;
+  Call_ListManagementTermDeleteAllTerms_568316 = ref object of OpenApiRestCall_567658
+proc url_ListManagementTermDeleteAllTerms_568318(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1441,7 +1441,7 @@ proc url_ListManagementTermDeleteAllTerms_594085(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementTermDeleteAllTerms_594084(path: JsonNode;
+proc validate_ListManagementTermDeleteAllTerms_568317(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes all terms from the list with list Id equal to the list Id passed.
   ## 
@@ -1452,11 +1452,11 @@ proc validate_ListManagementTermDeleteAllTerms_594084(path: JsonNode;
   ##         : List Id of the image list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594086 = path.getOrDefault("listId")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  var valid_568319 = path.getOrDefault("listId")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "listId", valid_594086
+  if valid_568319 != nil:
+    section.add "listId", valid_568319
   result.add "path", section
   ## parameters in `query` object:
   ##   language: JString (required)
@@ -1464,11 +1464,11 @@ proc validate_ListManagementTermDeleteAllTerms_594084(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `language` field"
-  var valid_594087 = query.getOrDefault("language")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  var valid_568320 = query.getOrDefault("language")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "language", valid_594087
+  if valid_568320 != nil:
+    section.add "language", valid_568320
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1477,21 +1477,21 @@ proc validate_ListManagementTermDeleteAllTerms_594084(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594088: Call_ListManagementTermDeleteAllTerms_594083;
+proc call*(call_568321: Call_ListManagementTermDeleteAllTerms_568316;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes all terms from the list with list Id equal to the list Id passed.
   ## 
-  let valid = call_594088.validator(path, query, header, formData, body)
-  let scheme = call_594088.pickScheme
+  let valid = call_568321.validator(path, query, header, formData, body)
+  let scheme = call_568321.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594088.url(scheme.get, call_594088.host, call_594088.base,
-                         call_594088.route, valid.getOrDefault("path"),
+  let url = call_568321.url(scheme.get, call_568321.host, call_568321.base,
+                         call_568321.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594088, url, valid)
+  result = hook(call_568321, url, valid)
 
-proc call*(call_594089: Call_ListManagementTermDeleteAllTerms_594083;
+proc call*(call_568322: Call_ListManagementTermDeleteAllTerms_568316;
           language: string; listId: string): Recallable =
   ## listManagementTermDeleteAllTerms
   ## Deletes all terms from the list with list Id equal to the list Id passed.
@@ -1499,21 +1499,21 @@ proc call*(call_594089: Call_ListManagementTermDeleteAllTerms_594083;
   ##           : Language of the terms.
   ##   listId: string (required)
   ##         : List Id of the image list.
-  var path_594090 = newJObject()
-  var query_594091 = newJObject()
-  add(query_594091, "language", newJString(language))
-  add(path_594090, "listId", newJString(listId))
-  result = call_594089.call(path_594090, query_594091, nil, nil, nil)
+  var path_568323 = newJObject()
+  var query_568324 = newJObject()
+  add(query_568324, "language", newJString(language))
+  add(path_568323, "listId", newJString(listId))
+  result = call_568322.call(path_568323, query_568324, nil, nil, nil)
 
-var listManagementTermDeleteAllTerms* = Call_ListManagementTermDeleteAllTerms_594083(
+var listManagementTermDeleteAllTerms* = Call_ListManagementTermDeleteAllTerms_568316(
     name: "listManagementTermDeleteAllTerms", meth: HttpMethod.HttpDelete,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/termlists/{listId}/terms",
-    validator: validate_ListManagementTermDeleteAllTerms_594084, base: "",
-    url: url_ListManagementTermDeleteAllTerms_594085, schemes: {Scheme.Https})
+    validator: validate_ListManagementTermDeleteAllTerms_568317, base: "",
+    url: url_ListManagementTermDeleteAllTerms_568318, schemes: {Scheme.Https})
 type
-  Call_ListManagementTermAddTerm_594092 = ref object of OpenApiRestCall_593425
-proc url_ListManagementTermAddTerm_594094(protocol: Scheme; host: string;
+  Call_ListManagementTermAddTerm_568325 = ref object of OpenApiRestCall_567658
+proc url_ListManagementTermAddTerm_568327(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1532,7 +1532,7 @@ proc url_ListManagementTermAddTerm_594094(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementTermAddTerm_594093(path: JsonNode; query: JsonNode;
+proc validate_ListManagementTermAddTerm_568326(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add a term to the term list with list Id equal to list Id passed.
   ## 
@@ -1545,16 +1545,16 @@ proc validate_ListManagementTermAddTerm_594093(path: JsonNode; query: JsonNode;
   ##       : Term to be deleted
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594095 = path.getOrDefault("listId")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  var valid_568328 = path.getOrDefault("listId")
+  valid_568328 = validateParameter(valid_568328, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "listId", valid_594095
-  var valid_594096 = path.getOrDefault("term")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
+  if valid_568328 != nil:
+    section.add "listId", valid_568328
+  var valid_568329 = path.getOrDefault("term")
+  valid_568329 = validateParameter(valid_568329, JString, required = true,
                                  default = nil)
-  if valid_594096 != nil:
-    section.add "term", valid_594096
+  if valid_568329 != nil:
+    section.add "term", valid_568329
   result.add "path", section
   ## parameters in `query` object:
   ##   language: JString (required)
@@ -1562,11 +1562,11 @@ proc validate_ListManagementTermAddTerm_594093(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `language` field"
-  var valid_594097 = query.getOrDefault("language")
-  valid_594097 = validateParameter(valid_594097, JString, required = true,
+  var valid_568330 = query.getOrDefault("language")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "language", valid_594097
+  if valid_568330 != nil:
+    section.add "language", valid_568330
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1575,20 +1575,20 @@ proc validate_ListManagementTermAddTerm_594093(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594098: Call_ListManagementTermAddTerm_594092; path: JsonNode;
+proc call*(call_568331: Call_ListManagementTermAddTerm_568325; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add a term to the term list with list Id equal to list Id passed.
   ## 
-  let valid = call_594098.validator(path, query, header, formData, body)
-  let scheme = call_594098.pickScheme
+  let valid = call_568331.validator(path, query, header, formData, body)
+  let scheme = call_568331.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594098.url(scheme.get, call_594098.host, call_594098.base,
-                         call_594098.route, valid.getOrDefault("path"),
+  let url = call_568331.url(scheme.get, call_568331.host, call_568331.base,
+                         call_568331.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594098, url, valid)
+  result = hook(call_568331, url, valid)
 
-proc call*(call_594099: Call_ListManagementTermAddTerm_594092; language: string;
+proc call*(call_568332: Call_ListManagementTermAddTerm_568325; language: string;
           listId: string; term: string): Recallable =
   ## listManagementTermAddTerm
   ## Add a term to the term list with list Id equal to list Id passed.
@@ -1598,22 +1598,22 @@ proc call*(call_594099: Call_ListManagementTermAddTerm_594092; language: string;
   ##         : List Id of the image list.
   ##   term: string (required)
   ##       : Term to be deleted
-  var path_594100 = newJObject()
-  var query_594101 = newJObject()
-  add(query_594101, "language", newJString(language))
-  add(path_594100, "listId", newJString(listId))
-  add(path_594100, "term", newJString(term))
-  result = call_594099.call(path_594100, query_594101, nil, nil, nil)
+  var path_568333 = newJObject()
+  var query_568334 = newJObject()
+  add(query_568334, "language", newJString(language))
+  add(path_568333, "listId", newJString(listId))
+  add(path_568333, "term", newJString(term))
+  result = call_568332.call(path_568333, query_568334, nil, nil, nil)
 
-var listManagementTermAddTerm* = Call_ListManagementTermAddTerm_594092(
+var listManagementTermAddTerm* = Call_ListManagementTermAddTerm_568325(
     name: "listManagementTermAddTerm", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/termlists/{listId}/terms/{term}",
-    validator: validate_ListManagementTermAddTerm_594093, base: "",
-    url: url_ListManagementTermAddTerm_594094, schemes: {Scheme.Https})
+    validator: validate_ListManagementTermAddTerm_568326, base: "",
+    url: url_ListManagementTermAddTerm_568327, schemes: {Scheme.Https})
 type
-  Call_ListManagementTermDeleteTerm_594102 = ref object of OpenApiRestCall_593425
-proc url_ListManagementTermDeleteTerm_594104(protocol: Scheme; host: string;
+  Call_ListManagementTermDeleteTerm_568335 = ref object of OpenApiRestCall_567658
+proc url_ListManagementTermDeleteTerm_568337(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1632,7 +1632,7 @@ proc url_ListManagementTermDeleteTerm_594104(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListManagementTermDeleteTerm_594103(path: JsonNode; query: JsonNode;
+proc validate_ListManagementTermDeleteTerm_568336(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a term from the list with list Id equal to the list Id passed.
   ## 
@@ -1645,16 +1645,16 @@ proc validate_ListManagementTermDeleteTerm_594103(path: JsonNode; query: JsonNod
   ##       : Term to be deleted
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `listId` field"
-  var valid_594105 = path.getOrDefault("listId")
-  valid_594105 = validateParameter(valid_594105, JString, required = true,
+  var valid_568338 = path.getOrDefault("listId")
+  valid_568338 = validateParameter(valid_568338, JString, required = true,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "listId", valid_594105
-  var valid_594106 = path.getOrDefault("term")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  if valid_568338 != nil:
+    section.add "listId", valid_568338
+  var valid_568339 = path.getOrDefault("term")
+  valid_568339 = validateParameter(valid_568339, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "term", valid_594106
+  if valid_568339 != nil:
+    section.add "term", valid_568339
   result.add "path", section
   ## parameters in `query` object:
   ##   language: JString (required)
@@ -1662,11 +1662,11 @@ proc validate_ListManagementTermDeleteTerm_594103(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `language` field"
-  var valid_594107 = query.getOrDefault("language")
-  valid_594107 = validateParameter(valid_594107, JString, required = true,
+  var valid_568340 = query.getOrDefault("language")
+  valid_568340 = validateParameter(valid_568340, JString, required = true,
                                  default = nil)
-  if valid_594107 != nil:
-    section.add "language", valid_594107
+  if valid_568340 != nil:
+    section.add "language", valid_568340
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1675,20 +1675,20 @@ proc validate_ListManagementTermDeleteTerm_594103(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594108: Call_ListManagementTermDeleteTerm_594102; path: JsonNode;
+proc call*(call_568341: Call_ListManagementTermDeleteTerm_568335; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a term from the list with list Id equal to the list Id passed.
   ## 
-  let valid = call_594108.validator(path, query, header, formData, body)
-  let scheme = call_594108.pickScheme
+  let valid = call_568341.validator(path, query, header, formData, body)
+  let scheme = call_568341.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594108.url(scheme.get, call_594108.host, call_594108.base,
-                         call_594108.route, valid.getOrDefault("path"),
+  let url = call_568341.url(scheme.get, call_568341.host, call_568341.base,
+                         call_568341.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594108, url, valid)
+  result = hook(call_568341, url, valid)
 
-proc call*(call_594109: Call_ListManagementTermDeleteTerm_594102; language: string;
+proc call*(call_568342: Call_ListManagementTermDeleteTerm_568335; language: string;
           listId: string; term: string): Recallable =
   ## listManagementTermDeleteTerm
   ## Deletes a term from the list with list Id equal to the list Id passed.
@@ -1698,22 +1698,22 @@ proc call*(call_594109: Call_ListManagementTermDeleteTerm_594102; language: stri
   ##         : List Id of the image list.
   ##   term: string (required)
   ##       : Term to be deleted
-  var path_594110 = newJObject()
-  var query_594111 = newJObject()
-  add(query_594111, "language", newJString(language))
-  add(path_594110, "listId", newJString(listId))
-  add(path_594110, "term", newJString(term))
-  result = call_594109.call(path_594110, query_594111, nil, nil, nil)
+  var path_568343 = newJObject()
+  var query_568344 = newJObject()
+  add(query_568344, "language", newJString(language))
+  add(path_568343, "listId", newJString(listId))
+  add(path_568343, "term", newJString(term))
+  result = call_568342.call(path_568343, query_568344, nil, nil, nil)
 
-var listManagementTermDeleteTerm* = Call_ListManagementTermDeleteTerm_594102(
+var listManagementTermDeleteTerm* = Call_ListManagementTermDeleteTerm_568335(
     name: "listManagementTermDeleteTerm", meth: HttpMethod.HttpDelete,
     host: "azure.local",
     route: "/contentmoderator/lists/v1.0/termlists/{listId}/terms/{term}",
-    validator: validate_ListManagementTermDeleteTerm_594103, base: "",
-    url: url_ListManagementTermDeleteTerm_594104, schemes: {Scheme.Https})
+    validator: validate_ListManagementTermDeleteTerm_568336, base: "",
+    url: url_ListManagementTermDeleteTerm_568337, schemes: {Scheme.Https})
 type
-  Call_ImageModerationEvaluate_594112 = ref object of OpenApiRestCall_593425
-proc url_ImageModerationEvaluate_594114(protocol: Scheme; host: string; base: string;
+  Call_ImageModerationEvaluate_568345 = ref object of OpenApiRestCall_567658
+proc url_ImageModerationEvaluate_568347(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1721,7 +1721,7 @@ proc url_ImageModerationEvaluate_594114(protocol: Scheme; host: string; base: st
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ImageModerationEvaluate_594113(path: JsonNode; query: JsonNode;
+proc validate_ImageModerationEvaluate_568346(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns probabilities of the image containing racy or adult content.
   ## 
@@ -1733,10 +1733,10 @@ proc validate_ImageModerationEvaluate_594113(path: JsonNode; query: JsonNode;
   ##   CacheImage: JBool
   ##             : Whether to retain the submitted image for future use; defaults to false if omitted.
   section = newJObject()
-  var valid_594115 = query.getOrDefault("CacheImage")
-  valid_594115 = validateParameter(valid_594115, JBool, required = false, default = nil)
-  if valid_594115 != nil:
-    section.add "CacheImage", valid_594115
+  var valid_568348 = query.getOrDefault("CacheImage")
+  valid_568348 = validateParameter(valid_568348, JBool, required = false, default = nil)
+  if valid_568348 != nil:
+    section.add "CacheImage", valid_568348
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1745,37 +1745,37 @@ proc validate_ImageModerationEvaluate_594113(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594116: Call_ImageModerationEvaluate_594112; path: JsonNode;
+proc call*(call_568349: Call_ImageModerationEvaluate_568345; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns probabilities of the image containing racy or adult content.
   ## 
-  let valid = call_594116.validator(path, query, header, formData, body)
-  let scheme = call_594116.pickScheme
+  let valid = call_568349.validator(path, query, header, formData, body)
+  let scheme = call_568349.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594116.url(scheme.get, call_594116.host, call_594116.base,
-                         call_594116.route, valid.getOrDefault("path"),
+  let url = call_568349.url(scheme.get, call_568349.host, call_568349.base,
+                         call_568349.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594116, url, valid)
+  result = hook(call_568349, url, valid)
 
-proc call*(call_594117: Call_ImageModerationEvaluate_594112;
+proc call*(call_568350: Call_ImageModerationEvaluate_568345;
           CacheImage: bool = false): Recallable =
   ## imageModerationEvaluate
   ## Returns probabilities of the image containing racy or adult content.
   ##   CacheImage: bool
   ##             : Whether to retain the submitted image for future use; defaults to false if omitted.
-  var query_594118 = newJObject()
-  add(query_594118, "CacheImage", newJBool(CacheImage))
-  result = call_594117.call(nil, query_594118, nil, nil, nil)
+  var query_568351 = newJObject()
+  add(query_568351, "CacheImage", newJBool(CacheImage))
+  result = call_568350.call(nil, query_568351, nil, nil, nil)
 
-var imageModerationEvaluate* = Call_ImageModerationEvaluate_594112(
+var imageModerationEvaluate* = Call_ImageModerationEvaluate_568345(
     name: "imageModerationEvaluate", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/contentmoderator/moderate/v1.0/ProcessImage/Evaluate",
-    validator: validate_ImageModerationEvaluate_594113, base: "",
-    url: url_ImageModerationEvaluate_594114, schemes: {Scheme.Https})
+    validator: validate_ImageModerationEvaluate_568346, base: "",
+    url: url_ImageModerationEvaluate_568347, schemes: {Scheme.Https})
 type
-  Call_ImageModerationFindFaces_594119 = ref object of OpenApiRestCall_593425
-proc url_ImageModerationFindFaces_594121(protocol: Scheme; host: string;
+  Call_ImageModerationFindFaces_568352 = ref object of OpenApiRestCall_567658
+proc url_ImageModerationFindFaces_568354(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1783,7 +1783,7 @@ proc url_ImageModerationFindFaces_594121(protocol: Scheme; host: string;
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ImageModerationFindFaces_594120(path: JsonNode; query: JsonNode;
+proc validate_ImageModerationFindFaces_568353(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the list of faces found.
   ## 
@@ -1795,10 +1795,10 @@ proc validate_ImageModerationFindFaces_594120(path: JsonNode; query: JsonNode;
   ##   CacheImage: JBool
   ##             : Whether to retain the submitted image for future use; defaults to false if omitted.
   section = newJObject()
-  var valid_594122 = query.getOrDefault("CacheImage")
-  valid_594122 = validateParameter(valid_594122, JBool, required = false, default = nil)
-  if valid_594122 != nil:
-    section.add "CacheImage", valid_594122
+  var valid_568355 = query.getOrDefault("CacheImage")
+  valid_568355 = validateParameter(valid_568355, JBool, required = false, default = nil)
+  if valid_568355 != nil:
+    section.add "CacheImage", valid_568355
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1807,45 +1807,45 @@ proc validate_ImageModerationFindFaces_594120(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594123: Call_ImageModerationFindFaces_594119; path: JsonNode;
+proc call*(call_568356: Call_ImageModerationFindFaces_568352; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of faces found.
   ## 
-  let valid = call_594123.validator(path, query, header, formData, body)
-  let scheme = call_594123.pickScheme
+  let valid = call_568356.validator(path, query, header, formData, body)
+  let scheme = call_568356.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594123.url(scheme.get, call_594123.host, call_594123.base,
-                         call_594123.route, valid.getOrDefault("path"),
+  let url = call_568356.url(scheme.get, call_568356.host, call_568356.base,
+                         call_568356.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594123, url, valid)
+  result = hook(call_568356, url, valid)
 
-proc call*(call_594124: Call_ImageModerationFindFaces_594119;
+proc call*(call_568357: Call_ImageModerationFindFaces_568352;
           CacheImage: bool = false): Recallable =
   ## imageModerationFindFaces
   ## Returns the list of faces found.
   ##   CacheImage: bool
   ##             : Whether to retain the submitted image for future use; defaults to false if omitted.
-  var query_594125 = newJObject()
-  add(query_594125, "CacheImage", newJBool(CacheImage))
-  result = call_594124.call(nil, query_594125, nil, nil, nil)
+  var query_568358 = newJObject()
+  add(query_568358, "CacheImage", newJBool(CacheImage))
+  result = call_568357.call(nil, query_568358, nil, nil, nil)
 
-var imageModerationFindFaces* = Call_ImageModerationFindFaces_594119(
+var imageModerationFindFaces* = Call_ImageModerationFindFaces_568352(
     name: "imageModerationFindFaces", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/contentmoderator/moderate/v1.0/ProcessImage/FindFaces",
-    validator: validate_ImageModerationFindFaces_594120, base: "",
-    url: url_ImageModerationFindFaces_594121, schemes: {Scheme.Https})
+    validator: validate_ImageModerationFindFaces_568353, base: "",
+    url: url_ImageModerationFindFaces_568354, schemes: {Scheme.Https})
 type
-  Call_ImageModerationMatch_594126 = ref object of OpenApiRestCall_593425
-proc url_ImageModerationMatch_594128(protocol: Scheme; host: string; base: string;
+  Call_ImageModerationMatch_568359 = ref object of OpenApiRestCall_567658
+proc url_ImageModerationMatch_568361(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ImageModerationMatch_594127(path: JsonNode; query: JsonNode;
+proc validate_ImageModerationMatch_568360(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Fuzzily match an image against one of your custom Image Lists. You can create and manage your custom image lists using <a href="/docs/services/578ff44d2703741568569ab9/operations/578ff7b12703741568569abe">this</a> API. 
   ## 
@@ -1863,15 +1863,15 @@ proc validate_ImageModerationMatch_594127(path: JsonNode; query: JsonNode;
   ##   listId: JString
   ##         : The list Id.
   section = newJObject()
-  var valid_594129 = query.getOrDefault("CacheImage")
-  valid_594129 = validateParameter(valid_594129, JBool, required = false, default = nil)
-  if valid_594129 != nil:
-    section.add "CacheImage", valid_594129
-  var valid_594130 = query.getOrDefault("listId")
-  valid_594130 = validateParameter(valid_594130, JString, required = false,
+  var valid_568362 = query.getOrDefault("CacheImage")
+  valid_568362 = validateParameter(valid_568362, JBool, required = false, default = nil)
+  if valid_568362 != nil:
+    section.add "CacheImage", valid_568362
+  var valid_568363 = query.getOrDefault("listId")
+  valid_568363 = validateParameter(valid_568363, JString, required = false,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "listId", valid_594130
+  if valid_568363 != nil:
+    section.add "listId", valid_568363
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1880,7 +1880,7 @@ proc validate_ImageModerationMatch_594127(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594131: Call_ImageModerationMatch_594126; path: JsonNode;
+proc call*(call_568364: Call_ImageModerationMatch_568359; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Fuzzily match an image against one of your custom Image Lists. You can create and manage your custom image lists using <a href="/docs/services/578ff44d2703741568569ab9/operations/578ff7b12703741568569abe">this</a> API. 
   ## 
@@ -1888,16 +1888,16 @@ proc call*(call_594131: Call_ImageModerationMatch_594126; path: JsonNode;
   ## <br/>
   ## Note: Refresh Index must be run on the corresponding Image List before additions and removals are reflected in the response.
   ## 
-  let valid = call_594131.validator(path, query, header, formData, body)
-  let scheme = call_594131.pickScheme
+  let valid = call_568364.validator(path, query, header, formData, body)
+  let scheme = call_568364.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594131.url(scheme.get, call_594131.host, call_594131.base,
-                         call_594131.route, valid.getOrDefault("path"),
+  let url = call_568364.url(scheme.get, call_568364.host, call_568364.base,
+                         call_568364.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594131, url, valid)
+  result = hook(call_568364, url, valid)
 
-proc call*(call_594132: Call_ImageModerationMatch_594126; CacheImage: bool = false;
+proc call*(call_568365: Call_ImageModerationMatch_568359; CacheImage: bool = false;
           listId: string = ""): Recallable =
   ## imageModerationMatch
   ## Fuzzily match an image against one of your custom Image Lists. You can create and manage your custom image lists using <a href="/docs/services/578ff44d2703741568569ab9/operations/578ff7b12703741568569abe">this</a> API. 
@@ -1909,26 +1909,26 @@ proc call*(call_594132: Call_ImageModerationMatch_594126; CacheImage: bool = fal
   ##             : Whether to retain the submitted image for future use; defaults to false if omitted.
   ##   listId: string
   ##         : The list Id.
-  var query_594133 = newJObject()
-  add(query_594133, "CacheImage", newJBool(CacheImage))
-  add(query_594133, "listId", newJString(listId))
-  result = call_594132.call(nil, query_594133, nil, nil, nil)
+  var query_568366 = newJObject()
+  add(query_568366, "CacheImage", newJBool(CacheImage))
+  add(query_568366, "listId", newJString(listId))
+  result = call_568365.call(nil, query_568366, nil, nil, nil)
 
-var imageModerationMatch* = Call_ImageModerationMatch_594126(
+var imageModerationMatch* = Call_ImageModerationMatch_568359(
     name: "imageModerationMatch", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/contentmoderator/moderate/v1.0/ProcessImage/Match",
-    validator: validate_ImageModerationMatch_594127, base: "",
-    url: url_ImageModerationMatch_594128, schemes: {Scheme.Https})
+    validator: validate_ImageModerationMatch_568360, base: "",
+    url: url_ImageModerationMatch_568361, schemes: {Scheme.Https})
 type
-  Call_ImageModerationOCR_594134 = ref object of OpenApiRestCall_593425
-proc url_ImageModerationOCR_594136(protocol: Scheme; host: string; base: string;
+  Call_ImageModerationOCR_568367 = ref object of OpenApiRestCall_567658
+proc url_ImageModerationOCR_568369(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ImageModerationOCR_594135(path: JsonNode; query: JsonNode;
+proc validate_ImageModerationOCR_568368(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Returns any text found in the image for the language specified. If no language is specified in input then the detection defaults to English.
@@ -1949,22 +1949,22 @@ proc validate_ImageModerationOCR_594135(path: JsonNode; query: JsonNode;
   ## 
   ## Note: This impacts the response time.
   section = newJObject()
-  var valid_594137 = query.getOrDefault("CacheImage")
-  valid_594137 = validateParameter(valid_594137, JBool, required = false, default = nil)
-  if valid_594137 != nil:
-    section.add "CacheImage", valid_594137
+  var valid_568370 = query.getOrDefault("CacheImage")
+  valid_568370 = validateParameter(valid_568370, JBool, required = false, default = nil)
+  if valid_568370 != nil:
+    section.add "CacheImage", valid_568370
   assert query != nil,
         "query argument is necessary due to required `language` field"
-  var valid_594138 = query.getOrDefault("language")
-  valid_594138 = validateParameter(valid_594138, JString, required = true,
+  var valid_568371 = query.getOrDefault("language")
+  valid_568371 = validateParameter(valid_568371, JString, required = true,
                                  default = nil)
-  if valid_594138 != nil:
-    section.add "language", valid_594138
-  var valid_594152 = query.getOrDefault("enhanced")
-  valid_594152 = validateParameter(valid_594152, JBool, required = false,
+  if valid_568371 != nil:
+    section.add "language", valid_568371
+  var valid_568385 = query.getOrDefault("enhanced")
+  valid_568385 = validateParameter(valid_568385, JBool, required = false,
                                  default = newJBool(false))
-  if valid_594152 != nil:
-    section.add "enhanced", valid_594152
+  if valid_568385 != nil:
+    section.add "enhanced", valid_568385
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1973,20 +1973,20 @@ proc validate_ImageModerationOCR_594135(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594153: Call_ImageModerationOCR_594134; path: JsonNode;
+proc call*(call_568386: Call_ImageModerationOCR_568367; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns any text found in the image for the language specified. If no language is specified in input then the detection defaults to English.
   ## 
-  let valid = call_594153.validator(path, query, header, formData, body)
-  let scheme = call_594153.pickScheme
+  let valid = call_568386.validator(path, query, header, formData, body)
+  let scheme = call_568386.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594153.url(scheme.get, call_594153.host, call_594153.base,
-                         call_594153.route, valid.getOrDefault("path"),
+  let url = call_568386.url(scheme.get, call_568386.host, call_568386.base,
+                         call_568386.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594153, url, valid)
+  result = hook(call_568386, url, valid)
 
-proc call*(call_594154: Call_ImageModerationOCR_594134; language: string;
+proc call*(call_568387: Call_ImageModerationOCR_568367; language: string;
           CacheImage: bool = false; enhanced: bool = false): Recallable =
   ## imageModerationOCR
   ## Returns any text found in the image for the language specified. If no language is specified in input then the detection defaults to English.
@@ -2000,27 +2000,27 @@ proc call*(call_594154: Call_ImageModerationOCR_594134; language: string;
   ## image/tiff is not supported when enhanced is set to true
   ## 
   ## Note: This impacts the response time.
-  var query_594155 = newJObject()
-  add(query_594155, "CacheImage", newJBool(CacheImage))
-  add(query_594155, "language", newJString(language))
-  add(query_594155, "enhanced", newJBool(enhanced))
-  result = call_594154.call(nil, query_594155, nil, nil, nil)
+  var query_568388 = newJObject()
+  add(query_568388, "CacheImage", newJBool(CacheImage))
+  add(query_568388, "language", newJString(language))
+  add(query_568388, "enhanced", newJBool(enhanced))
+  result = call_568387.call(nil, query_568388, nil, nil, nil)
 
-var imageModerationOCR* = Call_ImageModerationOCR_594134(
+var imageModerationOCR* = Call_ImageModerationOCR_568367(
     name: "imageModerationOCR", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/contentmoderator/moderate/v1.0/ProcessImage/OCR",
-    validator: validate_ImageModerationOCR_594135, base: "",
-    url: url_ImageModerationOCR_594136, schemes: {Scheme.Https})
+    validator: validate_ImageModerationOCR_568368, base: "",
+    url: url_ImageModerationOCR_568369, schemes: {Scheme.Https})
 type
-  Call_TextModerationDetectLanguage_594156 = ref object of OpenApiRestCall_593425
-proc url_TextModerationDetectLanguage_594158(protocol: Scheme; host: string;
+  Call_TextModerationDetectLanguage_568389 = ref object of OpenApiRestCall_567658
+proc url_TextModerationDetectLanguage_568391(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TextModerationDetectLanguage_594157(path: JsonNode; query: JsonNode;
+proc validate_TextModerationDetectLanguage_568390(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation will detect the language of given input content. Returns the <a href="http://www-01.sil.org/iso639-3/codes.asp">ISO 639-3 code</a> for the predominant language comprising the submitted text. Over 110 languages supported.
   ## 
@@ -2036,11 +2036,11 @@ proc validate_TextModerationDetectLanguage_594157(path: JsonNode; query: JsonNod
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Content-Type` field"
-  var valid_594159 = header.getOrDefault("Content-Type")
-  valid_594159 = validateParameter(valid_594159, JString, required = true,
+  var valid_568392 = header.getOrDefault("Content-Type")
+  valid_568392 = validateParameter(valid_568392, JString, required = true,
                                  default = newJString("text/plain"))
-  if valid_594159 != nil:
-    section.add "Content-Type", valid_594159
+  if valid_568392 != nil:
+    section.add "Content-Type", valid_568392
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2052,39 +2052,39 @@ proc validate_TextModerationDetectLanguage_594157(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594161: Call_TextModerationDetectLanguage_594156; path: JsonNode;
+proc call*(call_568394: Call_TextModerationDetectLanguage_568389; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation will detect the language of given input content. Returns the <a href="http://www-01.sil.org/iso639-3/codes.asp">ISO 639-3 code</a> for the predominant language comprising the submitted text. Over 110 languages supported.
   ## 
-  let valid = call_594161.validator(path, query, header, formData, body)
-  let scheme = call_594161.pickScheme
+  let valid = call_568394.validator(path, query, header, formData, body)
+  let scheme = call_568394.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594161.url(scheme.get, call_594161.host, call_594161.base,
-                         call_594161.route, valid.getOrDefault("path"),
+  let url = call_568394.url(scheme.get, call_568394.host, call_568394.base,
+                         call_568394.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594161, url, valid)
+  result = hook(call_568394, url, valid)
 
-proc call*(call_594162: Call_TextModerationDetectLanguage_594156;
+proc call*(call_568395: Call_TextModerationDetectLanguage_568389;
           TextContent: JsonNode): Recallable =
   ## textModerationDetectLanguage
   ## This operation will detect the language of given input content. Returns the <a href="http://www-01.sil.org/iso639-3/codes.asp">ISO 639-3 code</a> for the predominant language comprising the submitted text. Over 110 languages supported.
   ##   TextContent: JObject (required)
   ##              : Content to screen.
-  var body_594163 = newJObject()
+  var body_568396 = newJObject()
   if TextContent != nil:
-    body_594163 = TextContent
-  result = call_594162.call(nil, nil, nil, nil, body_594163)
+    body_568396 = TextContent
+  result = call_568395.call(nil, nil, nil, nil, body_568396)
 
-var textModerationDetectLanguage* = Call_TextModerationDetectLanguage_594156(
+var textModerationDetectLanguage* = Call_TextModerationDetectLanguage_568389(
     name: "textModerationDetectLanguage", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/contentmoderator/moderate/v1.0/ProcessText/DetectLanguage",
-    validator: validate_TextModerationDetectLanguage_594157, base: "",
-    url: url_TextModerationDetectLanguage_594158, schemes: {Scheme.Https})
+    validator: validate_TextModerationDetectLanguage_568390, base: "",
+    url: url_TextModerationDetectLanguage_568391, schemes: {Scheme.Https})
 type
-  Call_TextModerationScreenText_594164 = ref object of OpenApiRestCall_593425
-proc url_TextModerationScreenText_594166(protocol: Scheme; host: string;
+  Call_TextModerationScreenText_568397 = ref object of OpenApiRestCall_567658
+proc url_TextModerationScreenText_568399(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2092,7 +2092,7 @@ proc url_TextModerationScreenText_594166(protocol: Scheme; host: string;
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TextModerationScreenText_594165(path: JsonNode; query: JsonNode;
+proc validate_TextModerationScreenText_568398(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Detects profanity in more than 100 languages and match against custom and shared blacklists.
   ## 
@@ -2112,31 +2112,31 @@ proc validate_TextModerationScreenText_594165(path: JsonNode; query: JsonNode;
   ##   classify: JBool
   ##           : Classify input.
   section = newJObject()
-  var valid_594167 = query.getOrDefault("language")
-  valid_594167 = validateParameter(valid_594167, JString, required = false,
+  var valid_568400 = query.getOrDefault("language")
+  valid_568400 = validateParameter(valid_568400, JString, required = false,
                                  default = nil)
-  if valid_594167 != nil:
-    section.add "language", valid_594167
-  var valid_594168 = query.getOrDefault("autocorrect")
-  valid_594168 = validateParameter(valid_594168, JBool, required = false,
+  if valid_568400 != nil:
+    section.add "language", valid_568400
+  var valid_568401 = query.getOrDefault("autocorrect")
+  valid_568401 = validateParameter(valid_568401, JBool, required = false,
                                  default = newJBool(false))
-  if valid_594168 != nil:
-    section.add "autocorrect", valid_594168
-  var valid_594169 = query.getOrDefault("PII")
-  valid_594169 = validateParameter(valid_594169, JBool, required = false,
+  if valid_568401 != nil:
+    section.add "autocorrect", valid_568401
+  var valid_568402 = query.getOrDefault("PII")
+  valid_568402 = validateParameter(valid_568402, JBool, required = false,
                                  default = newJBool(false))
-  if valid_594169 != nil:
-    section.add "PII", valid_594169
-  var valid_594170 = query.getOrDefault("listId")
-  valid_594170 = validateParameter(valid_594170, JString, required = false,
+  if valid_568402 != nil:
+    section.add "PII", valid_568402
+  var valid_568403 = query.getOrDefault("listId")
+  valid_568403 = validateParameter(valid_568403, JString, required = false,
                                  default = nil)
-  if valid_594170 != nil:
-    section.add "listId", valid_594170
-  var valid_594171 = query.getOrDefault("classify")
-  valid_594171 = validateParameter(valid_594171, JBool, required = false,
+  if valid_568403 != nil:
+    section.add "listId", valid_568403
+  var valid_568404 = query.getOrDefault("classify")
+  valid_568404 = validateParameter(valid_568404, JBool, required = false,
                                  default = newJBool(false))
-  if valid_594171 != nil:
-    section.add "classify", valid_594171
+  if valid_568404 != nil:
+    section.add "classify", valid_568404
   result.add "query", section
   ## parameters in `header` object:
   ##   Content-Type: JString (required)
@@ -2144,11 +2144,11 @@ proc validate_TextModerationScreenText_594165(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Content-Type` field"
-  var valid_594172 = header.getOrDefault("Content-Type")
-  valid_594172 = validateParameter(valid_594172, JString, required = true,
+  var valid_568405 = header.getOrDefault("Content-Type")
+  valid_568405 = validateParameter(valid_568405, JString, required = true,
                                  default = newJString("text/plain"))
-  if valid_594172 != nil:
-    section.add "Content-Type", valid_594172
+  if valid_568405 != nil:
+    section.add "Content-Type", valid_568405
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2160,20 +2160,20 @@ proc validate_TextModerationScreenText_594165(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594174: Call_TextModerationScreenText_594164; path: JsonNode;
+proc call*(call_568407: Call_TextModerationScreenText_568397; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Detects profanity in more than 100 languages and match against custom and shared blacklists.
   ## 
-  let valid = call_594174.validator(path, query, header, formData, body)
-  let scheme = call_594174.pickScheme
+  let valid = call_568407.validator(path, query, header, formData, body)
+  let scheme = call_568407.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594174.url(scheme.get, call_594174.host, call_594174.base,
-                         call_594174.route, valid.getOrDefault("path"),
+  let url = call_568407.url(scheme.get, call_568407.host, call_568407.base,
+                         call_568407.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594174, url, valid)
+  result = hook(call_568407, url, valid)
 
-proc call*(call_594175: Call_TextModerationScreenText_594164;
+proc call*(call_568408: Call_TextModerationScreenText_568397;
           TextContent: JsonNode; language: string = ""; autocorrect: bool = false;
           PII: bool = false; listId: string = ""; classify: bool = false): Recallable =
   ## textModerationScreenText
@@ -2190,26 +2190,26 @@ proc call*(call_594175: Call_TextModerationScreenText_594164;
   ##           : Classify input.
   ##   TextContent: JObject (required)
   ##              : Content to screen.
-  var query_594176 = newJObject()
-  var body_594177 = newJObject()
-  add(query_594176, "language", newJString(language))
-  add(query_594176, "autocorrect", newJBool(autocorrect))
-  add(query_594176, "PII", newJBool(PII))
-  add(query_594176, "listId", newJString(listId))
-  add(query_594176, "classify", newJBool(classify))
+  var query_568409 = newJObject()
+  var body_568410 = newJObject()
+  add(query_568409, "language", newJString(language))
+  add(query_568409, "autocorrect", newJBool(autocorrect))
+  add(query_568409, "PII", newJBool(PII))
+  add(query_568409, "listId", newJString(listId))
+  add(query_568409, "classify", newJBool(classify))
   if TextContent != nil:
-    body_594177 = TextContent
-  result = call_594175.call(nil, query_594176, nil, nil, body_594177)
+    body_568410 = TextContent
+  result = call_568408.call(nil, query_568409, nil, nil, body_568410)
 
-var textModerationScreenText* = Call_TextModerationScreenText_594164(
+var textModerationScreenText* = Call_TextModerationScreenText_568397(
     name: "textModerationScreenText", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/contentmoderator/moderate/v1.0/ProcessText/Screen/",
-    validator: validate_TextModerationScreenText_594165, base: "",
-    url: url_TextModerationScreenText_594166, schemes: {Scheme.Https})
+    validator: validate_TextModerationScreenText_568398, base: "",
+    url: url_TextModerationScreenText_568399, schemes: {Scheme.Https})
 type
-  Call_ReviewsCreateJob_594178 = ref object of OpenApiRestCall_593425
-proc url_ReviewsCreateJob_594180(protocol: Scheme; host: string; base: string;
+  Call_ReviewsCreateJob_568411 = ref object of OpenApiRestCall_567658
+proc url_ReviewsCreateJob_568413(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2226,7 +2226,7 @@ proc url_ReviewsCreateJob_594180(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReviewsCreateJob_594179(path: JsonNode; query: JsonNode;
+proc validate_ReviewsCreateJob_568412(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## A job Id will be returned for the content posted on this endpoint. 
@@ -2285,11 +2285,11 @@ proc validate_ReviewsCreateJob_594179(path: JsonNode; query: JsonNode;
   ##           : Your team name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `teamName` field"
-  var valid_594181 = path.getOrDefault("teamName")
-  valid_594181 = validateParameter(valid_594181, JString, required = true,
+  var valid_568414 = path.getOrDefault("teamName")
+  valid_568414 = validateParameter(valid_568414, JString, required = true,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "teamName", valid_594181
+  if valid_568414 != nil:
+    section.add "teamName", valid_568414
   result.add "path", section
   ## parameters in `query` object:
   ##   WorkflowName: JString (required)
@@ -2303,26 +2303,26 @@ proc validate_ReviewsCreateJob_594179(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `WorkflowName` field"
-  var valid_594182 = query.getOrDefault("WorkflowName")
-  valid_594182 = validateParameter(valid_594182, JString, required = true,
+  var valid_568415 = query.getOrDefault("WorkflowName")
+  valid_568415 = validateParameter(valid_568415, JString, required = true,
                                  default = nil)
-  if valid_594182 != nil:
-    section.add "WorkflowName", valid_594182
-  var valid_594183 = query.getOrDefault("CallBackEndpoint")
-  valid_594183 = validateParameter(valid_594183, JString, required = false,
+  if valid_568415 != nil:
+    section.add "WorkflowName", valid_568415
+  var valid_568416 = query.getOrDefault("CallBackEndpoint")
+  valid_568416 = validateParameter(valid_568416, JString, required = false,
                                  default = nil)
-  if valid_594183 != nil:
-    section.add "CallBackEndpoint", valid_594183
-  var valid_594184 = query.getOrDefault("ContentType")
-  valid_594184 = validateParameter(valid_594184, JString, required = true,
+  if valid_568416 != nil:
+    section.add "CallBackEndpoint", valid_568416
+  var valid_568417 = query.getOrDefault("ContentType")
+  valid_568417 = validateParameter(valid_568417, JString, required = true,
                                  default = newJString("Image"))
-  if valid_594184 != nil:
-    section.add "ContentType", valid_594184
-  var valid_594185 = query.getOrDefault("ContentId")
-  valid_594185 = validateParameter(valid_594185, JString, required = true,
+  if valid_568417 != nil:
+    section.add "ContentType", valid_568417
+  var valid_568418 = query.getOrDefault("ContentId")
+  valid_568418 = validateParameter(valid_568418, JString, required = true,
                                  default = nil)
-  if valid_594185 != nil:
-    section.add "ContentId", valid_594185
+  if valid_568418 != nil:
+    section.add "ContentId", valid_568418
   result.add "query", section
   ## parameters in `header` object:
   ##   Content-Type: JString (required)
@@ -2330,11 +2330,11 @@ proc validate_ReviewsCreateJob_594179(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Content-Type` field"
-  var valid_594186 = header.getOrDefault("Content-Type")
-  valid_594186 = validateParameter(valid_594186, JString, required = true,
+  var valid_568419 = header.getOrDefault("Content-Type")
+  valid_568419 = validateParameter(valid_568419, JString, required = true,
                                  default = newJString("application/json"))
-  if valid_594186 != nil:
-    section.add "Content-Type", valid_594186
+  if valid_568419 != nil:
+    section.add "Content-Type", valid_568419
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2346,7 +2346,7 @@ proc validate_ReviewsCreateJob_594179(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594188: Call_ReviewsCreateJob_594178; path: JsonNode;
+proc call*(call_568421: Call_ReviewsCreateJob_568411; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## A job Id will be returned for the content posted on this endpoint. 
   ## 
@@ -2397,23 +2397,23 @@ proc call*(call_594188: Call_ReviewsCreateJob_594178; path: JsonNode;
   ## 
   ## </p>.
   ## 
-  let valid = call_594188.validator(path, query, header, formData, body)
-  let scheme = call_594188.pickScheme
+  let valid = call_568421.validator(path, query, header, formData, body)
+  let scheme = call_568421.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594188.url(scheme.get, call_594188.host, call_594188.base,
-                         call_594188.route, valid.getOrDefault("path"),
+  let url = call_568421.url(scheme.get, call_568421.host, call_568421.base,
+                         call_568421.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594188, url, valid)
+  result = hook(call_568421, url, valid)
 
-var reviewsCreateJob* = Call_ReviewsCreateJob_594178(name: "reviewsCreateJob",
+var reviewsCreateJob* = Call_ReviewsCreateJob_568411(name: "reviewsCreateJob",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/contentmoderator/review/v1.0/teams/{teamName}/jobs",
-    validator: validate_ReviewsCreateJob_594179, base: "",
-    url: url_ReviewsCreateJob_594180, schemes: {Scheme.Https})
+    validator: validate_ReviewsCreateJob_568412, base: "",
+    url: url_ReviewsCreateJob_568413, schemes: {Scheme.Https})
 type
-  Call_ReviewsGetJobDetails_594193 = ref object of OpenApiRestCall_593425
-proc url_ReviewsGetJobDetails_594195(protocol: Scheme; host: string; base: string;
+  Call_ReviewsGetJobDetails_568426 = ref object of OpenApiRestCall_567658
+proc url_ReviewsGetJobDetails_568428(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2432,7 +2432,7 @@ proc url_ReviewsGetJobDetails_594195(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReviewsGetJobDetails_594194(path: JsonNode; query: JsonNode;
+proc validate_ReviewsGetJobDetails_568427(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the Job Details for a Job Id.
   ## 
@@ -2445,16 +2445,16 @@ proc validate_ReviewsGetJobDetails_594194(path: JsonNode; query: JsonNode;
   ##        : Id of the job.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `teamName` field"
-  var valid_594196 = path.getOrDefault("teamName")
-  valid_594196 = validateParameter(valid_594196, JString, required = true,
+  var valid_568429 = path.getOrDefault("teamName")
+  valid_568429 = validateParameter(valid_568429, JString, required = true,
                                  default = nil)
-  if valid_594196 != nil:
-    section.add "teamName", valid_594196
-  var valid_594197 = path.getOrDefault("JobId")
-  valid_594197 = validateParameter(valid_594197, JString, required = true,
+  if valid_568429 != nil:
+    section.add "teamName", valid_568429
+  var valid_568430 = path.getOrDefault("JobId")
+  valid_568430 = validateParameter(valid_568430, JString, required = true,
                                  default = nil)
-  if valid_594197 != nil:
-    section.add "JobId", valid_594197
+  if valid_568430 != nil:
+    section.add "JobId", valid_568430
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2465,20 +2465,20 @@ proc validate_ReviewsGetJobDetails_594194(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594198: Call_ReviewsGetJobDetails_594193; path: JsonNode;
+proc call*(call_568431: Call_ReviewsGetJobDetails_568426; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the Job Details for a Job Id.
   ## 
-  let valid = call_594198.validator(path, query, header, formData, body)
-  let scheme = call_594198.pickScheme
+  let valid = call_568431.validator(path, query, header, formData, body)
+  let scheme = call_568431.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594198.url(scheme.get, call_594198.host, call_594198.base,
-                         call_594198.route, valid.getOrDefault("path"),
+  let url = call_568431.url(scheme.get, call_568431.host, call_568431.base,
+                         call_568431.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594198, url, valid)
+  result = hook(call_568431, url, valid)
 
-proc call*(call_594199: Call_ReviewsGetJobDetails_594193; teamName: string;
+proc call*(call_568432: Call_ReviewsGetJobDetails_568426; teamName: string;
           JobId: string): Recallable =
   ## reviewsGetJobDetails
   ## Get the Job Details for a Job Id.
@@ -2486,19 +2486,19 @@ proc call*(call_594199: Call_ReviewsGetJobDetails_594193; teamName: string;
   ##           : Your Team Name.
   ##   JobId: string (required)
   ##        : Id of the job.
-  var path_594200 = newJObject()
-  add(path_594200, "teamName", newJString(teamName))
-  add(path_594200, "JobId", newJString(JobId))
-  result = call_594199.call(path_594200, nil, nil, nil, nil)
+  var path_568433 = newJObject()
+  add(path_568433, "teamName", newJString(teamName))
+  add(path_568433, "JobId", newJString(JobId))
+  result = call_568432.call(path_568433, nil, nil, nil, nil)
 
-var reviewsGetJobDetails* = Call_ReviewsGetJobDetails_594193(
+var reviewsGetJobDetails* = Call_ReviewsGetJobDetails_568426(
     name: "reviewsGetJobDetails", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/contentmoderator/review/v1.0/teams/{teamName}/jobs/{JobId}",
-    validator: validate_ReviewsGetJobDetails_594194, base: "",
-    url: url_ReviewsGetJobDetails_594195, schemes: {Scheme.Https})
+    validator: validate_ReviewsGetJobDetails_568427, base: "",
+    url: url_ReviewsGetJobDetails_568428, schemes: {Scheme.Https})
 type
-  Call_ReviewsCreateReviews_594201 = ref object of OpenApiRestCall_593425
-proc url_ReviewsCreateReviews_594203(protocol: Scheme; host: string; base: string;
+  Call_ReviewsCreateReviews_568434 = ref object of OpenApiRestCall_567658
+proc url_ReviewsCreateReviews_568436(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2515,7 +2515,7 @@ proc url_ReviewsCreateReviews_594203(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReviewsCreateReviews_594202(path: JsonNode; query: JsonNode;
+proc validate_ReviewsCreateReviews_568435(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The reviews created would show up for Reviewers on your team. As Reviewers complete reviewing, results of the Review would be POSTED (i.e. HTTP POST) on the specified CallBackEndpoint.
   ## 
@@ -2549,21 +2549,21 @@ proc validate_ReviewsCreateReviews_594202(path: JsonNode; query: JsonNode;
   ##           : Your team name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `teamName` field"
-  var valid_594204 = path.getOrDefault("teamName")
-  valid_594204 = validateParameter(valid_594204, JString, required = true,
+  var valid_568437 = path.getOrDefault("teamName")
+  valid_568437 = validateParameter(valid_568437, JString, required = true,
                                  default = nil)
-  if valid_594204 != nil:
-    section.add "teamName", valid_594204
+  if valid_568437 != nil:
+    section.add "teamName", valid_568437
   result.add "path", section
   ## parameters in `query` object:
   ##   subTeam: JString
   ##          : SubTeam of your team, you want to assign the created review to.
   section = newJObject()
-  var valid_594205 = query.getOrDefault("subTeam")
-  valid_594205 = validateParameter(valid_594205, JString, required = false,
+  var valid_568438 = query.getOrDefault("subTeam")
+  valid_568438 = validateParameter(valid_568438, JString, required = false,
                                  default = nil)
-  if valid_594205 != nil:
-    section.add "subTeam", valid_594205
+  if valid_568438 != nil:
+    section.add "subTeam", valid_568438
   result.add "query", section
   ## parameters in `header` object:
   ##   UrlContentType: JString (required)
@@ -2571,11 +2571,11 @@ proc validate_ReviewsCreateReviews_594202(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `UrlContentType` field"
-  var valid_594206 = header.getOrDefault("UrlContentType")
-  valid_594206 = validateParameter(valid_594206, JString, required = true,
+  var valid_568439 = header.getOrDefault("UrlContentType")
+  valid_568439 = validateParameter(valid_568439, JString, required = true,
                                  default = nil)
-  if valid_594206 != nil:
-    section.add "UrlContentType", valid_594206
+  if valid_568439 != nil:
+    section.add "UrlContentType", valid_568439
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2587,7 +2587,7 @@ proc validate_ReviewsCreateReviews_594202(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594208: Call_ReviewsCreateReviews_594201; path: JsonNode;
+proc call*(call_568441: Call_ReviewsCreateReviews_568434; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The reviews created would show up for Reviewers on your team. As Reviewers complete reviewing, results of the Review would be POSTED (i.e. HTTP POST) on the specified CallBackEndpoint.
   ## 
@@ -2614,16 +2614,16 @@ proc call*(call_594208: Call_ReviewsCreateReviews_594201; path: JsonNode;
   ## 
   ## </p>.
   ## 
-  let valid = call_594208.validator(path, query, header, formData, body)
-  let scheme = call_594208.pickScheme
+  let valid = call_568441.validator(path, query, header, formData, body)
+  let scheme = call_568441.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594208.url(scheme.get, call_594208.host, call_594208.base,
-                         call_594208.route, valid.getOrDefault("path"),
+  let url = call_568441.url(scheme.get, call_568441.host, call_568441.base,
+                         call_568441.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594208, url, valid)
+  result = hook(call_568441, url, valid)
 
-proc call*(call_594209: Call_ReviewsCreateReviews_594201;
+proc call*(call_568442: Call_ReviewsCreateReviews_568434;
           createReviewBody: JsonNode; teamName: string; subTeam: string = ""): Recallable =
   ## reviewsCreateReviews
   ## The reviews created would show up for Reviewers on your team. As Reviewers complete reviewing, results of the Review would be POSTED (i.e. HTTP POST) on the specified CallBackEndpoint.
@@ -2656,23 +2656,23 @@ proc call*(call_594209: Call_ReviewsCreateReviews_594201;
   ##           : Your team name.
   ##   subTeam: string
   ##          : SubTeam of your team, you want to assign the created review to.
-  var path_594210 = newJObject()
-  var query_594211 = newJObject()
-  var body_594212 = newJObject()
+  var path_568443 = newJObject()
+  var query_568444 = newJObject()
+  var body_568445 = newJObject()
   if createReviewBody != nil:
-    body_594212 = createReviewBody
-  add(path_594210, "teamName", newJString(teamName))
-  add(query_594211, "subTeam", newJString(subTeam))
-  result = call_594209.call(path_594210, query_594211, nil, nil, body_594212)
+    body_568445 = createReviewBody
+  add(path_568443, "teamName", newJString(teamName))
+  add(query_568444, "subTeam", newJString(subTeam))
+  result = call_568442.call(path_568443, query_568444, nil, nil, body_568445)
 
-var reviewsCreateReviews* = Call_ReviewsCreateReviews_594201(
+var reviewsCreateReviews* = Call_ReviewsCreateReviews_568434(
     name: "reviewsCreateReviews", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/contentmoderator/review/v1.0/teams/{teamName}/reviews",
-    validator: validate_ReviewsCreateReviews_594202, base: "",
-    url: url_ReviewsCreateReviews_594203, schemes: {Scheme.Https})
+    validator: validate_ReviewsCreateReviews_568435, base: "",
+    url: url_ReviewsCreateReviews_568436, schemes: {Scheme.Https})
 type
-  Call_ReviewsGetReview_594213 = ref object of OpenApiRestCall_593425
-proc url_ReviewsGetReview_594215(protocol: Scheme; host: string; base: string;
+  Call_ReviewsGetReview_568446 = ref object of OpenApiRestCall_567658
+proc url_ReviewsGetReview_568448(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2691,7 +2691,7 @@ proc url_ReviewsGetReview_594215(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReviewsGetReview_594214(path: JsonNode; query: JsonNode;
+proc validate_ReviewsGetReview_568447(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Returns review details for the review Id passed.
@@ -2705,16 +2705,16 @@ proc validate_ReviewsGetReview_594214(path: JsonNode; query: JsonNode;
   ##           : Your Team Name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `reviewId` field"
-  var valid_594216 = path.getOrDefault("reviewId")
-  valid_594216 = validateParameter(valid_594216, JString, required = true,
+  var valid_568449 = path.getOrDefault("reviewId")
+  valid_568449 = validateParameter(valid_568449, JString, required = true,
                                  default = nil)
-  if valid_594216 != nil:
-    section.add "reviewId", valid_594216
-  var valid_594217 = path.getOrDefault("teamName")
-  valid_594217 = validateParameter(valid_594217, JString, required = true,
+  if valid_568449 != nil:
+    section.add "reviewId", valid_568449
+  var valid_568450 = path.getOrDefault("teamName")
+  valid_568450 = validateParameter(valid_568450, JString, required = true,
                                  default = nil)
-  if valid_594217 != nil:
-    section.add "teamName", valid_594217
+  if valid_568450 != nil:
+    section.add "teamName", valid_568450
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2725,20 +2725,20 @@ proc validate_ReviewsGetReview_594214(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594218: Call_ReviewsGetReview_594213; path: JsonNode;
+proc call*(call_568451: Call_ReviewsGetReview_568446; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns review details for the review Id passed.
   ## 
-  let valid = call_594218.validator(path, query, header, formData, body)
-  let scheme = call_594218.pickScheme
+  let valid = call_568451.validator(path, query, header, formData, body)
+  let scheme = call_568451.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594218.url(scheme.get, call_594218.host, call_594218.base,
-                         call_594218.route, valid.getOrDefault("path"),
+  let url = call_568451.url(scheme.get, call_568451.host, call_568451.base,
+                         call_568451.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594218, url, valid)
+  result = hook(call_568451, url, valid)
 
-proc call*(call_594219: Call_ReviewsGetReview_594213; reviewId: string;
+proc call*(call_568452: Call_ReviewsGetReview_568446; reviewId: string;
           teamName: string): Recallable =
   ## reviewsGetReview
   ## Returns review details for the review Id passed.
@@ -2746,19 +2746,19 @@ proc call*(call_594219: Call_ReviewsGetReview_594213; reviewId: string;
   ##           : Id of the review.
   ##   teamName: string (required)
   ##           : Your Team Name.
-  var path_594220 = newJObject()
-  add(path_594220, "reviewId", newJString(reviewId))
-  add(path_594220, "teamName", newJString(teamName))
-  result = call_594219.call(path_594220, nil, nil, nil, nil)
+  var path_568453 = newJObject()
+  add(path_568453, "reviewId", newJString(reviewId))
+  add(path_568453, "teamName", newJString(teamName))
+  result = call_568452.call(path_568453, nil, nil, nil, nil)
 
-var reviewsGetReview* = Call_ReviewsGetReview_594213(name: "reviewsGetReview",
+var reviewsGetReview* = Call_ReviewsGetReview_568446(name: "reviewsGetReview",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/contentmoderator/review/v1.0/teams/{teamName}/reviews/{reviewId}",
-    validator: validate_ReviewsGetReview_594214, base: "",
-    url: url_ReviewsGetReview_594215, schemes: {Scheme.Https})
+    validator: validate_ReviewsGetReview_568447, base: "",
+    url: url_ReviewsGetReview_568448, schemes: {Scheme.Https})
 type
-  Call_ReviewsAddVideoFrame_594233 = ref object of OpenApiRestCall_593425
-proc url_ReviewsAddVideoFrame_594235(protocol: Scheme; host: string; base: string;
+  Call_ReviewsAddVideoFrame_568466 = ref object of OpenApiRestCall_567658
+proc url_ReviewsAddVideoFrame_568468(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2778,7 +2778,7 @@ proc url_ReviewsAddVideoFrame_594235(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReviewsAddVideoFrame_594234(path: JsonNode; query: JsonNode;
+proc validate_ReviewsAddVideoFrame_568467(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The reviews created would show up for Reviewers on your team. As Reviewers complete reviewing, results of the Review would be POSTED (i.e. HTTP POST) on the specified CallBackEndpoint.
   ## 
@@ -2814,25 +2814,25 @@ proc validate_ReviewsAddVideoFrame_594234(path: JsonNode; query: JsonNode;
   ##           : Your team name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `reviewId` field"
-  var valid_594236 = path.getOrDefault("reviewId")
-  valid_594236 = validateParameter(valid_594236, JString, required = true,
+  var valid_568469 = path.getOrDefault("reviewId")
+  valid_568469 = validateParameter(valid_568469, JString, required = true,
                                  default = nil)
-  if valid_594236 != nil:
-    section.add "reviewId", valid_594236
-  var valid_594237 = path.getOrDefault("teamName")
-  valid_594237 = validateParameter(valid_594237, JString, required = true,
+  if valid_568469 != nil:
+    section.add "reviewId", valid_568469
+  var valid_568470 = path.getOrDefault("teamName")
+  valid_568470 = validateParameter(valid_568470, JString, required = true,
                                  default = nil)
-  if valid_594237 != nil:
-    section.add "teamName", valid_594237
+  if valid_568470 != nil:
+    section.add "teamName", valid_568470
   result.add "path", section
   ## parameters in `query` object:
   ##   timescale: JInt
   ##            : Timescale of the video you are adding frames to.
   section = newJObject()
-  var valid_594238 = query.getOrDefault("timescale")
-  valid_594238 = validateParameter(valid_594238, JInt, required = false, default = nil)
-  if valid_594238 != nil:
-    section.add "timescale", valid_594238
+  var valid_568471 = query.getOrDefault("timescale")
+  valid_568471 = validateParameter(valid_568471, JInt, required = false, default = nil)
+  if valid_568471 != nil:
+    section.add "timescale", valid_568471
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2841,7 +2841,7 @@ proc validate_ReviewsAddVideoFrame_594234(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594239: Call_ReviewsAddVideoFrame_594233; path: JsonNode;
+proc call*(call_568472: Call_ReviewsAddVideoFrame_568466; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The reviews created would show up for Reviewers on your team. As Reviewers complete reviewing, results of the Review would be POSTED (i.e. HTTP POST) on the specified CallBackEndpoint.
   ## 
@@ -2868,16 +2868,16 @@ proc call*(call_594239: Call_ReviewsAddVideoFrame_594233; path: JsonNode;
   ## 
   ## </p>.
   ## 
-  let valid = call_594239.validator(path, query, header, formData, body)
-  let scheme = call_594239.pickScheme
+  let valid = call_568472.validator(path, query, header, formData, body)
+  let scheme = call_568472.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594239.url(scheme.get, call_594239.host, call_594239.base,
-                         call_594239.route, valid.getOrDefault("path"),
+  let url = call_568472.url(scheme.get, call_568472.host, call_568472.base,
+                         call_568472.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594239, url, valid)
+  result = hook(call_568472, url, valid)
 
-proc call*(call_594240: Call_ReviewsAddVideoFrame_594233; reviewId: string;
+proc call*(call_568473: Call_ReviewsAddVideoFrame_568466; reviewId: string;
           teamName: string; timescale: int = 0): Recallable =
   ## reviewsAddVideoFrame
   ## The reviews created would show up for Reviewers on your team. As Reviewers complete reviewing, results of the Review would be POSTED (i.e. HTTP POST) on the specified CallBackEndpoint.
@@ -2910,20 +2910,20 @@ proc call*(call_594240: Call_ReviewsAddVideoFrame_594233; reviewId: string;
   ##           : Id of the review.
   ##   teamName: string (required)
   ##           : Your team name.
-  var path_594241 = newJObject()
-  var query_594242 = newJObject()
-  add(query_594242, "timescale", newJInt(timescale))
-  add(path_594241, "reviewId", newJString(reviewId))
-  add(path_594241, "teamName", newJString(teamName))
-  result = call_594240.call(path_594241, query_594242, nil, nil, nil)
+  var path_568474 = newJObject()
+  var query_568475 = newJObject()
+  add(query_568475, "timescale", newJInt(timescale))
+  add(path_568474, "reviewId", newJString(reviewId))
+  add(path_568474, "teamName", newJString(teamName))
+  result = call_568473.call(path_568474, query_568475, nil, nil, nil)
 
-var reviewsAddVideoFrame* = Call_ReviewsAddVideoFrame_594233(
+var reviewsAddVideoFrame* = Call_ReviewsAddVideoFrame_568466(
     name: "reviewsAddVideoFrame", meth: HttpMethod.HttpPost, host: "azure.local", route: "/contentmoderator/review/v1.0/teams/{teamName}/reviews/{reviewId}/frames",
-    validator: validate_ReviewsAddVideoFrame_594234, base: "",
-    url: url_ReviewsAddVideoFrame_594235, schemes: {Scheme.Https})
+    validator: validate_ReviewsAddVideoFrame_568467, base: "",
+    url: url_ReviewsAddVideoFrame_568468, schemes: {Scheme.Https})
 type
-  Call_ReviewsGetVideoFrames_594221 = ref object of OpenApiRestCall_593425
-proc url_ReviewsGetVideoFrames_594223(protocol: Scheme; host: string; base: string;
+  Call_ReviewsGetVideoFrames_568454 = ref object of OpenApiRestCall_567658
+proc url_ReviewsGetVideoFrames_568456(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2943,7 +2943,7 @@ proc url_ReviewsGetVideoFrames_594223(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReviewsGetVideoFrames_594222(path: JsonNode; query: JsonNode;
+proc validate_ReviewsGetVideoFrames_568455(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The reviews created would show up for Reviewers on your team. As Reviewers complete reviewing, results of the Review would be POSTED (i.e. HTTP POST) on the specified CallBackEndpoint.
   ## 
@@ -2979,16 +2979,16 @@ proc validate_ReviewsGetVideoFrames_594222(path: JsonNode; query: JsonNode;
   ##           : Your team name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `reviewId` field"
-  var valid_594224 = path.getOrDefault("reviewId")
-  valid_594224 = validateParameter(valid_594224, JString, required = true,
+  var valid_568457 = path.getOrDefault("reviewId")
+  valid_568457 = validateParameter(valid_568457, JString, required = true,
                                  default = nil)
-  if valid_594224 != nil:
-    section.add "reviewId", valid_594224
-  var valid_594225 = path.getOrDefault("teamName")
-  valid_594225 = validateParameter(valid_594225, JString, required = true,
+  if valid_568457 != nil:
+    section.add "reviewId", valid_568457
+  var valid_568458 = path.getOrDefault("teamName")
+  valid_568458 = validateParameter(valid_568458, JString, required = true,
                                  default = nil)
-  if valid_594225 != nil:
-    section.add "teamName", valid_594225
+  if valid_568458 != nil:
+    section.add "teamName", valid_568458
   result.add "path", section
   ## parameters in `query` object:
   ##   noOfRecords: JInt
@@ -2998,19 +2998,19 @@ proc validate_ReviewsGetVideoFrames_594222(path: JsonNode; query: JsonNode;
   ##   startSeed: JInt
   ##            : Time stamp of the frame from where you want to start fetching the frames.
   section = newJObject()
-  var valid_594226 = query.getOrDefault("noOfRecords")
-  valid_594226 = validateParameter(valid_594226, JInt, required = false, default = nil)
-  if valid_594226 != nil:
-    section.add "noOfRecords", valid_594226
-  var valid_594227 = query.getOrDefault("filter")
-  valid_594227 = validateParameter(valid_594227, JString, required = false,
+  var valid_568459 = query.getOrDefault("noOfRecords")
+  valid_568459 = validateParameter(valid_568459, JInt, required = false, default = nil)
+  if valid_568459 != nil:
+    section.add "noOfRecords", valid_568459
+  var valid_568460 = query.getOrDefault("filter")
+  valid_568460 = validateParameter(valid_568460, JString, required = false,
                                  default = nil)
-  if valid_594227 != nil:
-    section.add "filter", valid_594227
-  var valid_594228 = query.getOrDefault("startSeed")
-  valid_594228 = validateParameter(valid_594228, JInt, required = false, default = nil)
-  if valid_594228 != nil:
-    section.add "startSeed", valid_594228
+  if valid_568460 != nil:
+    section.add "filter", valid_568460
+  var valid_568461 = query.getOrDefault("startSeed")
+  valid_568461 = validateParameter(valid_568461, JInt, required = false, default = nil)
+  if valid_568461 != nil:
+    section.add "startSeed", valid_568461
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3019,7 +3019,7 @@ proc validate_ReviewsGetVideoFrames_594222(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594229: Call_ReviewsGetVideoFrames_594221; path: JsonNode;
+proc call*(call_568462: Call_ReviewsGetVideoFrames_568454; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The reviews created would show up for Reviewers on your team. As Reviewers complete reviewing, results of the Review would be POSTED (i.e. HTTP POST) on the specified CallBackEndpoint.
   ## 
@@ -3046,16 +3046,16 @@ proc call*(call_594229: Call_ReviewsGetVideoFrames_594221; path: JsonNode;
   ## 
   ## </p>.
   ## 
-  let valid = call_594229.validator(path, query, header, formData, body)
-  let scheme = call_594229.pickScheme
+  let valid = call_568462.validator(path, query, header, formData, body)
+  let scheme = call_568462.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594229.url(scheme.get, call_594229.host, call_594229.base,
-                         call_594229.route, valid.getOrDefault("path"),
+  let url = call_568462.url(scheme.get, call_568462.host, call_568462.base,
+                         call_568462.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594229, url, valid)
+  result = hook(call_568462, url, valid)
 
-proc call*(call_594230: Call_ReviewsGetVideoFrames_594221; reviewId: string;
+proc call*(call_568463: Call_ReviewsGetVideoFrames_568454; reviewId: string;
           teamName: string; noOfRecords: int = 0; filter: string = ""; startSeed: int = 0): Recallable =
   ## reviewsGetVideoFrames
   ## The reviews created would show up for Reviewers on your team. As Reviewers complete reviewing, results of the Review would be POSTED (i.e. HTTP POST) on the specified CallBackEndpoint.
@@ -3092,22 +3092,22 @@ proc call*(call_594230: Call_ReviewsGetVideoFrames_594221; reviewId: string;
   ##         : Get frames filtered by tags.
   ##   startSeed: int
   ##            : Time stamp of the frame from where you want to start fetching the frames.
-  var path_594231 = newJObject()
-  var query_594232 = newJObject()
-  add(query_594232, "noOfRecords", newJInt(noOfRecords))
-  add(path_594231, "reviewId", newJString(reviewId))
-  add(path_594231, "teamName", newJString(teamName))
-  add(query_594232, "filter", newJString(filter))
-  add(query_594232, "startSeed", newJInt(startSeed))
-  result = call_594230.call(path_594231, query_594232, nil, nil, nil)
+  var path_568464 = newJObject()
+  var query_568465 = newJObject()
+  add(query_568465, "noOfRecords", newJInt(noOfRecords))
+  add(path_568464, "reviewId", newJString(reviewId))
+  add(path_568464, "teamName", newJString(teamName))
+  add(query_568465, "filter", newJString(filter))
+  add(query_568465, "startSeed", newJInt(startSeed))
+  result = call_568463.call(path_568464, query_568465, nil, nil, nil)
 
-var reviewsGetVideoFrames* = Call_ReviewsGetVideoFrames_594221(
+var reviewsGetVideoFrames* = Call_ReviewsGetVideoFrames_568454(
     name: "reviewsGetVideoFrames", meth: HttpMethod.HttpGet, host: "azure.local", route: "/contentmoderator/review/v1.0/teams/{teamName}/reviews/{reviewId}/frames",
-    validator: validate_ReviewsGetVideoFrames_594222, base: "",
-    url: url_ReviewsGetVideoFrames_594223, schemes: {Scheme.Https})
+    validator: validate_ReviewsGetVideoFrames_568455, base: "",
+    url: url_ReviewsGetVideoFrames_568456, schemes: {Scheme.Https})
 type
-  Call_ReviewsPublishVideoReview_594243 = ref object of OpenApiRestCall_593425
-proc url_ReviewsPublishVideoReview_594245(protocol: Scheme; host: string;
+  Call_ReviewsPublishVideoReview_568476 = ref object of OpenApiRestCall_567658
+proc url_ReviewsPublishVideoReview_568478(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3127,7 +3127,7 @@ proc url_ReviewsPublishVideoReview_594245(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReviewsPublishVideoReview_594244(path: JsonNode; query: JsonNode;
+proc validate_ReviewsPublishVideoReview_568477(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Publish video review to make it available for review.
   ## 
@@ -3140,16 +3140,16 @@ proc validate_ReviewsPublishVideoReview_594244(path: JsonNode; query: JsonNode;
   ##           : Your team name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `reviewId` field"
-  var valid_594246 = path.getOrDefault("reviewId")
-  valid_594246 = validateParameter(valid_594246, JString, required = true,
+  var valid_568479 = path.getOrDefault("reviewId")
+  valid_568479 = validateParameter(valid_568479, JString, required = true,
                                  default = nil)
-  if valid_594246 != nil:
-    section.add "reviewId", valid_594246
-  var valid_594247 = path.getOrDefault("teamName")
-  valid_594247 = validateParameter(valid_594247, JString, required = true,
+  if valid_568479 != nil:
+    section.add "reviewId", valid_568479
+  var valid_568480 = path.getOrDefault("teamName")
+  valid_568480 = validateParameter(valid_568480, JString, required = true,
                                  default = nil)
-  if valid_594247 != nil:
-    section.add "teamName", valid_594247
+  if valid_568480 != nil:
+    section.add "teamName", valid_568480
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3160,20 +3160,20 @@ proc validate_ReviewsPublishVideoReview_594244(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594248: Call_ReviewsPublishVideoReview_594243; path: JsonNode;
+proc call*(call_568481: Call_ReviewsPublishVideoReview_568476; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Publish video review to make it available for review.
   ## 
-  let valid = call_594248.validator(path, query, header, formData, body)
-  let scheme = call_594248.pickScheme
+  let valid = call_568481.validator(path, query, header, formData, body)
+  let scheme = call_568481.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594248.url(scheme.get, call_594248.host, call_594248.base,
-                         call_594248.route, valid.getOrDefault("path"),
+  let url = call_568481.url(scheme.get, call_568481.host, call_568481.base,
+                         call_568481.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594248, url, valid)
+  result = hook(call_568481, url, valid)
 
-proc call*(call_594249: Call_ReviewsPublishVideoReview_594243; reviewId: string;
+proc call*(call_568482: Call_ReviewsPublishVideoReview_568476; reviewId: string;
           teamName: string): Recallable =
   ## reviewsPublishVideoReview
   ## Publish video review to make it available for review.
@@ -3181,19 +3181,19 @@ proc call*(call_594249: Call_ReviewsPublishVideoReview_594243; reviewId: string;
   ##           : Id of the review.
   ##   teamName: string (required)
   ##           : Your team name.
-  var path_594250 = newJObject()
-  add(path_594250, "reviewId", newJString(reviewId))
-  add(path_594250, "teamName", newJString(teamName))
-  result = call_594249.call(path_594250, nil, nil, nil, nil)
+  var path_568483 = newJObject()
+  add(path_568483, "reviewId", newJString(reviewId))
+  add(path_568483, "teamName", newJString(teamName))
+  result = call_568482.call(path_568483, nil, nil, nil, nil)
 
-var reviewsPublishVideoReview* = Call_ReviewsPublishVideoReview_594243(
+var reviewsPublishVideoReview* = Call_ReviewsPublishVideoReview_568476(
     name: "reviewsPublishVideoReview", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/contentmoderator/review/v1.0/teams/{teamName}/reviews/{reviewId}/publish",
-    validator: validate_ReviewsPublishVideoReview_594244, base: "",
-    url: url_ReviewsPublishVideoReview_594245, schemes: {Scheme.Https})
+    validator: validate_ReviewsPublishVideoReview_568477, base: "",
+    url: url_ReviewsPublishVideoReview_568478, schemes: {Scheme.Https})
 type
-  Call_ReviewsAddVideoTranscript_594251 = ref object of OpenApiRestCall_593425
-proc url_ReviewsAddVideoTranscript_594253(protocol: Scheme; host: string;
+  Call_ReviewsAddVideoTranscript_568484 = ref object of OpenApiRestCall_567658
+proc url_ReviewsAddVideoTranscript_568486(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3213,7 +3213,7 @@ proc url_ReviewsAddVideoTranscript_594253(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReviewsAddVideoTranscript_594252(path: JsonNode; query: JsonNode;
+proc validate_ReviewsAddVideoTranscript_568485(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This API adds a transcript file (text version of all the words spoken in a video) to a video review. The file should be a valid WebVTT format.
   ## 
@@ -3226,16 +3226,16 @@ proc validate_ReviewsAddVideoTranscript_594252(path: JsonNode; query: JsonNode;
   ##           : Your team name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `reviewId` field"
-  var valid_594254 = path.getOrDefault("reviewId")
-  valid_594254 = validateParameter(valid_594254, JString, required = true,
+  var valid_568487 = path.getOrDefault("reviewId")
+  valid_568487 = validateParameter(valid_568487, JString, required = true,
                                  default = nil)
-  if valid_594254 != nil:
-    section.add "reviewId", valid_594254
-  var valid_594255 = path.getOrDefault("teamName")
-  valid_594255 = validateParameter(valid_594255, JString, required = true,
+  if valid_568487 != nil:
+    section.add "reviewId", valid_568487
+  var valid_568488 = path.getOrDefault("teamName")
+  valid_568488 = validateParameter(valid_568488, JString, required = true,
                                  default = nil)
-  if valid_594255 != nil:
-    section.add "teamName", valid_594255
+  if valid_568488 != nil:
+    section.add "teamName", valid_568488
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3245,11 +3245,11 @@ proc validate_ReviewsAddVideoTranscript_594252(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Content-Type` field"
-  var valid_594256 = header.getOrDefault("Content-Type")
-  valid_594256 = validateParameter(valid_594256, JString, required = true,
+  var valid_568489 = header.getOrDefault("Content-Type")
+  valid_568489 = validateParameter(valid_568489, JString, required = true,
                                  default = newJString("text/plain"))
-  if valid_594256 != nil:
-    section.add "Content-Type", valid_594256
+  if valid_568489 != nil:
+    section.add "Content-Type", valid_568489
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -3261,20 +3261,20 @@ proc validate_ReviewsAddVideoTranscript_594252(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594258: Call_ReviewsAddVideoTranscript_594251; path: JsonNode;
+proc call*(call_568491: Call_ReviewsAddVideoTranscript_568484; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This API adds a transcript file (text version of all the words spoken in a video) to a video review. The file should be a valid WebVTT format.
   ## 
-  let valid = call_594258.validator(path, query, header, formData, body)
-  let scheme = call_594258.pickScheme
+  let valid = call_568491.validator(path, query, header, formData, body)
+  let scheme = call_568491.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594258.url(scheme.get, call_594258.host, call_594258.base,
-                         call_594258.route, valid.getOrDefault("path"),
+  let url = call_568491.url(scheme.get, call_568491.host, call_568491.base,
+                         call_568491.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594258, url, valid)
+  result = hook(call_568491, url, valid)
 
-proc call*(call_594259: Call_ReviewsAddVideoTranscript_594251; reviewId: string;
+proc call*(call_568492: Call_ReviewsAddVideoTranscript_568484; reviewId: string;
           teamName: string; VTTFile: JsonNode): Recallable =
   ## reviewsAddVideoTranscript
   ## This API adds a transcript file (text version of all the words spoken in a video) to a video review. The file should be a valid WebVTT format.
@@ -3284,22 +3284,22 @@ proc call*(call_594259: Call_ReviewsAddVideoTranscript_594251; reviewId: string;
   ##           : Your team name.
   ##   VTTFile: JObject (required)
   ##          : Transcript file of the video.
-  var path_594260 = newJObject()
-  var body_594261 = newJObject()
-  add(path_594260, "reviewId", newJString(reviewId))
-  add(path_594260, "teamName", newJString(teamName))
+  var path_568493 = newJObject()
+  var body_568494 = newJObject()
+  add(path_568493, "reviewId", newJString(reviewId))
+  add(path_568493, "teamName", newJString(teamName))
   if VTTFile != nil:
-    body_594261 = VTTFile
-  result = call_594259.call(path_594260, nil, nil, nil, body_594261)
+    body_568494 = VTTFile
+  result = call_568492.call(path_568493, nil, nil, nil, body_568494)
 
-var reviewsAddVideoTranscript* = Call_ReviewsAddVideoTranscript_594251(
+var reviewsAddVideoTranscript* = Call_ReviewsAddVideoTranscript_568484(
     name: "reviewsAddVideoTranscript", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/contentmoderator/review/v1.0/teams/{teamName}/reviews/{reviewId}/transcript",
-    validator: validate_ReviewsAddVideoTranscript_594252, base: "",
-    url: url_ReviewsAddVideoTranscript_594253, schemes: {Scheme.Https})
+    validator: validate_ReviewsAddVideoTranscript_568485, base: "",
+    url: url_ReviewsAddVideoTranscript_568486, schemes: {Scheme.Https})
 type
-  Call_ReviewsAddVideoTranscriptModerationResult_594262 = ref object of OpenApiRestCall_593425
-proc url_ReviewsAddVideoTranscriptModerationResult_594264(protocol: Scheme;
+  Call_ReviewsAddVideoTranscriptModerationResult_568495 = ref object of OpenApiRestCall_567658
+proc url_ReviewsAddVideoTranscriptModerationResult_568497(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3319,7 +3319,7 @@ proc url_ReviewsAddVideoTranscriptModerationResult_594264(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReviewsAddVideoTranscriptModerationResult_594263(path: JsonNode;
+proc validate_ReviewsAddVideoTranscriptModerationResult_568496(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This API adds a transcript screen text result file for a video review. Transcript screen text result file is a result of Screen Text API . In order to generate transcript screen text result file , a transcript file has to be screened for profanity using Screen Text API.
   ## 
@@ -3332,16 +3332,16 @@ proc validate_ReviewsAddVideoTranscriptModerationResult_594263(path: JsonNode;
   ##           : Your team name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `reviewId` field"
-  var valid_594265 = path.getOrDefault("reviewId")
-  valid_594265 = validateParameter(valid_594265, JString, required = true,
+  var valid_568498 = path.getOrDefault("reviewId")
+  valid_568498 = validateParameter(valid_568498, JString, required = true,
                                  default = nil)
-  if valid_594265 != nil:
-    section.add "reviewId", valid_594265
-  var valid_594266 = path.getOrDefault("teamName")
-  valid_594266 = validateParameter(valid_594266, JString, required = true,
+  if valid_568498 != nil:
+    section.add "reviewId", valid_568498
+  var valid_568499 = path.getOrDefault("teamName")
+  valid_568499 = validateParameter(valid_568499, JString, required = true,
                                  default = nil)
-  if valid_594266 != nil:
-    section.add "teamName", valid_594266
+  if valid_568499 != nil:
+    section.add "teamName", valid_568499
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3351,11 +3351,11 @@ proc validate_ReviewsAddVideoTranscriptModerationResult_594263(path: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Content-Type` field"
-  var valid_594267 = header.getOrDefault("Content-Type")
-  valid_594267 = validateParameter(valid_594267, JString, required = true,
+  var valid_568500 = header.getOrDefault("Content-Type")
+  valid_568500 = validateParameter(valid_568500, JString, required = true,
                                  default = nil)
-  if valid_594267 != nil:
-    section.add "Content-Type", valid_594267
+  if valid_568500 != nil:
+    section.add "Content-Type", valid_568500
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -3367,21 +3367,21 @@ proc validate_ReviewsAddVideoTranscriptModerationResult_594263(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594269: Call_ReviewsAddVideoTranscriptModerationResult_594262;
+proc call*(call_568502: Call_ReviewsAddVideoTranscriptModerationResult_568495;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## This API adds a transcript screen text result file for a video review. Transcript screen text result file is a result of Screen Text API . In order to generate transcript screen text result file , a transcript file has to be screened for profanity using Screen Text API.
   ## 
-  let valid = call_594269.validator(path, query, header, formData, body)
-  let scheme = call_594269.pickScheme
+  let valid = call_568502.validator(path, query, header, formData, body)
+  let scheme = call_568502.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594269.url(scheme.get, call_594269.host, call_594269.base,
-                         call_594269.route, valid.getOrDefault("path"),
+  let url = call_568502.url(scheme.get, call_568502.host, call_568502.base,
+                         call_568502.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594269, url, valid)
+  result = hook(call_568502, url, valid)
 
-proc call*(call_594270: Call_ReviewsAddVideoTranscriptModerationResult_594262;
+proc call*(call_568503: Call_ReviewsAddVideoTranscriptModerationResult_568495;
           transcriptModerationBody: JsonNode; reviewId: string; teamName: string): Recallable =
   ## reviewsAddVideoTranscriptModerationResult
   ## This API adds a transcript screen text result file for a video review. Transcript screen text result file is a result of Screen Text API . In order to generate transcript screen text result file , a transcript file has to be screened for profanity using Screen Text API.
@@ -3391,19 +3391,19 @@ proc call*(call_594270: Call_ReviewsAddVideoTranscriptModerationResult_594262;
   ##           : Id of the review.
   ##   teamName: string (required)
   ##           : Your team name.
-  var path_594271 = newJObject()
-  var body_594272 = newJObject()
+  var path_568504 = newJObject()
+  var body_568505 = newJObject()
   if transcriptModerationBody != nil:
-    body_594272 = transcriptModerationBody
-  add(path_594271, "reviewId", newJString(reviewId))
-  add(path_594271, "teamName", newJString(teamName))
-  result = call_594270.call(path_594271, nil, nil, nil, body_594272)
+    body_568505 = transcriptModerationBody
+  add(path_568504, "reviewId", newJString(reviewId))
+  add(path_568504, "teamName", newJString(teamName))
+  result = call_568503.call(path_568504, nil, nil, nil, body_568505)
 
-var reviewsAddVideoTranscriptModerationResult* = Call_ReviewsAddVideoTranscriptModerationResult_594262(
+var reviewsAddVideoTranscriptModerationResult* = Call_ReviewsAddVideoTranscriptModerationResult_568495(
     name: "reviewsAddVideoTranscriptModerationResult", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/contentmoderator/review/v1.0/teams/{teamName}/reviews/{reviewId}/transcriptmoderationresult",
-    validator: validate_ReviewsAddVideoTranscriptModerationResult_594263,
-    base: "", url: url_ReviewsAddVideoTranscriptModerationResult_594264,
+    validator: validate_ReviewsAddVideoTranscriptModerationResult_568496,
+    base: "", url: url_ReviewsAddVideoTranscriptModerationResult_568497,
     schemes: {Scheme.Https})
 export
   rest

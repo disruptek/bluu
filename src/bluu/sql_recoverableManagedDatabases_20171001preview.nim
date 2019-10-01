@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-recoverableManagedDatabases"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_RecoverableManagedDatabasesListByInstance_593630 = ref object of OpenApiRestCall_593408
-proc url_RecoverableManagedDatabasesListByInstance_593632(protocol: Scheme;
+  Call_RecoverableManagedDatabasesListByInstance_567863 = ref object of OpenApiRestCall_567641
+proc url_RecoverableManagedDatabasesListByInstance_567865(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +128,7 @@ proc url_RecoverableManagedDatabasesListByInstance_593632(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoverableManagedDatabasesListByInstance_593631(path: JsonNode;
+proc validate_RecoverableManagedDatabasesListByInstance_567864(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of recoverable managed databases.
   ## 
@@ -144,21 +144,21 @@ proc validate_RecoverableManagedDatabasesListByInstance_593631(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593805 = path.getOrDefault("resourceGroupName")
-  valid_593805 = validateParameter(valid_593805, JString, required = true,
+  var valid_568038 = path.getOrDefault("resourceGroupName")
+  valid_568038 = validateParameter(valid_568038, JString, required = true,
                                  default = nil)
-  if valid_593805 != nil:
-    section.add "resourceGroupName", valid_593805
-  var valid_593806 = path.getOrDefault("managedInstanceName")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  if valid_568038 != nil:
+    section.add "resourceGroupName", valid_568038
+  var valid_568039 = path.getOrDefault("managedInstanceName")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "managedInstanceName", valid_593806
-  var valid_593807 = path.getOrDefault("subscriptionId")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  if valid_568039 != nil:
+    section.add "managedInstanceName", valid_568039
+  var valid_568040 = path.getOrDefault("subscriptionId")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "subscriptionId", valid_593807
+  if valid_568040 != nil:
+    section.add "subscriptionId", valid_568040
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -166,11 +166,11 @@ proc validate_RecoverableManagedDatabasesListByInstance_593631(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = query.getOrDefault("api-version")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_568041 != nil:
+    section.add "api-version", valid_568041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -179,21 +179,21 @@ proc validate_RecoverableManagedDatabasesListByInstance_593631(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593831: Call_RecoverableManagedDatabasesListByInstance_593630;
+proc call*(call_568064: Call_RecoverableManagedDatabasesListByInstance_567863;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of recoverable managed databases.
   ## 
-  let valid = call_593831.validator(path, query, header, formData, body)
-  let scheme = call_593831.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593831.url(scheme.get, call_593831.host, call_593831.base,
-                         call_593831.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593831, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593902: Call_RecoverableManagedDatabasesListByInstance_593630;
+proc call*(call_568135: Call_RecoverableManagedDatabasesListByInstance_567863;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; subscriptionId: string): Recallable =
   ## recoverableManagedDatabasesListByInstance
@@ -206,23 +206,23 @@ proc call*(call_593902: Call_RecoverableManagedDatabasesListByInstance_593630;
   ##                      : The name of the managed instance.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_593903 = newJObject()
-  var query_593905 = newJObject()
-  add(path_593903, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593905, "api-version", newJString(apiVersion))
-  add(path_593903, "managedInstanceName", newJString(managedInstanceName))
-  add(path_593903, "subscriptionId", newJString(subscriptionId))
-  result = call_593902.call(path_593903, query_593905, nil, nil, nil)
+  var path_568136 = newJObject()
+  var query_568138 = newJObject()
+  add(path_568136, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568138, "api-version", newJString(apiVersion))
+  add(path_568136, "managedInstanceName", newJString(managedInstanceName))
+  add(path_568136, "subscriptionId", newJString(subscriptionId))
+  result = call_568135.call(path_568136, query_568138, nil, nil, nil)
 
-var recoverableManagedDatabasesListByInstance* = Call_RecoverableManagedDatabasesListByInstance_593630(
+var recoverableManagedDatabasesListByInstance* = Call_RecoverableManagedDatabasesListByInstance_567863(
     name: "recoverableManagedDatabasesListByInstance", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/recoverableDatabases",
-    validator: validate_RecoverableManagedDatabasesListByInstance_593631,
-    base: "", url: url_RecoverableManagedDatabasesListByInstance_593632,
+    validator: validate_RecoverableManagedDatabasesListByInstance_567864,
+    base: "", url: url_RecoverableManagedDatabasesListByInstance_567865,
     schemes: {Scheme.Https})
 type
-  Call_RecoverableManagedDatabasesGet_593944 = ref object of OpenApiRestCall_593408
-proc url_RecoverableManagedDatabasesGet_593946(protocol: Scheme; host: string;
+  Call_RecoverableManagedDatabasesGet_568177 = ref object of OpenApiRestCall_567641
+proc url_RecoverableManagedDatabasesGet_568179(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -249,7 +249,7 @@ proc url_RecoverableManagedDatabasesGet_593946(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoverableManagedDatabasesGet_593945(path: JsonNode;
+proc validate_RecoverableManagedDatabasesGet_568178(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a recoverable managed database.
   ## 
@@ -266,26 +266,26 @@ proc validate_RecoverableManagedDatabasesGet_593945(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593947 = path.getOrDefault("resourceGroupName")
-  valid_593947 = validateParameter(valid_593947, JString, required = true,
+  var valid_568180 = path.getOrDefault("resourceGroupName")
+  valid_568180 = validateParameter(valid_568180, JString, required = true,
                                  default = nil)
-  if valid_593947 != nil:
-    section.add "resourceGroupName", valid_593947
-  var valid_593948 = path.getOrDefault("managedInstanceName")
-  valid_593948 = validateParameter(valid_593948, JString, required = true,
+  if valid_568180 != nil:
+    section.add "resourceGroupName", valid_568180
+  var valid_568181 = path.getOrDefault("managedInstanceName")
+  valid_568181 = validateParameter(valid_568181, JString, required = true,
                                  default = nil)
-  if valid_593948 != nil:
-    section.add "managedInstanceName", valid_593948
-  var valid_593949 = path.getOrDefault("subscriptionId")
-  valid_593949 = validateParameter(valid_593949, JString, required = true,
+  if valid_568181 != nil:
+    section.add "managedInstanceName", valid_568181
+  var valid_568182 = path.getOrDefault("subscriptionId")
+  valid_568182 = validateParameter(valid_568182, JString, required = true,
                                  default = nil)
-  if valid_593949 != nil:
-    section.add "subscriptionId", valid_593949
-  var valid_593950 = path.getOrDefault("recoverableDatabaseName")
-  valid_593950 = validateParameter(valid_593950, JString, required = true,
+  if valid_568182 != nil:
+    section.add "subscriptionId", valid_568182
+  var valid_568183 = path.getOrDefault("recoverableDatabaseName")
+  valid_568183 = validateParameter(valid_568183, JString, required = true,
                                  default = nil)
-  if valid_593950 != nil:
-    section.add "recoverableDatabaseName", valid_593950
+  if valid_568183 != nil:
+    section.add "recoverableDatabaseName", valid_568183
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -293,11 +293,11 @@ proc validate_RecoverableManagedDatabasesGet_593945(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593951 = query.getOrDefault("api-version")
-  valid_593951 = validateParameter(valid_593951, JString, required = true,
+  var valid_568184 = query.getOrDefault("api-version")
+  valid_568184 = validateParameter(valid_568184, JString, required = true,
                                  default = nil)
-  if valid_593951 != nil:
-    section.add "api-version", valid_593951
+  if valid_568184 != nil:
+    section.add "api-version", valid_568184
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -306,20 +306,20 @@ proc validate_RecoverableManagedDatabasesGet_593945(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593952: Call_RecoverableManagedDatabasesGet_593944; path: JsonNode;
+proc call*(call_568185: Call_RecoverableManagedDatabasesGet_568177; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a recoverable managed database.
   ## 
-  let valid = call_593952.validator(path, query, header, formData, body)
-  let scheme = call_593952.pickScheme
+  let valid = call_568185.validator(path, query, header, formData, body)
+  let scheme = call_568185.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593952.url(scheme.get, call_593952.host, call_593952.base,
-                         call_593952.route, valid.getOrDefault("path"),
+  let url = call_568185.url(scheme.get, call_568185.host, call_568185.base,
+                         call_568185.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593952, url, valid)
+  result = hook(call_568185, url, valid)
 
-proc call*(call_593953: Call_RecoverableManagedDatabasesGet_593944;
+proc call*(call_568186: Call_RecoverableManagedDatabasesGet_568177;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; subscriptionId: string;
           recoverableDatabaseName: string): Recallable =
@@ -334,20 +334,20 @@ proc call*(call_593953: Call_RecoverableManagedDatabasesGet_593944;
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   recoverableDatabaseName: string (required)
-  var path_593954 = newJObject()
-  var query_593955 = newJObject()
-  add(path_593954, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593955, "api-version", newJString(apiVersion))
-  add(path_593954, "managedInstanceName", newJString(managedInstanceName))
-  add(path_593954, "subscriptionId", newJString(subscriptionId))
-  add(path_593954, "recoverableDatabaseName", newJString(recoverableDatabaseName))
-  result = call_593953.call(path_593954, query_593955, nil, nil, nil)
+  var path_568187 = newJObject()
+  var query_568188 = newJObject()
+  add(path_568187, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568188, "api-version", newJString(apiVersion))
+  add(path_568187, "managedInstanceName", newJString(managedInstanceName))
+  add(path_568187, "subscriptionId", newJString(subscriptionId))
+  add(path_568187, "recoverableDatabaseName", newJString(recoverableDatabaseName))
+  result = call_568186.call(path_568187, query_568188, nil, nil, nil)
 
-var recoverableManagedDatabasesGet* = Call_RecoverableManagedDatabasesGet_593944(
+var recoverableManagedDatabasesGet* = Call_RecoverableManagedDatabasesGet_568177(
     name: "recoverableManagedDatabasesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/recoverableDatabases/{recoverableDatabaseName}",
-    validator: validate_RecoverableManagedDatabasesGet_593945, base: "",
-    url: url_RecoverableManagedDatabasesGet_593946, schemes: {Scheme.Https})
+    validator: validate_RecoverableManagedDatabasesGet_568178, base: "",
+    url: url_RecoverableManagedDatabasesGet_568179, schemes: {Scheme.Https})
 export
   rest
 

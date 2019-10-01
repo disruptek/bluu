@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: InstanceMetadataClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,174 +103,15 @@ const
   macServiceName = "imds"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_GalleryApplicationsList_593630 = ref object of OpenApiRestCall_593408
-proc url_GalleryApplicationsList_593632(protocol: Scheme; host: string; base: string;
-                                       route: string; path: JsonNode;
-                                       query: JsonNode): Uri =
-  result.scheme = $protocol
-  result.hostname = host
-  result.query = $queryString(query)
-  result.path = base & route
-
-proc validate_GalleryApplicationsList_593631(path: JsonNode; query: JsonNode;
-    header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
-  ## Get list of the gallery applications.
-  ## 
-  var section: JsonNode
-  result = newJObject()
-  section = newJObject()
-  result.add "path", section
-  ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : This is the API version to use.
-  section = newJObject()
-  assert query != nil,
-        "query argument is necessary due to required `api-version` field"
-  var valid_593804 = query.getOrDefault("api-version")
-  valid_593804 = validateParameter(valid_593804, JString, required = true,
-                                 default = newJString("2018-10-01"))
-  if valid_593804 != nil:
-    section.add "api-version", valid_593804
-  result.add "query", section
-  ## parameters in `header` object:
-  ##   Metadata: JString (required)
-  ##           : This must be set to 'true'.
-  section = newJObject()
-  assert header != nil,
-        "header argument is necessary due to required `Metadata` field"
-  var valid_593805 = header.getOrDefault("Metadata")
-  valid_593805 = validateParameter(valid_593805, JString, required = true,
-                                 default = newJString("true"))
-  if valid_593805 != nil:
-    section.add "Metadata", valid_593805
-  result.add "header", section
-  section = newJObject()
-  result.add "formData", section
-  if body != nil:
-    result.add "body", body
-
-proc call*(call_593828: Call_GalleryApplicationsList_593630; path: JsonNode;
-          query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  ## Get list of the gallery applications.
-  ## 
-  let valid = call_593828.validator(path, query, header, formData, body)
-  let scheme = call_593828.pickScheme
-  if scheme.isNone:
-    raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593828.url(scheme.get, call_593828.host, call_593828.base,
-                         call_593828.route, valid.getOrDefault("path"),
-                         valid.getOrDefault("query"))
-  result = hook(call_593828, url, valid)
-
-proc call*(call_593899: Call_GalleryApplicationsList_593630;
-          apiVersion: string = "2018-10-01"): Recallable =
-  ## galleryApplicationsList
-  ## Get list of the gallery applications.
-  ##   apiVersion: string (required)
-  ##             : This is the API version to use.
-  var query_593900 = newJObject()
-  add(query_593900, "api-version", newJString(apiVersion))
-  result = call_593899.call(nil, query_593900, nil, nil, nil)
-
-var galleryApplicationsList* = Call_GalleryApplicationsList_593630(
-    name: "galleryApplicationsList", meth: HttpMethod.HttpGet,
-    host: "169.254.169.254", route: "/applications",
-    validator: validate_GalleryApplicationsList_593631, base: "/metadata",
-    url: url_GalleryApplicationsList_593632, schemes: {Scheme.Https})
-type
-  Call_GalleryApplicationGet_593940 = ref object of OpenApiRestCall_593408
-proc url_GalleryApplicationGet_593942(protocol: Scheme; host: string; base: string;
-                                     route: string; path: JsonNode; query: JsonNode): Uri =
-  result.scheme = $protocol
-  result.hostname = host
-  result.query = $queryString(query)
-  result.path = base & route
-
-proc validate_GalleryApplicationGet_593941(path: JsonNode; query: JsonNode;
-    header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
-  ## Get application package.
-  ## 
-  var section: JsonNode
-  result = newJObject()
-  section = newJObject()
-  result.add "path", section
-  ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : This is the API version to use.
-  ##   incarnationId: JString (required)
-  ##                : Incarnation Id of the gallery application
-  section = newJObject()
-  assert query != nil,
-        "query argument is necessary due to required `api-version` field"
-  var valid_593943 = query.getOrDefault("api-version")
-  valid_593943 = validateParameter(valid_593943, JString, required = true,
-                                 default = newJString("2018-10-01"))
-  if valid_593943 != nil:
-    section.add "api-version", valid_593943
-  var valid_593944 = query.getOrDefault("incarnationId")
-  valid_593944 = validateParameter(valid_593944, JString, required = true,
-                                 default = nil)
-  if valid_593944 != nil:
-    section.add "incarnationId", valid_593944
-  result.add "query", section
-  ## parameters in `header` object:
-  ##   Metadata: JString (required)
-  ##           : This must be set to 'true'.
-  section = newJObject()
-  assert header != nil,
-        "header argument is necessary due to required `Metadata` field"
-  var valid_593945 = header.getOrDefault("Metadata")
-  valid_593945 = validateParameter(valid_593945, JString, required = true,
-                                 default = newJString("true"))
-  if valid_593945 != nil:
-    section.add "Metadata", valid_593945
-  result.add "header", section
-  section = newJObject()
-  result.add "formData", section
-  if body != nil:
-    result.add "body", body
-
-proc call*(call_593946: Call_GalleryApplicationGet_593940; path: JsonNode;
-          query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  ## Get application package.
-  ## 
-  let valid = call_593946.validator(path, query, header, formData, body)
-  let scheme = call_593946.pickScheme
-  if scheme.isNone:
-    raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593946.url(scheme.get, call_593946.host, call_593946.base,
-                         call_593946.route, valid.getOrDefault("path"),
-                         valid.getOrDefault("query"))
-  result = hook(call_593946, url, valid)
-
-proc call*(call_593947: Call_GalleryApplicationGet_593940; incarnationId: string;
-          apiVersion: string = "2018-10-01"): Recallable =
-  ## galleryApplicationGet
-  ## Get application package.
-  ##   apiVersion: string (required)
-  ##             : This is the API version to use.
-  ##   incarnationId: string (required)
-  ##                : Incarnation Id of the gallery application
-  var query_593948 = newJObject()
-  add(query_593948, "api-version", newJString(apiVersion))
-  add(query_593948, "incarnationId", newJString(incarnationId))
-  result = call_593947.call(nil, query_593948, nil, nil, nil)
-
-var galleryApplicationGet* = Call_GalleryApplicationGet_593940(
-    name: "galleryApplicationGet", meth: HttpMethod.HttpGet,
-    host: "169.254.169.254", route: "/applications/app",
-    validator: validate_GalleryApplicationGet_593941, base: "/metadata",
-    url: url_GalleryApplicationGet_593942, schemes: {Scheme.Https})
-type
-  Call_AttestedGetDocument_593949 = ref object of OpenApiRestCall_593408
-proc url_AttestedGetDocument_593951(protocol: Scheme; host: string; base: string;
+  Call_AttestedGetDocument_567863 = ref object of OpenApiRestCall_567641
+proc url_AttestedGetDocument_567865(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AttestedGetDocument_593950(path: JsonNode; query: JsonNode;
+proc validate_AttestedGetDocument_567864(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get Attested Data for the Virtual Machine.
@@ -287,16 +128,16 @@ proc validate_AttestedGetDocument_593950(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593952 = query.getOrDefault("api-version")
-  valid_593952 = validateParameter(valid_593952, JString, required = true,
+  var valid_568037 = query.getOrDefault("api-version")
+  valid_568037 = validateParameter(valid_568037, JString, required = true,
                                  default = newJString("2018-10-01"))
-  if valid_593952 != nil:
-    section.add "api-version", valid_593952
-  var valid_593953 = query.getOrDefault("nonce")
-  valid_593953 = validateParameter(valid_593953, JString, required = false,
+  if valid_568037 != nil:
+    section.add "api-version", valid_568037
+  var valid_568038 = query.getOrDefault("nonce")
+  valid_568038 = validateParameter(valid_568038, JString, required = false,
                                  default = nil)
-  if valid_593953 != nil:
-    section.add "nonce", valid_593953
+  if valid_568038 != nil:
+    section.add "nonce", valid_568038
   result.add "query", section
   ## parameters in `header` object:
   ##   Metadata: JString (required)
@@ -304,31 +145,31 @@ proc validate_AttestedGetDocument_593950(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Metadata` field"
-  var valid_593954 = header.getOrDefault("Metadata")
-  valid_593954 = validateParameter(valid_593954, JString, required = true,
+  var valid_568039 = header.getOrDefault("Metadata")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = newJString("true"))
-  if valid_593954 != nil:
-    section.add "Metadata", valid_593954
+  if valid_568039 != nil:
+    section.add "Metadata", valid_568039
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_593955: Call_AttestedGetDocument_593949; path: JsonNode;
+proc call*(call_568062: Call_AttestedGetDocument_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get Attested Data for the Virtual Machine.
   ## 
-  let valid = call_593955.validator(path, query, header, formData, body)
-  let scheme = call_593955.pickScheme
+  let valid = call_568062.validator(path, query, header, formData, body)
+  let scheme = call_568062.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593955.url(scheme.get, call_593955.host, call_593955.base,
-                         call_593955.route, valid.getOrDefault("path"),
+  let url = call_568062.url(scheme.get, call_568062.host, call_568062.base,
+                         call_568062.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593955, url, valid)
+  result = hook(call_568062, url, valid)
 
-proc call*(call_593956: Call_AttestedGetDocument_593949;
+proc call*(call_568133: Call_AttestedGetDocument_567863;
           apiVersion: string = "2018-10-01"; nonce: string = ""): Recallable =
   ## attestedGetDocument
   ## Get Attested Data for the Virtual Machine.
@@ -336,25 +177,25 @@ proc call*(call_593956: Call_AttestedGetDocument_593949;
   ##             : This is the API version to use.
   ##   nonce: string
   ##        : This is a string of up to 32 random alphanumeric characters.
-  var query_593957 = newJObject()
-  add(query_593957, "api-version", newJString(apiVersion))
-  add(query_593957, "nonce", newJString(nonce))
-  result = call_593956.call(nil, query_593957, nil, nil, nil)
+  var query_568134 = newJObject()
+  add(query_568134, "api-version", newJString(apiVersion))
+  add(query_568134, "nonce", newJString(nonce))
+  result = call_568133.call(nil, query_568134, nil, nil, nil)
 
-var attestedGetDocument* = Call_AttestedGetDocument_593949(
+var attestedGetDocument* = Call_AttestedGetDocument_567863(
     name: "attestedGetDocument", meth: HttpMethod.HttpGet, host: "169.254.169.254",
-    route: "/attested/document", validator: validate_AttestedGetDocument_593950,
-    base: "/metadata", url: url_AttestedGetDocument_593951, schemes: {Scheme.Https})
+    route: "/attested/document", validator: validate_AttestedGetDocument_567864,
+    base: "/metadata", url: url_AttestedGetDocument_567865, schemes: {Scheme.Https})
 type
-  Call_IdentityGetInfo_593958 = ref object of OpenApiRestCall_593408
-proc url_IdentityGetInfo_593960(protocol: Scheme; host: string; base: string;
+  Call_IdentityGetInfo_568174 = ref object of OpenApiRestCall_567641
+proc url_IdentityGetInfo_568176(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_IdentityGetInfo_593959(path: JsonNode; query: JsonNode;
+proc validate_IdentityGetInfo_568175(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Get information about AAD Metadata
@@ -369,11 +210,11 @@ proc validate_IdentityGetInfo_593959(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593961 = query.getOrDefault("api-version")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568177 = query.getOrDefault("api-version")
+  valid_568177 = validateParameter(valid_568177, JString, required = true,
                                  default = newJString("2018-10-01"))
-  if valid_593961 != nil:
-    section.add "api-version", valid_593961
+  if valid_568177 != nil:
+    section.add "api-version", valid_568177
   result.add "query", section
   ## parameters in `header` object:
   ##   Metadata: JString (required)
@@ -381,54 +222,54 @@ proc validate_IdentityGetInfo_593959(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Metadata` field"
-  var valid_593962 = header.getOrDefault("Metadata")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_568178 = header.getOrDefault("Metadata")
+  valid_568178 = validateParameter(valid_568178, JString, required = true,
                                  default = newJString("true"))
-  if valid_593962 != nil:
-    section.add "Metadata", valid_593962
+  if valid_568178 != nil:
+    section.add "Metadata", valid_568178
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_593963: Call_IdentityGetInfo_593958; path: JsonNode; query: JsonNode;
+proc call*(call_568179: Call_IdentityGetInfo_568174; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get information about AAD Metadata
   ## 
-  let valid = call_593963.validator(path, query, header, formData, body)
-  let scheme = call_593963.pickScheme
+  let valid = call_568179.validator(path, query, header, formData, body)
+  let scheme = call_568179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593963.url(scheme.get, call_593963.host, call_593963.base,
-                         call_593963.route, valid.getOrDefault("path"),
+  let url = call_568179.url(scheme.get, call_568179.host, call_568179.base,
+                         call_568179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593963, url, valid)
+  result = hook(call_568179, url, valid)
 
-proc call*(call_593964: Call_IdentityGetInfo_593958;
+proc call*(call_568180: Call_IdentityGetInfo_568174;
           apiVersion: string = "2018-10-01"): Recallable =
   ## identityGetInfo
   ## Get information about AAD Metadata
   ##   apiVersion: string (required)
   ##             : This is the API version to use.
-  var query_593965 = newJObject()
-  add(query_593965, "api-version", newJString(apiVersion))
-  result = call_593964.call(nil, query_593965, nil, nil, nil)
+  var query_568181 = newJObject()
+  add(query_568181, "api-version", newJString(apiVersion))
+  result = call_568180.call(nil, query_568181, nil, nil, nil)
 
-var identityGetInfo* = Call_IdentityGetInfo_593958(name: "identityGetInfo",
+var identityGetInfo* = Call_IdentityGetInfo_568174(name: "identityGetInfo",
     meth: HttpMethod.HttpGet, host: "169.254.169.254", route: "/identity/info",
-    validator: validate_IdentityGetInfo_593959, base: "/metadata",
-    url: url_IdentityGetInfo_593960, schemes: {Scheme.Https})
+    validator: validate_IdentityGetInfo_568175, base: "/metadata",
+    url: url_IdentityGetInfo_568176, schemes: {Scheme.Https})
 type
-  Call_IdentityGetToken_593966 = ref object of OpenApiRestCall_593408
-proc url_IdentityGetToken_593968(protocol: Scheme; host: string; base: string;
+  Call_IdentityGetToken_568182 = ref object of OpenApiRestCall_567641
+proc url_IdentityGetToken_568184(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_IdentityGetToken_593967(path: JsonNode; query: JsonNode;
+proc validate_IdentityGetToken_568183(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get a Token from Azure AD
@@ -453,43 +294,43 @@ proc validate_IdentityGetToken_593967(path: JsonNode; query: JsonNode;
   ##   msi_res_id: JString
   ##             : This identifies, by urlencoded ARM resource id, a specific explicit identity to use when authenticating to Azure AD. Mutually exclusive with client_id and object_id.
   section = newJObject()
-  var valid_593969 = query.getOrDefault("object_id")
-  valid_593969 = validateParameter(valid_593969, JString, required = false,
+  var valid_568185 = query.getOrDefault("object_id")
+  valid_568185 = validateParameter(valid_568185, JString, required = false,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "object_id", valid_593969
-  var valid_593970 = query.getOrDefault("client_id")
-  valid_593970 = validateParameter(valid_593970, JString, required = false,
+  if valid_568185 != nil:
+    section.add "object_id", valid_568185
+  var valid_568186 = query.getOrDefault("client_id")
+  valid_568186 = validateParameter(valid_568186, JString, required = false,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "client_id", valid_593970
+  if valid_568186 != nil:
+    section.add "client_id", valid_568186
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568187 = query.getOrDefault("api-version")
+  valid_568187 = validateParameter(valid_568187, JString, required = true,
                                  default = newJString("2018-10-01"))
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
-  var valid_593972 = query.getOrDefault("resource")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  if valid_568187 != nil:
+    section.add "api-version", valid_568187
+  var valid_568188 = query.getOrDefault("resource")
+  valid_568188 = validateParameter(valid_568188, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "resource", valid_593972
-  var valid_593973 = query.getOrDefault("bypass_cache")
-  valid_593973 = validateParameter(valid_593973, JString, required = false,
+  if valid_568188 != nil:
+    section.add "resource", valid_568188
+  var valid_568189 = query.getOrDefault("bypass_cache")
+  valid_568189 = validateParameter(valid_568189, JString, required = false,
                                  default = newJString("true"))
-  if valid_593973 != nil:
-    section.add "bypass_cache", valid_593973
-  var valid_593974 = query.getOrDefault("authority")
-  valid_593974 = validateParameter(valid_593974, JString, required = false,
+  if valid_568189 != nil:
+    section.add "bypass_cache", valid_568189
+  var valid_568190 = query.getOrDefault("authority")
+  valid_568190 = validateParameter(valid_568190, JString, required = false,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "authority", valid_593974
-  var valid_593975 = query.getOrDefault("msi_res_id")
-  valid_593975 = validateParameter(valid_593975, JString, required = false,
+  if valid_568190 != nil:
+    section.add "authority", valid_568190
+  var valid_568191 = query.getOrDefault("msi_res_id")
+  valid_568191 = validateParameter(valid_568191, JString, required = false,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "msi_res_id", valid_593975
+  if valid_568191 != nil:
+    section.add "msi_res_id", valid_568191
   result.add "query", section
   ## parameters in `header` object:
   ##   Metadata: JString (required)
@@ -497,31 +338,31 @@ proc validate_IdentityGetToken_593967(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Metadata` field"
-  var valid_593976 = header.getOrDefault("Metadata")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_568192 = header.getOrDefault("Metadata")
+  valid_568192 = validateParameter(valid_568192, JString, required = true,
                                  default = newJString("true"))
-  if valid_593976 != nil:
-    section.add "Metadata", valid_593976
+  if valid_568192 != nil:
+    section.add "Metadata", valid_568192
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_593977: Call_IdentityGetToken_593966; path: JsonNode;
+proc call*(call_568193: Call_IdentityGetToken_568182; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a Token from Azure AD
   ## 
-  let valid = call_593977.validator(path, query, header, formData, body)
-  let scheme = call_593977.pickScheme
+  let valid = call_568193.validator(path, query, header, formData, body)
+  let scheme = call_568193.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593977.url(scheme.get, call_593977.host, call_593977.base,
-                         call_593977.route, valid.getOrDefault("path"),
+  let url = call_568193.url(scheme.get, call_568193.host, call_568193.base,
+                         call_568193.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593977, url, valid)
+  result = hook(call_568193, url, valid)
 
-proc call*(call_593978: Call_IdentityGetToken_593966; resource: string;
+proc call*(call_568194: Call_IdentityGetToken_568182; resource: string;
           objectId: string = ""; clientId: string = "";
           apiVersion: string = "2018-10-01"; bypassCache: string = "true";
           authority: string = ""; msiResId: string = ""): Recallable =
@@ -541,30 +382,30 @@ proc call*(call_593978: Call_IdentityGetToken_593966; resource: string;
   ##            : This indicates the authority to request AAD tokens from. Defaults to the known authority of the identity to be used.
   ##   msiResId: string
   ##           : This identifies, by urlencoded ARM resource id, a specific explicit identity to use when authenticating to Azure AD. Mutually exclusive with client_id and object_id.
-  var query_593979 = newJObject()
-  add(query_593979, "object_id", newJString(objectId))
-  add(query_593979, "client_id", newJString(clientId))
-  add(query_593979, "api-version", newJString(apiVersion))
-  add(query_593979, "resource", newJString(resource))
-  add(query_593979, "bypass_cache", newJString(bypassCache))
-  add(query_593979, "authority", newJString(authority))
-  add(query_593979, "msi_res_id", newJString(msiResId))
-  result = call_593978.call(nil, query_593979, nil, nil, nil)
+  var query_568195 = newJObject()
+  add(query_568195, "object_id", newJString(objectId))
+  add(query_568195, "client_id", newJString(clientId))
+  add(query_568195, "api-version", newJString(apiVersion))
+  add(query_568195, "resource", newJString(resource))
+  add(query_568195, "bypass_cache", newJString(bypassCache))
+  add(query_568195, "authority", newJString(authority))
+  add(query_568195, "msi_res_id", newJString(msiResId))
+  result = call_568194.call(nil, query_568195, nil, nil, nil)
 
-var identityGetToken* = Call_IdentityGetToken_593966(name: "identityGetToken",
+var identityGetToken* = Call_IdentityGetToken_568182(name: "identityGetToken",
     meth: HttpMethod.HttpGet, host: "169.254.169.254",
-    route: "/identity/oauth2/token", validator: validate_IdentityGetToken_593967,
-    base: "/metadata", url: url_IdentityGetToken_593968, schemes: {Scheme.Https})
+    route: "/identity/oauth2/token", validator: validate_IdentityGetToken_568183,
+    base: "/metadata", url: url_IdentityGetToken_568184, schemes: {Scheme.Https})
 type
-  Call_InstancesGetMetadata_593980 = ref object of OpenApiRestCall_593408
-proc url_InstancesGetMetadata_593982(protocol: Scheme; host: string; base: string;
+  Call_InstancesGetMetadata_568196 = ref object of OpenApiRestCall_567641
+proc url_InstancesGetMetadata_568198(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_InstancesGetMetadata_593981(path: JsonNode; query: JsonNode;
+proc validate_InstancesGetMetadata_568197(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get Instance Metadata for the Virtual Machine.
   ## 
@@ -578,11 +419,11 @@ proc validate_InstancesGetMetadata_593981(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568199 = query.getOrDefault("api-version")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = newJString("2018-10-01"))
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_568199 != nil:
+    section.add "api-version", valid_568199
   result.add "query", section
   ## parameters in `header` object:
   ##   Metadata: JString (required)
@@ -590,44 +431,44 @@ proc validate_InstancesGetMetadata_593981(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `Metadata` field"
-  var valid_593984 = header.getOrDefault("Metadata")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568200 = header.getOrDefault("Metadata")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = newJString("true"))
-  if valid_593984 != nil:
-    section.add "Metadata", valid_593984
+  if valid_568200 != nil:
+    section.add "Metadata", valid_568200
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_InstancesGetMetadata_593980; path: JsonNode;
+proc call*(call_568201: Call_InstancesGetMetadata_568196; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get Instance Metadata for the Virtual Machine.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_568201.validator(path, query, header, formData, body)
+  let scheme = call_568201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
+                         call_568201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_568201, url, valid)
 
-proc call*(call_593986: Call_InstancesGetMetadata_593980;
+proc call*(call_568202: Call_InstancesGetMetadata_568196;
           apiVersion: string = "2018-10-01"): Recallable =
   ## instancesGetMetadata
   ## Get Instance Metadata for the Virtual Machine.
   ##   apiVersion: string (required)
   ##             : This is the API version to use.
-  var query_593987 = newJObject()
-  add(query_593987, "api-version", newJString(apiVersion))
-  result = call_593986.call(nil, query_593987, nil, nil, nil)
+  var query_568203 = newJObject()
+  add(query_568203, "api-version", newJString(apiVersion))
+  result = call_568202.call(nil, query_568203, nil, nil, nil)
 
-var instancesGetMetadata* = Call_InstancesGetMetadata_593980(
+var instancesGetMetadata* = Call_InstancesGetMetadata_568196(
     name: "instancesGetMetadata", meth: HttpMethod.HttpGet, host: "169.254.169.254",
-    route: "/instance", validator: validate_InstancesGetMetadata_593981,
-    base: "/metadata", url: url_InstancesGetMetadata_593982, schemes: {Scheme.Https})
+    route: "/instance", validator: validate_InstancesGetMetadata_568197,
+    base: "/metadata", url: url_InstancesGetMetadata_568198, schemes: {Scheme.Https})
 export
   rest
 

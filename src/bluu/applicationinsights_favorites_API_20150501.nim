@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_596458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "applicationinsights-favorites_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_FavoritesList_593647 = ref object of OpenApiRestCall_593425
-proc url_FavoritesList_593649(protocol: Scheme; host: string; base: string;
+  Call_FavoritesList_596680 = ref object of OpenApiRestCall_596458
+proc url_FavoritesList_596682(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_FavoritesList_593649(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FavoritesList_593648(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FavoritesList_596681(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of favorites defined within an Application Insights component.
   ## 
@@ -143,21 +143,21 @@ proc validate_FavoritesList_593648(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_596855 = path.getOrDefault("resourceGroupName")
+  valid_596855 = validateParameter(valid_596855, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_596855 != nil:
+    section.add "resourceGroupName", valid_596855
+  var valid_596856 = path.getOrDefault("subscriptionId")
+  valid_596856 = validateParameter(valid_596856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
-  var valid_593824 = path.getOrDefault("resourceName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_596856 != nil:
+    section.add "subscriptionId", valid_596856
+  var valid_596857 = path.getOrDefault("resourceName")
+  valid_596857 = validateParameter(valid_596857, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "resourceName", valid_593824
+  if valid_596857 != nil:
+    section.add "resourceName", valid_596857
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -173,30 +173,30 @@ proc validate_FavoritesList_593648(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_596858 = query.getOrDefault("api-version")
+  valid_596858 = validateParameter(valid_596858, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
-  var valid_593839 = query.getOrDefault("sourceType")
-  valid_593839 = validateParameter(valid_593839, JString, required = false,
+  if valid_596858 != nil:
+    section.add "api-version", valid_596858
+  var valid_596872 = query.getOrDefault("sourceType")
+  valid_596872 = validateParameter(valid_596872, JString, required = false,
                                  default = newJString("retention"))
-  if valid_593839 != nil:
-    section.add "sourceType", valid_593839
-  var valid_593840 = query.getOrDefault("tags")
-  valid_593840 = validateParameter(valid_593840, JArray, required = false,
+  if valid_596872 != nil:
+    section.add "sourceType", valid_596872
+  var valid_596873 = query.getOrDefault("tags")
+  valid_596873 = validateParameter(valid_596873, JArray, required = false,
                                  default = nil)
-  if valid_593840 != nil:
-    section.add "tags", valid_593840
-  var valid_593841 = query.getOrDefault("canFetchContent")
-  valid_593841 = validateParameter(valid_593841, JBool, required = false, default = nil)
-  if valid_593841 != nil:
-    section.add "canFetchContent", valid_593841
-  var valid_593842 = query.getOrDefault("favoriteType")
-  valid_593842 = validateParameter(valid_593842, JString, required = false,
+  if valid_596873 != nil:
+    section.add "tags", valid_596873
+  var valid_596874 = query.getOrDefault("canFetchContent")
+  valid_596874 = validateParameter(valid_596874, JBool, required = false, default = nil)
+  if valid_596874 != nil:
+    section.add "canFetchContent", valid_596874
+  var valid_596875 = query.getOrDefault("favoriteType")
+  valid_596875 = validateParameter(valid_596875, JString, required = false,
                                  default = newJString("shared"))
-  if valid_593842 != nil:
-    section.add "favoriteType", valid_593842
+  if valid_596875 != nil:
+    section.add "favoriteType", valid_596875
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -205,20 +205,20 @@ proc validate_FavoritesList_593648(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593865: Call_FavoritesList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_596898: Call_FavoritesList_596680; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of favorites defined within an Application Insights component.
   ## 
-  let valid = call_593865.validator(path, query, header, formData, body)
-  let scheme = call_593865.pickScheme
+  let valid = call_596898.validator(path, query, header, formData, body)
+  let scheme = call_596898.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593865.url(scheme.get, call_593865.host, call_593865.base,
-                         call_593865.route, valid.getOrDefault("path"),
+  let url = call_596898.url(scheme.get, call_596898.host, call_596898.base,
+                         call_596898.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593865, url, valid)
+  result = hook(call_596898, url, valid)
 
-proc call*(call_593936: Call_FavoritesList_593647; resourceGroupName: string;
+proc call*(call_596969: Call_FavoritesList_596680; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string;
           sourceType: string = "retention"; tags: JsonNode = nil;
           canFetchContent: bool = false; favoriteType: string = "shared"): Recallable =
@@ -240,26 +240,26 @@ proc call*(call_593936: Call_FavoritesList_593647; resourceGroupName: string;
   ##                  : Flag indicating whether or not to return the full content for each applicable favorite. If false, only return summary content for favorites.
   ##   favoriteType: string
   ##               : The type of favorite. Value can be either shared or user.
-  var path_593937 = newJObject()
-  var query_593939 = newJObject()
-  add(path_593937, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593939, "api-version", newJString(apiVersion))
-  add(path_593937, "subscriptionId", newJString(subscriptionId))
-  add(path_593937, "resourceName", newJString(resourceName))
-  add(query_593939, "sourceType", newJString(sourceType))
+  var path_596970 = newJObject()
+  var query_596972 = newJObject()
+  add(path_596970, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596972, "api-version", newJString(apiVersion))
+  add(path_596970, "subscriptionId", newJString(subscriptionId))
+  add(path_596970, "resourceName", newJString(resourceName))
+  add(query_596972, "sourceType", newJString(sourceType))
   if tags != nil:
-    query_593939.add "tags", tags
-  add(query_593939, "canFetchContent", newJBool(canFetchContent))
-  add(query_593939, "favoriteType", newJString(favoriteType))
-  result = call_593936.call(path_593937, query_593939, nil, nil, nil)
+    query_596972.add "tags", tags
+  add(query_596972, "canFetchContent", newJBool(canFetchContent))
+  add(query_596972, "favoriteType", newJString(favoriteType))
+  result = call_596969.call(path_596970, query_596972, nil, nil, nil)
 
-var favoritesList* = Call_FavoritesList_593647(name: "favoritesList",
+var favoritesList* = Call_FavoritesList_596680(name: "favoritesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/favorites",
-    validator: validate_FavoritesList_593648, base: "", url: url_FavoritesList_593649,
+    validator: validate_FavoritesList_596681, base: "", url: url_FavoritesList_596682,
     schemes: {Scheme.Https})
 type
-  Call_FavoritesAdd_593990 = ref object of OpenApiRestCall_593425
-proc url_FavoritesAdd_593992(protocol: Scheme; host: string; base: string;
+  Call_FavoritesAdd_597023 = ref object of OpenApiRestCall_596458
+proc url_FavoritesAdd_597025(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -284,7 +284,7 @@ proc url_FavoritesAdd_593992(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FavoritesAdd_593991(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FavoritesAdd_597024(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Adds a new favorites to an Application Insights component.
   ## 
@@ -302,26 +302,26 @@ proc validate_FavoritesAdd_593991(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `favoriteId` field"
-  var valid_594010 = path.getOrDefault("favoriteId")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  var valid_597043 = path.getOrDefault("favoriteId")
+  valid_597043 = validateParameter(valid_597043, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "favoriteId", valid_594010
-  var valid_594011 = path.getOrDefault("resourceGroupName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  if valid_597043 != nil:
+    section.add "favoriteId", valid_597043
+  var valid_597044 = path.getOrDefault("resourceGroupName")
+  valid_597044 = validateParameter(valid_597044, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "resourceGroupName", valid_594011
-  var valid_594012 = path.getOrDefault("subscriptionId")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_597044 != nil:
+    section.add "resourceGroupName", valid_597044
+  var valid_597045 = path.getOrDefault("subscriptionId")
+  valid_597045 = validateParameter(valid_597045, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "subscriptionId", valid_594012
-  var valid_594013 = path.getOrDefault("resourceName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  if valid_597045 != nil:
+    section.add "subscriptionId", valid_597045
+  var valid_597046 = path.getOrDefault("resourceName")
+  valid_597046 = validateParameter(valid_597046, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "resourceName", valid_594013
+  if valid_597046 != nil:
+    section.add "resourceName", valid_597046
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -329,11 +329,11 @@ proc validate_FavoritesAdd_593991(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594014 = query.getOrDefault("api-version")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_597047 = query.getOrDefault("api-version")
+  valid_597047 = validateParameter(valid_597047, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "api-version", valid_594014
+  if valid_597047 != nil:
+    section.add "api-version", valid_597047
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -347,20 +347,20 @@ proc validate_FavoritesAdd_593991(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594016: Call_FavoritesAdd_593990; path: JsonNode; query: JsonNode;
+proc call*(call_597049: Call_FavoritesAdd_597023; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Adds a new favorites to an Application Insights component.
   ## 
-  let valid = call_594016.validator(path, query, header, formData, body)
-  let scheme = call_594016.pickScheme
+  let valid = call_597049.validator(path, query, header, formData, body)
+  let scheme = call_597049.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594016.url(scheme.get, call_594016.host, call_594016.base,
-                         call_594016.route, valid.getOrDefault("path"),
+  let url = call_597049.url(scheme.get, call_597049.host, call_597049.base,
+                         call_597049.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594016, url, valid)
+  result = hook(call_597049, url, valid)
 
-proc call*(call_594017: Call_FavoritesAdd_593990; favoriteId: string;
+proc call*(call_597050: Call_FavoritesAdd_597023; favoriteId: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; favoriteProperties: JsonNode): Recallable =
   ## favoritesAdd
@@ -377,25 +377,25 @@ proc call*(call_594017: Call_FavoritesAdd_593990; favoriteId: string;
   ##               : The name of the Application Insights component resource.
   ##   favoriteProperties: JObject (required)
   ##                     : Properties that need to be specified to create a new favorite and add it to an Application Insights component.
-  var path_594018 = newJObject()
-  var query_594019 = newJObject()
-  var body_594020 = newJObject()
-  add(path_594018, "favoriteId", newJString(favoriteId))
-  add(path_594018, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594019, "api-version", newJString(apiVersion))
-  add(path_594018, "subscriptionId", newJString(subscriptionId))
-  add(path_594018, "resourceName", newJString(resourceName))
+  var path_597051 = newJObject()
+  var query_597052 = newJObject()
+  var body_597053 = newJObject()
+  add(path_597051, "favoriteId", newJString(favoriteId))
+  add(path_597051, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597052, "api-version", newJString(apiVersion))
+  add(path_597051, "subscriptionId", newJString(subscriptionId))
+  add(path_597051, "resourceName", newJString(resourceName))
   if favoriteProperties != nil:
-    body_594020 = favoriteProperties
-  result = call_594017.call(path_594018, query_594019, nil, nil, body_594020)
+    body_597053 = favoriteProperties
+  result = call_597050.call(path_597051, query_597052, nil, nil, body_597053)
 
-var favoritesAdd* = Call_FavoritesAdd_593990(name: "favoritesAdd",
+var favoritesAdd* = Call_FavoritesAdd_597023(name: "favoritesAdd",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/favorites/{favoriteId}",
-    validator: validate_FavoritesAdd_593991, base: "", url: url_FavoritesAdd_593992,
+    validator: validate_FavoritesAdd_597024, base: "", url: url_FavoritesAdd_597025,
     schemes: {Scheme.Https})
 type
-  Call_FavoritesGet_593978 = ref object of OpenApiRestCall_593425
-proc url_FavoritesGet_593980(protocol: Scheme; host: string; base: string;
+  Call_FavoritesGet_597011 = ref object of OpenApiRestCall_596458
+proc url_FavoritesGet_597013(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -420,7 +420,7 @@ proc url_FavoritesGet_593980(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FavoritesGet_593979(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FavoritesGet_597012(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a single favorite by its FavoriteId, defined within an Application Insights component.
   ## 
@@ -438,26 +438,26 @@ proc validate_FavoritesGet_593979(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `favoriteId` field"
-  var valid_593981 = path.getOrDefault("favoriteId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_597014 = path.getOrDefault("favoriteId")
+  valid_597014 = validateParameter(valid_597014, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "favoriteId", valid_593981
-  var valid_593982 = path.getOrDefault("resourceGroupName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_597014 != nil:
+    section.add "favoriteId", valid_597014
+  var valid_597015 = path.getOrDefault("resourceGroupName")
+  valid_597015 = validateParameter(valid_597015, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "resourceGroupName", valid_593982
-  var valid_593983 = path.getOrDefault("subscriptionId")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_597015 != nil:
+    section.add "resourceGroupName", valid_597015
+  var valid_597016 = path.getOrDefault("subscriptionId")
+  valid_597016 = validateParameter(valid_597016, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "subscriptionId", valid_593983
-  var valid_593984 = path.getOrDefault("resourceName")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_597016 != nil:
+    section.add "subscriptionId", valid_597016
+  var valid_597017 = path.getOrDefault("resourceName")
+  valid_597017 = validateParameter(valid_597017, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "resourceName", valid_593984
+  if valid_597017 != nil:
+    section.add "resourceName", valid_597017
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -465,11 +465,11 @@ proc validate_FavoritesGet_593979(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_597018 = query.getOrDefault("api-version")
+  valid_597018 = validateParameter(valid_597018, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_597018 != nil:
+    section.add "api-version", valid_597018
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -478,20 +478,20 @@ proc validate_FavoritesGet_593979(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593986: Call_FavoritesGet_593978; path: JsonNode; query: JsonNode;
+proc call*(call_597019: Call_FavoritesGet_597011; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a single favorite by its FavoriteId, defined within an Application Insights component.
   ## 
-  let valid = call_593986.validator(path, query, header, formData, body)
-  let scheme = call_593986.pickScheme
+  let valid = call_597019.validator(path, query, header, formData, body)
+  let scheme = call_597019.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593986.url(scheme.get, call_593986.host, call_593986.base,
-                         call_593986.route, valid.getOrDefault("path"),
+  let url = call_597019.url(scheme.get, call_597019.host, call_597019.base,
+                         call_597019.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593986, url, valid)
+  result = hook(call_597019, url, valid)
 
-proc call*(call_593987: Call_FavoritesGet_593978; favoriteId: string;
+proc call*(call_597020: Call_FavoritesGet_597011; favoriteId: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## favoritesGet
@@ -506,22 +506,22 @@ proc call*(call_593987: Call_FavoritesGet_593978; favoriteId: string;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593988 = newJObject()
-  var query_593989 = newJObject()
-  add(path_593988, "favoriteId", newJString(favoriteId))
-  add(path_593988, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593989, "api-version", newJString(apiVersion))
-  add(path_593988, "subscriptionId", newJString(subscriptionId))
-  add(path_593988, "resourceName", newJString(resourceName))
-  result = call_593987.call(path_593988, query_593989, nil, nil, nil)
+  var path_597021 = newJObject()
+  var query_597022 = newJObject()
+  add(path_597021, "favoriteId", newJString(favoriteId))
+  add(path_597021, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597022, "api-version", newJString(apiVersion))
+  add(path_597021, "subscriptionId", newJString(subscriptionId))
+  add(path_597021, "resourceName", newJString(resourceName))
+  result = call_597020.call(path_597021, query_597022, nil, nil, nil)
 
-var favoritesGet* = Call_FavoritesGet_593978(name: "favoritesGet",
+var favoritesGet* = Call_FavoritesGet_597011(name: "favoritesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/favorites/{favoriteId}",
-    validator: validate_FavoritesGet_593979, base: "", url: url_FavoritesGet_593980,
+    validator: validate_FavoritesGet_597012, base: "", url: url_FavoritesGet_597013,
     schemes: {Scheme.Https})
 type
-  Call_FavoritesUpdate_594033 = ref object of OpenApiRestCall_593425
-proc url_FavoritesUpdate_594035(protocol: Scheme; host: string; base: string;
+  Call_FavoritesUpdate_597066 = ref object of OpenApiRestCall_596458
+proc url_FavoritesUpdate_597068(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -546,7 +546,7 @@ proc url_FavoritesUpdate_594035(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FavoritesUpdate_594034(path: JsonNode; query: JsonNode;
+proc validate_FavoritesUpdate_597067(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Updates a favorite that has already been added to an Application Insights component.
@@ -565,26 +565,26 @@ proc validate_FavoritesUpdate_594034(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `favoriteId` field"
-  var valid_594036 = path.getOrDefault("favoriteId")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  var valid_597069 = path.getOrDefault("favoriteId")
+  valid_597069 = validateParameter(valid_597069, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "favoriteId", valid_594036
-  var valid_594037 = path.getOrDefault("resourceGroupName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_597069 != nil:
+    section.add "favoriteId", valid_597069
+  var valid_597070 = path.getOrDefault("resourceGroupName")
+  valid_597070 = validateParameter(valid_597070, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "resourceGroupName", valid_594037
-  var valid_594038 = path.getOrDefault("subscriptionId")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_597070 != nil:
+    section.add "resourceGroupName", valid_597070
+  var valid_597071 = path.getOrDefault("subscriptionId")
+  valid_597071 = validateParameter(valid_597071, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "subscriptionId", valid_594038
-  var valid_594039 = path.getOrDefault("resourceName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_597071 != nil:
+    section.add "subscriptionId", valid_597071
+  var valid_597072 = path.getOrDefault("resourceName")
+  valid_597072 = validateParameter(valid_597072, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "resourceName", valid_594039
+  if valid_597072 != nil:
+    section.add "resourceName", valid_597072
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -592,11 +592,11 @@ proc validate_FavoritesUpdate_594034(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594040 = query.getOrDefault("api-version")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  var valid_597073 = query.getOrDefault("api-version")
+  valid_597073 = validateParameter(valid_597073, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "api-version", valid_594040
+  if valid_597073 != nil:
+    section.add "api-version", valid_597073
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -610,20 +610,20 @@ proc validate_FavoritesUpdate_594034(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594042: Call_FavoritesUpdate_594033; path: JsonNode; query: JsonNode;
+proc call*(call_597075: Call_FavoritesUpdate_597066; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a favorite that has already been added to an Application Insights component.
   ## 
-  let valid = call_594042.validator(path, query, header, formData, body)
-  let scheme = call_594042.pickScheme
+  let valid = call_597075.validator(path, query, header, formData, body)
+  let scheme = call_597075.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594042.url(scheme.get, call_594042.host, call_594042.base,
-                         call_594042.route, valid.getOrDefault("path"),
+  let url = call_597075.url(scheme.get, call_597075.host, call_597075.base,
+                         call_597075.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594042, url, valid)
+  result = hook(call_597075, url, valid)
 
-proc call*(call_594043: Call_FavoritesUpdate_594033; favoriteId: string;
+proc call*(call_597076: Call_FavoritesUpdate_597066; favoriteId: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; favoriteProperties: JsonNode): Recallable =
   ## favoritesUpdate
@@ -640,25 +640,25 @@ proc call*(call_594043: Call_FavoritesUpdate_594033; favoriteId: string;
   ##               : The name of the Application Insights component resource.
   ##   favoriteProperties: JObject (required)
   ##                     : Properties that need to be specified to update the existing favorite.
-  var path_594044 = newJObject()
-  var query_594045 = newJObject()
-  var body_594046 = newJObject()
-  add(path_594044, "favoriteId", newJString(favoriteId))
-  add(path_594044, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594045, "api-version", newJString(apiVersion))
-  add(path_594044, "subscriptionId", newJString(subscriptionId))
-  add(path_594044, "resourceName", newJString(resourceName))
+  var path_597077 = newJObject()
+  var query_597078 = newJObject()
+  var body_597079 = newJObject()
+  add(path_597077, "favoriteId", newJString(favoriteId))
+  add(path_597077, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597078, "api-version", newJString(apiVersion))
+  add(path_597077, "subscriptionId", newJString(subscriptionId))
+  add(path_597077, "resourceName", newJString(resourceName))
   if favoriteProperties != nil:
-    body_594046 = favoriteProperties
-  result = call_594043.call(path_594044, query_594045, nil, nil, body_594046)
+    body_597079 = favoriteProperties
+  result = call_597076.call(path_597077, query_597078, nil, nil, body_597079)
 
-var favoritesUpdate* = Call_FavoritesUpdate_594033(name: "favoritesUpdate",
+var favoritesUpdate* = Call_FavoritesUpdate_597066(name: "favoritesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/favorites/{favoriteId}",
-    validator: validate_FavoritesUpdate_594034, base: "", url: url_FavoritesUpdate_594035,
+    validator: validate_FavoritesUpdate_597067, base: "", url: url_FavoritesUpdate_597068,
     schemes: {Scheme.Https})
 type
-  Call_FavoritesDelete_594021 = ref object of OpenApiRestCall_593425
-proc url_FavoritesDelete_594023(protocol: Scheme; host: string; base: string;
+  Call_FavoritesDelete_597054 = ref object of OpenApiRestCall_596458
+proc url_FavoritesDelete_597056(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -683,7 +683,7 @@ proc url_FavoritesDelete_594023(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FavoritesDelete_594022(path: JsonNode; query: JsonNode;
+proc validate_FavoritesDelete_597055(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Remove a favorite that is associated to an Application Insights component.
@@ -702,26 +702,26 @@ proc validate_FavoritesDelete_594022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `favoriteId` field"
-  var valid_594024 = path.getOrDefault("favoriteId")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_597057 = path.getOrDefault("favoriteId")
+  valid_597057 = validateParameter(valid_597057, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "favoriteId", valid_594024
-  var valid_594025 = path.getOrDefault("resourceGroupName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  if valid_597057 != nil:
+    section.add "favoriteId", valid_597057
+  var valid_597058 = path.getOrDefault("resourceGroupName")
+  valid_597058 = validateParameter(valid_597058, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "resourceGroupName", valid_594025
-  var valid_594026 = path.getOrDefault("subscriptionId")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_597058 != nil:
+    section.add "resourceGroupName", valid_597058
+  var valid_597059 = path.getOrDefault("subscriptionId")
+  valid_597059 = validateParameter(valid_597059, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "subscriptionId", valid_594026
-  var valid_594027 = path.getOrDefault("resourceName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_597059 != nil:
+    section.add "subscriptionId", valid_597059
+  var valid_597060 = path.getOrDefault("resourceName")
+  valid_597060 = validateParameter(valid_597060, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "resourceName", valid_594027
+  if valid_597060 != nil:
+    section.add "resourceName", valid_597060
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -729,11 +729,11 @@ proc validate_FavoritesDelete_594022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594028 = query.getOrDefault("api-version")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  var valid_597061 = query.getOrDefault("api-version")
+  valid_597061 = validateParameter(valid_597061, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "api-version", valid_594028
+  if valid_597061 != nil:
+    section.add "api-version", valid_597061
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -742,20 +742,20 @@ proc validate_FavoritesDelete_594022(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594029: Call_FavoritesDelete_594021; path: JsonNode; query: JsonNode;
+proc call*(call_597062: Call_FavoritesDelete_597054; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Remove a favorite that is associated to an Application Insights component.
   ## 
-  let valid = call_594029.validator(path, query, header, formData, body)
-  let scheme = call_594029.pickScheme
+  let valid = call_597062.validator(path, query, header, formData, body)
+  let scheme = call_597062.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594029.url(scheme.get, call_594029.host, call_594029.base,
-                         call_594029.route, valid.getOrDefault("path"),
+  let url = call_597062.url(scheme.get, call_597062.host, call_597062.base,
+                         call_597062.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594029, url, valid)
+  result = hook(call_597062, url, valid)
 
-proc call*(call_594030: Call_FavoritesDelete_594021; favoriteId: string;
+proc call*(call_597063: Call_FavoritesDelete_597054; favoriteId: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## favoritesDelete
@@ -770,18 +770,18 @@ proc call*(call_594030: Call_FavoritesDelete_594021; favoriteId: string;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_594031 = newJObject()
-  var query_594032 = newJObject()
-  add(path_594031, "favoriteId", newJString(favoriteId))
-  add(path_594031, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594032, "api-version", newJString(apiVersion))
-  add(path_594031, "subscriptionId", newJString(subscriptionId))
-  add(path_594031, "resourceName", newJString(resourceName))
-  result = call_594030.call(path_594031, query_594032, nil, nil, nil)
+  var path_597064 = newJObject()
+  var query_597065 = newJObject()
+  add(path_597064, "favoriteId", newJString(favoriteId))
+  add(path_597064, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597065, "api-version", newJString(apiVersion))
+  add(path_597064, "subscriptionId", newJString(subscriptionId))
+  add(path_597064, "resourceName", newJString(resourceName))
+  result = call_597063.call(path_597064, query_597065, nil, nil, nil)
 
-var favoritesDelete* = Call_FavoritesDelete_594021(name: "favoritesDelete",
+var favoritesDelete* = Call_FavoritesDelete_597054(name: "favoritesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/favorites/{favoriteId}",
-    validator: validate_FavoritesDelete_594022, base: "", url: url_FavoritesDelete_594023,
+    validator: validate_FavoritesDelete_597055, base: "", url: url_FavoritesDelete_597056,
     schemes: {Scheme.Https})
 export
   rest

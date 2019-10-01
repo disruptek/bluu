@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SignalRManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "signalr"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_OperationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
+proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available REST API operations of the Microsoft.SignalRService provider.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = query.getOrDefault("api-version")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_568041 != nil:
+    section.add "api-version", valid_568041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593831: Call_OperationsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568064: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available REST API operations of the Microsoft.SignalRService provider.
   ## 
-  let valid = call_593831.validator(path, query, header, formData, body)
-  let scheme = call_593831.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593831.url(scheme.get, call_593831.host, call_593831.base,
-                         call_593831.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593831, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593902: Call_OperationsList_593647; apiVersion: string): Recallable =
+proc call*(call_568135: Call_OperationsList_567880; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available REST API operations of the Microsoft.SignalRService provider.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_593903 = newJObject()
-  add(query_593903, "api-version", newJString(apiVersion))
-  result = call_593902.call(nil, query_593903, nil, nil, nil)
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  result = call_568135.call(nil, query_568136, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593647(name: "operationsList",
+var operationsList* = Call_OperationsList_567880(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.SignalRService/operations",
-    validator: validate_OperationsList_593648, base: "", url: url_OperationsList_593649,
+    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
     schemes: {Scheme.Https})
 type
-  Call_SignalRListBySubscription_593943 = ref object of OpenApiRestCall_593425
-proc url_SignalRListBySubscription_593945(protocol: Scheme; host: string;
+  Call_SignalRListBySubscription_568176 = ref object of OpenApiRestCall_567658
+proc url_SignalRListBySubscription_568178(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +185,7 @@ proc url_SignalRListBySubscription_593945(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SignalRListBySubscription_593944(path: JsonNode; query: JsonNode;
+proc validate_SignalRListBySubscription_568177(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Handles requests to list all resources in a subscription.
   ## 
@@ -197,11 +197,11 @@ proc validate_SignalRListBySubscription_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_568193 = path.getOrDefault("subscriptionId")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
+  if valid_568193 != nil:
+    section.add "subscriptionId", valid_568193
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +209,11 @@ proc validate_SignalRListBySubscription_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593961 = query.getOrDefault("api-version")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = query.getOrDefault("api-version")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "api-version", valid_593961
+  if valid_568194 != nil:
+    section.add "api-version", valid_568194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -222,20 +222,20 @@ proc validate_SignalRListBySubscription_593944(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593962: Call_SignalRListBySubscription_593943; path: JsonNode;
+proc call*(call_568195: Call_SignalRListBySubscription_568176; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Handles requests to list all resources in a subscription.
   ## 
-  let valid = call_593962.validator(path, query, header, formData, body)
-  let scheme = call_593962.pickScheme
+  let valid = call_568195.validator(path, query, header, formData, body)
+  let scheme = call_568195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593962.url(scheme.get, call_593962.host, call_593962.base,
-                         call_593962.route, valid.getOrDefault("path"),
+  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
+                         call_568195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593962, url, valid)
+  result = hook(call_568195, url, valid)
 
-proc call*(call_593963: Call_SignalRListBySubscription_593943; apiVersion: string;
+proc call*(call_568196: Call_SignalRListBySubscription_568176; apiVersion: string;
           subscriptionId: string): Recallable =
   ## signalRListBySubscription
   ## Handles requests to list all resources in a subscription.
@@ -243,20 +243,20 @@ proc call*(call_593963: Call_SignalRListBySubscription_593943; apiVersion: strin
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription Id which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593964 = newJObject()
-  var query_593965 = newJObject()
-  add(query_593965, "api-version", newJString(apiVersion))
-  add(path_593964, "subscriptionId", newJString(subscriptionId))
-  result = call_593963.call(path_593964, query_593965, nil, nil, nil)
+  var path_568197 = newJObject()
+  var query_568198 = newJObject()
+  add(query_568198, "api-version", newJString(apiVersion))
+  add(path_568197, "subscriptionId", newJString(subscriptionId))
+  result = call_568196.call(path_568197, query_568198, nil, nil, nil)
 
-var signalRListBySubscription* = Call_SignalRListBySubscription_593943(
+var signalRListBySubscription* = Call_SignalRListBySubscription_568176(
     name: "signalRListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.SignalRService/SignalR",
-    validator: validate_SignalRListBySubscription_593944, base: "",
-    url: url_SignalRListBySubscription_593945, schemes: {Scheme.Https})
+    validator: validate_SignalRListBySubscription_568177, base: "",
+    url: url_SignalRListBySubscription_568178, schemes: {Scheme.Https})
 type
-  Call_SignalRCheckNameAvailability_593966 = ref object of OpenApiRestCall_593425
-proc url_SignalRCheckNameAvailability_593968(protocol: Scheme; host: string;
+  Call_SignalRCheckNameAvailability_568199 = ref object of OpenApiRestCall_567658
+proc url_SignalRCheckNameAvailability_568201(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -276,7 +276,7 @@ proc url_SignalRCheckNameAvailability_593968(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SignalRCheckNameAvailability_593967(path: JsonNode; query: JsonNode;
+proc validate_SignalRCheckNameAvailability_568200(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks that the SignalR name is valid and is not already in use.
   ## 
@@ -290,16 +290,16 @@ proc validate_SignalRCheckNameAvailability_593967(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593969 = path.getOrDefault("subscriptionId")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_568202 = path.getOrDefault("subscriptionId")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "subscriptionId", valid_593969
-  var valid_593970 = path.getOrDefault("location")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_568202 != nil:
+    section.add "subscriptionId", valid_568202
+  var valid_568203 = path.getOrDefault("location")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "location", valid_593970
+  if valid_568203 != nil:
+    section.add "location", valid_568203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -307,11 +307,11 @@ proc validate_SignalRCheckNameAvailability_593967(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568204 = query.getOrDefault("api-version")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
+  if valid_568204 != nil:
+    section.add "api-version", valid_568204
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -324,20 +324,20 @@ proc validate_SignalRCheckNameAvailability_593967(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593973: Call_SignalRCheckNameAvailability_593966; path: JsonNode;
+proc call*(call_568206: Call_SignalRCheckNameAvailability_568199; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks that the SignalR name is valid and is not already in use.
   ## 
-  let valid = call_593973.validator(path, query, header, formData, body)
-  let scheme = call_593973.pickScheme
+  let valid = call_568206.validator(path, query, header, formData, body)
+  let scheme = call_568206.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593973.url(scheme.get, call_593973.host, call_593973.base,
-                         call_593973.route, valid.getOrDefault("path"),
+  let url = call_568206.url(scheme.get, call_568206.host, call_568206.base,
+                         call_568206.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593973, url, valid)
+  result = hook(call_568206, url, valid)
 
-proc call*(call_593974: Call_SignalRCheckNameAvailability_593966;
+proc call*(call_568207: Call_SignalRCheckNameAvailability_568199;
           apiVersion: string; subscriptionId: string; location: string;
           parameters: JsonNode = nil): Recallable =
   ## signalRCheckNameAvailability
@@ -350,24 +350,24 @@ proc call*(call_593974: Call_SignalRCheckNameAvailability_593966;
   ##             : Parameters supplied to the operation.
   ##   location: string (required)
   ##           : the region
-  var path_593975 = newJObject()
-  var query_593976 = newJObject()
-  var body_593977 = newJObject()
-  add(query_593976, "api-version", newJString(apiVersion))
-  add(path_593975, "subscriptionId", newJString(subscriptionId))
+  var path_568208 = newJObject()
+  var query_568209 = newJObject()
+  var body_568210 = newJObject()
+  add(query_568209, "api-version", newJString(apiVersion))
+  add(path_568208, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593977 = parameters
-  add(path_593975, "location", newJString(location))
-  result = call_593974.call(path_593975, query_593976, nil, nil, body_593977)
+    body_568210 = parameters
+  add(path_568208, "location", newJString(location))
+  result = call_568207.call(path_568208, query_568209, nil, nil, body_568210)
 
-var signalRCheckNameAvailability* = Call_SignalRCheckNameAvailability_593966(
+var signalRCheckNameAvailability* = Call_SignalRCheckNameAvailability_568199(
     name: "signalRCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.SignalRService/locations/{location}/checkNameAvailability",
-    validator: validate_SignalRCheckNameAvailability_593967, base: "",
-    url: url_SignalRCheckNameAvailability_593968, schemes: {Scheme.Https})
+    validator: validate_SignalRCheckNameAvailability_568200, base: "",
+    url: url_SignalRCheckNameAvailability_568201, schemes: {Scheme.Https})
 type
-  Call_UsagesList_593978 = ref object of OpenApiRestCall_593425
-proc url_UsagesList_593980(protocol: Scheme; host: string; base: string; route: string;
+  Call_UsagesList_568211 = ref object of OpenApiRestCall_567658
+proc url_UsagesList_568213(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -387,7 +387,7 @@ proc url_UsagesList_593980(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsagesList_593979(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UsagesList_568212(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## List usage quotas for Azure SignalR service by location.
   ## 
@@ -401,16 +401,16 @@ proc validate_UsagesList_593979(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593981 = path.getOrDefault("subscriptionId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = path.getOrDefault("subscriptionId")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "subscriptionId", valid_593981
-  var valid_593982 = path.getOrDefault("location")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568214 != nil:
+    section.add "subscriptionId", valid_568214
+  var valid_568215 = path.getOrDefault("location")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "location", valid_593982
+  if valid_568215 != nil:
+    section.add "location", valid_568215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -418,11 +418,11 @@ proc validate_UsagesList_593979(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = query.getOrDefault("api-version")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_568216 != nil:
+    section.add "api-version", valid_568216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -431,20 +431,20 @@ proc validate_UsagesList_593979(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_UsagesList_593978; path: JsonNode; query: JsonNode;
+proc call*(call_568217: Call_UsagesList_568211; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List usage quotas for Azure SignalR service by location.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_568217.validator(path, query, header, formData, body)
+  let scheme = call_568217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
+                         call_568217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_568217, url, valid)
 
-proc call*(call_593985: Call_UsagesList_593978; apiVersion: string;
+proc call*(call_568218: Call_UsagesList_568211; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## usagesList
   ## List usage quotas for Azure SignalR service by location.
@@ -454,22 +454,22 @@ proc call*(call_593985: Call_UsagesList_593978; apiVersion: string;
   ##                 : Gets subscription Id which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : the location like "eastus"
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
-  add(path_593986, "location", newJString(location))
-  result = call_593985.call(path_593986, query_593987, nil, nil, nil)
+  var path_568219 = newJObject()
+  var query_568220 = newJObject()
+  add(query_568220, "api-version", newJString(apiVersion))
+  add(path_568219, "subscriptionId", newJString(subscriptionId))
+  add(path_568219, "location", newJString(location))
+  result = call_568218.call(path_568219, query_568220, nil, nil, nil)
 
-var usagesList* = Call_UsagesList_593978(name: "usagesList",
+var usagesList* = Call_UsagesList_568211(name: "usagesList",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.SignalRService/locations/{location}/usages",
-                                      validator: validate_UsagesList_593979,
-                                      base: "", url: url_UsagesList_593980,
+                                      validator: validate_UsagesList_568212,
+                                      base: "", url: url_UsagesList_568213,
                                       schemes: {Scheme.Https})
 type
-  Call_SignalRListByResourceGroup_593988 = ref object of OpenApiRestCall_593425
-proc url_SignalRListByResourceGroup_593990(protocol: Scheme; host: string;
+  Call_SignalRListByResourceGroup_568221 = ref object of OpenApiRestCall_567658
+proc url_SignalRListByResourceGroup_568223(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -490,7 +490,7 @@ proc url_SignalRListByResourceGroup_593990(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SignalRListByResourceGroup_593989(path: JsonNode; query: JsonNode;
+proc validate_SignalRListByResourceGroup_568222(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Handles requests to list all resources in a resource group.
   ## 
@@ -504,16 +504,16 @@ proc validate_SignalRListByResourceGroup_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593991 = path.getOrDefault("resourceGroupName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_568224 = path.getOrDefault("resourceGroupName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "resourceGroupName", valid_593991
-  var valid_593992 = path.getOrDefault("subscriptionId")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_568224 != nil:
+    section.add "resourceGroupName", valid_568224
+  var valid_568225 = path.getOrDefault("subscriptionId")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "subscriptionId", valid_593992
+  if valid_568225 != nil:
+    section.add "subscriptionId", valid_568225
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -521,11 +521,11 @@ proc validate_SignalRListByResourceGroup_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593993 = query.getOrDefault("api-version")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568226 = query.getOrDefault("api-version")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "api-version", valid_593993
+  if valid_568226 != nil:
+    section.add "api-version", valid_568226
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -534,20 +534,20 @@ proc validate_SignalRListByResourceGroup_593989(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593994: Call_SignalRListByResourceGroup_593988; path: JsonNode;
+proc call*(call_568227: Call_SignalRListByResourceGroup_568221; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Handles requests to list all resources in a resource group.
   ## 
-  let valid = call_593994.validator(path, query, header, formData, body)
-  let scheme = call_593994.pickScheme
+  let valid = call_568227.validator(path, query, header, formData, body)
+  let scheme = call_568227.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593994.url(scheme.get, call_593994.host, call_593994.base,
-                         call_593994.route, valid.getOrDefault("path"),
+  let url = call_568227.url(scheme.get, call_568227.host, call_568227.base,
+                         call_568227.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593994, url, valid)
+  result = hook(call_568227, url, valid)
 
-proc call*(call_593995: Call_SignalRListByResourceGroup_593988;
+proc call*(call_568228: Call_SignalRListByResourceGroup_568221;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## signalRListByResourceGroup
   ## Handles requests to list all resources in a resource group.
@@ -557,21 +557,21 @@ proc call*(call_593995: Call_SignalRListByResourceGroup_593988;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription Id which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593996 = newJObject()
-  var query_593997 = newJObject()
-  add(path_593996, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593997, "api-version", newJString(apiVersion))
-  add(path_593996, "subscriptionId", newJString(subscriptionId))
-  result = call_593995.call(path_593996, query_593997, nil, nil, nil)
+  var path_568229 = newJObject()
+  var query_568230 = newJObject()
+  add(path_568229, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568230, "api-version", newJString(apiVersion))
+  add(path_568229, "subscriptionId", newJString(subscriptionId))
+  result = call_568228.call(path_568229, query_568230, nil, nil, nil)
 
-var signalRListByResourceGroup* = Call_SignalRListByResourceGroup_593988(
+var signalRListByResourceGroup* = Call_SignalRListByResourceGroup_568221(
     name: "signalRListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/SignalR",
-    validator: validate_SignalRListByResourceGroup_593989, base: "",
-    url: url_SignalRListByResourceGroup_593990, schemes: {Scheme.Https})
+    validator: validate_SignalRListByResourceGroup_568222, base: "",
+    url: url_SignalRListByResourceGroup_568223, schemes: {Scheme.Https})
 type
-  Call_SignalRListKeys_593998 = ref object of OpenApiRestCall_593425
-proc url_SignalRListKeys_594000(protocol: Scheme; host: string; base: string;
+  Call_SignalRListKeys_568231 = ref object of OpenApiRestCall_567658
+proc url_SignalRListKeys_568233(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -595,7 +595,7 @@ proc url_SignalRListKeys_594000(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SignalRListKeys_593999(path: JsonNode; query: JsonNode;
+proc validate_SignalRListKeys_568232(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Get the access keys of the SignalR resource.
@@ -612,21 +612,21 @@ proc validate_SignalRListKeys_593999(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594001 = path.getOrDefault("resourceGroupName")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568234 = path.getOrDefault("resourceGroupName")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "resourceGroupName", valid_594001
-  var valid_594002 = path.getOrDefault("subscriptionId")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_568234 != nil:
+    section.add "resourceGroupName", valid_568234
+  var valid_568235 = path.getOrDefault("subscriptionId")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "subscriptionId", valid_594002
-  var valid_594003 = path.getOrDefault("resourceName")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_568235 != nil:
+    section.add "subscriptionId", valid_568235
+  var valid_568236 = path.getOrDefault("resourceName")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "resourceName", valid_594003
+  if valid_568236 != nil:
+    section.add "resourceName", valid_568236
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -634,11 +634,11 @@ proc validate_SignalRListKeys_593999(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594004 = query.getOrDefault("api-version")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = query.getOrDefault("api-version")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "api-version", valid_594004
+  if valid_568237 != nil:
+    section.add "api-version", valid_568237
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -647,20 +647,20 @@ proc validate_SignalRListKeys_593999(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594005: Call_SignalRListKeys_593998; path: JsonNode; query: JsonNode;
+proc call*(call_568238: Call_SignalRListKeys_568231; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the access keys of the SignalR resource.
   ## 
-  let valid = call_594005.validator(path, query, header, formData, body)
-  let scheme = call_594005.pickScheme
+  let valid = call_568238.validator(path, query, header, formData, body)
+  let scheme = call_568238.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594005.url(scheme.get, call_594005.host, call_594005.base,
-                         call_594005.route, valid.getOrDefault("path"),
+  let url = call_568238.url(scheme.get, call_568238.host, call_568238.base,
+                         call_568238.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594005, url, valid)
+  result = hook(call_568238, url, valid)
 
-proc call*(call_594006: Call_SignalRListKeys_593998; resourceGroupName: string;
+proc call*(call_568239: Call_SignalRListKeys_568231; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
   ## signalRListKeys
   ## Get the access keys of the SignalR resource.
@@ -672,21 +672,21 @@ proc call*(call_594006: Call_SignalRListKeys_593998; resourceGroupName: string;
   ##                 : Gets subscription Id which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the SignalR resource.
-  var path_594007 = newJObject()
-  var query_594008 = newJObject()
-  add(path_594007, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594008, "api-version", newJString(apiVersion))
-  add(path_594007, "subscriptionId", newJString(subscriptionId))
-  add(path_594007, "resourceName", newJString(resourceName))
-  result = call_594006.call(path_594007, query_594008, nil, nil, nil)
+  var path_568240 = newJObject()
+  var query_568241 = newJObject()
+  add(path_568240, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568241, "api-version", newJString(apiVersion))
+  add(path_568240, "subscriptionId", newJString(subscriptionId))
+  add(path_568240, "resourceName", newJString(resourceName))
+  result = call_568239.call(path_568240, query_568241, nil, nil, nil)
 
-var signalRListKeys* = Call_SignalRListKeys_593998(name: "signalRListKeys",
+var signalRListKeys* = Call_SignalRListKeys_568231(name: "signalRListKeys",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/SignalR/{resourceName}/listKeys",
-    validator: validate_SignalRListKeys_593999, base: "", url: url_SignalRListKeys_594000,
+    validator: validate_SignalRListKeys_568232, base: "", url: url_SignalRListKeys_568233,
     schemes: {Scheme.Https})
 type
-  Call_SignalRRegenerateKey_594009 = ref object of OpenApiRestCall_593425
-proc url_SignalRRegenerateKey_594011(protocol: Scheme; host: string; base: string;
+  Call_SignalRRegenerateKey_568242 = ref object of OpenApiRestCall_567658
+proc url_SignalRRegenerateKey_568244(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -710,7 +710,7 @@ proc url_SignalRRegenerateKey_594011(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SignalRRegenerateKey_594010(path: JsonNode; query: JsonNode;
+proc validate_SignalRRegenerateKey_568243(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerate SignalR service access key. PrimaryKey and SecondaryKey cannot be regenerated at the same time.
   ## 
@@ -726,21 +726,21 @@ proc validate_SignalRRegenerateKey_594010(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594012 = path.getOrDefault("resourceGroupName")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  var valid_568245 = path.getOrDefault("resourceGroupName")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "resourceGroupName", valid_594012
-  var valid_594013 = path.getOrDefault("subscriptionId")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  if valid_568245 != nil:
+    section.add "resourceGroupName", valid_568245
+  var valid_568246 = path.getOrDefault("subscriptionId")
+  valid_568246 = validateParameter(valid_568246, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "subscriptionId", valid_594013
-  var valid_594014 = path.getOrDefault("resourceName")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_568246 != nil:
+    section.add "subscriptionId", valid_568246
+  var valid_568247 = path.getOrDefault("resourceName")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "resourceName", valid_594014
+  if valid_568247 != nil:
+    section.add "resourceName", valid_568247
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -748,11 +748,11 @@ proc validate_SignalRRegenerateKey_594010(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594015 = query.getOrDefault("api-version")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_568248 = query.getOrDefault("api-version")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "api-version", valid_594015
+  if valid_568248 != nil:
+    section.add "api-version", valid_568248
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -765,20 +765,20 @@ proc validate_SignalRRegenerateKey_594010(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594017: Call_SignalRRegenerateKey_594009; path: JsonNode;
+proc call*(call_568250: Call_SignalRRegenerateKey_568242; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerate SignalR service access key. PrimaryKey and SecondaryKey cannot be regenerated at the same time.
   ## 
-  let valid = call_594017.validator(path, query, header, formData, body)
-  let scheme = call_594017.pickScheme
+  let valid = call_568250.validator(path, query, header, formData, body)
+  let scheme = call_568250.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594017.url(scheme.get, call_594017.host, call_594017.base,
-                         call_594017.route, valid.getOrDefault("path"),
+  let url = call_568250.url(scheme.get, call_568250.host, call_568250.base,
+                         call_568250.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594017, url, valid)
+  result = hook(call_568250, url, valid)
 
-proc call*(call_594018: Call_SignalRRegenerateKey_594009;
+proc call*(call_568251: Call_SignalRRegenerateKey_568242;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; parameters: JsonNode = nil): Recallable =
   ## signalRRegenerateKey
@@ -793,25 +793,25 @@ proc call*(call_594018: Call_SignalRRegenerateKey_594009;
   ##               : The name of the SignalR resource.
   ##   parameters: JObject
   ##             : Parameter that describes the Regenerate Key Operation.
-  var path_594019 = newJObject()
-  var query_594020 = newJObject()
-  var body_594021 = newJObject()
-  add(path_594019, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594020, "api-version", newJString(apiVersion))
-  add(path_594019, "subscriptionId", newJString(subscriptionId))
-  add(path_594019, "resourceName", newJString(resourceName))
+  var path_568252 = newJObject()
+  var query_568253 = newJObject()
+  var body_568254 = newJObject()
+  add(path_568252, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568253, "api-version", newJString(apiVersion))
+  add(path_568252, "subscriptionId", newJString(subscriptionId))
+  add(path_568252, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_594021 = parameters
-  result = call_594018.call(path_594019, query_594020, nil, nil, body_594021)
+    body_568254 = parameters
+  result = call_568251.call(path_568252, query_568253, nil, nil, body_568254)
 
-var signalRRegenerateKey* = Call_SignalRRegenerateKey_594009(
+var signalRRegenerateKey* = Call_SignalRRegenerateKey_568242(
     name: "signalRRegenerateKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/SignalR/{resourceName}/regenerateKey",
-    validator: validate_SignalRRegenerateKey_594010, base: "",
-    url: url_SignalRRegenerateKey_594011, schemes: {Scheme.Https})
+    validator: validate_SignalRRegenerateKey_568243, base: "",
+    url: url_SignalRRegenerateKey_568244, schemes: {Scheme.Https})
 type
-  Call_SignalRCreateOrUpdate_594033 = ref object of OpenApiRestCall_593425
-proc url_SignalRCreateOrUpdate_594035(protocol: Scheme; host: string; base: string;
+  Call_SignalRCreateOrUpdate_568266 = ref object of OpenApiRestCall_567658
+proc url_SignalRCreateOrUpdate_568268(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -834,7 +834,7 @@ proc url_SignalRCreateOrUpdate_594035(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SignalRCreateOrUpdate_594034(path: JsonNode; query: JsonNode;
+proc validate_SignalRCreateOrUpdate_568267(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new SignalR service and update an exiting SignalR service.
   ## 
@@ -850,21 +850,21 @@ proc validate_SignalRCreateOrUpdate_594034(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594036 = path.getOrDefault("resourceGroupName")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  var valid_568269 = path.getOrDefault("resourceGroupName")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "resourceGroupName", valid_594036
-  var valid_594037 = path.getOrDefault("subscriptionId")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_568269 != nil:
+    section.add "resourceGroupName", valid_568269
+  var valid_568270 = path.getOrDefault("subscriptionId")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "subscriptionId", valid_594037
-  var valid_594038 = path.getOrDefault("resourceName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_568270 != nil:
+    section.add "subscriptionId", valid_568270
+  var valid_568271 = path.getOrDefault("resourceName")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "resourceName", valid_594038
+  if valid_568271 != nil:
+    section.add "resourceName", valid_568271
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -872,11 +872,11 @@ proc validate_SignalRCreateOrUpdate_594034(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594039 = query.getOrDefault("api-version")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  var valid_568272 = query.getOrDefault("api-version")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "api-version", valid_594039
+  if valid_568272 != nil:
+    section.add "api-version", valid_568272
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -889,20 +889,20 @@ proc validate_SignalRCreateOrUpdate_594034(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594041: Call_SignalRCreateOrUpdate_594033; path: JsonNode;
+proc call*(call_568274: Call_SignalRCreateOrUpdate_568266; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new SignalR service and update an exiting SignalR service.
   ## 
-  let valid = call_594041.validator(path, query, header, formData, body)
-  let scheme = call_594041.pickScheme
+  let valid = call_568274.validator(path, query, header, formData, body)
+  let scheme = call_568274.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594041.url(scheme.get, call_594041.host, call_594041.base,
-                         call_594041.route, valid.getOrDefault("path"),
+  let url = call_568274.url(scheme.get, call_568274.host, call_568274.base,
+                         call_568274.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594041, url, valid)
+  result = hook(call_568274, url, valid)
 
-proc call*(call_594042: Call_SignalRCreateOrUpdate_594033;
+proc call*(call_568275: Call_SignalRCreateOrUpdate_568266;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; parameters: JsonNode = nil): Recallable =
   ## signalRCreateOrUpdate
@@ -917,25 +917,25 @@ proc call*(call_594042: Call_SignalRCreateOrUpdate_594033;
   ##               : The name of the SignalR resource.
   ##   parameters: JObject
   ##             : Parameters for the create or update operation
-  var path_594043 = newJObject()
-  var query_594044 = newJObject()
-  var body_594045 = newJObject()
-  add(path_594043, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594044, "api-version", newJString(apiVersion))
-  add(path_594043, "subscriptionId", newJString(subscriptionId))
-  add(path_594043, "resourceName", newJString(resourceName))
+  var path_568276 = newJObject()
+  var query_568277 = newJObject()
+  var body_568278 = newJObject()
+  add(path_568276, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568277, "api-version", newJString(apiVersion))
+  add(path_568276, "subscriptionId", newJString(subscriptionId))
+  add(path_568276, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_594045 = parameters
-  result = call_594042.call(path_594043, query_594044, nil, nil, body_594045)
+    body_568278 = parameters
+  result = call_568275.call(path_568276, query_568277, nil, nil, body_568278)
 
-var signalRCreateOrUpdate* = Call_SignalRCreateOrUpdate_594033(
+var signalRCreateOrUpdate* = Call_SignalRCreateOrUpdate_568266(
     name: "signalRCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/signalR/{resourceName}",
-    validator: validate_SignalRCreateOrUpdate_594034, base: "",
-    url: url_SignalRCreateOrUpdate_594035, schemes: {Scheme.Https})
+    validator: validate_SignalRCreateOrUpdate_568267, base: "",
+    url: url_SignalRCreateOrUpdate_568268, schemes: {Scheme.Https})
 type
-  Call_SignalRGet_594022 = ref object of OpenApiRestCall_593425
-proc url_SignalRGet_594024(protocol: Scheme; host: string; base: string; route: string;
+  Call_SignalRGet_568255 = ref object of OpenApiRestCall_567658
+proc url_SignalRGet_568257(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -958,7 +958,7 @@ proc url_SignalRGet_594024(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SignalRGet_594023(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SignalRGet_568256(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the SignalR service and its properties.
   ## 
@@ -974,21 +974,21 @@ proc validate_SignalRGet_594023(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594025 = path.getOrDefault("resourceGroupName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_568258 = path.getOrDefault("resourceGroupName")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "resourceGroupName", valid_594025
-  var valid_594026 = path.getOrDefault("subscriptionId")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_568258 != nil:
+    section.add "resourceGroupName", valid_568258
+  var valid_568259 = path.getOrDefault("subscriptionId")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "subscriptionId", valid_594026
-  var valid_594027 = path.getOrDefault("resourceName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_568259 != nil:
+    section.add "subscriptionId", valid_568259
+  var valid_568260 = path.getOrDefault("resourceName")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "resourceName", valid_594027
+  if valid_568260 != nil:
+    section.add "resourceName", valid_568260
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -996,11 +996,11 @@ proc validate_SignalRGet_594023(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594028 = query.getOrDefault("api-version")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  var valid_568261 = query.getOrDefault("api-version")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "api-version", valid_594028
+  if valid_568261 != nil:
+    section.add "api-version", valid_568261
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1009,20 +1009,20 @@ proc validate_SignalRGet_594023(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594029: Call_SignalRGet_594022; path: JsonNode; query: JsonNode;
+proc call*(call_568262: Call_SignalRGet_568255; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the SignalR service and its properties.
   ## 
-  let valid = call_594029.validator(path, query, header, formData, body)
-  let scheme = call_594029.pickScheme
+  let valid = call_568262.validator(path, query, header, formData, body)
+  let scheme = call_568262.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594029.url(scheme.get, call_594029.host, call_594029.base,
-                         call_594029.route, valid.getOrDefault("path"),
+  let url = call_568262.url(scheme.get, call_568262.host, call_568262.base,
+                         call_568262.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594029, url, valid)
+  result = hook(call_568262, url, valid)
 
-proc call*(call_594030: Call_SignalRGet_594022; resourceGroupName: string;
+proc call*(call_568263: Call_SignalRGet_568255; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
   ## signalRGet
   ## Get the SignalR service and its properties.
@@ -1034,23 +1034,23 @@ proc call*(call_594030: Call_SignalRGet_594022; resourceGroupName: string;
   ##                 : Gets subscription Id which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the SignalR resource.
-  var path_594031 = newJObject()
-  var query_594032 = newJObject()
-  add(path_594031, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594032, "api-version", newJString(apiVersion))
-  add(path_594031, "subscriptionId", newJString(subscriptionId))
-  add(path_594031, "resourceName", newJString(resourceName))
-  result = call_594030.call(path_594031, query_594032, nil, nil, nil)
+  var path_568264 = newJObject()
+  var query_568265 = newJObject()
+  add(path_568264, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568265, "api-version", newJString(apiVersion))
+  add(path_568264, "subscriptionId", newJString(subscriptionId))
+  add(path_568264, "resourceName", newJString(resourceName))
+  result = call_568263.call(path_568264, query_568265, nil, nil, nil)
 
-var signalRGet* = Call_SignalRGet_594022(name: "signalRGet",
+var signalRGet* = Call_SignalRGet_568255(name: "signalRGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/signalR/{resourceName}",
-                                      validator: validate_SignalRGet_594023,
-                                      base: "", url: url_SignalRGet_594024,
+                                      validator: validate_SignalRGet_568256,
+                                      base: "", url: url_SignalRGet_568257,
                                       schemes: {Scheme.Https})
 type
-  Call_SignalRUpdate_594057 = ref object of OpenApiRestCall_593425
-proc url_SignalRUpdate_594059(protocol: Scheme; host: string; base: string;
+  Call_SignalRUpdate_568290 = ref object of OpenApiRestCall_567658
+proc url_SignalRUpdate_568292(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1073,7 +1073,7 @@ proc url_SignalRUpdate_594059(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SignalRUpdate_594058(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SignalRUpdate_568291(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Operation to update an exiting SignalR service.
   ## 
@@ -1089,21 +1089,21 @@ proc validate_SignalRUpdate_594058(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594060 = path.getOrDefault("resourceGroupName")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  var valid_568293 = path.getOrDefault("resourceGroupName")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "resourceGroupName", valid_594060
-  var valid_594061 = path.getOrDefault("subscriptionId")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  if valid_568293 != nil:
+    section.add "resourceGroupName", valid_568293
+  var valid_568294 = path.getOrDefault("subscriptionId")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "subscriptionId", valid_594061
-  var valid_594062 = path.getOrDefault("resourceName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  if valid_568294 != nil:
+    section.add "subscriptionId", valid_568294
+  var valid_568295 = path.getOrDefault("resourceName")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "resourceName", valid_594062
+  if valid_568295 != nil:
+    section.add "resourceName", valid_568295
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1111,11 +1111,11 @@ proc validate_SignalRUpdate_594058(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594063 = query.getOrDefault("api-version")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  var valid_568296 = query.getOrDefault("api-version")
+  valid_568296 = validateParameter(valid_568296, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "api-version", valid_594063
+  if valid_568296 != nil:
+    section.add "api-version", valid_568296
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1128,20 +1128,20 @@ proc validate_SignalRUpdate_594058(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594065: Call_SignalRUpdate_594057; path: JsonNode; query: JsonNode;
+proc call*(call_568298: Call_SignalRUpdate_568290; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Operation to update an exiting SignalR service.
   ## 
-  let valid = call_594065.validator(path, query, header, formData, body)
-  let scheme = call_594065.pickScheme
+  let valid = call_568298.validator(path, query, header, formData, body)
+  let scheme = call_568298.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594065.url(scheme.get, call_594065.host, call_594065.base,
-                         call_594065.route, valid.getOrDefault("path"),
+  let url = call_568298.url(scheme.get, call_568298.host, call_568298.base,
+                         call_568298.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594065, url, valid)
+  result = hook(call_568298, url, valid)
 
-proc call*(call_594066: Call_SignalRUpdate_594057; resourceGroupName: string;
+proc call*(call_568299: Call_SignalRUpdate_568290; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string;
           parameters: JsonNode = nil): Recallable =
   ## signalRUpdate
@@ -1156,24 +1156,24 @@ proc call*(call_594066: Call_SignalRUpdate_594057; resourceGroupName: string;
   ##               : The name of the SignalR resource.
   ##   parameters: JObject
   ##             : Parameters for the update operation
-  var path_594067 = newJObject()
-  var query_594068 = newJObject()
-  var body_594069 = newJObject()
-  add(path_594067, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594068, "api-version", newJString(apiVersion))
-  add(path_594067, "subscriptionId", newJString(subscriptionId))
-  add(path_594067, "resourceName", newJString(resourceName))
+  var path_568300 = newJObject()
+  var query_568301 = newJObject()
+  var body_568302 = newJObject()
+  add(path_568300, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568301, "api-version", newJString(apiVersion))
+  add(path_568300, "subscriptionId", newJString(subscriptionId))
+  add(path_568300, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_594069 = parameters
-  result = call_594066.call(path_594067, query_594068, nil, nil, body_594069)
+    body_568302 = parameters
+  result = call_568299.call(path_568300, query_568301, nil, nil, body_568302)
 
-var signalRUpdate* = Call_SignalRUpdate_594057(name: "signalRUpdate",
+var signalRUpdate* = Call_SignalRUpdate_568290(name: "signalRUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/signalR/{resourceName}",
-    validator: validate_SignalRUpdate_594058, base: "", url: url_SignalRUpdate_594059,
+    validator: validate_SignalRUpdate_568291, base: "", url: url_SignalRUpdate_568292,
     schemes: {Scheme.Https})
 type
-  Call_SignalRDelete_594046 = ref object of OpenApiRestCall_593425
-proc url_SignalRDelete_594048(protocol: Scheme; host: string; base: string;
+  Call_SignalRDelete_568279 = ref object of OpenApiRestCall_567658
+proc url_SignalRDelete_568281(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1196,7 +1196,7 @@ proc url_SignalRDelete_594048(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SignalRDelete_594047(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SignalRDelete_568280(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Operation to delete a SignalR service.
   ## 
@@ -1212,21 +1212,21 @@ proc validate_SignalRDelete_594047(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594049 = path.getOrDefault("resourceGroupName")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  var valid_568282 = path.getOrDefault("resourceGroupName")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "resourceGroupName", valid_594049
-  var valid_594050 = path.getOrDefault("subscriptionId")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  if valid_568282 != nil:
+    section.add "resourceGroupName", valid_568282
+  var valid_568283 = path.getOrDefault("subscriptionId")
+  valid_568283 = validateParameter(valid_568283, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "subscriptionId", valid_594050
-  var valid_594051 = path.getOrDefault("resourceName")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_568283 != nil:
+    section.add "subscriptionId", valid_568283
+  var valid_568284 = path.getOrDefault("resourceName")
+  valid_568284 = validateParameter(valid_568284, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "resourceName", valid_594051
+  if valid_568284 != nil:
+    section.add "resourceName", valid_568284
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1234,11 +1234,11 @@ proc validate_SignalRDelete_594047(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594052 = query.getOrDefault("api-version")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  var valid_568285 = query.getOrDefault("api-version")
+  valid_568285 = validateParameter(valid_568285, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "api-version", valid_594052
+  if valid_568285 != nil:
+    section.add "api-version", valid_568285
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1247,20 +1247,20 @@ proc validate_SignalRDelete_594047(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594053: Call_SignalRDelete_594046; path: JsonNode; query: JsonNode;
+proc call*(call_568286: Call_SignalRDelete_568279; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Operation to delete a SignalR service.
   ## 
-  let valid = call_594053.validator(path, query, header, formData, body)
-  let scheme = call_594053.pickScheme
+  let valid = call_568286.validator(path, query, header, formData, body)
+  let scheme = call_568286.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594053.url(scheme.get, call_594053.host, call_594053.base,
-                         call_594053.route, valid.getOrDefault("path"),
+  let url = call_568286.url(scheme.get, call_568286.host, call_568286.base,
+                         call_568286.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594053, url, valid)
+  result = hook(call_568286, url, valid)
 
-proc call*(call_594054: Call_SignalRDelete_594046; resourceGroupName: string;
+proc call*(call_568287: Call_SignalRDelete_568279; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
   ## signalRDelete
   ## Operation to delete a SignalR service.
@@ -1272,21 +1272,21 @@ proc call*(call_594054: Call_SignalRDelete_594046; resourceGroupName: string;
   ##                 : Gets subscription Id which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the SignalR resource.
-  var path_594055 = newJObject()
-  var query_594056 = newJObject()
-  add(path_594055, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594056, "api-version", newJString(apiVersion))
-  add(path_594055, "subscriptionId", newJString(subscriptionId))
-  add(path_594055, "resourceName", newJString(resourceName))
-  result = call_594054.call(path_594055, query_594056, nil, nil, nil)
+  var path_568288 = newJObject()
+  var query_568289 = newJObject()
+  add(path_568288, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568289, "api-version", newJString(apiVersion))
+  add(path_568288, "subscriptionId", newJString(subscriptionId))
+  add(path_568288, "resourceName", newJString(resourceName))
+  result = call_568287.call(path_568288, query_568289, nil, nil, nil)
 
-var signalRDelete* = Call_SignalRDelete_594046(name: "signalRDelete",
+var signalRDelete* = Call_SignalRDelete_568279(name: "signalRDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/signalR/{resourceName}",
-    validator: validate_SignalRDelete_594047, base: "", url: url_SignalRDelete_594048,
+    validator: validate_SignalRDelete_568280, base: "", url: url_SignalRDelete_568281,
     schemes: {Scheme.Https})
 type
-  Call_SignalRRestart_594070 = ref object of OpenApiRestCall_593425
-proc url_SignalRRestart_594072(protocol: Scheme; host: string; base: string;
+  Call_SignalRRestart_568303 = ref object of OpenApiRestCall_567658
+proc url_SignalRRestart_568305(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1310,7 +1310,7 @@ proc url_SignalRRestart_594072(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SignalRRestart_594071(path: JsonNode; query: JsonNode;
+proc validate_SignalRRestart_568304(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Operation to restart a SignalR service.
@@ -1327,21 +1327,21 @@ proc validate_SignalRRestart_594071(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594073 = path.getOrDefault("resourceGroupName")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  var valid_568306 = path.getOrDefault("resourceGroupName")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "resourceGroupName", valid_594073
-  var valid_594074 = path.getOrDefault("subscriptionId")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_568306 != nil:
+    section.add "resourceGroupName", valid_568306
+  var valid_568307 = path.getOrDefault("subscriptionId")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "subscriptionId", valid_594074
-  var valid_594075 = path.getOrDefault("resourceName")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  if valid_568307 != nil:
+    section.add "subscriptionId", valid_568307
+  var valid_568308 = path.getOrDefault("resourceName")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "resourceName", valid_594075
+  if valid_568308 != nil:
+    section.add "resourceName", valid_568308
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1349,11 +1349,11 @@ proc validate_SignalRRestart_594071(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594076 = query.getOrDefault("api-version")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  var valid_568309 = query.getOrDefault("api-version")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "api-version", valid_594076
+  if valid_568309 != nil:
+    section.add "api-version", valid_568309
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1362,20 +1362,20 @@ proc validate_SignalRRestart_594071(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594077: Call_SignalRRestart_594070; path: JsonNode; query: JsonNode;
+proc call*(call_568310: Call_SignalRRestart_568303; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Operation to restart a SignalR service.
   ## 
-  let valid = call_594077.validator(path, query, header, formData, body)
-  let scheme = call_594077.pickScheme
+  let valid = call_568310.validator(path, query, header, formData, body)
+  let scheme = call_568310.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594077.url(scheme.get, call_594077.host, call_594077.base,
-                         call_594077.route, valid.getOrDefault("path"),
+  let url = call_568310.url(scheme.get, call_568310.host, call_568310.base,
+                         call_568310.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594077, url, valid)
+  result = hook(call_568310, url, valid)
 
-proc call*(call_594078: Call_SignalRRestart_594070; resourceGroupName: string;
+proc call*(call_568311: Call_SignalRRestart_568303; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
   ## signalRRestart
   ## Operation to restart a SignalR service.
@@ -1387,17 +1387,17 @@ proc call*(call_594078: Call_SignalRRestart_594070; resourceGroupName: string;
   ##                 : Gets subscription Id which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the SignalR resource.
-  var path_594079 = newJObject()
-  var query_594080 = newJObject()
-  add(path_594079, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594080, "api-version", newJString(apiVersion))
-  add(path_594079, "subscriptionId", newJString(subscriptionId))
-  add(path_594079, "resourceName", newJString(resourceName))
-  result = call_594078.call(path_594079, query_594080, nil, nil, nil)
+  var path_568312 = newJObject()
+  var query_568313 = newJObject()
+  add(path_568312, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568313, "api-version", newJString(apiVersion))
+  add(path_568312, "subscriptionId", newJString(subscriptionId))
+  add(path_568312, "resourceName", newJString(resourceName))
+  result = call_568311.call(path_568312, query_568313, nil, nil, nil)
 
-var signalRRestart* = Call_SignalRRestart_594070(name: "signalRRestart",
+var signalRRestart* = Call_SignalRRestart_568303(name: "signalRRestart",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/signalR/{resourceName}/restart",
-    validator: validate_SignalRRestart_594071, base: "", url: url_SignalRRestart_594072,
+    validator: validate_SignalRRestart_568304, base: "", url: url_SignalRRestart_568305,
     schemes: {Scheme.Https})
 export
   rest

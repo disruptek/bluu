@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "network-ddosProtectionPlan"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DdosProtectionPlansList_593630 = ref object of OpenApiRestCall_593408
-proc url_DdosProtectionPlansList_593632(protocol: Scheme; host: string; base: string;
+  Call_DdosProtectionPlansList_567863 = ref object of OpenApiRestCall_567641
+proc url_DdosProtectionPlansList_567865(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -122,7 +122,7 @@ proc url_DdosProtectionPlansList_593632(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DdosProtectionPlansList_593631(path: JsonNode; query: JsonNode;
+proc validate_DdosProtectionPlansList_567864(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all DDoS protection plans in a subscription.
   ## 
@@ -134,11 +134,11 @@ proc validate_DdosProtectionPlansList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593805 = path.getOrDefault("subscriptionId")
-  valid_593805 = validateParameter(valid_593805, JString, required = true,
+  var valid_568038 = path.getOrDefault("subscriptionId")
+  valid_568038 = validateParameter(valid_568038, JString, required = true,
                                  default = nil)
-  if valid_593805 != nil:
-    section.add "subscriptionId", valid_593805
+  if valid_568038 != nil:
+    section.add "subscriptionId", valid_568038
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -146,11 +146,11 @@ proc validate_DdosProtectionPlansList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593806 = query.getOrDefault("api-version")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_568039 = query.getOrDefault("api-version")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "api-version", valid_593806
+  if valid_568039 != nil:
+    section.add "api-version", valid_568039
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -159,20 +159,20 @@ proc validate_DdosProtectionPlansList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593829: Call_DdosProtectionPlansList_593630; path: JsonNode;
+proc call*(call_568062: Call_DdosProtectionPlansList_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all DDoS protection plans in a subscription.
   ## 
-  let valid = call_593829.validator(path, query, header, formData, body)
-  let scheme = call_593829.pickScheme
+  let valid = call_568062.validator(path, query, header, formData, body)
+  let scheme = call_568062.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593829.url(scheme.get, call_593829.host, call_593829.base,
-                         call_593829.route, valid.getOrDefault("path"),
+  let url = call_568062.url(scheme.get, call_568062.host, call_568062.base,
+                         call_568062.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593829, url, valid)
+  result = hook(call_568062, url, valid)
 
-proc call*(call_593900: Call_DdosProtectionPlansList_593630; apiVersion: string;
+proc call*(call_568133: Call_DdosProtectionPlansList_567863; apiVersion: string;
           subscriptionId: string): Recallable =
   ## ddosProtectionPlansList
   ## Gets all DDoS protection plans in a subscription.
@@ -180,20 +180,20 @@ proc call*(call_593900: Call_DdosProtectionPlansList_593630; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593901 = newJObject()
-  var query_593903 = newJObject()
-  add(query_593903, "api-version", newJString(apiVersion))
-  add(path_593901, "subscriptionId", newJString(subscriptionId))
-  result = call_593900.call(path_593901, query_593903, nil, nil, nil)
+  var path_568134 = newJObject()
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  add(path_568134, "subscriptionId", newJString(subscriptionId))
+  result = call_568133.call(path_568134, query_568136, nil, nil, nil)
 
-var ddosProtectionPlansList* = Call_DdosProtectionPlansList_593630(
+var ddosProtectionPlansList* = Call_DdosProtectionPlansList_567863(
     name: "ddosProtectionPlansList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/ddosProtectionPlans",
-    validator: validate_DdosProtectionPlansList_593631, base: "",
-    url: url_DdosProtectionPlansList_593632, schemes: {Scheme.Https})
+    validator: validate_DdosProtectionPlansList_567864, base: "",
+    url: url_DdosProtectionPlansList_567865, schemes: {Scheme.Https})
 type
-  Call_DdosProtectionPlansListByResourceGroup_593942 = ref object of OpenApiRestCall_593408
-proc url_DdosProtectionPlansListByResourceGroup_593944(protocol: Scheme;
+  Call_DdosProtectionPlansListByResourceGroup_568175 = ref object of OpenApiRestCall_567641
+proc url_DdosProtectionPlansListByResourceGroup_568177(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -214,7 +214,7 @@ proc url_DdosProtectionPlansListByResourceGroup_593944(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DdosProtectionPlansListByResourceGroup_593943(path: JsonNode;
+proc validate_DdosProtectionPlansListByResourceGroup_568176(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the DDoS protection plans in a resource group.
   ## 
@@ -228,16 +228,16 @@ proc validate_DdosProtectionPlansListByResourceGroup_593943(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593945 = path.getOrDefault("resourceGroupName")
-  valid_593945 = validateParameter(valid_593945, JString, required = true,
+  var valid_568178 = path.getOrDefault("resourceGroupName")
+  valid_568178 = validateParameter(valid_568178, JString, required = true,
                                  default = nil)
-  if valid_593945 != nil:
-    section.add "resourceGroupName", valid_593945
-  var valid_593946 = path.getOrDefault("subscriptionId")
-  valid_593946 = validateParameter(valid_593946, JString, required = true,
+  if valid_568178 != nil:
+    section.add "resourceGroupName", valid_568178
+  var valid_568179 = path.getOrDefault("subscriptionId")
+  valid_568179 = validateParameter(valid_568179, JString, required = true,
                                  default = nil)
-  if valid_593946 != nil:
-    section.add "subscriptionId", valid_593946
+  if valid_568179 != nil:
+    section.add "subscriptionId", valid_568179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -245,11 +245,11 @@ proc validate_DdosProtectionPlansListByResourceGroup_593943(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593947 = query.getOrDefault("api-version")
-  valid_593947 = validateParameter(valid_593947, JString, required = true,
+  var valid_568180 = query.getOrDefault("api-version")
+  valid_568180 = validateParameter(valid_568180, JString, required = true,
                                  default = nil)
-  if valid_593947 != nil:
-    section.add "api-version", valid_593947
+  if valid_568180 != nil:
+    section.add "api-version", valid_568180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -258,21 +258,21 @@ proc validate_DdosProtectionPlansListByResourceGroup_593943(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593948: Call_DdosProtectionPlansListByResourceGroup_593942;
+proc call*(call_568181: Call_DdosProtectionPlansListByResourceGroup_568175;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all the DDoS protection plans in a resource group.
   ## 
-  let valid = call_593948.validator(path, query, header, formData, body)
-  let scheme = call_593948.pickScheme
+  let valid = call_568181.validator(path, query, header, formData, body)
+  let scheme = call_568181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593948.url(scheme.get, call_593948.host, call_593948.base,
-                         call_593948.route, valid.getOrDefault("path"),
+  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
+                         call_568181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593948, url, valid)
+  result = hook(call_568181, url, valid)
 
-proc call*(call_593949: Call_DdosProtectionPlansListByResourceGroup_593942;
+proc call*(call_568182: Call_DdosProtectionPlansListByResourceGroup_568175;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## ddosProtectionPlansListByResourceGroup
   ## Gets all the DDoS protection plans in a resource group.
@@ -282,22 +282,22 @@ proc call*(call_593949: Call_DdosProtectionPlansListByResourceGroup_593942;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593950 = newJObject()
-  var query_593951 = newJObject()
-  add(path_593950, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593951, "api-version", newJString(apiVersion))
-  add(path_593950, "subscriptionId", newJString(subscriptionId))
-  result = call_593949.call(path_593950, query_593951, nil, nil, nil)
+  var path_568183 = newJObject()
+  var query_568184 = newJObject()
+  add(path_568183, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568184, "api-version", newJString(apiVersion))
+  add(path_568183, "subscriptionId", newJString(subscriptionId))
+  result = call_568182.call(path_568183, query_568184, nil, nil, nil)
 
-var ddosProtectionPlansListByResourceGroup* = Call_DdosProtectionPlansListByResourceGroup_593942(
+var ddosProtectionPlansListByResourceGroup* = Call_DdosProtectionPlansListByResourceGroup_568175(
     name: "ddosProtectionPlansListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosProtectionPlans",
-    validator: validate_DdosProtectionPlansListByResourceGroup_593943, base: "",
-    url: url_DdosProtectionPlansListByResourceGroup_593944,
+    validator: validate_DdosProtectionPlansListByResourceGroup_568176, base: "",
+    url: url_DdosProtectionPlansListByResourceGroup_568177,
     schemes: {Scheme.Https})
 type
-  Call_DdosProtectionPlansCreateOrUpdate_593963 = ref object of OpenApiRestCall_593408
-proc url_DdosProtectionPlansCreateOrUpdate_593965(protocol: Scheme; host: string;
+  Call_DdosProtectionPlansCreateOrUpdate_568196 = ref object of OpenApiRestCall_567641
+proc url_DdosProtectionPlansCreateOrUpdate_568198(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -321,7 +321,7 @@ proc url_DdosProtectionPlansCreateOrUpdate_593965(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DdosProtectionPlansCreateOrUpdate_593964(path: JsonNode;
+proc validate_DdosProtectionPlansCreateOrUpdate_568197(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a DDoS protection plan.
   ## 
@@ -337,21 +337,21 @@ proc validate_DdosProtectionPlansCreateOrUpdate_593964(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593983 = path.getOrDefault("resourceGroupName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = path.getOrDefault("resourceGroupName")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "resourceGroupName", valid_593983
-  var valid_593984 = path.getOrDefault("subscriptionId")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_568216 != nil:
+    section.add "resourceGroupName", valid_568216
+  var valid_568217 = path.getOrDefault("subscriptionId")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "subscriptionId", valid_593984
-  var valid_593985 = path.getOrDefault("ddosProtectionPlanName")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  if valid_568217 != nil:
+    section.add "subscriptionId", valid_568217
+  var valid_568218 = path.getOrDefault("ddosProtectionPlanName")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "ddosProtectionPlanName", valid_593985
+  if valid_568218 != nil:
+    section.add "ddosProtectionPlanName", valid_568218
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -359,11 +359,11 @@ proc validate_DdosProtectionPlansCreateOrUpdate_593964(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593986 = query.getOrDefault("api-version")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  var valid_568219 = query.getOrDefault("api-version")
+  valid_568219 = validateParameter(valid_568219, JString, required = true,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "api-version", valid_593986
+  if valid_568219 != nil:
+    section.add "api-version", valid_568219
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -377,21 +377,21 @@ proc validate_DdosProtectionPlansCreateOrUpdate_593964(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593988: Call_DdosProtectionPlansCreateOrUpdate_593963;
+proc call*(call_568221: Call_DdosProtectionPlansCreateOrUpdate_568196;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a DDoS protection plan.
   ## 
-  let valid = call_593988.validator(path, query, header, formData, body)
-  let scheme = call_593988.pickScheme
+  let valid = call_568221.validator(path, query, header, formData, body)
+  let scheme = call_568221.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593988.url(scheme.get, call_593988.host, call_593988.base,
-                         call_593988.route, valid.getOrDefault("path"),
+  let url = call_568221.url(scheme.get, call_568221.host, call_568221.base,
+                         call_568221.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593988, url, valid)
+  result = hook(call_568221, url, valid)
 
-proc call*(call_593989: Call_DdosProtectionPlansCreateOrUpdate_593963;
+proc call*(call_568222: Call_DdosProtectionPlansCreateOrUpdate_568196;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           ddosProtectionPlanName: string; parameters: JsonNode): Recallable =
   ## ddosProtectionPlansCreateOrUpdate
@@ -406,25 +406,25 @@ proc call*(call_593989: Call_DdosProtectionPlansCreateOrUpdate_593963;
   ##                         : The name of the DDoS protection plan.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update operation.
-  var path_593990 = newJObject()
-  var query_593991 = newJObject()
-  var body_593992 = newJObject()
-  add(path_593990, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593991, "api-version", newJString(apiVersion))
-  add(path_593990, "subscriptionId", newJString(subscriptionId))
-  add(path_593990, "ddosProtectionPlanName", newJString(ddosProtectionPlanName))
+  var path_568223 = newJObject()
+  var query_568224 = newJObject()
+  var body_568225 = newJObject()
+  add(path_568223, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568224, "api-version", newJString(apiVersion))
+  add(path_568223, "subscriptionId", newJString(subscriptionId))
+  add(path_568223, "ddosProtectionPlanName", newJString(ddosProtectionPlanName))
   if parameters != nil:
-    body_593992 = parameters
-  result = call_593989.call(path_593990, query_593991, nil, nil, body_593992)
+    body_568225 = parameters
+  result = call_568222.call(path_568223, query_568224, nil, nil, body_568225)
 
-var ddosProtectionPlansCreateOrUpdate* = Call_DdosProtectionPlansCreateOrUpdate_593963(
+var ddosProtectionPlansCreateOrUpdate* = Call_DdosProtectionPlansCreateOrUpdate_568196(
     name: "ddosProtectionPlansCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosProtectionPlans/{ddosProtectionPlanName}",
-    validator: validate_DdosProtectionPlansCreateOrUpdate_593964, base: "",
-    url: url_DdosProtectionPlansCreateOrUpdate_593965, schemes: {Scheme.Https})
+    validator: validate_DdosProtectionPlansCreateOrUpdate_568197, base: "",
+    url: url_DdosProtectionPlansCreateOrUpdate_568198, schemes: {Scheme.Https})
 type
-  Call_DdosProtectionPlansGet_593952 = ref object of OpenApiRestCall_593408
-proc url_DdosProtectionPlansGet_593954(protocol: Scheme; host: string; base: string;
+  Call_DdosProtectionPlansGet_568185 = ref object of OpenApiRestCall_567641
+proc url_DdosProtectionPlansGet_568187(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -448,7 +448,7 @@ proc url_DdosProtectionPlansGet_593954(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DdosProtectionPlansGet_593953(path: JsonNode; query: JsonNode;
+proc validate_DdosProtectionPlansGet_568186(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about the specified DDoS protection plan.
   ## 
@@ -464,21 +464,21 @@ proc validate_DdosProtectionPlansGet_593953(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593955 = path.getOrDefault("resourceGroupName")
-  valid_593955 = validateParameter(valid_593955, JString, required = true,
+  var valid_568188 = path.getOrDefault("resourceGroupName")
+  valid_568188 = validateParameter(valid_568188, JString, required = true,
                                  default = nil)
-  if valid_593955 != nil:
-    section.add "resourceGroupName", valid_593955
-  var valid_593956 = path.getOrDefault("subscriptionId")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  if valid_568188 != nil:
+    section.add "resourceGroupName", valid_568188
+  var valid_568189 = path.getOrDefault("subscriptionId")
+  valid_568189 = validateParameter(valid_568189, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "subscriptionId", valid_593956
-  var valid_593957 = path.getOrDefault("ddosProtectionPlanName")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  if valid_568189 != nil:
+    section.add "subscriptionId", valid_568189
+  var valid_568190 = path.getOrDefault("ddosProtectionPlanName")
+  valid_568190 = validateParameter(valid_568190, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "ddosProtectionPlanName", valid_593957
+  if valid_568190 != nil:
+    section.add "ddosProtectionPlanName", valid_568190
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -486,11 +486,11 @@ proc validate_DdosProtectionPlansGet_593953(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593958 = query.getOrDefault("api-version")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  var valid_568191 = query.getOrDefault("api-version")
+  valid_568191 = validateParameter(valid_568191, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "api-version", valid_593958
+  if valid_568191 != nil:
+    section.add "api-version", valid_568191
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -499,20 +499,20 @@ proc validate_DdosProtectionPlansGet_593953(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593959: Call_DdosProtectionPlansGet_593952; path: JsonNode;
+proc call*(call_568192: Call_DdosProtectionPlansGet_568185; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the specified DDoS protection plan.
   ## 
-  let valid = call_593959.validator(path, query, header, formData, body)
-  let scheme = call_593959.pickScheme
+  let valid = call_568192.validator(path, query, header, formData, body)
+  let scheme = call_568192.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593959.url(scheme.get, call_593959.host, call_593959.base,
-                         call_593959.route, valid.getOrDefault("path"),
+  let url = call_568192.url(scheme.get, call_568192.host, call_568192.base,
+                         call_568192.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593959, url, valid)
+  result = hook(call_568192, url, valid)
 
-proc call*(call_593960: Call_DdosProtectionPlansGet_593952;
+proc call*(call_568193: Call_DdosProtectionPlansGet_568185;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           ddosProtectionPlanName: string): Recallable =
   ## ddosProtectionPlansGet
@@ -525,22 +525,22 @@ proc call*(call_593960: Call_DdosProtectionPlansGet_593952;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   ddosProtectionPlanName: string (required)
   ##                         : The name of the DDoS protection plan.
-  var path_593961 = newJObject()
-  var query_593962 = newJObject()
-  add(path_593961, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593962, "api-version", newJString(apiVersion))
-  add(path_593961, "subscriptionId", newJString(subscriptionId))
-  add(path_593961, "ddosProtectionPlanName", newJString(ddosProtectionPlanName))
-  result = call_593960.call(path_593961, query_593962, nil, nil, nil)
+  var path_568194 = newJObject()
+  var query_568195 = newJObject()
+  add(path_568194, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568195, "api-version", newJString(apiVersion))
+  add(path_568194, "subscriptionId", newJString(subscriptionId))
+  add(path_568194, "ddosProtectionPlanName", newJString(ddosProtectionPlanName))
+  result = call_568193.call(path_568194, query_568195, nil, nil, nil)
 
-var ddosProtectionPlansGet* = Call_DdosProtectionPlansGet_593952(
+var ddosProtectionPlansGet* = Call_DdosProtectionPlansGet_568185(
     name: "ddosProtectionPlansGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosProtectionPlans/{ddosProtectionPlanName}",
-    validator: validate_DdosProtectionPlansGet_593953, base: "",
-    url: url_DdosProtectionPlansGet_593954, schemes: {Scheme.Https})
+    validator: validate_DdosProtectionPlansGet_568186, base: "",
+    url: url_DdosProtectionPlansGet_568187, schemes: {Scheme.Https})
 type
-  Call_DdosProtectionPlansDelete_593993 = ref object of OpenApiRestCall_593408
-proc url_DdosProtectionPlansDelete_593995(protocol: Scheme; host: string;
+  Call_DdosProtectionPlansDelete_568226 = ref object of OpenApiRestCall_567641
+proc url_DdosProtectionPlansDelete_568228(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -564,7 +564,7 @@ proc url_DdosProtectionPlansDelete_593995(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DdosProtectionPlansDelete_593994(path: JsonNode; query: JsonNode;
+proc validate_DdosProtectionPlansDelete_568227(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified DDoS protection plan.
   ## 
@@ -580,21 +580,21 @@ proc validate_DdosProtectionPlansDelete_593994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593996 = path.getOrDefault("resourceGroupName")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_568229 = path.getOrDefault("resourceGroupName")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "resourceGroupName", valid_593996
-  var valid_593997 = path.getOrDefault("subscriptionId")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  if valid_568229 != nil:
+    section.add "resourceGroupName", valid_568229
+  var valid_568230 = path.getOrDefault("subscriptionId")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "subscriptionId", valid_593997
-  var valid_593998 = path.getOrDefault("ddosProtectionPlanName")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  if valid_568230 != nil:
+    section.add "subscriptionId", valid_568230
+  var valid_568231 = path.getOrDefault("ddosProtectionPlanName")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "ddosProtectionPlanName", valid_593998
+  if valid_568231 != nil:
+    section.add "ddosProtectionPlanName", valid_568231
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -602,11 +602,11 @@ proc validate_DdosProtectionPlansDelete_593994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593999 = query.getOrDefault("api-version")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  var valid_568232 = query.getOrDefault("api-version")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "api-version", valid_593999
+  if valid_568232 != nil:
+    section.add "api-version", valid_568232
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -615,20 +615,20 @@ proc validate_DdosProtectionPlansDelete_593994(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594000: Call_DdosProtectionPlansDelete_593993; path: JsonNode;
+proc call*(call_568233: Call_DdosProtectionPlansDelete_568226; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified DDoS protection plan.
   ## 
-  let valid = call_594000.validator(path, query, header, formData, body)
-  let scheme = call_594000.pickScheme
+  let valid = call_568233.validator(path, query, header, formData, body)
+  let scheme = call_568233.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594000.url(scheme.get, call_594000.host, call_594000.base,
-                         call_594000.route, valid.getOrDefault("path"),
+  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
+                         call_568233.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594000, url, valid)
+  result = hook(call_568233, url, valid)
 
-proc call*(call_594001: Call_DdosProtectionPlansDelete_593993;
+proc call*(call_568234: Call_DdosProtectionPlansDelete_568226;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           ddosProtectionPlanName: string): Recallable =
   ## ddosProtectionPlansDelete
@@ -641,19 +641,19 @@ proc call*(call_594001: Call_DdosProtectionPlansDelete_593993;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   ddosProtectionPlanName: string (required)
   ##                         : The name of the DDoS protection plan.
-  var path_594002 = newJObject()
-  var query_594003 = newJObject()
-  add(path_594002, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594003, "api-version", newJString(apiVersion))
-  add(path_594002, "subscriptionId", newJString(subscriptionId))
-  add(path_594002, "ddosProtectionPlanName", newJString(ddosProtectionPlanName))
-  result = call_594001.call(path_594002, query_594003, nil, nil, nil)
+  var path_568235 = newJObject()
+  var query_568236 = newJObject()
+  add(path_568235, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568236, "api-version", newJString(apiVersion))
+  add(path_568235, "subscriptionId", newJString(subscriptionId))
+  add(path_568235, "ddosProtectionPlanName", newJString(ddosProtectionPlanName))
+  result = call_568234.call(path_568235, query_568236, nil, nil, nil)
 
-var ddosProtectionPlansDelete* = Call_DdosProtectionPlansDelete_593993(
+var ddosProtectionPlansDelete* = Call_DdosProtectionPlansDelete_568226(
     name: "ddosProtectionPlansDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosProtectionPlans/{ddosProtectionPlanName}",
-    validator: validate_DdosProtectionPlansDelete_593994, base: "",
-    url: url_DdosProtectionPlansDelete_593995, schemes: {Scheme.Https})
+    validator: validate_DdosProtectionPlansDelete_568227, base: "",
+    url: url_DdosProtectionPlansDelete_568228, schemes: {Scheme.Https})
 export
   rest
 

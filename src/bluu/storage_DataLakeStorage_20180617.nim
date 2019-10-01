@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Data Lake Storage
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "storage-DataLakeStorage"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_FilesystemList_593647 = ref object of OpenApiRestCall_593425
-proc url_FilesystemList_593649(protocol: Scheme; host: string; base: string;
+  Call_FilesystemList_567880 = ref object of OpenApiRestCall_567658
+proc url_FilesystemList_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_FilesystemList_593648(path: JsonNode; query: JsonNode;
+proc validate_FilesystemList_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## List filesystems and their properties in given account.
@@ -132,31 +132,31 @@ proc validate_FilesystemList_593648(path: JsonNode; query: JsonNode;
   ##   prefix: JString
   ##         : Filters results to filesystems within the specified prefix.
   section = newJObject()
-  var valid_593808 = query.getOrDefault("timeout")
-  valid_593808 = validateParameter(valid_593808, JInt, required = false, default = nil)
-  if valid_593808 != nil:
-    section.add "timeout", valid_593808
-  var valid_593809 = query.getOrDefault("continuation")
-  valid_593809 = validateParameter(valid_593809, JString, required = false,
+  var valid_568041 = query.getOrDefault("timeout")
+  valid_568041 = validateParameter(valid_568041, JInt, required = false, default = nil)
+  if valid_568041 != nil:
+    section.add "timeout", valid_568041
+  var valid_568042 = query.getOrDefault("continuation")
+  valid_568042 = validateParameter(valid_568042, JString, required = false,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "continuation", valid_593809
+  if valid_568042 != nil:
+    section.add "continuation", valid_568042
   assert query != nil,
         "query argument is necessary due to required `resource` field"
-  var valid_593823 = query.getOrDefault("resource")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_568056 = query.getOrDefault("resource")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = newJString("account"))
-  if valid_593823 != nil:
-    section.add "resource", valid_593823
-  var valid_593824 = query.getOrDefault("maxResults")
-  valid_593824 = validateParameter(valid_593824, JInt, required = false, default = nil)
-  if valid_593824 != nil:
-    section.add "maxResults", valid_593824
-  var valid_593825 = query.getOrDefault("prefix")
-  valid_593825 = validateParameter(valid_593825, JString, required = false,
+  if valid_568056 != nil:
+    section.add "resource", valid_568056
+  var valid_568057 = query.getOrDefault("maxResults")
+  valid_568057 = validateParameter(valid_568057, JInt, required = false, default = nil)
+  if valid_568057 != nil:
+    section.add "maxResults", valid_568057
+  var valid_568058 = query.getOrDefault("prefix")
+  valid_568058 = validateParameter(valid_568058, JString, required = false,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "prefix", valid_593825
+  if valid_568058 != nil:
+    section.add "prefix", valid_568058
   result.add "query", section
   ## parameters in `header` object:
   ##   x-ms-client-request-id: JString
@@ -166,41 +166,41 @@ proc validate_FilesystemList_593648(path: JsonNode; query: JsonNode;
   ##   x-ms-version: JString
   ##               : Specifies the version of the REST protocol used for processing the request. This is required when using shared key authorization.
   section = newJObject()
-  var valid_593826 = header.getOrDefault("x-ms-client-request-id")
-  valid_593826 = validateParameter(valid_593826, JString, required = false,
+  var valid_568059 = header.getOrDefault("x-ms-client-request-id")
+  valid_568059 = validateParameter(valid_568059, JString, required = false,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "x-ms-client-request-id", valid_593826
-  var valid_593827 = header.getOrDefault("x-ms-date")
-  valid_593827 = validateParameter(valid_593827, JString, required = false,
+  if valid_568059 != nil:
+    section.add "x-ms-client-request-id", valid_568059
+  var valid_568060 = header.getOrDefault("x-ms-date")
+  valid_568060 = validateParameter(valid_568060, JString, required = false,
                                  default = nil)
-  if valid_593827 != nil:
-    section.add "x-ms-date", valid_593827
-  var valid_593828 = header.getOrDefault("x-ms-version")
-  valid_593828 = validateParameter(valid_593828, JString, required = false,
+  if valid_568060 != nil:
+    section.add "x-ms-date", valid_568060
+  var valid_568061 = header.getOrDefault("x-ms-version")
+  valid_568061 = validateParameter(valid_568061, JString, required = false,
                                  default = nil)
-  if valid_593828 != nil:
-    section.add "x-ms-version", valid_593828
+  if valid_568061 != nil:
+    section.add "x-ms-version", valid_568061
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_593851: Call_FilesystemList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568084: Call_FilesystemList_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List filesystems and their properties in given account.
   ## 
-  let valid = call_593851.validator(path, query, header, formData, body)
-  let scheme = call_593851.pickScheme
+  let valid = call_568084.validator(path, query, header, formData, body)
+  let scheme = call_568084.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593851.url(scheme.get, call_593851.host, call_593851.base,
-                         call_593851.route, valid.getOrDefault("path"),
+  let url = call_568084.url(scheme.get, call_568084.host, call_568084.base,
+                         call_568084.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593851, url, valid)
+  result = hook(call_568084, url, valid)
 
-proc call*(call_593922: Call_FilesystemList_593647; timeout: int = 0;
+proc call*(call_568155: Call_FilesystemList_567880; timeout: int = 0;
           continuation: string = ""; resource: string = "account"; maxResults: int = 0;
           prefix: string = ""): Recallable =
   ## filesystemList
@@ -215,21 +215,21 @@ proc call*(call_593922: Call_FilesystemList_593647; timeout: int = 0;
   ##             : An optional value that specifies the maximum number of items to return. If omitted or greater than 5,000, the response will include up to 5,000 items.
   ##   prefix: string
   ##         : Filters results to filesystems within the specified prefix.
-  var query_593923 = newJObject()
-  add(query_593923, "timeout", newJInt(timeout))
-  add(query_593923, "continuation", newJString(continuation))
-  add(query_593923, "resource", newJString(resource))
-  add(query_593923, "maxResults", newJInt(maxResults))
-  add(query_593923, "prefix", newJString(prefix))
-  result = call_593922.call(nil, query_593923, nil, nil, nil)
+  var query_568156 = newJObject()
+  add(query_568156, "timeout", newJInt(timeout))
+  add(query_568156, "continuation", newJString(continuation))
+  add(query_568156, "resource", newJString(resource))
+  add(query_568156, "maxResults", newJInt(maxResults))
+  add(query_568156, "prefix", newJString(prefix))
+  result = call_568155.call(nil, query_568156, nil, nil, nil)
 
-var filesystemList* = Call_FilesystemList_593647(name: "filesystemList",
+var filesystemList* = Call_FilesystemList_567880(name: "filesystemList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/",
-    validator: validate_FilesystemList_593648, base: "", url: url_FilesystemList_593649,
+    validator: validate_FilesystemList_567881, base: "", url: url_FilesystemList_567882,
     schemes: {Scheme.Https})
 type
-  Call_FilesystemCreate_593994 = ref object of OpenApiRestCall_593425
-proc url_FilesystemCreate_593996(protocol: Scheme; host: string; base: string;
+  Call_FilesystemCreate_568227 = ref object of OpenApiRestCall_567658
+proc url_FilesystemCreate_568229(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -244,7 +244,7 @@ proc url_FilesystemCreate_593996(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FilesystemCreate_593995(path: JsonNode; query: JsonNode;
+proc validate_FilesystemCreate_568228(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Create a filesystem rooted at the specified location. If the filesystem already exists, the operation fails.  This operation does not support conditional HTTP requests.
@@ -257,11 +257,11 @@ proc validate_FilesystemCreate_593995(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `filesystem` field"
-  var valid_593997 = path.getOrDefault("filesystem")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  var valid_568230 = path.getOrDefault("filesystem")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "filesystem", valid_593997
+  if valid_568230 != nil:
+    section.add "filesystem", valid_568230
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -269,17 +269,17 @@ proc validate_FilesystemCreate_593995(path: JsonNode; query: JsonNode;
   ##   resource: JString (required)
   ##           : The value must be "filesystem" for all filesystem operations.
   section = newJObject()
-  var valid_593998 = query.getOrDefault("timeout")
-  valid_593998 = validateParameter(valid_593998, JInt, required = false, default = nil)
-  if valid_593998 != nil:
-    section.add "timeout", valid_593998
+  var valid_568231 = query.getOrDefault("timeout")
+  valid_568231 = validateParameter(valid_568231, JInt, required = false, default = nil)
+  if valid_568231 != nil:
+    section.add "timeout", valid_568231
   assert query != nil,
         "query argument is necessary due to required `resource` field"
-  var valid_593999 = query.getOrDefault("resource")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  var valid_568232 = query.getOrDefault("resource")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = newJString("filesystem"))
-  if valid_593999 != nil:
-    section.add "resource", valid_593999
+  if valid_568232 != nil:
+    section.add "resource", valid_568232
   result.add "query", section
   ## parameters in `header` object:
   ##   x-ms-properties: JString
@@ -291,46 +291,46 @@ proc validate_FilesystemCreate_593995(path: JsonNode; query: JsonNode;
   ##   x-ms-version: JString
   ##               : Specifies the version of the REST protocol used for processing the request. This is required when using shared key authorization.
   section = newJObject()
-  var valid_594000 = header.getOrDefault("x-ms-properties")
-  valid_594000 = validateParameter(valid_594000, JString, required = false,
+  var valid_568233 = header.getOrDefault("x-ms-properties")
+  valid_568233 = validateParameter(valid_568233, JString, required = false,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "x-ms-properties", valid_594000
-  var valid_594001 = header.getOrDefault("x-ms-client-request-id")
-  valid_594001 = validateParameter(valid_594001, JString, required = false,
+  if valid_568233 != nil:
+    section.add "x-ms-properties", valid_568233
+  var valid_568234 = header.getOrDefault("x-ms-client-request-id")
+  valid_568234 = validateParameter(valid_568234, JString, required = false,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "x-ms-client-request-id", valid_594001
-  var valid_594002 = header.getOrDefault("x-ms-date")
-  valid_594002 = validateParameter(valid_594002, JString, required = false,
+  if valid_568234 != nil:
+    section.add "x-ms-client-request-id", valid_568234
+  var valid_568235 = header.getOrDefault("x-ms-date")
+  valid_568235 = validateParameter(valid_568235, JString, required = false,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "x-ms-date", valid_594002
-  var valid_594003 = header.getOrDefault("x-ms-version")
-  valid_594003 = validateParameter(valid_594003, JString, required = false,
+  if valid_568235 != nil:
+    section.add "x-ms-date", valid_568235
+  var valid_568236 = header.getOrDefault("x-ms-version")
+  valid_568236 = validateParameter(valid_568236, JString, required = false,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "x-ms-version", valid_594003
+  if valid_568236 != nil:
+    section.add "x-ms-version", valid_568236
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594004: Call_FilesystemCreate_593994; path: JsonNode;
+proc call*(call_568237: Call_FilesystemCreate_568227; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a filesystem rooted at the specified location. If the filesystem already exists, the operation fails.  This operation does not support conditional HTTP requests.
   ## 
-  let valid = call_594004.validator(path, query, header, formData, body)
-  let scheme = call_594004.pickScheme
+  let valid = call_568237.validator(path, query, header, formData, body)
+  let scheme = call_568237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594004.url(scheme.get, call_594004.host, call_594004.base,
-                         call_594004.route, valid.getOrDefault("path"),
+  let url = call_568237.url(scheme.get, call_568237.host, call_568237.base,
+                         call_568237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594004, url, valid)
+  result = hook(call_568237, url, valid)
 
-proc call*(call_594005: Call_FilesystemCreate_593994; filesystem: string;
+proc call*(call_568238: Call_FilesystemCreate_568227; filesystem: string;
           timeout: int = 0; resource: string = "filesystem"): Recallable =
   ## filesystemCreate
   ## Create a filesystem rooted at the specified location. If the filesystem already exists, the operation fails.  This operation does not support conditional HTTP requests.
@@ -340,20 +340,20 @@ proc call*(call_594005: Call_FilesystemCreate_593994; filesystem: string;
   ##           : The value must be "filesystem" for all filesystem operations.
   ##   filesystem: string (required)
   ##             : The filesystem identifier.  The value must start and end with a letter or number and must contain only letters, numbers, and the dash (-) character.  Consecutive dashes are not permitted.  All letters must be lowercase.  The value must have between 3 and 63 characters.
-  var path_594006 = newJObject()
-  var query_594007 = newJObject()
-  add(query_594007, "timeout", newJInt(timeout))
-  add(query_594007, "resource", newJString(resource))
-  add(path_594006, "filesystem", newJString(filesystem))
-  result = call_594005.call(path_594006, query_594007, nil, nil, nil)
+  var path_568239 = newJObject()
+  var query_568240 = newJObject()
+  add(query_568240, "timeout", newJInt(timeout))
+  add(query_568240, "resource", newJString(resource))
+  add(path_568239, "filesystem", newJString(filesystem))
+  result = call_568238.call(path_568239, query_568240, nil, nil, nil)
 
-var filesystemCreate* = Call_FilesystemCreate_593994(name: "filesystemCreate",
+var filesystemCreate* = Call_FilesystemCreate_568227(name: "filesystemCreate",
     meth: HttpMethod.HttpPut, host: "azure.local", route: "/{filesystem}",
-    validator: validate_FilesystemCreate_593995, base: "",
-    url: url_FilesystemCreate_593996, schemes: {Scheme.Https})
+    validator: validate_FilesystemCreate_568228, base: "",
+    url: url_FilesystemCreate_568229, schemes: {Scheme.Https})
 type
-  Call_FilesystemGetProperties_594023 = ref object of OpenApiRestCall_593425
-proc url_FilesystemGetProperties_594025(protocol: Scheme; host: string; base: string;
+  Call_FilesystemGetProperties_568256 = ref object of OpenApiRestCall_567658
+proc url_FilesystemGetProperties_568258(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -369,7 +369,7 @@ proc url_FilesystemGetProperties_594025(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FilesystemGetProperties_594024(path: JsonNode; query: JsonNode;
+proc validate_FilesystemGetProperties_568257(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## All system and user-defined filesystem properties are specified in the response headers.
   ## 
@@ -381,11 +381,11 @@ proc validate_FilesystemGetProperties_594024(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `filesystem` field"
-  var valid_594026 = path.getOrDefault("filesystem")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_568259 = path.getOrDefault("filesystem")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "filesystem", valid_594026
+  if valid_568259 != nil:
+    section.add "filesystem", valid_568259
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -393,17 +393,17 @@ proc validate_FilesystemGetProperties_594024(path: JsonNode; query: JsonNode;
   ##   resource: JString (required)
   ##           : The value must be "filesystem" for all filesystem operations.
   section = newJObject()
-  var valid_594027 = query.getOrDefault("timeout")
-  valid_594027 = validateParameter(valid_594027, JInt, required = false, default = nil)
-  if valid_594027 != nil:
-    section.add "timeout", valid_594027
+  var valid_568260 = query.getOrDefault("timeout")
+  valid_568260 = validateParameter(valid_568260, JInt, required = false, default = nil)
+  if valid_568260 != nil:
+    section.add "timeout", valid_568260
   assert query != nil,
         "query argument is necessary due to required `resource` field"
-  var valid_594028 = query.getOrDefault("resource")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  var valid_568261 = query.getOrDefault("resource")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = newJString("filesystem"))
-  if valid_594028 != nil:
-    section.add "resource", valid_594028
+  if valid_568261 != nil:
+    section.add "resource", valid_568261
   result.add "query", section
   ## parameters in `header` object:
   ##   x-ms-client-request-id: JString
@@ -413,41 +413,41 @@ proc validate_FilesystemGetProperties_594024(path: JsonNode; query: JsonNode;
   ##   x-ms-version: JString
   ##               : Specifies the version of the REST protocol used for processing the request. This is required when using shared key authorization.
   section = newJObject()
-  var valid_594029 = header.getOrDefault("x-ms-client-request-id")
-  valid_594029 = validateParameter(valid_594029, JString, required = false,
+  var valid_568262 = header.getOrDefault("x-ms-client-request-id")
+  valid_568262 = validateParameter(valid_568262, JString, required = false,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "x-ms-client-request-id", valid_594029
-  var valid_594030 = header.getOrDefault("x-ms-date")
-  valid_594030 = validateParameter(valid_594030, JString, required = false,
+  if valid_568262 != nil:
+    section.add "x-ms-client-request-id", valid_568262
+  var valid_568263 = header.getOrDefault("x-ms-date")
+  valid_568263 = validateParameter(valid_568263, JString, required = false,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "x-ms-date", valid_594030
-  var valid_594031 = header.getOrDefault("x-ms-version")
-  valid_594031 = validateParameter(valid_594031, JString, required = false,
+  if valid_568263 != nil:
+    section.add "x-ms-date", valid_568263
+  var valid_568264 = header.getOrDefault("x-ms-version")
+  valid_568264 = validateParameter(valid_568264, JString, required = false,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "x-ms-version", valid_594031
+  if valid_568264 != nil:
+    section.add "x-ms-version", valid_568264
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594032: Call_FilesystemGetProperties_594023; path: JsonNode;
+proc call*(call_568265: Call_FilesystemGetProperties_568256; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## All system and user-defined filesystem properties are specified in the response headers.
   ## 
-  let valid = call_594032.validator(path, query, header, formData, body)
-  let scheme = call_594032.pickScheme
+  let valid = call_568265.validator(path, query, header, formData, body)
+  let scheme = call_568265.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594032.url(scheme.get, call_594032.host, call_594032.base,
-                         call_594032.route, valid.getOrDefault("path"),
+  let url = call_568265.url(scheme.get, call_568265.host, call_568265.base,
+                         call_568265.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594032, url, valid)
+  result = hook(call_568265, url, valid)
 
-proc call*(call_594033: Call_FilesystemGetProperties_594023; filesystem: string;
+proc call*(call_568266: Call_FilesystemGetProperties_568256; filesystem: string;
           timeout: int = 0; resource: string = "filesystem"): Recallable =
   ## filesystemGetProperties
   ## All system and user-defined filesystem properties are specified in the response headers.
@@ -457,20 +457,20 @@ proc call*(call_594033: Call_FilesystemGetProperties_594023; filesystem: string;
   ##           : The value must be "filesystem" for all filesystem operations.
   ##   filesystem: string (required)
   ##             : The filesystem identifier.  The value must start and end with a letter or number and must contain only letters, numbers, and the dash (-) character.  Consecutive dashes are not permitted.  All letters must be lowercase.  The value must have between 3 and 63 characters.
-  var path_594034 = newJObject()
-  var query_594035 = newJObject()
-  add(query_594035, "timeout", newJInt(timeout))
-  add(query_594035, "resource", newJString(resource))
-  add(path_594034, "filesystem", newJString(filesystem))
-  result = call_594033.call(path_594034, query_594035, nil, nil, nil)
+  var path_568267 = newJObject()
+  var query_568268 = newJObject()
+  add(query_568268, "timeout", newJInt(timeout))
+  add(query_568268, "resource", newJString(resource))
+  add(path_568267, "filesystem", newJString(filesystem))
+  result = call_568266.call(path_568267, query_568268, nil, nil, nil)
 
-var filesystemGetProperties* = Call_FilesystemGetProperties_594023(
+var filesystemGetProperties* = Call_FilesystemGetProperties_568256(
     name: "filesystemGetProperties", meth: HttpMethod.HttpHead, host: "azure.local",
-    route: "/{filesystem}", validator: validate_FilesystemGetProperties_594024,
-    base: "", url: url_FilesystemGetProperties_594025, schemes: {Scheme.Https})
+    route: "/{filesystem}", validator: validate_FilesystemGetProperties_568257,
+    base: "", url: url_FilesystemGetProperties_568258, schemes: {Scheme.Https})
 type
-  Call_PathList_593963 = ref object of OpenApiRestCall_593425
-proc url_PathList_593965(protocol: Scheme; host: string; base: string; route: string;
+  Call_PathList_568196 = ref object of OpenApiRestCall_567658
+proc url_PathList_568198(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -485,7 +485,7 @@ proc url_PathList_593965(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PathList_593964(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PathList_568197(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## List filesystem paths and their properties.
   ## 
@@ -497,11 +497,11 @@ proc validate_PathList_593964(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `filesystem` field"
-  var valid_593980 = path.getOrDefault("filesystem")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_568213 = path.getOrDefault("filesystem")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "filesystem", valid_593980
+  if valid_568213 != nil:
+    section.add "filesystem", valid_568213
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -517,35 +517,35 @@ proc validate_PathList_593964(path: JsonNode; query: JsonNode; header: JsonNode;
   ##   recursive: JBool (required)
   ##            : If "true", all paths are listed; otherwise, only paths at the root of the filesystem are listed.  If "directory" is specified, the list will only include paths that share the same root.
   section = newJObject()
-  var valid_593981 = query.getOrDefault("timeout")
-  valid_593981 = validateParameter(valid_593981, JInt, required = false, default = nil)
-  if valid_593981 != nil:
-    section.add "timeout", valid_593981
-  var valid_593982 = query.getOrDefault("continuation")
-  valid_593982 = validateParameter(valid_593982, JString, required = false,
+  var valid_568214 = query.getOrDefault("timeout")
+  valid_568214 = validateParameter(valid_568214, JInt, required = false, default = nil)
+  if valid_568214 != nil:
+    section.add "timeout", valid_568214
+  var valid_568215 = query.getOrDefault("continuation")
+  valid_568215 = validateParameter(valid_568215, JString, required = false,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "continuation", valid_593982
+  if valid_568215 != nil:
+    section.add "continuation", valid_568215
   assert query != nil,
         "query argument is necessary due to required `resource` field"
-  var valid_593983 = query.getOrDefault("resource")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = query.getOrDefault("resource")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = newJString("filesystem"))
-  if valid_593983 != nil:
-    section.add "resource", valid_593983
-  var valid_593984 = query.getOrDefault("directory")
-  valid_593984 = validateParameter(valid_593984, JString, required = false,
+  if valid_568216 != nil:
+    section.add "resource", valid_568216
+  var valid_568217 = query.getOrDefault("directory")
+  valid_568217 = validateParameter(valid_568217, JString, required = false,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "directory", valid_593984
-  var valid_593985 = query.getOrDefault("maxResults")
-  valid_593985 = validateParameter(valid_593985, JInt, required = false, default = nil)
-  if valid_593985 != nil:
-    section.add "maxResults", valid_593985
-  var valid_593986 = query.getOrDefault("recursive")
-  valid_593986 = validateParameter(valid_593986, JBool, required = true, default = nil)
-  if valid_593986 != nil:
-    section.add "recursive", valid_593986
+  if valid_568217 != nil:
+    section.add "directory", valid_568217
+  var valid_568218 = query.getOrDefault("maxResults")
+  valid_568218 = validateParameter(valid_568218, JInt, required = false, default = nil)
+  if valid_568218 != nil:
+    section.add "maxResults", valid_568218
+  var valid_568219 = query.getOrDefault("recursive")
+  valid_568219 = validateParameter(valid_568219, JBool, required = true, default = nil)
+  if valid_568219 != nil:
+    section.add "recursive", valid_568219
   result.add "query", section
   ## parameters in `header` object:
   ##   x-ms-client-request-id: JString
@@ -555,41 +555,41 @@ proc validate_PathList_593964(path: JsonNode; query: JsonNode; header: JsonNode;
   ##   x-ms-version: JString
   ##               : Specifies the version of the REST protocol used for processing the request. This is required when using shared key authorization.
   section = newJObject()
-  var valid_593987 = header.getOrDefault("x-ms-client-request-id")
-  valid_593987 = validateParameter(valid_593987, JString, required = false,
+  var valid_568220 = header.getOrDefault("x-ms-client-request-id")
+  valid_568220 = validateParameter(valid_568220, JString, required = false,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "x-ms-client-request-id", valid_593987
-  var valid_593988 = header.getOrDefault("x-ms-date")
-  valid_593988 = validateParameter(valid_593988, JString, required = false,
+  if valid_568220 != nil:
+    section.add "x-ms-client-request-id", valid_568220
+  var valid_568221 = header.getOrDefault("x-ms-date")
+  valid_568221 = validateParameter(valid_568221, JString, required = false,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "x-ms-date", valid_593988
-  var valid_593989 = header.getOrDefault("x-ms-version")
-  valid_593989 = validateParameter(valid_593989, JString, required = false,
+  if valid_568221 != nil:
+    section.add "x-ms-date", valid_568221
+  var valid_568222 = header.getOrDefault("x-ms-version")
+  valid_568222 = validateParameter(valid_568222, JString, required = false,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "x-ms-version", valid_593989
+  if valid_568222 != nil:
+    section.add "x-ms-version", valid_568222
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_593990: Call_PathList_593963; path: JsonNode; query: JsonNode;
+proc call*(call_568223: Call_PathList_568196; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List filesystem paths and their properties.
   ## 
-  let valid = call_593990.validator(path, query, header, formData, body)
-  let scheme = call_593990.pickScheme
+  let valid = call_568223.validator(path, query, header, formData, body)
+  let scheme = call_568223.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593990.url(scheme.get, call_593990.host, call_593990.base,
-                         call_593990.route, valid.getOrDefault("path"),
+  let url = call_568223.url(scheme.get, call_568223.host, call_568223.base,
+                         call_568223.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593990, url, valid)
+  result = hook(call_568223, url, valid)
 
-proc call*(call_593991: Call_PathList_593963; filesystem: string; recursive: bool;
+proc call*(call_568224: Call_PathList_568196; filesystem: string; recursive: bool;
           timeout: int = 0; continuation: string = ""; resource: string = "filesystem";
           directory: string = ""; maxResults: int = 0): Recallable =
   ## pathList
@@ -608,25 +608,25 @@ proc call*(call_593991: Call_PathList_593963; filesystem: string; recursive: boo
   ##             : The filesystem identifier.  The value must start and end with a letter or number and must contain only letters, numbers, and the dash (-) character.  Consecutive dashes are not permitted.  All letters must be lowercase.  The value must have between 3 and 63 characters.
   ##   recursive: bool (required)
   ##            : If "true", all paths are listed; otherwise, only paths at the root of the filesystem are listed.  If "directory" is specified, the list will only include paths that share the same root.
-  var path_593992 = newJObject()
-  var query_593993 = newJObject()
-  add(query_593993, "timeout", newJInt(timeout))
-  add(query_593993, "continuation", newJString(continuation))
-  add(query_593993, "resource", newJString(resource))
-  add(query_593993, "directory", newJString(directory))
-  add(query_593993, "maxResults", newJInt(maxResults))
-  add(path_593992, "filesystem", newJString(filesystem))
-  add(query_593993, "recursive", newJBool(recursive))
-  result = call_593991.call(path_593992, query_593993, nil, nil, nil)
+  var path_568225 = newJObject()
+  var query_568226 = newJObject()
+  add(query_568226, "timeout", newJInt(timeout))
+  add(query_568226, "continuation", newJString(continuation))
+  add(query_568226, "resource", newJString(resource))
+  add(query_568226, "directory", newJString(directory))
+  add(query_568226, "maxResults", newJInt(maxResults))
+  add(path_568225, "filesystem", newJString(filesystem))
+  add(query_568226, "recursive", newJBool(recursive))
+  result = call_568224.call(path_568225, query_568226, nil, nil, nil)
 
-var pathList* = Call_PathList_593963(name: "pathList", meth: HttpMethod.HttpGet,
+var pathList* = Call_PathList_568196(name: "pathList", meth: HttpMethod.HttpGet,
                                   host: "azure.local", route: "/{filesystem}",
-                                  validator: validate_PathList_593964, base: "",
-                                  url: url_PathList_593965,
+                                  validator: validate_PathList_568197, base: "",
+                                  url: url_PathList_568198,
                                   schemes: {Scheme.Https})
 type
-  Call_FilesystemSetProperties_594036 = ref object of OpenApiRestCall_593425
-proc url_FilesystemSetProperties_594038(protocol: Scheme; host: string; base: string;
+  Call_FilesystemSetProperties_568269 = ref object of OpenApiRestCall_567658
+proc url_FilesystemSetProperties_568271(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -642,7 +642,7 @@ proc url_FilesystemSetProperties_594038(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FilesystemSetProperties_594037(path: JsonNode; query: JsonNode;
+proc validate_FilesystemSetProperties_568270(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Set properties for the filesystem.  This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
@@ -654,11 +654,11 @@ proc validate_FilesystemSetProperties_594037(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `filesystem` field"
-  var valid_594039 = path.getOrDefault("filesystem")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  var valid_568272 = path.getOrDefault("filesystem")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "filesystem", valid_594039
+  if valid_568272 != nil:
+    section.add "filesystem", valid_568272
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -666,17 +666,17 @@ proc validate_FilesystemSetProperties_594037(path: JsonNode; query: JsonNode;
   ##   resource: JString (required)
   ##           : The value must be "filesystem" for all filesystem operations.
   section = newJObject()
-  var valid_594040 = query.getOrDefault("timeout")
-  valid_594040 = validateParameter(valid_594040, JInt, required = false, default = nil)
-  if valid_594040 != nil:
-    section.add "timeout", valid_594040
+  var valid_568273 = query.getOrDefault("timeout")
+  valid_568273 = validateParameter(valid_568273, JInt, required = false, default = nil)
+  if valid_568273 != nil:
+    section.add "timeout", valid_568273
   assert query != nil,
         "query argument is necessary due to required `resource` field"
-  var valid_594041 = query.getOrDefault("resource")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_568274 = query.getOrDefault("resource")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = newJString("filesystem"))
-  if valid_594041 != nil:
-    section.add "resource", valid_594041
+  if valid_568274 != nil:
+    section.add "resource", valid_568274
   result.add "query", section
   ## parameters in `header` object:
   ##   x-ms-properties: JString
@@ -692,56 +692,56 @@ proc validate_FilesystemSetProperties_594037(path: JsonNode; query: JsonNode;
   ##   x-ms-version: JString
   ##               : Specifies the version of the REST protocol used for processing the request. This is required when using shared key authorization.
   section = newJObject()
-  var valid_594042 = header.getOrDefault("x-ms-properties")
-  valid_594042 = validateParameter(valid_594042, JString, required = false,
+  var valid_568275 = header.getOrDefault("x-ms-properties")
+  valid_568275 = validateParameter(valid_568275, JString, required = false,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "x-ms-properties", valid_594042
-  var valid_594043 = header.getOrDefault("If-Unmodified-Since")
-  valid_594043 = validateParameter(valid_594043, JString, required = false,
+  if valid_568275 != nil:
+    section.add "x-ms-properties", valid_568275
+  var valid_568276 = header.getOrDefault("If-Unmodified-Since")
+  valid_568276 = validateParameter(valid_568276, JString, required = false,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "If-Unmodified-Since", valid_594043
-  var valid_594044 = header.getOrDefault("x-ms-client-request-id")
-  valid_594044 = validateParameter(valid_594044, JString, required = false,
+  if valid_568276 != nil:
+    section.add "If-Unmodified-Since", valid_568276
+  var valid_568277 = header.getOrDefault("x-ms-client-request-id")
+  valid_568277 = validateParameter(valid_568277, JString, required = false,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "x-ms-client-request-id", valid_594044
-  var valid_594045 = header.getOrDefault("x-ms-date")
-  valid_594045 = validateParameter(valid_594045, JString, required = false,
+  if valid_568277 != nil:
+    section.add "x-ms-client-request-id", valid_568277
+  var valid_568278 = header.getOrDefault("x-ms-date")
+  valid_568278 = validateParameter(valid_568278, JString, required = false,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "x-ms-date", valid_594045
-  var valid_594046 = header.getOrDefault("If-Modified-Since")
-  valid_594046 = validateParameter(valid_594046, JString, required = false,
+  if valid_568278 != nil:
+    section.add "x-ms-date", valid_568278
+  var valid_568279 = header.getOrDefault("If-Modified-Since")
+  valid_568279 = validateParameter(valid_568279, JString, required = false,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "If-Modified-Since", valid_594046
-  var valid_594047 = header.getOrDefault("x-ms-version")
-  valid_594047 = validateParameter(valid_594047, JString, required = false,
+  if valid_568279 != nil:
+    section.add "If-Modified-Since", valid_568279
+  var valid_568280 = header.getOrDefault("x-ms-version")
+  valid_568280 = validateParameter(valid_568280, JString, required = false,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "x-ms-version", valid_594047
+  if valid_568280 != nil:
+    section.add "x-ms-version", valid_568280
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594048: Call_FilesystemSetProperties_594036; path: JsonNode;
+proc call*(call_568281: Call_FilesystemSetProperties_568269; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Set properties for the filesystem.  This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
-  let valid = call_594048.validator(path, query, header, formData, body)
-  let scheme = call_594048.pickScheme
+  let valid = call_568281.validator(path, query, header, formData, body)
+  let scheme = call_568281.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594048.url(scheme.get, call_594048.host, call_594048.base,
-                         call_594048.route, valid.getOrDefault("path"),
+  let url = call_568281.url(scheme.get, call_568281.host, call_568281.base,
+                         call_568281.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594048, url, valid)
+  result = hook(call_568281, url, valid)
 
-proc call*(call_594049: Call_FilesystemSetProperties_594036; filesystem: string;
+proc call*(call_568282: Call_FilesystemSetProperties_568269; filesystem: string;
           timeout: int = 0; resource: string = "filesystem"): Recallable =
   ## filesystemSetProperties
   ## Set properties for the filesystem.  This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
@@ -751,21 +751,21 @@ proc call*(call_594049: Call_FilesystemSetProperties_594036; filesystem: string;
   ##           : The value must be "filesystem" for all filesystem operations.
   ##   filesystem: string (required)
   ##             : The filesystem identifier.  The value must start and end with a letter or number and must contain only letters, numbers, and the dash (-) character.  Consecutive dashes are not permitted.  All letters must be lowercase.  The value must have between 3 and 63 characters.
-  var path_594050 = newJObject()
-  var query_594051 = newJObject()
-  add(query_594051, "timeout", newJInt(timeout))
-  add(query_594051, "resource", newJString(resource))
-  add(path_594050, "filesystem", newJString(filesystem))
-  result = call_594049.call(path_594050, query_594051, nil, nil, nil)
+  var path_568283 = newJObject()
+  var query_568284 = newJObject()
+  add(query_568284, "timeout", newJInt(timeout))
+  add(query_568284, "resource", newJString(resource))
+  add(path_568283, "filesystem", newJString(filesystem))
+  result = call_568282.call(path_568283, query_568284, nil, nil, nil)
 
-var filesystemSetProperties* = Call_FilesystemSetProperties_594036(
+var filesystemSetProperties* = Call_FilesystemSetProperties_568269(
     name: "filesystemSetProperties", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/{filesystem}",
-    validator: validate_FilesystemSetProperties_594037, base: "",
-    url: url_FilesystemSetProperties_594038, schemes: {Scheme.Https})
+    validator: validate_FilesystemSetProperties_568270, base: "",
+    url: url_FilesystemSetProperties_568271, schemes: {Scheme.Https})
 type
-  Call_FilesystemDelete_594008 = ref object of OpenApiRestCall_593425
-proc url_FilesystemDelete_594010(protocol: Scheme; host: string; base: string;
+  Call_FilesystemDelete_568241 = ref object of OpenApiRestCall_567658
+proc url_FilesystemDelete_568243(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -780,7 +780,7 @@ proc url_FilesystemDelete_594010(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FilesystemDelete_594009(path: JsonNode; query: JsonNode;
+proc validate_FilesystemDelete_568242(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Marks the filesystem for deletion.  When a filesystem is deleted, a filesystem with the same identifier cannot be created for at least 30 seconds. While the filesystem is being deleted, attempts to create a filesystem with the same identifier will fail with status code 409 (Conflict), with the service returning additional error information indicating that the filesystem is being deleted. All other operations, including operations on any files or directories within the filesystem, will fail with status code 404 (Not Found) while the filesystem is being deleted. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
@@ -793,11 +793,11 @@ proc validate_FilesystemDelete_594009(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `filesystem` field"
-  var valid_594011 = path.getOrDefault("filesystem")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_568244 = path.getOrDefault("filesystem")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "filesystem", valid_594011
+  if valid_568244 != nil:
+    section.add "filesystem", valid_568244
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -805,17 +805,17 @@ proc validate_FilesystemDelete_594009(path: JsonNode; query: JsonNode;
   ##   resource: JString (required)
   ##           : The value must be "filesystem" for all filesystem operations.
   section = newJObject()
-  var valid_594012 = query.getOrDefault("timeout")
-  valid_594012 = validateParameter(valid_594012, JInt, required = false, default = nil)
-  if valid_594012 != nil:
-    section.add "timeout", valid_594012
+  var valid_568245 = query.getOrDefault("timeout")
+  valid_568245 = validateParameter(valid_568245, JInt, required = false, default = nil)
+  if valid_568245 != nil:
+    section.add "timeout", valid_568245
   assert query != nil,
         "query argument is necessary due to required `resource` field"
-  var valid_594013 = query.getOrDefault("resource")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  var valid_568246 = query.getOrDefault("resource")
+  valid_568246 = validateParameter(valid_568246, JString, required = true,
                                  default = newJString("filesystem"))
-  if valid_594013 != nil:
-    section.add "resource", valid_594013
+  if valid_568246 != nil:
+    section.add "resource", valid_568246
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Unmodified-Since: JString
@@ -829,51 +829,51 @@ proc validate_FilesystemDelete_594009(path: JsonNode; query: JsonNode;
   ##   x-ms-version: JString
   ##               : Specifies the version of the REST protocol used for processing the request. This is required when using shared key authorization.
   section = newJObject()
-  var valid_594014 = header.getOrDefault("If-Unmodified-Since")
-  valid_594014 = validateParameter(valid_594014, JString, required = false,
+  var valid_568247 = header.getOrDefault("If-Unmodified-Since")
+  valid_568247 = validateParameter(valid_568247, JString, required = false,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "If-Unmodified-Since", valid_594014
-  var valid_594015 = header.getOrDefault("x-ms-client-request-id")
-  valid_594015 = validateParameter(valid_594015, JString, required = false,
+  if valid_568247 != nil:
+    section.add "If-Unmodified-Since", valid_568247
+  var valid_568248 = header.getOrDefault("x-ms-client-request-id")
+  valid_568248 = validateParameter(valid_568248, JString, required = false,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "x-ms-client-request-id", valid_594015
-  var valid_594016 = header.getOrDefault("x-ms-date")
-  valid_594016 = validateParameter(valid_594016, JString, required = false,
+  if valid_568248 != nil:
+    section.add "x-ms-client-request-id", valid_568248
+  var valid_568249 = header.getOrDefault("x-ms-date")
+  valid_568249 = validateParameter(valid_568249, JString, required = false,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "x-ms-date", valid_594016
-  var valid_594017 = header.getOrDefault("If-Modified-Since")
-  valid_594017 = validateParameter(valid_594017, JString, required = false,
+  if valid_568249 != nil:
+    section.add "x-ms-date", valid_568249
+  var valid_568250 = header.getOrDefault("If-Modified-Since")
+  valid_568250 = validateParameter(valid_568250, JString, required = false,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "If-Modified-Since", valid_594017
-  var valid_594018 = header.getOrDefault("x-ms-version")
-  valid_594018 = validateParameter(valid_594018, JString, required = false,
+  if valid_568250 != nil:
+    section.add "If-Modified-Since", valid_568250
+  var valid_568251 = header.getOrDefault("x-ms-version")
+  valid_568251 = validateParameter(valid_568251, JString, required = false,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "x-ms-version", valid_594018
+  if valid_568251 != nil:
+    section.add "x-ms-version", valid_568251
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594019: Call_FilesystemDelete_594008; path: JsonNode;
+proc call*(call_568252: Call_FilesystemDelete_568241; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Marks the filesystem for deletion.  When a filesystem is deleted, a filesystem with the same identifier cannot be created for at least 30 seconds. While the filesystem is being deleted, attempts to create a filesystem with the same identifier will fail with status code 409 (Conflict), with the service returning additional error information indicating that the filesystem is being deleted. All other operations, including operations on any files or directories within the filesystem, will fail with status code 404 (Not Found) while the filesystem is being deleted. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
-  let valid = call_594019.validator(path, query, header, formData, body)
-  let scheme = call_594019.pickScheme
+  let valid = call_568252.validator(path, query, header, formData, body)
+  let scheme = call_568252.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594019.url(scheme.get, call_594019.host, call_594019.base,
-                         call_594019.route, valid.getOrDefault("path"),
+  let url = call_568252.url(scheme.get, call_568252.host, call_568252.base,
+                         call_568252.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594019, url, valid)
+  result = hook(call_568252, url, valid)
 
-proc call*(call_594020: Call_FilesystemDelete_594008; filesystem: string;
+proc call*(call_568253: Call_FilesystemDelete_568241; filesystem: string;
           timeout: int = 0; resource: string = "filesystem"): Recallable =
   ## filesystemDelete
   ## Marks the filesystem for deletion.  When a filesystem is deleted, a filesystem with the same identifier cannot be created for at least 30 seconds. While the filesystem is being deleted, attempts to create a filesystem with the same identifier will fail with status code 409 (Conflict), with the service returning additional error information indicating that the filesystem is being deleted. All other operations, including operations on any files or directories within the filesystem, will fail with status code 404 (Not Found) while the filesystem is being deleted. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
@@ -883,20 +883,20 @@ proc call*(call_594020: Call_FilesystemDelete_594008; filesystem: string;
   ##           : The value must be "filesystem" for all filesystem operations.
   ##   filesystem: string (required)
   ##             : The filesystem identifier.  The value must start and end with a letter or number and must contain only letters, numbers, and the dash (-) character.  Consecutive dashes are not permitted.  All letters must be lowercase.  The value must have between 3 and 63 characters.
-  var path_594021 = newJObject()
-  var query_594022 = newJObject()
-  add(query_594022, "timeout", newJInt(timeout))
-  add(query_594022, "resource", newJString(resource))
-  add(path_594021, "filesystem", newJString(filesystem))
-  result = call_594020.call(path_594021, query_594022, nil, nil, nil)
+  var path_568254 = newJObject()
+  var query_568255 = newJObject()
+  add(query_568255, "timeout", newJInt(timeout))
+  add(query_568255, "resource", newJString(resource))
+  add(path_568254, "filesystem", newJString(filesystem))
+  result = call_568253.call(path_568254, query_568255, nil, nil, nil)
 
-var filesystemDelete* = Call_FilesystemDelete_594008(name: "filesystemDelete",
+var filesystemDelete* = Call_FilesystemDelete_568241(name: "filesystemDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local", route: "/{filesystem}",
-    validator: validate_FilesystemDelete_594009, base: "",
-    url: url_FilesystemDelete_594010, schemes: {Scheme.Https})
+    validator: validate_FilesystemDelete_568242, base: "",
+    url: url_FilesystemDelete_568243, schemes: {Scheme.Https})
 type
-  Call_PathCreate_594070 = ref object of OpenApiRestCall_593425
-proc url_PathCreate_594072(protocol: Scheme; host: string; base: string; route: string;
+  Call_PathCreate_568303 = ref object of OpenApiRestCall_567658
+proc url_PathCreate_568305(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -914,7 +914,7 @@ proc url_PathCreate_594072(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PathCreate_594071(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PathCreate_568304(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or rename a file or directory.    By default, the destination is overwritten and if the destination already exists and has a lease the lease is broken.  This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).  To fail if the destination already exists, use a conditional request with If-None-Match: "*".
   ## 
@@ -927,16 +927,16 @@ proc validate_PathCreate_594071(path: JsonNode; query: JsonNode; header: JsonNod
   ##             : The filesystem identifier.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `path` field"
-  var valid_594073 = path.getOrDefault("path")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  var valid_568306 = path.getOrDefault("path")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "path", valid_594073
-  var valid_594074 = path.getOrDefault("filesystem")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_568306 != nil:
+    section.add "path", valid_568306
+  var valid_568307 = path.getOrDefault("filesystem")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "filesystem", valid_594074
+  if valid_568307 != nil:
+    section.add "filesystem", valid_568307
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -948,25 +948,25 @@ proc validate_PathCreate_594071(path: JsonNode; query: JsonNode; header: JsonNod
   ##   mode: JString
   ##       : Optional. Valid only when namespace is enabled. This parameter determines the behavior of the rename operation. The value must be "legacy" or "posix", and the default value will be "posix". 
   section = newJObject()
-  var valid_594075 = query.getOrDefault("timeout")
-  valid_594075 = validateParameter(valid_594075, JInt, required = false, default = nil)
-  if valid_594075 != nil:
-    section.add "timeout", valid_594075
-  var valid_594076 = query.getOrDefault("continuation")
-  valid_594076 = validateParameter(valid_594076, JString, required = false,
+  var valid_568308 = query.getOrDefault("timeout")
+  valid_568308 = validateParameter(valid_568308, JInt, required = false, default = nil)
+  if valid_568308 != nil:
+    section.add "timeout", valid_568308
+  var valid_568309 = query.getOrDefault("continuation")
+  valid_568309 = validateParameter(valid_568309, JString, required = false,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "continuation", valid_594076
-  var valid_594077 = query.getOrDefault("resource")
-  valid_594077 = validateParameter(valid_594077, JString, required = false,
+  if valid_568309 != nil:
+    section.add "continuation", valid_568309
+  var valid_568310 = query.getOrDefault("resource")
+  valid_568310 = validateParameter(valid_568310, JString, required = false,
                                  default = newJString("directory"))
-  if valid_594077 != nil:
-    section.add "resource", valid_594077
-  var valid_594078 = query.getOrDefault("mode")
-  valid_594078 = validateParameter(valid_594078, JString, required = false,
+  if valid_568310 != nil:
+    section.add "resource", valid_568310
+  var valid_568311 = query.getOrDefault("mode")
+  valid_568311 = validateParameter(valid_568311, JString, required = false,
                                  default = newJString("legacy"))
-  if valid_594078 != nil:
-    section.add "mode", valid_594078
+  if valid_568311 != nil:
+    section.add "mode", valid_568311
   result.add "query", section
   ## parameters in `header` object:
   ##   Content-Disposition: JString
@@ -1022,156 +1022,156 @@ proc validate_PathCreate_594071(path: JsonNode; query: JsonNode; header: JsonNod
   ##   Content-Encoding: JString
   ##                   : Optional.  Specifies which content encodings have been applied to the file. This value is returned to the client when the "Read File" operation is performed.
   section = newJObject()
-  var valid_594079 = header.getOrDefault("Content-Disposition")
-  valid_594079 = validateParameter(valid_594079, JString, required = false,
+  var valid_568312 = header.getOrDefault("Content-Disposition")
+  valid_568312 = validateParameter(valid_568312, JString, required = false,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "Content-Disposition", valid_594079
-  var valid_594080 = header.getOrDefault("x-ms-permissions")
-  valid_594080 = validateParameter(valid_594080, JString, required = false,
+  if valid_568312 != nil:
+    section.add "Content-Disposition", valid_568312
+  var valid_568313 = header.getOrDefault("x-ms-permissions")
+  valid_568313 = validateParameter(valid_568313, JString, required = false,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "x-ms-permissions", valid_594080
-  var valid_594081 = header.getOrDefault("x-ms-source-lease-id")
-  valid_594081 = validateParameter(valid_594081, JString, required = false,
+  if valid_568313 != nil:
+    section.add "x-ms-permissions", valid_568313
+  var valid_568314 = header.getOrDefault("x-ms-source-lease-id")
+  valid_568314 = validateParameter(valid_568314, JString, required = false,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "x-ms-source-lease-id", valid_594081
-  var valid_594082 = header.getOrDefault("If-Match")
-  valid_594082 = validateParameter(valid_594082, JString, required = false,
+  if valid_568314 != nil:
+    section.add "x-ms-source-lease-id", valid_568314
+  var valid_568315 = header.getOrDefault("If-Match")
+  valid_568315 = validateParameter(valid_568315, JString, required = false,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "If-Match", valid_594082
-  var valid_594083 = header.getOrDefault("x-ms-source-if-unmodified-since")
-  valid_594083 = validateParameter(valid_594083, JString, required = false,
+  if valid_568315 != nil:
+    section.add "If-Match", valid_568315
+  var valid_568316 = header.getOrDefault("x-ms-source-if-unmodified-since")
+  valid_568316 = validateParameter(valid_568316, JString, required = false,
                                  default = nil)
-  if valid_594083 != nil:
-    section.add "x-ms-source-if-unmodified-since", valid_594083
-  var valid_594084 = header.getOrDefault("x-ms-properties")
-  valid_594084 = validateParameter(valid_594084, JString, required = false,
+  if valid_568316 != nil:
+    section.add "x-ms-source-if-unmodified-since", valid_568316
+  var valid_568317 = header.getOrDefault("x-ms-properties")
+  valid_568317 = validateParameter(valid_568317, JString, required = false,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "x-ms-properties", valid_594084
-  var valid_594085 = header.getOrDefault("Cache-Control")
-  valid_594085 = validateParameter(valid_594085, JString, required = false,
+  if valid_568317 != nil:
+    section.add "x-ms-properties", valid_568317
+  var valid_568318 = header.getOrDefault("Cache-Control")
+  valid_568318 = validateParameter(valid_568318, JString, required = false,
                                  default = nil)
-  if valid_594085 != nil:
-    section.add "Cache-Control", valid_594085
-  var valid_594086 = header.getOrDefault("Content-Language")
-  valid_594086 = validateParameter(valid_594086, JString, required = false,
+  if valid_568318 != nil:
+    section.add "Cache-Control", valid_568318
+  var valid_568319 = header.getOrDefault("Content-Language")
+  valid_568319 = validateParameter(valid_568319, JString, required = false,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "Content-Language", valid_594086
-  var valid_594087 = header.getOrDefault("x-ms-source-if-match")
-  valid_594087 = validateParameter(valid_594087, JString, required = false,
+  if valid_568319 != nil:
+    section.add "Content-Language", valid_568319
+  var valid_568320 = header.getOrDefault("x-ms-source-if-match")
+  valid_568320 = validateParameter(valid_568320, JString, required = false,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "x-ms-source-if-match", valid_594087
-  var valid_594088 = header.getOrDefault("x-ms-content-language")
-  valid_594088 = validateParameter(valid_594088, JString, required = false,
+  if valid_568320 != nil:
+    section.add "x-ms-source-if-match", valid_568320
+  var valid_568321 = header.getOrDefault("x-ms-content-language")
+  valid_568321 = validateParameter(valid_568321, JString, required = false,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "x-ms-content-language", valid_594088
-  var valid_594089 = header.getOrDefault("If-Unmodified-Since")
-  valid_594089 = validateParameter(valid_594089, JString, required = false,
+  if valid_568321 != nil:
+    section.add "x-ms-content-language", valid_568321
+  var valid_568322 = header.getOrDefault("If-Unmodified-Since")
+  valid_568322 = validateParameter(valid_568322, JString, required = false,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "If-Unmodified-Since", valid_594089
-  var valid_594090 = header.getOrDefault("x-ms-lease-id")
-  valid_594090 = validateParameter(valid_594090, JString, required = false,
+  if valid_568322 != nil:
+    section.add "If-Unmodified-Since", valid_568322
+  var valid_568323 = header.getOrDefault("x-ms-lease-id")
+  valid_568323 = validateParameter(valid_568323, JString, required = false,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "x-ms-lease-id", valid_594090
-  var valid_594091 = header.getOrDefault("x-ms-content-encoding")
-  valid_594091 = validateParameter(valid_594091, JString, required = false,
+  if valid_568323 != nil:
+    section.add "x-ms-lease-id", valid_568323
+  var valid_568324 = header.getOrDefault("x-ms-content-encoding")
+  valid_568324 = validateParameter(valid_568324, JString, required = false,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "x-ms-content-encoding", valid_594091
-  var valid_594092 = header.getOrDefault("x-ms-cache-control")
-  valid_594092 = validateParameter(valid_594092, JString, required = false,
+  if valid_568324 != nil:
+    section.add "x-ms-content-encoding", valid_568324
+  var valid_568325 = header.getOrDefault("x-ms-cache-control")
+  valid_568325 = validateParameter(valid_568325, JString, required = false,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "x-ms-cache-control", valid_594092
-  var valid_594093 = header.getOrDefault("x-ms-client-request-id")
-  valid_594093 = validateParameter(valid_594093, JString, required = false,
+  if valid_568325 != nil:
+    section.add "x-ms-cache-control", valid_568325
+  var valid_568326 = header.getOrDefault("x-ms-client-request-id")
+  valid_568326 = validateParameter(valid_568326, JString, required = false,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "x-ms-client-request-id", valid_594093
-  var valid_594094 = header.getOrDefault("x-ms-source-if-none-match")
-  valid_594094 = validateParameter(valid_594094, JString, required = false,
+  if valid_568326 != nil:
+    section.add "x-ms-client-request-id", valid_568326
+  var valid_568327 = header.getOrDefault("x-ms-source-if-none-match")
+  valid_568327 = validateParameter(valid_568327, JString, required = false,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "x-ms-source-if-none-match", valid_594094
-  var valid_594095 = header.getOrDefault("x-ms-date")
-  valid_594095 = validateParameter(valid_594095, JString, required = false,
+  if valid_568327 != nil:
+    section.add "x-ms-source-if-none-match", valid_568327
+  var valid_568328 = header.getOrDefault("x-ms-date")
+  valid_568328 = validateParameter(valid_568328, JString, required = false,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "x-ms-date", valid_594095
-  var valid_594096 = header.getOrDefault("x-ms-proposed-lease-id")
-  valid_594096 = validateParameter(valid_594096, JString, required = false,
+  if valid_568328 != nil:
+    section.add "x-ms-date", valid_568328
+  var valid_568329 = header.getOrDefault("x-ms-proposed-lease-id")
+  valid_568329 = validateParameter(valid_568329, JString, required = false,
                                  default = nil)
-  if valid_594096 != nil:
-    section.add "x-ms-proposed-lease-id", valid_594096
-  var valid_594097 = header.getOrDefault("If-None-Match")
-  valid_594097 = validateParameter(valid_594097, JString, required = false,
+  if valid_568329 != nil:
+    section.add "x-ms-proposed-lease-id", valid_568329
+  var valid_568330 = header.getOrDefault("If-None-Match")
+  valid_568330 = validateParameter(valid_568330, JString, required = false,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "If-None-Match", valid_594097
-  var valid_594098 = header.getOrDefault("If-Modified-Since")
-  valid_594098 = validateParameter(valid_594098, JString, required = false,
+  if valid_568330 != nil:
+    section.add "If-None-Match", valid_568330
+  var valid_568331 = header.getOrDefault("If-Modified-Since")
+  valid_568331 = validateParameter(valid_568331, JString, required = false,
                                  default = nil)
-  if valid_594098 != nil:
-    section.add "If-Modified-Since", valid_594098
-  var valid_594099 = header.getOrDefault("x-ms-version")
-  valid_594099 = validateParameter(valid_594099, JString, required = false,
+  if valid_568331 != nil:
+    section.add "If-Modified-Since", valid_568331
+  var valid_568332 = header.getOrDefault("x-ms-version")
+  valid_568332 = validateParameter(valid_568332, JString, required = false,
                                  default = nil)
-  if valid_594099 != nil:
-    section.add "x-ms-version", valid_594099
-  var valid_594100 = header.getOrDefault("x-ms-rename-source")
-  valid_594100 = validateParameter(valid_594100, JString, required = false,
+  if valid_568332 != nil:
+    section.add "x-ms-version", valid_568332
+  var valid_568333 = header.getOrDefault("x-ms-rename-source")
+  valid_568333 = validateParameter(valid_568333, JString, required = false,
                                  default = nil)
-  if valid_594100 != nil:
-    section.add "x-ms-rename-source", valid_594100
-  var valid_594101 = header.getOrDefault("x-ms-content-disposition")
-  valid_594101 = validateParameter(valid_594101, JString, required = false,
+  if valid_568333 != nil:
+    section.add "x-ms-rename-source", valid_568333
+  var valid_568334 = header.getOrDefault("x-ms-content-disposition")
+  valid_568334 = validateParameter(valid_568334, JString, required = false,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "x-ms-content-disposition", valid_594101
-  var valid_594102 = header.getOrDefault("x-ms-content-type")
-  valid_594102 = validateParameter(valid_594102, JString, required = false,
+  if valid_568334 != nil:
+    section.add "x-ms-content-disposition", valid_568334
+  var valid_568335 = header.getOrDefault("x-ms-content-type")
+  valid_568335 = validateParameter(valid_568335, JString, required = false,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "x-ms-content-type", valid_594102
-  var valid_594103 = header.getOrDefault("x-ms-source-if-modified-since")
-  valid_594103 = validateParameter(valid_594103, JString, required = false,
+  if valid_568335 != nil:
+    section.add "x-ms-content-type", valid_568335
+  var valid_568336 = header.getOrDefault("x-ms-source-if-modified-since")
+  valid_568336 = validateParameter(valid_568336, JString, required = false,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "x-ms-source-if-modified-since", valid_594103
-  var valid_594104 = header.getOrDefault("Content-Encoding")
-  valid_594104 = validateParameter(valid_594104, JString, required = false,
+  if valid_568336 != nil:
+    section.add "x-ms-source-if-modified-since", valid_568336
+  var valid_568337 = header.getOrDefault("Content-Encoding")
+  valid_568337 = validateParameter(valid_568337, JString, required = false,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "Content-Encoding", valid_594104
+  if valid_568337 != nil:
+    section.add "Content-Encoding", valid_568337
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594105: Call_PathCreate_594070; path: JsonNode; query: JsonNode;
+proc call*(call_568338: Call_PathCreate_568303; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or rename a file or directory.    By default, the destination is overwritten and if the destination already exists and has a lease the lease is broken.  This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).  To fail if the destination already exists, use a conditional request with If-None-Match: "*".
   ## 
-  let valid = call_594105.validator(path, query, header, formData, body)
-  let scheme = call_594105.pickScheme
+  let valid = call_568338.validator(path, query, header, formData, body)
+  let scheme = call_568338.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594105.url(scheme.get, call_594105.host, call_594105.base,
-                         call_594105.route, valid.getOrDefault("path"),
+  let url = call_568338.url(scheme.get, call_568338.host, call_568338.base,
+                         call_568338.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594105, url, valid)
+  result = hook(call_568338, url, valid)
 
-proc call*(call_594106: Call_PathCreate_594070; path: string; filesystem: string;
+proc call*(call_568339: Call_PathCreate_568303; path: string; filesystem: string;
           timeout: int = 0; continuation: string = ""; resource: string = "directory";
           mode: string = "legacy"): Recallable =
   ## pathCreate
@@ -1188,26 +1188,26 @@ proc call*(call_594106: Call_PathCreate_594070; path: string; filesystem: string
   ##       : The file or directory path.
   ##   filesystem: string (required)
   ##             : The filesystem identifier.
-  var path_594107 = newJObject()
-  var query_594108 = newJObject()
-  add(query_594108, "timeout", newJInt(timeout))
-  add(query_594108, "continuation", newJString(continuation))
-  add(query_594108, "resource", newJString(resource))
-  add(query_594108, "mode", newJString(mode))
-  add(path_594107, "path", newJString(path))
-  add(path_594107, "filesystem", newJString(filesystem))
-  result = call_594106.call(path_594107, query_594108, nil, nil, nil)
+  var path_568340 = newJObject()
+  var query_568341 = newJObject()
+  add(query_568341, "timeout", newJInt(timeout))
+  add(query_568341, "continuation", newJString(continuation))
+  add(query_568341, "resource", newJString(resource))
+  add(query_568341, "mode", newJString(mode))
+  add(path_568340, "path", newJString(path))
+  add(path_568340, "filesystem", newJString(filesystem))
+  result = call_568339.call(path_568340, query_568341, nil, nil, nil)
 
-var pathCreate* = Call_PathCreate_594070(name: "pathCreate",
+var pathCreate* = Call_PathCreate_568303(name: "pathCreate",
                                       meth: HttpMethod.HttpPut,
                                       host: "azure.local",
                                       route: "/{filesystem}/{path}",
-                                      validator: validate_PathCreate_594071,
-                                      base: "", url: url_PathCreate_594072,
+                                      validator: validate_PathCreate_568304,
+                                      base: "", url: url_PathCreate_568305,
                                       schemes: {Scheme.Https})
 type
-  Call_PathGetProperties_594151 = ref object of OpenApiRestCall_593425
-proc url_PathGetProperties_594153(protocol: Scheme; host: string; base: string;
+  Call_PathGetProperties_568384 = ref object of OpenApiRestCall_567658
+proc url_PathGetProperties_568386(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1225,7 +1225,7 @@ proc url_PathGetProperties_594153(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PathGetProperties_594152(path: JsonNode; query: JsonNode;
+proc validate_PathGetProperties_568385(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get the properties for a file or directory, and optionally include the access control list.  This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
@@ -1239,16 +1239,16 @@ proc validate_PathGetProperties_594152(path: JsonNode; query: JsonNode;
   ##             : The filesystem identifier.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `path` field"
-  var valid_594154 = path.getOrDefault("path")
-  valid_594154 = validateParameter(valid_594154, JString, required = true,
+  var valid_568387 = path.getOrDefault("path")
+  valid_568387 = validateParameter(valid_568387, JString, required = true,
                                  default = nil)
-  if valid_594154 != nil:
-    section.add "path", valid_594154
-  var valid_594155 = path.getOrDefault("filesystem")
-  valid_594155 = validateParameter(valid_594155, JString, required = true,
+  if valid_568387 != nil:
+    section.add "path", valid_568387
+  var valid_568388 = path.getOrDefault("filesystem")
+  valid_568388 = validateParameter(valid_568388, JString, required = true,
                                  default = nil)
-  if valid_594155 != nil:
-    section.add "filesystem", valid_594155
+  if valid_568388 != nil:
+    section.add "filesystem", valid_568388
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -1256,15 +1256,15 @@ proc validate_PathGetProperties_594152(path: JsonNode; query: JsonNode;
   ##   action: JString
   ##         : Optional. If the value is "getAccessControl" the access control list is returned in the response headers (Hierarchical Namespace must be enabled for the account).
   section = newJObject()
-  var valid_594156 = query.getOrDefault("timeout")
-  valid_594156 = validateParameter(valid_594156, JInt, required = false, default = nil)
-  if valid_594156 != nil:
-    section.add "timeout", valid_594156
-  var valid_594157 = query.getOrDefault("action")
-  valid_594157 = validateParameter(valid_594157, JString, required = false,
+  var valid_568389 = query.getOrDefault("timeout")
+  valid_568389 = validateParameter(valid_568389, JInt, required = false, default = nil)
+  if valid_568389 != nil:
+    section.add "timeout", valid_568389
+  var valid_568390 = query.getOrDefault("action")
+  valid_568390 = validateParameter(valid_568390, JString, required = false,
                                  default = newJString("getAccessControl"))
-  if valid_594157 != nil:
-    section.add "action", valid_594157
+  if valid_568390 != nil:
+    section.add "action", valid_568390
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
@@ -1282,61 +1282,61 @@ proc validate_PathGetProperties_594152(path: JsonNode; query: JsonNode;
   ##   x-ms-version: JString
   ##               : Specifies the version of the REST protocol used for processing the request. This is required when using shared key authorization.
   section = newJObject()
-  var valid_594158 = header.getOrDefault("If-Match")
-  valid_594158 = validateParameter(valid_594158, JString, required = false,
+  var valid_568391 = header.getOrDefault("If-Match")
+  valid_568391 = validateParameter(valid_568391, JString, required = false,
                                  default = nil)
-  if valid_594158 != nil:
-    section.add "If-Match", valid_594158
-  var valid_594159 = header.getOrDefault("If-Unmodified-Since")
-  valid_594159 = validateParameter(valid_594159, JString, required = false,
+  if valid_568391 != nil:
+    section.add "If-Match", valid_568391
+  var valid_568392 = header.getOrDefault("If-Unmodified-Since")
+  valid_568392 = validateParameter(valid_568392, JString, required = false,
                                  default = nil)
-  if valid_594159 != nil:
-    section.add "If-Unmodified-Since", valid_594159
-  var valid_594160 = header.getOrDefault("x-ms-client-request-id")
-  valid_594160 = validateParameter(valid_594160, JString, required = false,
+  if valid_568392 != nil:
+    section.add "If-Unmodified-Since", valid_568392
+  var valid_568393 = header.getOrDefault("x-ms-client-request-id")
+  valid_568393 = validateParameter(valid_568393, JString, required = false,
                                  default = nil)
-  if valid_594160 != nil:
-    section.add "x-ms-client-request-id", valid_594160
-  var valid_594161 = header.getOrDefault("x-ms-date")
-  valid_594161 = validateParameter(valid_594161, JString, required = false,
+  if valid_568393 != nil:
+    section.add "x-ms-client-request-id", valid_568393
+  var valid_568394 = header.getOrDefault("x-ms-date")
+  valid_568394 = validateParameter(valid_568394, JString, required = false,
                                  default = nil)
-  if valid_594161 != nil:
-    section.add "x-ms-date", valid_594161
-  var valid_594162 = header.getOrDefault("If-None-Match")
-  valid_594162 = validateParameter(valid_594162, JString, required = false,
+  if valid_568394 != nil:
+    section.add "x-ms-date", valid_568394
+  var valid_568395 = header.getOrDefault("If-None-Match")
+  valid_568395 = validateParameter(valid_568395, JString, required = false,
                                  default = nil)
-  if valid_594162 != nil:
-    section.add "If-None-Match", valid_594162
-  var valid_594163 = header.getOrDefault("If-Modified-Since")
-  valid_594163 = validateParameter(valid_594163, JString, required = false,
+  if valid_568395 != nil:
+    section.add "If-None-Match", valid_568395
+  var valid_568396 = header.getOrDefault("If-Modified-Since")
+  valid_568396 = validateParameter(valid_568396, JString, required = false,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "If-Modified-Since", valid_594163
-  var valid_594164 = header.getOrDefault("x-ms-version")
-  valid_594164 = validateParameter(valid_594164, JString, required = false,
+  if valid_568396 != nil:
+    section.add "If-Modified-Since", valid_568396
+  var valid_568397 = header.getOrDefault("x-ms-version")
+  valid_568397 = validateParameter(valid_568397, JString, required = false,
                                  default = nil)
-  if valid_594164 != nil:
-    section.add "x-ms-version", valid_594164
+  if valid_568397 != nil:
+    section.add "x-ms-version", valid_568397
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594165: Call_PathGetProperties_594151; path: JsonNode;
+proc call*(call_568398: Call_PathGetProperties_568384; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the properties for a file or directory, and optionally include the access control list.  This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
-  let valid = call_594165.validator(path, query, header, formData, body)
-  let scheme = call_594165.pickScheme
+  let valid = call_568398.validator(path, query, header, formData, body)
+  let scheme = call_568398.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594165.url(scheme.get, call_594165.host, call_594165.base,
-                         call_594165.route, valid.getOrDefault("path"),
+  let url = call_568398.url(scheme.get, call_568398.host, call_568398.base,
+                         call_568398.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594165, url, valid)
+  result = hook(call_568398, url, valid)
 
-proc call*(call_594166: Call_PathGetProperties_594151; path: string;
+proc call*(call_568399: Call_PathGetProperties_568384; path: string;
           filesystem: string; timeout: int = 0; action: string = "getAccessControl"): Recallable =
   ## pathGetProperties
   ## Get the properties for a file or directory, and optionally include the access control list.  This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
@@ -1348,21 +1348,21 @@ proc call*(call_594166: Call_PathGetProperties_594151; path: string;
   ##       : The file or directory path.
   ##   filesystem: string (required)
   ##             : The filesystem identifier.
-  var path_594167 = newJObject()
-  var query_594168 = newJObject()
-  add(query_594168, "timeout", newJInt(timeout))
-  add(query_594168, "action", newJString(action))
-  add(path_594167, "path", newJString(path))
-  add(path_594167, "filesystem", newJString(filesystem))
-  result = call_594166.call(path_594167, query_594168, nil, nil, nil)
+  var path_568400 = newJObject()
+  var query_568401 = newJObject()
+  add(query_568401, "timeout", newJInt(timeout))
+  add(query_568401, "action", newJString(action))
+  add(path_568400, "path", newJString(path))
+  add(path_568400, "filesystem", newJString(filesystem))
+  result = call_568399.call(path_568400, query_568401, nil, nil, nil)
 
-var pathGetProperties* = Call_PathGetProperties_594151(name: "pathGetProperties",
+var pathGetProperties* = Call_PathGetProperties_568384(name: "pathGetProperties",
     meth: HttpMethod.HttpHead, host: "azure.local", route: "/{filesystem}/{path}",
-    validator: validate_PathGetProperties_594152, base: "",
-    url: url_PathGetProperties_594153, schemes: {Scheme.Https})
+    validator: validate_PathGetProperties_568385, base: "",
+    url: url_PathGetProperties_568386, schemes: {Scheme.Https})
 type
-  Call_PathLease_594109 = ref object of OpenApiRestCall_593425
-proc url_PathLease_594111(protocol: Scheme; host: string; base: string; route: string;
+  Call_PathLease_568342 = ref object of OpenApiRestCall_567658
+proc url_PathLease_568344(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1380,7 +1380,7 @@ proc url_PathLease_594111(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PathLease_594110(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PathLease_568343(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Create and manage a lease to restrict write and delete access to the path. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
@@ -1393,25 +1393,25 @@ proc validate_PathLease_594110(path: JsonNode; query: JsonNode; header: JsonNode
   ##             : The filesystem identifier.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `path` field"
-  var valid_594112 = path.getOrDefault("path")
-  valid_594112 = validateParameter(valid_594112, JString, required = true,
+  var valid_568345 = path.getOrDefault("path")
+  valid_568345 = validateParameter(valid_568345, JString, required = true,
                                  default = nil)
-  if valid_594112 != nil:
-    section.add "path", valid_594112
-  var valid_594113 = path.getOrDefault("filesystem")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  if valid_568345 != nil:
+    section.add "path", valid_568345
+  var valid_568346 = path.getOrDefault("filesystem")
+  valid_568346 = validateParameter(valid_568346, JString, required = true,
                                  default = nil)
-  if valid_594113 != nil:
-    section.add "filesystem", valid_594113
+  if valid_568346 != nil:
+    section.add "filesystem", valid_568346
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
   ##          : An optional operation timeout value in seconds. The period begins when the request is received by the service. If the timeout value elapses before the operation completes, the operation fails.
   section = newJObject()
-  var valid_594114 = query.getOrDefault("timeout")
-  valid_594114 = validateParameter(valid_594114, JInt, required = false, default = nil)
-  if valid_594114 != nil:
-    section.add "timeout", valid_594114
+  var valid_568347 = query.getOrDefault("timeout")
+  valid_568347 = validateParameter(valid_568347, JInt, required = false, default = nil)
+  if valid_568347 != nil:
+    section.add "timeout", valid_568347
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
@@ -1439,85 +1439,85 @@ proc validate_PathLease_594110(path: JsonNode; query: JsonNode; header: JsonNode
   ##   x-ms-lease-action: JString (required)
   ##                    : There are five lease actions: "acquire", "break", "change", "renew", and "release". Use "acquire" and specify the "x-ms-proposed-lease-id" and "x-ms-lease-duration" to acquire a new lease. Use "break" to break an existing lease. When a lease is broken, the lease break period is allowed to elapse, during which time no lease operation except break and release can be performed on the file. When a lease is successfully broken, the response indicates the interval in seconds until a new lease can be acquired. Use "change" and specify the current lease ID in "x-ms-lease-id" and the new lease ID in "x-ms-proposed-lease-id" to change the lease ID of an active lease. Use "renew" and specify the "x-ms-lease-id" to renew an existing lease. Use "release" and specify the "x-ms-lease-id" to release a lease.
   section = newJObject()
-  var valid_594115 = header.getOrDefault("If-Match")
-  valid_594115 = validateParameter(valid_594115, JString, required = false,
+  var valid_568348 = header.getOrDefault("If-Match")
+  valid_568348 = validateParameter(valid_568348, JString, required = false,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "If-Match", valid_594115
-  var valid_594116 = header.getOrDefault("x-ms-lease-duration")
-  valid_594116 = validateParameter(valid_594116, JInt, required = false, default = nil)
-  if valid_594116 != nil:
-    section.add "x-ms-lease-duration", valid_594116
-  var valid_594117 = header.getOrDefault("If-Unmodified-Since")
-  valid_594117 = validateParameter(valid_594117, JString, required = false,
+  if valid_568348 != nil:
+    section.add "If-Match", valid_568348
+  var valid_568349 = header.getOrDefault("x-ms-lease-duration")
+  valid_568349 = validateParameter(valid_568349, JInt, required = false, default = nil)
+  if valid_568349 != nil:
+    section.add "x-ms-lease-duration", valid_568349
+  var valid_568350 = header.getOrDefault("If-Unmodified-Since")
+  valid_568350 = validateParameter(valid_568350, JString, required = false,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "If-Unmodified-Since", valid_594117
-  var valid_594118 = header.getOrDefault("x-ms-lease-id")
-  valid_594118 = validateParameter(valid_594118, JString, required = false,
+  if valid_568350 != nil:
+    section.add "If-Unmodified-Since", valid_568350
+  var valid_568351 = header.getOrDefault("x-ms-lease-id")
+  valid_568351 = validateParameter(valid_568351, JString, required = false,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "x-ms-lease-id", valid_594118
-  var valid_594119 = header.getOrDefault("x-ms-client-request-id")
-  valid_594119 = validateParameter(valid_594119, JString, required = false,
+  if valid_568351 != nil:
+    section.add "x-ms-lease-id", valid_568351
+  var valid_568352 = header.getOrDefault("x-ms-client-request-id")
+  valid_568352 = validateParameter(valid_568352, JString, required = false,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "x-ms-client-request-id", valid_594119
-  var valid_594120 = header.getOrDefault("x-ms-date")
-  valid_594120 = validateParameter(valid_594120, JString, required = false,
+  if valid_568352 != nil:
+    section.add "x-ms-client-request-id", valid_568352
+  var valid_568353 = header.getOrDefault("x-ms-date")
+  valid_568353 = validateParameter(valid_568353, JString, required = false,
                                  default = nil)
-  if valid_594120 != nil:
-    section.add "x-ms-date", valid_594120
-  var valid_594121 = header.getOrDefault("x-ms-lease-break-period")
-  valid_594121 = validateParameter(valid_594121, JInt, required = false, default = nil)
-  if valid_594121 != nil:
-    section.add "x-ms-lease-break-period", valid_594121
-  var valid_594122 = header.getOrDefault("x-ms-proposed-lease-id")
-  valid_594122 = validateParameter(valid_594122, JString, required = false,
+  if valid_568353 != nil:
+    section.add "x-ms-date", valid_568353
+  var valid_568354 = header.getOrDefault("x-ms-lease-break-period")
+  valid_568354 = validateParameter(valid_568354, JInt, required = false, default = nil)
+  if valid_568354 != nil:
+    section.add "x-ms-lease-break-period", valid_568354
+  var valid_568355 = header.getOrDefault("x-ms-proposed-lease-id")
+  valid_568355 = validateParameter(valid_568355, JString, required = false,
                                  default = nil)
-  if valid_594122 != nil:
-    section.add "x-ms-proposed-lease-id", valid_594122
-  var valid_594123 = header.getOrDefault("If-None-Match")
-  valid_594123 = validateParameter(valid_594123, JString, required = false,
+  if valid_568355 != nil:
+    section.add "x-ms-proposed-lease-id", valid_568355
+  var valid_568356 = header.getOrDefault("If-None-Match")
+  valid_568356 = validateParameter(valid_568356, JString, required = false,
                                  default = nil)
-  if valid_594123 != nil:
-    section.add "If-None-Match", valid_594123
-  var valid_594124 = header.getOrDefault("If-Modified-Since")
-  valid_594124 = validateParameter(valid_594124, JString, required = false,
+  if valid_568356 != nil:
+    section.add "If-None-Match", valid_568356
+  var valid_568357 = header.getOrDefault("If-Modified-Since")
+  valid_568357 = validateParameter(valid_568357, JString, required = false,
                                  default = nil)
-  if valid_594124 != nil:
-    section.add "If-Modified-Since", valid_594124
-  var valid_594125 = header.getOrDefault("x-ms-version")
-  valid_594125 = validateParameter(valid_594125, JString, required = false,
+  if valid_568357 != nil:
+    section.add "If-Modified-Since", valid_568357
+  var valid_568358 = header.getOrDefault("x-ms-version")
+  valid_568358 = validateParameter(valid_568358, JString, required = false,
                                  default = nil)
-  if valid_594125 != nil:
-    section.add "x-ms-version", valid_594125
+  if valid_568358 != nil:
+    section.add "x-ms-version", valid_568358
   assert header != nil, "header argument is necessary due to required `x-ms-lease-action` field"
-  var valid_594126 = header.getOrDefault("x-ms-lease-action")
-  valid_594126 = validateParameter(valid_594126, JString, required = true,
+  var valid_568359 = header.getOrDefault("x-ms-lease-action")
+  valid_568359 = validateParameter(valid_568359, JString, required = true,
                                  default = newJString("acquire"))
-  if valid_594126 != nil:
-    section.add "x-ms-lease-action", valid_594126
+  if valid_568359 != nil:
+    section.add "x-ms-lease-action", valid_568359
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594127: Call_PathLease_594109; path: JsonNode; query: JsonNode;
+proc call*(call_568360: Call_PathLease_568342; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create and manage a lease to restrict write and delete access to the path. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
-  let valid = call_594127.validator(path, query, header, formData, body)
-  let scheme = call_594127.pickScheme
+  let valid = call_568360.validator(path, query, header, formData, body)
+  let scheme = call_568360.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594127.url(scheme.get, call_594127.host, call_594127.base,
-                         call_594127.route, valid.getOrDefault("path"),
+  let url = call_568360.url(scheme.get, call_568360.host, call_568360.base,
+                         call_568360.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594127, url, valid)
+  result = hook(call_568360, url, valid)
 
-proc call*(call_594128: Call_PathLease_594109; path: string; filesystem: string;
+proc call*(call_568361: Call_PathLease_568342; path: string; filesystem: string;
           timeout: int = 0): Recallable =
   ## pathLease
   ## Create and manage a lease to restrict write and delete access to the path. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
@@ -1527,22 +1527,22 @@ proc call*(call_594128: Call_PathLease_594109; path: string; filesystem: string;
   ##       : The file or directory path.
   ##   filesystem: string (required)
   ##             : The filesystem identifier.
-  var path_594129 = newJObject()
-  var query_594130 = newJObject()
-  add(query_594130, "timeout", newJInt(timeout))
-  add(path_594129, "path", newJString(path))
-  add(path_594129, "filesystem", newJString(filesystem))
-  result = call_594128.call(path_594129, query_594130, nil, nil, nil)
+  var path_568362 = newJObject()
+  var query_568363 = newJObject()
+  add(query_568363, "timeout", newJInt(timeout))
+  add(path_568362, "path", newJString(path))
+  add(path_568362, "filesystem", newJString(filesystem))
+  result = call_568361.call(path_568362, query_568363, nil, nil, nil)
 
-var pathLease* = Call_PathLease_594109(name: "pathLease", meth: HttpMethod.HttpPost,
+var pathLease* = Call_PathLease_568342(name: "pathLease", meth: HttpMethod.HttpPost,
                                     host: "azure.local",
                                     route: "/{filesystem}/{path}",
-                                    validator: validate_PathLease_594110,
-                                    base: "", url: url_PathLease_594111,
+                                    validator: validate_PathLease_568343,
+                                    base: "", url: url_PathLease_568344,
                                     schemes: {Scheme.Https})
 type
-  Call_PathRead_594052 = ref object of OpenApiRestCall_593425
-proc url_PathRead_594054(protocol: Scheme; host: string; base: string; route: string;
+  Call_PathRead_568285 = ref object of OpenApiRestCall_567658
+proc url_PathRead_568287(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1560,7 +1560,7 @@ proc url_PathRead_594054(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PathRead_594053(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PathRead_568286(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Read the contents of a file.  For read operations, range requests are supported. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
@@ -1573,25 +1573,25 @@ proc validate_PathRead_594053(path: JsonNode; query: JsonNode; header: JsonNode;
   ##             : The filesystem identifier.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `path` field"
-  var valid_594055 = path.getOrDefault("path")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  var valid_568288 = path.getOrDefault("path")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "path", valid_594055
-  var valid_594056 = path.getOrDefault("filesystem")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  if valid_568288 != nil:
+    section.add "path", valid_568288
+  var valid_568289 = path.getOrDefault("filesystem")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "filesystem", valid_594056
+  if valid_568289 != nil:
+    section.add "filesystem", valid_568289
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
   ##          : An optional operation timeout value in seconds. The period begins when the request is received by the service. If the timeout value elapses before the operation completes, the operation fails.
   section = newJObject()
-  var valid_594057 = query.getOrDefault("timeout")
-  valid_594057 = validateParameter(valid_594057, JInt, required = false, default = nil)
-  if valid_594057 != nil:
-    section.add "timeout", valid_594057
+  var valid_568290 = query.getOrDefault("timeout")
+  valid_568290 = validateParameter(valid_568290, JInt, required = false, default = nil)
+  if valid_568290 != nil:
+    section.add "timeout", valid_568290
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
@@ -1611,66 +1611,66 @@ proc validate_PathRead_594053(path: JsonNode; query: JsonNode; header: JsonNode;
   ##   Range: JString
   ##        : The HTTP Range request header specifies one or more byte ranges of the resource to be retrieved.
   section = newJObject()
-  var valid_594058 = header.getOrDefault("If-Match")
-  valid_594058 = validateParameter(valid_594058, JString, required = false,
+  var valid_568291 = header.getOrDefault("If-Match")
+  valid_568291 = validateParameter(valid_568291, JString, required = false,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "If-Match", valid_594058
-  var valid_594059 = header.getOrDefault("If-Unmodified-Since")
-  valid_594059 = validateParameter(valid_594059, JString, required = false,
+  if valid_568291 != nil:
+    section.add "If-Match", valid_568291
+  var valid_568292 = header.getOrDefault("If-Unmodified-Since")
+  valid_568292 = validateParameter(valid_568292, JString, required = false,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "If-Unmodified-Since", valid_594059
-  var valid_594060 = header.getOrDefault("x-ms-client-request-id")
-  valid_594060 = validateParameter(valid_594060, JString, required = false,
+  if valid_568292 != nil:
+    section.add "If-Unmodified-Since", valid_568292
+  var valid_568293 = header.getOrDefault("x-ms-client-request-id")
+  valid_568293 = validateParameter(valid_568293, JString, required = false,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "x-ms-client-request-id", valid_594060
-  var valid_594061 = header.getOrDefault("x-ms-date")
-  valid_594061 = validateParameter(valid_594061, JString, required = false,
+  if valid_568293 != nil:
+    section.add "x-ms-client-request-id", valid_568293
+  var valid_568294 = header.getOrDefault("x-ms-date")
+  valid_568294 = validateParameter(valid_568294, JString, required = false,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "x-ms-date", valid_594061
-  var valid_594062 = header.getOrDefault("If-None-Match")
-  valid_594062 = validateParameter(valid_594062, JString, required = false,
+  if valid_568294 != nil:
+    section.add "x-ms-date", valid_568294
+  var valid_568295 = header.getOrDefault("If-None-Match")
+  valid_568295 = validateParameter(valid_568295, JString, required = false,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "If-None-Match", valid_594062
-  var valid_594063 = header.getOrDefault("If-Modified-Since")
-  valid_594063 = validateParameter(valid_594063, JString, required = false,
+  if valid_568295 != nil:
+    section.add "If-None-Match", valid_568295
+  var valid_568296 = header.getOrDefault("If-Modified-Since")
+  valid_568296 = validateParameter(valid_568296, JString, required = false,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "If-Modified-Since", valid_594063
-  var valid_594064 = header.getOrDefault("x-ms-version")
-  valid_594064 = validateParameter(valid_594064, JString, required = false,
+  if valid_568296 != nil:
+    section.add "If-Modified-Since", valid_568296
+  var valid_568297 = header.getOrDefault("x-ms-version")
+  valid_568297 = validateParameter(valid_568297, JString, required = false,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "x-ms-version", valid_594064
-  var valid_594065 = header.getOrDefault("Range")
-  valid_594065 = validateParameter(valid_594065, JString, required = false,
+  if valid_568297 != nil:
+    section.add "x-ms-version", valid_568297
+  var valid_568298 = header.getOrDefault("Range")
+  valid_568298 = validateParameter(valid_568298, JString, required = false,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "Range", valid_594065
+  if valid_568298 != nil:
+    section.add "Range", valid_568298
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594066: Call_PathRead_594052; path: JsonNode; query: JsonNode;
+proc call*(call_568299: Call_PathRead_568285; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Read the contents of a file.  For read operations, range requests are supported. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
-  let valid = call_594066.validator(path, query, header, formData, body)
-  let scheme = call_594066.pickScheme
+  let valid = call_568299.validator(path, query, header, formData, body)
+  let scheme = call_568299.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594066.url(scheme.get, call_594066.host, call_594066.base,
-                         call_594066.route, valid.getOrDefault("path"),
+  let url = call_568299.url(scheme.get, call_568299.host, call_568299.base,
+                         call_568299.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594066, url, valid)
+  result = hook(call_568299, url, valid)
 
-proc call*(call_594067: Call_PathRead_594052; path: string; filesystem: string;
+proc call*(call_568300: Call_PathRead_568285; path: string; filesystem: string;
           timeout: int = 0): Recallable =
   ## pathRead
   ## Read the contents of a file.  For read operations, range requests are supported. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
@@ -1680,22 +1680,22 @@ proc call*(call_594067: Call_PathRead_594052; path: string; filesystem: string;
   ##       : The file or directory path.
   ##   filesystem: string (required)
   ##             : The filesystem identifier.
-  var path_594068 = newJObject()
-  var query_594069 = newJObject()
-  add(query_594069, "timeout", newJInt(timeout))
-  add(path_594068, "path", newJString(path))
-  add(path_594068, "filesystem", newJString(filesystem))
-  result = call_594067.call(path_594068, query_594069, nil, nil, nil)
+  var path_568301 = newJObject()
+  var query_568302 = newJObject()
+  add(query_568302, "timeout", newJInt(timeout))
+  add(path_568301, "path", newJString(path))
+  add(path_568301, "filesystem", newJString(filesystem))
+  result = call_568300.call(path_568301, query_568302, nil, nil, nil)
 
-var pathRead* = Call_PathRead_594052(name: "pathRead", meth: HttpMethod.HttpGet,
+var pathRead* = Call_PathRead_568285(name: "pathRead", meth: HttpMethod.HttpGet,
                                   host: "azure.local",
                                   route: "/{filesystem}/{path}",
-                                  validator: validate_PathRead_594053, base: "",
-                                  url: url_PathRead_594054,
+                                  validator: validate_PathRead_568286, base: "",
+                                  url: url_PathRead_568287,
                                   schemes: {Scheme.Https})
 type
-  Call_PathUpdate_594169 = ref object of OpenApiRestCall_593425
-proc url_PathUpdate_594171(protocol: Scheme; host: string; base: string; route: string;
+  Call_PathUpdate_568402 = ref object of OpenApiRestCall_567658
+proc url_PathUpdate_568404(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1713,7 +1713,7 @@ proc url_PathUpdate_594171(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PathUpdate_594170(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PathUpdate_568403(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Uploads data to be appended to a file, flushes (writes) previously uploaded data to a file, sets properties for a file or directory, or sets access control for a file or directory. Data can only be appended to a file. This operation supports conditional HTTP requests. For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
@@ -1726,16 +1726,16 @@ proc validate_PathUpdate_594170(path: JsonNode; query: JsonNode; header: JsonNod
   ##             : The filesystem identifier.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `path` field"
-  var valid_594172 = path.getOrDefault("path")
-  valid_594172 = validateParameter(valid_594172, JString, required = true,
+  var valid_568405 = path.getOrDefault("path")
+  valid_568405 = validateParameter(valid_568405, JString, required = true,
                                  default = nil)
-  if valid_594172 != nil:
-    section.add "path", valid_594172
-  var valid_594173 = path.getOrDefault("filesystem")
-  valid_594173 = validateParameter(valid_594173, JString, required = true,
+  if valid_568405 != nil:
+    section.add "path", valid_568405
+  var valid_568406 = path.getOrDefault("filesystem")
+  valid_568406 = validateParameter(valid_568406, JString, required = true,
                                  default = nil)
-  if valid_594173 != nil:
-    section.add "filesystem", valid_594173
+  if valid_568406 != nil:
+    section.add "filesystem", valid_568406
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -1747,24 +1747,24 @@ proc validate_PathUpdate_594170(path: JsonNode; query: JsonNode; header: JsonNod
   ##   position: JInt
   ##           : This parameter allows the caller to upload data in parallel and control the order in which it is appended to the file.  It is required when uploading data to be appended to the file and when flushing previously uploaded data to the file.  The value must be the position where the data is to be appended.  Uploaded data is not immediately flushed, or written, to the file.  To flush, the previously uploaded data must be contiguous, the position parameter must be specified and equal to the length of the file after all data has been written, and there must not be a request entity body included with the request.
   section = newJObject()
-  var valid_594174 = query.getOrDefault("timeout")
-  valid_594174 = validateParameter(valid_594174, JInt, required = false, default = nil)
-  if valid_594174 != nil:
-    section.add "timeout", valid_594174
+  var valid_568407 = query.getOrDefault("timeout")
+  valid_568407 = validateParameter(valid_568407, JInt, required = false, default = nil)
+  if valid_568407 != nil:
+    section.add "timeout", valid_568407
   assert query != nil, "query argument is necessary due to required `action` field"
-  var valid_594175 = query.getOrDefault("action")
-  valid_594175 = validateParameter(valid_594175, JString, required = true,
+  var valid_568408 = query.getOrDefault("action")
+  valid_568408 = validateParameter(valid_568408, JString, required = true,
                                  default = newJString("append"))
-  if valid_594175 != nil:
-    section.add "action", valid_594175
-  var valid_594176 = query.getOrDefault("retainUncommittedData")
-  valid_594176 = validateParameter(valid_594176, JBool, required = false, default = nil)
-  if valid_594176 != nil:
-    section.add "retainUncommittedData", valid_594176
-  var valid_594177 = query.getOrDefault("position")
-  valid_594177 = validateParameter(valid_594177, JInt, required = false, default = nil)
-  if valid_594177 != nil:
-    section.add "position", valid_594177
+  if valid_568408 != nil:
+    section.add "action", valid_568408
+  var valid_568409 = query.getOrDefault("retainUncommittedData")
+  valid_568409 = validateParameter(valid_568409, JBool, required = false, default = nil)
+  if valid_568409 != nil:
+    section.add "retainUncommittedData", valid_568409
+  var valid_568410 = query.getOrDefault("position")
+  valid_568410 = validateParameter(valid_568410, JInt, required = false, default = nil)
+  if valid_568410 != nil:
+    section.add "position", valid_568410
   result.add "query", section
   ## parameters in `header` object:
   ##   x-ms-permissions: JString
@@ -1808,106 +1808,106 @@ proc validate_PathUpdate_594170(path: JsonNode; query: JsonNode; header: JsonNod
   ##   x-ms-lease-action: JString
   ##                    : Optional.  The lease action can be "renew" to renew an existing lease or "release" to release a lease.
   section = newJObject()
-  var valid_594178 = header.getOrDefault("x-ms-permissions")
-  valid_594178 = validateParameter(valid_594178, JString, required = false,
+  var valid_568411 = header.getOrDefault("x-ms-permissions")
+  valid_568411 = validateParameter(valid_568411, JString, required = false,
                                  default = nil)
-  if valid_594178 != nil:
-    section.add "x-ms-permissions", valid_594178
-  var valid_594179 = header.getOrDefault("x-ms-acl")
-  valid_594179 = validateParameter(valid_594179, JString, required = false,
+  if valid_568411 != nil:
+    section.add "x-ms-permissions", valid_568411
+  var valid_568412 = header.getOrDefault("x-ms-acl")
+  valid_568412 = validateParameter(valid_568412, JString, required = false,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "x-ms-acl", valid_594179
-  var valid_594180 = header.getOrDefault("If-Match")
-  valid_594180 = validateParameter(valid_594180, JString, required = false,
+  if valid_568412 != nil:
+    section.add "x-ms-acl", valid_568412
+  var valid_568413 = header.getOrDefault("If-Match")
+  valid_568413 = validateParameter(valid_568413, JString, required = false,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "If-Match", valid_594180
-  var valid_594181 = header.getOrDefault("x-ms-properties")
-  valid_594181 = validateParameter(valid_594181, JString, required = false,
+  if valid_568413 != nil:
+    section.add "If-Match", valid_568413
+  var valid_568414 = header.getOrDefault("x-ms-properties")
+  valid_568414 = validateParameter(valid_568414, JString, required = false,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "x-ms-properties", valid_594181
-  var valid_594182 = header.getOrDefault("x-ms-content-language")
-  valid_594182 = validateParameter(valid_594182, JString, required = false,
+  if valid_568414 != nil:
+    section.add "x-ms-properties", valid_568414
+  var valid_568415 = header.getOrDefault("x-ms-content-language")
+  valid_568415 = validateParameter(valid_568415, JString, required = false,
                                  default = nil)
-  if valid_594182 != nil:
-    section.add "x-ms-content-language", valid_594182
-  var valid_594183 = header.getOrDefault("x-ms-group")
-  valid_594183 = validateParameter(valid_594183, JString, required = false,
+  if valid_568415 != nil:
+    section.add "x-ms-content-language", valid_568415
+  var valid_568416 = header.getOrDefault("x-ms-group")
+  valid_568416 = validateParameter(valid_568416, JString, required = false,
                                  default = nil)
-  if valid_594183 != nil:
-    section.add "x-ms-group", valid_594183
-  var valid_594184 = header.getOrDefault("If-Unmodified-Since")
-  valid_594184 = validateParameter(valid_594184, JString, required = false,
+  if valid_568416 != nil:
+    section.add "x-ms-group", valid_568416
+  var valid_568417 = header.getOrDefault("If-Unmodified-Since")
+  valid_568417 = validateParameter(valid_568417, JString, required = false,
                                  default = nil)
-  if valid_594184 != nil:
-    section.add "If-Unmodified-Since", valid_594184
-  var valid_594185 = header.getOrDefault("x-ms-lease-id")
-  valid_594185 = validateParameter(valid_594185, JString, required = false,
+  if valid_568417 != nil:
+    section.add "If-Unmodified-Since", valid_568417
+  var valid_568418 = header.getOrDefault("x-ms-lease-id")
+  valid_568418 = validateParameter(valid_568418, JString, required = false,
                                  default = nil)
-  if valid_594185 != nil:
-    section.add "x-ms-lease-id", valid_594185
-  var valid_594186 = header.getOrDefault("x-ms-content-encoding")
-  valid_594186 = validateParameter(valid_594186, JString, required = false,
+  if valid_568418 != nil:
+    section.add "x-ms-lease-id", valid_568418
+  var valid_568419 = header.getOrDefault("x-ms-content-encoding")
+  valid_568419 = validateParameter(valid_568419, JString, required = false,
                                  default = nil)
-  if valid_594186 != nil:
-    section.add "x-ms-content-encoding", valid_594186
-  var valid_594187 = header.getOrDefault("x-ms-cache-control")
-  valid_594187 = validateParameter(valid_594187, JString, required = false,
+  if valid_568419 != nil:
+    section.add "x-ms-content-encoding", valid_568419
+  var valid_568420 = header.getOrDefault("x-ms-cache-control")
+  valid_568420 = validateParameter(valid_568420, JString, required = false,
                                  default = nil)
-  if valid_594187 != nil:
-    section.add "x-ms-cache-control", valid_594187
-  var valid_594188 = header.getOrDefault("x-ms-client-request-id")
-  valid_594188 = validateParameter(valid_594188, JString, required = false,
+  if valid_568420 != nil:
+    section.add "x-ms-cache-control", valid_568420
+  var valid_568421 = header.getOrDefault("x-ms-client-request-id")
+  valid_568421 = validateParameter(valid_568421, JString, required = false,
                                  default = nil)
-  if valid_594188 != nil:
-    section.add "x-ms-client-request-id", valid_594188
-  var valid_594189 = header.getOrDefault("x-ms-date")
-  valid_594189 = validateParameter(valid_594189, JString, required = false,
+  if valid_568421 != nil:
+    section.add "x-ms-client-request-id", valid_568421
+  var valid_568422 = header.getOrDefault("x-ms-date")
+  valid_568422 = validateParameter(valid_568422, JString, required = false,
                                  default = nil)
-  if valid_594189 != nil:
-    section.add "x-ms-date", valid_594189
-  var valid_594190 = header.getOrDefault("Content-Length")
-  valid_594190 = validateParameter(valid_594190, JString, required = false,
+  if valid_568422 != nil:
+    section.add "x-ms-date", valid_568422
+  var valid_568423 = header.getOrDefault("Content-Length")
+  valid_568423 = validateParameter(valid_568423, JString, required = false,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "Content-Length", valid_594190
-  var valid_594191 = header.getOrDefault("If-None-Match")
-  valid_594191 = validateParameter(valid_594191, JString, required = false,
+  if valid_568423 != nil:
+    section.add "Content-Length", valid_568423
+  var valid_568424 = header.getOrDefault("If-None-Match")
+  valid_568424 = validateParameter(valid_568424, JString, required = false,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "If-None-Match", valid_594191
-  var valid_594192 = header.getOrDefault("If-Modified-Since")
-  valid_594192 = validateParameter(valid_594192, JString, required = false,
+  if valid_568424 != nil:
+    section.add "If-None-Match", valid_568424
+  var valid_568425 = header.getOrDefault("If-Modified-Since")
+  valid_568425 = validateParameter(valid_568425, JString, required = false,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "If-Modified-Since", valid_594192
-  var valid_594193 = header.getOrDefault("x-ms-owner")
-  valid_594193 = validateParameter(valid_594193, JString, required = false,
+  if valid_568425 != nil:
+    section.add "If-Modified-Since", valid_568425
+  var valid_568426 = header.getOrDefault("x-ms-owner")
+  valid_568426 = validateParameter(valid_568426, JString, required = false,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "x-ms-owner", valid_594193
-  var valid_594194 = header.getOrDefault("x-ms-version")
-  valid_594194 = validateParameter(valid_594194, JString, required = false,
+  if valid_568426 != nil:
+    section.add "x-ms-owner", valid_568426
+  var valid_568427 = header.getOrDefault("x-ms-version")
+  valid_568427 = validateParameter(valid_568427, JString, required = false,
                                  default = nil)
-  if valid_594194 != nil:
-    section.add "x-ms-version", valid_594194
-  var valid_594195 = header.getOrDefault("x-ms-content-disposition")
-  valid_594195 = validateParameter(valid_594195, JString, required = false,
+  if valid_568427 != nil:
+    section.add "x-ms-version", valid_568427
+  var valid_568428 = header.getOrDefault("x-ms-content-disposition")
+  valid_568428 = validateParameter(valid_568428, JString, required = false,
                                  default = nil)
-  if valid_594195 != nil:
-    section.add "x-ms-content-disposition", valid_594195
-  var valid_594196 = header.getOrDefault("x-ms-content-type")
-  valid_594196 = validateParameter(valid_594196, JString, required = false,
+  if valid_568428 != nil:
+    section.add "x-ms-content-disposition", valid_568428
+  var valid_568429 = header.getOrDefault("x-ms-content-type")
+  valid_568429 = validateParameter(valid_568429, JString, required = false,
                                  default = nil)
-  if valid_594196 != nil:
-    section.add "x-ms-content-type", valid_594196
-  var valid_594197 = header.getOrDefault("x-ms-lease-action")
-  valid_594197 = validateParameter(valid_594197, JString, required = false,
+  if valid_568429 != nil:
+    section.add "x-ms-content-type", valid_568429
+  var valid_568430 = header.getOrDefault("x-ms-lease-action")
+  valid_568430 = validateParameter(valid_568430, JString, required = false,
                                  default = newJString("renew"))
-  if valid_594197 != nil:
-    section.add "x-ms-lease-action", valid_594197
+  if valid_568430 != nil:
+    section.add "x-ms-lease-action", valid_568430
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1918,20 +1918,20 @@ proc validate_PathUpdate_594170(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594199: Call_PathUpdate_594169; path: JsonNode; query: JsonNode;
+proc call*(call_568432: Call_PathUpdate_568402; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Uploads data to be appended to a file, flushes (writes) previously uploaded data to a file, sets properties for a file or directory, or sets access control for a file or directory. Data can only be appended to a file. This operation supports conditional HTTP requests. For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
-  let valid = call_594199.validator(path, query, header, formData, body)
-  let scheme = call_594199.pickScheme
+  let valid = call_568432.validator(path, query, header, formData, body)
+  let scheme = call_568432.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594199.url(scheme.get, call_594199.host, call_594199.base,
-                         call_594199.route, valid.getOrDefault("path"),
+  let url = call_568432.url(scheme.get, call_568432.host, call_568432.base,
+                         call_568432.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594199, url, valid)
+  result = hook(call_568432, url, valid)
 
-proc call*(call_594200: Call_PathUpdate_594169; path: string; filesystem: string;
+proc call*(call_568433: Call_PathUpdate_568402; path: string; filesystem: string;
           timeout: int = 0; action: string = "append";
           retainUncommittedData: bool = false; requestBody: JsonNode = nil;
           position: int = 0): Recallable =
@@ -1951,29 +1951,29 @@ proc call*(call_594200: Call_PathUpdate_594169; path: string; filesystem: string
   ##           : This parameter allows the caller to upload data in parallel and control the order in which it is appended to the file.  It is required when uploading data to be appended to the file and when flushing previously uploaded data to the file.  The value must be the position where the data is to be appended.  Uploaded data is not immediately flushed, or written, to the file.  To flush, the previously uploaded data must be contiguous, the position parameter must be specified and equal to the length of the file after all data has been written, and there must not be a request entity body included with the request.
   ##   filesystem: string (required)
   ##             : The filesystem identifier.
-  var path_594201 = newJObject()
-  var query_594202 = newJObject()
-  var body_594203 = newJObject()
-  add(query_594202, "timeout", newJInt(timeout))
-  add(query_594202, "action", newJString(action))
-  add(path_594201, "path", newJString(path))
-  add(query_594202, "retainUncommittedData", newJBool(retainUncommittedData))
+  var path_568434 = newJObject()
+  var query_568435 = newJObject()
+  var body_568436 = newJObject()
+  add(query_568435, "timeout", newJInt(timeout))
+  add(query_568435, "action", newJString(action))
+  add(path_568434, "path", newJString(path))
+  add(query_568435, "retainUncommittedData", newJBool(retainUncommittedData))
   if requestBody != nil:
-    body_594203 = requestBody
-  add(query_594202, "position", newJInt(position))
-  add(path_594201, "filesystem", newJString(filesystem))
-  result = call_594200.call(path_594201, query_594202, nil, nil, body_594203)
+    body_568436 = requestBody
+  add(query_568435, "position", newJInt(position))
+  add(path_568434, "filesystem", newJString(filesystem))
+  result = call_568433.call(path_568434, query_568435, nil, nil, body_568436)
 
-var pathUpdate* = Call_PathUpdate_594169(name: "pathUpdate",
+var pathUpdate* = Call_PathUpdate_568402(name: "pathUpdate",
                                       meth: HttpMethod.HttpPatch,
                                       host: "azure.local",
                                       route: "/{filesystem}/{path}",
-                                      validator: validate_PathUpdate_594170,
-                                      base: "", url: url_PathUpdate_594171,
+                                      validator: validate_PathUpdate_568403,
+                                      base: "", url: url_PathUpdate_568404,
                                       schemes: {Scheme.Https})
 type
-  Call_PathDelete_594131 = ref object of OpenApiRestCall_593425
-proc url_PathDelete_594133(protocol: Scheme; host: string; base: string; route: string;
+  Call_PathDelete_568364 = ref object of OpenApiRestCall_567658
+proc url_PathDelete_568366(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1991,7 +1991,7 @@ proc url_PathDelete_594133(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PathDelete_594132(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PathDelete_568365(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the file or directory. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
@@ -2004,16 +2004,16 @@ proc validate_PathDelete_594132(path: JsonNode; query: JsonNode; header: JsonNod
   ##             : The filesystem identifier.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `path` field"
-  var valid_594134 = path.getOrDefault("path")
-  valid_594134 = validateParameter(valid_594134, JString, required = true,
+  var valid_568367 = path.getOrDefault("path")
+  valid_568367 = validateParameter(valid_568367, JString, required = true,
                                  default = nil)
-  if valid_594134 != nil:
-    section.add "path", valid_594134
-  var valid_594135 = path.getOrDefault("filesystem")
-  valid_594135 = validateParameter(valid_594135, JString, required = true,
+  if valid_568367 != nil:
+    section.add "path", valid_568367
+  var valid_568368 = path.getOrDefault("filesystem")
+  valid_568368 = validateParameter(valid_568368, JString, required = true,
                                  default = nil)
-  if valid_594135 != nil:
-    section.add "filesystem", valid_594135
+  if valid_568368 != nil:
+    section.add "filesystem", valid_568368
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -2023,19 +2023,19 @@ proc validate_PathDelete_594132(path: JsonNode; query: JsonNode; header: JsonNod
   ##   recursive: JBool
   ##            : Required and valid only when the resource is a directory.  If "true", all paths beneath the directory will be deleted. If "false" and the directory is non-empty, an error occurs.
   section = newJObject()
-  var valid_594136 = query.getOrDefault("timeout")
-  valid_594136 = validateParameter(valid_594136, JInt, required = false, default = nil)
-  if valid_594136 != nil:
-    section.add "timeout", valid_594136
-  var valid_594137 = query.getOrDefault("continuation")
-  valid_594137 = validateParameter(valid_594137, JString, required = false,
+  var valid_568369 = query.getOrDefault("timeout")
+  valid_568369 = validateParameter(valid_568369, JInt, required = false, default = nil)
+  if valid_568369 != nil:
+    section.add "timeout", valid_568369
+  var valid_568370 = query.getOrDefault("continuation")
+  valid_568370 = validateParameter(valid_568370, JString, required = false,
                                  default = nil)
-  if valid_594137 != nil:
-    section.add "continuation", valid_594137
-  var valid_594138 = query.getOrDefault("recursive")
-  valid_594138 = validateParameter(valid_594138, JBool, required = false, default = nil)
-  if valid_594138 != nil:
-    section.add "recursive", valid_594138
+  if valid_568370 != nil:
+    section.add "continuation", valid_568370
+  var valid_568371 = query.getOrDefault("recursive")
+  valid_568371 = validateParameter(valid_568371, JBool, required = false, default = nil)
+  if valid_568371 != nil:
+    section.add "recursive", valid_568371
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
@@ -2055,66 +2055,66 @@ proc validate_PathDelete_594132(path: JsonNode; query: JsonNode; header: JsonNod
   ##   x-ms-version: JString
   ##               : Specifies the version of the REST protocol used for processing the request. This is required when using shared key authorization.
   section = newJObject()
-  var valid_594139 = header.getOrDefault("If-Match")
-  valid_594139 = validateParameter(valid_594139, JString, required = false,
+  var valid_568372 = header.getOrDefault("If-Match")
+  valid_568372 = validateParameter(valid_568372, JString, required = false,
                                  default = nil)
-  if valid_594139 != nil:
-    section.add "If-Match", valid_594139
-  var valid_594140 = header.getOrDefault("If-Unmodified-Since")
-  valid_594140 = validateParameter(valid_594140, JString, required = false,
+  if valid_568372 != nil:
+    section.add "If-Match", valid_568372
+  var valid_568373 = header.getOrDefault("If-Unmodified-Since")
+  valid_568373 = validateParameter(valid_568373, JString, required = false,
                                  default = nil)
-  if valid_594140 != nil:
-    section.add "If-Unmodified-Since", valid_594140
-  var valid_594141 = header.getOrDefault("x-ms-lease-id")
-  valid_594141 = validateParameter(valid_594141, JString, required = false,
+  if valid_568373 != nil:
+    section.add "If-Unmodified-Since", valid_568373
+  var valid_568374 = header.getOrDefault("x-ms-lease-id")
+  valid_568374 = validateParameter(valid_568374, JString, required = false,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "x-ms-lease-id", valid_594141
-  var valid_594142 = header.getOrDefault("x-ms-client-request-id")
-  valid_594142 = validateParameter(valid_594142, JString, required = false,
+  if valid_568374 != nil:
+    section.add "x-ms-lease-id", valid_568374
+  var valid_568375 = header.getOrDefault("x-ms-client-request-id")
+  valid_568375 = validateParameter(valid_568375, JString, required = false,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "x-ms-client-request-id", valid_594142
-  var valid_594143 = header.getOrDefault("x-ms-date")
-  valid_594143 = validateParameter(valid_594143, JString, required = false,
+  if valid_568375 != nil:
+    section.add "x-ms-client-request-id", valid_568375
+  var valid_568376 = header.getOrDefault("x-ms-date")
+  valid_568376 = validateParameter(valid_568376, JString, required = false,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "x-ms-date", valid_594143
-  var valid_594144 = header.getOrDefault("If-None-Match")
-  valid_594144 = validateParameter(valid_594144, JString, required = false,
+  if valid_568376 != nil:
+    section.add "x-ms-date", valid_568376
+  var valid_568377 = header.getOrDefault("If-None-Match")
+  valid_568377 = validateParameter(valid_568377, JString, required = false,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "If-None-Match", valid_594144
-  var valid_594145 = header.getOrDefault("If-Modified-Since")
-  valid_594145 = validateParameter(valid_594145, JString, required = false,
+  if valid_568377 != nil:
+    section.add "If-None-Match", valid_568377
+  var valid_568378 = header.getOrDefault("If-Modified-Since")
+  valid_568378 = validateParameter(valid_568378, JString, required = false,
                                  default = nil)
-  if valid_594145 != nil:
-    section.add "If-Modified-Since", valid_594145
-  var valid_594146 = header.getOrDefault("x-ms-version")
-  valid_594146 = validateParameter(valid_594146, JString, required = false,
+  if valid_568378 != nil:
+    section.add "If-Modified-Since", valid_568378
+  var valid_568379 = header.getOrDefault("x-ms-version")
+  valid_568379 = validateParameter(valid_568379, JString, required = false,
                                  default = nil)
-  if valid_594146 != nil:
-    section.add "x-ms-version", valid_594146
+  if valid_568379 != nil:
+    section.add "x-ms-version", valid_568379
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594147: Call_PathDelete_594131; path: JsonNode; query: JsonNode;
+proc call*(call_568380: Call_PathDelete_568364; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the file or directory. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
   ## 
-  let valid = call_594147.validator(path, query, header, formData, body)
-  let scheme = call_594147.pickScheme
+  let valid = call_568380.validator(path, query, header, formData, body)
+  let scheme = call_568380.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594147.url(scheme.get, call_594147.host, call_594147.base,
-                         call_594147.route, valid.getOrDefault("path"),
+  let url = call_568380.url(scheme.get, call_568380.host, call_568380.base,
+                         call_568380.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594147, url, valid)
+  result = hook(call_568380, url, valid)
 
-proc call*(call_594148: Call_PathDelete_594131; path: string; filesystem: string;
+proc call*(call_568381: Call_PathDelete_568364; path: string; filesystem: string;
           timeout: int = 0; continuation: string = ""; recursive: bool = false): Recallable =
   ## pathDelete
   ## Delete the file or directory. This operation supports conditional HTTP requests.  For more information, see [Specifying Conditional Headers for Blob Service Operations](https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations).
@@ -2128,21 +2128,21 @@ proc call*(call_594148: Call_PathDelete_594131; path: string; filesystem: string
   ##             : The filesystem identifier.
   ##   recursive: bool
   ##            : Required and valid only when the resource is a directory.  If "true", all paths beneath the directory will be deleted. If "false" and the directory is non-empty, an error occurs.
-  var path_594149 = newJObject()
-  var query_594150 = newJObject()
-  add(query_594150, "timeout", newJInt(timeout))
-  add(query_594150, "continuation", newJString(continuation))
-  add(path_594149, "path", newJString(path))
-  add(path_594149, "filesystem", newJString(filesystem))
-  add(query_594150, "recursive", newJBool(recursive))
-  result = call_594148.call(path_594149, query_594150, nil, nil, nil)
+  var path_568382 = newJObject()
+  var query_568383 = newJObject()
+  add(query_568383, "timeout", newJInt(timeout))
+  add(query_568383, "continuation", newJString(continuation))
+  add(path_568382, "path", newJString(path))
+  add(path_568382, "filesystem", newJString(filesystem))
+  add(query_568383, "recursive", newJBool(recursive))
+  result = call_568381.call(path_568382, query_568383, nil, nil, nil)
 
-var pathDelete* = Call_PathDelete_594131(name: "pathDelete",
+var pathDelete* = Call_PathDelete_568364(name: "pathDelete",
                                       meth: HttpMethod.HttpDelete,
                                       host: "azure.local",
                                       route: "/{filesystem}/{path}",
-                                      validator: validate_PathDelete_594132,
-                                      base: "", url: url_PathDelete_594133,
+                                      validator: validate_PathDelete_568365,
+                                      base: "", url: url_PathDelete_568366,
                                       schemes: {Scheme.Https})
 export
   rest

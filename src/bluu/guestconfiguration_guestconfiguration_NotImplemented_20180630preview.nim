@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: GuestConfiguration
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "guestconfiguration-guestconfiguration_NotImplemented"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_GuestConfigurationAssignmentsDelete_593630 = ref object of OpenApiRestCall_593408
-proc url_GuestConfigurationAssignmentsDelete_593632(protocol: Scheme; host: string;
+  Call_GuestConfigurationAssignmentsDelete_567863 = ref object of OpenApiRestCall_567641
+proc url_GuestConfigurationAssignmentsDelete_567865(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,7 +130,7 @@ proc url_GuestConfigurationAssignmentsDelete_593632(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestConfigurationAssignmentsDelete_593631(path: JsonNode;
+proc validate_GuestConfigurationAssignmentsDelete_567864(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a guest configuration assignment
   ## 
@@ -148,26 +148,26 @@ proc validate_GuestConfigurationAssignmentsDelete_593631(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593792 = path.getOrDefault("resourceGroupName")
-  valid_593792 = validateParameter(valid_593792, JString, required = true,
+  var valid_568025 = path.getOrDefault("resourceGroupName")
+  valid_568025 = validateParameter(valid_568025, JString, required = true,
                                  default = nil)
-  if valid_593792 != nil:
-    section.add "resourceGroupName", valid_593792
-  var valid_593793 = path.getOrDefault("guestConfigurationAssignmentName")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  if valid_568025 != nil:
+    section.add "resourceGroupName", valid_568025
+  var valid_568026 = path.getOrDefault("guestConfigurationAssignmentName")
+  valid_568026 = validateParameter(valid_568026, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "guestConfigurationAssignmentName", valid_593793
-  var valid_593794 = path.getOrDefault("subscriptionId")
-  valid_593794 = validateParameter(valid_593794, JString, required = true,
+  if valid_568026 != nil:
+    section.add "guestConfigurationAssignmentName", valid_568026
+  var valid_568027 = path.getOrDefault("subscriptionId")
+  valid_568027 = validateParameter(valid_568027, JString, required = true,
                                  default = nil)
-  if valid_593794 != nil:
-    section.add "subscriptionId", valid_593794
-  var valid_593795 = path.getOrDefault("vmName")
-  valid_593795 = validateParameter(valid_593795, JString, required = true,
+  if valid_568027 != nil:
+    section.add "subscriptionId", valid_568027
+  var valid_568028 = path.getOrDefault("vmName")
+  valid_568028 = validateParameter(valid_568028, JString, required = true,
                                  default = nil)
-  if valid_593795 != nil:
-    section.add "vmName", valid_593795
+  if valid_568028 != nil:
+    section.add "vmName", valid_568028
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -175,11 +175,11 @@ proc validate_GuestConfigurationAssignmentsDelete_593631(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593796 = query.getOrDefault("api-version")
-  valid_593796 = validateParameter(valid_593796, JString, required = true,
+  var valid_568029 = query.getOrDefault("api-version")
+  valid_568029 = validateParameter(valid_568029, JString, required = true,
                                  default = nil)
-  if valid_593796 != nil:
-    section.add "api-version", valid_593796
+  if valid_568029 != nil:
+    section.add "api-version", valid_568029
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -188,21 +188,21 @@ proc validate_GuestConfigurationAssignmentsDelete_593631(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593823: Call_GuestConfigurationAssignmentsDelete_593630;
+proc call*(call_568056: Call_GuestConfigurationAssignmentsDelete_567863;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete a guest configuration assignment
   ## 
-  let valid = call_593823.validator(path, query, header, formData, body)
-  let scheme = call_593823.pickScheme
+  let valid = call_568056.validator(path, query, header, formData, body)
+  let scheme = call_568056.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593823.url(scheme.get, call_593823.host, call_593823.base,
-                         call_593823.route, valid.getOrDefault("path"),
+  let url = call_568056.url(scheme.get, call_568056.host, call_568056.base,
+                         call_568056.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593823, url, valid)
+  result = hook(call_568056, url, valid)
 
-proc call*(call_593894: Call_GuestConfigurationAssignmentsDelete_593630;
+proc call*(call_568127: Call_GuestConfigurationAssignmentsDelete_567863;
           resourceGroupName: string; apiVersion: string;
           guestConfigurationAssignmentName: string; subscriptionId: string;
           vmName: string): Recallable =
@@ -218,21 +218,21 @@ proc call*(call_593894: Call_GuestConfigurationAssignmentsDelete_593630;
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_593895 = newJObject()
-  var query_593897 = newJObject()
-  add(path_593895, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593897, "api-version", newJString(apiVersion))
-  add(path_593895, "guestConfigurationAssignmentName",
+  var path_568128 = newJObject()
+  var query_568130 = newJObject()
+  add(path_568128, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568130, "api-version", newJString(apiVersion))
+  add(path_568128, "guestConfigurationAssignmentName",
       newJString(guestConfigurationAssignmentName))
-  add(path_593895, "subscriptionId", newJString(subscriptionId))
-  add(path_593895, "vmName", newJString(vmName))
-  result = call_593894.call(path_593895, query_593897, nil, nil, nil)
+  add(path_568128, "subscriptionId", newJString(subscriptionId))
+  add(path_568128, "vmName", newJString(vmName))
+  result = call_568127.call(path_568128, query_568130, nil, nil, nil)
 
-var guestConfigurationAssignmentsDelete* = Call_GuestConfigurationAssignmentsDelete_593630(
+var guestConfigurationAssignmentsDelete* = Call_GuestConfigurationAssignmentsDelete_567863(
     name: "guestConfigurationAssignmentsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/{guestConfigurationAssignmentName}",
-    validator: validate_GuestConfigurationAssignmentsDelete_593631, base: "",
-    url: url_GuestConfigurationAssignmentsDelete_593632, schemes: {Scheme.Https})
+    validator: validate_GuestConfigurationAssignmentsDelete_567864, base: "",
+    url: url_GuestConfigurationAssignmentsDelete_567865, schemes: {Scheme.Https})
 export
   rest
 

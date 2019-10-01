@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: CostManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593426 = ref object of OpenApiRestCall
+  OpenApiRestCall_567659 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593426](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567659](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593426): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567659): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "cost-management-costmanagement"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_QueryBillingAccount_593648 = ref object of OpenApiRestCall_593426
-proc url_QueryBillingAccount_593650(protocol: Scheme; host: string; base: string;
+  Call_QueryBillingAccount_567881 = ref object of OpenApiRestCall_567659
+proc url_QueryBillingAccount_567883(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -122,7 +122,7 @@ proc url_QueryBillingAccount_593650(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryBillingAccount_593649(path: JsonNode; query: JsonNode;
+proc validate_QueryBillingAccount_567882(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Lists the usage data for billing account.
@@ -136,11 +136,11 @@ proc validate_QueryBillingAccount_593649(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountId` field"
-  var valid_593840 = path.getOrDefault("billingAccountId")
-  valid_593840 = validateParameter(valid_593840, JString, required = true,
+  var valid_568073 = path.getOrDefault("billingAccountId")
+  valid_568073 = validateParameter(valid_568073, JString, required = true,
                                  default = nil)
-  if valid_593840 != nil:
-    section.add "billingAccountId", valid_593840
+  if valid_568073 != nil:
+    section.add "billingAccountId", valid_568073
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -148,11 +148,11 @@ proc validate_QueryBillingAccount_593649(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593841 = query.getOrDefault("api-version")
-  valid_593841 = validateParameter(valid_593841, JString, required = true,
+  var valid_568074 = query.getOrDefault("api-version")
+  valid_568074 = validateParameter(valid_568074, JString, required = true,
                                  default = nil)
-  if valid_593841 != nil:
-    section.add "api-version", valid_593841
+  if valid_568074 != nil:
+    section.add "api-version", valid_568074
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -166,21 +166,21 @@ proc validate_QueryBillingAccount_593649(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593865: Call_QueryBillingAccount_593648; path: JsonNode;
+proc call*(call_568098: Call_QueryBillingAccount_567881; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the usage data for billing account.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_593865.validator(path, query, header, formData, body)
-  let scheme = call_593865.pickScheme
+  let valid = call_568098.validator(path, query, header, formData, body)
+  let scheme = call_568098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593865.url(scheme.get, call_593865.host, call_593865.base,
-                         call_593865.route, valid.getOrDefault("path"),
+  let url = call_568098.url(scheme.get, call_568098.host, call_568098.base,
+                         call_568098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593865, url, valid)
+  result = hook(call_568098, url, valid)
 
-proc call*(call_593936: Call_QueryBillingAccount_593648; apiVersion: string;
+proc call*(call_568169: Call_QueryBillingAccount_567881; apiVersion: string;
           billingAccountId: string; parameters: JsonNode): Recallable =
   ## queryBillingAccount
   ## Lists the usage data for billing account.
@@ -191,23 +191,23 @@ proc call*(call_593936: Call_QueryBillingAccount_593648; apiVersion: string;
   ##                   : BillingAccount ID
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the CreateOrUpdate Report Config operation.
-  var path_593937 = newJObject()
-  var query_593939 = newJObject()
-  var body_593940 = newJObject()
-  add(query_593939, "api-version", newJString(apiVersion))
-  add(path_593937, "billingAccountId", newJString(billingAccountId))
+  var path_568170 = newJObject()
+  var query_568172 = newJObject()
+  var body_568173 = newJObject()
+  add(query_568172, "api-version", newJString(apiVersion))
+  add(path_568170, "billingAccountId", newJString(billingAccountId))
   if parameters != nil:
-    body_593940 = parameters
-  result = call_593936.call(path_593937, query_593939, nil, nil, body_593940)
+    body_568173 = parameters
+  result = call_568169.call(path_568170, query_568172, nil, nil, body_568173)
 
-var queryBillingAccount* = Call_QueryBillingAccount_593648(
+var queryBillingAccount* = Call_QueryBillingAccount_567881(
     name: "queryBillingAccount", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.CostManagement/Query",
-    validator: validate_QueryBillingAccount_593649, base: "",
-    url: url_QueryBillingAccount_593650, schemes: {Scheme.Https})
+    validator: validate_QueryBillingAccount_567882, base: "",
+    url: url_QueryBillingAccount_567883, schemes: {Scheme.Https})
 type
-  Call_BillingAccountDimensionsList_593979 = ref object of OpenApiRestCall_593426
-proc url_BillingAccountDimensionsList_593981(protocol: Scheme; host: string;
+  Call_BillingAccountDimensionsList_568212 = ref object of OpenApiRestCall_567659
+proc url_BillingAccountDimensionsList_568214(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -226,7 +226,7 @@ proc url_BillingAccountDimensionsList_593981(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingAccountDimensionsList_593980(path: JsonNode; query: JsonNode;
+proc validate_BillingAccountDimensionsList_568213(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the dimensions by billingAccount Id.
   ## 
@@ -239,11 +239,11 @@ proc validate_BillingAccountDimensionsList_593980(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountId` field"
-  var valid_593983 = path.getOrDefault("billingAccountId")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = path.getOrDefault("billingAccountId")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "billingAccountId", valid_593983
+  if valid_568216 != nil:
+    section.add "billingAccountId", valid_568216
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -259,30 +259,30 @@ proc validate_BillingAccountDimensionsList_593980(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593984 = query.getOrDefault("api-version")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568217 = query.getOrDefault("api-version")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "api-version", valid_593984
-  var valid_593985 = query.getOrDefault("$expand")
-  valid_593985 = validateParameter(valid_593985, JString, required = false,
+  if valid_568217 != nil:
+    section.add "api-version", valid_568217
+  var valid_568218 = query.getOrDefault("$expand")
+  valid_568218 = validateParameter(valid_568218, JString, required = false,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "$expand", valid_593985
-  var valid_593986 = query.getOrDefault("$top")
-  valid_593986 = validateParameter(valid_593986, JInt, required = false, default = nil)
-  if valid_593986 != nil:
-    section.add "$top", valid_593986
-  var valid_593987 = query.getOrDefault("$skiptoken")
-  valid_593987 = validateParameter(valid_593987, JString, required = false,
+  if valid_568218 != nil:
+    section.add "$expand", valid_568218
+  var valid_568219 = query.getOrDefault("$top")
+  valid_568219 = validateParameter(valid_568219, JInt, required = false, default = nil)
+  if valid_568219 != nil:
+    section.add "$top", valid_568219
+  var valid_568220 = query.getOrDefault("$skiptoken")
+  valid_568220 = validateParameter(valid_568220, JString, required = false,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "$skiptoken", valid_593987
-  var valid_593988 = query.getOrDefault("$filter")
-  valid_593988 = validateParameter(valid_593988, JString, required = false,
+  if valid_568220 != nil:
+    section.add "$skiptoken", valid_568220
+  var valid_568221 = query.getOrDefault("$filter")
+  valid_568221 = validateParameter(valid_568221, JString, required = false,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "$filter", valid_593988
+  if valid_568221 != nil:
+    section.add "$filter", valid_568221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -291,21 +291,21 @@ proc validate_BillingAccountDimensionsList_593980(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593989: Call_BillingAccountDimensionsList_593979; path: JsonNode;
+proc call*(call_568222: Call_BillingAccountDimensionsList_568212; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the dimensions by billingAccount Id.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_593989.validator(path, query, header, formData, body)
-  let scheme = call_593989.pickScheme
+  let valid = call_568222.validator(path, query, header, formData, body)
+  let scheme = call_568222.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593989.url(scheme.get, call_593989.host, call_593989.base,
-                         call_593989.route, valid.getOrDefault("path"),
+  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
+                         call_568222.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593989, url, valid)
+  result = hook(call_568222, url, valid)
 
-proc call*(call_593990: Call_BillingAccountDimensionsList_593979;
+proc call*(call_568223: Call_BillingAccountDimensionsList_568212;
           apiVersion: string; billingAccountId: string; Expand: string = "";
           Top: int = 0; Skiptoken: string = ""; Filter: string = ""): Recallable =
   ## billingAccountDimensionsList
@@ -323,31 +323,31 @@ proc call*(call_593990: Call_BillingAccountDimensionsList_593979;
   ##                   : BillingAccount ID
   ##   Filter: string
   ##         : May be used to filter dimensions by properties/category, properties/usageStart, properties/usageEnd. Supported operators are 'eq','lt', 'gt', 'le', 'ge'.
-  var path_593991 = newJObject()
-  var query_593992 = newJObject()
-  add(query_593992, "api-version", newJString(apiVersion))
-  add(query_593992, "$expand", newJString(Expand))
-  add(query_593992, "$top", newJInt(Top))
-  add(query_593992, "$skiptoken", newJString(Skiptoken))
-  add(path_593991, "billingAccountId", newJString(billingAccountId))
-  add(query_593992, "$filter", newJString(Filter))
-  result = call_593990.call(path_593991, query_593992, nil, nil, nil)
+  var path_568224 = newJObject()
+  var query_568225 = newJObject()
+  add(query_568225, "api-version", newJString(apiVersion))
+  add(query_568225, "$expand", newJString(Expand))
+  add(query_568225, "$top", newJInt(Top))
+  add(query_568225, "$skiptoken", newJString(Skiptoken))
+  add(path_568224, "billingAccountId", newJString(billingAccountId))
+  add(query_568225, "$filter", newJString(Filter))
+  result = call_568223.call(path_568224, query_568225, nil, nil, nil)
 
-var billingAccountDimensionsList* = Call_BillingAccountDimensionsList_593979(
+var billingAccountDimensionsList* = Call_BillingAccountDimensionsList_568212(
     name: "billingAccountDimensionsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.CostManagement/dimensions",
-    validator: validate_BillingAccountDimensionsList_593980, base: "",
-    url: url_BillingAccountDimensionsList_593981, schemes: {Scheme.Https})
+    validator: validate_BillingAccountDimensionsList_568213, base: "",
+    url: url_BillingAccountDimensionsList_568214, schemes: {Scheme.Https})
 type
-  Call_OperationsList_593993 = ref object of OpenApiRestCall_593426
-proc url_OperationsList_593995(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_568226 = ref object of OpenApiRestCall_567659
+proc url_OperationsList_568228(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593994(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_568227(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available consumption REST API operations.
@@ -362,11 +362,11 @@ proc validate_OperationsList_593994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593996 = query.getOrDefault("api-version")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_568229 = query.getOrDefault("api-version")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "api-version", valid_593996
+  if valid_568229 != nil:
+    section.add "api-version", valid_568229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -375,36 +375,36 @@ proc validate_OperationsList_593994(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_OperationsList_593993; path: JsonNode; query: JsonNode;
+proc call*(call_568230: Call_OperationsList_568226; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available consumption REST API operations.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_OperationsList_593993; apiVersion: string): Recallable =
+proc call*(call_568231: Call_OperationsList_568226; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available consumption REST API operations.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-05-31.
-  var query_593999 = newJObject()
-  add(query_593999, "api-version", newJString(apiVersion))
-  result = call_593998.call(nil, query_593999, nil, nil, nil)
+  var query_568232 = newJObject()
+  add(query_568232, "api-version", newJString(apiVersion))
+  result = call_568231.call(nil, query_568232, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593993(name: "operationsList",
+var operationsList* = Call_OperationsList_568226(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.CostManagement/operations",
-    validator: validate_OperationsList_593994, base: "", url: url_OperationsList_593995,
+    validator: validate_OperationsList_568227, base: "", url: url_OperationsList_568228,
     schemes: {Scheme.Https})
 type
-  Call_QuerySubscription_594000 = ref object of OpenApiRestCall_593426
-proc url_QuerySubscription_594002(protocol: Scheme; host: string; base: string;
+  Call_QuerySubscription_568233 = ref object of OpenApiRestCall_567659
+proc url_QuerySubscription_568235(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -420,7 +420,7 @@ proc url_QuerySubscription_594002(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuerySubscription_594001(path: JsonNode; query: JsonNode;
+proc validate_QuerySubscription_568234(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Lists the usage data for subscriptionId.
@@ -434,11 +434,11 @@ proc validate_QuerySubscription_594001(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594003 = path.getOrDefault("subscriptionId")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  var valid_568236 = path.getOrDefault("subscriptionId")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "subscriptionId", valid_594003
+  if valid_568236 != nil:
+    section.add "subscriptionId", valid_568236
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -446,11 +446,11 @@ proc validate_QuerySubscription_594001(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594004 = query.getOrDefault("api-version")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = query.getOrDefault("api-version")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "api-version", valid_594004
+  if valid_568237 != nil:
+    section.add "api-version", valid_568237
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -464,21 +464,21 @@ proc validate_QuerySubscription_594001(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594006: Call_QuerySubscription_594000; path: JsonNode;
+proc call*(call_568239: Call_QuerySubscription_568233; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the usage data for subscriptionId.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594006.validator(path, query, header, formData, body)
-  let scheme = call_594006.pickScheme
+  let valid = call_568239.validator(path, query, header, formData, body)
+  let scheme = call_568239.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594006.url(scheme.get, call_594006.host, call_594006.base,
-                         call_594006.route, valid.getOrDefault("path"),
+  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
+                         call_568239.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594006, url, valid)
+  result = hook(call_568239, url, valid)
 
-proc call*(call_594007: Call_QuerySubscription_594000; apiVersion: string;
+proc call*(call_568240: Call_QuerySubscription_568233; apiVersion: string;
           subscriptionId: string; parameters: JsonNode): Recallable =
   ## querySubscription
   ## Lists the usage data for subscriptionId.
@@ -489,22 +489,22 @@ proc call*(call_594007: Call_QuerySubscription_594000; apiVersion: string;
   ##                 : Azure Subscription ID.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the CreateOrUpdate Report Config operation.
-  var path_594008 = newJObject()
-  var query_594009 = newJObject()
-  var body_594010 = newJObject()
-  add(query_594009, "api-version", newJString(apiVersion))
-  add(path_594008, "subscriptionId", newJString(subscriptionId))
+  var path_568241 = newJObject()
+  var query_568242 = newJObject()
+  var body_568243 = newJObject()
+  add(query_568242, "api-version", newJString(apiVersion))
+  add(path_568241, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594010 = parameters
-  result = call_594007.call(path_594008, query_594009, nil, nil, body_594010)
+    body_568243 = parameters
+  result = call_568240.call(path_568241, query_568242, nil, nil, body_568243)
 
-var querySubscription* = Call_QuerySubscription_594000(name: "querySubscription",
+var querySubscription* = Call_QuerySubscription_568233(name: "querySubscription",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.CostManagement/Query",
-    validator: validate_QuerySubscription_594001, base: "",
-    url: url_QuerySubscription_594002, schemes: {Scheme.Https})
+    validator: validate_QuerySubscription_568234, base: "",
+    url: url_QuerySubscription_568235, schemes: {Scheme.Https})
 type
-  Call_SubscriptionDimensionsList_594011 = ref object of OpenApiRestCall_593426
-proc url_SubscriptionDimensionsList_594013(protocol: Scheme; host: string;
+  Call_SubscriptionDimensionsList_568244 = ref object of OpenApiRestCall_567659
+proc url_SubscriptionDimensionsList_568246(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -521,7 +521,7 @@ proc url_SubscriptionDimensionsList_594013(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriptionDimensionsList_594012(path: JsonNode; query: JsonNode;
+proc validate_SubscriptionDimensionsList_568245(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the dimensions by subscription Id.
   ## 
@@ -534,11 +534,11 @@ proc validate_SubscriptionDimensionsList_594012(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594014 = path.getOrDefault("subscriptionId")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_568247 = path.getOrDefault("subscriptionId")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "subscriptionId", valid_594014
+  if valid_568247 != nil:
+    section.add "subscriptionId", valid_568247
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -554,30 +554,30 @@ proc validate_SubscriptionDimensionsList_594012(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594015 = query.getOrDefault("api-version")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_568248 = query.getOrDefault("api-version")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "api-version", valid_594015
-  var valid_594016 = query.getOrDefault("$expand")
-  valid_594016 = validateParameter(valid_594016, JString, required = false,
+  if valid_568248 != nil:
+    section.add "api-version", valid_568248
+  var valid_568249 = query.getOrDefault("$expand")
+  valid_568249 = validateParameter(valid_568249, JString, required = false,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "$expand", valid_594016
-  var valid_594017 = query.getOrDefault("$top")
-  valid_594017 = validateParameter(valid_594017, JInt, required = false, default = nil)
-  if valid_594017 != nil:
-    section.add "$top", valid_594017
-  var valid_594018 = query.getOrDefault("$skiptoken")
-  valid_594018 = validateParameter(valid_594018, JString, required = false,
+  if valid_568249 != nil:
+    section.add "$expand", valid_568249
+  var valid_568250 = query.getOrDefault("$top")
+  valid_568250 = validateParameter(valid_568250, JInt, required = false, default = nil)
+  if valid_568250 != nil:
+    section.add "$top", valid_568250
+  var valid_568251 = query.getOrDefault("$skiptoken")
+  valid_568251 = validateParameter(valid_568251, JString, required = false,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "$skiptoken", valid_594018
-  var valid_594019 = query.getOrDefault("$filter")
-  valid_594019 = validateParameter(valid_594019, JString, required = false,
+  if valid_568251 != nil:
+    section.add "$skiptoken", valid_568251
+  var valid_568252 = query.getOrDefault("$filter")
+  valid_568252 = validateParameter(valid_568252, JString, required = false,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "$filter", valid_594019
+  if valid_568252 != nil:
+    section.add "$filter", valid_568252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -586,21 +586,21 @@ proc validate_SubscriptionDimensionsList_594012(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594020: Call_SubscriptionDimensionsList_594011; path: JsonNode;
+proc call*(call_568253: Call_SubscriptionDimensionsList_568244; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the dimensions by subscription Id.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594020.validator(path, query, header, formData, body)
-  let scheme = call_594020.pickScheme
+  let valid = call_568253.validator(path, query, header, formData, body)
+  let scheme = call_568253.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594020.url(scheme.get, call_594020.host, call_594020.base,
-                         call_594020.route, valid.getOrDefault("path"),
+  let url = call_568253.url(scheme.get, call_568253.host, call_568253.base,
+                         call_568253.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594020, url, valid)
+  result = hook(call_568253, url, valid)
 
-proc call*(call_594021: Call_SubscriptionDimensionsList_594011; apiVersion: string;
+proc call*(call_568254: Call_SubscriptionDimensionsList_568244; apiVersion: string;
           subscriptionId: string; Expand: string = ""; Top: int = 0;
           Skiptoken: string = ""; Filter: string = ""): Recallable =
   ## subscriptionDimensionsList
@@ -618,24 +618,24 @@ proc call*(call_594021: Call_SubscriptionDimensionsList_594011; apiVersion: stri
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
   ##   Filter: string
   ##         : May be used to filter dimensions by properties/category, properties/usageStart, properties/usageEnd. Supported operators are 'eq','lt', 'gt', 'le', 'ge'.
-  var path_594022 = newJObject()
-  var query_594023 = newJObject()
-  add(query_594023, "api-version", newJString(apiVersion))
-  add(query_594023, "$expand", newJString(Expand))
-  add(path_594022, "subscriptionId", newJString(subscriptionId))
-  add(query_594023, "$top", newJInt(Top))
-  add(query_594023, "$skiptoken", newJString(Skiptoken))
-  add(query_594023, "$filter", newJString(Filter))
-  result = call_594021.call(path_594022, query_594023, nil, nil, nil)
+  var path_568255 = newJObject()
+  var query_568256 = newJObject()
+  add(query_568256, "api-version", newJString(apiVersion))
+  add(query_568256, "$expand", newJString(Expand))
+  add(path_568255, "subscriptionId", newJString(subscriptionId))
+  add(query_568256, "$top", newJInt(Top))
+  add(query_568256, "$skiptoken", newJString(Skiptoken))
+  add(query_568256, "$filter", newJString(Filter))
+  result = call_568254.call(path_568255, query_568256, nil, nil, nil)
 
-var subscriptionDimensionsList* = Call_SubscriptionDimensionsList_594011(
+var subscriptionDimensionsList* = Call_SubscriptionDimensionsList_568244(
     name: "subscriptionDimensionsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.CostManagement/dimensions",
-    validator: validate_SubscriptionDimensionsList_594012, base: "",
-    url: url_SubscriptionDimensionsList_594013, schemes: {Scheme.Https})
+    validator: validate_SubscriptionDimensionsList_568245, base: "",
+    url: url_SubscriptionDimensionsList_568246, schemes: {Scheme.Https})
 type
-  Call_ReportConfigList_594024 = ref object of OpenApiRestCall_593426
-proc url_ReportConfigList_594026(protocol: Scheme; host: string; base: string;
+  Call_ReportConfigList_568257 = ref object of OpenApiRestCall_567659
+proc url_ReportConfigList_568259(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -652,7 +652,7 @@ proc url_ReportConfigList_594026(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportConfigList_594025(path: JsonNode; query: JsonNode;
+proc validate_ReportConfigList_568258(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Lists all report configs for a subscription.
@@ -666,11 +666,11 @@ proc validate_ReportConfigList_594025(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594027 = path.getOrDefault("subscriptionId")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  var valid_568260 = path.getOrDefault("subscriptionId")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "subscriptionId", valid_594027
+  if valid_568260 != nil:
+    section.add "subscriptionId", valid_568260
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -678,11 +678,11 @@ proc validate_ReportConfigList_594025(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594028 = query.getOrDefault("api-version")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  var valid_568261 = query.getOrDefault("api-version")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "api-version", valid_594028
+  if valid_568261 != nil:
+    section.add "api-version", valid_568261
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -691,21 +691,21 @@ proc validate_ReportConfigList_594025(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594029: Call_ReportConfigList_594024; path: JsonNode;
+proc call*(call_568262: Call_ReportConfigList_568257; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all report configs for a subscription.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594029.validator(path, query, header, formData, body)
-  let scheme = call_594029.pickScheme
+  let valid = call_568262.validator(path, query, header, formData, body)
+  let scheme = call_568262.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594029.url(scheme.get, call_594029.host, call_594029.base,
-                         call_594029.route, valid.getOrDefault("path"),
+  let url = call_568262.url(scheme.get, call_568262.host, call_568262.base,
+                         call_568262.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594029, url, valid)
+  result = hook(call_568262, url, valid)
 
-proc call*(call_594030: Call_ReportConfigList_594024; apiVersion: string;
+proc call*(call_568263: Call_ReportConfigList_568257; apiVersion: string;
           subscriptionId: string): Recallable =
   ## reportConfigList
   ## Lists all report configs for a subscription.
@@ -714,19 +714,19 @@ proc call*(call_594030: Call_ReportConfigList_594024; apiVersion: string;
   ##             : Version of the API to be used with the client request. The current version is 2018-05-31.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_594031 = newJObject()
-  var query_594032 = newJObject()
-  add(query_594032, "api-version", newJString(apiVersion))
-  add(path_594031, "subscriptionId", newJString(subscriptionId))
-  result = call_594030.call(path_594031, query_594032, nil, nil, nil)
+  var path_568264 = newJObject()
+  var query_568265 = newJObject()
+  add(query_568265, "api-version", newJString(apiVersion))
+  add(path_568264, "subscriptionId", newJString(subscriptionId))
+  result = call_568263.call(path_568264, query_568265, nil, nil, nil)
 
-var reportConfigList* = Call_ReportConfigList_594024(name: "reportConfigList",
+var reportConfigList* = Call_ReportConfigList_568257(name: "reportConfigList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.CostManagement/reportconfigs",
-    validator: validate_ReportConfigList_594025, base: "",
-    url: url_ReportConfigList_594026, schemes: {Scheme.Https})
+    validator: validate_ReportConfigList_568258, base: "",
+    url: url_ReportConfigList_568259, schemes: {Scheme.Https})
 type
-  Call_ReportConfigCreateOrUpdate_594043 = ref object of OpenApiRestCall_593426
-proc url_ReportConfigCreateOrUpdate_594045(protocol: Scheme; host: string;
+  Call_ReportConfigCreateOrUpdate_568276 = ref object of OpenApiRestCall_567659
+proc url_ReportConfigCreateOrUpdate_568278(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -746,7 +746,7 @@ proc url_ReportConfigCreateOrUpdate_594045(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportConfigCreateOrUpdate_594044(path: JsonNode; query: JsonNode;
+proc validate_ReportConfigCreateOrUpdate_568277(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create or update a report config. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
@@ -761,16 +761,16 @@ proc validate_ReportConfigCreateOrUpdate_594044(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594046 = path.getOrDefault("subscriptionId")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  var valid_568279 = path.getOrDefault("subscriptionId")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "subscriptionId", valid_594046
-  var valid_594047 = path.getOrDefault("reportConfigName")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  if valid_568279 != nil:
+    section.add "subscriptionId", valid_568279
+  var valid_568280 = path.getOrDefault("reportConfigName")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "reportConfigName", valid_594047
+  if valid_568280 != nil:
+    section.add "reportConfigName", valid_568280
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -778,11 +778,11 @@ proc validate_ReportConfigCreateOrUpdate_594044(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594048 = query.getOrDefault("api-version")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  var valid_568281 = query.getOrDefault("api-version")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "api-version", valid_594048
+  if valid_568281 != nil:
+    section.add "api-version", valid_568281
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -796,21 +796,21 @@ proc validate_ReportConfigCreateOrUpdate_594044(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594050: Call_ReportConfigCreateOrUpdate_594043; path: JsonNode;
+proc call*(call_568283: Call_ReportConfigCreateOrUpdate_568276; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to create or update a report config. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594050.validator(path, query, header, formData, body)
-  let scheme = call_594050.pickScheme
+  let valid = call_568283.validator(path, query, header, formData, body)
+  let scheme = call_568283.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594050.url(scheme.get, call_594050.host, call_594050.base,
-                         call_594050.route, valid.getOrDefault("path"),
+  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
+                         call_568283.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594050, url, valid)
+  result = hook(call_568283, url, valid)
 
-proc call*(call_594051: Call_ReportConfigCreateOrUpdate_594043; apiVersion: string;
+proc call*(call_568284: Call_ReportConfigCreateOrUpdate_568276; apiVersion: string;
           subscriptionId: string; parameters: JsonNode; reportConfigName: string): Recallable =
   ## reportConfigCreateOrUpdate
   ## The operation to create or update a report config. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
@@ -823,24 +823,24 @@ proc call*(call_594051: Call_ReportConfigCreateOrUpdate_594043; apiVersion: stri
   ##             : Parameters supplied to the CreateOrUpdate Report Config operation.
   ##   reportConfigName: string (required)
   ##                   : Report Config Name.
-  var path_594052 = newJObject()
-  var query_594053 = newJObject()
-  var body_594054 = newJObject()
-  add(query_594053, "api-version", newJString(apiVersion))
-  add(path_594052, "subscriptionId", newJString(subscriptionId))
+  var path_568285 = newJObject()
+  var query_568286 = newJObject()
+  var body_568287 = newJObject()
+  add(query_568286, "api-version", newJString(apiVersion))
+  add(path_568285, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594054 = parameters
-  add(path_594052, "reportConfigName", newJString(reportConfigName))
-  result = call_594051.call(path_594052, query_594053, nil, nil, body_594054)
+    body_568287 = parameters
+  add(path_568285, "reportConfigName", newJString(reportConfigName))
+  result = call_568284.call(path_568285, query_568286, nil, nil, body_568287)
 
-var reportConfigCreateOrUpdate* = Call_ReportConfigCreateOrUpdate_594043(
+var reportConfigCreateOrUpdate* = Call_ReportConfigCreateOrUpdate_568276(
     name: "reportConfigCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.CostManagement/reportconfigs/{reportConfigName}",
-    validator: validate_ReportConfigCreateOrUpdate_594044, base: "",
-    url: url_ReportConfigCreateOrUpdate_594045, schemes: {Scheme.Https})
+    validator: validate_ReportConfigCreateOrUpdate_568277, base: "",
+    url: url_ReportConfigCreateOrUpdate_568278, schemes: {Scheme.Https})
 type
-  Call_ReportConfigGet_594033 = ref object of OpenApiRestCall_593426
-proc url_ReportConfigGet_594035(protocol: Scheme; host: string; base: string;
+  Call_ReportConfigGet_568266 = ref object of OpenApiRestCall_567659
+proc url_ReportConfigGet_568268(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -860,7 +860,7 @@ proc url_ReportConfigGet_594035(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportConfigGet_594034(path: JsonNode; query: JsonNode;
+proc validate_ReportConfigGet_568267(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the report config for a subscription by report config name.
@@ -876,16 +876,16 @@ proc validate_ReportConfigGet_594034(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594036 = path.getOrDefault("subscriptionId")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  var valid_568269 = path.getOrDefault("subscriptionId")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "subscriptionId", valid_594036
-  var valid_594037 = path.getOrDefault("reportConfigName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_568269 != nil:
+    section.add "subscriptionId", valid_568269
+  var valid_568270 = path.getOrDefault("reportConfigName")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "reportConfigName", valid_594037
+  if valid_568270 != nil:
+    section.add "reportConfigName", valid_568270
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -893,11 +893,11 @@ proc validate_ReportConfigGet_594034(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594038 = query.getOrDefault("api-version")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  var valid_568271 = query.getOrDefault("api-version")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "api-version", valid_594038
+  if valid_568271 != nil:
+    section.add "api-version", valid_568271
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -906,21 +906,21 @@ proc validate_ReportConfigGet_594034(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594039: Call_ReportConfigGet_594033; path: JsonNode; query: JsonNode;
+proc call*(call_568272: Call_ReportConfigGet_568266; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the report config for a subscription by report config name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594039.validator(path, query, header, formData, body)
-  let scheme = call_594039.pickScheme
+  let valid = call_568272.validator(path, query, header, formData, body)
+  let scheme = call_568272.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594039.url(scheme.get, call_594039.host, call_594039.base,
-                         call_594039.route, valid.getOrDefault("path"),
+  let url = call_568272.url(scheme.get, call_568272.host, call_568272.base,
+                         call_568272.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594039, url, valid)
+  result = hook(call_568272, url, valid)
 
-proc call*(call_594040: Call_ReportConfigGet_594033; apiVersion: string;
+proc call*(call_568273: Call_ReportConfigGet_568266; apiVersion: string;
           subscriptionId: string; reportConfigName: string): Recallable =
   ## reportConfigGet
   ## Gets the report config for a subscription by report config name.
@@ -931,20 +931,20 @@ proc call*(call_594040: Call_ReportConfigGet_594033; apiVersion: string;
   ##                 : Azure Subscription ID.
   ##   reportConfigName: string (required)
   ##                   : Report Config Name.
-  var path_594041 = newJObject()
-  var query_594042 = newJObject()
-  add(query_594042, "api-version", newJString(apiVersion))
-  add(path_594041, "subscriptionId", newJString(subscriptionId))
-  add(path_594041, "reportConfigName", newJString(reportConfigName))
-  result = call_594040.call(path_594041, query_594042, nil, nil, nil)
+  var path_568274 = newJObject()
+  var query_568275 = newJObject()
+  add(query_568275, "api-version", newJString(apiVersion))
+  add(path_568274, "subscriptionId", newJString(subscriptionId))
+  add(path_568274, "reportConfigName", newJString(reportConfigName))
+  result = call_568273.call(path_568274, query_568275, nil, nil, nil)
 
-var reportConfigGet* = Call_ReportConfigGet_594033(name: "reportConfigGet",
+var reportConfigGet* = Call_ReportConfigGet_568266(name: "reportConfigGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.CostManagement/reportconfigs/{reportConfigName}",
-    validator: validate_ReportConfigGet_594034, base: "", url: url_ReportConfigGet_594035,
+    validator: validate_ReportConfigGet_568267, base: "", url: url_ReportConfigGet_568268,
     schemes: {Scheme.Https})
 type
-  Call_ReportConfigDelete_594055 = ref object of OpenApiRestCall_593426
-proc url_ReportConfigDelete_594057(protocol: Scheme; host: string; base: string;
+  Call_ReportConfigDelete_568288 = ref object of OpenApiRestCall_567659
+proc url_ReportConfigDelete_568290(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -964,7 +964,7 @@ proc url_ReportConfigDelete_594057(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportConfigDelete_594056(path: JsonNode; query: JsonNode;
+proc validate_ReportConfigDelete_568289(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## The operation to delete a report.
@@ -980,16 +980,16 @@ proc validate_ReportConfigDelete_594056(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594058 = path.getOrDefault("subscriptionId")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  var valid_568291 = path.getOrDefault("subscriptionId")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "subscriptionId", valid_594058
-  var valid_594059 = path.getOrDefault("reportConfigName")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  if valid_568291 != nil:
+    section.add "subscriptionId", valid_568291
+  var valid_568292 = path.getOrDefault("reportConfigName")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "reportConfigName", valid_594059
+  if valid_568292 != nil:
+    section.add "reportConfigName", valid_568292
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -997,11 +997,11 @@ proc validate_ReportConfigDelete_594056(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594060 = query.getOrDefault("api-version")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  var valid_568293 = query.getOrDefault("api-version")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "api-version", valid_594060
+  if valid_568293 != nil:
+    section.add "api-version", valid_568293
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1010,21 +1010,21 @@ proc validate_ReportConfigDelete_594056(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594061: Call_ReportConfigDelete_594055; path: JsonNode;
+proc call*(call_568294: Call_ReportConfigDelete_568288; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to delete a report.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594061.validator(path, query, header, formData, body)
-  let scheme = call_594061.pickScheme
+  let valid = call_568294.validator(path, query, header, formData, body)
+  let scheme = call_568294.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594061.url(scheme.get, call_594061.host, call_594061.base,
-                         call_594061.route, valid.getOrDefault("path"),
+  let url = call_568294.url(scheme.get, call_568294.host, call_568294.base,
+                         call_568294.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594061, url, valid)
+  result = hook(call_568294, url, valid)
 
-proc call*(call_594062: Call_ReportConfigDelete_594055; apiVersion: string;
+proc call*(call_568295: Call_ReportConfigDelete_568288; apiVersion: string;
           subscriptionId: string; reportConfigName: string): Recallable =
   ## reportConfigDelete
   ## The operation to delete a report.
@@ -1035,21 +1035,21 @@ proc call*(call_594062: Call_ReportConfigDelete_594055; apiVersion: string;
   ##                 : Azure Subscription ID.
   ##   reportConfigName: string (required)
   ##                   : Report Config Name.
-  var path_594063 = newJObject()
-  var query_594064 = newJObject()
-  add(query_594064, "api-version", newJString(apiVersion))
-  add(path_594063, "subscriptionId", newJString(subscriptionId))
-  add(path_594063, "reportConfigName", newJString(reportConfigName))
-  result = call_594062.call(path_594063, query_594064, nil, nil, nil)
+  var path_568296 = newJObject()
+  var query_568297 = newJObject()
+  add(query_568297, "api-version", newJString(apiVersion))
+  add(path_568296, "subscriptionId", newJString(subscriptionId))
+  add(path_568296, "reportConfigName", newJString(reportConfigName))
+  result = call_568295.call(path_568296, query_568297, nil, nil, nil)
 
-var reportConfigDelete* = Call_ReportConfigDelete_594055(
+var reportConfigDelete* = Call_ReportConfigDelete_568288(
     name: "reportConfigDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.CostManagement/reportconfigs/{reportConfigName}",
-    validator: validate_ReportConfigDelete_594056, base: "",
-    url: url_ReportConfigDelete_594057, schemes: {Scheme.Https})
+    validator: validate_ReportConfigDelete_568289, base: "",
+    url: url_ReportConfigDelete_568290, schemes: {Scheme.Https})
 type
-  Call_ResourceGroupDimensionsList_594065 = ref object of OpenApiRestCall_593426
-proc url_ResourceGroupDimensionsList_594067(protocol: Scheme; host: string;
+  Call_ResourceGroupDimensionsList_568298 = ref object of OpenApiRestCall_567659
+proc url_ResourceGroupDimensionsList_568300(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1070,7 +1070,7 @@ proc url_ResourceGroupDimensionsList_594067(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResourceGroupDimensionsList_594066(path: JsonNode; query: JsonNode;
+proc validate_ResourceGroupDimensionsList_568299(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the dimensions by resource group Id.
   ## 
@@ -1085,16 +1085,16 @@ proc validate_ResourceGroupDimensionsList_594066(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594068 = path.getOrDefault("resourceGroupName")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  var valid_568301 = path.getOrDefault("resourceGroupName")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "resourceGroupName", valid_594068
-  var valid_594069 = path.getOrDefault("subscriptionId")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  if valid_568301 != nil:
+    section.add "resourceGroupName", valid_568301
+  var valid_568302 = path.getOrDefault("subscriptionId")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "subscriptionId", valid_594069
+  if valid_568302 != nil:
+    section.add "subscriptionId", valid_568302
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1110,30 +1110,30 @@ proc validate_ResourceGroupDimensionsList_594066(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594070 = query.getOrDefault("api-version")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  var valid_568303 = query.getOrDefault("api-version")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "api-version", valid_594070
-  var valid_594071 = query.getOrDefault("$expand")
-  valid_594071 = validateParameter(valid_594071, JString, required = false,
+  if valid_568303 != nil:
+    section.add "api-version", valid_568303
+  var valid_568304 = query.getOrDefault("$expand")
+  valid_568304 = validateParameter(valid_568304, JString, required = false,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "$expand", valid_594071
-  var valid_594072 = query.getOrDefault("$top")
-  valid_594072 = validateParameter(valid_594072, JInt, required = false, default = nil)
-  if valid_594072 != nil:
-    section.add "$top", valid_594072
-  var valid_594073 = query.getOrDefault("$skiptoken")
-  valid_594073 = validateParameter(valid_594073, JString, required = false,
+  if valid_568304 != nil:
+    section.add "$expand", valid_568304
+  var valid_568305 = query.getOrDefault("$top")
+  valid_568305 = validateParameter(valid_568305, JInt, required = false, default = nil)
+  if valid_568305 != nil:
+    section.add "$top", valid_568305
+  var valid_568306 = query.getOrDefault("$skiptoken")
+  valid_568306 = validateParameter(valid_568306, JString, required = false,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "$skiptoken", valid_594073
-  var valid_594074 = query.getOrDefault("$filter")
-  valid_594074 = validateParameter(valid_594074, JString, required = false,
+  if valid_568306 != nil:
+    section.add "$skiptoken", valid_568306
+  var valid_568307 = query.getOrDefault("$filter")
+  valid_568307 = validateParameter(valid_568307, JString, required = false,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "$filter", valid_594074
+  if valid_568307 != nil:
+    section.add "$filter", valid_568307
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1142,21 +1142,21 @@ proc validate_ResourceGroupDimensionsList_594066(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594075: Call_ResourceGroupDimensionsList_594065; path: JsonNode;
+proc call*(call_568308: Call_ResourceGroupDimensionsList_568298; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the dimensions by resource group Id.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594075.validator(path, query, header, formData, body)
-  let scheme = call_594075.pickScheme
+  let valid = call_568308.validator(path, query, header, formData, body)
+  let scheme = call_568308.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594075.url(scheme.get, call_594075.host, call_594075.base,
-                         call_594075.route, valid.getOrDefault("path"),
+  let url = call_568308.url(scheme.get, call_568308.host, call_568308.base,
+                         call_568308.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594075, url, valid)
+  result = hook(call_568308, url, valid)
 
-proc call*(call_594076: Call_ResourceGroupDimensionsList_594065;
+proc call*(call_568309: Call_ResourceGroupDimensionsList_568298;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           Expand: string = ""; Top: int = 0; Skiptoken: string = ""; Filter: string = ""): Recallable =
   ## resourceGroupDimensionsList
@@ -1176,25 +1176,25 @@ proc call*(call_594076: Call_ResourceGroupDimensionsList_594065;
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
   ##   Filter: string
   ##         : May be used to filter dimensions by properties/category, properties/usageStart, properties/usageEnd. Supported operators are 'eq','lt', 'gt', 'le', 'ge'.
-  var path_594077 = newJObject()
-  var query_594078 = newJObject()
-  add(path_594077, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594078, "api-version", newJString(apiVersion))
-  add(query_594078, "$expand", newJString(Expand))
-  add(path_594077, "subscriptionId", newJString(subscriptionId))
-  add(query_594078, "$top", newJInt(Top))
-  add(query_594078, "$skiptoken", newJString(Skiptoken))
-  add(query_594078, "$filter", newJString(Filter))
-  result = call_594076.call(path_594077, query_594078, nil, nil, nil)
+  var path_568310 = newJObject()
+  var query_568311 = newJObject()
+  add(path_568310, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568311, "api-version", newJString(apiVersion))
+  add(query_568311, "$expand", newJString(Expand))
+  add(path_568310, "subscriptionId", newJString(subscriptionId))
+  add(query_568311, "$top", newJInt(Top))
+  add(query_568311, "$skiptoken", newJString(Skiptoken))
+  add(query_568311, "$filter", newJString(Filter))
+  result = call_568309.call(path_568310, query_568311, nil, nil, nil)
 
-var resourceGroupDimensionsList* = Call_ResourceGroupDimensionsList_594065(
+var resourceGroupDimensionsList* = Call_ResourceGroupDimensionsList_568298(
     name: "resourceGroupDimensionsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CostManagement/dimensions",
-    validator: validate_ResourceGroupDimensionsList_594066, base: "",
-    url: url_ResourceGroupDimensionsList_594067, schemes: {Scheme.Https})
+    validator: validate_ResourceGroupDimensionsList_568299, base: "",
+    url: url_ResourceGroupDimensionsList_568300, schemes: {Scheme.Https})
 type
-  Call_ReportConfigListByResourceGroupName_594079 = ref object of OpenApiRestCall_593426
-proc url_ReportConfigListByResourceGroupName_594081(protocol: Scheme; host: string;
+  Call_ReportConfigListByResourceGroupName_568312 = ref object of OpenApiRestCall_567659
+proc url_ReportConfigListByResourceGroupName_568314(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1215,7 +1215,7 @@ proc url_ReportConfigListByResourceGroupName_594081(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportConfigListByResourceGroupName_594080(path: JsonNode;
+proc validate_ReportConfigListByResourceGroupName_568313(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all report configs for a resource group under a subscription.
   ## 
@@ -1230,16 +1230,16 @@ proc validate_ReportConfigListByResourceGroupName_594080(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594082 = path.getOrDefault("resourceGroupName")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  var valid_568315 = path.getOrDefault("resourceGroupName")
+  valid_568315 = validateParameter(valid_568315, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "resourceGroupName", valid_594082
-  var valid_594083 = path.getOrDefault("subscriptionId")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
+  if valid_568315 != nil:
+    section.add "resourceGroupName", valid_568315
+  var valid_568316 = path.getOrDefault("subscriptionId")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = nil)
-  if valid_594083 != nil:
-    section.add "subscriptionId", valid_594083
+  if valid_568316 != nil:
+    section.add "subscriptionId", valid_568316
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1247,11 +1247,11 @@ proc validate_ReportConfigListByResourceGroupName_594080(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594084 = query.getOrDefault("api-version")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  var valid_568317 = query.getOrDefault("api-version")
+  valid_568317 = validateParameter(valid_568317, JString, required = true,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "api-version", valid_594084
+  if valid_568317 != nil:
+    section.add "api-version", valid_568317
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1260,22 +1260,22 @@ proc validate_ReportConfigListByResourceGroupName_594080(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594085: Call_ReportConfigListByResourceGroupName_594079;
+proc call*(call_568318: Call_ReportConfigListByResourceGroupName_568312;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all report configs for a resource group under a subscription.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594085.validator(path, query, header, formData, body)
-  let scheme = call_594085.pickScheme
+  let valid = call_568318.validator(path, query, header, formData, body)
+  let scheme = call_568318.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594085.url(scheme.get, call_594085.host, call_594085.base,
-                         call_594085.route, valid.getOrDefault("path"),
+  let url = call_568318.url(scheme.get, call_568318.host, call_568318.base,
+                         call_568318.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594085, url, valid)
+  result = hook(call_568318, url, valid)
 
-proc call*(call_594086: Call_ReportConfigListByResourceGroupName_594079;
+proc call*(call_568319: Call_ReportConfigListByResourceGroupName_568312;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## reportConfigListByResourceGroupName
   ## Lists all report configs for a resource group under a subscription.
@@ -1286,21 +1286,21 @@ proc call*(call_594086: Call_ReportConfigListByResourceGroupName_594079;
   ##             : Version of the API to be used with the client request. The current version is 2018-05-31.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_594087 = newJObject()
-  var query_594088 = newJObject()
-  add(path_594087, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594088, "api-version", newJString(apiVersion))
-  add(path_594087, "subscriptionId", newJString(subscriptionId))
-  result = call_594086.call(path_594087, query_594088, nil, nil, nil)
+  var path_568320 = newJObject()
+  var query_568321 = newJObject()
+  add(path_568320, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568321, "api-version", newJString(apiVersion))
+  add(path_568320, "subscriptionId", newJString(subscriptionId))
+  result = call_568319.call(path_568320, query_568321, nil, nil, nil)
 
-var reportConfigListByResourceGroupName* = Call_ReportConfigListByResourceGroupName_594079(
+var reportConfigListByResourceGroupName* = Call_ReportConfigListByResourceGroupName_568312(
     name: "reportConfigListByResourceGroupName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CostManagement/reportconfigs",
-    validator: validate_ReportConfigListByResourceGroupName_594080, base: "",
-    url: url_ReportConfigListByResourceGroupName_594081, schemes: {Scheme.Https})
+    validator: validate_ReportConfigListByResourceGroupName_568313, base: "",
+    url: url_ReportConfigListByResourceGroupName_568314, schemes: {Scheme.Https})
 type
-  Call_ReportConfigCreateOrUpdateByResourceGroupName_594100 = ref object of OpenApiRestCall_593426
-proc url_ReportConfigCreateOrUpdateByResourceGroupName_594102(protocol: Scheme;
+  Call_ReportConfigCreateOrUpdateByResourceGroupName_568333 = ref object of OpenApiRestCall_567659
+proc url_ReportConfigCreateOrUpdateByResourceGroupName_568335(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1324,7 +1324,7 @@ proc url_ReportConfigCreateOrUpdateByResourceGroupName_594102(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportConfigCreateOrUpdateByResourceGroupName_594101(
+proc validate_ReportConfigCreateOrUpdateByResourceGroupName_568334(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## The operation to create or update a report config. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
@@ -1342,21 +1342,21 @@ proc validate_ReportConfigCreateOrUpdateByResourceGroupName_594101(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594103 = path.getOrDefault("resourceGroupName")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  var valid_568336 = path.getOrDefault("resourceGroupName")
+  valid_568336 = validateParameter(valid_568336, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "resourceGroupName", valid_594103
-  var valid_594104 = path.getOrDefault("subscriptionId")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  if valid_568336 != nil:
+    section.add "resourceGroupName", valid_568336
+  var valid_568337 = path.getOrDefault("subscriptionId")
+  valid_568337 = validateParameter(valid_568337, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "subscriptionId", valid_594104
-  var valid_594105 = path.getOrDefault("reportConfigName")
-  valid_594105 = validateParameter(valid_594105, JString, required = true,
+  if valid_568337 != nil:
+    section.add "subscriptionId", valid_568337
+  var valid_568338 = path.getOrDefault("reportConfigName")
+  valid_568338 = validateParameter(valid_568338, JString, required = true,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "reportConfigName", valid_594105
+  if valid_568338 != nil:
+    section.add "reportConfigName", valid_568338
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1364,11 +1364,11 @@ proc validate_ReportConfigCreateOrUpdateByResourceGroupName_594101(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594106 = query.getOrDefault("api-version")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  var valid_568339 = query.getOrDefault("api-version")
+  valid_568339 = validateParameter(valid_568339, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "api-version", valid_594106
+  if valid_568339 != nil:
+    section.add "api-version", valid_568339
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1382,22 +1382,22 @@ proc validate_ReportConfigCreateOrUpdateByResourceGroupName_594101(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594108: Call_ReportConfigCreateOrUpdateByResourceGroupName_594100;
+proc call*(call_568341: Call_ReportConfigCreateOrUpdateByResourceGroupName_568333;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The operation to create or update a report config. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594108.validator(path, query, header, formData, body)
-  let scheme = call_594108.pickScheme
+  let valid = call_568341.validator(path, query, header, formData, body)
+  let scheme = call_568341.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594108.url(scheme.get, call_594108.host, call_594108.base,
-                         call_594108.route, valid.getOrDefault("path"),
+  let url = call_568341.url(scheme.get, call_568341.host, call_568341.base,
+                         call_568341.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594108, url, valid)
+  result = hook(call_568341, url, valid)
 
-proc call*(call_594109: Call_ReportConfigCreateOrUpdateByResourceGroupName_594100;
+proc call*(call_568342: Call_ReportConfigCreateOrUpdateByResourceGroupName_568333;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; reportConfigName: string): Recallable =
   ## reportConfigCreateOrUpdateByResourceGroupName
@@ -1413,26 +1413,26 @@ proc call*(call_594109: Call_ReportConfigCreateOrUpdateByResourceGroupName_59410
   ##             : Parameters supplied to the CreateOrUpdate Report Config operation.
   ##   reportConfigName: string (required)
   ##                   : Report Config Name.
-  var path_594110 = newJObject()
-  var query_594111 = newJObject()
-  var body_594112 = newJObject()
-  add(path_594110, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594111, "api-version", newJString(apiVersion))
-  add(path_594110, "subscriptionId", newJString(subscriptionId))
+  var path_568343 = newJObject()
+  var query_568344 = newJObject()
+  var body_568345 = newJObject()
+  add(path_568343, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568344, "api-version", newJString(apiVersion))
+  add(path_568343, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594112 = parameters
-  add(path_594110, "reportConfigName", newJString(reportConfigName))
-  result = call_594109.call(path_594110, query_594111, nil, nil, body_594112)
+    body_568345 = parameters
+  add(path_568343, "reportConfigName", newJString(reportConfigName))
+  result = call_568342.call(path_568343, query_568344, nil, nil, body_568345)
 
-var reportConfigCreateOrUpdateByResourceGroupName* = Call_ReportConfigCreateOrUpdateByResourceGroupName_594100(
+var reportConfigCreateOrUpdateByResourceGroupName* = Call_ReportConfigCreateOrUpdateByResourceGroupName_568333(
     name: "reportConfigCreateOrUpdateByResourceGroupName",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CostManagement/reportconfigs/{reportConfigName}",
-    validator: validate_ReportConfigCreateOrUpdateByResourceGroupName_594101,
-    base: "", url: url_ReportConfigCreateOrUpdateByResourceGroupName_594102,
+    validator: validate_ReportConfigCreateOrUpdateByResourceGroupName_568334,
+    base: "", url: url_ReportConfigCreateOrUpdateByResourceGroupName_568335,
     schemes: {Scheme.Https})
 type
-  Call_ReportConfigGetByResourceGroupName_594089 = ref object of OpenApiRestCall_593426
-proc url_ReportConfigGetByResourceGroupName_594091(protocol: Scheme; host: string;
+  Call_ReportConfigGetByResourceGroupName_568322 = ref object of OpenApiRestCall_567659
+proc url_ReportConfigGetByResourceGroupName_568324(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1456,7 +1456,7 @@ proc url_ReportConfigGetByResourceGroupName_594091(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportConfigGetByResourceGroupName_594090(path: JsonNode;
+proc validate_ReportConfigGetByResourceGroupName_568323(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the report config for a resource group under a subscription by report config name.
   ## 
@@ -1473,21 +1473,21 @@ proc validate_ReportConfigGetByResourceGroupName_594090(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594092 = path.getOrDefault("resourceGroupName")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  var valid_568325 = path.getOrDefault("resourceGroupName")
+  valid_568325 = validateParameter(valid_568325, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "resourceGroupName", valid_594092
-  var valid_594093 = path.getOrDefault("subscriptionId")
-  valid_594093 = validateParameter(valid_594093, JString, required = true,
+  if valid_568325 != nil:
+    section.add "resourceGroupName", valid_568325
+  var valid_568326 = path.getOrDefault("subscriptionId")
+  valid_568326 = validateParameter(valid_568326, JString, required = true,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "subscriptionId", valid_594093
-  var valid_594094 = path.getOrDefault("reportConfigName")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  if valid_568326 != nil:
+    section.add "subscriptionId", valid_568326
+  var valid_568327 = path.getOrDefault("reportConfigName")
+  valid_568327 = validateParameter(valid_568327, JString, required = true,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "reportConfigName", valid_594094
+  if valid_568327 != nil:
+    section.add "reportConfigName", valid_568327
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1495,11 +1495,11 @@ proc validate_ReportConfigGetByResourceGroupName_594090(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594095 = query.getOrDefault("api-version")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  var valid_568328 = query.getOrDefault("api-version")
+  valid_568328 = validateParameter(valid_568328, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "api-version", valid_594095
+  if valid_568328 != nil:
+    section.add "api-version", valid_568328
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1508,22 +1508,22 @@ proc validate_ReportConfigGetByResourceGroupName_594090(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594096: Call_ReportConfigGetByResourceGroupName_594089;
+proc call*(call_568329: Call_ReportConfigGetByResourceGroupName_568322;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the report config for a resource group under a subscription by report config name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594096.validator(path, query, header, formData, body)
-  let scheme = call_594096.pickScheme
+  let valid = call_568329.validator(path, query, header, formData, body)
+  let scheme = call_568329.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594096.url(scheme.get, call_594096.host, call_594096.base,
-                         call_594096.route, valid.getOrDefault("path"),
+  let url = call_568329.url(scheme.get, call_568329.host, call_568329.base,
+                         call_568329.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594096, url, valid)
+  result = hook(call_568329, url, valid)
 
-proc call*(call_594097: Call_ReportConfigGetByResourceGroupName_594089;
+proc call*(call_568330: Call_ReportConfigGetByResourceGroupName_568322;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           reportConfigName: string): Recallable =
   ## reportConfigGetByResourceGroupName
@@ -1537,22 +1537,22 @@ proc call*(call_594097: Call_ReportConfigGetByResourceGroupName_594089;
   ##                 : Azure Subscription ID.
   ##   reportConfigName: string (required)
   ##                   : Report Config Name.
-  var path_594098 = newJObject()
-  var query_594099 = newJObject()
-  add(path_594098, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594099, "api-version", newJString(apiVersion))
-  add(path_594098, "subscriptionId", newJString(subscriptionId))
-  add(path_594098, "reportConfigName", newJString(reportConfigName))
-  result = call_594097.call(path_594098, query_594099, nil, nil, nil)
+  var path_568331 = newJObject()
+  var query_568332 = newJObject()
+  add(path_568331, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568332, "api-version", newJString(apiVersion))
+  add(path_568331, "subscriptionId", newJString(subscriptionId))
+  add(path_568331, "reportConfigName", newJString(reportConfigName))
+  result = call_568330.call(path_568331, query_568332, nil, nil, nil)
 
-var reportConfigGetByResourceGroupName* = Call_ReportConfigGetByResourceGroupName_594089(
+var reportConfigGetByResourceGroupName* = Call_ReportConfigGetByResourceGroupName_568322(
     name: "reportConfigGetByResourceGroupName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CostManagement/reportconfigs/{reportConfigName}",
-    validator: validate_ReportConfigGetByResourceGroupName_594090, base: "",
-    url: url_ReportConfigGetByResourceGroupName_594091, schemes: {Scheme.Https})
+    validator: validate_ReportConfigGetByResourceGroupName_568323, base: "",
+    url: url_ReportConfigGetByResourceGroupName_568324, schemes: {Scheme.Https})
 type
-  Call_ReportConfigDeleteByResourceGroupName_594113 = ref object of OpenApiRestCall_593426
-proc url_ReportConfigDeleteByResourceGroupName_594115(protocol: Scheme;
+  Call_ReportConfigDeleteByResourceGroupName_568346 = ref object of OpenApiRestCall_567659
+proc url_ReportConfigDeleteByResourceGroupName_568348(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1576,7 +1576,7 @@ proc url_ReportConfigDeleteByResourceGroupName_594115(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportConfigDeleteByResourceGroupName_594114(path: JsonNode;
+proc validate_ReportConfigDeleteByResourceGroupName_568347(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to delete a report config.
   ## 
@@ -1593,21 +1593,21 @@ proc validate_ReportConfigDeleteByResourceGroupName_594114(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594116 = path.getOrDefault("resourceGroupName")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  var valid_568349 = path.getOrDefault("resourceGroupName")
+  valid_568349 = validateParameter(valid_568349, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "resourceGroupName", valid_594116
-  var valid_594117 = path.getOrDefault("subscriptionId")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  if valid_568349 != nil:
+    section.add "resourceGroupName", valid_568349
+  var valid_568350 = path.getOrDefault("subscriptionId")
+  valid_568350 = validateParameter(valid_568350, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "subscriptionId", valid_594117
-  var valid_594118 = path.getOrDefault("reportConfigName")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  if valid_568350 != nil:
+    section.add "subscriptionId", valid_568350
+  var valid_568351 = path.getOrDefault("reportConfigName")
+  valid_568351 = validateParameter(valid_568351, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "reportConfigName", valid_594118
+  if valid_568351 != nil:
+    section.add "reportConfigName", valid_568351
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1615,11 +1615,11 @@ proc validate_ReportConfigDeleteByResourceGroupName_594114(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594119 = query.getOrDefault("api-version")
-  valid_594119 = validateParameter(valid_594119, JString, required = true,
+  var valid_568352 = query.getOrDefault("api-version")
+  valid_568352 = validateParameter(valid_568352, JString, required = true,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "api-version", valid_594119
+  if valid_568352 != nil:
+    section.add "api-version", valid_568352
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1628,22 +1628,22 @@ proc validate_ReportConfigDeleteByResourceGroupName_594114(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594120: Call_ReportConfigDeleteByResourceGroupName_594113;
+proc call*(call_568353: Call_ReportConfigDeleteByResourceGroupName_568346;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The operation to delete a report config.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594120.validator(path, query, header, formData, body)
-  let scheme = call_594120.pickScheme
+  let valid = call_568353.validator(path, query, header, formData, body)
+  let scheme = call_568353.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594120.url(scheme.get, call_594120.host, call_594120.base,
-                         call_594120.route, valid.getOrDefault("path"),
+  let url = call_568353.url(scheme.get, call_568353.host, call_568353.base,
+                         call_568353.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594120, url, valid)
+  result = hook(call_568353, url, valid)
 
-proc call*(call_594121: Call_ReportConfigDeleteByResourceGroupName_594113;
+proc call*(call_568354: Call_ReportConfigDeleteByResourceGroupName_568346;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           reportConfigName: string): Recallable =
   ## reportConfigDeleteByResourceGroupName
@@ -1657,22 +1657,22 @@ proc call*(call_594121: Call_ReportConfigDeleteByResourceGroupName_594113;
   ##                 : Azure Subscription ID.
   ##   reportConfigName: string (required)
   ##                   : Report Config Name.
-  var path_594122 = newJObject()
-  var query_594123 = newJObject()
-  add(path_594122, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594123, "api-version", newJString(apiVersion))
-  add(path_594122, "subscriptionId", newJString(subscriptionId))
-  add(path_594122, "reportConfigName", newJString(reportConfigName))
-  result = call_594121.call(path_594122, query_594123, nil, nil, nil)
+  var path_568355 = newJObject()
+  var query_568356 = newJObject()
+  add(path_568355, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568356, "api-version", newJString(apiVersion))
+  add(path_568355, "subscriptionId", newJString(subscriptionId))
+  add(path_568355, "reportConfigName", newJString(reportConfigName))
+  result = call_568354.call(path_568355, query_568356, nil, nil, nil)
 
-var reportConfigDeleteByResourceGroupName* = Call_ReportConfigDeleteByResourceGroupName_594113(
+var reportConfigDeleteByResourceGroupName* = Call_ReportConfigDeleteByResourceGroupName_568346(
     name: "reportConfigDeleteByResourceGroupName", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CostManagement/reportconfigs/{reportConfigName}",
-    validator: validate_ReportConfigDeleteByResourceGroupName_594114, base: "",
-    url: url_ReportConfigDeleteByResourceGroupName_594115, schemes: {Scheme.Https})
+    validator: validate_ReportConfigDeleteByResourceGroupName_568347, base: "",
+    url: url_ReportConfigDeleteByResourceGroupName_568348, schemes: {Scheme.Https})
 type
-  Call_QueryResourceGroup_594124 = ref object of OpenApiRestCall_593426
-proc url_QueryResourceGroup_594126(protocol: Scheme; host: string; base: string;
+  Call_QueryResourceGroup_568357 = ref object of OpenApiRestCall_567659
+proc url_QueryResourceGroup_568359(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1692,7 +1692,7 @@ proc url_QueryResourceGroup_594126(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryResourceGroup_594125(path: JsonNode; query: JsonNode;
+proc validate_QueryResourceGroup_568358(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Lists the usage data for subscriptionId and resource group.
@@ -1708,16 +1708,16 @@ proc validate_QueryResourceGroup_594125(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594127 = path.getOrDefault("resourceGroupName")
-  valid_594127 = validateParameter(valid_594127, JString, required = true,
+  var valid_568360 = path.getOrDefault("resourceGroupName")
+  valid_568360 = validateParameter(valid_568360, JString, required = true,
                                  default = nil)
-  if valid_594127 != nil:
-    section.add "resourceGroupName", valid_594127
-  var valid_594128 = path.getOrDefault("subscriptionId")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  if valid_568360 != nil:
+    section.add "resourceGroupName", valid_568360
+  var valid_568361 = path.getOrDefault("subscriptionId")
+  valid_568361 = validateParameter(valid_568361, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "subscriptionId", valid_594128
+  if valid_568361 != nil:
+    section.add "subscriptionId", valid_568361
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1725,11 +1725,11 @@ proc validate_QueryResourceGroup_594125(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594129 = query.getOrDefault("api-version")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  var valid_568362 = query.getOrDefault("api-version")
+  valid_568362 = validateParameter(valid_568362, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "api-version", valid_594129
+  if valid_568362 != nil:
+    section.add "api-version", valid_568362
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1743,21 +1743,21 @@ proc validate_QueryResourceGroup_594125(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594131: Call_QueryResourceGroup_594124; path: JsonNode;
+proc call*(call_568364: Call_QueryResourceGroup_568357; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the usage data for subscriptionId and resource group.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594131.validator(path, query, header, formData, body)
-  let scheme = call_594131.pickScheme
+  let valid = call_568364.validator(path, query, header, formData, body)
+  let scheme = call_568364.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594131.url(scheme.get, call_594131.host, call_594131.base,
-                         call_594131.route, valid.getOrDefault("path"),
+  let url = call_568364.url(scheme.get, call_568364.host, call_568364.base,
+                         call_568364.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594131, url, valid)
+  result = hook(call_568364, url, valid)
 
-proc call*(call_594132: Call_QueryResourceGroup_594124; resourceGroupName: string;
+proc call*(call_568365: Call_QueryResourceGroup_568357; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; parameters: JsonNode): Recallable =
   ## queryResourceGroup
   ## Lists the usage data for subscriptionId and resource group.
@@ -1770,21 +1770,21 @@ proc call*(call_594132: Call_QueryResourceGroup_594124; resourceGroupName: strin
   ##                 : Azure Subscription ID.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the CreateOrUpdate Report Config operation.
-  var path_594133 = newJObject()
-  var query_594134 = newJObject()
-  var body_594135 = newJObject()
-  add(path_594133, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594134, "api-version", newJString(apiVersion))
-  add(path_594133, "subscriptionId", newJString(subscriptionId))
+  var path_568366 = newJObject()
+  var query_568367 = newJObject()
+  var body_568368 = newJObject()
+  add(path_568366, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568367, "api-version", newJString(apiVersion))
+  add(path_568366, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594135 = parameters
-  result = call_594132.call(path_594133, query_594134, nil, nil, body_594135)
+    body_568368 = parameters
+  result = call_568365.call(path_568366, query_568367, nil, nil, body_568368)
 
-var queryResourceGroup* = Call_QueryResourceGroup_594124(
+var queryResourceGroup* = Call_QueryResourceGroup_568357(
     name: "queryResourceGroup", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.CostManagement/Query",
-    validator: validate_QueryResourceGroup_594125, base: "",
-    url: url_QueryResourceGroup_594126, schemes: {Scheme.Https})
+    validator: validate_QueryResourceGroup_568358, base: "",
+    url: url_QueryResourceGroup_568359, schemes: {Scheme.Https})
 export
   rest
 

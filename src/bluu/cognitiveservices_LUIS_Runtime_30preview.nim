@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: LUIS Runtime Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "cognitiveservices-LUIS-Runtime"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_PredictionGetSlotPrediction_593954 = ref object of OpenApiRestCall_593425
-proc url_PredictionGetSlotPrediction_593956(protocol: Scheme; host: string;
+  Call_PredictionGetSlotPrediction_568187 = ref object of OpenApiRestCall_567658
+proc url_PredictionGetSlotPrediction_568189(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -123,7 +123,7 @@ proc url_PredictionGetSlotPrediction_593956(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PredictionGetSlotPrediction_593955(path: JsonNode; query: JsonNode;
+proc validate_PredictionGetSlotPrediction_568188(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the predictions for an application slot.
   ## 
@@ -136,16 +136,16 @@ proc validate_PredictionGetSlotPrediction_593955(path: JsonNode; query: JsonNode
   ##           : The application slot name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `appId` field"
-  var valid_593966 = path.getOrDefault("appId")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_568199 = path.getOrDefault("appId")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "appId", valid_593966
-  var valid_593967 = path.getOrDefault("slotName")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_568199 != nil:
+    section.add "appId", valid_568199
+  var valid_568200 = path.getOrDefault("slotName")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "slotName", valid_593967
+  if valid_568200 != nil:
+    section.add "slotName", valid_568200
   result.add "path", section
   ## parameters in `query` object:
   ##   verbose: JBool
@@ -155,18 +155,18 @@ proc validate_PredictionGetSlotPrediction_593955(path: JsonNode; query: JsonNode
   ##   log: JBool
   ##      : Indicates whether to log the endpoint query or not.
   section = newJObject()
-  var valid_593968 = query.getOrDefault("verbose")
-  valid_593968 = validateParameter(valid_593968, JBool, required = false, default = nil)
-  if valid_593968 != nil:
-    section.add "verbose", valid_593968
-  var valid_593969 = query.getOrDefault("show-all-intents")
-  valid_593969 = validateParameter(valid_593969, JBool, required = false, default = nil)
-  if valid_593969 != nil:
-    section.add "show-all-intents", valid_593969
-  var valid_593970 = query.getOrDefault("log")
-  valid_593970 = validateParameter(valid_593970, JBool, required = false, default = nil)
-  if valid_593970 != nil:
-    section.add "log", valid_593970
+  var valid_568201 = query.getOrDefault("verbose")
+  valid_568201 = validateParameter(valid_568201, JBool, required = false, default = nil)
+  if valid_568201 != nil:
+    section.add "verbose", valid_568201
+  var valid_568202 = query.getOrDefault("show-all-intents")
+  valid_568202 = validateParameter(valid_568202, JBool, required = false, default = nil)
+  if valid_568202 != nil:
+    section.add "show-all-intents", valid_568202
+  var valid_568203 = query.getOrDefault("log")
+  valid_568203 = validateParameter(valid_568203, JBool, required = false, default = nil)
+  if valid_568203 != nil:
+    section.add "log", valid_568203
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -180,20 +180,20 @@ proc validate_PredictionGetSlotPrediction_593955(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593972: Call_PredictionGetSlotPrediction_593954; path: JsonNode;
+proc call*(call_568205: Call_PredictionGetSlotPrediction_568187; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the predictions for an application slot.
   ## 
-  let valid = call_593972.validator(path, query, header, formData, body)
-  let scheme = call_593972.pickScheme
+  let valid = call_568205.validator(path, query, header, formData, body)
+  let scheme = call_568205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593972.url(scheme.get, call_593972.host, call_593972.base,
-                         call_593972.route, valid.getOrDefault("path"),
+  let url = call_568205.url(scheme.get, call_568205.host, call_568205.base,
+                         call_568205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593972, url, valid)
+  result = hook(call_568205, url, valid)
 
-proc call*(call_593973: Call_PredictionGetSlotPrediction_593954; appId: string;
+proc call*(call_568206: Call_PredictionGetSlotPrediction_568187; appId: string;
           slotName: string; predictionRequest: JsonNode; verbose: bool = false;
           showAllIntents: bool = false; log: bool = false): Recallable =
   ## predictionGetSlotPrediction
@@ -210,26 +210,26 @@ proc call*(call_593973: Call_PredictionGetSlotPrediction_593954; appId: string;
   ##           : The application slot name.
   ##   predictionRequest: JObject (required)
   ##                    : The prediction request parameters.
-  var path_593974 = newJObject()
-  var query_593975 = newJObject()
-  var body_593976 = newJObject()
-  add(query_593975, "verbose", newJBool(verbose))
-  add(query_593975, "show-all-intents", newJBool(showAllIntents))
-  add(path_593974, "appId", newJString(appId))
-  add(query_593975, "log", newJBool(log))
-  add(path_593974, "slotName", newJString(slotName))
+  var path_568207 = newJObject()
+  var query_568208 = newJObject()
+  var body_568209 = newJObject()
+  add(query_568208, "verbose", newJBool(verbose))
+  add(query_568208, "show-all-intents", newJBool(showAllIntents))
+  add(path_568207, "appId", newJString(appId))
+  add(query_568208, "log", newJBool(log))
+  add(path_568207, "slotName", newJString(slotName))
   if predictionRequest != nil:
-    body_593976 = predictionRequest
-  result = call_593973.call(path_593974, query_593975, nil, nil, body_593976)
+    body_568209 = predictionRequest
+  result = call_568206.call(path_568207, query_568208, nil, nil, body_568209)
 
-var predictionGetSlotPrediction* = Call_PredictionGetSlotPrediction_593954(
+var predictionGetSlotPrediction* = Call_PredictionGetSlotPrediction_568187(
     name: "predictionGetSlotPrediction", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/apps/{appId}/slots/{slotName}/predict",
-    validator: validate_PredictionGetSlotPrediction_593955, base: "",
-    url: url_PredictionGetSlotPrediction_593956, schemes: {Scheme.Https})
+    validator: validate_PredictionGetSlotPrediction_568188, base: "",
+    url: url_PredictionGetSlotPrediction_568189, schemes: {Scheme.Https})
 type
-  Call_PredictionGetSlotPredictionGET_593647 = ref object of OpenApiRestCall_593425
-proc url_PredictionGetSlotPredictionGET_593649(protocol: Scheme; host: string;
+  Call_PredictionGetSlotPredictionGET_567880 = ref object of OpenApiRestCall_567658
+proc url_PredictionGetSlotPredictionGET_567882(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -248,7 +248,7 @@ proc url_PredictionGetSlotPredictionGET_593649(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PredictionGetSlotPredictionGET_593648(path: JsonNode;
+proc validate_PredictionGetSlotPredictionGET_567881(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the predictions for an application slot.
   ## 
@@ -261,16 +261,16 @@ proc validate_PredictionGetSlotPredictionGET_593648(path: JsonNode;
   ##           : The application slot name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `appId` field"
-  var valid_593809 = path.getOrDefault("appId")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_568042 = path.getOrDefault("appId")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "appId", valid_593809
-  var valid_593810 = path.getOrDefault("slotName")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_568042 != nil:
+    section.add "appId", valid_568042
+  var valid_568043 = path.getOrDefault("slotName")
+  valid_568043 = validateParameter(valid_568043, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "slotName", valid_593810
+  if valid_568043 != nil:
+    section.add "slotName", valid_568043
   result.add "path", section
   ## parameters in `query` object:
   ##   verbose: JBool
@@ -282,24 +282,24 @@ proc validate_PredictionGetSlotPredictionGET_593648(path: JsonNode;
   ##   log: JBool
   ##      : Indicates whether to log the endpoint query or not.
   section = newJObject()
-  var valid_593811 = query.getOrDefault("verbose")
-  valid_593811 = validateParameter(valid_593811, JBool, required = false, default = nil)
-  if valid_593811 != nil:
-    section.add "verbose", valid_593811
-  var valid_593812 = query.getOrDefault("show-all-intents")
-  valid_593812 = validateParameter(valid_593812, JBool, required = false, default = nil)
-  if valid_593812 != nil:
-    section.add "show-all-intents", valid_593812
+  var valid_568044 = query.getOrDefault("verbose")
+  valid_568044 = validateParameter(valid_568044, JBool, required = false, default = nil)
+  if valid_568044 != nil:
+    section.add "verbose", valid_568044
+  var valid_568045 = query.getOrDefault("show-all-intents")
+  valid_568045 = validateParameter(valid_568045, JBool, required = false, default = nil)
+  if valid_568045 != nil:
+    section.add "show-all-intents", valid_568045
   assert query != nil, "query argument is necessary due to required `query` field"
-  var valid_593813 = query.getOrDefault("query")
-  valid_593813 = validateParameter(valid_593813, JString, required = true,
+  var valid_568046 = query.getOrDefault("query")
+  valid_568046 = validateParameter(valid_568046, JString, required = true,
                                  default = nil)
-  if valid_593813 != nil:
-    section.add "query", valid_593813
-  var valid_593814 = query.getOrDefault("log")
-  valid_593814 = validateParameter(valid_593814, JBool, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "log", valid_593814
+  if valid_568046 != nil:
+    section.add "query", valid_568046
+  var valid_568047 = query.getOrDefault("log")
+  valid_568047 = validateParameter(valid_568047, JBool, required = false, default = nil)
+  if valid_568047 != nil:
+    section.add "log", valid_568047
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -308,20 +308,20 @@ proc validate_PredictionGetSlotPredictionGET_593648(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593841: Call_PredictionGetSlotPredictionGET_593647; path: JsonNode;
+proc call*(call_568074: Call_PredictionGetSlotPredictionGET_567880; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the predictions for an application slot.
   ## 
-  let valid = call_593841.validator(path, query, header, formData, body)
-  let scheme = call_593841.pickScheme
+  let valid = call_568074.validator(path, query, header, formData, body)
+  let scheme = call_568074.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593841.url(scheme.get, call_593841.host, call_593841.base,
-                         call_593841.route, valid.getOrDefault("path"),
+  let url = call_568074.url(scheme.get, call_568074.host, call_568074.base,
+                         call_568074.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593841, url, valid)
+  result = hook(call_568074, url, valid)
 
-proc call*(call_593912: Call_PredictionGetSlotPredictionGET_593647; query: string;
+proc call*(call_568145: Call_PredictionGetSlotPredictionGET_567880; query: string;
           appId: string; slotName: string; verbose: bool = false;
           showAllIntents: bool = false; log: bool = false): Recallable =
   ## predictionGetSlotPredictionGET
@@ -338,24 +338,24 @@ proc call*(call_593912: Call_PredictionGetSlotPredictionGET_593647; query: strin
   ##      : Indicates whether to log the endpoint query or not.
   ##   slotName: string (required)
   ##           : The application slot name.
-  var path_593913 = newJObject()
-  var query_593915 = newJObject()
-  add(query_593915, "verbose", newJBool(verbose))
-  add(query_593915, "show-all-intents", newJBool(showAllIntents))
-  add(query_593915, "query", newJString(query))
-  add(path_593913, "appId", newJString(appId))
-  add(query_593915, "log", newJBool(log))
-  add(path_593913, "slotName", newJString(slotName))
-  result = call_593912.call(path_593913, query_593915, nil, nil, nil)
+  var path_568146 = newJObject()
+  var query_568148 = newJObject()
+  add(query_568148, "verbose", newJBool(verbose))
+  add(query_568148, "show-all-intents", newJBool(showAllIntents))
+  add(query_568148, "query", newJString(query))
+  add(path_568146, "appId", newJString(appId))
+  add(query_568148, "log", newJBool(log))
+  add(path_568146, "slotName", newJString(slotName))
+  result = call_568145.call(path_568146, query_568148, nil, nil, nil)
 
-var predictionGetSlotPredictionGET* = Call_PredictionGetSlotPredictionGET_593647(
+var predictionGetSlotPredictionGET* = Call_PredictionGetSlotPredictionGET_567880(
     name: "predictionGetSlotPredictionGET", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/apps/{appId}/slots/{slotName}/predict",
-    validator: validate_PredictionGetSlotPredictionGET_593648, base: "",
-    url: url_PredictionGetSlotPredictionGET_593649, schemes: {Scheme.Https})
+    validator: validate_PredictionGetSlotPredictionGET_567881, base: "",
+    url: url_PredictionGetSlotPredictionGET_567882, schemes: {Scheme.Https})
 type
-  Call_PredictionGetVersionPrediction_593990 = ref object of OpenApiRestCall_593425
-proc url_PredictionGetVersionPrediction_593992(protocol: Scheme; host: string;
+  Call_PredictionGetVersionPrediction_568223 = ref object of OpenApiRestCall_567658
+proc url_PredictionGetVersionPrediction_568225(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -374,7 +374,7 @@ proc url_PredictionGetVersionPrediction_593992(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PredictionGetVersionPrediction_593991(path: JsonNode;
+proc validate_PredictionGetVersionPrediction_568224(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the predictions for an application version.
   ## 
@@ -387,16 +387,16 @@ proc validate_PredictionGetVersionPrediction_593991(path: JsonNode;
   ##        : The application ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `versionId` field"
-  var valid_593993 = path.getOrDefault("versionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568226 = path.getOrDefault("versionId")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "versionId", valid_593993
-  var valid_593994 = path.getOrDefault("appId")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "versionId", valid_568226
+  var valid_568227 = path.getOrDefault("appId")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "appId", valid_593994
+  if valid_568227 != nil:
+    section.add "appId", valid_568227
   result.add "path", section
   ## parameters in `query` object:
   ##   verbose: JBool
@@ -406,18 +406,18 @@ proc validate_PredictionGetVersionPrediction_593991(path: JsonNode;
   ##   log: JBool
   ##      : Indicates whether to log the endpoint query or not.
   section = newJObject()
-  var valid_593995 = query.getOrDefault("verbose")
-  valid_593995 = validateParameter(valid_593995, JBool, required = false, default = nil)
-  if valid_593995 != nil:
-    section.add "verbose", valid_593995
-  var valid_593996 = query.getOrDefault("show-all-intents")
-  valid_593996 = validateParameter(valid_593996, JBool, required = false, default = nil)
-  if valid_593996 != nil:
-    section.add "show-all-intents", valid_593996
-  var valid_593997 = query.getOrDefault("log")
-  valid_593997 = validateParameter(valid_593997, JBool, required = false, default = nil)
-  if valid_593997 != nil:
-    section.add "log", valid_593997
+  var valid_568228 = query.getOrDefault("verbose")
+  valid_568228 = validateParameter(valid_568228, JBool, required = false, default = nil)
+  if valid_568228 != nil:
+    section.add "verbose", valid_568228
+  var valid_568229 = query.getOrDefault("show-all-intents")
+  valid_568229 = validateParameter(valid_568229, JBool, required = false, default = nil)
+  if valid_568229 != nil:
+    section.add "show-all-intents", valid_568229
+  var valid_568230 = query.getOrDefault("log")
+  valid_568230 = validateParameter(valid_568230, JBool, required = false, default = nil)
+  if valid_568230 != nil:
+    section.add "log", valid_568230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -431,20 +431,20 @@ proc validate_PredictionGetVersionPrediction_593991(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593999: Call_PredictionGetVersionPrediction_593990; path: JsonNode;
+proc call*(call_568232: Call_PredictionGetVersionPrediction_568223; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the predictions for an application version.
   ## 
-  let valid = call_593999.validator(path, query, header, formData, body)
-  let scheme = call_593999.pickScheme
+  let valid = call_568232.validator(path, query, header, formData, body)
+  let scheme = call_568232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593999.url(scheme.get, call_593999.host, call_593999.base,
-                         call_593999.route, valid.getOrDefault("path"),
+  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
+                         call_568232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593999, url, valid)
+  result = hook(call_568232, url, valid)
 
-proc call*(call_594000: Call_PredictionGetVersionPrediction_593990;
+proc call*(call_568233: Call_PredictionGetVersionPrediction_568223;
           versionId: string; appId: string; predictionRequest: JsonNode;
           verbose: bool = false; showAllIntents: bool = false; log: bool = false): Recallable =
   ## predictionGetVersionPrediction
@@ -461,26 +461,26 @@ proc call*(call_594000: Call_PredictionGetVersionPrediction_593990;
   ##      : Indicates whether to log the endpoint query or not.
   ##   predictionRequest: JObject (required)
   ##                    : The prediction request parameters.
-  var path_594001 = newJObject()
-  var query_594002 = newJObject()
-  var body_594003 = newJObject()
-  add(query_594002, "verbose", newJBool(verbose))
-  add(path_594001, "versionId", newJString(versionId))
-  add(query_594002, "show-all-intents", newJBool(showAllIntents))
-  add(path_594001, "appId", newJString(appId))
-  add(query_594002, "log", newJBool(log))
+  var path_568234 = newJObject()
+  var query_568235 = newJObject()
+  var body_568236 = newJObject()
+  add(query_568235, "verbose", newJBool(verbose))
+  add(path_568234, "versionId", newJString(versionId))
+  add(query_568235, "show-all-intents", newJBool(showAllIntents))
+  add(path_568234, "appId", newJString(appId))
+  add(query_568235, "log", newJBool(log))
   if predictionRequest != nil:
-    body_594003 = predictionRequest
-  result = call_594000.call(path_594001, query_594002, nil, nil, body_594003)
+    body_568236 = predictionRequest
+  result = call_568233.call(path_568234, query_568235, nil, nil, body_568236)
 
-var predictionGetVersionPrediction* = Call_PredictionGetVersionPrediction_593990(
+var predictionGetVersionPrediction* = Call_PredictionGetVersionPrediction_568223(
     name: "predictionGetVersionPrediction", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/apps/{appId}/versions/{versionId}/predict",
-    validator: validate_PredictionGetVersionPrediction_593991, base: "",
-    url: url_PredictionGetVersionPrediction_593992, schemes: {Scheme.Https})
+    validator: validate_PredictionGetVersionPrediction_568224, base: "",
+    url: url_PredictionGetVersionPrediction_568225, schemes: {Scheme.Https})
 type
-  Call_PredictionGetVersionPredictionGET_593977 = ref object of OpenApiRestCall_593425
-proc url_PredictionGetVersionPredictionGET_593979(protocol: Scheme; host: string;
+  Call_PredictionGetVersionPredictionGET_568210 = ref object of OpenApiRestCall_567658
+proc url_PredictionGetVersionPredictionGET_568212(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -499,7 +499,7 @@ proc url_PredictionGetVersionPredictionGET_593979(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PredictionGetVersionPredictionGET_593978(path: JsonNode;
+proc validate_PredictionGetVersionPredictionGET_568211(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the predictions for an application version.
   ## 
@@ -512,16 +512,16 @@ proc validate_PredictionGetVersionPredictionGET_593978(path: JsonNode;
   ##        : The application ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `versionId` field"
-  var valid_593980 = path.getOrDefault("versionId")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_568213 = path.getOrDefault("versionId")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "versionId", valid_593980
-  var valid_593981 = path.getOrDefault("appId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_568213 != nil:
+    section.add "versionId", valid_568213
+  var valid_568214 = path.getOrDefault("appId")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "appId", valid_593981
+  if valid_568214 != nil:
+    section.add "appId", valid_568214
   result.add "path", section
   ## parameters in `query` object:
   ##   verbose: JBool
@@ -533,24 +533,24 @@ proc validate_PredictionGetVersionPredictionGET_593978(path: JsonNode;
   ##   log: JBool
   ##      : Indicates whether to log the endpoint query or not.
   section = newJObject()
-  var valid_593982 = query.getOrDefault("verbose")
-  valid_593982 = validateParameter(valid_593982, JBool, required = false, default = nil)
-  if valid_593982 != nil:
-    section.add "verbose", valid_593982
-  var valid_593983 = query.getOrDefault("show-all-intents")
-  valid_593983 = validateParameter(valid_593983, JBool, required = false, default = nil)
-  if valid_593983 != nil:
-    section.add "show-all-intents", valid_593983
+  var valid_568215 = query.getOrDefault("verbose")
+  valid_568215 = validateParameter(valid_568215, JBool, required = false, default = nil)
+  if valid_568215 != nil:
+    section.add "verbose", valid_568215
+  var valid_568216 = query.getOrDefault("show-all-intents")
+  valid_568216 = validateParameter(valid_568216, JBool, required = false, default = nil)
+  if valid_568216 != nil:
+    section.add "show-all-intents", valid_568216
   assert query != nil, "query argument is necessary due to required `query` field"
-  var valid_593984 = query.getOrDefault("query")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568217 = query.getOrDefault("query")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "query", valid_593984
-  var valid_593985 = query.getOrDefault("log")
-  valid_593985 = validateParameter(valid_593985, JBool, required = false, default = nil)
-  if valid_593985 != nil:
-    section.add "log", valid_593985
+  if valid_568217 != nil:
+    section.add "query", valid_568217
+  var valid_568218 = query.getOrDefault("log")
+  valid_568218 = validateParameter(valid_568218, JBool, required = false, default = nil)
+  if valid_568218 != nil:
+    section.add "log", valid_568218
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -559,21 +559,21 @@ proc validate_PredictionGetVersionPredictionGET_593978(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593986: Call_PredictionGetVersionPredictionGET_593977;
+proc call*(call_568219: Call_PredictionGetVersionPredictionGET_568210;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the predictions for an application version.
   ## 
-  let valid = call_593986.validator(path, query, header, formData, body)
-  let scheme = call_593986.pickScheme
+  let valid = call_568219.validator(path, query, header, formData, body)
+  let scheme = call_568219.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593986.url(scheme.get, call_593986.host, call_593986.base,
-                         call_593986.route, valid.getOrDefault("path"),
+  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
+                         call_568219.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593986, url, valid)
+  result = hook(call_568219, url, valid)
 
-proc call*(call_593987: Call_PredictionGetVersionPredictionGET_593977;
+proc call*(call_568220: Call_PredictionGetVersionPredictionGET_568210;
           versionId: string; query: string; appId: string; verbose: bool = false;
           showAllIntents: bool = false; log: bool = false): Recallable =
   ## predictionGetVersionPredictionGET
@@ -590,21 +590,21 @@ proc call*(call_593987: Call_PredictionGetVersionPredictionGET_593977;
   ##        : The application ID.
   ##   log: bool
   ##      : Indicates whether to log the endpoint query or not.
-  var path_593988 = newJObject()
-  var query_593989 = newJObject()
-  add(query_593989, "verbose", newJBool(verbose))
-  add(path_593988, "versionId", newJString(versionId))
-  add(query_593989, "show-all-intents", newJBool(showAllIntents))
-  add(query_593989, "query", newJString(query))
-  add(path_593988, "appId", newJString(appId))
-  add(query_593989, "log", newJBool(log))
-  result = call_593987.call(path_593988, query_593989, nil, nil, nil)
+  var path_568221 = newJObject()
+  var query_568222 = newJObject()
+  add(query_568222, "verbose", newJBool(verbose))
+  add(path_568221, "versionId", newJString(versionId))
+  add(query_568222, "show-all-intents", newJBool(showAllIntents))
+  add(query_568222, "query", newJString(query))
+  add(path_568221, "appId", newJString(appId))
+  add(query_568222, "log", newJBool(log))
+  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
 
-var predictionGetVersionPredictionGET* = Call_PredictionGetVersionPredictionGET_593977(
+var predictionGetVersionPredictionGET* = Call_PredictionGetVersionPredictionGET_568210(
     name: "predictionGetVersionPredictionGET", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/apps/{appId}/versions/{versionId}/predict",
-    validator: validate_PredictionGetVersionPredictionGET_593978, base: "",
-    url: url_PredictionGetVersionPredictionGET_593979, schemes: {Scheme.Https})
+    validator: validate_PredictionGetVersionPredictionGET_568211, base: "",
+    url: url_PredictionGetVersionPredictionGET_568212, schemes: {Scheme.Https})
 export
   rest
 

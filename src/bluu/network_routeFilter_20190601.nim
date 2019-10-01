@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "network-routeFilter"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_RouteFiltersList_593646 = ref object of OpenApiRestCall_593424
-proc url_RouteFiltersList_593648(protocol: Scheme; host: string; base: string;
+  Call_RouteFiltersList_567879 = ref object of OpenApiRestCall_567657
+proc url_RouteFiltersList_567881(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +120,7 @@ proc url_RouteFiltersList_593648(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFiltersList_593647(path: JsonNode; query: JsonNode;
+proc validate_RouteFiltersList_567880(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets all route filters in a subscription.
@@ -133,11 +133,11 @@ proc validate_RouteFiltersList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593808 = path.getOrDefault("subscriptionId")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = path.getOrDefault("subscriptionId")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "subscriptionId", valid_593808
+  if valid_568041 != nil:
+    section.add "subscriptionId", valid_568041
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_RouteFiltersList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593809 = query.getOrDefault("api-version")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_568042 = query.getOrDefault("api-version")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "api-version", valid_593809
+  if valid_568042 != nil:
+    section.add "api-version", valid_568042
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_RouteFiltersList_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593836: Call_RouteFiltersList_593646; path: JsonNode;
+proc call*(call_568069: Call_RouteFiltersList_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all route filters in a subscription.
   ## 
-  let valid = call_593836.validator(path, query, header, formData, body)
-  let scheme = call_593836.pickScheme
+  let valid = call_568069.validator(path, query, header, formData, body)
+  let scheme = call_568069.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593836.url(scheme.get, call_593836.host, call_593836.base,
-                         call_593836.route, valid.getOrDefault("path"),
+  let url = call_568069.url(scheme.get, call_568069.host, call_568069.base,
+                         call_568069.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593836, url, valid)
+  result = hook(call_568069, url, valid)
 
-proc call*(call_593907: Call_RouteFiltersList_593646; apiVersion: string;
+proc call*(call_568140: Call_RouteFiltersList_567879; apiVersion: string;
           subscriptionId: string): Recallable =
   ## routeFiltersList
   ## Gets all route filters in a subscription.
@@ -179,19 +179,19 @@ proc call*(call_593907: Call_RouteFiltersList_593646; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593908 = newJObject()
-  var query_593910 = newJObject()
-  add(query_593910, "api-version", newJString(apiVersion))
-  add(path_593908, "subscriptionId", newJString(subscriptionId))
-  result = call_593907.call(path_593908, query_593910, nil, nil, nil)
+  var path_568141 = newJObject()
+  var query_568143 = newJObject()
+  add(query_568143, "api-version", newJString(apiVersion))
+  add(path_568141, "subscriptionId", newJString(subscriptionId))
+  result = call_568140.call(path_568141, query_568143, nil, nil, nil)
 
-var routeFiltersList* = Call_RouteFiltersList_593646(name: "routeFiltersList",
+var routeFiltersList* = Call_RouteFiltersList_567879(name: "routeFiltersList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/routeFilters",
-    validator: validate_RouteFiltersList_593647, base: "",
-    url: url_RouteFiltersList_593648, schemes: {Scheme.Https})
+    validator: validate_RouteFiltersList_567880, base: "",
+    url: url_RouteFiltersList_567881, schemes: {Scheme.Https})
 type
-  Call_RouteFiltersListByResourceGroup_593949 = ref object of OpenApiRestCall_593424
-proc url_RouteFiltersListByResourceGroup_593951(protocol: Scheme; host: string;
+  Call_RouteFiltersListByResourceGroup_568182 = ref object of OpenApiRestCall_567657
+proc url_RouteFiltersListByResourceGroup_568184(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,7 +211,7 @@ proc url_RouteFiltersListByResourceGroup_593951(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFiltersListByResourceGroup_593950(path: JsonNode;
+proc validate_RouteFiltersListByResourceGroup_568183(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all route filters in a resource group.
   ## 
@@ -225,16 +225,16 @@ proc validate_RouteFiltersListByResourceGroup_593950(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593952 = path.getOrDefault("resourceGroupName")
-  valid_593952 = validateParameter(valid_593952, JString, required = true,
+  var valid_568185 = path.getOrDefault("resourceGroupName")
+  valid_568185 = validateParameter(valid_568185, JString, required = true,
                                  default = nil)
-  if valid_593952 != nil:
-    section.add "resourceGroupName", valid_593952
-  var valid_593953 = path.getOrDefault("subscriptionId")
-  valid_593953 = validateParameter(valid_593953, JString, required = true,
+  if valid_568185 != nil:
+    section.add "resourceGroupName", valid_568185
+  var valid_568186 = path.getOrDefault("subscriptionId")
+  valid_568186 = validateParameter(valid_568186, JString, required = true,
                                  default = nil)
-  if valid_593953 != nil:
-    section.add "subscriptionId", valid_593953
+  if valid_568186 != nil:
+    section.add "subscriptionId", valid_568186
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +242,11 @@ proc validate_RouteFiltersListByResourceGroup_593950(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593954 = query.getOrDefault("api-version")
-  valid_593954 = validateParameter(valid_593954, JString, required = true,
+  var valid_568187 = query.getOrDefault("api-version")
+  valid_568187 = validateParameter(valid_568187, JString, required = true,
                                  default = nil)
-  if valid_593954 != nil:
-    section.add "api-version", valid_593954
+  if valid_568187 != nil:
+    section.add "api-version", valid_568187
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -255,21 +255,21 @@ proc validate_RouteFiltersListByResourceGroup_593950(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593955: Call_RouteFiltersListByResourceGroup_593949;
+proc call*(call_568188: Call_RouteFiltersListByResourceGroup_568182;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all route filters in a resource group.
   ## 
-  let valid = call_593955.validator(path, query, header, formData, body)
-  let scheme = call_593955.pickScheme
+  let valid = call_568188.validator(path, query, header, formData, body)
+  let scheme = call_568188.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593955.url(scheme.get, call_593955.host, call_593955.base,
-                         call_593955.route, valid.getOrDefault("path"),
+  let url = call_568188.url(scheme.get, call_568188.host, call_568188.base,
+                         call_568188.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593955, url, valid)
+  result = hook(call_568188, url, valid)
 
-proc call*(call_593956: Call_RouteFiltersListByResourceGroup_593949;
+proc call*(call_568189: Call_RouteFiltersListByResourceGroup_568182;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## routeFiltersListByResourceGroup
   ## Gets all route filters in a resource group.
@@ -279,21 +279,21 @@ proc call*(call_593956: Call_RouteFiltersListByResourceGroup_593949;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593957 = newJObject()
-  var query_593958 = newJObject()
-  add(path_593957, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593958, "api-version", newJString(apiVersion))
-  add(path_593957, "subscriptionId", newJString(subscriptionId))
-  result = call_593956.call(path_593957, query_593958, nil, nil, nil)
+  var path_568190 = newJObject()
+  var query_568191 = newJObject()
+  add(path_568190, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568191, "api-version", newJString(apiVersion))
+  add(path_568190, "subscriptionId", newJString(subscriptionId))
+  result = call_568189.call(path_568190, query_568191, nil, nil, nil)
 
-var routeFiltersListByResourceGroup* = Call_RouteFiltersListByResourceGroup_593949(
+var routeFiltersListByResourceGroup* = Call_RouteFiltersListByResourceGroup_568182(
     name: "routeFiltersListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeFilters",
-    validator: validate_RouteFiltersListByResourceGroup_593950, base: "",
-    url: url_RouteFiltersListByResourceGroup_593951, schemes: {Scheme.Https})
+    validator: validate_RouteFiltersListByResourceGroup_568183, base: "",
+    url: url_RouteFiltersListByResourceGroup_568184, schemes: {Scheme.Https})
 type
-  Call_RouteFiltersCreateOrUpdate_593972 = ref object of OpenApiRestCall_593424
-proc url_RouteFiltersCreateOrUpdate_593974(protocol: Scheme; host: string;
+  Call_RouteFiltersCreateOrUpdate_568205 = ref object of OpenApiRestCall_567657
+proc url_RouteFiltersCreateOrUpdate_568207(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -315,7 +315,7 @@ proc url_RouteFiltersCreateOrUpdate_593974(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFiltersCreateOrUpdate_593973(path: JsonNode; query: JsonNode;
+proc validate_RouteFiltersCreateOrUpdate_568206(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a route filter in a specified resource group.
   ## 
@@ -331,21 +331,21 @@ proc validate_RouteFiltersCreateOrUpdate_593973(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594001 = path.getOrDefault("resourceGroupName")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568234 = path.getOrDefault("resourceGroupName")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "resourceGroupName", valid_594001
-  var valid_594002 = path.getOrDefault("subscriptionId")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_568234 != nil:
+    section.add "resourceGroupName", valid_568234
+  var valid_568235 = path.getOrDefault("subscriptionId")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "subscriptionId", valid_594002
-  var valid_594003 = path.getOrDefault("routeFilterName")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_568235 != nil:
+    section.add "subscriptionId", valid_568235
+  var valid_568236 = path.getOrDefault("routeFilterName")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "routeFilterName", valid_594003
+  if valid_568236 != nil:
+    section.add "routeFilterName", valid_568236
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -353,11 +353,11 @@ proc validate_RouteFiltersCreateOrUpdate_593973(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594004 = query.getOrDefault("api-version")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = query.getOrDefault("api-version")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "api-version", valid_594004
+  if valid_568237 != nil:
+    section.add "api-version", valid_568237
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -371,20 +371,20 @@ proc validate_RouteFiltersCreateOrUpdate_593973(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594006: Call_RouteFiltersCreateOrUpdate_593972; path: JsonNode;
+proc call*(call_568239: Call_RouteFiltersCreateOrUpdate_568205; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a route filter in a specified resource group.
   ## 
-  let valid = call_594006.validator(path, query, header, formData, body)
-  let scheme = call_594006.pickScheme
+  let valid = call_568239.validator(path, query, header, formData, body)
+  let scheme = call_568239.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594006.url(scheme.get, call_594006.host, call_594006.base,
-                         call_594006.route, valid.getOrDefault("path"),
+  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
+                         call_568239.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594006, url, valid)
+  result = hook(call_568239, url, valid)
 
-proc call*(call_594007: Call_RouteFiltersCreateOrUpdate_593972;
+proc call*(call_568240: Call_RouteFiltersCreateOrUpdate_568205;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           routeFilterParameters: JsonNode; routeFilterName: string): Recallable =
   ## routeFiltersCreateOrUpdate
@@ -399,25 +399,25 @@ proc call*(call_594007: Call_RouteFiltersCreateOrUpdate_593972;
   ##                        : Parameters supplied to the create or update route filter operation.
   ##   routeFilterName: string (required)
   ##                  : The name of the route filter.
-  var path_594008 = newJObject()
-  var query_594009 = newJObject()
-  var body_594010 = newJObject()
-  add(path_594008, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594009, "api-version", newJString(apiVersion))
-  add(path_594008, "subscriptionId", newJString(subscriptionId))
+  var path_568241 = newJObject()
+  var query_568242 = newJObject()
+  var body_568243 = newJObject()
+  add(path_568241, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568242, "api-version", newJString(apiVersion))
+  add(path_568241, "subscriptionId", newJString(subscriptionId))
   if routeFilterParameters != nil:
-    body_594010 = routeFilterParameters
-  add(path_594008, "routeFilterName", newJString(routeFilterName))
-  result = call_594007.call(path_594008, query_594009, nil, nil, body_594010)
+    body_568243 = routeFilterParameters
+  add(path_568241, "routeFilterName", newJString(routeFilterName))
+  result = call_568240.call(path_568241, query_568242, nil, nil, body_568243)
 
-var routeFiltersCreateOrUpdate* = Call_RouteFiltersCreateOrUpdate_593972(
+var routeFiltersCreateOrUpdate* = Call_RouteFiltersCreateOrUpdate_568205(
     name: "routeFiltersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeFilters/{routeFilterName}",
-    validator: validate_RouteFiltersCreateOrUpdate_593973, base: "",
-    url: url_RouteFiltersCreateOrUpdate_593974, schemes: {Scheme.Https})
+    validator: validate_RouteFiltersCreateOrUpdate_568206, base: "",
+    url: url_RouteFiltersCreateOrUpdate_568207, schemes: {Scheme.Https})
 type
-  Call_RouteFiltersGet_593959 = ref object of OpenApiRestCall_593424
-proc url_RouteFiltersGet_593961(protocol: Scheme; host: string; base: string;
+  Call_RouteFiltersGet_568192 = ref object of OpenApiRestCall_567657
+proc url_RouteFiltersGet_568194(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -439,7 +439,7 @@ proc url_RouteFiltersGet_593961(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFiltersGet_593960(path: JsonNode; query: JsonNode;
+proc validate_RouteFiltersGet_568193(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the specified route filter.
@@ -456,21 +456,21 @@ proc validate_RouteFiltersGet_593960(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593963 = path.getOrDefault("resourceGroupName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = path.getOrDefault("resourceGroupName")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "resourceGroupName", valid_593963
-  var valid_593964 = path.getOrDefault("subscriptionId")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_568196 != nil:
+    section.add "resourceGroupName", valid_568196
+  var valid_568197 = path.getOrDefault("subscriptionId")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "subscriptionId", valid_593964
-  var valid_593965 = path.getOrDefault("routeFilterName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "subscriptionId", valid_568197
+  var valid_568198 = path.getOrDefault("routeFilterName")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "routeFilterName", valid_593965
+  if valid_568198 != nil:
+    section.add "routeFilterName", valid_568198
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -480,16 +480,16 @@ proc validate_RouteFiltersGet_593960(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593966 = query.getOrDefault("api-version")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_568199 = query.getOrDefault("api-version")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "api-version", valid_593966
-  var valid_593967 = query.getOrDefault("$expand")
-  valid_593967 = validateParameter(valid_593967, JString, required = false,
+  if valid_568199 != nil:
+    section.add "api-version", valid_568199
+  var valid_568200 = query.getOrDefault("$expand")
+  valid_568200 = validateParameter(valid_568200, JString, required = false,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "$expand", valid_593967
+  if valid_568200 != nil:
+    section.add "$expand", valid_568200
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -498,20 +498,20 @@ proc validate_RouteFiltersGet_593960(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_RouteFiltersGet_593959; path: JsonNode; query: JsonNode;
+proc call*(call_568201: Call_RouteFiltersGet_568192; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified route filter.
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_568201.validator(path, query, header, formData, body)
+  let scheme = call_568201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
+                         call_568201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_568201, url, valid)
 
-proc call*(call_593969: Call_RouteFiltersGet_593959; resourceGroupName: string;
+proc call*(call_568202: Call_RouteFiltersGet_568192; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; routeFilterName: string;
           Expand: string = ""): Recallable =
   ## routeFiltersGet
@@ -526,22 +526,22 @@ proc call*(call_593969: Call_RouteFiltersGet_593959; resourceGroupName: string;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   routeFilterName: string (required)
   ##                  : The name of the route filter.
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  add(path_593970, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(query_593971, "$expand", newJString(Expand))
-  add(path_593970, "subscriptionId", newJString(subscriptionId))
-  add(path_593970, "routeFilterName", newJString(routeFilterName))
-  result = call_593969.call(path_593970, query_593971, nil, nil, nil)
+  var path_568203 = newJObject()
+  var query_568204 = newJObject()
+  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568204, "api-version", newJString(apiVersion))
+  add(query_568204, "$expand", newJString(Expand))
+  add(path_568203, "subscriptionId", newJString(subscriptionId))
+  add(path_568203, "routeFilterName", newJString(routeFilterName))
+  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
 
-var routeFiltersGet* = Call_RouteFiltersGet_593959(name: "routeFiltersGet",
+var routeFiltersGet* = Call_RouteFiltersGet_568192(name: "routeFiltersGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeFilters/{routeFilterName}",
-    validator: validate_RouteFiltersGet_593960, base: "", url: url_RouteFiltersGet_593961,
+    validator: validate_RouteFiltersGet_568193, base: "", url: url_RouteFiltersGet_568194,
     schemes: {Scheme.Https})
 type
-  Call_RouteFiltersUpdate_594022 = ref object of OpenApiRestCall_593424
-proc url_RouteFiltersUpdate_594024(protocol: Scheme; host: string; base: string;
+  Call_RouteFiltersUpdate_568255 = ref object of OpenApiRestCall_567657
+proc url_RouteFiltersUpdate_568257(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -563,7 +563,7 @@ proc url_RouteFiltersUpdate_594024(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFiltersUpdate_594023(path: JsonNode; query: JsonNode;
+proc validate_RouteFiltersUpdate_568256(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Updates a route filter in a specified resource group.
@@ -580,21 +580,21 @@ proc validate_RouteFiltersUpdate_594023(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594025 = path.getOrDefault("resourceGroupName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_568258 = path.getOrDefault("resourceGroupName")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "resourceGroupName", valid_594025
-  var valid_594026 = path.getOrDefault("subscriptionId")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_568258 != nil:
+    section.add "resourceGroupName", valid_568258
+  var valid_568259 = path.getOrDefault("subscriptionId")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "subscriptionId", valid_594026
-  var valid_594027 = path.getOrDefault("routeFilterName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_568259 != nil:
+    section.add "subscriptionId", valid_568259
+  var valid_568260 = path.getOrDefault("routeFilterName")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "routeFilterName", valid_594027
+  if valid_568260 != nil:
+    section.add "routeFilterName", valid_568260
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -602,11 +602,11 @@ proc validate_RouteFiltersUpdate_594023(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594028 = query.getOrDefault("api-version")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  var valid_568261 = query.getOrDefault("api-version")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "api-version", valid_594028
+  if valid_568261 != nil:
+    section.add "api-version", valid_568261
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -620,20 +620,20 @@ proc validate_RouteFiltersUpdate_594023(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594030: Call_RouteFiltersUpdate_594022; path: JsonNode;
+proc call*(call_568263: Call_RouteFiltersUpdate_568255; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a route filter in a specified resource group.
   ## 
-  let valid = call_594030.validator(path, query, header, formData, body)
-  let scheme = call_594030.pickScheme
+  let valid = call_568263.validator(path, query, header, formData, body)
+  let scheme = call_568263.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594030.url(scheme.get, call_594030.host, call_594030.base,
-                         call_594030.route, valid.getOrDefault("path"),
+  let url = call_568263.url(scheme.get, call_568263.host, call_568263.base,
+                         call_568263.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594030, url, valid)
+  result = hook(call_568263, url, valid)
 
-proc call*(call_594031: Call_RouteFiltersUpdate_594022; resourceGroupName: string;
+proc call*(call_568264: Call_RouteFiltersUpdate_568255; resourceGroupName: string;
           apiVersion: string; subscriptionId: string;
           routeFilterParameters: JsonNode; routeFilterName: string): Recallable =
   ## routeFiltersUpdate
@@ -648,25 +648,25 @@ proc call*(call_594031: Call_RouteFiltersUpdate_594022; resourceGroupName: strin
   ##                        : Parameters supplied to the update route filter operation.
   ##   routeFilterName: string (required)
   ##                  : The name of the route filter.
-  var path_594032 = newJObject()
-  var query_594033 = newJObject()
-  var body_594034 = newJObject()
-  add(path_594032, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594033, "api-version", newJString(apiVersion))
-  add(path_594032, "subscriptionId", newJString(subscriptionId))
+  var path_568265 = newJObject()
+  var query_568266 = newJObject()
+  var body_568267 = newJObject()
+  add(path_568265, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568266, "api-version", newJString(apiVersion))
+  add(path_568265, "subscriptionId", newJString(subscriptionId))
   if routeFilterParameters != nil:
-    body_594034 = routeFilterParameters
-  add(path_594032, "routeFilterName", newJString(routeFilterName))
-  result = call_594031.call(path_594032, query_594033, nil, nil, body_594034)
+    body_568267 = routeFilterParameters
+  add(path_568265, "routeFilterName", newJString(routeFilterName))
+  result = call_568264.call(path_568265, query_568266, nil, nil, body_568267)
 
-var routeFiltersUpdate* = Call_RouteFiltersUpdate_594022(
+var routeFiltersUpdate* = Call_RouteFiltersUpdate_568255(
     name: "routeFiltersUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeFilters/{routeFilterName}",
-    validator: validate_RouteFiltersUpdate_594023, base: "",
-    url: url_RouteFiltersUpdate_594024, schemes: {Scheme.Https})
+    validator: validate_RouteFiltersUpdate_568256, base: "",
+    url: url_RouteFiltersUpdate_568257, schemes: {Scheme.Https})
 type
-  Call_RouteFiltersDelete_594011 = ref object of OpenApiRestCall_593424
-proc url_RouteFiltersDelete_594013(protocol: Scheme; host: string; base: string;
+  Call_RouteFiltersDelete_568244 = ref object of OpenApiRestCall_567657
+proc url_RouteFiltersDelete_568246(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -688,7 +688,7 @@ proc url_RouteFiltersDelete_594013(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFiltersDelete_594012(path: JsonNode; query: JsonNode;
+proc validate_RouteFiltersDelete_568245(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes the specified route filter.
@@ -705,21 +705,21 @@ proc validate_RouteFiltersDelete_594012(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594014 = path.getOrDefault("resourceGroupName")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_568247 = path.getOrDefault("resourceGroupName")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "resourceGroupName", valid_594014
-  var valid_594015 = path.getOrDefault("subscriptionId")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_568247 != nil:
+    section.add "resourceGroupName", valid_568247
+  var valid_568248 = path.getOrDefault("subscriptionId")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "subscriptionId", valid_594015
-  var valid_594016 = path.getOrDefault("routeFilterName")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_568248 != nil:
+    section.add "subscriptionId", valid_568248
+  var valid_568249 = path.getOrDefault("routeFilterName")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "routeFilterName", valid_594016
+  if valid_568249 != nil:
+    section.add "routeFilterName", valid_568249
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -727,11 +727,11 @@ proc validate_RouteFiltersDelete_594012(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594017 = query.getOrDefault("api-version")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  var valid_568250 = query.getOrDefault("api-version")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "api-version", valid_594017
+  if valid_568250 != nil:
+    section.add "api-version", valid_568250
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -740,20 +740,20 @@ proc validate_RouteFiltersDelete_594012(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_RouteFiltersDelete_594011; path: JsonNode;
+proc call*(call_568251: Call_RouteFiltersDelete_568244; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified route filter.
   ## 
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_568251.validator(path, query, header, formData, body)
+  let scheme = call_568251.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_568251.url(scheme.get, call_568251.host, call_568251.base,
+                         call_568251.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_568251, url, valid)
 
-proc call*(call_594019: Call_RouteFiltersDelete_594011; resourceGroupName: string;
+proc call*(call_568252: Call_RouteFiltersDelete_568244; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; routeFilterName: string): Recallable =
   ## routeFiltersDelete
   ## Deletes the specified route filter.
@@ -765,22 +765,22 @@ proc call*(call_594019: Call_RouteFiltersDelete_594011; resourceGroupName: strin
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   routeFilterName: string (required)
   ##                  : The name of the route filter.
-  var path_594020 = newJObject()
-  var query_594021 = newJObject()
-  add(path_594020, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594021, "api-version", newJString(apiVersion))
-  add(path_594020, "subscriptionId", newJString(subscriptionId))
-  add(path_594020, "routeFilterName", newJString(routeFilterName))
-  result = call_594019.call(path_594020, query_594021, nil, nil, nil)
+  var path_568253 = newJObject()
+  var query_568254 = newJObject()
+  add(path_568253, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568254, "api-version", newJString(apiVersion))
+  add(path_568253, "subscriptionId", newJString(subscriptionId))
+  add(path_568253, "routeFilterName", newJString(routeFilterName))
+  result = call_568252.call(path_568253, query_568254, nil, nil, nil)
 
-var routeFiltersDelete* = Call_RouteFiltersDelete_594011(
+var routeFiltersDelete* = Call_RouteFiltersDelete_568244(
     name: "routeFiltersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeFilters/{routeFilterName}",
-    validator: validate_RouteFiltersDelete_594012, base: "",
-    url: url_RouteFiltersDelete_594013, schemes: {Scheme.Https})
+    validator: validate_RouteFiltersDelete_568245, base: "",
+    url: url_RouteFiltersDelete_568246, schemes: {Scheme.Https})
 type
-  Call_RouteFilterRulesListByRouteFilter_594035 = ref object of OpenApiRestCall_593424
-proc url_RouteFilterRulesListByRouteFilter_594037(protocol: Scheme; host: string;
+  Call_RouteFilterRulesListByRouteFilter_568268 = ref object of OpenApiRestCall_567657
+proc url_RouteFilterRulesListByRouteFilter_568270(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -803,7 +803,7 @@ proc url_RouteFilterRulesListByRouteFilter_594037(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFilterRulesListByRouteFilter_594036(path: JsonNode;
+proc validate_RouteFilterRulesListByRouteFilter_568269(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all RouteFilterRules in a route filter.
   ## 
@@ -819,21 +819,21 @@ proc validate_RouteFilterRulesListByRouteFilter_594036(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594038 = path.getOrDefault("resourceGroupName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  var valid_568271 = path.getOrDefault("resourceGroupName")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "resourceGroupName", valid_594038
-  var valid_594039 = path.getOrDefault("subscriptionId")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_568271 != nil:
+    section.add "resourceGroupName", valid_568271
+  var valid_568272 = path.getOrDefault("subscriptionId")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "subscriptionId", valid_594039
-  var valid_594040 = path.getOrDefault("routeFilterName")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_568272 != nil:
+    section.add "subscriptionId", valid_568272
+  var valid_568273 = path.getOrDefault("routeFilterName")
+  valid_568273 = validateParameter(valid_568273, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "routeFilterName", valid_594040
+  if valid_568273 != nil:
+    section.add "routeFilterName", valid_568273
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -841,11 +841,11 @@ proc validate_RouteFilterRulesListByRouteFilter_594036(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594041 = query.getOrDefault("api-version")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_568274 = query.getOrDefault("api-version")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "api-version", valid_594041
+  if valid_568274 != nil:
+    section.add "api-version", valid_568274
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -854,21 +854,21 @@ proc validate_RouteFilterRulesListByRouteFilter_594036(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594042: Call_RouteFilterRulesListByRouteFilter_594035;
+proc call*(call_568275: Call_RouteFilterRulesListByRouteFilter_568268;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all RouteFilterRules in a route filter.
   ## 
-  let valid = call_594042.validator(path, query, header, formData, body)
-  let scheme = call_594042.pickScheme
+  let valid = call_568275.validator(path, query, header, formData, body)
+  let scheme = call_568275.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594042.url(scheme.get, call_594042.host, call_594042.base,
-                         call_594042.route, valid.getOrDefault("path"),
+  let url = call_568275.url(scheme.get, call_568275.host, call_568275.base,
+                         call_568275.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594042, url, valid)
+  result = hook(call_568275, url, valid)
 
-proc call*(call_594043: Call_RouteFilterRulesListByRouteFilter_594035;
+proc call*(call_568276: Call_RouteFilterRulesListByRouteFilter_568268;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           routeFilterName: string): Recallable =
   ## routeFilterRulesListByRouteFilter
@@ -881,22 +881,22 @@ proc call*(call_594043: Call_RouteFilterRulesListByRouteFilter_594035;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   routeFilterName: string (required)
   ##                  : The name of the route filter.
-  var path_594044 = newJObject()
-  var query_594045 = newJObject()
-  add(path_594044, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594045, "api-version", newJString(apiVersion))
-  add(path_594044, "subscriptionId", newJString(subscriptionId))
-  add(path_594044, "routeFilterName", newJString(routeFilterName))
-  result = call_594043.call(path_594044, query_594045, nil, nil, nil)
+  var path_568277 = newJObject()
+  var query_568278 = newJObject()
+  add(path_568277, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568278, "api-version", newJString(apiVersion))
+  add(path_568277, "subscriptionId", newJString(subscriptionId))
+  add(path_568277, "routeFilterName", newJString(routeFilterName))
+  result = call_568276.call(path_568277, query_568278, nil, nil, nil)
 
-var routeFilterRulesListByRouteFilter* = Call_RouteFilterRulesListByRouteFilter_594035(
+var routeFilterRulesListByRouteFilter* = Call_RouteFilterRulesListByRouteFilter_568268(
     name: "routeFilterRulesListByRouteFilter", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeFilters/{routeFilterName}/routeFilterRules",
-    validator: validate_RouteFilterRulesListByRouteFilter_594036, base: "",
-    url: url_RouteFilterRulesListByRouteFilter_594037, schemes: {Scheme.Https})
+    validator: validate_RouteFilterRulesListByRouteFilter_568269, base: "",
+    url: url_RouteFilterRulesListByRouteFilter_568270, schemes: {Scheme.Https})
 type
-  Call_RouteFilterRulesCreateOrUpdate_594058 = ref object of OpenApiRestCall_593424
-proc url_RouteFilterRulesCreateOrUpdate_594060(protocol: Scheme; host: string;
+  Call_RouteFilterRulesCreateOrUpdate_568291 = ref object of OpenApiRestCall_567657
+proc url_RouteFilterRulesCreateOrUpdate_568293(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -921,7 +921,7 @@ proc url_RouteFilterRulesCreateOrUpdate_594060(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFilterRulesCreateOrUpdate_594059(path: JsonNode;
+proc validate_RouteFilterRulesCreateOrUpdate_568292(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a route in the specified route filter.
   ## 
@@ -939,26 +939,26 @@ proc validate_RouteFilterRulesCreateOrUpdate_594059(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594061 = path.getOrDefault("resourceGroupName")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  var valid_568294 = path.getOrDefault("resourceGroupName")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "resourceGroupName", valid_594061
-  var valid_594062 = path.getOrDefault("ruleName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  if valid_568294 != nil:
+    section.add "resourceGroupName", valid_568294
+  var valid_568295 = path.getOrDefault("ruleName")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "ruleName", valid_594062
-  var valid_594063 = path.getOrDefault("subscriptionId")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  if valid_568295 != nil:
+    section.add "ruleName", valid_568295
+  var valid_568296 = path.getOrDefault("subscriptionId")
+  valid_568296 = validateParameter(valid_568296, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "subscriptionId", valid_594063
-  var valid_594064 = path.getOrDefault("routeFilterName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_568296 != nil:
+    section.add "subscriptionId", valid_568296
+  var valid_568297 = path.getOrDefault("routeFilterName")
+  valid_568297 = validateParameter(valid_568297, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "routeFilterName", valid_594064
+  if valid_568297 != nil:
+    section.add "routeFilterName", valid_568297
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -966,11 +966,11 @@ proc validate_RouteFilterRulesCreateOrUpdate_594059(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594065 = query.getOrDefault("api-version")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  var valid_568298 = query.getOrDefault("api-version")
+  valid_568298 = validateParameter(valid_568298, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "api-version", valid_594065
+  if valid_568298 != nil:
+    section.add "api-version", valid_568298
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -984,20 +984,20 @@ proc validate_RouteFilterRulesCreateOrUpdate_594059(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594067: Call_RouteFilterRulesCreateOrUpdate_594058; path: JsonNode;
+proc call*(call_568300: Call_RouteFilterRulesCreateOrUpdate_568291; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a route in the specified route filter.
   ## 
-  let valid = call_594067.validator(path, query, header, formData, body)
-  let scheme = call_594067.pickScheme
+  let valid = call_568300.validator(path, query, header, formData, body)
+  let scheme = call_568300.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594067.url(scheme.get, call_594067.host, call_594067.base,
-                         call_594067.route, valid.getOrDefault("path"),
+  let url = call_568300.url(scheme.get, call_568300.host, call_568300.base,
+                         call_568300.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594067, url, valid)
+  result = hook(call_568300, url, valid)
 
-proc call*(call_594068: Call_RouteFilterRulesCreateOrUpdate_594058;
+proc call*(call_568301: Call_RouteFilterRulesCreateOrUpdate_568291;
           routeFilterRuleParameters: JsonNode; resourceGroupName: string;
           apiVersion: string; ruleName: string; subscriptionId: string;
           routeFilterName: string): Recallable =
@@ -1015,26 +1015,26 @@ proc call*(call_594068: Call_RouteFilterRulesCreateOrUpdate_594058;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   routeFilterName: string (required)
   ##                  : The name of the route filter.
-  var path_594069 = newJObject()
-  var query_594070 = newJObject()
-  var body_594071 = newJObject()
+  var path_568302 = newJObject()
+  var query_568303 = newJObject()
+  var body_568304 = newJObject()
   if routeFilterRuleParameters != nil:
-    body_594071 = routeFilterRuleParameters
-  add(path_594069, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594070, "api-version", newJString(apiVersion))
-  add(path_594069, "ruleName", newJString(ruleName))
-  add(path_594069, "subscriptionId", newJString(subscriptionId))
-  add(path_594069, "routeFilterName", newJString(routeFilterName))
-  result = call_594068.call(path_594069, query_594070, nil, nil, body_594071)
+    body_568304 = routeFilterRuleParameters
+  add(path_568302, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568303, "api-version", newJString(apiVersion))
+  add(path_568302, "ruleName", newJString(ruleName))
+  add(path_568302, "subscriptionId", newJString(subscriptionId))
+  add(path_568302, "routeFilterName", newJString(routeFilterName))
+  result = call_568301.call(path_568302, query_568303, nil, nil, body_568304)
 
-var routeFilterRulesCreateOrUpdate* = Call_RouteFilterRulesCreateOrUpdate_594058(
+var routeFilterRulesCreateOrUpdate* = Call_RouteFilterRulesCreateOrUpdate_568291(
     name: "routeFilterRulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeFilters/{routeFilterName}/routeFilterRules/{ruleName}",
-    validator: validate_RouteFilterRulesCreateOrUpdate_594059, base: "",
-    url: url_RouteFilterRulesCreateOrUpdate_594060, schemes: {Scheme.Https})
+    validator: validate_RouteFilterRulesCreateOrUpdate_568292, base: "",
+    url: url_RouteFilterRulesCreateOrUpdate_568293, schemes: {Scheme.Https})
 type
-  Call_RouteFilterRulesGet_594046 = ref object of OpenApiRestCall_593424
-proc url_RouteFilterRulesGet_594048(protocol: Scheme; host: string; base: string;
+  Call_RouteFilterRulesGet_568279 = ref object of OpenApiRestCall_567657
+proc url_RouteFilterRulesGet_568281(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1059,7 +1059,7 @@ proc url_RouteFilterRulesGet_594048(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFilterRulesGet_594047(path: JsonNode; query: JsonNode;
+proc validate_RouteFilterRulesGet_568280(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets the specified rule from a route filter.
@@ -1078,26 +1078,26 @@ proc validate_RouteFilterRulesGet_594047(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594049 = path.getOrDefault("resourceGroupName")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  var valid_568282 = path.getOrDefault("resourceGroupName")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "resourceGroupName", valid_594049
-  var valid_594050 = path.getOrDefault("ruleName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  if valid_568282 != nil:
+    section.add "resourceGroupName", valid_568282
+  var valid_568283 = path.getOrDefault("ruleName")
+  valid_568283 = validateParameter(valid_568283, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "ruleName", valid_594050
-  var valid_594051 = path.getOrDefault("subscriptionId")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_568283 != nil:
+    section.add "ruleName", valid_568283
+  var valid_568284 = path.getOrDefault("subscriptionId")
+  valid_568284 = validateParameter(valid_568284, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "subscriptionId", valid_594051
-  var valid_594052 = path.getOrDefault("routeFilterName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_568284 != nil:
+    section.add "subscriptionId", valid_568284
+  var valid_568285 = path.getOrDefault("routeFilterName")
+  valid_568285 = validateParameter(valid_568285, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "routeFilterName", valid_594052
+  if valid_568285 != nil:
+    section.add "routeFilterName", valid_568285
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1105,11 +1105,11 @@ proc validate_RouteFilterRulesGet_594047(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594053 = query.getOrDefault("api-version")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_568286 = query.getOrDefault("api-version")
+  valid_568286 = validateParameter(valid_568286, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "api-version", valid_594053
+  if valid_568286 != nil:
+    section.add "api-version", valid_568286
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1118,20 +1118,20 @@ proc validate_RouteFilterRulesGet_594047(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594054: Call_RouteFilterRulesGet_594046; path: JsonNode;
+proc call*(call_568287: Call_RouteFilterRulesGet_568279; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified rule from a route filter.
   ## 
-  let valid = call_594054.validator(path, query, header, formData, body)
-  let scheme = call_594054.pickScheme
+  let valid = call_568287.validator(path, query, header, formData, body)
+  let scheme = call_568287.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594054.url(scheme.get, call_594054.host, call_594054.base,
-                         call_594054.route, valid.getOrDefault("path"),
+  let url = call_568287.url(scheme.get, call_568287.host, call_568287.base,
+                         call_568287.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594054, url, valid)
+  result = hook(call_568287, url, valid)
 
-proc call*(call_594055: Call_RouteFilterRulesGet_594046; resourceGroupName: string;
+proc call*(call_568288: Call_RouteFilterRulesGet_568279; resourceGroupName: string;
           apiVersion: string; ruleName: string; subscriptionId: string;
           routeFilterName: string): Recallable =
   ## routeFilterRulesGet
@@ -1146,23 +1146,23 @@ proc call*(call_594055: Call_RouteFilterRulesGet_594046; resourceGroupName: stri
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   routeFilterName: string (required)
   ##                  : The name of the route filter.
-  var path_594056 = newJObject()
-  var query_594057 = newJObject()
-  add(path_594056, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594057, "api-version", newJString(apiVersion))
-  add(path_594056, "ruleName", newJString(ruleName))
-  add(path_594056, "subscriptionId", newJString(subscriptionId))
-  add(path_594056, "routeFilterName", newJString(routeFilterName))
-  result = call_594055.call(path_594056, query_594057, nil, nil, nil)
+  var path_568289 = newJObject()
+  var query_568290 = newJObject()
+  add(path_568289, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568290, "api-version", newJString(apiVersion))
+  add(path_568289, "ruleName", newJString(ruleName))
+  add(path_568289, "subscriptionId", newJString(subscriptionId))
+  add(path_568289, "routeFilterName", newJString(routeFilterName))
+  result = call_568288.call(path_568289, query_568290, nil, nil, nil)
 
-var routeFilterRulesGet* = Call_RouteFilterRulesGet_594046(
+var routeFilterRulesGet* = Call_RouteFilterRulesGet_568279(
     name: "routeFilterRulesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeFilters/{routeFilterName}/routeFilterRules/{ruleName}",
-    validator: validate_RouteFilterRulesGet_594047, base: "",
-    url: url_RouteFilterRulesGet_594048, schemes: {Scheme.Https})
+    validator: validate_RouteFilterRulesGet_568280, base: "",
+    url: url_RouteFilterRulesGet_568281, schemes: {Scheme.Https})
 type
-  Call_RouteFilterRulesUpdate_594084 = ref object of OpenApiRestCall_593424
-proc url_RouteFilterRulesUpdate_594086(protocol: Scheme; host: string; base: string;
+  Call_RouteFilterRulesUpdate_568317 = ref object of OpenApiRestCall_567657
+proc url_RouteFilterRulesUpdate_568319(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1187,7 +1187,7 @@ proc url_RouteFilterRulesUpdate_594086(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFilterRulesUpdate_594085(path: JsonNode; query: JsonNode;
+proc validate_RouteFilterRulesUpdate_568318(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a route in the specified route filter.
   ## 
@@ -1205,26 +1205,26 @@ proc validate_RouteFilterRulesUpdate_594085(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594087 = path.getOrDefault("resourceGroupName")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  var valid_568320 = path.getOrDefault("resourceGroupName")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "resourceGroupName", valid_594087
-  var valid_594088 = path.getOrDefault("ruleName")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  if valid_568320 != nil:
+    section.add "resourceGroupName", valid_568320
+  var valid_568321 = path.getOrDefault("ruleName")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "ruleName", valid_594088
-  var valid_594089 = path.getOrDefault("subscriptionId")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  if valid_568321 != nil:
+    section.add "ruleName", valid_568321
+  var valid_568322 = path.getOrDefault("subscriptionId")
+  valid_568322 = validateParameter(valid_568322, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "subscriptionId", valid_594089
-  var valid_594090 = path.getOrDefault("routeFilterName")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  if valid_568322 != nil:
+    section.add "subscriptionId", valid_568322
+  var valid_568323 = path.getOrDefault("routeFilterName")
+  valid_568323 = validateParameter(valid_568323, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "routeFilterName", valid_594090
+  if valid_568323 != nil:
+    section.add "routeFilterName", valid_568323
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1232,11 +1232,11 @@ proc validate_RouteFilterRulesUpdate_594085(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594091 = query.getOrDefault("api-version")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  var valid_568324 = query.getOrDefault("api-version")
+  valid_568324 = validateParameter(valid_568324, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "api-version", valid_594091
+  if valid_568324 != nil:
+    section.add "api-version", valid_568324
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1250,20 +1250,20 @@ proc validate_RouteFilterRulesUpdate_594085(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594093: Call_RouteFilterRulesUpdate_594084; path: JsonNode;
+proc call*(call_568326: Call_RouteFilterRulesUpdate_568317; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a route in the specified route filter.
   ## 
-  let valid = call_594093.validator(path, query, header, formData, body)
-  let scheme = call_594093.pickScheme
+  let valid = call_568326.validator(path, query, header, formData, body)
+  let scheme = call_568326.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594093.url(scheme.get, call_594093.host, call_594093.base,
-                         call_594093.route, valid.getOrDefault("path"),
+  let url = call_568326.url(scheme.get, call_568326.host, call_568326.base,
+                         call_568326.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594093, url, valid)
+  result = hook(call_568326, url, valid)
 
-proc call*(call_594094: Call_RouteFilterRulesUpdate_594084;
+proc call*(call_568327: Call_RouteFilterRulesUpdate_568317;
           routeFilterRuleParameters: JsonNode; resourceGroupName: string;
           apiVersion: string; ruleName: string; subscriptionId: string;
           routeFilterName: string): Recallable =
@@ -1281,26 +1281,26 @@ proc call*(call_594094: Call_RouteFilterRulesUpdate_594084;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   routeFilterName: string (required)
   ##                  : The name of the route filter.
-  var path_594095 = newJObject()
-  var query_594096 = newJObject()
-  var body_594097 = newJObject()
+  var path_568328 = newJObject()
+  var query_568329 = newJObject()
+  var body_568330 = newJObject()
   if routeFilterRuleParameters != nil:
-    body_594097 = routeFilterRuleParameters
-  add(path_594095, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594096, "api-version", newJString(apiVersion))
-  add(path_594095, "ruleName", newJString(ruleName))
-  add(path_594095, "subscriptionId", newJString(subscriptionId))
-  add(path_594095, "routeFilterName", newJString(routeFilterName))
-  result = call_594094.call(path_594095, query_594096, nil, nil, body_594097)
+    body_568330 = routeFilterRuleParameters
+  add(path_568328, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568329, "api-version", newJString(apiVersion))
+  add(path_568328, "ruleName", newJString(ruleName))
+  add(path_568328, "subscriptionId", newJString(subscriptionId))
+  add(path_568328, "routeFilterName", newJString(routeFilterName))
+  result = call_568327.call(path_568328, query_568329, nil, nil, body_568330)
 
-var routeFilterRulesUpdate* = Call_RouteFilterRulesUpdate_594084(
+var routeFilterRulesUpdate* = Call_RouteFilterRulesUpdate_568317(
     name: "routeFilterRulesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeFilters/{routeFilterName}/routeFilterRules/{ruleName}",
-    validator: validate_RouteFilterRulesUpdate_594085, base: "",
-    url: url_RouteFilterRulesUpdate_594086, schemes: {Scheme.Https})
+    validator: validate_RouteFilterRulesUpdate_568318, base: "",
+    url: url_RouteFilterRulesUpdate_568319, schemes: {Scheme.Https})
 type
-  Call_RouteFilterRulesDelete_594072 = ref object of OpenApiRestCall_593424
-proc url_RouteFilterRulesDelete_594074(protocol: Scheme; host: string; base: string;
+  Call_RouteFilterRulesDelete_568305 = ref object of OpenApiRestCall_567657
+proc url_RouteFilterRulesDelete_568307(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1325,7 +1325,7 @@ proc url_RouteFilterRulesDelete_594074(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RouteFilterRulesDelete_594073(path: JsonNode; query: JsonNode;
+proc validate_RouteFilterRulesDelete_568306(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified rule from a route filter.
   ## 
@@ -1343,26 +1343,26 @@ proc validate_RouteFilterRulesDelete_594073(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594075 = path.getOrDefault("resourceGroupName")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  var valid_568308 = path.getOrDefault("resourceGroupName")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "resourceGroupName", valid_594075
-  var valid_594076 = path.getOrDefault("ruleName")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  if valid_568308 != nil:
+    section.add "resourceGroupName", valid_568308
+  var valid_568309 = path.getOrDefault("ruleName")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "ruleName", valid_594076
-  var valid_594077 = path.getOrDefault("subscriptionId")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  if valid_568309 != nil:
+    section.add "ruleName", valid_568309
+  var valid_568310 = path.getOrDefault("subscriptionId")
+  valid_568310 = validateParameter(valid_568310, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "subscriptionId", valid_594077
-  var valid_594078 = path.getOrDefault("routeFilterName")
-  valid_594078 = validateParameter(valid_594078, JString, required = true,
+  if valid_568310 != nil:
+    section.add "subscriptionId", valid_568310
+  var valid_568311 = path.getOrDefault("routeFilterName")
+  valid_568311 = validateParameter(valid_568311, JString, required = true,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "routeFilterName", valid_594078
+  if valid_568311 != nil:
+    section.add "routeFilterName", valid_568311
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1370,11 +1370,11 @@ proc validate_RouteFilterRulesDelete_594073(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594079 = query.getOrDefault("api-version")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+  var valid_568312 = query.getOrDefault("api-version")
+  valid_568312 = validateParameter(valid_568312, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "api-version", valid_594079
+  if valid_568312 != nil:
+    section.add "api-version", valid_568312
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1383,20 +1383,20 @@ proc validate_RouteFilterRulesDelete_594073(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594080: Call_RouteFilterRulesDelete_594072; path: JsonNode;
+proc call*(call_568313: Call_RouteFilterRulesDelete_568305; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified rule from a route filter.
   ## 
-  let valid = call_594080.validator(path, query, header, formData, body)
-  let scheme = call_594080.pickScheme
+  let valid = call_568313.validator(path, query, header, formData, body)
+  let scheme = call_568313.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594080.url(scheme.get, call_594080.host, call_594080.base,
-                         call_594080.route, valid.getOrDefault("path"),
+  let url = call_568313.url(scheme.get, call_568313.host, call_568313.base,
+                         call_568313.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594080, url, valid)
+  result = hook(call_568313, url, valid)
 
-proc call*(call_594081: Call_RouteFilterRulesDelete_594072;
+proc call*(call_568314: Call_RouteFilterRulesDelete_568305;
           resourceGroupName: string; apiVersion: string; ruleName: string;
           subscriptionId: string; routeFilterName: string): Recallable =
   ## routeFilterRulesDelete
@@ -1411,20 +1411,20 @@ proc call*(call_594081: Call_RouteFilterRulesDelete_594072;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   routeFilterName: string (required)
   ##                  : The name of the route filter.
-  var path_594082 = newJObject()
-  var query_594083 = newJObject()
-  add(path_594082, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594083, "api-version", newJString(apiVersion))
-  add(path_594082, "ruleName", newJString(ruleName))
-  add(path_594082, "subscriptionId", newJString(subscriptionId))
-  add(path_594082, "routeFilterName", newJString(routeFilterName))
-  result = call_594081.call(path_594082, query_594083, nil, nil, nil)
+  var path_568315 = newJObject()
+  var query_568316 = newJObject()
+  add(path_568315, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568316, "api-version", newJString(apiVersion))
+  add(path_568315, "ruleName", newJString(ruleName))
+  add(path_568315, "subscriptionId", newJString(subscriptionId))
+  add(path_568315, "routeFilterName", newJString(routeFilterName))
+  result = call_568314.call(path_568315, query_568316, nil, nil, nil)
 
-var routeFilterRulesDelete* = Call_RouteFilterRulesDelete_594072(
+var routeFilterRulesDelete* = Call_RouteFilterRulesDelete_568305(
     name: "routeFilterRulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeFilters/{routeFilterName}/routeFilterRules/{ruleName}",
-    validator: validate_RouteFilterRulesDelete_594073, base: "",
-    url: url_RouteFilterRulesDelete_594074, schemes: {Scheme.Https})
+    validator: validate_RouteFilterRulesDelete_568306, base: "",
+    url: url_RouteFilterRulesDelete_568307, schemes: {Scheme.Https})
 export
   rest
 

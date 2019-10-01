@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ACE Provisioning ManagementPartner
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "managementpartner-ManagementPartner"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationList_593646 = ref object of OpenApiRestCall_593424
-proc url_OperationList_593648(protocol: Scheme; host: string; base: string;
+  Call_OperationList_567879 = ref object of OpenApiRestCall_567657
+proc url_OperationList_567881(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationList_593647(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_OperationList_567880(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the operations.
   ## 
@@ -125,11 +125,11 @@ proc validate_OperationList_593647(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_568040 = query.getOrDefault("api-version")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_568040 != nil:
+    section.add "api-version", valid_568040
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -138,43 +138,43 @@ proc validate_OperationList_593647(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593830: Call_OperationList_593646; path: JsonNode; query: JsonNode;
+proc call*(call_568063: Call_OperationList_567879; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the operations.
   ## 
-  let valid = call_593830.validator(path, query, header, formData, body)
-  let scheme = call_593830.pickScheme
+  let valid = call_568063.validator(path, query, header, formData, body)
+  let scheme = call_568063.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593830.url(scheme.get, call_593830.host, call_593830.base,
-                         call_593830.route, valid.getOrDefault("path"),
+  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
+                         call_568063.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593830, url, valid)
+  result = hook(call_568063, url, valid)
 
-proc call*(call_593901: Call_OperationList_593646; apiVersion: string): Recallable =
+proc call*(call_568134: Call_OperationList_567879; apiVersion: string): Recallable =
   ## operationList
   ## List all the operations.
   ##   apiVersion: string (required)
   ##             : Supported version.
-  var query_593902 = newJObject()
-  add(query_593902, "api-version", newJString(apiVersion))
-  result = call_593901.call(nil, query_593902, nil, nil, nil)
+  var query_568135 = newJObject()
+  add(query_568135, "api-version", newJString(apiVersion))
+  result = call_568134.call(nil, query_568135, nil, nil, nil)
 
-var operationList* = Call_OperationList_593646(name: "operationList",
+var operationList* = Call_OperationList_567879(name: "operationList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.ManagementPartner/operations",
-    validator: validate_OperationList_593647, base: "", url: url_OperationList_593648,
+    validator: validate_OperationList_567880, base: "", url: url_OperationList_567881,
     schemes: {Scheme.Https})
 type
-  Call_PartnersGet_593942 = ref object of OpenApiRestCall_593424
-proc url_PartnersGet_593944(protocol: Scheme; host: string; base: string;
+  Call_PartnersGet_568175 = ref object of OpenApiRestCall_567657
+proc url_PartnersGet_568177(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_PartnersGet_593943(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PartnersGet_568176(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the management partner using the objectId and tenantId.
   ## 
@@ -188,11 +188,11 @@ proc validate_PartnersGet_593943(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593945 = query.getOrDefault("api-version")
-  valid_593945 = validateParameter(valid_593945, JString, required = true,
+  var valid_568178 = query.getOrDefault("api-version")
+  valid_568178 = validateParameter(valid_568178, JString, required = true,
                                  default = nil)
-  if valid_593945 != nil:
-    section.add "api-version", valid_593945
+  if valid_568178 != nil:
+    section.add "api-version", valid_568178
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -201,37 +201,37 @@ proc validate_PartnersGet_593943(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593946: Call_PartnersGet_593942; path: JsonNode; query: JsonNode;
+proc call*(call_568179: Call_PartnersGet_568175; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the management partner using the objectId and tenantId.
   ## 
-  let valid = call_593946.validator(path, query, header, formData, body)
-  let scheme = call_593946.pickScheme
+  let valid = call_568179.validator(path, query, header, formData, body)
+  let scheme = call_568179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593946.url(scheme.get, call_593946.host, call_593946.base,
-                         call_593946.route, valid.getOrDefault("path"),
+  let url = call_568179.url(scheme.get, call_568179.host, call_568179.base,
+                         call_568179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593946, url, valid)
+  result = hook(call_568179, url, valid)
 
-proc call*(call_593947: Call_PartnersGet_593942; apiVersion: string): Recallable =
+proc call*(call_568180: Call_PartnersGet_568175; apiVersion: string): Recallable =
   ## partnersGet
   ## Get the management partner using the objectId and tenantId.
   ##   apiVersion: string (required)
   ##             : Supported version.
-  var query_593948 = newJObject()
-  add(query_593948, "api-version", newJString(apiVersion))
-  result = call_593947.call(nil, query_593948, nil, nil, nil)
+  var query_568181 = newJObject()
+  add(query_568181, "api-version", newJString(apiVersion))
+  result = call_568180.call(nil, query_568181, nil, nil, nil)
 
-var partnersGet* = Call_PartnersGet_593942(name: "partnersGet",
+var partnersGet* = Call_PartnersGet_568175(name: "partnersGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/providers/Microsoft.ManagementPartner/partners",
-                                        validator: validate_PartnersGet_593943,
-                                        base: "", url: url_PartnersGet_593944,
+                                        validator: validate_PartnersGet_568176,
+                                        base: "", url: url_PartnersGet_568177,
                                         schemes: {Scheme.Https})
 type
-  Call_PartnerCreate_593972 = ref object of OpenApiRestCall_593424
-proc url_PartnerCreate_593974(protocol: Scheme; host: string; base: string;
+  Call_PartnerCreate_568205 = ref object of OpenApiRestCall_567657
+proc url_PartnerCreate_568207(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -247,7 +247,7 @@ proc url_PartnerCreate_593974(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PartnerCreate_593973(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PartnerCreate_568206(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a management partner for the objectId and tenantId.
   ## 
@@ -258,11 +258,11 @@ proc validate_PartnerCreate_593973(path: JsonNode; query: JsonNode; header: Json
   ##            : Id of the Partner
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `partnerId` field"
-  var valid_593975 = path.getOrDefault("partnerId")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_568208 = path.getOrDefault("partnerId")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "partnerId", valid_593975
+  if valid_568208 != nil:
+    section.add "partnerId", valid_568208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -270,11 +270,11 @@ proc validate_PartnerCreate_593973(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593976 = query.getOrDefault("api-version")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_568209 = query.getOrDefault("api-version")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "api-version", valid_593976
+  if valid_568209 != nil:
+    section.add "api-version", valid_568209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -283,20 +283,20 @@ proc validate_PartnerCreate_593973(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593977: Call_PartnerCreate_593972; path: JsonNode; query: JsonNode;
+proc call*(call_568210: Call_PartnerCreate_568205; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a management partner for the objectId and tenantId.
   ## 
-  let valid = call_593977.validator(path, query, header, formData, body)
-  let scheme = call_593977.pickScheme
+  let valid = call_568210.validator(path, query, header, formData, body)
+  let scheme = call_568210.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593977.url(scheme.get, call_593977.host, call_593977.base,
-                         call_593977.route, valid.getOrDefault("path"),
+  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
+                         call_568210.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593977, url, valid)
+  result = hook(call_568210, url, valid)
 
-proc call*(call_593978: Call_PartnerCreate_593972; apiVersion: string;
+proc call*(call_568211: Call_PartnerCreate_568205; apiVersion: string;
           partnerId: string): Recallable =
   ## partnerCreate
   ## Create a management partner for the objectId and tenantId.
@@ -304,20 +304,20 @@ proc call*(call_593978: Call_PartnerCreate_593972; apiVersion: string;
   ##             : Supported version.
   ##   partnerId: string (required)
   ##            : Id of the Partner
-  var path_593979 = newJObject()
-  var query_593980 = newJObject()
-  add(query_593980, "api-version", newJString(apiVersion))
-  add(path_593979, "partnerId", newJString(partnerId))
-  result = call_593978.call(path_593979, query_593980, nil, nil, nil)
+  var path_568212 = newJObject()
+  var query_568213 = newJObject()
+  add(query_568213, "api-version", newJString(apiVersion))
+  add(path_568212, "partnerId", newJString(partnerId))
+  result = call_568211.call(path_568212, query_568213, nil, nil, nil)
 
-var partnerCreate* = Call_PartnerCreate_593972(name: "partnerCreate",
+var partnerCreate* = Call_PartnerCreate_568205(name: "partnerCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com",
     route: "/providers/Microsoft.ManagementPartner/partners/{partnerId}",
-    validator: validate_PartnerCreate_593973, base: "", url: url_PartnerCreate_593974,
+    validator: validate_PartnerCreate_568206, base: "", url: url_PartnerCreate_568207,
     schemes: {Scheme.Https})
 type
-  Call_PartnerGet_593949 = ref object of OpenApiRestCall_593424
-proc url_PartnerGet_593951(protocol: Scheme; host: string; base: string; route: string;
+  Call_PartnerGet_568182 = ref object of OpenApiRestCall_567657
+proc url_PartnerGet_568184(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -333,7 +333,7 @@ proc url_PartnerGet_593951(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PartnerGet_593950(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PartnerGet_568183(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the management partner using the partnerId, objectId and tenantId.
   ## 
@@ -344,11 +344,11 @@ proc validate_PartnerGet_593950(path: JsonNode; query: JsonNode; header: JsonNod
   ##            : Id of the Partner
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `partnerId` field"
-  var valid_593966 = path.getOrDefault("partnerId")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_568199 = path.getOrDefault("partnerId")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "partnerId", valid_593966
+  if valid_568199 != nil:
+    section.add "partnerId", valid_568199
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -356,11 +356,11 @@ proc validate_PartnerGet_593950(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593967 = query.getOrDefault("api-version")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  var valid_568200 = query.getOrDefault("api-version")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "api-version", valid_593967
+  if valid_568200 != nil:
+    section.add "api-version", valid_568200
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -369,41 +369,41 @@ proc validate_PartnerGet_593950(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_PartnerGet_593949; path: JsonNode; query: JsonNode;
+proc call*(call_568201: Call_PartnerGet_568182; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the management partner using the partnerId, objectId and tenantId.
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_568201.validator(path, query, header, formData, body)
+  let scheme = call_568201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
+                         call_568201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_568201, url, valid)
 
-proc call*(call_593969: Call_PartnerGet_593949; apiVersion: string; partnerId: string): Recallable =
+proc call*(call_568202: Call_PartnerGet_568182; apiVersion: string; partnerId: string): Recallable =
   ## partnerGet
   ## Get the management partner using the partnerId, objectId and tenantId.
   ##   apiVersion: string (required)
   ##             : Supported version.
   ##   partnerId: string (required)
   ##            : Id of the Partner
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(path_593970, "partnerId", newJString(partnerId))
-  result = call_593969.call(path_593970, query_593971, nil, nil, nil)
+  var path_568203 = newJObject()
+  var query_568204 = newJObject()
+  add(query_568204, "api-version", newJString(apiVersion))
+  add(path_568203, "partnerId", newJString(partnerId))
+  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
 
-var partnerGet* = Call_PartnerGet_593949(name: "partnerGet",
+var partnerGet* = Call_PartnerGet_568182(name: "partnerGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/providers/Microsoft.ManagementPartner/partners/{partnerId}",
-                                      validator: validate_PartnerGet_593950,
-                                      base: "", url: url_PartnerGet_593951,
+                                      validator: validate_PartnerGet_568183,
+                                      base: "", url: url_PartnerGet_568184,
                                       schemes: {Scheme.Https})
 type
-  Call_PartnerUpdate_593990 = ref object of OpenApiRestCall_593424
-proc url_PartnerUpdate_593992(protocol: Scheme; host: string; base: string;
+  Call_PartnerUpdate_568223 = ref object of OpenApiRestCall_567657
+proc url_PartnerUpdate_568225(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -419,7 +419,7 @@ proc url_PartnerUpdate_593992(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PartnerUpdate_593991(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PartnerUpdate_568224(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the management partner for the objectId and tenantId.
   ## 
@@ -430,11 +430,11 @@ proc validate_PartnerUpdate_593991(path: JsonNode; query: JsonNode; header: Json
   ##            : Id of the Partner
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `partnerId` field"
-  var valid_593993 = path.getOrDefault("partnerId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568226 = path.getOrDefault("partnerId")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "partnerId", valid_593993
+  if valid_568226 != nil:
+    section.add "partnerId", valid_568226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -442,11 +442,11 @@ proc validate_PartnerUpdate_593991(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568227 = query.getOrDefault("api-version")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
+  if valid_568227 != nil:
+    section.add "api-version", valid_568227
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -455,20 +455,20 @@ proc validate_PartnerUpdate_593991(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593995: Call_PartnerUpdate_593990; path: JsonNode; query: JsonNode;
+proc call*(call_568228: Call_PartnerUpdate_568223; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the management partner for the objectId and tenantId.
   ## 
-  let valid = call_593995.validator(path, query, header, formData, body)
-  let scheme = call_593995.pickScheme
+  let valid = call_568228.validator(path, query, header, formData, body)
+  let scheme = call_568228.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593995.url(scheme.get, call_593995.host, call_593995.base,
-                         call_593995.route, valid.getOrDefault("path"),
+  let url = call_568228.url(scheme.get, call_568228.host, call_568228.base,
+                         call_568228.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593995, url, valid)
+  result = hook(call_568228, url, valid)
 
-proc call*(call_593996: Call_PartnerUpdate_593990; apiVersion: string;
+proc call*(call_568229: Call_PartnerUpdate_568223; apiVersion: string;
           partnerId: string): Recallable =
   ## partnerUpdate
   ## Update the management partner for the objectId and tenantId.
@@ -476,20 +476,20 @@ proc call*(call_593996: Call_PartnerUpdate_593990; apiVersion: string;
   ##             : Supported version.
   ##   partnerId: string (required)
   ##            : Id of the Partner
-  var path_593997 = newJObject()
-  var query_593998 = newJObject()
-  add(query_593998, "api-version", newJString(apiVersion))
-  add(path_593997, "partnerId", newJString(partnerId))
-  result = call_593996.call(path_593997, query_593998, nil, nil, nil)
+  var path_568230 = newJObject()
+  var query_568231 = newJObject()
+  add(query_568231, "api-version", newJString(apiVersion))
+  add(path_568230, "partnerId", newJString(partnerId))
+  result = call_568229.call(path_568230, query_568231, nil, nil, nil)
 
-var partnerUpdate* = Call_PartnerUpdate_593990(name: "partnerUpdate",
+var partnerUpdate* = Call_PartnerUpdate_568223(name: "partnerUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com",
     route: "/providers/Microsoft.ManagementPartner/partners/{partnerId}",
-    validator: validate_PartnerUpdate_593991, base: "", url: url_PartnerUpdate_593992,
+    validator: validate_PartnerUpdate_568224, base: "", url: url_PartnerUpdate_568225,
     schemes: {Scheme.Https})
 type
-  Call_PartnerDelete_593981 = ref object of OpenApiRestCall_593424
-proc url_PartnerDelete_593983(protocol: Scheme; host: string; base: string;
+  Call_PartnerDelete_568214 = ref object of OpenApiRestCall_567657
+proc url_PartnerDelete_568216(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -505,7 +505,7 @@ proc url_PartnerDelete_593983(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PartnerDelete_593982(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PartnerDelete_568215(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the management partner for the objectId and tenantId.
   ## 
@@ -516,11 +516,11 @@ proc validate_PartnerDelete_593982(path: JsonNode; query: JsonNode; header: Json
   ##            : Id of the Partner
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `partnerId` field"
-  var valid_593984 = path.getOrDefault("partnerId")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568217 = path.getOrDefault("partnerId")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "partnerId", valid_593984
+  if valid_568217 != nil:
+    section.add "partnerId", valid_568217
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -528,11 +528,11 @@ proc validate_PartnerDelete_593982(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568218 = query.getOrDefault("api-version")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_568218 != nil:
+    section.add "api-version", valid_568218
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -541,20 +541,20 @@ proc validate_PartnerDelete_593982(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593986: Call_PartnerDelete_593981; path: JsonNode; query: JsonNode;
+proc call*(call_568219: Call_PartnerDelete_568214; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the management partner for the objectId and tenantId.
   ## 
-  let valid = call_593986.validator(path, query, header, formData, body)
-  let scheme = call_593986.pickScheme
+  let valid = call_568219.validator(path, query, header, formData, body)
+  let scheme = call_568219.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593986.url(scheme.get, call_593986.host, call_593986.base,
-                         call_593986.route, valid.getOrDefault("path"),
+  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
+                         call_568219.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593986, url, valid)
+  result = hook(call_568219, url, valid)
 
-proc call*(call_593987: Call_PartnerDelete_593981; apiVersion: string;
+proc call*(call_568220: Call_PartnerDelete_568214; apiVersion: string;
           partnerId: string): Recallable =
   ## partnerDelete
   ## Delete the management partner for the objectId and tenantId.
@@ -562,16 +562,16 @@ proc call*(call_593987: Call_PartnerDelete_593981; apiVersion: string;
   ##             : Supported version.
   ##   partnerId: string (required)
   ##            : Id of the Partner
-  var path_593988 = newJObject()
-  var query_593989 = newJObject()
-  add(query_593989, "api-version", newJString(apiVersion))
-  add(path_593988, "partnerId", newJString(partnerId))
-  result = call_593987.call(path_593988, query_593989, nil, nil, nil)
+  var path_568221 = newJObject()
+  var query_568222 = newJObject()
+  add(query_568222, "api-version", newJString(apiVersion))
+  add(path_568221, "partnerId", newJString(partnerId))
+  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
 
-var partnerDelete* = Call_PartnerDelete_593981(name: "partnerDelete",
+var partnerDelete* = Call_PartnerDelete_568214(name: "partnerDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com",
     route: "/providers/Microsoft.ManagementPartner/partners/{partnerId}",
-    validator: validate_PartnerDelete_593982, base: "", url: url_PartnerDelete_593983,
+    validator: validate_PartnerDelete_568215, base: "", url: url_PartnerDelete_568216,
     schemes: {Scheme.Https})
 export
   rest

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Machine Learning Compute Management Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "machinelearningcompute-machineLearningCompute"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_MachineLearningComputeListAvailableOperations_593646 = ref object of OpenApiRestCall_593424
-proc url_MachineLearningComputeListAvailableOperations_593648(protocol: Scheme;
+  Call_MachineLearningComputeListAvailableOperations_567879 = ref object of OpenApiRestCall_567657
+proc url_MachineLearningComputeListAvailableOperations_567881(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_MachineLearningComputeListAvailableOperations_593647(
+proc validate_MachineLearningComputeListAvailableOperations_567880(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets all available operations.
@@ -126,11 +126,11 @@ proc validate_MachineLearningComputeListAvailableOperations_593647(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_568040 = query.getOrDefault("api-version")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_568040 != nil:
+    section.add "api-version", valid_568040
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,40 +139,40 @@ proc validate_MachineLearningComputeListAvailableOperations_593647(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593830: Call_MachineLearningComputeListAvailableOperations_593646;
+proc call*(call_568063: Call_MachineLearningComputeListAvailableOperations_567879;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all available operations.
   ## 
-  let valid = call_593830.validator(path, query, header, formData, body)
-  let scheme = call_593830.pickScheme
+  let valid = call_568063.validator(path, query, header, formData, body)
+  let scheme = call_568063.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593830.url(scheme.get, call_593830.host, call_593830.base,
-                         call_593830.route, valid.getOrDefault("path"),
+  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
+                         call_568063.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593830, url, valid)
+  result = hook(call_568063, url, valid)
 
-proc call*(call_593901: Call_MachineLearningComputeListAvailableOperations_593646;
+proc call*(call_568134: Call_MachineLearningComputeListAvailableOperations_567879;
           apiVersion: string): Recallable =
   ## machineLearningComputeListAvailableOperations
   ## Gets all available operations.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearningCompute resource provider API to use.
-  var query_593902 = newJObject()
-  add(query_593902, "api-version", newJString(apiVersion))
-  result = call_593901.call(nil, query_593902, nil, nil, nil)
+  var query_568135 = newJObject()
+  add(query_568135, "api-version", newJString(apiVersion))
+  result = call_568134.call(nil, query_568135, nil, nil, nil)
 
-var machineLearningComputeListAvailableOperations* = Call_MachineLearningComputeListAvailableOperations_593646(
+var machineLearningComputeListAvailableOperations* = Call_MachineLearningComputeListAvailableOperations_567879(
     name: "machineLearningComputeListAvailableOperations",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.MachineLearningCompute/operations",
-    validator: validate_MachineLearningComputeListAvailableOperations_593647,
-    base: "", url: url_MachineLearningComputeListAvailableOperations_593648,
+    validator: validate_MachineLearningComputeListAvailableOperations_567880,
+    base: "", url: url_MachineLearningComputeListAvailableOperations_567881,
     schemes: {Scheme.Https})
 type
-  Call_OperationalizationClustersListBySubscriptionId_593942 = ref object of OpenApiRestCall_593424
-proc url_OperationalizationClustersListBySubscriptionId_593944(protocol: Scheme;
+  Call_OperationalizationClustersListBySubscriptionId_568175 = ref object of OpenApiRestCall_567657
+proc url_OperationalizationClustersListBySubscriptionId_568177(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -188,7 +188,7 @@ proc url_OperationalizationClustersListBySubscriptionId_593944(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationalizationClustersListBySubscriptionId_593943(
+proc validate_OperationalizationClustersListBySubscriptionId_568176(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets the operationalization clusters in the specified subscription.
@@ -201,11 +201,11 @@ proc validate_OperationalizationClustersListBySubscriptionId_593943(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_568193 = path.getOrDefault("subscriptionId")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
+  if valid_568193 != nil:
+    section.add "subscriptionId", valid_568193
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -215,16 +215,16 @@ proc validate_OperationalizationClustersListBySubscriptionId_593943(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593961 = query.getOrDefault("api-version")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = query.getOrDefault("api-version")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "api-version", valid_593961
-  var valid_593962 = query.getOrDefault("$skiptoken")
-  valid_593962 = validateParameter(valid_593962, JString, required = false,
+  if valid_568194 != nil:
+    section.add "api-version", valid_568194
+  var valid_568195 = query.getOrDefault("$skiptoken")
+  valid_568195 = validateParameter(valid_568195, JString, required = false,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "$skiptoken", valid_593962
+  if valid_568195 != nil:
+    section.add "$skiptoken", valid_568195
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -233,21 +233,21 @@ proc validate_OperationalizationClustersListBySubscriptionId_593943(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593963: Call_OperationalizationClustersListBySubscriptionId_593942;
+proc call*(call_568196: Call_OperationalizationClustersListBySubscriptionId_568175;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the operationalization clusters in the specified subscription.
   ## 
-  let valid = call_593963.validator(path, query, header, formData, body)
-  let scheme = call_593963.pickScheme
+  let valid = call_568196.validator(path, query, header, formData, body)
+  let scheme = call_568196.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593963.url(scheme.get, call_593963.host, call_593963.base,
-                         call_593963.route, valid.getOrDefault("path"),
+  let url = call_568196.url(scheme.get, call_568196.host, call_568196.base,
+                         call_568196.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593963, url, valid)
+  result = hook(call_568196, url, valid)
 
-proc call*(call_593964: Call_OperationalizationClustersListBySubscriptionId_593942;
+proc call*(call_568197: Call_OperationalizationClustersListBySubscriptionId_568175;
           apiVersion: string; subscriptionId: string; Skiptoken: string = ""): Recallable =
   ## operationalizationClustersListBySubscriptionId
   ## Gets the operationalization clusters in the specified subscription.
@@ -257,22 +257,22 @@ proc call*(call_593964: Call_OperationalizationClustersListBySubscriptionId_5939
   ##                 : The Azure subscription ID.
   ##   Skiptoken: string
   ##            : Continuation token for pagination.
-  var path_593965 = newJObject()
-  var query_593966 = newJObject()
-  add(query_593966, "api-version", newJString(apiVersion))
-  add(path_593965, "subscriptionId", newJString(subscriptionId))
-  add(query_593966, "$skiptoken", newJString(Skiptoken))
-  result = call_593964.call(path_593965, query_593966, nil, nil, nil)
+  var path_568198 = newJObject()
+  var query_568199 = newJObject()
+  add(query_568199, "api-version", newJString(apiVersion))
+  add(path_568198, "subscriptionId", newJString(subscriptionId))
+  add(query_568199, "$skiptoken", newJString(Skiptoken))
+  result = call_568197.call(path_568198, query_568199, nil, nil, nil)
 
-var operationalizationClustersListBySubscriptionId* = Call_OperationalizationClustersListBySubscriptionId_593942(
+var operationalizationClustersListBySubscriptionId* = Call_OperationalizationClustersListBySubscriptionId_568175(
     name: "operationalizationClustersListBySubscriptionId",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MachineLearningCompute/operationalizationClusters",
-    validator: validate_OperationalizationClustersListBySubscriptionId_593943,
-    base: "", url: url_OperationalizationClustersListBySubscriptionId_593944,
+    validator: validate_OperationalizationClustersListBySubscriptionId_568176,
+    base: "", url: url_OperationalizationClustersListBySubscriptionId_568177,
     schemes: {Scheme.Https})
 type
-  Call_OperationalizationClustersListByResourceGroup_593967 = ref object of OpenApiRestCall_593424
-proc url_OperationalizationClustersListByResourceGroup_593969(protocol: Scheme;
+  Call_OperationalizationClustersListByResourceGroup_568200 = ref object of OpenApiRestCall_567657
+proc url_OperationalizationClustersListByResourceGroup_568202(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -292,7 +292,7 @@ proc url_OperationalizationClustersListByResourceGroup_593969(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationalizationClustersListByResourceGroup_593968(
+proc validate_OperationalizationClustersListByResourceGroup_568201(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets the clusters in the specified resource group.
@@ -307,16 +307,16 @@ proc validate_OperationalizationClustersListByResourceGroup_593968(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593970 = path.getOrDefault("resourceGroupName")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  var valid_568203 = path.getOrDefault("resourceGroupName")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "resourceGroupName", valid_593970
-  var valid_593971 = path.getOrDefault("subscriptionId")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  if valid_568203 != nil:
+    section.add "resourceGroupName", valid_568203
+  var valid_568204 = path.getOrDefault("subscriptionId")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "subscriptionId", valid_593971
+  if valid_568204 != nil:
+    section.add "subscriptionId", valid_568204
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -326,16 +326,16 @@ proc validate_OperationalizationClustersListByResourceGroup_593968(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593972 = query.getOrDefault("api-version")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_568205 = query.getOrDefault("api-version")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "api-version", valid_593972
-  var valid_593973 = query.getOrDefault("$skiptoken")
-  valid_593973 = validateParameter(valid_593973, JString, required = false,
+  if valid_568205 != nil:
+    section.add "api-version", valid_568205
+  var valid_568206 = query.getOrDefault("$skiptoken")
+  valid_568206 = validateParameter(valid_568206, JString, required = false,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "$skiptoken", valid_593973
+  if valid_568206 != nil:
+    section.add "$skiptoken", valid_568206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -344,21 +344,21 @@ proc validate_OperationalizationClustersListByResourceGroup_593968(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593974: Call_OperationalizationClustersListByResourceGroup_593967;
+proc call*(call_568207: Call_OperationalizationClustersListByResourceGroup_568200;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the clusters in the specified resource group.
   ## 
-  let valid = call_593974.validator(path, query, header, formData, body)
-  let scheme = call_593974.pickScheme
+  let valid = call_568207.validator(path, query, header, formData, body)
+  let scheme = call_568207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593974.url(scheme.get, call_593974.host, call_593974.base,
-                         call_593974.route, valid.getOrDefault("path"),
+  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
+                         call_568207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593974, url, valid)
+  result = hook(call_568207, url, valid)
 
-proc call*(call_593975: Call_OperationalizationClustersListByResourceGroup_593967;
+proc call*(call_568208: Call_OperationalizationClustersListByResourceGroup_568200;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           Skiptoken: string = ""): Recallable =
   ## operationalizationClustersListByResourceGroup
@@ -371,23 +371,23 @@ proc call*(call_593975: Call_OperationalizationClustersListByResourceGroup_59396
   ##                 : The Azure subscription ID.
   ##   Skiptoken: string
   ##            : Continuation token for pagination.
-  var path_593976 = newJObject()
-  var query_593977 = newJObject()
-  add(path_593976, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593977, "api-version", newJString(apiVersion))
-  add(path_593976, "subscriptionId", newJString(subscriptionId))
-  add(query_593977, "$skiptoken", newJString(Skiptoken))
-  result = call_593975.call(path_593976, query_593977, nil, nil, nil)
+  var path_568209 = newJObject()
+  var query_568210 = newJObject()
+  add(path_568209, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568210, "api-version", newJString(apiVersion))
+  add(path_568209, "subscriptionId", newJString(subscriptionId))
+  add(query_568210, "$skiptoken", newJString(Skiptoken))
+  result = call_568208.call(path_568209, query_568210, nil, nil, nil)
 
-var operationalizationClustersListByResourceGroup* = Call_OperationalizationClustersListByResourceGroup_593967(
+var operationalizationClustersListByResourceGroup* = Call_OperationalizationClustersListByResourceGroup_568200(
     name: "operationalizationClustersListByResourceGroup",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningCompute/operationalizationClusters",
-    validator: validate_OperationalizationClustersListByResourceGroup_593968,
-    base: "", url: url_OperationalizationClustersListByResourceGroup_593969,
+    validator: validate_OperationalizationClustersListByResourceGroup_568201,
+    base: "", url: url_OperationalizationClustersListByResourceGroup_568202,
     schemes: {Scheme.Https})
 type
-  Call_OperationalizationClustersCreateOrUpdate_593989 = ref object of OpenApiRestCall_593424
-proc url_OperationalizationClustersCreateOrUpdate_593991(protocol: Scheme;
+  Call_OperationalizationClustersCreateOrUpdate_568222 = ref object of OpenApiRestCall_567657
+proc url_OperationalizationClustersCreateOrUpdate_568224(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -409,7 +409,7 @@ proc url_OperationalizationClustersCreateOrUpdate_593991(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationalizationClustersCreateOrUpdate_593990(path: JsonNode;
+proc validate_OperationalizationClustersCreateOrUpdate_568223(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an operationalization cluster.
   ## 
@@ -425,21 +425,21 @@ proc validate_OperationalizationClustersCreateOrUpdate_593990(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_593992 = path.getOrDefault("clusterName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568225 = path.getOrDefault("clusterName")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "clusterName", valid_593992
-  var valid_593993 = path.getOrDefault("resourceGroupName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "clusterName", valid_568225
+  var valid_568226 = path.getOrDefault("resourceGroupName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "resourceGroupName", valid_593993
-  var valid_593994 = path.getOrDefault("subscriptionId")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "resourceGroupName", valid_568226
+  var valid_568227 = path.getOrDefault("subscriptionId")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "subscriptionId", valid_593994
+  if valid_568227 != nil:
+    section.add "subscriptionId", valid_568227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -447,11 +447,11 @@ proc validate_OperationalizationClustersCreateOrUpdate_593990(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593995 = query.getOrDefault("api-version")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_568228 = query.getOrDefault("api-version")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "api-version", valid_593995
+  if valid_568228 != nil:
+    section.add "api-version", valid_568228
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -465,21 +465,21 @@ proc validate_OperationalizationClustersCreateOrUpdate_593990(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_OperationalizationClustersCreateOrUpdate_593989;
+proc call*(call_568230: Call_OperationalizationClustersCreateOrUpdate_568222;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update an operationalization cluster.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_OperationalizationClustersCreateOrUpdate_593989;
+proc call*(call_568231: Call_OperationalizationClustersCreateOrUpdate_568222;
           clusterName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; parameters: JsonNode): Recallable =
   ## operationalizationClustersCreateOrUpdate
@@ -494,26 +494,26 @@ proc call*(call_593998: Call_OperationalizationClustersCreateOrUpdate_593989;
   ##                 : The Azure subscription ID.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to create or update an Operationalization cluster.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  var body_594001 = newJObject()
-  add(path_593999, "clusterName", newJString(clusterName))
-  add(path_593999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  var body_568234 = newJObject()
+  add(path_568232, "clusterName", newJString(clusterName))
+  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594001 = parameters
-  result = call_593998.call(path_593999, query_594000, nil, nil, body_594001)
+    body_568234 = parameters
+  result = call_568231.call(path_568232, query_568233, nil, nil, body_568234)
 
-var operationalizationClustersCreateOrUpdate* = Call_OperationalizationClustersCreateOrUpdate_593989(
+var operationalizationClustersCreateOrUpdate* = Call_OperationalizationClustersCreateOrUpdate_568222(
     name: "operationalizationClustersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningCompute/operationalizationClusters/{clusterName}",
-    validator: validate_OperationalizationClustersCreateOrUpdate_593990, base: "",
-    url: url_OperationalizationClustersCreateOrUpdate_593991,
+    validator: validate_OperationalizationClustersCreateOrUpdate_568223, base: "",
+    url: url_OperationalizationClustersCreateOrUpdate_568224,
     schemes: {Scheme.Https})
 type
-  Call_OperationalizationClustersGet_593978 = ref object of OpenApiRestCall_593424
-proc url_OperationalizationClustersGet_593980(protocol: Scheme; host: string;
+  Call_OperationalizationClustersGet_568211 = ref object of OpenApiRestCall_567657
+proc url_OperationalizationClustersGet_568213(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -535,7 +535,7 @@ proc url_OperationalizationClustersGet_593980(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationalizationClustersGet_593979(path: JsonNode; query: JsonNode;
+proc validate_OperationalizationClustersGet_568212(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the operationalization cluster resource view. Note that the credentials are not returned by this call. Call ListKeys to get them.
   ## 
@@ -551,21 +551,21 @@ proc validate_OperationalizationClustersGet_593979(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_593981 = path.getOrDefault("clusterName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = path.getOrDefault("clusterName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "clusterName", valid_593981
-  var valid_593982 = path.getOrDefault("resourceGroupName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568214 != nil:
+    section.add "clusterName", valid_568214
+  var valid_568215 = path.getOrDefault("resourceGroupName")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "resourceGroupName", valid_593982
-  var valid_593983 = path.getOrDefault("subscriptionId")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_568215 != nil:
+    section.add "resourceGroupName", valid_568215
+  var valid_568216 = path.getOrDefault("subscriptionId")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "subscriptionId", valid_593983
+  if valid_568216 != nil:
+    section.add "subscriptionId", valid_568216
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -573,11 +573,11 @@ proc validate_OperationalizationClustersGet_593979(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593984 = query.getOrDefault("api-version")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568217 = query.getOrDefault("api-version")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "api-version", valid_593984
+  if valid_568217 != nil:
+    section.add "api-version", valid_568217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -586,20 +586,20 @@ proc validate_OperationalizationClustersGet_593979(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_OperationalizationClustersGet_593978; path: JsonNode;
+proc call*(call_568218: Call_OperationalizationClustersGet_568211; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the operationalization cluster resource view. Note that the credentials are not returned by this call. Call ListKeys to get them.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_568218.validator(path, query, header, formData, body)
+  let scheme = call_568218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_568218.url(scheme.get, call_568218.host, call_568218.base,
+                         call_568218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_568218, url, valid)
 
-proc call*(call_593986: Call_OperationalizationClustersGet_593978;
+proc call*(call_568219: Call_OperationalizationClustersGet_568211;
           clusterName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## operationalizationClustersGet
@@ -612,22 +612,22 @@ proc call*(call_593986: Call_OperationalizationClustersGet_593978;
   ##             : The version of the Microsoft.MachineLearningCompute resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  add(path_593987, "clusterName", newJString(clusterName))
-  add(path_593987, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
-  result = call_593986.call(path_593987, query_593988, nil, nil, nil)
+  var path_568220 = newJObject()
+  var query_568221 = newJObject()
+  add(path_568220, "clusterName", newJString(clusterName))
+  add(path_568220, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568221, "api-version", newJString(apiVersion))
+  add(path_568220, "subscriptionId", newJString(subscriptionId))
+  result = call_568219.call(path_568220, query_568221, nil, nil, nil)
 
-var operationalizationClustersGet* = Call_OperationalizationClustersGet_593978(
+var operationalizationClustersGet* = Call_OperationalizationClustersGet_568211(
     name: "operationalizationClustersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningCompute/operationalizationClusters/{clusterName}",
-    validator: validate_OperationalizationClustersGet_593979, base: "",
-    url: url_OperationalizationClustersGet_593980, schemes: {Scheme.Https})
+    validator: validate_OperationalizationClustersGet_568212, base: "",
+    url: url_OperationalizationClustersGet_568213, schemes: {Scheme.Https})
 type
-  Call_OperationalizationClustersUpdate_594014 = ref object of OpenApiRestCall_593424
-proc url_OperationalizationClustersUpdate_594016(protocol: Scheme; host: string;
+  Call_OperationalizationClustersUpdate_568247 = ref object of OpenApiRestCall_567657
+proc url_OperationalizationClustersUpdate_568249(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -649,7 +649,7 @@ proc url_OperationalizationClustersUpdate_594016(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationalizationClustersUpdate_594015(path: JsonNode;
+proc validate_OperationalizationClustersUpdate_568248(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The PATCH operation can be used to update only the tags for a cluster. Use PUT operation to update other properties.
   ## 
@@ -665,21 +665,21 @@ proc validate_OperationalizationClustersUpdate_594015(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594017 = path.getOrDefault("clusterName")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  var valid_568250 = path.getOrDefault("clusterName")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "clusterName", valid_594017
-  var valid_594018 = path.getOrDefault("resourceGroupName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  if valid_568250 != nil:
+    section.add "clusterName", valid_568250
+  var valid_568251 = path.getOrDefault("resourceGroupName")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "resourceGroupName", valid_594018
-  var valid_594019 = path.getOrDefault("subscriptionId")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  if valid_568251 != nil:
+    section.add "resourceGroupName", valid_568251
+  var valid_568252 = path.getOrDefault("subscriptionId")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "subscriptionId", valid_594019
+  if valid_568252 != nil:
+    section.add "subscriptionId", valid_568252
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -687,11 +687,11 @@ proc validate_OperationalizationClustersUpdate_594015(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594020 = query.getOrDefault("api-version")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  var valid_568253 = query.getOrDefault("api-version")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "api-version", valid_594020
+  if valid_568253 != nil:
+    section.add "api-version", valid_568253
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -705,21 +705,21 @@ proc validate_OperationalizationClustersUpdate_594015(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594022: Call_OperationalizationClustersUpdate_594014;
+proc call*(call_568255: Call_OperationalizationClustersUpdate_568247;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The PATCH operation can be used to update only the tags for a cluster. Use PUT operation to update other properties.
   ## 
-  let valid = call_594022.validator(path, query, header, formData, body)
-  let scheme = call_594022.pickScheme
+  let valid = call_568255.validator(path, query, header, formData, body)
+  let scheme = call_568255.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594022.url(scheme.get, call_594022.host, call_594022.base,
-                         call_594022.route, valid.getOrDefault("path"),
+  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
+                         call_568255.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594022, url, valid)
+  result = hook(call_568255, url, valid)
 
-proc call*(call_594023: Call_OperationalizationClustersUpdate_594014;
+proc call*(call_568256: Call_OperationalizationClustersUpdate_568247;
           clusterName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; parameters: JsonNode): Recallable =
   ## operationalizationClustersUpdate
@@ -734,25 +734,25 @@ proc call*(call_594023: Call_OperationalizationClustersUpdate_594014;
   ##                 : The Azure subscription ID.
   ##   parameters: JObject (required)
   ##             : The parameters supplied to patch the cluster.
-  var path_594024 = newJObject()
-  var query_594025 = newJObject()
-  var body_594026 = newJObject()
-  add(path_594024, "clusterName", newJString(clusterName))
-  add(path_594024, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594025, "api-version", newJString(apiVersion))
-  add(path_594024, "subscriptionId", newJString(subscriptionId))
+  var path_568257 = newJObject()
+  var query_568258 = newJObject()
+  var body_568259 = newJObject()
+  add(path_568257, "clusterName", newJString(clusterName))
+  add(path_568257, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568258, "api-version", newJString(apiVersion))
+  add(path_568257, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594026 = parameters
-  result = call_594023.call(path_594024, query_594025, nil, nil, body_594026)
+    body_568259 = parameters
+  result = call_568256.call(path_568257, query_568258, nil, nil, body_568259)
 
-var operationalizationClustersUpdate* = Call_OperationalizationClustersUpdate_594014(
+var operationalizationClustersUpdate* = Call_OperationalizationClustersUpdate_568247(
     name: "operationalizationClustersUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningCompute/operationalizationClusters/{clusterName}",
-    validator: validate_OperationalizationClustersUpdate_594015, base: "",
-    url: url_OperationalizationClustersUpdate_594016, schemes: {Scheme.Https})
+    validator: validate_OperationalizationClustersUpdate_568248, base: "",
+    url: url_OperationalizationClustersUpdate_568249, schemes: {Scheme.Https})
 type
-  Call_OperationalizationClustersDelete_594002 = ref object of OpenApiRestCall_593424
-proc url_OperationalizationClustersDelete_594004(protocol: Scheme; host: string;
+  Call_OperationalizationClustersDelete_568235 = ref object of OpenApiRestCall_567657
+proc url_OperationalizationClustersDelete_568237(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -774,7 +774,7 @@ proc url_OperationalizationClustersDelete_594004(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationalizationClustersDelete_594003(path: JsonNode;
+proc validate_OperationalizationClustersDelete_568236(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified cluster.
   ## 
@@ -790,21 +790,21 @@ proc validate_OperationalizationClustersDelete_594003(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594005 = path.getOrDefault("clusterName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_568238 = path.getOrDefault("clusterName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "clusterName", valid_594005
-  var valid_594006 = path.getOrDefault("resourceGroupName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_568238 != nil:
+    section.add "clusterName", valid_568238
+  var valid_568239 = path.getOrDefault("resourceGroupName")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "resourceGroupName", valid_594006
-  var valid_594007 = path.getOrDefault("subscriptionId")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "resourceGroupName", valid_568239
+  var valid_568240 = path.getOrDefault("subscriptionId")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "subscriptionId", valid_594007
+  if valid_568240 != nil:
+    section.add "subscriptionId", valid_568240
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -814,15 +814,15 @@ proc validate_OperationalizationClustersDelete_594003(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594008 = query.getOrDefault("api-version")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  var valid_568241 = query.getOrDefault("api-version")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "api-version", valid_594008
-  var valid_594009 = query.getOrDefault("deleteAll")
-  valid_594009 = validateParameter(valid_594009, JBool, required = false, default = nil)
-  if valid_594009 != nil:
-    section.add "deleteAll", valid_594009
+  if valid_568241 != nil:
+    section.add "api-version", valid_568241
+  var valid_568242 = query.getOrDefault("deleteAll")
+  valid_568242 = validateParameter(valid_568242, JBool, required = false, default = nil)
+  if valid_568242 != nil:
+    section.add "deleteAll", valid_568242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -831,21 +831,21 @@ proc validate_OperationalizationClustersDelete_594003(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594010: Call_OperationalizationClustersDelete_594002;
+proc call*(call_568243: Call_OperationalizationClustersDelete_568235;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes the specified cluster.
   ## 
-  let valid = call_594010.validator(path, query, header, formData, body)
-  let scheme = call_594010.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594010.url(scheme.get, call_594010.host, call_594010.base,
-                         call_594010.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594010, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594011: Call_OperationalizationClustersDelete_594002;
+proc call*(call_568244: Call_OperationalizationClustersDelete_568235;
           clusterName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string; deleteAll: bool = false): Recallable =
   ## operationalizationClustersDelete
@@ -860,23 +860,23 @@ proc call*(call_594011: Call_OperationalizationClustersDelete_594002;
   ##                 : The Azure subscription ID.
   ##   deleteAll: bool
   ##            : If true, deletes all resources associated with this cluster.
-  var path_594012 = newJObject()
-  var query_594013 = newJObject()
-  add(path_594012, "clusterName", newJString(clusterName))
-  add(path_594012, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594013, "api-version", newJString(apiVersion))
-  add(path_594012, "subscriptionId", newJString(subscriptionId))
-  add(query_594013, "deleteAll", newJBool(deleteAll))
-  result = call_594011.call(path_594012, query_594013, nil, nil, nil)
+  var path_568245 = newJObject()
+  var query_568246 = newJObject()
+  add(path_568245, "clusterName", newJString(clusterName))
+  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568246, "api-version", newJString(apiVersion))
+  add(path_568245, "subscriptionId", newJString(subscriptionId))
+  add(query_568246, "deleteAll", newJBool(deleteAll))
+  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
 
-var operationalizationClustersDelete* = Call_OperationalizationClustersDelete_594002(
+var operationalizationClustersDelete* = Call_OperationalizationClustersDelete_568235(
     name: "operationalizationClustersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningCompute/operationalizationClusters/{clusterName}",
-    validator: validate_OperationalizationClustersDelete_594003, base: "",
-    url: url_OperationalizationClustersDelete_594004, schemes: {Scheme.Https})
+    validator: validate_OperationalizationClustersDelete_568236, base: "",
+    url: url_OperationalizationClustersDelete_568237, schemes: {Scheme.Https})
 type
-  Call_OperationalizationClustersCheckSystemServicesUpdatesAvailable_594027 = ref object of OpenApiRestCall_593424
-proc url_OperationalizationClustersCheckSystemServicesUpdatesAvailable_594029(
+  Call_OperationalizationClustersCheckSystemServicesUpdatesAvailable_568260 = ref object of OpenApiRestCall_567657
+proc url_OperationalizationClustersCheckSystemServicesUpdatesAvailable_568262(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -900,7 +900,7 @@ proc url_OperationalizationClustersCheckSystemServicesUpdatesAvailable_594029(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationalizationClustersCheckSystemServicesUpdatesAvailable_594028(
+proc validate_OperationalizationClustersCheckSystemServicesUpdatesAvailable_568261(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Checks if updates are available for system services in the cluster.
@@ -917,21 +917,21 @@ proc validate_OperationalizationClustersCheckSystemServicesUpdatesAvailable_5940
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594030 = path.getOrDefault("clusterName")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  var valid_568263 = path.getOrDefault("clusterName")
+  valid_568263 = validateParameter(valid_568263, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "clusterName", valid_594030
-  var valid_594031 = path.getOrDefault("resourceGroupName")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  if valid_568263 != nil:
+    section.add "clusterName", valid_568263
+  var valid_568264 = path.getOrDefault("resourceGroupName")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "resourceGroupName", valid_594031
-  var valid_594032 = path.getOrDefault("subscriptionId")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  if valid_568264 != nil:
+    section.add "resourceGroupName", valid_568264
+  var valid_568265 = path.getOrDefault("subscriptionId")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "subscriptionId", valid_594032
+  if valid_568265 != nil:
+    section.add "subscriptionId", valid_568265
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -939,11 +939,11 @@ proc validate_OperationalizationClustersCheckSystemServicesUpdatesAvailable_5940
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594033 = query.getOrDefault("api-version")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  var valid_568266 = query.getOrDefault("api-version")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "api-version", valid_594033
+  if valid_568266 != nil:
+    section.add "api-version", valid_568266
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -952,21 +952,21 @@ proc validate_OperationalizationClustersCheckSystemServicesUpdatesAvailable_5940
   if body != nil:
     result.add "body", body
 
-proc call*(call_594034: Call_OperationalizationClustersCheckSystemServicesUpdatesAvailable_594027;
+proc call*(call_568267: Call_OperationalizationClustersCheckSystemServicesUpdatesAvailable_568260;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Checks if updates are available for system services in the cluster.
   ## 
-  let valid = call_594034.validator(path, query, header, formData, body)
-  let scheme = call_594034.pickScheme
+  let valid = call_568267.validator(path, query, header, formData, body)
+  let scheme = call_568267.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594034.url(scheme.get, call_594034.host, call_594034.base,
-                         call_594034.route, valid.getOrDefault("path"),
+  let url = call_568267.url(scheme.get, call_568267.host, call_568267.base,
+                         call_568267.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594034, url, valid)
+  result = hook(call_568267, url, valid)
 
-proc call*(call_594035: Call_OperationalizationClustersCheckSystemServicesUpdatesAvailable_594027;
+proc call*(call_568268: Call_OperationalizationClustersCheckSystemServicesUpdatesAvailable_568260;
           clusterName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## operationalizationClustersCheckSystemServicesUpdatesAvailable
@@ -979,23 +979,23 @@ proc call*(call_594035: Call_OperationalizationClustersCheckSystemServicesUpdate
   ##             : The version of the Microsoft.MachineLearningCompute resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_594036 = newJObject()
-  var query_594037 = newJObject()
-  add(path_594036, "clusterName", newJString(clusterName))
-  add(path_594036, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594037, "api-version", newJString(apiVersion))
-  add(path_594036, "subscriptionId", newJString(subscriptionId))
-  result = call_594035.call(path_594036, query_594037, nil, nil, nil)
+  var path_568269 = newJObject()
+  var query_568270 = newJObject()
+  add(path_568269, "clusterName", newJString(clusterName))
+  add(path_568269, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568270, "api-version", newJString(apiVersion))
+  add(path_568269, "subscriptionId", newJString(subscriptionId))
+  result = call_568268.call(path_568269, query_568270, nil, nil, nil)
 
-var operationalizationClustersCheckSystemServicesUpdatesAvailable* = Call_OperationalizationClustersCheckSystemServicesUpdatesAvailable_594027(
+var operationalizationClustersCheckSystemServicesUpdatesAvailable* = Call_OperationalizationClustersCheckSystemServicesUpdatesAvailable_568260(
     name: "operationalizationClustersCheckSystemServicesUpdatesAvailable",
-    meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningCompute/operationalizationClusters/{clusterName}/checkSystemServicesUpdatesAvailable", validator: validate_OperationalizationClustersCheckSystemServicesUpdatesAvailable_594028,
+    meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningCompute/operationalizationClusters/{clusterName}/checkSystemServicesUpdatesAvailable", validator: validate_OperationalizationClustersCheckSystemServicesUpdatesAvailable_568261,
     base: "",
-    url: url_OperationalizationClustersCheckSystemServicesUpdatesAvailable_594029,
+    url: url_OperationalizationClustersCheckSystemServicesUpdatesAvailable_568262,
     schemes: {Scheme.Https})
 type
-  Call_OperationalizationClustersListKeys_594038 = ref object of OpenApiRestCall_593424
-proc url_OperationalizationClustersListKeys_594040(protocol: Scheme; host: string;
+  Call_OperationalizationClustersListKeys_568271 = ref object of OpenApiRestCall_567657
+proc url_OperationalizationClustersListKeys_568273(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1018,7 +1018,7 @@ proc url_OperationalizationClustersListKeys_594040(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationalizationClustersListKeys_594039(path: JsonNode;
+proc validate_OperationalizationClustersListKeys_568272(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the credentials for the specified cluster such as Storage, ACR and ACS credentials. This is a long running operation because it fetches keys from dependencies.
   ## 
@@ -1034,21 +1034,21 @@ proc validate_OperationalizationClustersListKeys_594039(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594041 = path.getOrDefault("clusterName")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_568274 = path.getOrDefault("clusterName")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "clusterName", valid_594041
-  var valid_594042 = path.getOrDefault("resourceGroupName")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  if valid_568274 != nil:
+    section.add "clusterName", valid_568274
+  var valid_568275 = path.getOrDefault("resourceGroupName")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "resourceGroupName", valid_594042
-  var valid_594043 = path.getOrDefault("subscriptionId")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  if valid_568275 != nil:
+    section.add "resourceGroupName", valid_568275
+  var valid_568276 = path.getOrDefault("subscriptionId")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "subscriptionId", valid_594043
+  if valid_568276 != nil:
+    section.add "subscriptionId", valid_568276
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1056,11 +1056,11 @@ proc validate_OperationalizationClustersListKeys_594039(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594044 = query.getOrDefault("api-version")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  var valid_568277 = query.getOrDefault("api-version")
+  valid_568277 = validateParameter(valid_568277, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "api-version", valid_594044
+  if valid_568277 != nil:
+    section.add "api-version", valid_568277
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1069,21 +1069,21 @@ proc validate_OperationalizationClustersListKeys_594039(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594045: Call_OperationalizationClustersListKeys_594038;
+proc call*(call_568278: Call_OperationalizationClustersListKeys_568271;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the credentials for the specified cluster such as Storage, ACR and ACS credentials. This is a long running operation because it fetches keys from dependencies.
   ## 
-  let valid = call_594045.validator(path, query, header, formData, body)
-  let scheme = call_594045.pickScheme
+  let valid = call_568278.validator(path, query, header, formData, body)
+  let scheme = call_568278.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594045.url(scheme.get, call_594045.host, call_594045.base,
-                         call_594045.route, valid.getOrDefault("path"),
+  let url = call_568278.url(scheme.get, call_568278.host, call_568278.base,
+                         call_568278.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594045, url, valid)
+  result = hook(call_568278, url, valid)
 
-proc call*(call_594046: Call_OperationalizationClustersListKeys_594038;
+proc call*(call_568279: Call_OperationalizationClustersListKeys_568271;
           clusterName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## operationalizationClustersListKeys
@@ -1096,22 +1096,22 @@ proc call*(call_594046: Call_OperationalizationClustersListKeys_594038;
   ##             : The version of the Microsoft.MachineLearningCompute resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_594047 = newJObject()
-  var query_594048 = newJObject()
-  add(path_594047, "clusterName", newJString(clusterName))
-  add(path_594047, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594048, "api-version", newJString(apiVersion))
-  add(path_594047, "subscriptionId", newJString(subscriptionId))
-  result = call_594046.call(path_594047, query_594048, nil, nil, nil)
+  var path_568280 = newJObject()
+  var query_568281 = newJObject()
+  add(path_568280, "clusterName", newJString(clusterName))
+  add(path_568280, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568281, "api-version", newJString(apiVersion))
+  add(path_568280, "subscriptionId", newJString(subscriptionId))
+  result = call_568279.call(path_568280, query_568281, nil, nil, nil)
 
-var operationalizationClustersListKeys* = Call_OperationalizationClustersListKeys_594038(
+var operationalizationClustersListKeys* = Call_OperationalizationClustersListKeys_568271(
     name: "operationalizationClustersListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningCompute/operationalizationClusters/{clusterName}/listKeys",
-    validator: validate_OperationalizationClustersListKeys_594039, base: "",
-    url: url_OperationalizationClustersListKeys_594040, schemes: {Scheme.Https})
+    validator: validate_OperationalizationClustersListKeys_568272, base: "",
+    url: url_OperationalizationClustersListKeys_568273, schemes: {Scheme.Https})
 type
-  Call_OperationalizationClustersUpdateSystemServices_594049 = ref object of OpenApiRestCall_593424
-proc url_OperationalizationClustersUpdateSystemServices_594051(protocol: Scheme;
+  Call_OperationalizationClustersUpdateSystemServices_568282 = ref object of OpenApiRestCall_567657
+proc url_OperationalizationClustersUpdateSystemServices_568284(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1134,7 +1134,7 @@ proc url_OperationalizationClustersUpdateSystemServices_594051(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationalizationClustersUpdateSystemServices_594050(
+proc validate_OperationalizationClustersUpdateSystemServices_568283(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Updates system services in a cluster.
@@ -1151,21 +1151,21 @@ proc validate_OperationalizationClustersUpdateSystemServices_594050(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594052 = path.getOrDefault("clusterName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  var valid_568285 = path.getOrDefault("clusterName")
+  valid_568285 = validateParameter(valid_568285, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "clusterName", valid_594052
-  var valid_594053 = path.getOrDefault("resourceGroupName")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  if valid_568285 != nil:
+    section.add "clusterName", valid_568285
+  var valid_568286 = path.getOrDefault("resourceGroupName")
+  valid_568286 = validateParameter(valid_568286, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "resourceGroupName", valid_594053
-  var valid_594054 = path.getOrDefault("subscriptionId")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  if valid_568286 != nil:
+    section.add "resourceGroupName", valid_568286
+  var valid_568287 = path.getOrDefault("subscriptionId")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "subscriptionId", valid_594054
+  if valid_568287 != nil:
+    section.add "subscriptionId", valid_568287
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1173,11 +1173,11 @@ proc validate_OperationalizationClustersUpdateSystemServices_594050(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594055 = query.getOrDefault("api-version")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  var valid_568288 = query.getOrDefault("api-version")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "api-version", valid_594055
+  if valid_568288 != nil:
+    section.add "api-version", valid_568288
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1186,21 +1186,21 @@ proc validate_OperationalizationClustersUpdateSystemServices_594050(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594056: Call_OperationalizationClustersUpdateSystemServices_594049;
+proc call*(call_568289: Call_OperationalizationClustersUpdateSystemServices_568282;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Updates system services in a cluster.
   ## 
-  let valid = call_594056.validator(path, query, header, formData, body)
-  let scheme = call_594056.pickScheme
+  let valid = call_568289.validator(path, query, header, formData, body)
+  let scheme = call_568289.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594056.url(scheme.get, call_594056.host, call_594056.base,
-                         call_594056.route, valid.getOrDefault("path"),
+  let url = call_568289.url(scheme.get, call_568289.host, call_568289.base,
+                         call_568289.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594056, url, valid)
+  result = hook(call_568289, url, valid)
 
-proc call*(call_594057: Call_OperationalizationClustersUpdateSystemServices_594049;
+proc call*(call_568290: Call_OperationalizationClustersUpdateSystemServices_568282;
           clusterName: string; resourceGroupName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## operationalizationClustersUpdateSystemServices
@@ -1213,19 +1213,19 @@ proc call*(call_594057: Call_OperationalizationClustersUpdateSystemServices_5940
   ##             : The version of the Microsoft.MachineLearningCompute resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_594058 = newJObject()
-  var query_594059 = newJObject()
-  add(path_594058, "clusterName", newJString(clusterName))
-  add(path_594058, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594059, "api-version", newJString(apiVersion))
-  add(path_594058, "subscriptionId", newJString(subscriptionId))
-  result = call_594057.call(path_594058, query_594059, nil, nil, nil)
+  var path_568291 = newJObject()
+  var query_568292 = newJObject()
+  add(path_568291, "clusterName", newJString(clusterName))
+  add(path_568291, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568292, "api-version", newJString(apiVersion))
+  add(path_568291, "subscriptionId", newJString(subscriptionId))
+  result = call_568290.call(path_568291, query_568292, nil, nil, nil)
 
-var operationalizationClustersUpdateSystemServices* = Call_OperationalizationClustersUpdateSystemServices_594049(
+var operationalizationClustersUpdateSystemServices* = Call_OperationalizationClustersUpdateSystemServices_568282(
     name: "operationalizationClustersUpdateSystemServices",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningCompute/operationalizationClusters/{clusterName}/updateSystemServices",
-    validator: validate_OperationalizationClustersUpdateSystemServices_594050,
-    base: "", url: url_OperationalizationClustersUpdateSystemServices_594051,
+    validator: validate_OperationalizationClustersUpdateSystemServices_568283,
+    base: "", url: url_OperationalizationClustersUpdateSystemServices_568284,
     schemes: {Scheme.Https})
 export
   rest

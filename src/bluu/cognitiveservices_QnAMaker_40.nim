@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: QnAMaker Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "cognitiveservices-QnAMaker"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AlterationsReplace_593884 = ref object of OpenApiRestCall_593425
-proc url_AlterationsReplace_593886(protocol: Scheme; host: string; base: string;
+  Call_AlterationsReplace_568117 = ref object of OpenApiRestCall_567658
+proc url_AlterationsReplace_568119(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AlterationsReplace_593885(path: JsonNode; query: JsonNode;
+proc validate_AlterationsReplace_568118(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   var section: JsonNode
@@ -132,40 +132,40 @@ proc validate_AlterationsReplace_593885(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593943: Call_AlterationsReplace_593884; path: JsonNode;
+proc call*(call_568176: Call_AlterationsReplace_568117; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593943.validator(path, query, header, formData, body)
-  let scheme = call_593943.pickScheme
+  let valid = call_568176.validator(path, query, header, formData, body)
+  let scheme = call_568176.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593943.url(scheme.get, call_593943.host, call_593943.base,
-                         call_593943.route, valid.getOrDefault("path"),
+  let url = call_568176.url(scheme.get, call_568176.host, call_568176.base,
+                         call_568176.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593943, url, valid)
+  result = hook(call_568176, url, valid)
 
-proc call*(call_593944: Call_AlterationsReplace_593884; wordAlterations: JsonNode): Recallable =
+proc call*(call_568177: Call_AlterationsReplace_568117; wordAlterations: JsonNode): Recallable =
   ## alterationsReplace
   ##   wordAlterations: JObject (required)
   ##                  : New alterations data.
-  var body_593945 = newJObject()
+  var body_568178 = newJObject()
   if wordAlterations != nil:
-    body_593945 = wordAlterations
-  result = call_593944.call(nil, nil, nil, nil, body_593945)
+    body_568178 = wordAlterations
+  result = call_568177.call(nil, nil, nil, nil, body_568178)
 
-var alterationsReplace* = Call_AlterationsReplace_593884(
+var alterationsReplace* = Call_AlterationsReplace_568117(
     name: "alterationsReplace", meth: HttpMethod.HttpPut, host: "azure.local",
-    route: "/alterations", validator: validate_AlterationsReplace_593885, base: "",
-    url: url_AlterationsReplace_593886, schemes: {Scheme.Https})
+    route: "/alterations", validator: validate_AlterationsReplace_568118, base: "",
+    url: url_AlterationsReplace_568119, schemes: {Scheme.Https})
 type
-  Call_AlterationsGet_593647 = ref object of OpenApiRestCall_593425
-proc url_AlterationsGet_593649(protocol: Scheme; host: string; base: string;
+  Call_AlterationsGet_567880 = ref object of OpenApiRestCall_567658
+proc url_AlterationsGet_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AlterationsGet_593648(path: JsonNode; query: JsonNode;
+proc validate_AlterationsGet_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   var section: JsonNode
@@ -181,35 +181,35 @@ proc validate_AlterationsGet_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593762: Call_AlterationsGet_593647; path: JsonNode; query: JsonNode;
+proc call*(call_567995: Call_AlterationsGet_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593762.validator(path, query, header, formData, body)
-  let scheme = call_593762.pickScheme
+  let valid = call_567995.validator(path, query, header, formData, body)
+  let scheme = call_567995.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593762.url(scheme.get, call_593762.host, call_593762.base,
-                         call_593762.route, valid.getOrDefault("path"),
+  let url = call_567995.url(scheme.get, call_567995.host, call_567995.base,
+                         call_567995.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593762, url, valid)
+  result = hook(call_567995, url, valid)
 
-proc call*(call_593846: Call_AlterationsGet_593647): Recallable =
+proc call*(call_568079: Call_AlterationsGet_567880): Recallable =
   ## alterationsGet
-  result = call_593846.call(nil, nil, nil, nil, nil)
+  result = call_568079.call(nil, nil, nil, nil, nil)
 
-var alterationsGet* = Call_AlterationsGet_593647(name: "alterationsGet",
+var alterationsGet* = Call_AlterationsGet_567880(name: "alterationsGet",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/alterations",
-    validator: validate_AlterationsGet_593648, base: "", url: url_AlterationsGet_593649,
+    validator: validate_AlterationsGet_567881, base: "", url: url_AlterationsGet_567882,
     schemes: {Scheme.Https})
 type
-  Call_EndpointSettingsGetSettings_593947 = ref object of OpenApiRestCall_593425
-proc url_EndpointSettingsGetSettings_593949(protocol: Scheme; host: string;
+  Call_EndpointSettingsGetSettings_568180 = ref object of OpenApiRestCall_567658
+proc url_EndpointSettingsGetSettings_568182(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_EndpointSettingsGetSettings_593948(path: JsonNode; query: JsonNode;
+proc validate_EndpointSettingsGetSettings_568181(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -224,36 +224,36 @@ proc validate_EndpointSettingsGetSettings_593948(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593950: Call_EndpointSettingsGetSettings_593947; path: JsonNode;
+proc call*(call_568183: Call_EndpointSettingsGetSettings_568180; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593950.validator(path, query, header, formData, body)
-  let scheme = call_593950.pickScheme
+  let valid = call_568183.validator(path, query, header, formData, body)
+  let scheme = call_568183.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593950.url(scheme.get, call_593950.host, call_593950.base,
-                         call_593950.route, valid.getOrDefault("path"),
+  let url = call_568183.url(scheme.get, call_568183.host, call_568183.base,
+                         call_568183.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593950, url, valid)
+  result = hook(call_568183, url, valid)
 
-proc call*(call_593951: Call_EndpointSettingsGetSettings_593947): Recallable =
+proc call*(call_568184: Call_EndpointSettingsGetSettings_568180): Recallable =
   ## endpointSettingsGetSettings
-  result = call_593951.call(nil, nil, nil, nil, nil)
+  result = call_568184.call(nil, nil, nil, nil, nil)
 
-var endpointSettingsGetSettings* = Call_EndpointSettingsGetSettings_593947(
+var endpointSettingsGetSettings* = Call_EndpointSettingsGetSettings_568180(
     name: "endpointSettingsGetSettings", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/endpointSettings",
-    validator: validate_EndpointSettingsGetSettings_593948, base: "",
-    url: url_EndpointSettingsGetSettings_593949, schemes: {Scheme.Https})
+    validator: validate_EndpointSettingsGetSettings_568181, base: "",
+    url: url_EndpointSettingsGetSettings_568182, schemes: {Scheme.Https})
 type
-  Call_EndpointSettingsUpdateSettings_593952 = ref object of OpenApiRestCall_593425
-proc url_EndpointSettingsUpdateSettings_593954(protocol: Scheme; host: string;
+  Call_EndpointSettingsUpdateSettings_568185 = ref object of OpenApiRestCall_567658
+proc url_EndpointSettingsUpdateSettings_568187(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_EndpointSettingsUpdateSettings_593953(path: JsonNode;
+proc validate_EndpointSettingsUpdateSettings_568186(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -273,42 +273,42 @@ proc validate_EndpointSettingsUpdateSettings_593953(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593956: Call_EndpointSettingsUpdateSettings_593952; path: JsonNode;
+proc call*(call_568189: Call_EndpointSettingsUpdateSettings_568185; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593956.validator(path, query, header, formData, body)
-  let scheme = call_593956.pickScheme
+  let valid = call_568189.validator(path, query, header, formData, body)
+  let scheme = call_568189.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593956.url(scheme.get, call_593956.host, call_593956.base,
-                         call_593956.route, valid.getOrDefault("path"),
+  let url = call_568189.url(scheme.get, call_568189.host, call_568189.base,
+                         call_568189.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593956, url, valid)
+  result = hook(call_568189, url, valid)
 
-proc call*(call_593957: Call_EndpointSettingsUpdateSettings_593952;
+proc call*(call_568190: Call_EndpointSettingsUpdateSettings_568185;
           endpointSettingsPayload: JsonNode): Recallable =
   ## endpointSettingsUpdateSettings
   ##   endpointSettingsPayload: JObject (required)
   ##                          : Post body of the request.
-  var body_593958 = newJObject()
+  var body_568191 = newJObject()
   if endpointSettingsPayload != nil:
-    body_593958 = endpointSettingsPayload
-  result = call_593957.call(nil, nil, nil, nil, body_593958)
+    body_568191 = endpointSettingsPayload
+  result = call_568190.call(nil, nil, nil, nil, body_568191)
 
-var endpointSettingsUpdateSettings* = Call_EndpointSettingsUpdateSettings_593952(
+var endpointSettingsUpdateSettings* = Call_EndpointSettingsUpdateSettings_568185(
     name: "endpointSettingsUpdateSettings", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/endpointSettings",
-    validator: validate_EndpointSettingsUpdateSettings_593953, base: "",
-    url: url_EndpointSettingsUpdateSettings_593954, schemes: {Scheme.Https})
+    validator: validate_EndpointSettingsUpdateSettings_568186, base: "",
+    url: url_EndpointSettingsUpdateSettings_568187, schemes: {Scheme.Https})
 type
-  Call_EndpointKeysGetKeys_593959 = ref object of OpenApiRestCall_593425
-proc url_EndpointKeysGetKeys_593961(protocol: Scheme; host: string; base: string;
+  Call_EndpointKeysGetKeys_568192 = ref object of OpenApiRestCall_567658
+proc url_EndpointKeysGetKeys_568194(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_EndpointKeysGetKeys_593960(path: JsonNode; query: JsonNode;
+proc validate_EndpointKeysGetKeys_568193(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   var section: JsonNode
@@ -324,28 +324,28 @@ proc validate_EndpointKeysGetKeys_593960(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593962: Call_EndpointKeysGetKeys_593959; path: JsonNode;
+proc call*(call_568195: Call_EndpointKeysGetKeys_568192; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593962.validator(path, query, header, formData, body)
-  let scheme = call_593962.pickScheme
+  let valid = call_568195.validator(path, query, header, formData, body)
+  let scheme = call_568195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593962.url(scheme.get, call_593962.host, call_593962.base,
-                         call_593962.route, valid.getOrDefault("path"),
+  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
+                         call_568195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593962, url, valid)
+  result = hook(call_568195, url, valid)
 
-proc call*(call_593963: Call_EndpointKeysGetKeys_593959): Recallable =
+proc call*(call_568196: Call_EndpointKeysGetKeys_568192): Recallable =
   ## endpointKeysGetKeys
-  result = call_593963.call(nil, nil, nil, nil, nil)
+  result = call_568196.call(nil, nil, nil, nil, nil)
 
-var endpointKeysGetKeys* = Call_EndpointKeysGetKeys_593959(
+var endpointKeysGetKeys* = Call_EndpointKeysGetKeys_568192(
     name: "endpointKeysGetKeys", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/endpointkeys", validator: validate_EndpointKeysGetKeys_593960,
-    base: "", url: url_EndpointKeysGetKeys_593961, schemes: {Scheme.Https})
+    route: "/endpointkeys", validator: validate_EndpointKeysGetKeys_568193,
+    base: "", url: url_EndpointKeysGetKeys_568194, schemes: {Scheme.Https})
 type
-  Call_EndpointKeysRefreshKeys_593964 = ref object of OpenApiRestCall_593425
-proc url_EndpointKeysRefreshKeys_593966(protocol: Scheme; host: string; base: string;
+  Call_EndpointKeysRefreshKeys_568197 = ref object of OpenApiRestCall_567658
+proc url_EndpointKeysRefreshKeys_568199(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -361,7 +361,7 @@ proc url_EndpointKeysRefreshKeys_593966(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointKeysRefreshKeys_593965(path: JsonNode; query: JsonNode;
+proc validate_EndpointKeysRefreshKeys_568198(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -370,11 +370,11 @@ proc validate_EndpointKeysRefreshKeys_593965(path: JsonNode; query: JsonNode;
   ##          : Type of Key
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `keyType` field"
-  var valid_593981 = path.getOrDefault("keyType")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = path.getOrDefault("keyType")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "keyType", valid_593981
+  if valid_568214 != nil:
+    section.add "keyType", valid_568214
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -385,40 +385,40 @@ proc validate_EndpointKeysRefreshKeys_593965(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593982: Call_EndpointKeysRefreshKeys_593964; path: JsonNode;
+proc call*(call_568215: Call_EndpointKeysRefreshKeys_568197; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593982.validator(path, query, header, formData, body)
-  let scheme = call_593982.pickScheme
+  let valid = call_568215.validator(path, query, header, formData, body)
+  let scheme = call_568215.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593982.url(scheme.get, call_593982.host, call_593982.base,
-                         call_593982.route, valid.getOrDefault("path"),
+  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
+                         call_568215.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593982, url, valid)
+  result = hook(call_568215, url, valid)
 
-proc call*(call_593983: Call_EndpointKeysRefreshKeys_593964; keyType: string): Recallable =
+proc call*(call_568216: Call_EndpointKeysRefreshKeys_568197; keyType: string): Recallable =
   ## endpointKeysRefreshKeys
   ##   keyType: string (required)
   ##          : Type of Key
-  var path_593984 = newJObject()
-  add(path_593984, "keyType", newJString(keyType))
-  result = call_593983.call(path_593984, nil, nil, nil, nil)
+  var path_568217 = newJObject()
+  add(path_568217, "keyType", newJString(keyType))
+  result = call_568216.call(path_568217, nil, nil, nil, nil)
 
-var endpointKeysRefreshKeys* = Call_EndpointKeysRefreshKeys_593964(
+var endpointKeysRefreshKeys* = Call_EndpointKeysRefreshKeys_568197(
     name: "endpointKeysRefreshKeys", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/endpointkeys/{keyType}",
-    validator: validate_EndpointKeysRefreshKeys_593965, base: "",
-    url: url_EndpointKeysRefreshKeys_593966, schemes: {Scheme.Https})
+    validator: validate_EndpointKeysRefreshKeys_568198, base: "",
+    url: url_EndpointKeysRefreshKeys_568199, schemes: {Scheme.Https})
 type
-  Call_KnowledgebaseListAll_593986 = ref object of OpenApiRestCall_593425
-proc url_KnowledgebaseListAll_593988(protocol: Scheme; host: string; base: string;
+  Call_KnowledgebaseListAll_568219 = ref object of OpenApiRestCall_567658
+proc url_KnowledgebaseListAll_568221(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_KnowledgebaseListAll_593987(path: JsonNode; query: JsonNode;
+proc validate_KnowledgebaseListAll_568220(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -433,35 +433,35 @@ proc validate_KnowledgebaseListAll_593987(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593989: Call_KnowledgebaseListAll_593986; path: JsonNode;
+proc call*(call_568222: Call_KnowledgebaseListAll_568219; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593989.validator(path, query, header, formData, body)
-  let scheme = call_593989.pickScheme
+  let valid = call_568222.validator(path, query, header, formData, body)
+  let scheme = call_568222.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593989.url(scheme.get, call_593989.host, call_593989.base,
-                         call_593989.route, valid.getOrDefault("path"),
+  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
+                         call_568222.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593989, url, valid)
+  result = hook(call_568222, url, valid)
 
-proc call*(call_593990: Call_KnowledgebaseListAll_593986): Recallable =
+proc call*(call_568223: Call_KnowledgebaseListAll_568219): Recallable =
   ## knowledgebaseListAll
-  result = call_593990.call(nil, nil, nil, nil, nil)
+  result = call_568223.call(nil, nil, nil, nil, nil)
 
-var knowledgebaseListAll* = Call_KnowledgebaseListAll_593986(
+var knowledgebaseListAll* = Call_KnowledgebaseListAll_568219(
     name: "knowledgebaseListAll", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/knowledgebases", validator: validate_KnowledgebaseListAll_593987,
-    base: "", url: url_KnowledgebaseListAll_593988, schemes: {Scheme.Https})
+    route: "/knowledgebases", validator: validate_KnowledgebaseListAll_568220,
+    base: "", url: url_KnowledgebaseListAll_568221, schemes: {Scheme.Https})
 type
-  Call_KnowledgebaseCreate_593991 = ref object of OpenApiRestCall_593425
-proc url_KnowledgebaseCreate_593993(protocol: Scheme; host: string; base: string;
+  Call_KnowledgebaseCreate_568224 = ref object of OpenApiRestCall_567658
+proc url_KnowledgebaseCreate_568226(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_KnowledgebaseCreate_593992(path: JsonNode; query: JsonNode;
+proc validate_KnowledgebaseCreate_568225(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   var section: JsonNode
@@ -482,33 +482,33 @@ proc validate_KnowledgebaseCreate_593992(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593995: Call_KnowledgebaseCreate_593991; path: JsonNode;
+proc call*(call_568228: Call_KnowledgebaseCreate_568224; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593995.validator(path, query, header, formData, body)
-  let scheme = call_593995.pickScheme
+  let valid = call_568228.validator(path, query, header, formData, body)
+  let scheme = call_568228.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593995.url(scheme.get, call_593995.host, call_593995.base,
-                         call_593995.route, valid.getOrDefault("path"),
+  let url = call_568228.url(scheme.get, call_568228.host, call_568228.base,
+                         call_568228.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593995, url, valid)
+  result = hook(call_568228, url, valid)
 
-proc call*(call_593996: Call_KnowledgebaseCreate_593991; createKbPayload: JsonNode): Recallable =
+proc call*(call_568229: Call_KnowledgebaseCreate_568224; createKbPayload: JsonNode): Recallable =
   ## knowledgebaseCreate
   ##   createKbPayload: JObject (required)
   ##                  : Post body of the request.
-  var body_593997 = newJObject()
+  var body_568230 = newJObject()
   if createKbPayload != nil:
-    body_593997 = createKbPayload
-  result = call_593996.call(nil, nil, nil, nil, body_593997)
+    body_568230 = createKbPayload
+  result = call_568229.call(nil, nil, nil, nil, body_568230)
 
-var knowledgebaseCreate* = Call_KnowledgebaseCreate_593991(
+var knowledgebaseCreate* = Call_KnowledgebaseCreate_568224(
     name: "knowledgebaseCreate", meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/knowledgebases/create", validator: validate_KnowledgebaseCreate_593992,
-    base: "", url: url_KnowledgebaseCreate_593993, schemes: {Scheme.Https})
+    route: "/knowledgebases/create", validator: validate_KnowledgebaseCreate_568225,
+    base: "", url: url_KnowledgebaseCreate_568226, schemes: {Scheme.Https})
 type
-  Call_KnowledgebaseReplace_594005 = ref object of OpenApiRestCall_593425
-proc url_KnowledgebaseReplace_594007(protocol: Scheme; host: string; base: string;
+  Call_KnowledgebaseReplace_568238 = ref object of OpenApiRestCall_567658
+proc url_KnowledgebaseReplace_568240(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -523,7 +523,7 @@ proc url_KnowledgebaseReplace_594007(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_KnowledgebaseReplace_594006(path: JsonNode; query: JsonNode;
+proc validate_KnowledgebaseReplace_568239(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -532,11 +532,11 @@ proc validate_KnowledgebaseReplace_594006(path: JsonNode; query: JsonNode;
   ##       : Knowledgebase id.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `kbId` field"
-  var valid_594008 = path.getOrDefault("kbId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  var valid_568241 = path.getOrDefault("kbId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "kbId", valid_594008
+  if valid_568241 != nil:
+    section.add "kbId", valid_568241
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -552,38 +552,38 @@ proc validate_KnowledgebaseReplace_594006(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594010: Call_KnowledgebaseReplace_594005; path: JsonNode;
+proc call*(call_568243: Call_KnowledgebaseReplace_568238; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594010.validator(path, query, header, formData, body)
-  let scheme = call_594010.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594010.url(scheme.get, call_594010.host, call_594010.base,
-                         call_594010.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594010, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594011: Call_KnowledgebaseReplace_594005; kbId: string;
+proc call*(call_568244: Call_KnowledgebaseReplace_568238; kbId: string;
           replaceKb: JsonNode): Recallable =
   ## knowledgebaseReplace
   ##   kbId: string (required)
   ##       : Knowledgebase id.
   ##   replaceKb: JObject (required)
   ##            : An instance of ReplaceKbDTO which contains list of qnas to be uploaded
-  var path_594012 = newJObject()
-  var body_594013 = newJObject()
-  add(path_594012, "kbId", newJString(kbId))
+  var path_568245 = newJObject()
+  var body_568246 = newJObject()
+  add(path_568245, "kbId", newJString(kbId))
   if replaceKb != nil:
-    body_594013 = replaceKb
-  result = call_594011.call(path_594012, nil, nil, nil, body_594013)
+    body_568246 = replaceKb
+  result = call_568244.call(path_568245, nil, nil, nil, body_568246)
 
-var knowledgebaseReplace* = Call_KnowledgebaseReplace_594005(
+var knowledgebaseReplace* = Call_KnowledgebaseReplace_568238(
     name: "knowledgebaseReplace", meth: HttpMethod.HttpPut, host: "azure.local",
-    route: "/knowledgebases/{kbId}", validator: validate_KnowledgebaseReplace_594006,
-    base: "", url: url_KnowledgebaseReplace_594007, schemes: {Scheme.Https})
+    route: "/knowledgebases/{kbId}", validator: validate_KnowledgebaseReplace_568239,
+    base: "", url: url_KnowledgebaseReplace_568240, schemes: {Scheme.Https})
 type
-  Call_KnowledgebasePublish_594014 = ref object of OpenApiRestCall_593425
-proc url_KnowledgebasePublish_594016(protocol: Scheme; host: string; base: string;
+  Call_KnowledgebasePublish_568247 = ref object of OpenApiRestCall_567658
+proc url_KnowledgebasePublish_568249(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -598,7 +598,7 @@ proc url_KnowledgebasePublish_594016(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_KnowledgebasePublish_594015(path: JsonNode; query: JsonNode;
+proc validate_KnowledgebasePublish_568248(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -607,11 +607,11 @@ proc validate_KnowledgebasePublish_594015(path: JsonNode; query: JsonNode;
   ##       : Knowledgebase id.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `kbId` field"
-  var valid_594017 = path.getOrDefault("kbId")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  var valid_568250 = path.getOrDefault("kbId")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "kbId", valid_594017
+  if valid_568250 != nil:
+    section.add "kbId", valid_568250
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -622,32 +622,32 @@ proc validate_KnowledgebasePublish_594015(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_KnowledgebasePublish_594014; path: JsonNode;
+proc call*(call_568251: Call_KnowledgebasePublish_568247; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_568251.validator(path, query, header, formData, body)
+  let scheme = call_568251.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_568251.url(scheme.get, call_568251.host, call_568251.base,
+                         call_568251.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_568251, url, valid)
 
-proc call*(call_594019: Call_KnowledgebasePublish_594014; kbId: string): Recallable =
+proc call*(call_568252: Call_KnowledgebasePublish_568247; kbId: string): Recallable =
   ## knowledgebasePublish
   ##   kbId: string (required)
   ##       : Knowledgebase id.
-  var path_594020 = newJObject()
-  add(path_594020, "kbId", newJString(kbId))
-  result = call_594019.call(path_594020, nil, nil, nil, nil)
+  var path_568253 = newJObject()
+  add(path_568253, "kbId", newJString(kbId))
+  result = call_568252.call(path_568253, nil, nil, nil, nil)
 
-var knowledgebasePublish* = Call_KnowledgebasePublish_594014(
+var knowledgebasePublish* = Call_KnowledgebasePublish_568247(
     name: "knowledgebasePublish", meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/knowledgebases/{kbId}", validator: validate_KnowledgebasePublish_594015,
-    base: "", url: url_KnowledgebasePublish_594016, schemes: {Scheme.Https})
+    route: "/knowledgebases/{kbId}", validator: validate_KnowledgebasePublish_568248,
+    base: "", url: url_KnowledgebasePublish_568249, schemes: {Scheme.Https})
 type
-  Call_KnowledgebaseGetDetails_593998 = ref object of OpenApiRestCall_593425
-proc url_KnowledgebaseGetDetails_594000(protocol: Scheme; host: string; base: string;
+  Call_KnowledgebaseGetDetails_568231 = ref object of OpenApiRestCall_567658
+proc url_KnowledgebaseGetDetails_568233(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -663,7 +663,7 @@ proc url_KnowledgebaseGetDetails_594000(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_KnowledgebaseGetDetails_593999(path: JsonNode; query: JsonNode;
+proc validate_KnowledgebaseGetDetails_568232(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -672,11 +672,11 @@ proc validate_KnowledgebaseGetDetails_593999(path: JsonNode; query: JsonNode;
   ##       : Knowledgebase id.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `kbId` field"
-  var valid_594001 = path.getOrDefault("kbId")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568234 = path.getOrDefault("kbId")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "kbId", valid_594001
+  if valid_568234 != nil:
+    section.add "kbId", valid_568234
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -687,32 +687,32 @@ proc validate_KnowledgebaseGetDetails_593999(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594002: Call_KnowledgebaseGetDetails_593998; path: JsonNode;
+proc call*(call_568235: Call_KnowledgebaseGetDetails_568231; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594002.validator(path, query, header, formData, body)
-  let scheme = call_594002.pickScheme
+  let valid = call_568235.validator(path, query, header, formData, body)
+  let scheme = call_568235.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594002.url(scheme.get, call_594002.host, call_594002.base,
-                         call_594002.route, valid.getOrDefault("path"),
+  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
+                         call_568235.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594002, url, valid)
+  result = hook(call_568235, url, valid)
 
-proc call*(call_594003: Call_KnowledgebaseGetDetails_593998; kbId: string): Recallable =
+proc call*(call_568236: Call_KnowledgebaseGetDetails_568231; kbId: string): Recallable =
   ## knowledgebaseGetDetails
   ##   kbId: string (required)
   ##       : Knowledgebase id.
-  var path_594004 = newJObject()
-  add(path_594004, "kbId", newJString(kbId))
-  result = call_594003.call(path_594004, nil, nil, nil, nil)
+  var path_568237 = newJObject()
+  add(path_568237, "kbId", newJString(kbId))
+  result = call_568236.call(path_568237, nil, nil, nil, nil)
 
-var knowledgebaseGetDetails* = Call_KnowledgebaseGetDetails_593998(
+var knowledgebaseGetDetails* = Call_KnowledgebaseGetDetails_568231(
     name: "knowledgebaseGetDetails", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/knowledgebases/{kbId}", validator: validate_KnowledgebaseGetDetails_593999,
-    base: "", url: url_KnowledgebaseGetDetails_594000, schemes: {Scheme.Https})
+    route: "/knowledgebases/{kbId}", validator: validate_KnowledgebaseGetDetails_568232,
+    base: "", url: url_KnowledgebaseGetDetails_568233, schemes: {Scheme.Https})
 type
-  Call_KnowledgebaseUpdate_594028 = ref object of OpenApiRestCall_593425
-proc url_KnowledgebaseUpdate_594030(protocol: Scheme; host: string; base: string;
+  Call_KnowledgebaseUpdate_568261 = ref object of OpenApiRestCall_567658
+proc url_KnowledgebaseUpdate_568263(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -727,7 +727,7 @@ proc url_KnowledgebaseUpdate_594030(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_KnowledgebaseUpdate_594029(path: JsonNode; query: JsonNode;
+proc validate_KnowledgebaseUpdate_568262(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   var section: JsonNode
@@ -737,11 +737,11 @@ proc validate_KnowledgebaseUpdate_594029(path: JsonNode; query: JsonNode;
   ##       : Knowledgebase id.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `kbId` field"
-  var valid_594031 = path.getOrDefault("kbId")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  var valid_568264 = path.getOrDefault("kbId")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "kbId", valid_594031
+  if valid_568264 != nil:
+    section.add "kbId", valid_568264
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -757,38 +757,38 @@ proc validate_KnowledgebaseUpdate_594029(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594033: Call_KnowledgebaseUpdate_594028; path: JsonNode;
+proc call*(call_568266: Call_KnowledgebaseUpdate_568261; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594033.validator(path, query, header, formData, body)
-  let scheme = call_594033.pickScheme
+  let valid = call_568266.validator(path, query, header, formData, body)
+  let scheme = call_568266.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594033.url(scheme.get, call_594033.host, call_594033.base,
-                         call_594033.route, valid.getOrDefault("path"),
+  let url = call_568266.url(scheme.get, call_568266.host, call_568266.base,
+                         call_568266.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594033, url, valid)
+  result = hook(call_568266, url, valid)
 
-proc call*(call_594034: Call_KnowledgebaseUpdate_594028; kbId: string;
+proc call*(call_568267: Call_KnowledgebaseUpdate_568261; kbId: string;
           updateKb: JsonNode): Recallable =
   ## knowledgebaseUpdate
   ##   kbId: string (required)
   ##       : Knowledgebase id.
   ##   updateKb: JObject (required)
   ##           : Post body of the request.
-  var path_594035 = newJObject()
-  var body_594036 = newJObject()
-  add(path_594035, "kbId", newJString(kbId))
+  var path_568268 = newJObject()
+  var body_568269 = newJObject()
+  add(path_568268, "kbId", newJString(kbId))
   if updateKb != nil:
-    body_594036 = updateKb
-  result = call_594034.call(path_594035, nil, nil, nil, body_594036)
+    body_568269 = updateKb
+  result = call_568267.call(path_568268, nil, nil, nil, body_568269)
 
-var knowledgebaseUpdate* = Call_KnowledgebaseUpdate_594028(
+var knowledgebaseUpdate* = Call_KnowledgebaseUpdate_568261(
     name: "knowledgebaseUpdate", meth: HttpMethod.HttpPatch, host: "azure.local",
-    route: "/knowledgebases/{kbId}", validator: validate_KnowledgebaseUpdate_594029,
-    base: "", url: url_KnowledgebaseUpdate_594030, schemes: {Scheme.Https})
+    route: "/knowledgebases/{kbId}", validator: validate_KnowledgebaseUpdate_568262,
+    base: "", url: url_KnowledgebaseUpdate_568263, schemes: {Scheme.Https})
 type
-  Call_KnowledgebaseDelete_594021 = ref object of OpenApiRestCall_593425
-proc url_KnowledgebaseDelete_594023(protocol: Scheme; host: string; base: string;
+  Call_KnowledgebaseDelete_568254 = ref object of OpenApiRestCall_567658
+proc url_KnowledgebaseDelete_568256(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -803,7 +803,7 @@ proc url_KnowledgebaseDelete_594023(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_KnowledgebaseDelete_594022(path: JsonNode; query: JsonNode;
+proc validate_KnowledgebaseDelete_568255(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   var section: JsonNode
@@ -813,11 +813,11 @@ proc validate_KnowledgebaseDelete_594022(path: JsonNode; query: JsonNode;
   ##       : Knowledgebase id.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `kbId` field"
-  var valid_594024 = path.getOrDefault("kbId")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_568257 = path.getOrDefault("kbId")
+  valid_568257 = validateParameter(valid_568257, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "kbId", valid_594024
+  if valid_568257 != nil:
+    section.add "kbId", valid_568257
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -828,32 +828,32 @@ proc validate_KnowledgebaseDelete_594022(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594025: Call_KnowledgebaseDelete_594021; path: JsonNode;
+proc call*(call_568258: Call_KnowledgebaseDelete_568254; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594025.validator(path, query, header, formData, body)
-  let scheme = call_594025.pickScheme
+  let valid = call_568258.validator(path, query, header, formData, body)
+  let scheme = call_568258.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594025.url(scheme.get, call_594025.host, call_594025.base,
-                         call_594025.route, valid.getOrDefault("path"),
+  let url = call_568258.url(scheme.get, call_568258.host, call_568258.base,
+                         call_568258.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594025, url, valid)
+  result = hook(call_568258, url, valid)
 
-proc call*(call_594026: Call_KnowledgebaseDelete_594021; kbId: string): Recallable =
+proc call*(call_568259: Call_KnowledgebaseDelete_568254; kbId: string): Recallable =
   ## knowledgebaseDelete
   ##   kbId: string (required)
   ##       : Knowledgebase id.
-  var path_594027 = newJObject()
-  add(path_594027, "kbId", newJString(kbId))
-  result = call_594026.call(path_594027, nil, nil, nil, nil)
+  var path_568260 = newJObject()
+  add(path_568260, "kbId", newJString(kbId))
+  result = call_568259.call(path_568260, nil, nil, nil, nil)
 
-var knowledgebaseDelete* = Call_KnowledgebaseDelete_594021(
+var knowledgebaseDelete* = Call_KnowledgebaseDelete_568254(
     name: "knowledgebaseDelete", meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/knowledgebases/{kbId}", validator: validate_KnowledgebaseDelete_594022,
-    base: "", url: url_KnowledgebaseDelete_594023, schemes: {Scheme.Https})
+    route: "/knowledgebases/{kbId}", validator: validate_KnowledgebaseDelete_568255,
+    base: "", url: url_KnowledgebaseDelete_568256, schemes: {Scheme.Https})
 type
-  Call_KnowledgebaseDownload_594037 = ref object of OpenApiRestCall_593425
-proc url_KnowledgebaseDownload_594039(protocol: Scheme; host: string; base: string;
+  Call_KnowledgebaseDownload_568270 = ref object of OpenApiRestCall_567658
+proc url_KnowledgebaseDownload_568272(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -872,7 +872,7 @@ proc url_KnowledgebaseDownload_594039(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_KnowledgebaseDownload_594038(path: JsonNode; query: JsonNode;
+proc validate_KnowledgebaseDownload_568271(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -883,16 +883,16 @@ proc validate_KnowledgebaseDownload_594038(path: JsonNode; query: JsonNode;
   ##              : Specifies whether environment is Test or Prod.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `kbId` field"
-  var valid_594040 = path.getOrDefault("kbId")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  var valid_568273 = path.getOrDefault("kbId")
+  valid_568273 = validateParameter(valid_568273, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "kbId", valid_594040
-  var valid_594054 = path.getOrDefault("environment")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  if valid_568273 != nil:
+    section.add "kbId", valid_568273
+  var valid_568287 = path.getOrDefault("environment")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = newJString("Prod"))
-  if valid_594054 != nil:
-    section.add "environment", valid_594054
+  if valid_568287 != nil:
+    section.add "environment", valid_568287
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -903,37 +903,37 @@ proc validate_KnowledgebaseDownload_594038(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594055: Call_KnowledgebaseDownload_594037; path: JsonNode;
+proc call*(call_568288: Call_KnowledgebaseDownload_568270; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594055.validator(path, query, header, formData, body)
-  let scheme = call_594055.pickScheme
+  let valid = call_568288.validator(path, query, header, formData, body)
+  let scheme = call_568288.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594055.url(scheme.get, call_594055.host, call_594055.base,
-                         call_594055.route, valid.getOrDefault("path"),
+  let url = call_568288.url(scheme.get, call_568288.host, call_568288.base,
+                         call_568288.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594055, url, valid)
+  result = hook(call_568288, url, valid)
 
-proc call*(call_594056: Call_KnowledgebaseDownload_594037; kbId: string;
+proc call*(call_568289: Call_KnowledgebaseDownload_568270; kbId: string;
           environment: string = "Prod"): Recallable =
   ## knowledgebaseDownload
   ##   kbId: string (required)
   ##       : Knowledgebase id.
   ##   environment: string (required)
   ##              : Specifies whether environment is Test or Prod.
-  var path_594057 = newJObject()
-  add(path_594057, "kbId", newJString(kbId))
-  add(path_594057, "environment", newJString(environment))
-  result = call_594056.call(path_594057, nil, nil, nil, nil)
+  var path_568290 = newJObject()
+  add(path_568290, "kbId", newJString(kbId))
+  add(path_568290, "environment", newJString(environment))
+  result = call_568289.call(path_568290, nil, nil, nil, nil)
 
-var knowledgebaseDownload* = Call_KnowledgebaseDownload_594037(
+var knowledgebaseDownload* = Call_KnowledgebaseDownload_568270(
     name: "knowledgebaseDownload", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/knowledgebases/{kbId}/{environment}/qna",
-    validator: validate_KnowledgebaseDownload_594038, base: "",
-    url: url_KnowledgebaseDownload_594039, schemes: {Scheme.Https})
+    validator: validate_KnowledgebaseDownload_568271, base: "",
+    url: url_KnowledgebaseDownload_568272, schemes: {Scheme.Https})
 type
-  Call_OperationsGetDetails_594058 = ref object of OpenApiRestCall_593425
-proc url_OperationsGetDetails_594060(protocol: Scheme; host: string; base: string;
+  Call_OperationsGetDetails_568291 = ref object of OpenApiRestCall_567658
+proc url_OperationsGetDetails_568293(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -948,7 +948,7 @@ proc url_OperationsGetDetails_594060(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationsGetDetails_594059(path: JsonNode; query: JsonNode;
+proc validate_OperationsGetDetails_568292(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -958,11 +958,11 @@ proc validate_OperationsGetDetails_594059(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `operationId` field"
-  var valid_594061 = path.getOrDefault("operationId")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  var valid_568294 = path.getOrDefault("operationId")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "operationId", valid_594061
+  if valid_568294 != nil:
+    section.add "operationId", valid_568294
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -973,29 +973,29 @@ proc validate_OperationsGetDetails_594059(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594062: Call_OperationsGetDetails_594058; path: JsonNode;
+proc call*(call_568295: Call_OperationsGetDetails_568291; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594062.validator(path, query, header, formData, body)
-  let scheme = call_594062.pickScheme
+  let valid = call_568295.validator(path, query, header, formData, body)
+  let scheme = call_568295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594062.url(scheme.get, call_594062.host, call_594062.base,
-                         call_594062.route, valid.getOrDefault("path"),
+  let url = call_568295.url(scheme.get, call_568295.host, call_568295.base,
+                         call_568295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594062, url, valid)
+  result = hook(call_568295, url, valid)
 
-proc call*(call_594063: Call_OperationsGetDetails_594058; operationId: string): Recallable =
+proc call*(call_568296: Call_OperationsGetDetails_568291; operationId: string): Recallable =
   ## operationsGetDetails
   ##   operationId: string (required)
   ##              : Operation id.
-  var path_594064 = newJObject()
-  add(path_594064, "operationId", newJString(operationId))
-  result = call_594063.call(path_594064, nil, nil, nil, nil)
+  var path_568297 = newJObject()
+  add(path_568297, "operationId", newJString(operationId))
+  result = call_568296.call(path_568297, nil, nil, nil, nil)
 
-var operationsGetDetails* = Call_OperationsGetDetails_594058(
+var operationsGetDetails* = Call_OperationsGetDetails_568291(
     name: "operationsGetDetails", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/operations/{operationId}", validator: validate_OperationsGetDetails_594059,
-    base: "", url: url_OperationsGetDetails_594060, schemes: {Scheme.Https})
+    route: "/operations/{operationId}", validator: validate_OperationsGetDetails_568292,
+    base: "", url: url_OperationsGetDetails_568293, schemes: {Scheme.Https})
 export
   rest
 

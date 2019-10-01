@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: AutomationManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_596458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "automation-watcher"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_WatcherListByAutomationAccount_593647 = ref object of OpenApiRestCall_593425
-proc url_WatcherListByAutomationAccount_593649(protocol: Scheme; host: string;
+  Call_WatcherListByAutomationAccount_596680 = ref object of OpenApiRestCall_596458
+proc url_WatcherListByAutomationAccount_596682(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +129,7 @@ proc url_WatcherListByAutomationAccount_593649(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WatcherListByAutomationAccount_593648(path: JsonNode;
+proc validate_WatcherListByAutomationAccount_596681(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of watchers.
   ## 
@@ -145,21 +145,21 @@ proc validate_WatcherListByAutomationAccount_593648(path: JsonNode;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593810 = path.getOrDefault("automationAccountName")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  var valid_596843 = path.getOrDefault("automationAccountName")
+  valid_596843 = validateParameter(valid_596843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "automationAccountName", valid_593810
-  var valid_593811 = path.getOrDefault("resourceGroupName")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_596843 != nil:
+    section.add "automationAccountName", valid_596843
+  var valid_596844 = path.getOrDefault("resourceGroupName")
+  valid_596844 = validateParameter(valid_596844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "resourceGroupName", valid_593811
-  var valid_593812 = path.getOrDefault("subscriptionId")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  if valid_596844 != nil:
+    section.add "resourceGroupName", valid_596844
+  var valid_596845 = path.getOrDefault("subscriptionId")
+  valid_596845 = validateParameter(valid_596845, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "subscriptionId", valid_593812
+  if valid_596845 != nil:
+    section.add "subscriptionId", valid_596845
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -169,16 +169,16 @@ proc validate_WatcherListByAutomationAccount_593648(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593813 = query.getOrDefault("api-version")
-  valid_593813 = validateParameter(valid_593813, JString, required = true,
+  var valid_596846 = query.getOrDefault("api-version")
+  valid_596846 = validateParameter(valid_596846, JString, required = true,
                                  default = nil)
-  if valid_593813 != nil:
-    section.add "api-version", valid_593813
-  var valid_593814 = query.getOrDefault("$filter")
-  valid_593814 = validateParameter(valid_593814, JString, required = false,
+  if valid_596846 != nil:
+    section.add "api-version", valid_596846
+  var valid_596847 = query.getOrDefault("$filter")
+  valid_596847 = validateParameter(valid_596847, JString, required = false,
                                  default = nil)
-  if valid_593814 != nil:
-    section.add "$filter", valid_593814
+  if valid_596847 != nil:
+    section.add "$filter", valid_596847
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -187,21 +187,21 @@ proc validate_WatcherListByAutomationAccount_593648(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593841: Call_WatcherListByAutomationAccount_593647; path: JsonNode;
+proc call*(call_596874: Call_WatcherListByAutomationAccount_596680; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a list of watchers.
   ## 
   ## http://aka.ms/azureautomationsdk/watcheroperations
-  let valid = call_593841.validator(path, query, header, formData, body)
-  let scheme = call_593841.pickScheme
+  let valid = call_596874.validator(path, query, header, formData, body)
+  let scheme = call_596874.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593841.url(scheme.get, call_593841.host, call_593841.base,
-                         call_593841.route, valid.getOrDefault("path"),
+  let url = call_596874.url(scheme.get, call_596874.host, call_596874.base,
+                         call_596874.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593841, url, valid)
+  result = hook(call_596874, url, valid)
 
-proc call*(call_593912: Call_WatcherListByAutomationAccount_593647;
+proc call*(call_596945: Call_WatcherListByAutomationAccount_596680;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; Filter: string = ""): Recallable =
   ## watcherListByAutomationAccount
@@ -217,23 +217,23 @@ proc call*(call_593912: Call_WatcherListByAutomationAccount_593647;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_593913 = newJObject()
-  var query_593915 = newJObject()
-  add(path_593913, "automationAccountName", newJString(automationAccountName))
-  add(path_593913, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593915, "api-version", newJString(apiVersion))
-  add(path_593913, "subscriptionId", newJString(subscriptionId))
-  add(query_593915, "$filter", newJString(Filter))
-  result = call_593912.call(path_593913, query_593915, nil, nil, nil)
+  var path_596946 = newJObject()
+  var query_596948 = newJObject()
+  add(path_596946, "automationAccountName", newJString(automationAccountName))
+  add(path_596946, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596948, "api-version", newJString(apiVersion))
+  add(path_596946, "subscriptionId", newJString(subscriptionId))
+  add(query_596948, "$filter", newJString(Filter))
+  result = call_596945.call(path_596946, query_596948, nil, nil, nil)
 
-var watcherListByAutomationAccount* = Call_WatcherListByAutomationAccount_593647(
+var watcherListByAutomationAccount* = Call_WatcherListByAutomationAccount_596680(
     name: "watcherListByAutomationAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/watchers",
-    validator: validate_WatcherListByAutomationAccount_593648, base: "",
-    url: url_WatcherListByAutomationAccount_593649, schemes: {Scheme.Https})
+    validator: validate_WatcherListByAutomationAccount_596681, base: "",
+    url: url_WatcherListByAutomationAccount_596682, schemes: {Scheme.Https})
 type
-  Call_WatcherCreateOrUpdate_593966 = ref object of OpenApiRestCall_593425
-proc url_WatcherCreateOrUpdate_593968(protocol: Scheme; host: string; base: string;
+  Call_WatcherCreateOrUpdate_596999 = ref object of OpenApiRestCall_596458
+proc url_WatcherCreateOrUpdate_597001(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -260,7 +260,7 @@ proc url_WatcherCreateOrUpdate_593968(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WatcherCreateOrUpdate_593967(path: JsonNode; query: JsonNode;
+proc validate_WatcherCreateOrUpdate_597000(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create the watcher identified by watcher name.
   ## 
@@ -278,26 +278,26 @@ proc validate_WatcherCreateOrUpdate_593967(path: JsonNode; query: JsonNode;
   ##              : The watcher name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593995 = path.getOrDefault("automationAccountName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_597028 = path.getOrDefault("automationAccountName")
+  valid_597028 = validateParameter(valid_597028, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "automationAccountName", valid_593995
-  var valid_593996 = path.getOrDefault("resourceGroupName")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_597028 != nil:
+    section.add "automationAccountName", valid_597028
+  var valid_597029 = path.getOrDefault("resourceGroupName")
+  valid_597029 = validateParameter(valid_597029, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "resourceGroupName", valid_593996
-  var valid_593997 = path.getOrDefault("subscriptionId")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  if valid_597029 != nil:
+    section.add "resourceGroupName", valid_597029
+  var valid_597030 = path.getOrDefault("subscriptionId")
+  valid_597030 = validateParameter(valid_597030, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "subscriptionId", valid_593997
-  var valid_593998 = path.getOrDefault("watcherName")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  if valid_597030 != nil:
+    section.add "subscriptionId", valid_597030
+  var valid_597031 = path.getOrDefault("watcherName")
+  valid_597031 = validateParameter(valid_597031, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "watcherName", valid_593998
+  if valid_597031 != nil:
+    section.add "watcherName", valid_597031
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -305,11 +305,11 @@ proc validate_WatcherCreateOrUpdate_593967(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593999 = query.getOrDefault("api-version")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  var valid_597032 = query.getOrDefault("api-version")
+  valid_597032 = validateParameter(valid_597032, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "api-version", valid_593999
+  if valid_597032 != nil:
+    section.add "api-version", valid_597032
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -323,21 +323,21 @@ proc validate_WatcherCreateOrUpdate_593967(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594001: Call_WatcherCreateOrUpdate_593966; path: JsonNode;
+proc call*(call_597034: Call_WatcherCreateOrUpdate_596999; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create the watcher identified by watcher name.
   ## 
   ## http://aka.ms/azureautomationsdk/watcheroperations
-  let valid = call_594001.validator(path, query, header, formData, body)
-  let scheme = call_594001.pickScheme
+  let valid = call_597034.validator(path, query, header, formData, body)
+  let scheme = call_597034.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594001.url(scheme.get, call_594001.host, call_594001.base,
-                         call_594001.route, valid.getOrDefault("path"),
+  let url = call_597034.url(scheme.get, call_597034.host, call_597034.base,
+                         call_597034.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594001, url, valid)
+  result = hook(call_597034, url, valid)
 
-proc call*(call_594002: Call_WatcherCreateOrUpdate_593966;
+proc call*(call_597035: Call_WatcherCreateOrUpdate_596999;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; watcherName: string;
           parameters: JsonNode): Recallable =
@@ -356,26 +356,26 @@ proc call*(call_594002: Call_WatcherCreateOrUpdate_593966;
   ##              : The watcher name.
   ##   parameters: JObject (required)
   ##             : The create or update parameters for watcher.
-  var path_594003 = newJObject()
-  var query_594004 = newJObject()
-  var body_594005 = newJObject()
-  add(path_594003, "automationAccountName", newJString(automationAccountName))
-  add(path_594003, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594004, "api-version", newJString(apiVersion))
-  add(path_594003, "subscriptionId", newJString(subscriptionId))
-  add(path_594003, "watcherName", newJString(watcherName))
+  var path_597036 = newJObject()
+  var query_597037 = newJObject()
+  var body_597038 = newJObject()
+  add(path_597036, "automationAccountName", newJString(automationAccountName))
+  add(path_597036, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597037, "api-version", newJString(apiVersion))
+  add(path_597036, "subscriptionId", newJString(subscriptionId))
+  add(path_597036, "watcherName", newJString(watcherName))
   if parameters != nil:
-    body_594005 = parameters
-  result = call_594002.call(path_594003, query_594004, nil, nil, body_594005)
+    body_597038 = parameters
+  result = call_597035.call(path_597036, query_597037, nil, nil, body_597038)
 
-var watcherCreateOrUpdate* = Call_WatcherCreateOrUpdate_593966(
+var watcherCreateOrUpdate* = Call_WatcherCreateOrUpdate_596999(
     name: "watcherCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/watchers/{watcherName}",
-    validator: validate_WatcherCreateOrUpdate_593967, base: "",
-    url: url_WatcherCreateOrUpdate_593968, schemes: {Scheme.Https})
+    validator: validate_WatcherCreateOrUpdate_597000, base: "",
+    url: url_WatcherCreateOrUpdate_597001, schemes: {Scheme.Https})
 type
-  Call_WatcherGet_593954 = ref object of OpenApiRestCall_593425
-proc url_WatcherGet_593956(protocol: Scheme; host: string; base: string; route: string;
+  Call_WatcherGet_596987 = ref object of OpenApiRestCall_596458
+proc url_WatcherGet_596989(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -402,7 +402,7 @@ proc url_WatcherGet_593956(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WatcherGet_593955(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WatcherGet_596988(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the watcher identified by watcher name.
   ## 
@@ -420,26 +420,26 @@ proc validate_WatcherGet_593955(path: JsonNode; query: JsonNode; header: JsonNod
   ##              : The watcher name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593957 = path.getOrDefault("automationAccountName")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  var valid_596990 = path.getOrDefault("automationAccountName")
+  valid_596990 = validateParameter(valid_596990, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "automationAccountName", valid_593957
-  var valid_593958 = path.getOrDefault("resourceGroupName")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  if valid_596990 != nil:
+    section.add "automationAccountName", valid_596990
+  var valid_596991 = path.getOrDefault("resourceGroupName")
+  valid_596991 = validateParameter(valid_596991, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "resourceGroupName", valid_593958
-  var valid_593959 = path.getOrDefault("subscriptionId")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_596991 != nil:
+    section.add "resourceGroupName", valid_596991
+  var valid_596992 = path.getOrDefault("subscriptionId")
+  valid_596992 = validateParameter(valid_596992, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "subscriptionId", valid_593959
-  var valid_593960 = path.getOrDefault("watcherName")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  if valid_596992 != nil:
+    section.add "subscriptionId", valid_596992
+  var valid_596993 = path.getOrDefault("watcherName")
+  valid_596993 = validateParameter(valid_596993, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "watcherName", valid_593960
+  if valid_596993 != nil:
+    section.add "watcherName", valid_596993
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -447,11 +447,11 @@ proc validate_WatcherGet_593955(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593961 = query.getOrDefault("api-version")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_596994 = query.getOrDefault("api-version")
+  valid_596994 = validateParameter(valid_596994, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "api-version", valid_593961
+  if valid_596994 != nil:
+    section.add "api-version", valid_596994
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -460,21 +460,21 @@ proc validate_WatcherGet_593955(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593962: Call_WatcherGet_593954; path: JsonNode; query: JsonNode;
+proc call*(call_596995: Call_WatcherGet_596987; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the watcher identified by watcher name.
   ## 
   ## http://aka.ms/azureautomationsdk/watcheroperations
-  let valid = call_593962.validator(path, query, header, formData, body)
-  let scheme = call_593962.pickScheme
+  let valid = call_596995.validator(path, query, header, formData, body)
+  let scheme = call_596995.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593962.url(scheme.get, call_593962.host, call_593962.base,
-                         call_593962.route, valid.getOrDefault("path"),
+  let url = call_596995.url(scheme.get, call_596995.host, call_596995.base,
+                         call_596995.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593962, url, valid)
+  result = hook(call_596995, url, valid)
 
-proc call*(call_593963: Call_WatcherGet_593954; automationAccountName: string;
+proc call*(call_596996: Call_WatcherGet_596987; automationAccountName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           watcherName: string): Recallable =
   ## watcherGet
@@ -490,24 +490,24 @@ proc call*(call_593963: Call_WatcherGet_593954; automationAccountName: string;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   watcherName: string (required)
   ##              : The watcher name.
-  var path_593964 = newJObject()
-  var query_593965 = newJObject()
-  add(path_593964, "automationAccountName", newJString(automationAccountName))
-  add(path_593964, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593965, "api-version", newJString(apiVersion))
-  add(path_593964, "subscriptionId", newJString(subscriptionId))
-  add(path_593964, "watcherName", newJString(watcherName))
-  result = call_593963.call(path_593964, query_593965, nil, nil, nil)
+  var path_596997 = newJObject()
+  var query_596998 = newJObject()
+  add(path_596997, "automationAccountName", newJString(automationAccountName))
+  add(path_596997, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596998, "api-version", newJString(apiVersion))
+  add(path_596997, "subscriptionId", newJString(subscriptionId))
+  add(path_596997, "watcherName", newJString(watcherName))
+  result = call_596996.call(path_596997, query_596998, nil, nil, nil)
 
-var watcherGet* = Call_WatcherGet_593954(name: "watcherGet",
+var watcherGet* = Call_WatcherGet_596987(name: "watcherGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/watchers/{watcherName}",
-                                      validator: validate_WatcherGet_593955,
-                                      base: "", url: url_WatcherGet_593956,
+                                      validator: validate_WatcherGet_596988,
+                                      base: "", url: url_WatcherGet_596989,
                                       schemes: {Scheme.Https})
 type
-  Call_WatcherUpdate_594018 = ref object of OpenApiRestCall_593425
-proc url_WatcherUpdate_594020(protocol: Scheme; host: string; base: string;
+  Call_WatcherUpdate_597051 = ref object of OpenApiRestCall_596458
+proc url_WatcherUpdate_597053(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -534,7 +534,7 @@ proc url_WatcherUpdate_594020(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WatcherUpdate_594019(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WatcherUpdate_597052(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the watcher identified by watcher name.
   ## 
@@ -552,26 +552,26 @@ proc validate_WatcherUpdate_594019(path: JsonNode; query: JsonNode; header: Json
   ##              : The watcher name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594021 = path.getOrDefault("automationAccountName")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  var valid_597054 = path.getOrDefault("automationAccountName")
+  valid_597054 = validateParameter(valid_597054, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "automationAccountName", valid_594021
-  var valid_594022 = path.getOrDefault("resourceGroupName")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  if valid_597054 != nil:
+    section.add "automationAccountName", valid_597054
+  var valid_597055 = path.getOrDefault("resourceGroupName")
+  valid_597055 = validateParameter(valid_597055, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "resourceGroupName", valid_594022
-  var valid_594023 = path.getOrDefault("subscriptionId")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  if valid_597055 != nil:
+    section.add "resourceGroupName", valid_597055
+  var valid_597056 = path.getOrDefault("subscriptionId")
+  valid_597056 = validateParameter(valid_597056, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "subscriptionId", valid_594023
-  var valid_594024 = path.getOrDefault("watcherName")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  if valid_597056 != nil:
+    section.add "subscriptionId", valid_597056
+  var valid_597057 = path.getOrDefault("watcherName")
+  valid_597057 = validateParameter(valid_597057, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "watcherName", valid_594024
+  if valid_597057 != nil:
+    section.add "watcherName", valid_597057
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -579,11 +579,11 @@ proc validate_WatcherUpdate_594019(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594025 = query.getOrDefault("api-version")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_597058 = query.getOrDefault("api-version")
+  valid_597058 = validateParameter(valid_597058, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "api-version", valid_594025
+  if valid_597058 != nil:
+    section.add "api-version", valid_597058
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -597,21 +597,21 @@ proc validate_WatcherUpdate_594019(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594027: Call_WatcherUpdate_594018; path: JsonNode; query: JsonNode;
+proc call*(call_597060: Call_WatcherUpdate_597051; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the watcher identified by watcher name.
   ## 
   ## http://aka.ms/azureautomationsdk/watcheroperations
-  let valid = call_594027.validator(path, query, header, formData, body)
-  let scheme = call_594027.pickScheme
+  let valid = call_597060.validator(path, query, header, formData, body)
+  let scheme = call_597060.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594027.url(scheme.get, call_594027.host, call_594027.base,
-                         call_594027.route, valid.getOrDefault("path"),
+  let url = call_597060.url(scheme.get, call_597060.host, call_597060.base,
+                         call_597060.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594027, url, valid)
+  result = hook(call_597060, url, valid)
 
-proc call*(call_594028: Call_WatcherUpdate_594018; automationAccountName: string;
+proc call*(call_597061: Call_WatcherUpdate_597051; automationAccountName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           watcherName: string; parameters: JsonNode): Recallable =
   ## watcherUpdate
@@ -629,25 +629,25 @@ proc call*(call_594028: Call_WatcherUpdate_594018; automationAccountName: string
   ##              : The watcher name.
   ##   parameters: JObject (required)
   ##             : The update parameters for watcher.
-  var path_594029 = newJObject()
-  var query_594030 = newJObject()
-  var body_594031 = newJObject()
-  add(path_594029, "automationAccountName", newJString(automationAccountName))
-  add(path_594029, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594030, "api-version", newJString(apiVersion))
-  add(path_594029, "subscriptionId", newJString(subscriptionId))
-  add(path_594029, "watcherName", newJString(watcherName))
+  var path_597062 = newJObject()
+  var query_597063 = newJObject()
+  var body_597064 = newJObject()
+  add(path_597062, "automationAccountName", newJString(automationAccountName))
+  add(path_597062, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597063, "api-version", newJString(apiVersion))
+  add(path_597062, "subscriptionId", newJString(subscriptionId))
+  add(path_597062, "watcherName", newJString(watcherName))
   if parameters != nil:
-    body_594031 = parameters
-  result = call_594028.call(path_594029, query_594030, nil, nil, body_594031)
+    body_597064 = parameters
+  result = call_597061.call(path_597062, query_597063, nil, nil, body_597064)
 
-var watcherUpdate* = Call_WatcherUpdate_594018(name: "watcherUpdate",
+var watcherUpdate* = Call_WatcherUpdate_597051(name: "watcherUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/watchers/{watcherName}",
-    validator: validate_WatcherUpdate_594019, base: "", url: url_WatcherUpdate_594020,
+    validator: validate_WatcherUpdate_597052, base: "", url: url_WatcherUpdate_597053,
     schemes: {Scheme.Https})
 type
-  Call_WatcherDelete_594006 = ref object of OpenApiRestCall_593425
-proc url_WatcherDelete_594008(protocol: Scheme; host: string; base: string;
+  Call_WatcherDelete_597039 = ref object of OpenApiRestCall_596458
+proc url_WatcherDelete_597041(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -674,7 +674,7 @@ proc url_WatcherDelete_594008(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WatcherDelete_594007(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WatcherDelete_597040(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the watcher by name.
   ## 
@@ -692,26 +692,26 @@ proc validate_WatcherDelete_594007(path: JsonNode; query: JsonNode; header: Json
   ##              : The watcher name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594009 = path.getOrDefault("automationAccountName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_597042 = path.getOrDefault("automationAccountName")
+  valid_597042 = validateParameter(valid_597042, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "automationAccountName", valid_594009
-  var valid_594010 = path.getOrDefault("resourceGroupName")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  if valid_597042 != nil:
+    section.add "automationAccountName", valid_597042
+  var valid_597043 = path.getOrDefault("resourceGroupName")
+  valid_597043 = validateParameter(valid_597043, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "resourceGroupName", valid_594010
-  var valid_594011 = path.getOrDefault("subscriptionId")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  if valid_597043 != nil:
+    section.add "resourceGroupName", valid_597043
+  var valid_597044 = path.getOrDefault("subscriptionId")
+  valid_597044 = validateParameter(valid_597044, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "subscriptionId", valid_594011
-  var valid_594012 = path.getOrDefault("watcherName")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_597044 != nil:
+    section.add "subscriptionId", valid_597044
+  var valid_597045 = path.getOrDefault("watcherName")
+  valid_597045 = validateParameter(valid_597045, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "watcherName", valid_594012
+  if valid_597045 != nil:
+    section.add "watcherName", valid_597045
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -719,11 +719,11 @@ proc validate_WatcherDelete_594007(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594013 = query.getOrDefault("api-version")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  var valid_597046 = query.getOrDefault("api-version")
+  valid_597046 = validateParameter(valid_597046, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "api-version", valid_594013
+  if valid_597046 != nil:
+    section.add "api-version", valid_597046
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -732,21 +732,21 @@ proc validate_WatcherDelete_594007(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594014: Call_WatcherDelete_594006; path: JsonNode; query: JsonNode;
+proc call*(call_597047: Call_WatcherDelete_597039; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the watcher by name.
   ## 
   ## http://aka.ms/azureautomationsdk/watcheroperations
-  let valid = call_594014.validator(path, query, header, formData, body)
-  let scheme = call_594014.pickScheme
+  let valid = call_597047.validator(path, query, header, formData, body)
+  let scheme = call_597047.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594014.url(scheme.get, call_594014.host, call_594014.base,
-                         call_594014.route, valid.getOrDefault("path"),
+  let url = call_597047.url(scheme.get, call_597047.host, call_597047.base,
+                         call_597047.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594014, url, valid)
+  result = hook(call_597047, url, valid)
 
-proc call*(call_594015: Call_WatcherDelete_594006; automationAccountName: string;
+proc call*(call_597048: Call_WatcherDelete_597039; automationAccountName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           watcherName: string): Recallable =
   ## watcherDelete
@@ -762,22 +762,22 @@ proc call*(call_594015: Call_WatcherDelete_594006; automationAccountName: string
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   watcherName: string (required)
   ##              : The watcher name.
-  var path_594016 = newJObject()
-  var query_594017 = newJObject()
-  add(path_594016, "automationAccountName", newJString(automationAccountName))
-  add(path_594016, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594017, "api-version", newJString(apiVersion))
-  add(path_594016, "subscriptionId", newJString(subscriptionId))
-  add(path_594016, "watcherName", newJString(watcherName))
-  result = call_594015.call(path_594016, query_594017, nil, nil, nil)
+  var path_597049 = newJObject()
+  var query_597050 = newJObject()
+  add(path_597049, "automationAccountName", newJString(automationAccountName))
+  add(path_597049, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597050, "api-version", newJString(apiVersion))
+  add(path_597049, "subscriptionId", newJString(subscriptionId))
+  add(path_597049, "watcherName", newJString(watcherName))
+  result = call_597048.call(path_597049, query_597050, nil, nil, nil)
 
-var watcherDelete* = Call_WatcherDelete_594006(name: "watcherDelete",
+var watcherDelete* = Call_WatcherDelete_597039(name: "watcherDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/watchers/{watcherName}",
-    validator: validate_WatcherDelete_594007, base: "", url: url_WatcherDelete_594008,
+    validator: validate_WatcherDelete_597040, base: "", url: url_WatcherDelete_597041,
     schemes: {Scheme.Https})
 type
-  Call_WatcherStart_594032 = ref object of OpenApiRestCall_593425
-proc url_WatcherStart_594034(protocol: Scheme; host: string; base: string;
+  Call_WatcherStart_597065 = ref object of OpenApiRestCall_596458
+proc url_WatcherStart_597067(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -805,7 +805,7 @@ proc url_WatcherStart_594034(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WatcherStart_594033(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WatcherStart_597066(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Resume the watcher identified by watcher name.
   ## 
@@ -823,26 +823,26 @@ proc validate_WatcherStart_594033(path: JsonNode; query: JsonNode; header: JsonN
   ##              : The watcher name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594035 = path.getOrDefault("automationAccountName")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  var valid_597068 = path.getOrDefault("automationAccountName")
+  valid_597068 = validateParameter(valid_597068, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "automationAccountName", valid_594035
-  var valid_594036 = path.getOrDefault("resourceGroupName")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  if valid_597068 != nil:
+    section.add "automationAccountName", valid_597068
+  var valid_597069 = path.getOrDefault("resourceGroupName")
+  valid_597069 = validateParameter(valid_597069, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "resourceGroupName", valid_594036
-  var valid_594037 = path.getOrDefault("subscriptionId")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_597069 != nil:
+    section.add "resourceGroupName", valid_597069
+  var valid_597070 = path.getOrDefault("subscriptionId")
+  valid_597070 = validateParameter(valid_597070, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "subscriptionId", valid_594037
-  var valid_594038 = path.getOrDefault("watcherName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_597070 != nil:
+    section.add "subscriptionId", valid_597070
+  var valid_597071 = path.getOrDefault("watcherName")
+  valid_597071 = validateParameter(valid_597071, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "watcherName", valid_594038
+  if valid_597071 != nil:
+    section.add "watcherName", valid_597071
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -850,11 +850,11 @@ proc validate_WatcherStart_594033(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594039 = query.getOrDefault("api-version")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  var valid_597072 = query.getOrDefault("api-version")
+  valid_597072 = validateParameter(valid_597072, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "api-version", valid_594039
+  if valid_597072 != nil:
+    section.add "api-version", valid_597072
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -863,21 +863,21 @@ proc validate_WatcherStart_594033(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594040: Call_WatcherStart_594032; path: JsonNode; query: JsonNode;
+proc call*(call_597073: Call_WatcherStart_597065; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resume the watcher identified by watcher name.
   ## 
   ## http://aka.ms/azureautomationsdk/watcheroperations
-  let valid = call_594040.validator(path, query, header, formData, body)
-  let scheme = call_594040.pickScheme
+  let valid = call_597073.validator(path, query, header, formData, body)
+  let scheme = call_597073.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594040.url(scheme.get, call_594040.host, call_594040.base,
-                         call_594040.route, valid.getOrDefault("path"),
+  let url = call_597073.url(scheme.get, call_597073.host, call_597073.base,
+                         call_597073.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594040, url, valid)
+  result = hook(call_597073, url, valid)
 
-proc call*(call_594041: Call_WatcherStart_594032; automationAccountName: string;
+proc call*(call_597074: Call_WatcherStart_597065; automationAccountName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           watcherName: string): Recallable =
   ## watcherStart
@@ -893,22 +893,22 @@ proc call*(call_594041: Call_WatcherStart_594032; automationAccountName: string;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   watcherName: string (required)
   ##              : The watcher name.
-  var path_594042 = newJObject()
-  var query_594043 = newJObject()
-  add(path_594042, "automationAccountName", newJString(automationAccountName))
-  add(path_594042, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594043, "api-version", newJString(apiVersion))
-  add(path_594042, "subscriptionId", newJString(subscriptionId))
-  add(path_594042, "watcherName", newJString(watcherName))
-  result = call_594041.call(path_594042, query_594043, nil, nil, nil)
+  var path_597075 = newJObject()
+  var query_597076 = newJObject()
+  add(path_597075, "automationAccountName", newJString(automationAccountName))
+  add(path_597075, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597076, "api-version", newJString(apiVersion))
+  add(path_597075, "subscriptionId", newJString(subscriptionId))
+  add(path_597075, "watcherName", newJString(watcherName))
+  result = call_597074.call(path_597075, query_597076, nil, nil, nil)
 
-var watcherStart* = Call_WatcherStart_594032(name: "watcherStart",
+var watcherStart* = Call_WatcherStart_597065(name: "watcherStart",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/watchers/{watcherName}/start",
-    validator: validate_WatcherStart_594033, base: "", url: url_WatcherStart_594034,
+    validator: validate_WatcherStart_597066, base: "", url: url_WatcherStart_597067,
     schemes: {Scheme.Https})
 type
-  Call_WatcherStop_594044 = ref object of OpenApiRestCall_593425
-proc url_WatcherStop_594046(protocol: Scheme; host: string; base: string;
+  Call_WatcherStop_597077 = ref object of OpenApiRestCall_596458
+proc url_WatcherStop_597079(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -936,7 +936,7 @@ proc url_WatcherStop_594046(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WatcherStop_594045(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WatcherStop_597078(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Resume the watcher identified by watcher name.
   ## 
@@ -954,26 +954,26 @@ proc validate_WatcherStop_594045(path: JsonNode; query: JsonNode; header: JsonNo
   ##              : The watcher name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594047 = path.getOrDefault("automationAccountName")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  var valid_597080 = path.getOrDefault("automationAccountName")
+  valid_597080 = validateParameter(valid_597080, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "automationAccountName", valid_594047
-  var valid_594048 = path.getOrDefault("resourceGroupName")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  if valid_597080 != nil:
+    section.add "automationAccountName", valid_597080
+  var valid_597081 = path.getOrDefault("resourceGroupName")
+  valid_597081 = validateParameter(valid_597081, JString, required = true,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "resourceGroupName", valid_594048
-  var valid_594049 = path.getOrDefault("subscriptionId")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  if valid_597081 != nil:
+    section.add "resourceGroupName", valid_597081
+  var valid_597082 = path.getOrDefault("subscriptionId")
+  valid_597082 = validateParameter(valid_597082, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "subscriptionId", valid_594049
-  var valid_594050 = path.getOrDefault("watcherName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  if valid_597082 != nil:
+    section.add "subscriptionId", valid_597082
+  var valid_597083 = path.getOrDefault("watcherName")
+  valid_597083 = validateParameter(valid_597083, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "watcherName", valid_594050
+  if valid_597083 != nil:
+    section.add "watcherName", valid_597083
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -981,11 +981,11 @@ proc validate_WatcherStop_594045(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594051 = query.getOrDefault("api-version")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  var valid_597084 = query.getOrDefault("api-version")
+  valid_597084 = validateParameter(valid_597084, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "api-version", valid_594051
+  if valid_597084 != nil:
+    section.add "api-version", valid_597084
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -994,21 +994,21 @@ proc validate_WatcherStop_594045(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594052: Call_WatcherStop_594044; path: JsonNode; query: JsonNode;
+proc call*(call_597085: Call_WatcherStop_597077; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resume the watcher identified by watcher name.
   ## 
   ## http://aka.ms/azureautomationsdk/watcheroperations
-  let valid = call_594052.validator(path, query, header, formData, body)
-  let scheme = call_594052.pickScheme
+  let valid = call_597085.validator(path, query, header, formData, body)
+  let scheme = call_597085.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594052.url(scheme.get, call_594052.host, call_594052.base,
-                         call_594052.route, valid.getOrDefault("path"),
+  let url = call_597085.url(scheme.get, call_597085.host, call_597085.base,
+                         call_597085.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594052, url, valid)
+  result = hook(call_597085, url, valid)
 
-proc call*(call_594053: Call_WatcherStop_594044; automationAccountName: string;
+proc call*(call_597086: Call_WatcherStop_597077; automationAccountName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           watcherName: string): Recallable =
   ## watcherStop
@@ -1024,20 +1024,20 @@ proc call*(call_594053: Call_WatcherStop_594044; automationAccountName: string;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   watcherName: string (required)
   ##              : The watcher name.
-  var path_594054 = newJObject()
-  var query_594055 = newJObject()
-  add(path_594054, "automationAccountName", newJString(automationAccountName))
-  add(path_594054, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594055, "api-version", newJString(apiVersion))
-  add(path_594054, "subscriptionId", newJString(subscriptionId))
-  add(path_594054, "watcherName", newJString(watcherName))
-  result = call_594053.call(path_594054, query_594055, nil, nil, nil)
+  var path_597087 = newJObject()
+  var query_597088 = newJObject()
+  add(path_597087, "automationAccountName", newJString(automationAccountName))
+  add(path_597087, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597088, "api-version", newJString(apiVersion))
+  add(path_597087, "subscriptionId", newJString(subscriptionId))
+  add(path_597087, "watcherName", newJString(watcherName))
+  result = call_597086.call(path_597087, query_597088, nil, nil, nil)
 
-var watcherStop* = Call_WatcherStop_594044(name: "watcherStop",
+var watcherStop* = Call_WatcherStop_597077(name: "watcherStop",
                                         meth: HttpMethod.HttpPost,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/watchers/{watcherName}/stop",
-                                        validator: validate_WatcherStop_594045,
-                                        base: "", url: url_WatcherStop_594046,
+                                        validator: validate_WatcherStop_597078,
+                                        base: "", url: url_WatcherStop_597079,
                                         schemes: {Scheme.Https})
 export
   rest

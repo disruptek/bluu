@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: DeviceServices
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "windowsiot-WindowsIotServices"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593646 = ref object of OpenApiRestCall_593424
-proc url_OperationsList_593648(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567879 = ref object of OpenApiRestCall_567657
+proc url_OperationsList_567881(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Windows IoT Services REST API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_568040 = query.getOrDefault("api-version")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_568040 != nil:
+    section.add "api-version", valid_568040
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593830: Call_OperationsList_593646; path: JsonNode; query: JsonNode;
+proc call*(call_568063: Call_OperationsList_567879; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Windows IoT Services REST API operations.
   ## 
-  let valid = call_593830.validator(path, query, header, formData, body)
-  let scheme = call_593830.pickScheme
+  let valid = call_568063.validator(path, query, header, formData, body)
+  let scheme = call_568063.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593830.url(scheme.get, call_593830.host, call_593830.base,
-                         call_593830.route, valid.getOrDefault("path"),
+  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
+                         call_568063.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593830, url, valid)
+  result = hook(call_568063, url, valid)
 
-proc call*(call_593901: Call_OperationsList_593646; apiVersion: string): Recallable =
+proc call*(call_568134: Call_OperationsList_567879; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Windows IoT Services REST API operations.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  var query_593902 = newJObject()
-  add(query_593902, "api-version", newJString(apiVersion))
-  result = call_593901.call(nil, query_593902, nil, nil, nil)
+  var query_568135 = newJObject()
+  add(query_568135, "api-version", newJString(apiVersion))
+  result = call_568134.call(nil, query_568135, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593646(name: "operationsList",
+var operationsList* = Call_OperationsList_567879(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.WindowsIoT/operations",
-    validator: validate_OperationsList_593647, base: "", url: url_OperationsList_593648,
+    validator: validate_OperationsList_567880, base: "", url: url_OperationsList_567881,
     schemes: {Scheme.Https})
 type
-  Call_ServicesCheckDeviceServiceNameAvailability_593942 = ref object of OpenApiRestCall_593424
-proc url_ServicesCheckDeviceServiceNameAvailability_593944(protocol: Scheme;
+  Call_ServicesCheckDeviceServiceNameAvailability_568175 = ref object of OpenApiRestCall_567657
+proc url_ServicesCheckDeviceServiceNameAvailability_568177(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +184,7 @@ proc url_ServicesCheckDeviceServiceNameAvailability_593944(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesCheckDeviceServiceNameAvailability_593943(path: JsonNode;
+proc validate_ServicesCheckDeviceServiceNameAvailability_568176(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check if a Windows IoT Device Service name is available.
   ## 
@@ -196,11 +196,11 @@ proc validate_ServicesCheckDeviceServiceNameAvailability_593943(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593959 = path.getOrDefault("subscriptionId")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  var valid_568192 = path.getOrDefault("subscriptionId")
+  valid_568192 = validateParameter(valid_568192, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "subscriptionId", valid_593959
+  if valid_568192 != nil:
+    section.add "subscriptionId", valid_568192
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -208,11 +208,11 @@ proc validate_ServicesCheckDeviceServiceNameAvailability_593943(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593960 = query.getOrDefault("api-version")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_568193 = query.getOrDefault("api-version")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "api-version", valid_593960
+  if valid_568193 != nil:
+    section.add "api-version", valid_568193
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -226,21 +226,21 @@ proc validate_ServicesCheckDeviceServiceNameAvailability_593943(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593962: Call_ServicesCheckDeviceServiceNameAvailability_593942;
+proc call*(call_568195: Call_ServicesCheckDeviceServiceNameAvailability_568175;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Check if a Windows IoT Device Service name is available.
   ## 
-  let valid = call_593962.validator(path, query, header, formData, body)
-  let scheme = call_593962.pickScheme
+  let valid = call_568195.validator(path, query, header, formData, body)
+  let scheme = call_568195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593962.url(scheme.get, call_593962.host, call_593962.base,
-                         call_593962.route, valid.getOrDefault("path"),
+  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
+                         call_568195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593962, url, valid)
+  result = hook(call_568195, url, valid)
 
-proc call*(call_593963: Call_ServicesCheckDeviceServiceNameAvailability_593942;
+proc call*(call_568196: Call_ServicesCheckDeviceServiceNameAvailability_568175;
           apiVersion: string; subscriptionId: string;
           deviceServiceCheckNameAvailabilityParameters: JsonNode): Recallable =
   ## servicesCheckDeviceServiceNameAvailability
@@ -251,24 +251,24 @@ proc call*(call_593963: Call_ServicesCheckDeviceServiceNameAvailability_593942;
   ##                 : The subscription identifier.
   ##   deviceServiceCheckNameAvailabilityParameters: JObject (required)
   ##                                               : Set the name parameter in the DeviceServiceCheckNameAvailabilityParameters structure to the name of the Windows IoT Device Service to check.
-  var path_593964 = newJObject()
-  var query_593965 = newJObject()
-  var body_593966 = newJObject()
-  add(query_593965, "api-version", newJString(apiVersion))
-  add(path_593964, "subscriptionId", newJString(subscriptionId))
+  var path_568197 = newJObject()
+  var query_568198 = newJObject()
+  var body_568199 = newJObject()
+  add(query_568198, "api-version", newJString(apiVersion))
+  add(path_568197, "subscriptionId", newJString(subscriptionId))
   if deviceServiceCheckNameAvailabilityParameters != nil:
-    body_593966 = deviceServiceCheckNameAvailabilityParameters
-  result = call_593963.call(path_593964, query_593965, nil, nil, body_593966)
+    body_568199 = deviceServiceCheckNameAvailabilityParameters
+  result = call_568196.call(path_568197, query_568198, nil, nil, body_568199)
 
-var servicesCheckDeviceServiceNameAvailability* = Call_ServicesCheckDeviceServiceNameAvailability_593942(
+var servicesCheckDeviceServiceNameAvailability* = Call_ServicesCheckDeviceServiceNameAvailability_568175(
     name: "servicesCheckDeviceServiceNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.WindowsIoT/checkDeviceServiceNameAvailability",
-    validator: validate_ServicesCheckDeviceServiceNameAvailability_593943,
-    base: "", url: url_ServicesCheckDeviceServiceNameAvailability_593944,
+    validator: validate_ServicesCheckDeviceServiceNameAvailability_568176,
+    base: "", url: url_ServicesCheckDeviceServiceNameAvailability_568177,
     schemes: {Scheme.Https})
 type
-  Call_ServicesList_593967 = ref object of OpenApiRestCall_593424
-proc url_ServicesList_593969(protocol: Scheme; host: string; base: string;
+  Call_ServicesList_568200 = ref object of OpenApiRestCall_567657
+proc url_ServicesList_568202(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -285,7 +285,7 @@ proc url_ServicesList_593969(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesList_593968(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServicesList_568201(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all the IoT hubs in a subscription.
   ## 
@@ -297,11 +297,11 @@ proc validate_ServicesList_593968(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593970 = path.getOrDefault("subscriptionId")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  var valid_568203 = path.getOrDefault("subscriptionId")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "subscriptionId", valid_593970
+  if valid_568203 != nil:
+    section.add "subscriptionId", valid_568203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -309,11 +309,11 @@ proc validate_ServicesList_593968(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568204 = query.getOrDefault("api-version")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
+  if valid_568204 != nil:
+    section.add "api-version", valid_568204
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -322,20 +322,20 @@ proc validate_ServicesList_593968(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593972: Call_ServicesList_593967; path: JsonNode; query: JsonNode;
+proc call*(call_568205: Call_ServicesList_568200; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all the IoT hubs in a subscription.
   ## 
-  let valid = call_593972.validator(path, query, header, formData, body)
-  let scheme = call_593972.pickScheme
+  let valid = call_568205.validator(path, query, header, formData, body)
+  let scheme = call_568205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593972.url(scheme.get, call_593972.host, call_593972.base,
-                         call_593972.route, valid.getOrDefault("path"),
+  let url = call_568205.url(scheme.get, call_568205.host, call_568205.base,
+                         call_568205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593972, url, valid)
+  result = hook(call_568205, url, valid)
 
-proc call*(call_593973: Call_ServicesList_593967; apiVersion: string;
+proc call*(call_568206: Call_ServicesList_568200; apiVersion: string;
           subscriptionId: string): Recallable =
   ## servicesList
   ## Get all the IoT hubs in a subscription.
@@ -343,19 +343,19 @@ proc call*(call_593973: Call_ServicesList_593967; apiVersion: string;
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_593974 = newJObject()
-  var query_593975 = newJObject()
-  add(query_593975, "api-version", newJString(apiVersion))
-  add(path_593974, "subscriptionId", newJString(subscriptionId))
-  result = call_593973.call(path_593974, query_593975, nil, nil, nil)
+  var path_568207 = newJObject()
+  var query_568208 = newJObject()
+  add(query_568208, "api-version", newJString(apiVersion))
+  add(path_568207, "subscriptionId", newJString(subscriptionId))
+  result = call_568206.call(path_568207, query_568208, nil, nil, nil)
 
-var servicesList* = Call_ServicesList_593967(name: "servicesList",
+var servicesList* = Call_ServicesList_568200(name: "servicesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.WindowsIoT/deviceServices",
-    validator: validate_ServicesList_593968, base: "", url: url_ServicesList_593969,
+    validator: validate_ServicesList_568201, base: "", url: url_ServicesList_568202,
     schemes: {Scheme.Https})
 type
-  Call_ServicesListByResourceGroup_593976 = ref object of OpenApiRestCall_593424
-proc url_ServicesListByResourceGroup_593978(protocol: Scheme; host: string;
+  Call_ServicesListByResourceGroup_568209 = ref object of OpenApiRestCall_567657
+proc url_ServicesListByResourceGroup_568211(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -376,7 +376,7 @@ proc url_ServicesListByResourceGroup_593978(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesListByResourceGroup_593977(path: JsonNode; query: JsonNode;
+proc validate_ServicesListByResourceGroup_568210(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all the IoT hubs in a resource group.
   ## 
@@ -390,16 +390,16 @@ proc validate_ServicesListByResourceGroup_593977(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593979 = path.getOrDefault("resourceGroupName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_568212 = path.getOrDefault("resourceGroupName")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "resourceGroupName", valid_593979
-  var valid_593980 = path.getOrDefault("subscriptionId")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_568212 != nil:
+    section.add "resourceGroupName", valid_568212
+  var valid_568213 = path.getOrDefault("subscriptionId")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "subscriptionId", valid_593980
+  if valid_568213 != nil:
+    section.add "subscriptionId", valid_568213
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -407,11 +407,11 @@ proc validate_ServicesListByResourceGroup_593977(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593981 = query.getOrDefault("api-version")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = query.getOrDefault("api-version")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "api-version", valid_593981
+  if valid_568214 != nil:
+    section.add "api-version", valid_568214
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -420,20 +420,20 @@ proc validate_ServicesListByResourceGroup_593977(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593982: Call_ServicesListByResourceGroup_593976; path: JsonNode;
+proc call*(call_568215: Call_ServicesListByResourceGroup_568209; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all the IoT hubs in a resource group.
   ## 
-  let valid = call_593982.validator(path, query, header, formData, body)
-  let scheme = call_593982.pickScheme
+  let valid = call_568215.validator(path, query, header, formData, body)
+  let scheme = call_568215.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593982.url(scheme.get, call_593982.host, call_593982.base,
-                         call_593982.route, valid.getOrDefault("path"),
+  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
+                         call_568215.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593982, url, valid)
+  result = hook(call_568215, url, valid)
 
-proc call*(call_593983: Call_ServicesListByResourceGroup_593976;
+proc call*(call_568216: Call_ServicesListByResourceGroup_568209;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## servicesListByResourceGroup
   ## Get all the IoT hubs in a resource group.
@@ -443,21 +443,21 @@ proc call*(call_593983: Call_ServicesListByResourceGroup_593976;
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_593984 = newJObject()
-  var query_593985 = newJObject()
-  add(path_593984, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593985, "api-version", newJString(apiVersion))
-  add(path_593984, "subscriptionId", newJString(subscriptionId))
-  result = call_593983.call(path_593984, query_593985, nil, nil, nil)
+  var path_568217 = newJObject()
+  var query_568218 = newJObject()
+  add(path_568217, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568218, "api-version", newJString(apiVersion))
+  add(path_568217, "subscriptionId", newJString(subscriptionId))
+  result = call_568216.call(path_568217, query_568218, nil, nil, nil)
 
-var servicesListByResourceGroup* = Call_ServicesListByResourceGroup_593976(
+var servicesListByResourceGroup* = Call_ServicesListByResourceGroup_568209(
     name: "servicesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.WindowsIoT/deviceServices",
-    validator: validate_ServicesListByResourceGroup_593977, base: "",
-    url: url_ServicesListByResourceGroup_593978, schemes: {Scheme.Https})
+    validator: validate_ServicesListByResourceGroup_568210, base: "",
+    url: url_ServicesListByResourceGroup_568211, schemes: {Scheme.Https})
 type
-  Call_ServicesCreateOrUpdate_593997 = ref object of OpenApiRestCall_593424
-proc url_ServicesCreateOrUpdate_593999(protocol: Scheme; host: string; base: string;
+  Call_ServicesCreateOrUpdate_568230 = ref object of OpenApiRestCall_567657
+proc url_ServicesCreateOrUpdate_568232(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -480,7 +480,7 @@ proc url_ServicesCreateOrUpdate_593999(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesCreateOrUpdate_593998(path: JsonNode; query: JsonNode;
+proc validate_ServicesCreateOrUpdate_568231(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update the metadata of a Windows IoT Device Service. The usual pattern to modify a property is to retrieve the Windows IoT Device Service metadata and security metadata, and then combine them with the modified values in a new body to update the Windows IoT Device Service.
   ## 
@@ -496,21 +496,21 @@ proc validate_ServicesCreateOrUpdate_593998(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594000 = path.getOrDefault("resourceGroupName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_568233 = path.getOrDefault("resourceGroupName")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "resourceGroupName", valid_594000
-  var valid_594001 = path.getOrDefault("subscriptionId")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_568233 != nil:
+    section.add "resourceGroupName", valid_568233
+  var valid_568234 = path.getOrDefault("subscriptionId")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "subscriptionId", valid_594001
-  var valid_594002 = path.getOrDefault("deviceName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_568234 != nil:
+    section.add "subscriptionId", valid_568234
+  var valid_568235 = path.getOrDefault("deviceName")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "deviceName", valid_594002
+  if valid_568235 != nil:
+    section.add "deviceName", valid_568235
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -518,21 +518,21 @@ proc validate_ServicesCreateOrUpdate_593998(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594003 = query.getOrDefault("api-version")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  var valid_568236 = query.getOrDefault("api-version")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "api-version", valid_594003
+  if valid_568236 != nil:
+    section.add "api-version", valid_568236
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Windows IoT Device Service. Do not specify for creating a new Windows IoT Device Service. Required to update an existing Windows IoT Device Service.
   section = newJObject()
-  var valid_594004 = header.getOrDefault("If-Match")
-  valid_594004 = validateParameter(valid_594004, JString, required = false,
+  var valid_568237 = header.getOrDefault("If-Match")
+  valid_568237 = validateParameter(valid_568237, JString, required = false,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "If-Match", valid_594004
+  if valid_568237 != nil:
+    section.add "If-Match", valid_568237
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -544,20 +544,20 @@ proc validate_ServicesCreateOrUpdate_593998(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594006: Call_ServicesCreateOrUpdate_593997; path: JsonNode;
+proc call*(call_568239: Call_ServicesCreateOrUpdate_568230; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update the metadata of a Windows IoT Device Service. The usual pattern to modify a property is to retrieve the Windows IoT Device Service metadata and security metadata, and then combine them with the modified values in a new body to update the Windows IoT Device Service.
   ## 
-  let valid = call_594006.validator(path, query, header, formData, body)
-  let scheme = call_594006.pickScheme
+  let valid = call_568239.validator(path, query, header, formData, body)
+  let scheme = call_568239.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594006.url(scheme.get, call_594006.host, call_594006.base,
-                         call_594006.route, valid.getOrDefault("path"),
+  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
+                         call_568239.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594006, url, valid)
+  result = hook(call_568239, url, valid)
 
-proc call*(call_594007: Call_ServicesCreateOrUpdate_593997;
+proc call*(call_568240: Call_ServicesCreateOrUpdate_568230;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           deviceService: JsonNode; deviceName: string): Recallable =
   ## servicesCreateOrUpdate
@@ -572,25 +572,25 @@ proc call*(call_594007: Call_ServicesCreateOrUpdate_593997;
   ##                : The Windows IoT Device Service metadata and security metadata.
   ##   deviceName: string (required)
   ##             : The name of the Windows IoT Device Service.
-  var path_594008 = newJObject()
-  var query_594009 = newJObject()
-  var body_594010 = newJObject()
-  add(path_594008, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594009, "api-version", newJString(apiVersion))
-  add(path_594008, "subscriptionId", newJString(subscriptionId))
+  var path_568241 = newJObject()
+  var query_568242 = newJObject()
+  var body_568243 = newJObject()
+  add(path_568241, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568242, "api-version", newJString(apiVersion))
+  add(path_568241, "subscriptionId", newJString(subscriptionId))
   if deviceService != nil:
-    body_594010 = deviceService
-  add(path_594008, "deviceName", newJString(deviceName))
-  result = call_594007.call(path_594008, query_594009, nil, nil, body_594010)
+    body_568243 = deviceService
+  add(path_568241, "deviceName", newJString(deviceName))
+  result = call_568240.call(path_568241, query_568242, nil, nil, body_568243)
 
-var servicesCreateOrUpdate* = Call_ServicesCreateOrUpdate_593997(
+var servicesCreateOrUpdate* = Call_ServicesCreateOrUpdate_568230(
     name: "servicesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.WindowsIoT/deviceServices/{deviceName}",
-    validator: validate_ServicesCreateOrUpdate_593998, base: "",
-    url: url_ServicesCreateOrUpdate_593999, schemes: {Scheme.Https})
+    validator: validate_ServicesCreateOrUpdate_568231, base: "",
+    url: url_ServicesCreateOrUpdate_568232, schemes: {Scheme.Https})
 type
-  Call_ServicesGet_593986 = ref object of OpenApiRestCall_593424
-proc url_ServicesGet_593988(protocol: Scheme; host: string; base: string;
+  Call_ServicesGet_568219 = ref object of OpenApiRestCall_567657
+proc url_ServicesGet_568221(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -613,7 +613,7 @@ proc url_ServicesGet_593988(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesGet_593987(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServicesGet_568220(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the non-security related metadata of a Windows IoT Device Service.
   ## 
@@ -629,21 +629,21 @@ proc validate_ServicesGet_593987(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593989 = path.getOrDefault("resourceGroupName")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  var valid_568222 = path.getOrDefault("resourceGroupName")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "resourceGroupName", valid_593989
-  var valid_593990 = path.getOrDefault("subscriptionId")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  if valid_568222 != nil:
+    section.add "resourceGroupName", valid_568222
+  var valid_568223 = path.getOrDefault("subscriptionId")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "subscriptionId", valid_593990
-  var valid_593991 = path.getOrDefault("deviceName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_568223 != nil:
+    section.add "subscriptionId", valid_568223
+  var valid_568224 = path.getOrDefault("deviceName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "deviceName", valid_593991
+  if valid_568224 != nil:
+    section.add "deviceName", valid_568224
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -651,11 +651,11 @@ proc validate_ServicesGet_593987(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593992 = query.getOrDefault("api-version")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568225 = query.getOrDefault("api-version")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "api-version", valid_593992
+  if valid_568225 != nil:
+    section.add "api-version", valid_568225
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -664,20 +664,20 @@ proc validate_ServicesGet_593987(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593993: Call_ServicesGet_593986; path: JsonNode; query: JsonNode;
+proc call*(call_568226: Call_ServicesGet_568219; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the non-security related metadata of a Windows IoT Device Service.
   ## 
-  let valid = call_593993.validator(path, query, header, formData, body)
-  let scheme = call_593993.pickScheme
+  let valid = call_568226.validator(path, query, header, formData, body)
+  let scheme = call_568226.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593993.url(scheme.get, call_593993.host, call_593993.base,
-                         call_593993.route, valid.getOrDefault("path"),
+  let url = call_568226.url(scheme.get, call_568226.host, call_568226.base,
+                         call_568226.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593993, url, valid)
+  result = hook(call_568226, url, valid)
 
-proc call*(call_593994: Call_ServicesGet_593986; resourceGroupName: string;
+proc call*(call_568227: Call_ServicesGet_568219; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; deviceName: string): Recallable =
   ## servicesGet
   ## Get the non-security related metadata of a Windows IoT Device Service.
@@ -689,23 +689,23 @@ proc call*(call_593994: Call_ServicesGet_593986; resourceGroupName: string;
   ##                 : The subscription identifier.
   ##   deviceName: string (required)
   ##             : The name of the Windows IoT Device Service.
-  var path_593995 = newJObject()
-  var query_593996 = newJObject()
-  add(path_593995, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593996, "api-version", newJString(apiVersion))
-  add(path_593995, "subscriptionId", newJString(subscriptionId))
-  add(path_593995, "deviceName", newJString(deviceName))
-  result = call_593994.call(path_593995, query_593996, nil, nil, nil)
+  var path_568228 = newJObject()
+  var query_568229 = newJObject()
+  add(path_568228, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568229, "api-version", newJString(apiVersion))
+  add(path_568228, "subscriptionId", newJString(subscriptionId))
+  add(path_568228, "deviceName", newJString(deviceName))
+  result = call_568227.call(path_568228, query_568229, nil, nil, nil)
 
-var servicesGet* = Call_ServicesGet_593986(name: "servicesGet",
+var servicesGet* = Call_ServicesGet_568219(name: "servicesGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.WindowsIoT/deviceServices/{deviceName}",
-                                        validator: validate_ServicesGet_593987,
-                                        base: "", url: url_ServicesGet_593988,
+                                        validator: validate_ServicesGet_568220,
+                                        base: "", url: url_ServicesGet_568221,
                                         schemes: {Scheme.Https})
 type
-  Call_ServicesUpdate_594022 = ref object of OpenApiRestCall_593424
-proc url_ServicesUpdate_594024(protocol: Scheme; host: string; base: string;
+  Call_ServicesUpdate_568255 = ref object of OpenApiRestCall_567657
+proc url_ServicesUpdate_568257(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -728,7 +728,7 @@ proc url_ServicesUpdate_594024(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesUpdate_594023(path: JsonNode; query: JsonNode;
+proc validate_ServicesUpdate_568256(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates the metadata of a Windows IoT Device Service. The usual pattern to modify a property is to retrieve the Windows IoT Device Service metadata and security metadata, and then combine them with the modified values in a new body to update the Windows IoT Device Service.
@@ -745,21 +745,21 @@ proc validate_ServicesUpdate_594023(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594025 = path.getOrDefault("resourceGroupName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_568258 = path.getOrDefault("resourceGroupName")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "resourceGroupName", valid_594025
-  var valid_594026 = path.getOrDefault("subscriptionId")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_568258 != nil:
+    section.add "resourceGroupName", valid_568258
+  var valid_568259 = path.getOrDefault("subscriptionId")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "subscriptionId", valid_594026
-  var valid_594027 = path.getOrDefault("deviceName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_568259 != nil:
+    section.add "subscriptionId", valid_568259
+  var valid_568260 = path.getOrDefault("deviceName")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "deviceName", valid_594027
+  if valid_568260 != nil:
+    section.add "deviceName", valid_568260
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -767,21 +767,21 @@ proc validate_ServicesUpdate_594023(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594028 = query.getOrDefault("api-version")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  var valid_568261 = query.getOrDefault("api-version")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "api-version", valid_594028
+  if valid_568261 != nil:
+    section.add "api-version", valid_568261
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Windows IoT Device Service. Do not specify for creating a brand new Windows IoT Device Service. Required to update an existing Windows IoT Device Service.
   section = newJObject()
-  var valid_594029 = header.getOrDefault("If-Match")
-  valid_594029 = validateParameter(valid_594029, JString, required = false,
+  var valid_568262 = header.getOrDefault("If-Match")
+  valid_568262 = validateParameter(valid_568262, JString, required = false,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "If-Match", valid_594029
+  if valid_568262 != nil:
+    section.add "If-Match", valid_568262
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -793,20 +793,20 @@ proc validate_ServicesUpdate_594023(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594031: Call_ServicesUpdate_594022; path: JsonNode; query: JsonNode;
+proc call*(call_568264: Call_ServicesUpdate_568255; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the metadata of a Windows IoT Device Service. The usual pattern to modify a property is to retrieve the Windows IoT Device Service metadata and security metadata, and then combine them with the modified values in a new body to update the Windows IoT Device Service.
   ## 
-  let valid = call_594031.validator(path, query, header, formData, body)
-  let scheme = call_594031.pickScheme
+  let valid = call_568264.validator(path, query, header, formData, body)
+  let scheme = call_568264.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594031.url(scheme.get, call_594031.host, call_594031.base,
-                         call_594031.route, valid.getOrDefault("path"),
+  let url = call_568264.url(scheme.get, call_568264.host, call_568264.base,
+                         call_568264.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594031, url, valid)
+  result = hook(call_568264, url, valid)
 
-proc call*(call_594032: Call_ServicesUpdate_594022; resourceGroupName: string;
+proc call*(call_568265: Call_ServicesUpdate_568255; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; deviceService: JsonNode;
           deviceName: string): Recallable =
   ## servicesUpdate
@@ -821,24 +821,24 @@ proc call*(call_594032: Call_ServicesUpdate_594022; resourceGroupName: string;
   ##                : The Windows IoT Device Service metadata and security metadata.
   ##   deviceName: string (required)
   ##             : The name of the Windows IoT Device Service.
-  var path_594033 = newJObject()
-  var query_594034 = newJObject()
-  var body_594035 = newJObject()
-  add(path_594033, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594034, "api-version", newJString(apiVersion))
-  add(path_594033, "subscriptionId", newJString(subscriptionId))
+  var path_568266 = newJObject()
+  var query_568267 = newJObject()
+  var body_568268 = newJObject()
+  add(path_568266, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568267, "api-version", newJString(apiVersion))
+  add(path_568266, "subscriptionId", newJString(subscriptionId))
   if deviceService != nil:
-    body_594035 = deviceService
-  add(path_594033, "deviceName", newJString(deviceName))
-  result = call_594032.call(path_594033, query_594034, nil, nil, body_594035)
+    body_568268 = deviceService
+  add(path_568266, "deviceName", newJString(deviceName))
+  result = call_568265.call(path_568266, query_568267, nil, nil, body_568268)
 
-var servicesUpdate* = Call_ServicesUpdate_594022(name: "servicesUpdate",
+var servicesUpdate* = Call_ServicesUpdate_568255(name: "servicesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.WindowsIoT/deviceServices/{deviceName}",
-    validator: validate_ServicesUpdate_594023, base: "", url: url_ServicesUpdate_594024,
+    validator: validate_ServicesUpdate_568256, base: "", url: url_ServicesUpdate_568257,
     schemes: {Scheme.Https})
 type
-  Call_ServicesDelete_594011 = ref object of OpenApiRestCall_593424
-proc url_ServicesDelete_594013(protocol: Scheme; host: string; base: string;
+  Call_ServicesDelete_568244 = ref object of OpenApiRestCall_567657
+proc url_ServicesDelete_568246(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -861,7 +861,7 @@ proc url_ServicesDelete_594013(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesDelete_594012(path: JsonNode; query: JsonNode;
+proc validate_ServicesDelete_568245(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Delete a Windows IoT Device Service.
@@ -878,21 +878,21 @@ proc validate_ServicesDelete_594012(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594014 = path.getOrDefault("resourceGroupName")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_568247 = path.getOrDefault("resourceGroupName")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "resourceGroupName", valid_594014
-  var valid_594015 = path.getOrDefault("subscriptionId")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_568247 != nil:
+    section.add "resourceGroupName", valid_568247
+  var valid_568248 = path.getOrDefault("subscriptionId")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "subscriptionId", valid_594015
-  var valid_594016 = path.getOrDefault("deviceName")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_568248 != nil:
+    section.add "subscriptionId", valid_568248
+  var valid_568249 = path.getOrDefault("deviceName")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "deviceName", valid_594016
+  if valid_568249 != nil:
+    section.add "deviceName", valid_568249
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -900,11 +900,11 @@ proc validate_ServicesDelete_594012(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594017 = query.getOrDefault("api-version")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  var valid_568250 = query.getOrDefault("api-version")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "api-version", valid_594017
+  if valid_568250 != nil:
+    section.add "api-version", valid_568250
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -913,20 +913,20 @@ proc validate_ServicesDelete_594012(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_ServicesDelete_594011; path: JsonNode; query: JsonNode;
+proc call*(call_568251: Call_ServicesDelete_568244; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Windows IoT Device Service.
   ## 
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_568251.validator(path, query, header, formData, body)
+  let scheme = call_568251.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_568251.url(scheme.get, call_568251.host, call_568251.base,
+                         call_568251.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_568251, url, valid)
 
-proc call*(call_594019: Call_ServicesDelete_594011; resourceGroupName: string;
+proc call*(call_568252: Call_ServicesDelete_568244; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; deviceName: string): Recallable =
   ## servicesDelete
   ## Delete a Windows IoT Device Service.
@@ -938,17 +938,17 @@ proc call*(call_594019: Call_ServicesDelete_594011; resourceGroupName: string;
   ##                 : The subscription identifier.
   ##   deviceName: string (required)
   ##             : The name of the Windows IoT Device Service.
-  var path_594020 = newJObject()
-  var query_594021 = newJObject()
-  add(path_594020, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594021, "api-version", newJString(apiVersion))
-  add(path_594020, "subscriptionId", newJString(subscriptionId))
-  add(path_594020, "deviceName", newJString(deviceName))
-  result = call_594019.call(path_594020, query_594021, nil, nil, nil)
+  var path_568253 = newJObject()
+  var query_568254 = newJObject()
+  add(path_568253, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568254, "api-version", newJString(apiVersion))
+  add(path_568253, "subscriptionId", newJString(subscriptionId))
+  add(path_568253, "deviceName", newJString(deviceName))
+  result = call_568252.call(path_568253, query_568254, nil, nil, nil)
 
-var servicesDelete* = Call_ServicesDelete_594011(name: "servicesDelete",
+var servicesDelete* = Call_ServicesDelete_568244(name: "servicesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.WindowsIoT/deviceServices/{deviceName}",
-    validator: validate_ServicesDelete_594012, base: "", url: url_ServicesDelete_594013,
+    validator: validate_ServicesDelete_568245, base: "", url: url_ServicesDelete_568246,
     schemes: {Scheme.Https})
 export
   rest

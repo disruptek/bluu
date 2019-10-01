@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: KeyVaultManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "keyvault-secrets"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SecretsList_593646 = ref object of OpenApiRestCall_593424
-proc url_SecretsList_593648(protocol: Scheme; host: string; base: string;
+  Call_SecretsList_567879 = ref object of OpenApiRestCall_567657
+proc url_SecretsList_567881(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_SecretsList_593648(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecretsList_593647(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SecretsList_567880(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## The List operation gets information about the secrets in a vault.  NOTE: This API is intended for internal use in ARM deployments. Users should use the data-plane REST service for interaction with vault secrets.
   ## 
@@ -143,21 +143,21 @@ proc validate_SecretsList_593647(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = path.getOrDefault("resourceGroupName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "resourceGroupName", valid_568055
+  var valid_568056 = path.getOrDefault("subscriptionId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
-  var valid_593824 = path.getOrDefault("vaultName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_568056 != nil:
+    section.add "subscriptionId", valid_568056
+  var valid_568057 = path.getOrDefault("vaultName")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "vaultName", valid_593824
+  if valid_568057 != nil:
+    section.add "vaultName", valid_568057
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -167,15 +167,15 @@ proc validate_SecretsList_593647(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_568058 = query.getOrDefault("api-version")
+  valid_568058 = validateParameter(valid_568058, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
-  var valid_593826 = query.getOrDefault("$top")
-  valid_593826 = validateParameter(valid_593826, JInt, required = false, default = nil)
-  if valid_593826 != nil:
-    section.add "$top", valid_593826
+  if valid_568058 != nil:
+    section.add "api-version", valid_568058
+  var valid_568059 = query.getOrDefault("$top")
+  valid_568059 = validateParameter(valid_568059, JInt, required = false, default = nil)
+  if valid_568059 != nil:
+    section.add "$top", valid_568059
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -184,20 +184,20 @@ proc validate_SecretsList_593647(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593849: Call_SecretsList_593646; path: JsonNode; query: JsonNode;
+proc call*(call_568082: Call_SecretsList_567879; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The List operation gets information about the secrets in a vault.  NOTE: This API is intended for internal use in ARM deployments. Users should use the data-plane REST service for interaction with vault secrets.
   ## 
-  let valid = call_593849.validator(path, query, header, formData, body)
-  let scheme = call_593849.pickScheme
+  let valid = call_568082.validator(path, query, header, formData, body)
+  let scheme = call_568082.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593849.url(scheme.get, call_593849.host, call_593849.base,
-                         call_593849.route, valid.getOrDefault("path"),
+  let url = call_568082.url(scheme.get, call_568082.host, call_568082.base,
+                         call_568082.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593849, url, valid)
+  result = hook(call_568082, url, valid)
 
-proc call*(call_593920: Call_SecretsList_593646; resourceGroupName: string;
+proc call*(call_568153: Call_SecretsList_567879; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; vaultName: string; Top: int = 0): Recallable =
   ## secretsList
   ## The List operation gets information about the secrets in a vault.  NOTE: This API is intended for internal use in ARM deployments. Users should use the data-plane REST service for interaction with vault secrets.
@@ -211,24 +211,24 @@ proc call*(call_593920: Call_SecretsList_593646; resourceGroupName: string;
   ##      : Maximum number of results to return.
   ##   vaultName: string (required)
   ##            : The name of the vault.
-  var path_593921 = newJObject()
-  var query_593923 = newJObject()
-  add(path_593921, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593923, "api-version", newJString(apiVersion))
-  add(path_593921, "subscriptionId", newJString(subscriptionId))
-  add(query_593923, "$top", newJInt(Top))
-  add(path_593921, "vaultName", newJString(vaultName))
-  result = call_593920.call(path_593921, query_593923, nil, nil, nil)
+  var path_568154 = newJObject()
+  var query_568156 = newJObject()
+  add(path_568154, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568156, "api-version", newJString(apiVersion))
+  add(path_568154, "subscriptionId", newJString(subscriptionId))
+  add(query_568156, "$top", newJInt(Top))
+  add(path_568154, "vaultName", newJString(vaultName))
+  result = call_568153.call(path_568154, query_568156, nil, nil, nil)
 
-var secretsList* = Call_SecretsList_593646(name: "secretsList",
+var secretsList* = Call_SecretsList_567879(name: "secretsList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}/secrets",
-                                        validator: validate_SecretsList_593647,
-                                        base: "", url: url_SecretsList_593648,
+                                        validator: validate_SecretsList_567880,
+                                        base: "", url: url_SecretsList_567881,
                                         schemes: {Scheme.Https})
 type
-  Call_SecretsCreateOrUpdate_593974 = ref object of OpenApiRestCall_593424
-proc url_SecretsCreateOrUpdate_593976(protocol: Scheme; host: string; base: string;
+  Call_SecretsCreateOrUpdate_568207 = ref object of OpenApiRestCall_567657
+proc url_SecretsCreateOrUpdate_568209(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -253,7 +253,7 @@ proc url_SecretsCreateOrUpdate_593976(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecretsCreateOrUpdate_593975(path: JsonNode; query: JsonNode;
+proc validate_SecretsCreateOrUpdate_568208(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a secret in a key vault in the specified subscription.  NOTE: This API is intended for internal use in ARM deployments. Users should use the data-plane REST service for interaction with vault secrets.
   ## 
@@ -271,26 +271,26 @@ proc validate_SecretsCreateOrUpdate_593975(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593994 = path.getOrDefault("resourceGroupName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568227 = path.getOrDefault("resourceGroupName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "resourceGroupName", valid_593994
-  var valid_593995 = path.getOrDefault("subscriptionId")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_568227 != nil:
+    section.add "resourceGroupName", valid_568227
+  var valid_568228 = path.getOrDefault("subscriptionId")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "subscriptionId", valid_593995
-  var valid_593996 = path.getOrDefault("vaultName")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_568228 != nil:
+    section.add "subscriptionId", valid_568228
+  var valid_568229 = path.getOrDefault("vaultName")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "vaultName", valid_593996
-  var valid_593997 = path.getOrDefault("secretName")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  if valid_568229 != nil:
+    section.add "vaultName", valid_568229
+  var valid_568230 = path.getOrDefault("secretName")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "secretName", valid_593997
+  if valid_568230 != nil:
+    section.add "secretName", valid_568230
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -298,11 +298,11 @@ proc validate_SecretsCreateOrUpdate_593975(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593998 = query.getOrDefault("api-version")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  var valid_568231 = query.getOrDefault("api-version")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "api-version", valid_593998
+  if valid_568231 != nil:
+    section.add "api-version", valid_568231
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -316,20 +316,20 @@ proc validate_SecretsCreateOrUpdate_593975(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594000: Call_SecretsCreateOrUpdate_593974; path: JsonNode;
+proc call*(call_568233: Call_SecretsCreateOrUpdate_568207; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a secret in a key vault in the specified subscription.  NOTE: This API is intended for internal use in ARM deployments. Users should use the data-plane REST service for interaction with vault secrets.
   ## 
-  let valid = call_594000.validator(path, query, header, formData, body)
-  let scheme = call_594000.pickScheme
+  let valid = call_568233.validator(path, query, header, formData, body)
+  let scheme = call_568233.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594000.url(scheme.get, call_594000.host, call_594000.base,
-                         call_594000.route, valid.getOrDefault("path"),
+  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
+                         call_568233.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594000, url, valid)
+  result = hook(call_568233, url, valid)
 
-proc call*(call_594001: Call_SecretsCreateOrUpdate_593974;
+proc call*(call_568234: Call_SecretsCreateOrUpdate_568207;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           vaultName: string; parameters: JsonNode; secretName: string): Recallable =
   ## secretsCreateOrUpdate
@@ -346,26 +346,26 @@ proc call*(call_594001: Call_SecretsCreateOrUpdate_593974;
   ##             : Parameters to create or update the secret
   ##   secretName: string (required)
   ##             : Name of the secret
-  var path_594002 = newJObject()
-  var query_594003 = newJObject()
-  var body_594004 = newJObject()
-  add(path_594002, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594003, "api-version", newJString(apiVersion))
-  add(path_594002, "subscriptionId", newJString(subscriptionId))
-  add(path_594002, "vaultName", newJString(vaultName))
+  var path_568235 = newJObject()
+  var query_568236 = newJObject()
+  var body_568237 = newJObject()
+  add(path_568235, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568236, "api-version", newJString(apiVersion))
+  add(path_568235, "subscriptionId", newJString(subscriptionId))
+  add(path_568235, "vaultName", newJString(vaultName))
   if parameters != nil:
-    body_594004 = parameters
-  add(path_594002, "secretName", newJString(secretName))
-  result = call_594001.call(path_594002, query_594003, nil, nil, body_594004)
+    body_568237 = parameters
+  add(path_568235, "secretName", newJString(secretName))
+  result = call_568234.call(path_568235, query_568236, nil, nil, body_568237)
 
-var secretsCreateOrUpdate* = Call_SecretsCreateOrUpdate_593974(
+var secretsCreateOrUpdate* = Call_SecretsCreateOrUpdate_568207(
     name: "secretsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}/secrets/{secretName}",
-    validator: validate_SecretsCreateOrUpdate_593975, base: "",
-    url: url_SecretsCreateOrUpdate_593976, schemes: {Scheme.Https})
+    validator: validate_SecretsCreateOrUpdate_568208, base: "",
+    url: url_SecretsCreateOrUpdate_568209, schemes: {Scheme.Https})
 type
-  Call_SecretsGet_593962 = ref object of OpenApiRestCall_593424
-proc url_SecretsGet_593964(protocol: Scheme; host: string; base: string; route: string;
+  Call_SecretsGet_568195 = ref object of OpenApiRestCall_567657
+proc url_SecretsGet_568197(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -390,7 +390,7 @@ proc url_SecretsGet_593964(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecretsGet_593963(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SecretsGet_568196(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the specified secret.  NOTE: This API is intended for internal use in ARM deployments. Users should use the data-plane REST service for interaction with vault secrets.
   ## 
@@ -408,26 +408,26 @@ proc validate_SecretsGet_593963(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593965 = path.getOrDefault("resourceGroupName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_568198 = path.getOrDefault("resourceGroupName")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "resourceGroupName", valid_593965
-  var valid_593966 = path.getOrDefault("subscriptionId")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_568198 != nil:
+    section.add "resourceGroupName", valid_568198
+  var valid_568199 = path.getOrDefault("subscriptionId")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "subscriptionId", valid_593966
-  var valid_593967 = path.getOrDefault("vaultName")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_568199 != nil:
+    section.add "subscriptionId", valid_568199
+  var valid_568200 = path.getOrDefault("vaultName")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "vaultName", valid_593967
-  var valid_593968 = path.getOrDefault("secretName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  if valid_568200 != nil:
+    section.add "vaultName", valid_568200
+  var valid_568201 = path.getOrDefault("secretName")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "secretName", valid_593968
+  if valid_568201 != nil:
+    section.add "secretName", valid_568201
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -435,11 +435,11 @@ proc validate_SecretsGet_593963(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593969 = query.getOrDefault("api-version")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_568202 = query.getOrDefault("api-version")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "api-version", valid_593969
+  if valid_568202 != nil:
+    section.add "api-version", valid_568202
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -448,20 +448,20 @@ proc validate_SecretsGet_593963(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593970: Call_SecretsGet_593962; path: JsonNode; query: JsonNode;
+proc call*(call_568203: Call_SecretsGet_568195; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified secret.  NOTE: This API is intended for internal use in ARM deployments. Users should use the data-plane REST service for interaction with vault secrets.
   ## 
-  let valid = call_593970.validator(path, query, header, formData, body)
-  let scheme = call_593970.pickScheme
+  let valid = call_568203.validator(path, query, header, formData, body)
+  let scheme = call_568203.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593970.url(scheme.get, call_593970.host, call_593970.base,
-                         call_593970.route, valid.getOrDefault("path"),
+  let url = call_568203.url(scheme.get, call_568203.host, call_568203.base,
+                         call_568203.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593970, url, valid)
+  result = hook(call_568203, url, valid)
 
-proc call*(call_593971: Call_SecretsGet_593962; resourceGroupName: string;
+proc call*(call_568204: Call_SecretsGet_568195; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; vaultName: string;
           secretName: string): Recallable =
   ## secretsGet
@@ -476,24 +476,24 @@ proc call*(call_593971: Call_SecretsGet_593962; resourceGroupName: string;
   ##            : The name of the vault.
   ##   secretName: string (required)
   ##             : The name of the secret.
-  var path_593972 = newJObject()
-  var query_593973 = newJObject()
-  add(path_593972, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593973, "api-version", newJString(apiVersion))
-  add(path_593972, "subscriptionId", newJString(subscriptionId))
-  add(path_593972, "vaultName", newJString(vaultName))
-  add(path_593972, "secretName", newJString(secretName))
-  result = call_593971.call(path_593972, query_593973, nil, nil, nil)
+  var path_568205 = newJObject()
+  var query_568206 = newJObject()
+  add(path_568205, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568206, "api-version", newJString(apiVersion))
+  add(path_568205, "subscriptionId", newJString(subscriptionId))
+  add(path_568205, "vaultName", newJString(vaultName))
+  add(path_568205, "secretName", newJString(secretName))
+  result = call_568204.call(path_568205, query_568206, nil, nil, nil)
 
-var secretsGet* = Call_SecretsGet_593962(name: "secretsGet",
+var secretsGet* = Call_SecretsGet_568195(name: "secretsGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}/secrets/{secretName}",
-                                      validator: validate_SecretsGet_593963,
-                                      base: "", url: url_SecretsGet_593964,
+                                      validator: validate_SecretsGet_568196,
+                                      base: "", url: url_SecretsGet_568197,
                                       schemes: {Scheme.Https})
 type
-  Call_SecretsUpdate_594005 = ref object of OpenApiRestCall_593424
-proc url_SecretsUpdate_594007(protocol: Scheme; host: string; base: string;
+  Call_SecretsUpdate_568238 = ref object of OpenApiRestCall_567657
+proc url_SecretsUpdate_568240(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -518,7 +518,7 @@ proc url_SecretsUpdate_594007(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecretsUpdate_594006(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SecretsUpdate_568239(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Update a secret in the specified subscription.  NOTE: This API is intended for internal use in ARM deployments.  Users should use the data-plane REST service for interaction with vault secrets.
   ## 
@@ -536,26 +536,26 @@ proc validate_SecretsUpdate_594006(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594008 = path.getOrDefault("resourceGroupName")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  var valid_568241 = path.getOrDefault("resourceGroupName")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "resourceGroupName", valid_594008
-  var valid_594009 = path.getOrDefault("subscriptionId")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_568241 != nil:
+    section.add "resourceGroupName", valid_568241
+  var valid_568242 = path.getOrDefault("subscriptionId")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "subscriptionId", valid_594009
-  var valid_594010 = path.getOrDefault("vaultName")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  if valid_568242 != nil:
+    section.add "subscriptionId", valid_568242
+  var valid_568243 = path.getOrDefault("vaultName")
+  valid_568243 = validateParameter(valid_568243, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "vaultName", valid_594010
-  var valid_594011 = path.getOrDefault("secretName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  if valid_568243 != nil:
+    section.add "vaultName", valid_568243
+  var valid_568244 = path.getOrDefault("secretName")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "secretName", valid_594011
+  if valid_568244 != nil:
+    section.add "secretName", valid_568244
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -563,11 +563,11 @@ proc validate_SecretsUpdate_594006(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594012 = query.getOrDefault("api-version")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  var valid_568245 = query.getOrDefault("api-version")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "api-version", valid_594012
+  if valid_568245 != nil:
+    section.add "api-version", valid_568245
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -581,20 +581,20 @@ proc validate_SecretsUpdate_594006(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594014: Call_SecretsUpdate_594005; path: JsonNode; query: JsonNode;
+proc call*(call_568247: Call_SecretsUpdate_568238; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a secret in the specified subscription.  NOTE: This API is intended for internal use in ARM deployments.  Users should use the data-plane REST service for interaction with vault secrets.
   ## 
-  let valid = call_594014.validator(path, query, header, formData, body)
-  let scheme = call_594014.pickScheme
+  let valid = call_568247.validator(path, query, header, formData, body)
+  let scheme = call_568247.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594014.url(scheme.get, call_594014.host, call_594014.base,
-                         call_594014.route, valid.getOrDefault("path"),
+  let url = call_568247.url(scheme.get, call_568247.host, call_568247.base,
+                         call_568247.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594014, url, valid)
+  result = hook(call_568247, url, valid)
 
-proc call*(call_594015: Call_SecretsUpdate_594005; resourceGroupName: string;
+proc call*(call_568248: Call_SecretsUpdate_568238; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; vaultName: string;
           parameters: JsonNode; secretName: string): Recallable =
   ## secretsUpdate
@@ -611,21 +611,21 @@ proc call*(call_594015: Call_SecretsUpdate_594005; resourceGroupName: string;
   ##             : Parameters to patch the secret
   ##   secretName: string (required)
   ##             : Name of the secret
-  var path_594016 = newJObject()
-  var query_594017 = newJObject()
-  var body_594018 = newJObject()
-  add(path_594016, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594017, "api-version", newJString(apiVersion))
-  add(path_594016, "subscriptionId", newJString(subscriptionId))
-  add(path_594016, "vaultName", newJString(vaultName))
+  var path_568249 = newJObject()
+  var query_568250 = newJObject()
+  var body_568251 = newJObject()
+  add(path_568249, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568250, "api-version", newJString(apiVersion))
+  add(path_568249, "subscriptionId", newJString(subscriptionId))
+  add(path_568249, "vaultName", newJString(vaultName))
   if parameters != nil:
-    body_594018 = parameters
-  add(path_594016, "secretName", newJString(secretName))
-  result = call_594015.call(path_594016, query_594017, nil, nil, body_594018)
+    body_568251 = parameters
+  add(path_568249, "secretName", newJString(secretName))
+  result = call_568248.call(path_568249, query_568250, nil, nil, body_568251)
 
-var secretsUpdate* = Call_SecretsUpdate_594005(name: "secretsUpdate",
+var secretsUpdate* = Call_SecretsUpdate_568238(name: "secretsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}/secrets/{secretName}",
-    validator: validate_SecretsUpdate_594006, base: "", url: url_SecretsUpdate_594007,
+    validator: validate_SecretsUpdate_568239, base: "", url: url_SecretsUpdate_568240,
     schemes: {Scheme.Https})
 export
   rest

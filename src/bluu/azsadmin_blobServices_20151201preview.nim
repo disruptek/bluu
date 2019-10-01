@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: StorageManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_574458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-blobServices"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BlobServicesGet_593647 = ref object of OpenApiRestCall_593425
-proc url_BlobServicesGet_593649(protocol: Scheme; host: string; base: string;
+  Call_BlobServicesGet_574680 = ref object of OpenApiRestCall_574458
+proc url_BlobServicesGet_574682(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +129,7 @@ proc url_BlobServicesGet_593649(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobServicesGet_593648(path: JsonNode; query: JsonNode;
+proc validate_BlobServicesGet_574681(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Returns the BLOB service.
@@ -148,26 +148,26 @@ proc validate_BlobServicesGet_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_574842 = path.getOrDefault("resourceGroupName")
+  valid_574842 = validateParameter(valid_574842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("farmId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_574842 != nil:
+    section.add "resourceGroupName", valid_574842
+  var valid_574843 = path.getOrDefault("farmId")
+  valid_574843 = validateParameter(valid_574843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "farmId", valid_593810
-  var valid_593811 = path.getOrDefault("subscriptionId")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_574843 != nil:
+    section.add "farmId", valid_574843
+  var valid_574844 = path.getOrDefault("subscriptionId")
+  valid_574844 = validateParameter(valid_574844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "subscriptionId", valid_593811
-  var valid_593825 = path.getOrDefault("serviceType")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_574844 != nil:
+    section.add "subscriptionId", valid_574844
+  var valid_574858 = path.getOrDefault("serviceType")
+  valid_574858 = validateParameter(valid_574858, JString, required = true,
                                  default = newJString("default"))
-  if valid_593825 != nil:
-    section.add "serviceType", valid_593825
+  if valid_574858 != nil:
+    section.add "serviceType", valid_574858
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -175,11 +175,11 @@ proc validate_BlobServicesGet_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593826 = query.getOrDefault("api-version")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  var valid_574859 = query.getOrDefault("api-version")
+  valid_574859 = validateParameter(valid_574859, JString, required = true,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "api-version", valid_593826
+  if valid_574859 != nil:
+    section.add "api-version", valid_574859
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -188,20 +188,20 @@ proc validate_BlobServicesGet_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593853: Call_BlobServicesGet_593647; path: JsonNode; query: JsonNode;
+proc call*(call_574886: Call_BlobServicesGet_574680; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the BLOB service.
   ## 
-  let valid = call_593853.validator(path, query, header, formData, body)
-  let scheme = call_593853.pickScheme
+  let valid = call_574886.validator(path, query, header, formData, body)
+  let scheme = call_574886.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593853.url(scheme.get, call_593853.host, call_593853.base,
-                         call_593853.route, valid.getOrDefault("path"),
+  let url = call_574886.url(scheme.get, call_574886.host, call_574886.base,
+                         call_574886.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593853, url, valid)
+  result = hook(call_574886, url, valid)
 
-proc call*(call_593924: Call_BlobServicesGet_593647; resourceGroupName: string;
+proc call*(call_574957: Call_BlobServicesGet_574680; resourceGroupName: string;
           apiVersion: string; farmId: string; subscriptionId: string;
           serviceType: string = "default"): Recallable =
   ## blobServicesGet
@@ -216,22 +216,22 @@ proc call*(call_593924: Call_BlobServicesGet_593647; resourceGroupName: string;
   ##                 : Subscription Id.
   ##   serviceType: string (required)
   ##              : The service type.
-  var path_593925 = newJObject()
-  var query_593927 = newJObject()
-  add(path_593925, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593927, "api-version", newJString(apiVersion))
-  add(path_593925, "farmId", newJString(farmId))
-  add(path_593925, "subscriptionId", newJString(subscriptionId))
-  add(path_593925, "serviceType", newJString(serviceType))
-  result = call_593924.call(path_593925, query_593927, nil, nil, nil)
+  var path_574958 = newJObject()
+  var query_574960 = newJObject()
+  add(path_574958, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574960, "api-version", newJString(apiVersion))
+  add(path_574958, "farmId", newJString(farmId))
+  add(path_574958, "subscriptionId", newJString(subscriptionId))
+  add(path_574958, "serviceType", newJString(serviceType))
+  result = call_574957.call(path_574958, query_574960, nil, nil, nil)
 
-var blobServicesGet* = Call_BlobServicesGet_593647(name: "blobServicesGet",
+var blobServicesGet* = Call_BlobServicesGet_574680(name: "blobServicesGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/blobservices/{serviceType}",
-    validator: validate_BlobServicesGet_593648, base: "", url: url_BlobServicesGet_593649,
+    validator: validate_BlobServicesGet_574681, base: "", url: url_BlobServicesGet_574682,
     schemes: {Scheme.Https})
 type
-  Call_BlobServicesListMetricDefinitions_593966 = ref object of OpenApiRestCall_593425
-proc url_BlobServicesListMetricDefinitions_593968(protocol: Scheme; host: string;
+  Call_BlobServicesListMetricDefinitions_574999 = ref object of OpenApiRestCall_574458
+proc url_BlobServicesListMetricDefinitions_575001(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -257,7 +257,7 @@ proc url_BlobServicesListMetricDefinitions_593968(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobServicesListMetricDefinitions_593967(path: JsonNode;
+proc validate_BlobServicesListMetricDefinitions_575000(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the list of metric definitions for BLOB service.
   ## 
@@ -275,26 +275,26 @@ proc validate_BlobServicesListMetricDefinitions_593967(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593969 = path.getOrDefault("resourceGroupName")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_575002 = path.getOrDefault("resourceGroupName")
+  valid_575002 = validateParameter(valid_575002, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "resourceGroupName", valid_593969
-  var valid_593970 = path.getOrDefault("farmId")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_575002 != nil:
+    section.add "resourceGroupName", valid_575002
+  var valid_575003 = path.getOrDefault("farmId")
+  valid_575003 = validateParameter(valid_575003, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "farmId", valid_593970
-  var valid_593971 = path.getOrDefault("subscriptionId")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  if valid_575003 != nil:
+    section.add "farmId", valid_575003
+  var valid_575004 = path.getOrDefault("subscriptionId")
+  valid_575004 = validateParameter(valid_575004, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "subscriptionId", valid_593971
-  var valid_593972 = path.getOrDefault("serviceType")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  if valid_575004 != nil:
+    section.add "subscriptionId", valid_575004
+  var valid_575005 = path.getOrDefault("serviceType")
+  valid_575005 = validateParameter(valid_575005, JString, required = true,
                                  default = newJString("default"))
-  if valid_593972 != nil:
-    section.add "serviceType", valid_593972
+  if valid_575005 != nil:
+    section.add "serviceType", valid_575005
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -302,11 +302,11 @@ proc validate_BlobServicesListMetricDefinitions_593967(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593973 = query.getOrDefault("api-version")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_575006 = query.getOrDefault("api-version")
+  valid_575006 = validateParameter(valid_575006, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "api-version", valid_593973
+  if valid_575006 != nil:
+    section.add "api-version", valid_575006
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -315,21 +315,21 @@ proc validate_BlobServicesListMetricDefinitions_593967(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593974: Call_BlobServicesListMetricDefinitions_593966;
+proc call*(call_575007: Call_BlobServicesListMetricDefinitions_574999;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns the list of metric definitions for BLOB service.
   ## 
-  let valid = call_593974.validator(path, query, header, formData, body)
-  let scheme = call_593974.pickScheme
+  let valid = call_575007.validator(path, query, header, formData, body)
+  let scheme = call_575007.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593974.url(scheme.get, call_593974.host, call_593974.base,
-                         call_593974.route, valid.getOrDefault("path"),
+  let url = call_575007.url(scheme.get, call_575007.host, call_575007.base,
+                         call_575007.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593974, url, valid)
+  result = hook(call_575007, url, valid)
 
-proc call*(call_593975: Call_BlobServicesListMetricDefinitions_593966;
+proc call*(call_575008: Call_BlobServicesListMetricDefinitions_574999;
           resourceGroupName: string; apiVersion: string; farmId: string;
           subscriptionId: string; serviceType: string = "default"): Recallable =
   ## blobServicesListMetricDefinitions
@@ -344,23 +344,23 @@ proc call*(call_593975: Call_BlobServicesListMetricDefinitions_593966;
   ##                 : Subscription Id.
   ##   serviceType: string (required)
   ##              : The service type.
-  var path_593976 = newJObject()
-  var query_593977 = newJObject()
-  add(path_593976, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593977, "api-version", newJString(apiVersion))
-  add(path_593976, "farmId", newJString(farmId))
-  add(path_593976, "subscriptionId", newJString(subscriptionId))
-  add(path_593976, "serviceType", newJString(serviceType))
-  result = call_593975.call(path_593976, query_593977, nil, nil, nil)
+  var path_575009 = newJObject()
+  var query_575010 = newJObject()
+  add(path_575009, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575010, "api-version", newJString(apiVersion))
+  add(path_575009, "farmId", newJString(farmId))
+  add(path_575009, "subscriptionId", newJString(subscriptionId))
+  add(path_575009, "serviceType", newJString(serviceType))
+  result = call_575008.call(path_575009, query_575010, nil, nil, nil)
 
-var blobServicesListMetricDefinitions* = Call_BlobServicesListMetricDefinitions_593966(
+var blobServicesListMetricDefinitions* = Call_BlobServicesListMetricDefinitions_574999(
     name: "blobServicesListMetricDefinitions", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/blobservices/{serviceType}/metricdefinitions",
-    validator: validate_BlobServicesListMetricDefinitions_593967, base: "",
-    url: url_BlobServicesListMetricDefinitions_593968, schemes: {Scheme.Https})
+    validator: validate_BlobServicesListMetricDefinitions_575000, base: "",
+    url: url_BlobServicesListMetricDefinitions_575001, schemes: {Scheme.Https})
 type
-  Call_BlobServicesListMetrics_593978 = ref object of OpenApiRestCall_593425
-proc url_BlobServicesListMetrics_593980(protocol: Scheme; host: string; base: string;
+  Call_BlobServicesListMetrics_575011 = ref object of OpenApiRestCall_574458
+proc url_BlobServicesListMetrics_575013(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -387,7 +387,7 @@ proc url_BlobServicesListMetrics_593980(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobServicesListMetrics_593979(path: JsonNode; query: JsonNode;
+proc validate_BlobServicesListMetrics_575012(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of metrics for BLOB service.
   ## 
@@ -405,26 +405,26 @@ proc validate_BlobServicesListMetrics_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593981 = path.getOrDefault("resourceGroupName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_575014 = path.getOrDefault("resourceGroupName")
+  valid_575014 = validateParameter(valid_575014, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "resourceGroupName", valid_593981
-  var valid_593982 = path.getOrDefault("farmId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_575014 != nil:
+    section.add "resourceGroupName", valid_575014
+  var valid_575015 = path.getOrDefault("farmId")
+  valid_575015 = validateParameter(valid_575015, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "farmId", valid_593982
-  var valid_593983 = path.getOrDefault("subscriptionId")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_575015 != nil:
+    section.add "farmId", valid_575015
+  var valid_575016 = path.getOrDefault("subscriptionId")
+  valid_575016 = validateParameter(valid_575016, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "subscriptionId", valid_593983
-  var valid_593984 = path.getOrDefault("serviceType")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_575016 != nil:
+    section.add "subscriptionId", valid_575016
+  var valid_575017 = path.getOrDefault("serviceType")
+  valid_575017 = validateParameter(valid_575017, JString, required = true,
                                  default = newJString("default"))
-  if valid_593984 != nil:
-    section.add "serviceType", valid_593984
+  if valid_575017 != nil:
+    section.add "serviceType", valid_575017
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -432,11 +432,11 @@ proc validate_BlobServicesListMetrics_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_575018 = query.getOrDefault("api-version")
+  valid_575018 = validateParameter(valid_575018, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_575018 != nil:
+    section.add "api-version", valid_575018
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -445,20 +445,20 @@ proc validate_BlobServicesListMetrics_593979(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593986: Call_BlobServicesListMetrics_593978; path: JsonNode;
+proc call*(call_575019: Call_BlobServicesListMetrics_575011; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of metrics for BLOB service.
   ## 
-  let valid = call_593986.validator(path, query, header, formData, body)
-  let scheme = call_593986.pickScheme
+  let valid = call_575019.validator(path, query, header, formData, body)
+  let scheme = call_575019.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593986.url(scheme.get, call_593986.host, call_593986.base,
-                         call_593986.route, valid.getOrDefault("path"),
+  let url = call_575019.url(scheme.get, call_575019.host, call_575019.base,
+                         call_575019.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593986, url, valid)
+  result = hook(call_575019, url, valid)
 
-proc call*(call_593987: Call_BlobServicesListMetrics_593978;
+proc call*(call_575020: Call_BlobServicesListMetrics_575011;
           resourceGroupName: string; apiVersion: string; farmId: string;
           subscriptionId: string; serviceType: string = "default"): Recallable =
   ## blobServicesListMetrics
@@ -473,20 +473,20 @@ proc call*(call_593987: Call_BlobServicesListMetrics_593978;
   ##                 : Subscription Id.
   ##   serviceType: string (required)
   ##              : The service type.
-  var path_593988 = newJObject()
-  var query_593989 = newJObject()
-  add(path_593988, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593989, "api-version", newJString(apiVersion))
-  add(path_593988, "farmId", newJString(farmId))
-  add(path_593988, "subscriptionId", newJString(subscriptionId))
-  add(path_593988, "serviceType", newJString(serviceType))
-  result = call_593987.call(path_593988, query_593989, nil, nil, nil)
+  var path_575021 = newJObject()
+  var query_575022 = newJObject()
+  add(path_575021, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575022, "api-version", newJString(apiVersion))
+  add(path_575021, "farmId", newJString(farmId))
+  add(path_575021, "subscriptionId", newJString(subscriptionId))
+  add(path_575021, "serviceType", newJString(serviceType))
+  result = call_575020.call(path_575021, query_575022, nil, nil, nil)
 
-var blobServicesListMetrics* = Call_BlobServicesListMetrics_593978(
+var blobServicesListMetrics* = Call_BlobServicesListMetrics_575011(
     name: "blobServicesListMetrics", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/blobservices/{serviceType}/metrics",
-    validator: validate_BlobServicesListMetrics_593979, base: "",
-    url: url_BlobServicesListMetrics_593980, schemes: {Scheme.Https})
+    validator: validate_BlobServicesListMetrics_575012, base: "",
+    url: url_BlobServicesListMetrics_575013, schemes: {Scheme.Https})
 export
   rest
 

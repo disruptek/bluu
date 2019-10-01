@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "network-networkSecurityGroup"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_NetworkSecurityGroupsListAll_593646 = ref object of OpenApiRestCall_593424
-proc url_NetworkSecurityGroupsListAll_593648(protocol: Scheme; host: string;
+  Call_NetworkSecurityGroupsListAll_567879 = ref object of OpenApiRestCall_567657
+proc url_NetworkSecurityGroupsListAll_567881(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_NetworkSecurityGroupsListAll_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkSecurityGroupsListAll_593647(path: JsonNode; query: JsonNode;
+proc validate_NetworkSecurityGroupsListAll_567880(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all network security groups in a subscription.
   ## 
@@ -133,11 +133,11 @@ proc validate_NetworkSecurityGroupsListAll_593647(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593821 = path.getOrDefault("subscriptionId")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("subscriptionId")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "subscriptionId", valid_593821
+  if valid_568054 != nil:
+    section.add "subscriptionId", valid_568054
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_NetworkSecurityGroupsListAll_593647(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593822 = query.getOrDefault("api-version")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = query.getOrDefault("api-version")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "api-version", valid_593822
+  if valid_568055 != nil:
+    section.add "api-version", valid_568055
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_NetworkSecurityGroupsListAll_593647(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593845: Call_NetworkSecurityGroupsListAll_593646; path: JsonNode;
+proc call*(call_568078: Call_NetworkSecurityGroupsListAll_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all network security groups in a subscription.
   ## 
-  let valid = call_593845.validator(path, query, header, formData, body)
-  let scheme = call_593845.pickScheme
+  let valid = call_568078.validator(path, query, header, formData, body)
+  let scheme = call_568078.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593845.url(scheme.get, call_593845.host, call_593845.base,
-                         call_593845.route, valid.getOrDefault("path"),
+  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
+                         call_568078.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593845, url, valid)
+  result = hook(call_568078, url, valid)
 
-proc call*(call_593916: Call_NetworkSecurityGroupsListAll_593646;
+proc call*(call_568149: Call_NetworkSecurityGroupsListAll_567879;
           apiVersion: string; subscriptionId: string): Recallable =
   ## networkSecurityGroupsListAll
   ## Gets all network security groups in a subscription.
@@ -179,20 +179,20 @@ proc call*(call_593916: Call_NetworkSecurityGroupsListAll_593646;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593917 = newJObject()
-  var query_593919 = newJObject()
-  add(query_593919, "api-version", newJString(apiVersion))
-  add(path_593917, "subscriptionId", newJString(subscriptionId))
-  result = call_593916.call(path_593917, query_593919, nil, nil, nil)
+  var path_568150 = newJObject()
+  var query_568152 = newJObject()
+  add(query_568152, "api-version", newJString(apiVersion))
+  add(path_568150, "subscriptionId", newJString(subscriptionId))
+  result = call_568149.call(path_568150, query_568152, nil, nil, nil)
 
-var networkSecurityGroupsListAll* = Call_NetworkSecurityGroupsListAll_593646(
+var networkSecurityGroupsListAll* = Call_NetworkSecurityGroupsListAll_567879(
     name: "networkSecurityGroupsListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/networkSecurityGroups",
-    validator: validate_NetworkSecurityGroupsListAll_593647, base: "",
-    url: url_NetworkSecurityGroupsListAll_593648, schemes: {Scheme.Https})
+    validator: validate_NetworkSecurityGroupsListAll_567880, base: "",
+    url: url_NetworkSecurityGroupsListAll_567881, schemes: {Scheme.Https})
 type
-  Call_NetworkSecurityGroupsList_593958 = ref object of OpenApiRestCall_593424
-proc url_NetworkSecurityGroupsList_593960(protocol: Scheme; host: string;
+  Call_NetworkSecurityGroupsList_568191 = ref object of OpenApiRestCall_567657
+proc url_NetworkSecurityGroupsList_568193(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -213,7 +213,7 @@ proc url_NetworkSecurityGroupsList_593960(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkSecurityGroupsList_593959(path: JsonNode; query: JsonNode;
+proc validate_NetworkSecurityGroupsList_568192(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all network security groups in a resource group.
   ## 
@@ -227,16 +227,16 @@ proc validate_NetworkSecurityGroupsList_593959(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593961 = path.getOrDefault("resourceGroupName")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = path.getOrDefault("resourceGroupName")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "resourceGroupName", valid_593961
-  var valid_593962 = path.getOrDefault("subscriptionId")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_568194 != nil:
+    section.add "resourceGroupName", valid_568194
+  var valid_568195 = path.getOrDefault("subscriptionId")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "subscriptionId", valid_593962
+  if valid_568195 != nil:
+    section.add "subscriptionId", valid_568195
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -244,11 +244,11 @@ proc validate_NetworkSecurityGroupsList_593959(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593963 = query.getOrDefault("api-version")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = query.getOrDefault("api-version")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "api-version", valid_593963
+  if valid_568196 != nil:
+    section.add "api-version", valid_568196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -257,20 +257,20 @@ proc validate_NetworkSecurityGroupsList_593959(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593964: Call_NetworkSecurityGroupsList_593958; path: JsonNode;
+proc call*(call_568197: Call_NetworkSecurityGroupsList_568191; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all network security groups in a resource group.
   ## 
-  let valid = call_593964.validator(path, query, header, formData, body)
-  let scheme = call_593964.pickScheme
+  let valid = call_568197.validator(path, query, header, formData, body)
+  let scheme = call_568197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593964.url(scheme.get, call_593964.host, call_593964.base,
-                         call_593964.route, valid.getOrDefault("path"),
+  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
+                         call_568197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593964, url, valid)
+  result = hook(call_568197, url, valid)
 
-proc call*(call_593965: Call_NetworkSecurityGroupsList_593958;
+proc call*(call_568198: Call_NetworkSecurityGroupsList_568191;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## networkSecurityGroupsList
   ## Gets all network security groups in a resource group.
@@ -280,21 +280,21 @@ proc call*(call_593965: Call_NetworkSecurityGroupsList_593958;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593966 = newJObject()
-  var query_593967 = newJObject()
-  add(path_593966, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593967, "api-version", newJString(apiVersion))
-  add(path_593966, "subscriptionId", newJString(subscriptionId))
-  result = call_593965.call(path_593966, query_593967, nil, nil, nil)
+  var path_568199 = newJObject()
+  var query_568200 = newJObject()
+  add(path_568199, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568200, "api-version", newJString(apiVersion))
+  add(path_568199, "subscriptionId", newJString(subscriptionId))
+  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
 
-var networkSecurityGroupsList* = Call_NetworkSecurityGroupsList_593958(
+var networkSecurityGroupsList* = Call_NetworkSecurityGroupsList_568191(
     name: "networkSecurityGroupsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups",
-    validator: validate_NetworkSecurityGroupsList_593959, base: "",
-    url: url_NetworkSecurityGroupsList_593960, schemes: {Scheme.Https})
+    validator: validate_NetworkSecurityGroupsList_568192, base: "",
+    url: url_NetworkSecurityGroupsList_568193, schemes: {Scheme.Https})
 type
-  Call_NetworkSecurityGroupsCreateOrUpdate_593981 = ref object of OpenApiRestCall_593424
-proc url_NetworkSecurityGroupsCreateOrUpdate_593983(protocol: Scheme; host: string;
+  Call_NetworkSecurityGroupsCreateOrUpdate_568214 = ref object of OpenApiRestCall_567657
+proc url_NetworkSecurityGroupsCreateOrUpdate_568216(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -318,7 +318,7 @@ proc url_NetworkSecurityGroupsCreateOrUpdate_593983(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkSecurityGroupsCreateOrUpdate_593982(path: JsonNode;
+proc validate_NetworkSecurityGroupsCreateOrUpdate_568215(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a network security group in the specified resource group.
   ## 
@@ -334,21 +334,21 @@ proc validate_NetworkSecurityGroupsCreateOrUpdate_593982(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594001 = path.getOrDefault("resourceGroupName")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568234 = path.getOrDefault("resourceGroupName")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "resourceGroupName", valid_594001
-  var valid_594002 = path.getOrDefault("subscriptionId")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_568234 != nil:
+    section.add "resourceGroupName", valid_568234
+  var valid_568235 = path.getOrDefault("subscriptionId")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "subscriptionId", valid_594002
-  var valid_594003 = path.getOrDefault("networkSecurityGroupName")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_568235 != nil:
+    section.add "subscriptionId", valid_568235
+  var valid_568236 = path.getOrDefault("networkSecurityGroupName")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "networkSecurityGroupName", valid_594003
+  if valid_568236 != nil:
+    section.add "networkSecurityGroupName", valid_568236
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -356,11 +356,11 @@ proc validate_NetworkSecurityGroupsCreateOrUpdate_593982(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594004 = query.getOrDefault("api-version")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = query.getOrDefault("api-version")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "api-version", valid_594004
+  if valid_568237 != nil:
+    section.add "api-version", valid_568237
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -374,21 +374,21 @@ proc validate_NetworkSecurityGroupsCreateOrUpdate_593982(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594006: Call_NetworkSecurityGroupsCreateOrUpdate_593981;
+proc call*(call_568239: Call_NetworkSecurityGroupsCreateOrUpdate_568214;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a network security group in the specified resource group.
   ## 
-  let valid = call_594006.validator(path, query, header, formData, body)
-  let scheme = call_594006.pickScheme
+  let valid = call_568239.validator(path, query, header, formData, body)
+  let scheme = call_568239.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594006.url(scheme.get, call_594006.host, call_594006.base,
-                         call_594006.route, valid.getOrDefault("path"),
+  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
+                         call_568239.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594006, url, valid)
+  result = hook(call_568239, url, valid)
 
-proc call*(call_594007: Call_NetworkSecurityGroupsCreateOrUpdate_593981;
+proc call*(call_568240: Call_NetworkSecurityGroupsCreateOrUpdate_568214;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkSecurityGroupName: string; parameters: JsonNode): Recallable =
   ## networkSecurityGroupsCreateOrUpdate
@@ -403,26 +403,26 @@ proc call*(call_594007: Call_NetworkSecurityGroupsCreateOrUpdate_593981;
   ##                           : The name of the network security group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update network security group operation.
-  var path_594008 = newJObject()
-  var query_594009 = newJObject()
-  var body_594010 = newJObject()
-  add(path_594008, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594009, "api-version", newJString(apiVersion))
-  add(path_594008, "subscriptionId", newJString(subscriptionId))
-  add(path_594008, "networkSecurityGroupName",
+  var path_568241 = newJObject()
+  var query_568242 = newJObject()
+  var body_568243 = newJObject()
+  add(path_568241, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568242, "api-version", newJString(apiVersion))
+  add(path_568241, "subscriptionId", newJString(subscriptionId))
+  add(path_568241, "networkSecurityGroupName",
       newJString(networkSecurityGroupName))
   if parameters != nil:
-    body_594010 = parameters
-  result = call_594007.call(path_594008, query_594009, nil, nil, body_594010)
+    body_568243 = parameters
+  result = call_568240.call(path_568241, query_568242, nil, nil, body_568243)
 
-var networkSecurityGroupsCreateOrUpdate* = Call_NetworkSecurityGroupsCreateOrUpdate_593981(
+var networkSecurityGroupsCreateOrUpdate* = Call_NetworkSecurityGroupsCreateOrUpdate_568214(
     name: "networkSecurityGroupsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}",
-    validator: validate_NetworkSecurityGroupsCreateOrUpdate_593982, base: "",
-    url: url_NetworkSecurityGroupsCreateOrUpdate_593983, schemes: {Scheme.Https})
+    validator: validate_NetworkSecurityGroupsCreateOrUpdate_568215, base: "",
+    url: url_NetworkSecurityGroupsCreateOrUpdate_568216, schemes: {Scheme.Https})
 type
-  Call_NetworkSecurityGroupsGet_593968 = ref object of OpenApiRestCall_593424
-proc url_NetworkSecurityGroupsGet_593970(protocol: Scheme; host: string;
+  Call_NetworkSecurityGroupsGet_568201 = ref object of OpenApiRestCall_567657
+proc url_NetworkSecurityGroupsGet_568203(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -447,7 +447,7 @@ proc url_NetworkSecurityGroupsGet_593970(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkSecurityGroupsGet_593969(path: JsonNode; query: JsonNode;
+proc validate_NetworkSecurityGroupsGet_568202(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the specified network security group.
   ## 
@@ -463,21 +463,21 @@ proc validate_NetworkSecurityGroupsGet_593969(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593972 = path.getOrDefault("resourceGroupName")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_568205 = path.getOrDefault("resourceGroupName")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "resourceGroupName", valid_593972
-  var valid_593973 = path.getOrDefault("subscriptionId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  if valid_568205 != nil:
+    section.add "resourceGroupName", valid_568205
+  var valid_568206 = path.getOrDefault("subscriptionId")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "subscriptionId", valid_593973
-  var valid_593974 = path.getOrDefault("networkSecurityGroupName")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  if valid_568206 != nil:
+    section.add "subscriptionId", valid_568206
+  var valid_568207 = path.getOrDefault("networkSecurityGroupName")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "networkSecurityGroupName", valid_593974
+  if valid_568207 != nil:
+    section.add "networkSecurityGroupName", valid_568207
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -487,16 +487,16 @@ proc validate_NetworkSecurityGroupsGet_593969(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593975 = query.getOrDefault("api-version")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_568208 = query.getOrDefault("api-version")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "api-version", valid_593975
-  var valid_593976 = query.getOrDefault("$expand")
-  valid_593976 = validateParameter(valid_593976, JString, required = false,
+  if valid_568208 != nil:
+    section.add "api-version", valid_568208
+  var valid_568209 = query.getOrDefault("$expand")
+  valid_568209 = validateParameter(valid_568209, JString, required = false,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "$expand", valid_593976
+  if valid_568209 != nil:
+    section.add "$expand", valid_568209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -505,20 +505,20 @@ proc validate_NetworkSecurityGroupsGet_593969(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593977: Call_NetworkSecurityGroupsGet_593968; path: JsonNode;
+proc call*(call_568210: Call_NetworkSecurityGroupsGet_568201; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified network security group.
   ## 
-  let valid = call_593977.validator(path, query, header, formData, body)
-  let scheme = call_593977.pickScheme
+  let valid = call_568210.validator(path, query, header, formData, body)
+  let scheme = call_568210.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593977.url(scheme.get, call_593977.host, call_593977.base,
-                         call_593977.route, valid.getOrDefault("path"),
+  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
+                         call_568210.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593977, url, valid)
+  result = hook(call_568210, url, valid)
 
-proc call*(call_593978: Call_NetworkSecurityGroupsGet_593968;
+proc call*(call_568211: Call_NetworkSecurityGroupsGet_568201;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkSecurityGroupName: string; Expand: string = ""): Recallable =
   ## networkSecurityGroupsGet
@@ -533,24 +533,24 @@ proc call*(call_593978: Call_NetworkSecurityGroupsGet_593968;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   networkSecurityGroupName: string (required)
   ##                           : The name of the network security group.
-  var path_593979 = newJObject()
-  var query_593980 = newJObject()
-  add(path_593979, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593980, "api-version", newJString(apiVersion))
-  add(query_593980, "$expand", newJString(Expand))
-  add(path_593979, "subscriptionId", newJString(subscriptionId))
-  add(path_593979, "networkSecurityGroupName",
+  var path_568212 = newJObject()
+  var query_568213 = newJObject()
+  add(path_568212, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568213, "api-version", newJString(apiVersion))
+  add(query_568213, "$expand", newJString(Expand))
+  add(path_568212, "subscriptionId", newJString(subscriptionId))
+  add(path_568212, "networkSecurityGroupName",
       newJString(networkSecurityGroupName))
-  result = call_593978.call(path_593979, query_593980, nil, nil, nil)
+  result = call_568211.call(path_568212, query_568213, nil, nil, nil)
 
-var networkSecurityGroupsGet* = Call_NetworkSecurityGroupsGet_593968(
+var networkSecurityGroupsGet* = Call_NetworkSecurityGroupsGet_568201(
     name: "networkSecurityGroupsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}",
-    validator: validate_NetworkSecurityGroupsGet_593969, base: "",
-    url: url_NetworkSecurityGroupsGet_593970, schemes: {Scheme.Https})
+    validator: validate_NetworkSecurityGroupsGet_568202, base: "",
+    url: url_NetworkSecurityGroupsGet_568203, schemes: {Scheme.Https})
 type
-  Call_NetworkSecurityGroupsDelete_594011 = ref object of OpenApiRestCall_593424
-proc url_NetworkSecurityGroupsDelete_594013(protocol: Scheme; host: string;
+  Call_NetworkSecurityGroupsDelete_568244 = ref object of OpenApiRestCall_567657
+proc url_NetworkSecurityGroupsDelete_568246(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -574,7 +574,7 @@ proc url_NetworkSecurityGroupsDelete_594013(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkSecurityGroupsDelete_594012(path: JsonNode; query: JsonNode;
+proc validate_NetworkSecurityGroupsDelete_568245(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified network security group.
   ## 
@@ -590,21 +590,21 @@ proc validate_NetworkSecurityGroupsDelete_594012(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594014 = path.getOrDefault("resourceGroupName")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_568247 = path.getOrDefault("resourceGroupName")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "resourceGroupName", valid_594014
-  var valid_594015 = path.getOrDefault("subscriptionId")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_568247 != nil:
+    section.add "resourceGroupName", valid_568247
+  var valid_568248 = path.getOrDefault("subscriptionId")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "subscriptionId", valid_594015
-  var valid_594016 = path.getOrDefault("networkSecurityGroupName")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_568248 != nil:
+    section.add "subscriptionId", valid_568248
+  var valid_568249 = path.getOrDefault("networkSecurityGroupName")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "networkSecurityGroupName", valid_594016
+  if valid_568249 != nil:
+    section.add "networkSecurityGroupName", valid_568249
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -612,11 +612,11 @@ proc validate_NetworkSecurityGroupsDelete_594012(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594017 = query.getOrDefault("api-version")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  var valid_568250 = query.getOrDefault("api-version")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "api-version", valid_594017
+  if valid_568250 != nil:
+    section.add "api-version", valid_568250
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -625,20 +625,20 @@ proc validate_NetworkSecurityGroupsDelete_594012(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_NetworkSecurityGroupsDelete_594011; path: JsonNode;
+proc call*(call_568251: Call_NetworkSecurityGroupsDelete_568244; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified network security group.
   ## 
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_568251.validator(path, query, header, formData, body)
+  let scheme = call_568251.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_568251.url(scheme.get, call_568251.host, call_568251.base,
+                         call_568251.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_568251, url, valid)
 
-proc call*(call_594019: Call_NetworkSecurityGroupsDelete_594011;
+proc call*(call_568252: Call_NetworkSecurityGroupsDelete_568244;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkSecurityGroupName: string): Recallable =
   ## networkSecurityGroupsDelete
@@ -651,23 +651,23 @@ proc call*(call_594019: Call_NetworkSecurityGroupsDelete_594011;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   networkSecurityGroupName: string (required)
   ##                           : The name of the network security group.
-  var path_594020 = newJObject()
-  var query_594021 = newJObject()
-  add(path_594020, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594021, "api-version", newJString(apiVersion))
-  add(path_594020, "subscriptionId", newJString(subscriptionId))
-  add(path_594020, "networkSecurityGroupName",
+  var path_568253 = newJObject()
+  var query_568254 = newJObject()
+  add(path_568253, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568254, "api-version", newJString(apiVersion))
+  add(path_568253, "subscriptionId", newJString(subscriptionId))
+  add(path_568253, "networkSecurityGroupName",
       newJString(networkSecurityGroupName))
-  result = call_594019.call(path_594020, query_594021, nil, nil, nil)
+  result = call_568252.call(path_568253, query_568254, nil, nil, nil)
 
-var networkSecurityGroupsDelete* = Call_NetworkSecurityGroupsDelete_594011(
+var networkSecurityGroupsDelete* = Call_NetworkSecurityGroupsDelete_568244(
     name: "networkSecurityGroupsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}",
-    validator: validate_NetworkSecurityGroupsDelete_594012, base: "",
-    url: url_NetworkSecurityGroupsDelete_594013, schemes: {Scheme.Https})
+    validator: validate_NetworkSecurityGroupsDelete_568245, base: "",
+    url: url_NetworkSecurityGroupsDelete_568246, schemes: {Scheme.Https})
 type
-  Call_DefaultSecurityRulesList_594022 = ref object of OpenApiRestCall_593424
-proc url_DefaultSecurityRulesList_594024(protocol: Scheme; host: string;
+  Call_DefaultSecurityRulesList_568255 = ref object of OpenApiRestCall_567657
+proc url_DefaultSecurityRulesList_568257(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -693,7 +693,7 @@ proc url_DefaultSecurityRulesList_594024(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DefaultSecurityRulesList_594023(path: JsonNode; query: JsonNode;
+proc validate_DefaultSecurityRulesList_568256(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all default security rules in a network security group.
   ## 
@@ -709,21 +709,21 @@ proc validate_DefaultSecurityRulesList_594023(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594025 = path.getOrDefault("resourceGroupName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_568258 = path.getOrDefault("resourceGroupName")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "resourceGroupName", valid_594025
-  var valid_594026 = path.getOrDefault("subscriptionId")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_568258 != nil:
+    section.add "resourceGroupName", valid_568258
+  var valid_568259 = path.getOrDefault("subscriptionId")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "subscriptionId", valid_594026
-  var valid_594027 = path.getOrDefault("networkSecurityGroupName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_568259 != nil:
+    section.add "subscriptionId", valid_568259
+  var valid_568260 = path.getOrDefault("networkSecurityGroupName")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "networkSecurityGroupName", valid_594027
+  if valid_568260 != nil:
+    section.add "networkSecurityGroupName", valid_568260
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -731,11 +731,11 @@ proc validate_DefaultSecurityRulesList_594023(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594028 = query.getOrDefault("api-version")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  var valid_568261 = query.getOrDefault("api-version")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "api-version", valid_594028
+  if valid_568261 != nil:
+    section.add "api-version", valid_568261
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -744,20 +744,20 @@ proc validate_DefaultSecurityRulesList_594023(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594029: Call_DefaultSecurityRulesList_594022; path: JsonNode;
+proc call*(call_568262: Call_DefaultSecurityRulesList_568255; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all default security rules in a network security group.
   ## 
-  let valid = call_594029.validator(path, query, header, formData, body)
-  let scheme = call_594029.pickScheme
+  let valid = call_568262.validator(path, query, header, formData, body)
+  let scheme = call_568262.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594029.url(scheme.get, call_594029.host, call_594029.base,
-                         call_594029.route, valid.getOrDefault("path"),
+  let url = call_568262.url(scheme.get, call_568262.host, call_568262.base,
+                         call_568262.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594029, url, valid)
+  result = hook(call_568262, url, valid)
 
-proc call*(call_594030: Call_DefaultSecurityRulesList_594022;
+proc call*(call_568263: Call_DefaultSecurityRulesList_568255;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkSecurityGroupName: string): Recallable =
   ## defaultSecurityRulesList
@@ -770,23 +770,23 @@ proc call*(call_594030: Call_DefaultSecurityRulesList_594022;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   networkSecurityGroupName: string (required)
   ##                           : The name of the network security group.
-  var path_594031 = newJObject()
-  var query_594032 = newJObject()
-  add(path_594031, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594032, "api-version", newJString(apiVersion))
-  add(path_594031, "subscriptionId", newJString(subscriptionId))
-  add(path_594031, "networkSecurityGroupName",
+  var path_568264 = newJObject()
+  var query_568265 = newJObject()
+  add(path_568264, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568265, "api-version", newJString(apiVersion))
+  add(path_568264, "subscriptionId", newJString(subscriptionId))
+  add(path_568264, "networkSecurityGroupName",
       newJString(networkSecurityGroupName))
-  result = call_594030.call(path_594031, query_594032, nil, nil, nil)
+  result = call_568263.call(path_568264, query_568265, nil, nil, nil)
 
-var defaultSecurityRulesList* = Call_DefaultSecurityRulesList_594022(
+var defaultSecurityRulesList* = Call_DefaultSecurityRulesList_568255(
     name: "defaultSecurityRulesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/defaultSecurityRules",
-    validator: validate_DefaultSecurityRulesList_594023, base: "",
-    url: url_DefaultSecurityRulesList_594024, schemes: {Scheme.Https})
+    validator: validate_DefaultSecurityRulesList_568256, base: "",
+    url: url_DefaultSecurityRulesList_568257, schemes: {Scheme.Https})
 type
-  Call_DefaultSecurityRulesGet_594033 = ref object of OpenApiRestCall_593424
-proc url_DefaultSecurityRulesGet_594035(protocol: Scheme; host: string; base: string;
+  Call_DefaultSecurityRulesGet_568266 = ref object of OpenApiRestCall_567657
+proc url_DefaultSecurityRulesGet_568268(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -815,7 +815,7 @@ proc url_DefaultSecurityRulesGet_594035(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DefaultSecurityRulesGet_594034(path: JsonNode; query: JsonNode;
+proc validate_DefaultSecurityRulesGet_568267(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the specified default network security rule.
   ## 
@@ -833,26 +833,26 @@ proc validate_DefaultSecurityRulesGet_594034(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594036 = path.getOrDefault("resourceGroupName")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  var valid_568269 = path.getOrDefault("resourceGroupName")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "resourceGroupName", valid_594036
-  var valid_594037 = path.getOrDefault("subscriptionId")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_568269 != nil:
+    section.add "resourceGroupName", valid_568269
+  var valid_568270 = path.getOrDefault("subscriptionId")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "subscriptionId", valid_594037
-  var valid_594038 = path.getOrDefault("defaultSecurityRuleName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_568270 != nil:
+    section.add "subscriptionId", valid_568270
+  var valid_568271 = path.getOrDefault("defaultSecurityRuleName")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "defaultSecurityRuleName", valid_594038
-  var valid_594039 = path.getOrDefault("networkSecurityGroupName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_568271 != nil:
+    section.add "defaultSecurityRuleName", valid_568271
+  var valid_568272 = path.getOrDefault("networkSecurityGroupName")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "networkSecurityGroupName", valid_594039
+  if valid_568272 != nil:
+    section.add "networkSecurityGroupName", valid_568272
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -860,11 +860,11 @@ proc validate_DefaultSecurityRulesGet_594034(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594040 = query.getOrDefault("api-version")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  var valid_568273 = query.getOrDefault("api-version")
+  valid_568273 = validateParameter(valid_568273, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "api-version", valid_594040
+  if valid_568273 != nil:
+    section.add "api-version", valid_568273
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -873,20 +873,20 @@ proc validate_DefaultSecurityRulesGet_594034(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594041: Call_DefaultSecurityRulesGet_594033; path: JsonNode;
+proc call*(call_568274: Call_DefaultSecurityRulesGet_568266; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the specified default network security rule.
   ## 
-  let valid = call_594041.validator(path, query, header, formData, body)
-  let scheme = call_594041.pickScheme
+  let valid = call_568274.validator(path, query, header, formData, body)
+  let scheme = call_568274.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594041.url(scheme.get, call_594041.host, call_594041.base,
-                         call_594041.route, valid.getOrDefault("path"),
+  let url = call_568274.url(scheme.get, call_568274.host, call_568274.base,
+                         call_568274.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594041, url, valid)
+  result = hook(call_568274, url, valid)
 
-proc call*(call_594042: Call_DefaultSecurityRulesGet_594033;
+proc call*(call_568275: Call_DefaultSecurityRulesGet_568266;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           defaultSecurityRuleName: string; networkSecurityGroupName: string): Recallable =
   ## defaultSecurityRulesGet
@@ -901,24 +901,24 @@ proc call*(call_594042: Call_DefaultSecurityRulesGet_594033;
   ##                          : The name of the default security rule.
   ##   networkSecurityGroupName: string (required)
   ##                           : The name of the network security group.
-  var path_594043 = newJObject()
-  var query_594044 = newJObject()
-  add(path_594043, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594044, "api-version", newJString(apiVersion))
-  add(path_594043, "subscriptionId", newJString(subscriptionId))
-  add(path_594043, "defaultSecurityRuleName", newJString(defaultSecurityRuleName))
-  add(path_594043, "networkSecurityGroupName",
+  var path_568276 = newJObject()
+  var query_568277 = newJObject()
+  add(path_568276, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568277, "api-version", newJString(apiVersion))
+  add(path_568276, "subscriptionId", newJString(subscriptionId))
+  add(path_568276, "defaultSecurityRuleName", newJString(defaultSecurityRuleName))
+  add(path_568276, "networkSecurityGroupName",
       newJString(networkSecurityGroupName))
-  result = call_594042.call(path_594043, query_594044, nil, nil, nil)
+  result = call_568275.call(path_568276, query_568277, nil, nil, nil)
 
-var defaultSecurityRulesGet* = Call_DefaultSecurityRulesGet_594033(
+var defaultSecurityRulesGet* = Call_DefaultSecurityRulesGet_568266(
     name: "defaultSecurityRulesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/defaultSecurityRules/{defaultSecurityRuleName}",
-    validator: validate_DefaultSecurityRulesGet_594034, base: "",
-    url: url_DefaultSecurityRulesGet_594035, schemes: {Scheme.Https})
+    validator: validate_DefaultSecurityRulesGet_568267, base: "",
+    url: url_DefaultSecurityRulesGet_568268, schemes: {Scheme.Https})
 type
-  Call_SecurityRulesList_594045 = ref object of OpenApiRestCall_593424
-proc url_SecurityRulesList_594047(protocol: Scheme; host: string; base: string;
+  Call_SecurityRulesList_568278 = ref object of OpenApiRestCall_567657
+proc url_SecurityRulesList_568280(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -943,7 +943,7 @@ proc url_SecurityRulesList_594047(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecurityRulesList_594046(path: JsonNode; query: JsonNode;
+proc validate_SecurityRulesList_568279(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets all security rules in a network security group.
@@ -960,21 +960,21 @@ proc validate_SecurityRulesList_594046(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594048 = path.getOrDefault("resourceGroupName")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  var valid_568281 = path.getOrDefault("resourceGroupName")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "resourceGroupName", valid_594048
-  var valid_594049 = path.getOrDefault("subscriptionId")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  if valid_568281 != nil:
+    section.add "resourceGroupName", valid_568281
+  var valid_568282 = path.getOrDefault("subscriptionId")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "subscriptionId", valid_594049
-  var valid_594050 = path.getOrDefault("networkSecurityGroupName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  if valid_568282 != nil:
+    section.add "subscriptionId", valid_568282
+  var valid_568283 = path.getOrDefault("networkSecurityGroupName")
+  valid_568283 = validateParameter(valid_568283, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "networkSecurityGroupName", valid_594050
+  if valid_568283 != nil:
+    section.add "networkSecurityGroupName", valid_568283
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -982,11 +982,11 @@ proc validate_SecurityRulesList_594046(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594051 = query.getOrDefault("api-version")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  var valid_568284 = query.getOrDefault("api-version")
+  valid_568284 = validateParameter(valid_568284, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "api-version", valid_594051
+  if valid_568284 != nil:
+    section.add "api-version", valid_568284
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -995,20 +995,20 @@ proc validate_SecurityRulesList_594046(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594052: Call_SecurityRulesList_594045; path: JsonNode;
+proc call*(call_568285: Call_SecurityRulesList_568278; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all security rules in a network security group.
   ## 
-  let valid = call_594052.validator(path, query, header, formData, body)
-  let scheme = call_594052.pickScheme
+  let valid = call_568285.validator(path, query, header, formData, body)
+  let scheme = call_568285.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594052.url(scheme.get, call_594052.host, call_594052.base,
-                         call_594052.route, valid.getOrDefault("path"),
+  let url = call_568285.url(scheme.get, call_568285.host, call_568285.base,
+                         call_568285.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594052, url, valid)
+  result = hook(call_568285, url, valid)
 
-proc call*(call_594053: Call_SecurityRulesList_594045; resourceGroupName: string;
+proc call*(call_568286: Call_SecurityRulesList_568278; resourceGroupName: string;
           apiVersion: string; subscriptionId: string;
           networkSecurityGroupName: string): Recallable =
   ## securityRulesList
@@ -1021,22 +1021,22 @@ proc call*(call_594053: Call_SecurityRulesList_594045; resourceGroupName: string
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   networkSecurityGroupName: string (required)
   ##                           : The name of the network security group.
-  var path_594054 = newJObject()
-  var query_594055 = newJObject()
-  add(path_594054, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594055, "api-version", newJString(apiVersion))
-  add(path_594054, "subscriptionId", newJString(subscriptionId))
-  add(path_594054, "networkSecurityGroupName",
+  var path_568287 = newJObject()
+  var query_568288 = newJObject()
+  add(path_568287, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568288, "api-version", newJString(apiVersion))
+  add(path_568287, "subscriptionId", newJString(subscriptionId))
+  add(path_568287, "networkSecurityGroupName",
       newJString(networkSecurityGroupName))
-  result = call_594053.call(path_594054, query_594055, nil, nil, nil)
+  result = call_568286.call(path_568287, query_568288, nil, nil, nil)
 
-var securityRulesList* = Call_SecurityRulesList_594045(name: "securityRulesList",
+var securityRulesList* = Call_SecurityRulesList_568278(name: "securityRulesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules",
-    validator: validate_SecurityRulesList_594046, base: "",
-    url: url_SecurityRulesList_594047, schemes: {Scheme.Https})
+    validator: validate_SecurityRulesList_568279, base: "",
+    url: url_SecurityRulesList_568280, schemes: {Scheme.Https})
 type
-  Call_SecurityRulesCreateOrUpdate_594068 = ref object of OpenApiRestCall_593424
-proc url_SecurityRulesCreateOrUpdate_594070(protocol: Scheme; host: string;
+  Call_SecurityRulesCreateOrUpdate_568301 = ref object of OpenApiRestCall_567657
+proc url_SecurityRulesCreateOrUpdate_568303(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1064,7 +1064,7 @@ proc url_SecurityRulesCreateOrUpdate_594070(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecurityRulesCreateOrUpdate_594069(path: JsonNode; query: JsonNode;
+proc validate_SecurityRulesCreateOrUpdate_568302(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a security rule in the specified network security group.
   ## 
@@ -1082,26 +1082,26 @@ proc validate_SecurityRulesCreateOrUpdate_594069(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594071 = path.getOrDefault("resourceGroupName")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  var valid_568304 = path.getOrDefault("resourceGroupName")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "resourceGroupName", valid_594071
-  var valid_594072 = path.getOrDefault("subscriptionId")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  if valid_568304 != nil:
+    section.add "resourceGroupName", valid_568304
+  var valid_568305 = path.getOrDefault("subscriptionId")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "subscriptionId", valid_594072
-  var valid_594073 = path.getOrDefault("networkSecurityGroupName")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  if valid_568305 != nil:
+    section.add "subscriptionId", valid_568305
+  var valid_568306 = path.getOrDefault("networkSecurityGroupName")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "networkSecurityGroupName", valid_594073
-  var valid_594074 = path.getOrDefault("securityRuleName")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_568306 != nil:
+    section.add "networkSecurityGroupName", valid_568306
+  var valid_568307 = path.getOrDefault("securityRuleName")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "securityRuleName", valid_594074
+  if valid_568307 != nil:
+    section.add "securityRuleName", valid_568307
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1109,11 +1109,11 @@ proc validate_SecurityRulesCreateOrUpdate_594069(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594075 = query.getOrDefault("api-version")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  var valid_568308 = query.getOrDefault("api-version")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "api-version", valid_594075
+  if valid_568308 != nil:
+    section.add "api-version", valid_568308
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1127,20 +1127,20 @@ proc validate_SecurityRulesCreateOrUpdate_594069(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594077: Call_SecurityRulesCreateOrUpdate_594068; path: JsonNode;
+proc call*(call_568310: Call_SecurityRulesCreateOrUpdate_568301; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a security rule in the specified network security group.
   ## 
-  let valid = call_594077.validator(path, query, header, formData, body)
-  let scheme = call_594077.pickScheme
+  let valid = call_568310.validator(path, query, header, formData, body)
+  let scheme = call_568310.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594077.url(scheme.get, call_594077.host, call_594077.base,
-                         call_594077.route, valid.getOrDefault("path"),
+  let url = call_568310.url(scheme.get, call_568310.host, call_568310.base,
+                         call_568310.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594077, url, valid)
+  result = hook(call_568310, url, valid)
 
-proc call*(call_594078: Call_SecurityRulesCreateOrUpdate_594068;
+proc call*(call_568311: Call_SecurityRulesCreateOrUpdate_568301;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkSecurityGroupName: string; securityRuleName: string;
           securityRuleParameters: JsonNode): Recallable =
@@ -1158,27 +1158,27 @@ proc call*(call_594078: Call_SecurityRulesCreateOrUpdate_594068;
   ##                   : The name of the security rule.
   ##   securityRuleParameters: JObject (required)
   ##                         : Parameters supplied to the create or update network security rule operation.
-  var path_594079 = newJObject()
-  var query_594080 = newJObject()
-  var body_594081 = newJObject()
-  add(path_594079, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594080, "api-version", newJString(apiVersion))
-  add(path_594079, "subscriptionId", newJString(subscriptionId))
-  add(path_594079, "networkSecurityGroupName",
+  var path_568312 = newJObject()
+  var query_568313 = newJObject()
+  var body_568314 = newJObject()
+  add(path_568312, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568313, "api-version", newJString(apiVersion))
+  add(path_568312, "subscriptionId", newJString(subscriptionId))
+  add(path_568312, "networkSecurityGroupName",
       newJString(networkSecurityGroupName))
-  add(path_594079, "securityRuleName", newJString(securityRuleName))
+  add(path_568312, "securityRuleName", newJString(securityRuleName))
   if securityRuleParameters != nil:
-    body_594081 = securityRuleParameters
-  result = call_594078.call(path_594079, query_594080, nil, nil, body_594081)
+    body_568314 = securityRuleParameters
+  result = call_568311.call(path_568312, query_568313, nil, nil, body_568314)
 
-var securityRulesCreateOrUpdate* = Call_SecurityRulesCreateOrUpdate_594068(
+var securityRulesCreateOrUpdate* = Call_SecurityRulesCreateOrUpdate_568301(
     name: "securityRulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules/{securityRuleName}",
-    validator: validate_SecurityRulesCreateOrUpdate_594069, base: "",
-    url: url_SecurityRulesCreateOrUpdate_594070, schemes: {Scheme.Https})
+    validator: validate_SecurityRulesCreateOrUpdate_568302, base: "",
+    url: url_SecurityRulesCreateOrUpdate_568303, schemes: {Scheme.Https})
 type
-  Call_SecurityRulesGet_594056 = ref object of OpenApiRestCall_593424
-proc url_SecurityRulesGet_594058(protocol: Scheme; host: string; base: string;
+  Call_SecurityRulesGet_568289 = ref object of OpenApiRestCall_567657
+proc url_SecurityRulesGet_568291(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1206,7 +1206,7 @@ proc url_SecurityRulesGet_594058(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecurityRulesGet_594057(path: JsonNode; query: JsonNode;
+proc validate_SecurityRulesGet_568290(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get the specified network security rule.
@@ -1225,26 +1225,26 @@ proc validate_SecurityRulesGet_594057(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594059 = path.getOrDefault("resourceGroupName")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  var valid_568292 = path.getOrDefault("resourceGroupName")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "resourceGroupName", valid_594059
-  var valid_594060 = path.getOrDefault("subscriptionId")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  if valid_568292 != nil:
+    section.add "resourceGroupName", valid_568292
+  var valid_568293 = path.getOrDefault("subscriptionId")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "subscriptionId", valid_594060
-  var valid_594061 = path.getOrDefault("networkSecurityGroupName")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  if valid_568293 != nil:
+    section.add "subscriptionId", valid_568293
+  var valid_568294 = path.getOrDefault("networkSecurityGroupName")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "networkSecurityGroupName", valid_594061
-  var valid_594062 = path.getOrDefault("securityRuleName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  if valid_568294 != nil:
+    section.add "networkSecurityGroupName", valid_568294
+  var valid_568295 = path.getOrDefault("securityRuleName")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "securityRuleName", valid_594062
+  if valid_568295 != nil:
+    section.add "securityRuleName", valid_568295
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1252,11 +1252,11 @@ proc validate_SecurityRulesGet_594057(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594063 = query.getOrDefault("api-version")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  var valid_568296 = query.getOrDefault("api-version")
+  valid_568296 = validateParameter(valid_568296, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "api-version", valid_594063
+  if valid_568296 != nil:
+    section.add "api-version", valid_568296
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1265,20 +1265,20 @@ proc validate_SecurityRulesGet_594057(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594064: Call_SecurityRulesGet_594056; path: JsonNode;
+proc call*(call_568297: Call_SecurityRulesGet_568289; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the specified network security rule.
   ## 
-  let valid = call_594064.validator(path, query, header, formData, body)
-  let scheme = call_594064.pickScheme
+  let valid = call_568297.validator(path, query, header, formData, body)
+  let scheme = call_568297.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594064.url(scheme.get, call_594064.host, call_594064.base,
-                         call_594064.route, valid.getOrDefault("path"),
+  let url = call_568297.url(scheme.get, call_568297.host, call_568297.base,
+                         call_568297.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594064, url, valid)
+  result = hook(call_568297, url, valid)
 
-proc call*(call_594065: Call_SecurityRulesGet_594056; resourceGroupName: string;
+proc call*(call_568298: Call_SecurityRulesGet_568289; resourceGroupName: string;
           apiVersion: string; subscriptionId: string;
           networkSecurityGroupName: string; securityRuleName: string): Recallable =
   ## securityRulesGet
@@ -1293,23 +1293,23 @@ proc call*(call_594065: Call_SecurityRulesGet_594056; resourceGroupName: string;
   ##                           : The name of the network security group.
   ##   securityRuleName: string (required)
   ##                   : The name of the security rule.
-  var path_594066 = newJObject()
-  var query_594067 = newJObject()
-  add(path_594066, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594067, "api-version", newJString(apiVersion))
-  add(path_594066, "subscriptionId", newJString(subscriptionId))
-  add(path_594066, "networkSecurityGroupName",
+  var path_568299 = newJObject()
+  var query_568300 = newJObject()
+  add(path_568299, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568300, "api-version", newJString(apiVersion))
+  add(path_568299, "subscriptionId", newJString(subscriptionId))
+  add(path_568299, "networkSecurityGroupName",
       newJString(networkSecurityGroupName))
-  add(path_594066, "securityRuleName", newJString(securityRuleName))
-  result = call_594065.call(path_594066, query_594067, nil, nil, nil)
+  add(path_568299, "securityRuleName", newJString(securityRuleName))
+  result = call_568298.call(path_568299, query_568300, nil, nil, nil)
 
-var securityRulesGet* = Call_SecurityRulesGet_594056(name: "securityRulesGet",
+var securityRulesGet* = Call_SecurityRulesGet_568289(name: "securityRulesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules/{securityRuleName}",
-    validator: validate_SecurityRulesGet_594057, base: "",
-    url: url_SecurityRulesGet_594058, schemes: {Scheme.Https})
+    validator: validate_SecurityRulesGet_568290, base: "",
+    url: url_SecurityRulesGet_568291, schemes: {Scheme.Https})
 type
-  Call_SecurityRulesDelete_594082 = ref object of OpenApiRestCall_593424
-proc url_SecurityRulesDelete_594084(protocol: Scheme; host: string; base: string;
+  Call_SecurityRulesDelete_568315 = ref object of OpenApiRestCall_567657
+proc url_SecurityRulesDelete_568317(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1337,7 +1337,7 @@ proc url_SecurityRulesDelete_594084(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecurityRulesDelete_594083(path: JsonNode; query: JsonNode;
+proc validate_SecurityRulesDelete_568316(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes the specified network security rule.
@@ -1356,26 +1356,26 @@ proc validate_SecurityRulesDelete_594083(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594085 = path.getOrDefault("resourceGroupName")
-  valid_594085 = validateParameter(valid_594085, JString, required = true,
+  var valid_568318 = path.getOrDefault("resourceGroupName")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594085 != nil:
-    section.add "resourceGroupName", valid_594085
-  var valid_594086 = path.getOrDefault("subscriptionId")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  if valid_568318 != nil:
+    section.add "resourceGroupName", valid_568318
+  var valid_568319 = path.getOrDefault("subscriptionId")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "subscriptionId", valid_594086
-  var valid_594087 = path.getOrDefault("networkSecurityGroupName")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  if valid_568319 != nil:
+    section.add "subscriptionId", valid_568319
+  var valid_568320 = path.getOrDefault("networkSecurityGroupName")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "networkSecurityGroupName", valid_594087
-  var valid_594088 = path.getOrDefault("securityRuleName")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  if valid_568320 != nil:
+    section.add "networkSecurityGroupName", valid_568320
+  var valid_568321 = path.getOrDefault("securityRuleName")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "securityRuleName", valid_594088
+  if valid_568321 != nil:
+    section.add "securityRuleName", valid_568321
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1383,11 +1383,11 @@ proc validate_SecurityRulesDelete_594083(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594089 = query.getOrDefault("api-version")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_568322 = query.getOrDefault("api-version")
+  valid_568322 = validateParameter(valid_568322, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "api-version", valid_594089
+  if valid_568322 != nil:
+    section.add "api-version", valid_568322
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1396,20 +1396,20 @@ proc validate_SecurityRulesDelete_594083(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594090: Call_SecurityRulesDelete_594082; path: JsonNode;
+proc call*(call_568323: Call_SecurityRulesDelete_568315; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified network security rule.
   ## 
-  let valid = call_594090.validator(path, query, header, formData, body)
-  let scheme = call_594090.pickScheme
+  let valid = call_568323.validator(path, query, header, formData, body)
+  let scheme = call_568323.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594090.url(scheme.get, call_594090.host, call_594090.base,
-                         call_594090.route, valid.getOrDefault("path"),
+  let url = call_568323.url(scheme.get, call_568323.host, call_568323.base,
+                         call_568323.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594090, url, valid)
+  result = hook(call_568323, url, valid)
 
-proc call*(call_594091: Call_SecurityRulesDelete_594082; resourceGroupName: string;
+proc call*(call_568324: Call_SecurityRulesDelete_568315; resourceGroupName: string;
           apiVersion: string; subscriptionId: string;
           networkSecurityGroupName: string; securityRuleName: string): Recallable =
   ## securityRulesDelete
@@ -1424,21 +1424,21 @@ proc call*(call_594091: Call_SecurityRulesDelete_594082; resourceGroupName: stri
   ##                           : The name of the network security group.
   ##   securityRuleName: string (required)
   ##                   : The name of the security rule.
-  var path_594092 = newJObject()
-  var query_594093 = newJObject()
-  add(path_594092, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594093, "api-version", newJString(apiVersion))
-  add(path_594092, "subscriptionId", newJString(subscriptionId))
-  add(path_594092, "networkSecurityGroupName",
+  var path_568325 = newJObject()
+  var query_568326 = newJObject()
+  add(path_568325, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568326, "api-version", newJString(apiVersion))
+  add(path_568325, "subscriptionId", newJString(subscriptionId))
+  add(path_568325, "networkSecurityGroupName",
       newJString(networkSecurityGroupName))
-  add(path_594092, "securityRuleName", newJString(securityRuleName))
-  result = call_594091.call(path_594092, query_594093, nil, nil, nil)
+  add(path_568325, "securityRuleName", newJString(securityRuleName))
+  result = call_568324.call(path_568325, query_568326, nil, nil, nil)
 
-var securityRulesDelete* = Call_SecurityRulesDelete_594082(
+var securityRulesDelete* = Call_SecurityRulesDelete_568315(
     name: "securityRulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}/securityRules/{securityRuleName}",
-    validator: validate_SecurityRulesDelete_594083, base: "",
-    url: url_SecurityRulesDelete_594084, schemes: {Scheme.Https})
+    validator: validate_SecurityRulesDelete_568316, base: "",
+    url: url_SecurityRulesDelete_568317, schemes: {Scheme.Https})
 export
   rest
 

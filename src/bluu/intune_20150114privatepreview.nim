@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: IntuneResourceManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "intune"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_GetLocations_593630 = ref object of OpenApiRestCall_593408
-proc url_GetLocations_593632(protocol: Scheme; host: string; base: string;
+  Call_GetLocations_567863 = ref object of OpenApiRestCall_567641
+proc url_GetLocations_567865(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetLocations_593631(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GetLocations_567864(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns location for user tenant.
   ## 
@@ -125,11 +125,11 @@ proc validate_GetLocations_593631(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593791 = query.getOrDefault("api-version")
-  valid_593791 = validateParameter(valid_593791, JString, required = true,
+  var valid_568024 = query.getOrDefault("api-version")
+  valid_568024 = validateParameter(valid_568024, JString, required = true,
                                  default = nil)
-  if valid_593791 != nil:
-    section.add "api-version", valid_593791
+  if valid_568024 != nil:
+    section.add "api-version", valid_568024
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -138,43 +138,43 @@ proc validate_GetLocations_593631(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593814: Call_GetLocations_593630; path: JsonNode; query: JsonNode;
+proc call*(call_568047: Call_GetLocations_567863; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns location for user tenant.
   ## 
-  let valid = call_593814.validator(path, query, header, formData, body)
-  let scheme = call_593814.pickScheme
+  let valid = call_568047.validator(path, query, header, formData, body)
+  let scheme = call_568047.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593814.url(scheme.get, call_593814.host, call_593814.base,
-                         call_593814.route, valid.getOrDefault("path"),
+  let url = call_568047.url(scheme.get, call_568047.host, call_568047.base,
+                         call_568047.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593814, url, valid)
+  result = hook(call_568047, url, valid)
 
-proc call*(call_593885: Call_GetLocations_593630; apiVersion: string): Recallable =
+proc call*(call_568118: Call_GetLocations_567863; apiVersion: string): Recallable =
   ## getLocations
   ## Returns location for user tenant.
   ##   apiVersion: string (required)
   ##             : Service Api Version.
-  var query_593886 = newJObject()
-  add(query_593886, "api-version", newJString(apiVersion))
-  result = call_593885.call(nil, query_593886, nil, nil, nil)
+  var query_568119 = newJObject()
+  add(query_568119, "api-version", newJString(apiVersion))
+  result = call_568118.call(nil, query_568119, nil, nil, nil)
 
-var getLocations* = Call_GetLocations_593630(name: "getLocations",
+var getLocations* = Call_GetLocations_567863(name: "getLocations",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Intune/locations",
-    validator: validate_GetLocations_593631, base: "", url: url_GetLocations_593632,
+    validator: validate_GetLocations_567864, base: "", url: url_GetLocations_567865,
     schemes: {Scheme.Https})
 type
-  Call_GetLocationByHostName_593926 = ref object of OpenApiRestCall_593408
-proc url_GetLocationByHostName_593928(protocol: Scheme; host: string; base: string;
+  Call_GetLocationByHostName_568159 = ref object of OpenApiRestCall_567641
+proc url_GetLocationByHostName_568161(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetLocationByHostName_593927(path: JsonNode; query: JsonNode;
+proc validate_GetLocationByHostName_568160(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns location for given tenant.
   ## 
@@ -188,11 +188,11 @@ proc validate_GetLocationByHostName_593927(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593929 = query.getOrDefault("api-version")
-  valid_593929 = validateParameter(valid_593929, JString, required = true,
+  var valid_568162 = query.getOrDefault("api-version")
+  valid_568162 = validateParameter(valid_568162, JString, required = true,
                                  default = nil)
-  if valid_593929 != nil:
-    section.add "api-version", valid_593929
+  if valid_568162 != nil:
+    section.add "api-version", valid_568162
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -201,37 +201,37 @@ proc validate_GetLocationByHostName_593927(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593930: Call_GetLocationByHostName_593926; path: JsonNode;
+proc call*(call_568163: Call_GetLocationByHostName_568159; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns location for given tenant.
   ## 
-  let valid = call_593930.validator(path, query, header, formData, body)
-  let scheme = call_593930.pickScheme
+  let valid = call_568163.validator(path, query, header, formData, body)
+  let scheme = call_568163.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593930.url(scheme.get, call_593930.host, call_593930.base,
-                         call_593930.route, valid.getOrDefault("path"),
+  let url = call_568163.url(scheme.get, call_568163.host, call_568163.base,
+                         call_568163.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593930, url, valid)
+  result = hook(call_568163, url, valid)
 
-proc call*(call_593931: Call_GetLocationByHostName_593926; apiVersion: string): Recallable =
+proc call*(call_568164: Call_GetLocationByHostName_568159; apiVersion: string): Recallable =
   ## getLocationByHostName
   ## Returns location for given tenant.
   ##   apiVersion: string (required)
   ##             : Service Api Version.
-  var query_593932 = newJObject()
-  add(query_593932, "api-version", newJString(apiVersion))
-  result = call_593931.call(nil, query_593932, nil, nil, nil)
+  var query_568165 = newJObject()
+  add(query_568165, "api-version", newJString(apiVersion))
+  result = call_568164.call(nil, query_568165, nil, nil, nil)
 
-var getLocationByHostName* = Call_GetLocationByHostName_593926(
+var getLocationByHostName* = Call_GetLocationByHostName_568159(
     name: "getLocationByHostName", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Intune/locations/hostName",
-    validator: validate_GetLocationByHostName_593927, base: "",
-    url: url_GetLocationByHostName_593928, schemes: {Scheme.Https})
+    validator: validate_GetLocationByHostName_568160, base: "",
+    url: url_GetLocationByHostName_568161, schemes: {Scheme.Https})
 type
-  Call_AndroidGetAppForMAMPolicy_593933 = ref object of OpenApiRestCall_593408
-proc url_AndroidGetAppForMAMPolicy_593935(protocol: Scheme; host: string;
+  Call_AndroidGetAppForMAMPolicy_568166 = ref object of OpenApiRestCall_567641
+proc url_AndroidGetAppForMAMPolicy_568168(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -251,7 +251,7 @@ proc url_AndroidGetAppForMAMPolicy_593935(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidGetAppForMAMPolicy_593934(path: JsonNode; query: JsonNode;
+proc validate_AndroidGetAppForMAMPolicy_568167(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get apps for an AndroidMAMPolicy.
   ## 
@@ -264,16 +264,16 @@ proc validate_AndroidGetAppForMAMPolicy_593934(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_593951 = path.getOrDefault("hostName")
-  valid_593951 = validateParameter(valid_593951, JString, required = true,
+  var valid_568184 = path.getOrDefault("hostName")
+  valid_568184 = validateParameter(valid_568184, JString, required = true,
                                  default = nil)
-  if valid_593951 != nil:
-    section.add "hostName", valid_593951
-  var valid_593952 = path.getOrDefault("policyName")
-  valid_593952 = validateParameter(valid_593952, JString, required = true,
+  if valid_568184 != nil:
+    section.add "hostName", valid_568184
+  var valid_568185 = path.getOrDefault("policyName")
+  valid_568185 = validateParameter(valid_568185, JString, required = true,
                                  default = nil)
-  if valid_593952 != nil:
-    section.add "policyName", valid_593952
+  if valid_568185 != nil:
+    section.add "policyName", valid_568185
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -286,25 +286,25 @@ proc validate_AndroidGetAppForMAMPolicy_593934(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593953 = query.getOrDefault("api-version")
-  valid_593953 = validateParameter(valid_593953, JString, required = true,
+  var valid_568186 = query.getOrDefault("api-version")
+  valid_568186 = validateParameter(valid_568186, JString, required = true,
                                  default = nil)
-  if valid_593953 != nil:
-    section.add "api-version", valid_593953
-  var valid_593954 = query.getOrDefault("$top")
-  valid_593954 = validateParameter(valid_593954, JInt, required = false, default = nil)
-  if valid_593954 != nil:
-    section.add "$top", valid_593954
-  var valid_593955 = query.getOrDefault("$select")
-  valid_593955 = validateParameter(valid_593955, JString, required = false,
+  if valid_568186 != nil:
+    section.add "api-version", valid_568186
+  var valid_568187 = query.getOrDefault("$top")
+  valid_568187 = validateParameter(valid_568187, JInt, required = false, default = nil)
+  if valid_568187 != nil:
+    section.add "$top", valid_568187
+  var valid_568188 = query.getOrDefault("$select")
+  valid_568188 = validateParameter(valid_568188, JString, required = false,
                                  default = nil)
-  if valid_593955 != nil:
-    section.add "$select", valid_593955
-  var valid_593956 = query.getOrDefault("$filter")
-  valid_593956 = validateParameter(valid_593956, JString, required = false,
+  if valid_568188 != nil:
+    section.add "$select", valid_568188
+  var valid_568189 = query.getOrDefault("$filter")
+  valid_568189 = validateParameter(valid_568189, JString, required = false,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "$filter", valid_593956
+  if valid_568189 != nil:
+    section.add "$filter", valid_568189
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -313,20 +313,20 @@ proc validate_AndroidGetAppForMAMPolicy_593934(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593957: Call_AndroidGetAppForMAMPolicy_593933; path: JsonNode;
+proc call*(call_568190: Call_AndroidGetAppForMAMPolicy_568166; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get apps for an AndroidMAMPolicy.
   ## 
-  let valid = call_593957.validator(path, query, header, formData, body)
-  let scheme = call_593957.pickScheme
+  let valid = call_568190.validator(path, query, header, formData, body)
+  let scheme = call_568190.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593957.url(scheme.get, call_593957.host, call_593957.base,
-                         call_593957.route, valid.getOrDefault("path"),
+  let url = call_568190.url(scheme.get, call_568190.host, call_568190.base,
+                         call_568190.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593957, url, valid)
+  result = hook(call_568190, url, valid)
 
-proc call*(call_593958: Call_AndroidGetAppForMAMPolicy_593933; apiVersion: string;
+proc call*(call_568191: Call_AndroidGetAppForMAMPolicy_568166; apiVersion: string;
           hostName: string; policyName: string; Top: int = 0; Select: string = "";
           Filter: string = ""): Recallable =
   ## androidGetAppForMAMPolicy
@@ -342,24 +342,24 @@ proc call*(call_593958: Call_AndroidGetAppForMAMPolicy_593933; apiVersion: strin
   ##             : Unique name for the policy
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_593959 = newJObject()
-  var query_593960 = newJObject()
-  add(query_593960, "api-version", newJString(apiVersion))
-  add(query_593960, "$top", newJInt(Top))
-  add(query_593960, "$select", newJString(Select))
-  add(path_593959, "hostName", newJString(hostName))
-  add(path_593959, "policyName", newJString(policyName))
-  add(query_593960, "$filter", newJString(Filter))
-  result = call_593958.call(path_593959, query_593960, nil, nil, nil)
+  var path_568192 = newJObject()
+  var query_568193 = newJObject()
+  add(query_568193, "api-version", newJString(apiVersion))
+  add(query_568193, "$top", newJInt(Top))
+  add(query_568193, "$select", newJString(Select))
+  add(path_568192, "hostName", newJString(hostName))
+  add(path_568192, "policyName", newJString(policyName))
+  add(query_568193, "$filter", newJString(Filter))
+  result = call_568191.call(path_568192, query_568193, nil, nil, nil)
 
-var androidGetAppForMAMPolicy* = Call_AndroidGetAppForMAMPolicy_593933(
+var androidGetAppForMAMPolicy* = Call_AndroidGetAppForMAMPolicy_568166(
     name: "androidGetAppForMAMPolicy", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/AndroidPolicies/{policyName}/apps",
-    validator: validate_AndroidGetAppForMAMPolicy_593934, base: "",
-    url: url_AndroidGetAppForMAMPolicy_593935, schemes: {Scheme.Https})
+    validator: validate_AndroidGetAppForMAMPolicy_568167, base: "",
+    url: url_AndroidGetAppForMAMPolicy_568168, schemes: {Scheme.Https})
 type
-  Call_AndroidGetMAMPolicies_593961 = ref object of OpenApiRestCall_593408
-proc url_AndroidGetMAMPolicies_593963(protocol: Scheme; host: string; base: string;
+  Call_AndroidGetMAMPolicies_568194 = ref object of OpenApiRestCall_567641
+proc url_AndroidGetMAMPolicies_568196(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -376,7 +376,7 @@ proc url_AndroidGetMAMPolicies_593963(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidGetMAMPolicies_593962(path: JsonNode; query: JsonNode;
+proc validate_AndroidGetMAMPolicies_568195(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns Intune Android policies.
   ## 
@@ -387,11 +387,11 @@ proc validate_AndroidGetMAMPolicies_593962(path: JsonNode; query: JsonNode;
   ##           : Location hostName for the tenant
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_593964 = path.getOrDefault("hostName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_568197 = path.getOrDefault("hostName")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "hostName", valid_593964
+  if valid_568197 != nil:
+    section.add "hostName", valid_568197
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -404,25 +404,25 @@ proc validate_AndroidGetMAMPolicies_593962(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593965 = query.getOrDefault("api-version")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_568198 = query.getOrDefault("api-version")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "api-version", valid_593965
-  var valid_593966 = query.getOrDefault("$top")
-  valid_593966 = validateParameter(valid_593966, JInt, required = false, default = nil)
-  if valid_593966 != nil:
-    section.add "$top", valid_593966
-  var valid_593967 = query.getOrDefault("$select")
-  valid_593967 = validateParameter(valid_593967, JString, required = false,
+  if valid_568198 != nil:
+    section.add "api-version", valid_568198
+  var valid_568199 = query.getOrDefault("$top")
+  valid_568199 = validateParameter(valid_568199, JInt, required = false, default = nil)
+  if valid_568199 != nil:
+    section.add "$top", valid_568199
+  var valid_568200 = query.getOrDefault("$select")
+  valid_568200 = validateParameter(valid_568200, JString, required = false,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "$select", valid_593967
-  var valid_593968 = query.getOrDefault("$filter")
-  valid_593968 = validateParameter(valid_593968, JString, required = false,
+  if valid_568200 != nil:
+    section.add "$select", valid_568200
+  var valid_568201 = query.getOrDefault("$filter")
+  valid_568201 = validateParameter(valid_568201, JString, required = false,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "$filter", valid_593968
+  if valid_568201 != nil:
+    section.add "$filter", valid_568201
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -431,20 +431,20 @@ proc validate_AndroidGetMAMPolicies_593962(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593969: Call_AndroidGetMAMPolicies_593961; path: JsonNode;
+proc call*(call_568202: Call_AndroidGetMAMPolicies_568194; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns Intune Android policies.
   ## 
-  let valid = call_593969.validator(path, query, header, formData, body)
-  let scheme = call_593969.pickScheme
+  let valid = call_568202.validator(path, query, header, formData, body)
+  let scheme = call_568202.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593969.url(scheme.get, call_593969.host, call_593969.base,
-                         call_593969.route, valid.getOrDefault("path"),
+  let url = call_568202.url(scheme.get, call_568202.host, call_568202.base,
+                         call_568202.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593969, url, valid)
+  result = hook(call_568202, url, valid)
 
-proc call*(call_593970: Call_AndroidGetMAMPolicies_593961; apiVersion: string;
+proc call*(call_568203: Call_AndroidGetMAMPolicies_568194; apiVersion: string;
           hostName: string; Top: int = 0; Select: string = ""; Filter: string = ""): Recallable =
   ## androidGetMAMPolicies
   ## Returns Intune Android policies.
@@ -457,24 +457,24 @@ proc call*(call_593970: Call_AndroidGetMAMPolicies_593961; apiVersion: string;
   ##           : Location hostName for the tenant
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_593971 = newJObject()
-  var query_593972 = newJObject()
-  add(query_593972, "api-version", newJString(apiVersion))
-  add(query_593972, "$top", newJInt(Top))
-  add(query_593972, "$select", newJString(Select))
-  add(path_593971, "hostName", newJString(hostName))
-  add(query_593972, "$filter", newJString(Filter))
-  result = call_593970.call(path_593971, query_593972, nil, nil, nil)
+  var path_568204 = newJObject()
+  var query_568205 = newJObject()
+  add(query_568205, "api-version", newJString(apiVersion))
+  add(query_568205, "$top", newJInt(Top))
+  add(query_568205, "$select", newJString(Select))
+  add(path_568204, "hostName", newJString(hostName))
+  add(query_568205, "$filter", newJString(Filter))
+  result = call_568203.call(path_568204, query_568205, nil, nil, nil)
 
-var androidGetMAMPolicies* = Call_AndroidGetMAMPolicies_593961(
+var androidGetMAMPolicies* = Call_AndroidGetMAMPolicies_568194(
     name: "androidGetMAMPolicies", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Intune/locations/{hostName}/androidPolicies",
-    validator: validate_AndroidGetMAMPolicies_593962, base: "",
-    url: url_AndroidGetMAMPolicies_593963, schemes: {Scheme.Https})
+    validator: validate_AndroidGetMAMPolicies_568195, base: "",
+    url: url_AndroidGetMAMPolicies_568196, schemes: {Scheme.Https})
 type
-  Call_AndroidCreateOrUpdateMAMPolicy_593984 = ref object of OpenApiRestCall_593408
-proc url_AndroidCreateOrUpdateMAMPolicy_593986(protocol: Scheme; host: string;
+  Call_AndroidCreateOrUpdateMAMPolicy_568217 = ref object of OpenApiRestCall_567641
+proc url_AndroidCreateOrUpdateMAMPolicy_568219(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -493,7 +493,7 @@ proc url_AndroidCreateOrUpdateMAMPolicy_593986(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidCreateOrUpdateMAMPolicy_593985(path: JsonNode;
+proc validate_AndroidCreateOrUpdateMAMPolicy_568218(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates AndroidMAMPolicy.
   ## 
@@ -506,16 +506,16 @@ proc validate_AndroidCreateOrUpdateMAMPolicy_593985(path: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594004 = path.getOrDefault("hostName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = path.getOrDefault("hostName")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "hostName", valid_594004
-  var valid_594005 = path.getOrDefault("policyName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  if valid_568237 != nil:
+    section.add "hostName", valid_568237
+  var valid_568238 = path.getOrDefault("policyName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "policyName", valid_594005
+  if valid_568238 != nil:
+    section.add "policyName", valid_568238
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -523,11 +523,11 @@ proc validate_AndroidCreateOrUpdateMAMPolicy_593985(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594006 = query.getOrDefault("api-version")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_568239 = query.getOrDefault("api-version")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "api-version", valid_594006
+  if valid_568239 != nil:
+    section.add "api-version", valid_568239
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -541,20 +541,20 @@ proc validate_AndroidCreateOrUpdateMAMPolicy_593985(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594008: Call_AndroidCreateOrUpdateMAMPolicy_593984; path: JsonNode;
+proc call*(call_568241: Call_AndroidCreateOrUpdateMAMPolicy_568217; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates AndroidMAMPolicy.
   ## 
-  let valid = call_594008.validator(path, query, header, formData, body)
-  let scheme = call_594008.pickScheme
+  let valid = call_568241.validator(path, query, header, formData, body)
+  let scheme = call_568241.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594008.url(scheme.get, call_594008.host, call_594008.base,
-                         call_594008.route, valid.getOrDefault("path"),
+  let url = call_568241.url(scheme.get, call_568241.host, call_568241.base,
+                         call_568241.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594008, url, valid)
+  result = hook(call_568241, url, valid)
 
-proc call*(call_594009: Call_AndroidCreateOrUpdateMAMPolicy_593984;
+proc call*(call_568242: Call_AndroidCreateOrUpdateMAMPolicy_568217;
           apiVersion: string; hostName: string; policyName: string;
           parameters: JsonNode): Recallable =
   ## androidCreateOrUpdateMAMPolicy
@@ -567,24 +567,24 @@ proc call*(call_594009: Call_AndroidCreateOrUpdateMAMPolicy_593984;
   ##             : Unique name for the policy
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create or update an android policy operation.
-  var path_594010 = newJObject()
-  var query_594011 = newJObject()
-  var body_594012 = newJObject()
-  add(query_594011, "api-version", newJString(apiVersion))
-  add(path_594010, "hostName", newJString(hostName))
-  add(path_594010, "policyName", newJString(policyName))
+  var path_568243 = newJObject()
+  var query_568244 = newJObject()
+  var body_568245 = newJObject()
+  add(query_568244, "api-version", newJString(apiVersion))
+  add(path_568243, "hostName", newJString(hostName))
+  add(path_568243, "policyName", newJString(policyName))
   if parameters != nil:
-    body_594012 = parameters
-  result = call_594009.call(path_594010, query_594011, nil, nil, body_594012)
+    body_568245 = parameters
+  result = call_568242.call(path_568243, query_568244, nil, nil, body_568245)
 
-var androidCreateOrUpdateMAMPolicy* = Call_AndroidCreateOrUpdateMAMPolicy_593984(
+var androidCreateOrUpdateMAMPolicy* = Call_AndroidCreateOrUpdateMAMPolicy_568217(
     name: "androidCreateOrUpdateMAMPolicy", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/androidPolicies/{policyName}",
-    validator: validate_AndroidCreateOrUpdateMAMPolicy_593985, base: "",
-    url: url_AndroidCreateOrUpdateMAMPolicy_593986, schemes: {Scheme.Https})
+    validator: validate_AndroidCreateOrUpdateMAMPolicy_568218, base: "",
+    url: url_AndroidCreateOrUpdateMAMPolicy_568219, schemes: {Scheme.Https})
 type
-  Call_AndroidGetMAMPolicyByName_593973 = ref object of OpenApiRestCall_593408
-proc url_AndroidGetMAMPolicyByName_593975(protocol: Scheme; host: string;
+  Call_AndroidGetMAMPolicyByName_568206 = ref object of OpenApiRestCall_567641
+proc url_AndroidGetMAMPolicyByName_568208(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -603,7 +603,7 @@ proc url_AndroidGetMAMPolicyByName_593975(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidGetMAMPolicyByName_593974(path: JsonNode; query: JsonNode;
+proc validate_AndroidGetMAMPolicyByName_568207(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns AndroidMAMPolicy with given name.
   ## 
@@ -616,16 +616,16 @@ proc validate_AndroidGetMAMPolicyByName_593974(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_593976 = path.getOrDefault("hostName")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_568209 = path.getOrDefault("hostName")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "hostName", valid_593976
-  var valid_593977 = path.getOrDefault("policyName")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_568209 != nil:
+    section.add "hostName", valid_568209
+  var valid_568210 = path.getOrDefault("policyName")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "policyName", valid_593977
+  if valid_568210 != nil:
+    section.add "policyName", valid_568210
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -635,16 +635,16 @@ proc validate_AndroidGetMAMPolicyByName_593974(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593978 = query.getOrDefault("api-version")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_568211 = query.getOrDefault("api-version")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "api-version", valid_593978
-  var valid_593979 = query.getOrDefault("$select")
-  valid_593979 = validateParameter(valid_593979, JString, required = false,
+  if valid_568211 != nil:
+    section.add "api-version", valid_568211
+  var valid_568212 = query.getOrDefault("$select")
+  valid_568212 = validateParameter(valid_568212, JString, required = false,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "$select", valid_593979
+  if valid_568212 != nil:
+    section.add "$select", valid_568212
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -653,20 +653,20 @@ proc validate_AndroidGetMAMPolicyByName_593974(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593980: Call_AndroidGetMAMPolicyByName_593973; path: JsonNode;
+proc call*(call_568213: Call_AndroidGetMAMPolicyByName_568206; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns AndroidMAMPolicy with given name.
   ## 
-  let valid = call_593980.validator(path, query, header, formData, body)
-  let scheme = call_593980.pickScheme
+  let valid = call_568213.validator(path, query, header, formData, body)
+  let scheme = call_568213.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593980.url(scheme.get, call_593980.host, call_593980.base,
-                         call_593980.route, valid.getOrDefault("path"),
+  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
+                         call_568213.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593980, url, valid)
+  result = hook(call_568213, url, valid)
 
-proc call*(call_593981: Call_AndroidGetMAMPolicyByName_593973; apiVersion: string;
+proc call*(call_568214: Call_AndroidGetMAMPolicyByName_568206; apiVersion: string;
           hostName: string; policyName: string; Select: string = ""): Recallable =
   ## androidGetMAMPolicyByName
   ## Returns AndroidMAMPolicy with given name.
@@ -678,22 +678,22 @@ proc call*(call_593981: Call_AndroidGetMAMPolicyByName_593973; apiVersion: strin
   ##           : Location hostName for the tenant
   ##   policyName: string (required)
   ##             : Unique name for the policy
-  var path_593982 = newJObject()
-  var query_593983 = newJObject()
-  add(query_593983, "api-version", newJString(apiVersion))
-  add(query_593983, "$select", newJString(Select))
-  add(path_593982, "hostName", newJString(hostName))
-  add(path_593982, "policyName", newJString(policyName))
-  result = call_593981.call(path_593982, query_593983, nil, nil, nil)
+  var path_568215 = newJObject()
+  var query_568216 = newJObject()
+  add(query_568216, "api-version", newJString(apiVersion))
+  add(query_568216, "$select", newJString(Select))
+  add(path_568215, "hostName", newJString(hostName))
+  add(path_568215, "policyName", newJString(policyName))
+  result = call_568214.call(path_568215, query_568216, nil, nil, nil)
 
-var androidGetMAMPolicyByName* = Call_AndroidGetMAMPolicyByName_593973(
+var androidGetMAMPolicyByName* = Call_AndroidGetMAMPolicyByName_568206(
     name: "androidGetMAMPolicyByName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/androidPolicies/{policyName}",
-    validator: validate_AndroidGetMAMPolicyByName_593974, base: "",
-    url: url_AndroidGetMAMPolicyByName_593975, schemes: {Scheme.Https})
+    validator: validate_AndroidGetMAMPolicyByName_568207, base: "",
+    url: url_AndroidGetMAMPolicyByName_568208, schemes: {Scheme.Https})
 type
-  Call_AndroidPatchMAMPolicy_594023 = ref object of OpenApiRestCall_593408
-proc url_AndroidPatchMAMPolicy_594025(protocol: Scheme; host: string; base: string;
+  Call_AndroidPatchMAMPolicy_568256 = ref object of OpenApiRestCall_567641
+proc url_AndroidPatchMAMPolicy_568258(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -712,7 +712,7 @@ proc url_AndroidPatchMAMPolicy_594025(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidPatchMAMPolicy_594024(path: JsonNode; query: JsonNode;
+proc validate_AndroidPatchMAMPolicy_568257(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Patch AndroidMAMPolicy.
   ## 
@@ -725,16 +725,16 @@ proc validate_AndroidPatchMAMPolicy_594024(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594026 = path.getOrDefault("hostName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_568259 = path.getOrDefault("hostName")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "hostName", valid_594026
-  var valid_594027 = path.getOrDefault("policyName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_568259 != nil:
+    section.add "hostName", valid_568259
+  var valid_568260 = path.getOrDefault("policyName")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "policyName", valid_594027
+  if valid_568260 != nil:
+    section.add "policyName", valid_568260
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -742,11 +742,11 @@ proc validate_AndroidPatchMAMPolicy_594024(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594028 = query.getOrDefault("api-version")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  var valid_568261 = query.getOrDefault("api-version")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "api-version", valid_594028
+  if valid_568261 != nil:
+    section.add "api-version", valid_568261
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -760,20 +760,20 @@ proc validate_AndroidPatchMAMPolicy_594024(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594030: Call_AndroidPatchMAMPolicy_594023; path: JsonNode;
+proc call*(call_568263: Call_AndroidPatchMAMPolicy_568256; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patch AndroidMAMPolicy.
   ## 
-  let valid = call_594030.validator(path, query, header, formData, body)
-  let scheme = call_594030.pickScheme
+  let valid = call_568263.validator(path, query, header, formData, body)
+  let scheme = call_568263.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594030.url(scheme.get, call_594030.host, call_594030.base,
-                         call_594030.route, valid.getOrDefault("path"),
+  let url = call_568263.url(scheme.get, call_568263.host, call_568263.base,
+                         call_568263.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594030, url, valid)
+  result = hook(call_568263, url, valid)
 
-proc call*(call_594031: Call_AndroidPatchMAMPolicy_594023; apiVersion: string;
+proc call*(call_568264: Call_AndroidPatchMAMPolicy_568256; apiVersion: string;
           hostName: string; policyName: string; parameters: JsonNode): Recallable =
   ## androidPatchMAMPolicy
   ## Patch AndroidMAMPolicy.
@@ -785,24 +785,24 @@ proc call*(call_594031: Call_AndroidPatchMAMPolicy_594023; apiVersion: string;
   ##             : Unique name for the policy
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create or update an android policy operation.
-  var path_594032 = newJObject()
-  var query_594033 = newJObject()
-  var body_594034 = newJObject()
-  add(query_594033, "api-version", newJString(apiVersion))
-  add(path_594032, "hostName", newJString(hostName))
-  add(path_594032, "policyName", newJString(policyName))
+  var path_568265 = newJObject()
+  var query_568266 = newJObject()
+  var body_568267 = newJObject()
+  add(query_568266, "api-version", newJString(apiVersion))
+  add(path_568265, "hostName", newJString(hostName))
+  add(path_568265, "policyName", newJString(policyName))
   if parameters != nil:
-    body_594034 = parameters
-  result = call_594031.call(path_594032, query_594033, nil, nil, body_594034)
+    body_568267 = parameters
+  result = call_568264.call(path_568265, query_568266, nil, nil, body_568267)
 
-var androidPatchMAMPolicy* = Call_AndroidPatchMAMPolicy_594023(
+var androidPatchMAMPolicy* = Call_AndroidPatchMAMPolicy_568256(
     name: "androidPatchMAMPolicy", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/androidPolicies/{policyName}",
-    validator: validate_AndroidPatchMAMPolicy_594024, base: "",
-    url: url_AndroidPatchMAMPolicy_594025, schemes: {Scheme.Https})
+    validator: validate_AndroidPatchMAMPolicy_568257, base: "",
+    url: url_AndroidPatchMAMPolicy_568258, schemes: {Scheme.Https})
 type
-  Call_AndroidDeleteMAMPolicy_594013 = ref object of OpenApiRestCall_593408
-proc url_AndroidDeleteMAMPolicy_594015(protocol: Scheme; host: string; base: string;
+  Call_AndroidDeleteMAMPolicy_568246 = ref object of OpenApiRestCall_567641
+proc url_AndroidDeleteMAMPolicy_568248(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -821,7 +821,7 @@ proc url_AndroidDeleteMAMPolicy_594015(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidDeleteMAMPolicy_594014(path: JsonNode; query: JsonNode;
+proc validate_AndroidDeleteMAMPolicy_568247(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete Android Policy
   ## 
@@ -834,16 +834,16 @@ proc validate_AndroidDeleteMAMPolicy_594014(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594016 = path.getOrDefault("hostName")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_568249 = path.getOrDefault("hostName")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "hostName", valid_594016
-  var valid_594017 = path.getOrDefault("policyName")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  if valid_568249 != nil:
+    section.add "hostName", valid_568249
+  var valid_568250 = path.getOrDefault("policyName")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "policyName", valid_594017
+  if valid_568250 != nil:
+    section.add "policyName", valid_568250
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -851,11 +851,11 @@ proc validate_AndroidDeleteMAMPolicy_594014(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594018 = query.getOrDefault("api-version")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  var valid_568251 = query.getOrDefault("api-version")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "api-version", valid_594018
+  if valid_568251 != nil:
+    section.add "api-version", valid_568251
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -864,20 +864,20 @@ proc validate_AndroidDeleteMAMPolicy_594014(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594019: Call_AndroidDeleteMAMPolicy_594013; path: JsonNode;
+proc call*(call_568252: Call_AndroidDeleteMAMPolicy_568246; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete Android Policy
   ## 
-  let valid = call_594019.validator(path, query, header, formData, body)
-  let scheme = call_594019.pickScheme
+  let valid = call_568252.validator(path, query, header, formData, body)
+  let scheme = call_568252.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594019.url(scheme.get, call_594019.host, call_594019.base,
-                         call_594019.route, valid.getOrDefault("path"),
+  let url = call_568252.url(scheme.get, call_568252.host, call_568252.base,
+                         call_568252.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594019, url, valid)
+  result = hook(call_568252, url, valid)
 
-proc call*(call_594020: Call_AndroidDeleteMAMPolicy_594013; apiVersion: string;
+proc call*(call_568253: Call_AndroidDeleteMAMPolicy_568246; apiVersion: string;
           hostName: string; policyName: string): Recallable =
   ## androidDeleteMAMPolicy
   ## Delete Android Policy
@@ -887,21 +887,21 @@ proc call*(call_594020: Call_AndroidDeleteMAMPolicy_594013; apiVersion: string;
   ##           : Location hostName for the tenant
   ##   policyName: string (required)
   ##             : Unique name for the policy
-  var path_594021 = newJObject()
-  var query_594022 = newJObject()
-  add(query_594022, "api-version", newJString(apiVersion))
-  add(path_594021, "hostName", newJString(hostName))
-  add(path_594021, "policyName", newJString(policyName))
-  result = call_594020.call(path_594021, query_594022, nil, nil, nil)
+  var path_568254 = newJObject()
+  var query_568255 = newJObject()
+  add(query_568255, "api-version", newJString(apiVersion))
+  add(path_568254, "hostName", newJString(hostName))
+  add(path_568254, "policyName", newJString(policyName))
+  result = call_568253.call(path_568254, query_568255, nil, nil, nil)
 
-var androidDeleteMAMPolicy* = Call_AndroidDeleteMAMPolicy_594013(
+var androidDeleteMAMPolicy* = Call_AndroidDeleteMAMPolicy_568246(
     name: "androidDeleteMAMPolicy", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/androidPolicies/{policyName}",
-    validator: validate_AndroidDeleteMAMPolicy_594014, base: "",
-    url: url_AndroidDeleteMAMPolicy_594015, schemes: {Scheme.Https})
+    validator: validate_AndroidDeleteMAMPolicy_568247, base: "",
+    url: url_AndroidDeleteMAMPolicy_568248, schemes: {Scheme.Https})
 type
-  Call_AndroidAddAppForMAMPolicy_594035 = ref object of OpenApiRestCall_593408
-proc url_AndroidAddAppForMAMPolicy_594037(protocol: Scheme; host: string;
+  Call_AndroidAddAppForMAMPolicy_568268 = ref object of OpenApiRestCall_567641
+proc url_AndroidAddAppForMAMPolicy_568270(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -923,7 +923,7 @@ proc url_AndroidAddAppForMAMPolicy_594037(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidAddAppForMAMPolicy_594036(path: JsonNode; query: JsonNode;
+proc validate_AndroidAddAppForMAMPolicy_568269(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add app to an AndroidMAMPolicy.
   ## 
@@ -938,21 +938,21 @@ proc validate_AndroidAddAppForMAMPolicy_594036(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `appName` field"
-  var valid_594038 = path.getOrDefault("appName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  var valid_568271 = path.getOrDefault("appName")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "appName", valid_594038
-  var valid_594039 = path.getOrDefault("hostName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_568271 != nil:
+    section.add "appName", valid_568271
+  var valid_568272 = path.getOrDefault("hostName")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "hostName", valid_594039
-  var valid_594040 = path.getOrDefault("policyName")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_568272 != nil:
+    section.add "hostName", valid_568272
+  var valid_568273 = path.getOrDefault("policyName")
+  valid_568273 = validateParameter(valid_568273, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "policyName", valid_594040
+  if valid_568273 != nil:
+    section.add "policyName", valid_568273
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -960,11 +960,11 @@ proc validate_AndroidAddAppForMAMPolicy_594036(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594041 = query.getOrDefault("api-version")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_568274 = query.getOrDefault("api-version")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "api-version", valid_594041
+  if valid_568274 != nil:
+    section.add "api-version", valid_568274
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -978,20 +978,20 @@ proc validate_AndroidAddAppForMAMPolicy_594036(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594043: Call_AndroidAddAppForMAMPolicy_594035; path: JsonNode;
+proc call*(call_568276: Call_AndroidAddAppForMAMPolicy_568268; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add app to an AndroidMAMPolicy.
   ## 
-  let valid = call_594043.validator(path, query, header, formData, body)
-  let scheme = call_594043.pickScheme
+  let valid = call_568276.validator(path, query, header, formData, body)
+  let scheme = call_568276.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594043.url(scheme.get, call_594043.host, call_594043.base,
-                         call_594043.route, valid.getOrDefault("path"),
+  let url = call_568276.url(scheme.get, call_568276.host, call_568276.base,
+                         call_568276.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594043, url, valid)
+  result = hook(call_568276, url, valid)
 
-proc call*(call_594044: Call_AndroidAddAppForMAMPolicy_594035; apiVersion: string;
+proc call*(call_568277: Call_AndroidAddAppForMAMPolicy_568268; apiVersion: string;
           appName: string; hostName: string; policyName: string; parameters: JsonNode): Recallable =
   ## androidAddAppForMAMPolicy
   ## Add app to an AndroidMAMPolicy.
@@ -1005,25 +1005,25 @@ proc call*(call_594044: Call_AndroidAddAppForMAMPolicy_594035; apiVersion: strin
   ##             : Unique name for the policy
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create or update app to an android policy operation.
-  var path_594045 = newJObject()
-  var query_594046 = newJObject()
-  var body_594047 = newJObject()
-  add(query_594046, "api-version", newJString(apiVersion))
-  add(path_594045, "appName", newJString(appName))
-  add(path_594045, "hostName", newJString(hostName))
-  add(path_594045, "policyName", newJString(policyName))
+  var path_568278 = newJObject()
+  var query_568279 = newJObject()
+  var body_568280 = newJObject()
+  add(query_568279, "api-version", newJString(apiVersion))
+  add(path_568278, "appName", newJString(appName))
+  add(path_568278, "hostName", newJString(hostName))
+  add(path_568278, "policyName", newJString(policyName))
   if parameters != nil:
-    body_594047 = parameters
-  result = call_594044.call(path_594045, query_594046, nil, nil, body_594047)
+    body_568280 = parameters
+  result = call_568277.call(path_568278, query_568279, nil, nil, body_568280)
 
-var androidAddAppForMAMPolicy* = Call_AndroidAddAppForMAMPolicy_594035(
+var androidAddAppForMAMPolicy* = Call_AndroidAddAppForMAMPolicy_568268(
     name: "androidAddAppForMAMPolicy", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/androidPolicies/{policyName}/apps/{appName}",
-    validator: validate_AndroidAddAppForMAMPolicy_594036, base: "",
-    url: url_AndroidAddAppForMAMPolicy_594037, schemes: {Scheme.Https})
+    validator: validate_AndroidAddAppForMAMPolicy_568269, base: "",
+    url: url_AndroidAddAppForMAMPolicy_568270, schemes: {Scheme.Https})
 type
-  Call_AndroidDeleteAppForMAMPolicy_594048 = ref object of OpenApiRestCall_593408
-proc url_AndroidDeleteAppForMAMPolicy_594050(protocol: Scheme; host: string;
+  Call_AndroidDeleteAppForMAMPolicy_568281 = ref object of OpenApiRestCall_567641
+proc url_AndroidDeleteAppForMAMPolicy_568283(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1045,7 +1045,7 @@ proc url_AndroidDeleteAppForMAMPolicy_594050(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidDeleteAppForMAMPolicy_594049(path: JsonNode; query: JsonNode;
+proc validate_AndroidDeleteAppForMAMPolicy_568282(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete App for Android Policy
   ## 
@@ -1060,21 +1060,21 @@ proc validate_AndroidDeleteAppForMAMPolicy_594049(path: JsonNode; query: JsonNod
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `appName` field"
-  var valid_594051 = path.getOrDefault("appName")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  var valid_568284 = path.getOrDefault("appName")
+  valid_568284 = validateParameter(valid_568284, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "appName", valid_594051
-  var valid_594052 = path.getOrDefault("hostName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_568284 != nil:
+    section.add "appName", valid_568284
+  var valid_568285 = path.getOrDefault("hostName")
+  valid_568285 = validateParameter(valid_568285, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "hostName", valid_594052
-  var valid_594053 = path.getOrDefault("policyName")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  if valid_568285 != nil:
+    section.add "hostName", valid_568285
+  var valid_568286 = path.getOrDefault("policyName")
+  valid_568286 = validateParameter(valid_568286, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "policyName", valid_594053
+  if valid_568286 != nil:
+    section.add "policyName", valid_568286
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1082,11 +1082,11 @@ proc validate_AndroidDeleteAppForMAMPolicy_594049(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594054 = query.getOrDefault("api-version")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  var valid_568287 = query.getOrDefault("api-version")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "api-version", valid_594054
+  if valid_568287 != nil:
+    section.add "api-version", valid_568287
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1095,20 +1095,20 @@ proc validate_AndroidDeleteAppForMAMPolicy_594049(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594055: Call_AndroidDeleteAppForMAMPolicy_594048; path: JsonNode;
+proc call*(call_568288: Call_AndroidDeleteAppForMAMPolicy_568281; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete App for Android Policy
   ## 
-  let valid = call_594055.validator(path, query, header, formData, body)
-  let scheme = call_594055.pickScheme
+  let valid = call_568288.validator(path, query, header, formData, body)
+  let scheme = call_568288.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594055.url(scheme.get, call_594055.host, call_594055.base,
-                         call_594055.route, valid.getOrDefault("path"),
+  let url = call_568288.url(scheme.get, call_568288.host, call_568288.base,
+                         call_568288.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594055, url, valid)
+  result = hook(call_568288, url, valid)
 
-proc call*(call_594056: Call_AndroidDeleteAppForMAMPolicy_594048;
+proc call*(call_568289: Call_AndroidDeleteAppForMAMPolicy_568281;
           apiVersion: string; appName: string; hostName: string; policyName: string): Recallable =
   ## androidDeleteAppForMAMPolicy
   ## Delete App for Android Policy
@@ -1120,22 +1120,22 @@ proc call*(call_594056: Call_AndroidDeleteAppForMAMPolicy_594048;
   ##           : Location hostName for the tenant
   ##   policyName: string (required)
   ##             : Unique name for the policy
-  var path_594057 = newJObject()
-  var query_594058 = newJObject()
-  add(query_594058, "api-version", newJString(apiVersion))
-  add(path_594057, "appName", newJString(appName))
-  add(path_594057, "hostName", newJString(hostName))
-  add(path_594057, "policyName", newJString(policyName))
-  result = call_594056.call(path_594057, query_594058, nil, nil, nil)
+  var path_568290 = newJObject()
+  var query_568291 = newJObject()
+  add(query_568291, "api-version", newJString(apiVersion))
+  add(path_568290, "appName", newJString(appName))
+  add(path_568290, "hostName", newJString(hostName))
+  add(path_568290, "policyName", newJString(policyName))
+  result = call_568289.call(path_568290, query_568291, nil, nil, nil)
 
-var androidDeleteAppForMAMPolicy* = Call_AndroidDeleteAppForMAMPolicy_594048(
+var androidDeleteAppForMAMPolicy* = Call_AndroidDeleteAppForMAMPolicy_568281(
     name: "androidDeleteAppForMAMPolicy", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/androidPolicies/{policyName}/apps/{appName}",
-    validator: validate_AndroidDeleteAppForMAMPolicy_594049, base: "",
-    url: url_AndroidDeleteAppForMAMPolicy_594050, schemes: {Scheme.Https})
+    validator: validate_AndroidDeleteAppForMAMPolicy_568282, base: "",
+    url: url_AndroidDeleteAppForMAMPolicy_568283, schemes: {Scheme.Https})
 type
-  Call_AndroidGetGroupsForMAMPolicy_594059 = ref object of OpenApiRestCall_593408
-proc url_AndroidGetGroupsForMAMPolicy_594061(protocol: Scheme; host: string;
+  Call_AndroidGetGroupsForMAMPolicy_568292 = ref object of OpenApiRestCall_567641
+proc url_AndroidGetGroupsForMAMPolicy_568294(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1155,7 +1155,7 @@ proc url_AndroidGetGroupsForMAMPolicy_594061(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidGetGroupsForMAMPolicy_594060(path: JsonNode; query: JsonNode;
+proc validate_AndroidGetGroupsForMAMPolicy_568293(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns groups for a given AndroidMAMPolicy.
   ## 
@@ -1168,16 +1168,16 @@ proc validate_AndroidGetGroupsForMAMPolicy_594060(path: JsonNode; query: JsonNod
   ##             : policy name for the tenant
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594062 = path.getOrDefault("hostName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  var valid_568295 = path.getOrDefault("hostName")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "hostName", valid_594062
-  var valid_594063 = path.getOrDefault("policyName")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  if valid_568295 != nil:
+    section.add "hostName", valid_568295
+  var valid_568296 = path.getOrDefault("policyName")
+  valid_568296 = validateParameter(valid_568296, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "policyName", valid_594063
+  if valid_568296 != nil:
+    section.add "policyName", valid_568296
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1185,11 +1185,11 @@ proc validate_AndroidGetGroupsForMAMPolicy_594060(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594064 = query.getOrDefault("api-version")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  var valid_568297 = query.getOrDefault("api-version")
+  valid_568297 = validateParameter(valid_568297, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "api-version", valid_594064
+  if valid_568297 != nil:
+    section.add "api-version", valid_568297
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1198,20 +1198,20 @@ proc validate_AndroidGetGroupsForMAMPolicy_594060(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594065: Call_AndroidGetGroupsForMAMPolicy_594059; path: JsonNode;
+proc call*(call_568298: Call_AndroidGetGroupsForMAMPolicy_568292; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns groups for a given AndroidMAMPolicy.
   ## 
-  let valid = call_594065.validator(path, query, header, formData, body)
-  let scheme = call_594065.pickScheme
+  let valid = call_568298.validator(path, query, header, formData, body)
+  let scheme = call_568298.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594065.url(scheme.get, call_594065.host, call_594065.base,
-                         call_594065.route, valid.getOrDefault("path"),
+  let url = call_568298.url(scheme.get, call_568298.host, call_568298.base,
+                         call_568298.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594065, url, valid)
+  result = hook(call_568298, url, valid)
 
-proc call*(call_594066: Call_AndroidGetGroupsForMAMPolicy_594059;
+proc call*(call_568299: Call_AndroidGetGroupsForMAMPolicy_568292;
           apiVersion: string; hostName: string; policyName: string): Recallable =
   ## androidGetGroupsForMAMPolicy
   ## Returns groups for a given AndroidMAMPolicy.
@@ -1221,21 +1221,21 @@ proc call*(call_594066: Call_AndroidGetGroupsForMAMPolicy_594059;
   ##           : Location hostName for the tenant
   ##   policyName: string (required)
   ##             : policy name for the tenant
-  var path_594067 = newJObject()
-  var query_594068 = newJObject()
-  add(query_594068, "api-version", newJString(apiVersion))
-  add(path_594067, "hostName", newJString(hostName))
-  add(path_594067, "policyName", newJString(policyName))
-  result = call_594066.call(path_594067, query_594068, nil, nil, nil)
+  var path_568300 = newJObject()
+  var query_568301 = newJObject()
+  add(query_568301, "api-version", newJString(apiVersion))
+  add(path_568300, "hostName", newJString(hostName))
+  add(path_568300, "policyName", newJString(policyName))
+  result = call_568299.call(path_568300, query_568301, nil, nil, nil)
 
-var androidGetGroupsForMAMPolicy* = Call_AndroidGetGroupsForMAMPolicy_594059(
+var androidGetGroupsForMAMPolicy* = Call_AndroidGetGroupsForMAMPolicy_568292(
     name: "androidGetGroupsForMAMPolicy", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/androidPolicies/{policyName}/groups",
-    validator: validate_AndroidGetGroupsForMAMPolicy_594060, base: "",
-    url: url_AndroidGetGroupsForMAMPolicy_594061, schemes: {Scheme.Https})
+    validator: validate_AndroidGetGroupsForMAMPolicy_568293, base: "",
+    url: url_AndroidGetGroupsForMAMPolicy_568294, schemes: {Scheme.Https})
 type
-  Call_AndroidAddGroupForMAMPolicy_594069 = ref object of OpenApiRestCall_593408
-proc url_AndroidAddGroupForMAMPolicy_594071(protocol: Scheme; host: string;
+  Call_AndroidAddGroupForMAMPolicy_568302 = ref object of OpenApiRestCall_567641
+proc url_AndroidAddGroupForMAMPolicy_568304(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1257,7 +1257,7 @@ proc url_AndroidAddGroupForMAMPolicy_594071(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidAddGroupForMAMPolicy_594070(path: JsonNode; query: JsonNode;
+proc validate_AndroidAddGroupForMAMPolicy_568303(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add group to an AndroidMAMPolicy.
   ## 
@@ -1272,21 +1272,21 @@ proc validate_AndroidAddGroupForMAMPolicy_594070(path: JsonNode; query: JsonNode
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_594072 = path.getOrDefault("groupId")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  var valid_568305 = path.getOrDefault("groupId")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "groupId", valid_594072
-  var valid_594073 = path.getOrDefault("hostName")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  if valid_568305 != nil:
+    section.add "groupId", valid_568305
+  var valid_568306 = path.getOrDefault("hostName")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "hostName", valid_594073
-  var valid_594074 = path.getOrDefault("policyName")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_568306 != nil:
+    section.add "hostName", valid_568306
+  var valid_568307 = path.getOrDefault("policyName")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "policyName", valid_594074
+  if valid_568307 != nil:
+    section.add "policyName", valid_568307
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1294,11 +1294,11 @@ proc validate_AndroidAddGroupForMAMPolicy_594070(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594075 = query.getOrDefault("api-version")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  var valid_568308 = query.getOrDefault("api-version")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "api-version", valid_594075
+  if valid_568308 != nil:
+    section.add "api-version", valid_568308
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1312,20 +1312,20 @@ proc validate_AndroidAddGroupForMAMPolicy_594070(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594077: Call_AndroidAddGroupForMAMPolicy_594069; path: JsonNode;
+proc call*(call_568310: Call_AndroidAddGroupForMAMPolicy_568302; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add group to an AndroidMAMPolicy.
   ## 
-  let valid = call_594077.validator(path, query, header, formData, body)
-  let scheme = call_594077.pickScheme
+  let valid = call_568310.validator(path, query, header, formData, body)
+  let scheme = call_568310.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594077.url(scheme.get, call_594077.host, call_594077.base,
-                         call_594077.route, valid.getOrDefault("path"),
+  let url = call_568310.url(scheme.get, call_568310.host, call_568310.base,
+                         call_568310.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594077, url, valid)
+  result = hook(call_568310, url, valid)
 
-proc call*(call_594078: Call_AndroidAddGroupForMAMPolicy_594069; groupId: string;
+proc call*(call_568311: Call_AndroidAddGroupForMAMPolicy_568302; groupId: string;
           apiVersion: string; hostName: string; policyName: string;
           parameters: JsonNode): Recallable =
   ## androidAddGroupForMAMPolicy
@@ -1340,25 +1340,25 @@ proc call*(call_594078: Call_AndroidAddGroupForMAMPolicy_594069; groupId: string
   ##             : Unique name for the policy
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create or update app to an android policy operation.
-  var path_594079 = newJObject()
-  var query_594080 = newJObject()
-  var body_594081 = newJObject()
-  add(path_594079, "groupId", newJString(groupId))
-  add(query_594080, "api-version", newJString(apiVersion))
-  add(path_594079, "hostName", newJString(hostName))
-  add(path_594079, "policyName", newJString(policyName))
+  var path_568312 = newJObject()
+  var query_568313 = newJObject()
+  var body_568314 = newJObject()
+  add(path_568312, "groupId", newJString(groupId))
+  add(query_568313, "api-version", newJString(apiVersion))
+  add(path_568312, "hostName", newJString(hostName))
+  add(path_568312, "policyName", newJString(policyName))
   if parameters != nil:
-    body_594081 = parameters
-  result = call_594078.call(path_594079, query_594080, nil, nil, body_594081)
+    body_568314 = parameters
+  result = call_568311.call(path_568312, query_568313, nil, nil, body_568314)
 
-var androidAddGroupForMAMPolicy* = Call_AndroidAddGroupForMAMPolicy_594069(
+var androidAddGroupForMAMPolicy* = Call_AndroidAddGroupForMAMPolicy_568302(
     name: "androidAddGroupForMAMPolicy", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/androidPolicies/{policyName}/groups/{groupId}",
-    validator: validate_AndroidAddGroupForMAMPolicy_594070, base: "",
-    url: url_AndroidAddGroupForMAMPolicy_594071, schemes: {Scheme.Https})
+    validator: validate_AndroidAddGroupForMAMPolicy_568303, base: "",
+    url: url_AndroidAddGroupForMAMPolicy_568304, schemes: {Scheme.Https})
 type
-  Call_AndroidDeleteGroupForMAMPolicy_594082 = ref object of OpenApiRestCall_593408
-proc url_AndroidDeleteGroupForMAMPolicy_594084(protocol: Scheme; host: string;
+  Call_AndroidDeleteGroupForMAMPolicy_568315 = ref object of OpenApiRestCall_567641
+proc url_AndroidDeleteGroupForMAMPolicy_568317(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1380,7 +1380,7 @@ proc url_AndroidDeleteGroupForMAMPolicy_594084(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AndroidDeleteGroupForMAMPolicy_594083(path: JsonNode;
+proc validate_AndroidDeleteGroupForMAMPolicy_568316(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete Group for Android Policy
   ## 
@@ -1395,21 +1395,21 @@ proc validate_AndroidDeleteGroupForMAMPolicy_594083(path: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_594085 = path.getOrDefault("groupId")
-  valid_594085 = validateParameter(valid_594085, JString, required = true,
+  var valid_568318 = path.getOrDefault("groupId")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594085 != nil:
-    section.add "groupId", valid_594085
-  var valid_594086 = path.getOrDefault("hostName")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  if valid_568318 != nil:
+    section.add "groupId", valid_568318
+  var valid_568319 = path.getOrDefault("hostName")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "hostName", valid_594086
-  var valid_594087 = path.getOrDefault("policyName")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  if valid_568319 != nil:
+    section.add "hostName", valid_568319
+  var valid_568320 = path.getOrDefault("policyName")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "policyName", valid_594087
+  if valid_568320 != nil:
+    section.add "policyName", valid_568320
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1417,11 +1417,11 @@ proc validate_AndroidDeleteGroupForMAMPolicy_594083(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594088 = query.getOrDefault("api-version")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  var valid_568321 = query.getOrDefault("api-version")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "api-version", valid_594088
+  if valid_568321 != nil:
+    section.add "api-version", valid_568321
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1430,20 +1430,20 @@ proc validate_AndroidDeleteGroupForMAMPolicy_594083(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594089: Call_AndroidDeleteGroupForMAMPolicy_594082; path: JsonNode;
+proc call*(call_568322: Call_AndroidDeleteGroupForMAMPolicy_568315; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete Group for Android Policy
   ## 
-  let valid = call_594089.validator(path, query, header, formData, body)
-  let scheme = call_594089.pickScheme
+  let valid = call_568322.validator(path, query, header, formData, body)
+  let scheme = call_568322.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594089.url(scheme.get, call_594089.host, call_594089.base,
-                         call_594089.route, valid.getOrDefault("path"),
+  let url = call_568322.url(scheme.get, call_568322.host, call_568322.base,
+                         call_568322.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594089, url, valid)
+  result = hook(call_568322, url, valid)
 
-proc call*(call_594090: Call_AndroidDeleteGroupForMAMPolicy_594082;
+proc call*(call_568323: Call_AndroidDeleteGroupForMAMPolicy_568315;
           groupId: string; apiVersion: string; hostName: string; policyName: string): Recallable =
   ## androidDeleteGroupForMAMPolicy
   ## Delete Group for Android Policy
@@ -1455,22 +1455,22 @@ proc call*(call_594090: Call_AndroidDeleteGroupForMAMPolicy_594082;
   ##           : Location hostName for the tenant
   ##   policyName: string (required)
   ##             : Unique name for the policy
-  var path_594091 = newJObject()
-  var query_594092 = newJObject()
-  add(path_594091, "groupId", newJString(groupId))
-  add(query_594092, "api-version", newJString(apiVersion))
-  add(path_594091, "hostName", newJString(hostName))
-  add(path_594091, "policyName", newJString(policyName))
-  result = call_594090.call(path_594091, query_594092, nil, nil, nil)
+  var path_568324 = newJObject()
+  var query_568325 = newJObject()
+  add(path_568324, "groupId", newJString(groupId))
+  add(query_568325, "api-version", newJString(apiVersion))
+  add(path_568324, "hostName", newJString(hostName))
+  add(path_568324, "policyName", newJString(policyName))
+  result = call_568323.call(path_568324, query_568325, nil, nil, nil)
 
-var androidDeleteGroupForMAMPolicy* = Call_AndroidDeleteGroupForMAMPolicy_594082(
+var androidDeleteGroupForMAMPolicy* = Call_AndroidDeleteGroupForMAMPolicy_568315(
     name: "androidDeleteGroupForMAMPolicy", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/androidPolicies/{policyName}/groups/{groupId}",
-    validator: validate_AndroidDeleteGroupForMAMPolicy_594083, base: "",
-    url: url_AndroidDeleteGroupForMAMPolicy_594084, schemes: {Scheme.Https})
+    validator: validate_AndroidDeleteGroupForMAMPolicy_568316, base: "",
+    url: url_AndroidDeleteGroupForMAMPolicy_568317, schemes: {Scheme.Https})
 type
-  Call_GetApps_594093 = ref object of OpenApiRestCall_593408
-proc url_GetApps_594095(protocol: Scheme; host: string; base: string; route: string;
+  Call_GetApps_568326 = ref object of OpenApiRestCall_567641
+proc url_GetApps_568328(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1487,7 +1487,7 @@ proc url_GetApps_594095(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetApps_594094(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GetApps_568327(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns Intune Manageable apps.
   ## 
@@ -1498,11 +1498,11 @@ proc validate_GetApps_594094(path: JsonNode; query: JsonNode; header: JsonNode;
   ##           : Location hostName for the tenant
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594096 = path.getOrDefault("hostName")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
+  var valid_568329 = path.getOrDefault("hostName")
+  valid_568329 = validateParameter(valid_568329, JString, required = true,
                                  default = nil)
-  if valid_594096 != nil:
-    section.add "hostName", valid_594096
+  if valid_568329 != nil:
+    section.add "hostName", valid_568329
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1515,25 +1515,25 @@ proc validate_GetApps_594094(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594097 = query.getOrDefault("api-version")
-  valid_594097 = validateParameter(valid_594097, JString, required = true,
+  var valid_568330 = query.getOrDefault("api-version")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "api-version", valid_594097
-  var valid_594098 = query.getOrDefault("$top")
-  valid_594098 = validateParameter(valid_594098, JInt, required = false, default = nil)
-  if valid_594098 != nil:
-    section.add "$top", valid_594098
-  var valid_594099 = query.getOrDefault("$select")
-  valid_594099 = validateParameter(valid_594099, JString, required = false,
+  if valid_568330 != nil:
+    section.add "api-version", valid_568330
+  var valid_568331 = query.getOrDefault("$top")
+  valid_568331 = validateParameter(valid_568331, JInt, required = false, default = nil)
+  if valid_568331 != nil:
+    section.add "$top", valid_568331
+  var valid_568332 = query.getOrDefault("$select")
+  valid_568332 = validateParameter(valid_568332, JString, required = false,
                                  default = nil)
-  if valid_594099 != nil:
-    section.add "$select", valid_594099
-  var valid_594100 = query.getOrDefault("$filter")
-  valid_594100 = validateParameter(valid_594100, JString, required = false,
+  if valid_568332 != nil:
+    section.add "$select", valid_568332
+  var valid_568333 = query.getOrDefault("$filter")
+  valid_568333 = validateParameter(valid_568333, JString, required = false,
                                  default = nil)
-  if valid_594100 != nil:
-    section.add "$filter", valid_594100
+  if valid_568333 != nil:
+    section.add "$filter", valid_568333
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1542,20 +1542,20 @@ proc validate_GetApps_594094(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594101: Call_GetApps_594093; path: JsonNode; query: JsonNode;
+proc call*(call_568334: Call_GetApps_568326; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns Intune Manageable apps.
   ## 
-  let valid = call_594101.validator(path, query, header, formData, body)
-  let scheme = call_594101.pickScheme
+  let valid = call_568334.validator(path, query, header, formData, body)
+  let scheme = call_568334.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594101.url(scheme.get, call_594101.host, call_594101.base,
-                         call_594101.route, valid.getOrDefault("path"),
+  let url = call_568334.url(scheme.get, call_568334.host, call_568334.base,
+                         call_568334.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594101, url, valid)
+  result = hook(call_568334, url, valid)
 
-proc call*(call_594102: Call_GetApps_594093; apiVersion: string; hostName: string;
+proc call*(call_568335: Call_GetApps_568326; apiVersion: string; hostName: string;
           Top: int = 0; Select: string = ""; Filter: string = ""): Recallable =
   ## getApps
   ## Returns Intune Manageable apps.
@@ -1568,22 +1568,22 @@ proc call*(call_594102: Call_GetApps_594093; apiVersion: string; hostName: strin
   ##           : Location hostName for the tenant
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_594103 = newJObject()
-  var query_594104 = newJObject()
-  add(query_594104, "api-version", newJString(apiVersion))
-  add(query_594104, "$top", newJInt(Top))
-  add(query_594104, "$select", newJString(Select))
-  add(path_594103, "hostName", newJString(hostName))
-  add(query_594104, "$filter", newJString(Filter))
-  result = call_594102.call(path_594103, query_594104, nil, nil, nil)
+  var path_568336 = newJObject()
+  var query_568337 = newJObject()
+  add(query_568337, "api-version", newJString(apiVersion))
+  add(query_568337, "$top", newJInt(Top))
+  add(query_568337, "$select", newJString(Select))
+  add(path_568336, "hostName", newJString(hostName))
+  add(query_568337, "$filter", newJString(Filter))
+  result = call_568335.call(path_568336, query_568337, nil, nil, nil)
 
-var getApps* = Call_GetApps_594093(name: "getApps", meth: HttpMethod.HttpGet,
+var getApps* = Call_GetApps_568326(name: "getApps", meth: HttpMethod.HttpGet,
                                 host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/apps",
-                                validator: validate_GetApps_594094, base: "",
-                                url: url_GetApps_594095, schemes: {Scheme.Https})
+                                validator: validate_GetApps_568327, base: "",
+                                url: url_GetApps_568328, schemes: {Scheme.Https})
 type
-  Call_GetMAMFlaggedUsers_594105 = ref object of OpenApiRestCall_593408
-proc url_GetMAMFlaggedUsers_594107(protocol: Scheme; host: string; base: string;
+  Call_GetMAMFlaggedUsers_568338 = ref object of OpenApiRestCall_567641
+proc url_GetMAMFlaggedUsers_568340(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1600,7 +1600,7 @@ proc url_GetMAMFlaggedUsers_594107(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetMAMFlaggedUsers_594106(path: JsonNode; query: JsonNode;
+proc validate_GetMAMFlaggedUsers_568339(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Returns Intune flagged user collection
@@ -1612,11 +1612,11 @@ proc validate_GetMAMFlaggedUsers_594106(path: JsonNode; query: JsonNode;
   ##           : Location hostName for the tenant
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594108 = path.getOrDefault("hostName")
-  valid_594108 = validateParameter(valid_594108, JString, required = true,
+  var valid_568341 = path.getOrDefault("hostName")
+  valid_568341 = validateParameter(valid_568341, JString, required = true,
                                  default = nil)
-  if valid_594108 != nil:
-    section.add "hostName", valid_594108
+  if valid_568341 != nil:
+    section.add "hostName", valid_568341
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1629,25 +1629,25 @@ proc validate_GetMAMFlaggedUsers_594106(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594109 = query.getOrDefault("api-version")
-  valid_594109 = validateParameter(valid_594109, JString, required = true,
+  var valid_568342 = query.getOrDefault("api-version")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = nil)
-  if valid_594109 != nil:
-    section.add "api-version", valid_594109
-  var valid_594110 = query.getOrDefault("$top")
-  valid_594110 = validateParameter(valid_594110, JInt, required = false, default = nil)
-  if valid_594110 != nil:
-    section.add "$top", valid_594110
-  var valid_594111 = query.getOrDefault("$select")
-  valid_594111 = validateParameter(valid_594111, JString, required = false,
+  if valid_568342 != nil:
+    section.add "api-version", valid_568342
+  var valid_568343 = query.getOrDefault("$top")
+  valid_568343 = validateParameter(valid_568343, JInt, required = false, default = nil)
+  if valid_568343 != nil:
+    section.add "$top", valid_568343
+  var valid_568344 = query.getOrDefault("$select")
+  valid_568344 = validateParameter(valid_568344, JString, required = false,
                                  default = nil)
-  if valid_594111 != nil:
-    section.add "$select", valid_594111
-  var valid_594112 = query.getOrDefault("$filter")
-  valid_594112 = validateParameter(valid_594112, JString, required = false,
+  if valid_568344 != nil:
+    section.add "$select", valid_568344
+  var valid_568345 = query.getOrDefault("$filter")
+  valid_568345 = validateParameter(valid_568345, JString, required = false,
                                  default = nil)
-  if valid_594112 != nil:
-    section.add "$filter", valid_594112
+  if valid_568345 != nil:
+    section.add "$filter", valid_568345
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1656,20 +1656,20 @@ proc validate_GetMAMFlaggedUsers_594106(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594113: Call_GetMAMFlaggedUsers_594105; path: JsonNode;
+proc call*(call_568346: Call_GetMAMFlaggedUsers_568338; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns Intune flagged user collection
   ## 
-  let valid = call_594113.validator(path, query, header, formData, body)
-  let scheme = call_594113.pickScheme
+  let valid = call_568346.validator(path, query, header, formData, body)
+  let scheme = call_568346.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594113.url(scheme.get, call_594113.host, call_594113.base,
-                         call_594113.route, valid.getOrDefault("path"),
+  let url = call_568346.url(scheme.get, call_568346.host, call_568346.base,
+                         call_568346.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594113, url, valid)
+  result = hook(call_568346, url, valid)
 
-proc call*(call_594114: Call_GetMAMFlaggedUsers_594105; apiVersion: string;
+proc call*(call_568347: Call_GetMAMFlaggedUsers_568338; apiVersion: string;
           hostName: string; Top: int = 0; Select: string = ""; Filter: string = ""): Recallable =
   ## getMAMFlaggedUsers
   ## Returns Intune flagged user collection
@@ -1682,24 +1682,24 @@ proc call*(call_594114: Call_GetMAMFlaggedUsers_594105; apiVersion: string;
   ##           : Location hostName for the tenant
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_594115 = newJObject()
-  var query_594116 = newJObject()
-  add(query_594116, "api-version", newJString(apiVersion))
-  add(query_594116, "$top", newJInt(Top))
-  add(query_594116, "$select", newJString(Select))
-  add(path_594115, "hostName", newJString(hostName))
-  add(query_594116, "$filter", newJString(Filter))
-  result = call_594114.call(path_594115, query_594116, nil, nil, nil)
+  var path_568348 = newJObject()
+  var query_568349 = newJObject()
+  add(query_568349, "api-version", newJString(apiVersion))
+  add(query_568349, "$top", newJInt(Top))
+  add(query_568349, "$select", newJString(Select))
+  add(path_568348, "hostName", newJString(hostName))
+  add(query_568349, "$filter", newJString(Filter))
+  result = call_568347.call(path_568348, query_568349, nil, nil, nil)
 
-var getMAMFlaggedUsers* = Call_GetMAMFlaggedUsers_594105(
+var getMAMFlaggedUsers* = Call_GetMAMFlaggedUsers_568338(
     name: "getMAMFlaggedUsers", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Intune/locations/{hostName}/flaggedUsers",
-    validator: validate_GetMAMFlaggedUsers_594106, base: "",
-    url: url_GetMAMFlaggedUsers_594107, schemes: {Scheme.Https})
+    validator: validate_GetMAMFlaggedUsers_568339, base: "",
+    url: url_GetMAMFlaggedUsers_568340, schemes: {Scheme.Https})
 type
-  Call_GetMAMFlaggedUserByName_594117 = ref object of OpenApiRestCall_593408
-proc url_GetMAMFlaggedUserByName_594119(protocol: Scheme; host: string; base: string;
+  Call_GetMAMFlaggedUserByName_568350 = ref object of OpenApiRestCall_567641
+proc url_GetMAMFlaggedUserByName_568352(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1719,7 +1719,7 @@ proc url_GetMAMFlaggedUserByName_594119(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetMAMFlaggedUserByName_594118(path: JsonNode; query: JsonNode;
+proc validate_GetMAMFlaggedUserByName_568351(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns Intune flagged user details
   ## 
@@ -1732,16 +1732,16 @@ proc validate_GetMAMFlaggedUserByName_594118(path: JsonNode; query: JsonNode;
   ##           : Flagged userName
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594120 = path.getOrDefault("hostName")
-  valid_594120 = validateParameter(valid_594120, JString, required = true,
+  var valid_568353 = path.getOrDefault("hostName")
+  valid_568353 = validateParameter(valid_568353, JString, required = true,
                                  default = nil)
-  if valid_594120 != nil:
-    section.add "hostName", valid_594120
-  var valid_594121 = path.getOrDefault("userName")
-  valid_594121 = validateParameter(valid_594121, JString, required = true,
+  if valid_568353 != nil:
+    section.add "hostName", valid_568353
+  var valid_568354 = path.getOrDefault("userName")
+  valid_568354 = validateParameter(valid_568354, JString, required = true,
                                  default = nil)
-  if valid_594121 != nil:
-    section.add "userName", valid_594121
+  if valid_568354 != nil:
+    section.add "userName", valid_568354
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1751,16 +1751,16 @@ proc validate_GetMAMFlaggedUserByName_594118(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594122 = query.getOrDefault("api-version")
-  valid_594122 = validateParameter(valid_594122, JString, required = true,
+  var valid_568355 = query.getOrDefault("api-version")
+  valid_568355 = validateParameter(valid_568355, JString, required = true,
                                  default = nil)
-  if valid_594122 != nil:
-    section.add "api-version", valid_594122
-  var valid_594123 = query.getOrDefault("$select")
-  valid_594123 = validateParameter(valid_594123, JString, required = false,
+  if valid_568355 != nil:
+    section.add "api-version", valid_568355
+  var valid_568356 = query.getOrDefault("$select")
+  valid_568356 = validateParameter(valid_568356, JString, required = false,
                                  default = nil)
-  if valid_594123 != nil:
-    section.add "$select", valid_594123
+  if valid_568356 != nil:
+    section.add "$select", valid_568356
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1769,20 +1769,20 @@ proc validate_GetMAMFlaggedUserByName_594118(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594124: Call_GetMAMFlaggedUserByName_594117; path: JsonNode;
+proc call*(call_568357: Call_GetMAMFlaggedUserByName_568350; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns Intune flagged user details
   ## 
-  let valid = call_594124.validator(path, query, header, formData, body)
-  let scheme = call_594124.pickScheme
+  let valid = call_568357.validator(path, query, header, formData, body)
+  let scheme = call_568357.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594124.url(scheme.get, call_594124.host, call_594124.base,
-                         call_594124.route, valid.getOrDefault("path"),
+  let url = call_568357.url(scheme.get, call_568357.host, call_568357.base,
+                         call_568357.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594124, url, valid)
+  result = hook(call_568357, url, valid)
 
-proc call*(call_594125: Call_GetMAMFlaggedUserByName_594117; apiVersion: string;
+proc call*(call_568358: Call_GetMAMFlaggedUserByName_568350; apiVersion: string;
           hostName: string; userName: string; Select: string = ""): Recallable =
   ## getMAMFlaggedUserByName
   ## Returns Intune flagged user details
@@ -1794,22 +1794,22 @@ proc call*(call_594125: Call_GetMAMFlaggedUserByName_594117; apiVersion: string;
   ##           : Location hostName for the tenant
   ##   userName: string (required)
   ##           : Flagged userName
-  var path_594126 = newJObject()
-  var query_594127 = newJObject()
-  add(query_594127, "api-version", newJString(apiVersion))
-  add(query_594127, "$select", newJString(Select))
-  add(path_594126, "hostName", newJString(hostName))
-  add(path_594126, "userName", newJString(userName))
-  result = call_594125.call(path_594126, query_594127, nil, nil, nil)
+  var path_568359 = newJObject()
+  var query_568360 = newJObject()
+  add(query_568360, "api-version", newJString(apiVersion))
+  add(query_568360, "$select", newJString(Select))
+  add(path_568359, "hostName", newJString(hostName))
+  add(path_568359, "userName", newJString(userName))
+  result = call_568358.call(path_568359, query_568360, nil, nil, nil)
 
-var getMAMFlaggedUserByName* = Call_GetMAMFlaggedUserByName_594117(
+var getMAMFlaggedUserByName* = Call_GetMAMFlaggedUserByName_568350(
     name: "getMAMFlaggedUserByName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/flaggedUsers/{userName}",
-    validator: validate_GetMAMFlaggedUserByName_594118, base: "",
-    url: url_GetMAMFlaggedUserByName_594119, schemes: {Scheme.Https})
+    validator: validate_GetMAMFlaggedUserByName_568351, base: "",
+    url: url_GetMAMFlaggedUserByName_568352, schemes: {Scheme.Https})
 type
-  Call_GetMAMUserFlaggedEnrolledApps_594128 = ref object of OpenApiRestCall_593408
-proc url_GetMAMUserFlaggedEnrolledApps_594130(protocol: Scheme; host: string;
+  Call_GetMAMUserFlaggedEnrolledApps_568361 = ref object of OpenApiRestCall_567641
+proc url_GetMAMUserFlaggedEnrolledApps_568363(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1829,7 +1829,7 @@ proc url_GetMAMUserFlaggedEnrolledApps_594130(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetMAMUserFlaggedEnrolledApps_594129(path: JsonNode; query: JsonNode;
+proc validate_GetMAMUserFlaggedEnrolledApps_568362(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns Intune flagged enrolled app collection for the User
   ## 
@@ -1842,16 +1842,16 @@ proc validate_GetMAMUserFlaggedEnrolledApps_594129(path: JsonNode; query: JsonNo
   ##           : User name for the tenant
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594131 = path.getOrDefault("hostName")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  var valid_568364 = path.getOrDefault("hostName")
+  valid_568364 = validateParameter(valid_568364, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "hostName", valid_594131
-  var valid_594132 = path.getOrDefault("userName")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  if valid_568364 != nil:
+    section.add "hostName", valid_568364
+  var valid_568365 = path.getOrDefault("userName")
+  valid_568365 = validateParameter(valid_568365, JString, required = true,
                                  default = nil)
-  if valid_594132 != nil:
-    section.add "userName", valid_594132
+  if valid_568365 != nil:
+    section.add "userName", valid_568365
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1864,25 +1864,25 @@ proc validate_GetMAMUserFlaggedEnrolledApps_594129(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594133 = query.getOrDefault("api-version")
-  valid_594133 = validateParameter(valid_594133, JString, required = true,
+  var valid_568366 = query.getOrDefault("api-version")
+  valid_568366 = validateParameter(valid_568366, JString, required = true,
                                  default = nil)
-  if valid_594133 != nil:
-    section.add "api-version", valid_594133
-  var valid_594134 = query.getOrDefault("$top")
-  valid_594134 = validateParameter(valid_594134, JInt, required = false, default = nil)
-  if valid_594134 != nil:
-    section.add "$top", valid_594134
-  var valid_594135 = query.getOrDefault("$select")
-  valid_594135 = validateParameter(valid_594135, JString, required = false,
+  if valid_568366 != nil:
+    section.add "api-version", valid_568366
+  var valid_568367 = query.getOrDefault("$top")
+  valid_568367 = validateParameter(valid_568367, JInt, required = false, default = nil)
+  if valid_568367 != nil:
+    section.add "$top", valid_568367
+  var valid_568368 = query.getOrDefault("$select")
+  valid_568368 = validateParameter(valid_568368, JString, required = false,
                                  default = nil)
-  if valid_594135 != nil:
-    section.add "$select", valid_594135
-  var valid_594136 = query.getOrDefault("$filter")
-  valid_594136 = validateParameter(valid_594136, JString, required = false,
+  if valid_568368 != nil:
+    section.add "$select", valid_568368
+  var valid_568369 = query.getOrDefault("$filter")
+  valid_568369 = validateParameter(valid_568369, JString, required = false,
                                  default = nil)
-  if valid_594136 != nil:
-    section.add "$filter", valid_594136
+  if valid_568369 != nil:
+    section.add "$filter", valid_568369
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1891,20 +1891,20 @@ proc validate_GetMAMUserFlaggedEnrolledApps_594129(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594137: Call_GetMAMUserFlaggedEnrolledApps_594128; path: JsonNode;
+proc call*(call_568370: Call_GetMAMUserFlaggedEnrolledApps_568361; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns Intune flagged enrolled app collection for the User
   ## 
-  let valid = call_594137.validator(path, query, header, formData, body)
-  let scheme = call_594137.pickScheme
+  let valid = call_568370.validator(path, query, header, formData, body)
+  let scheme = call_568370.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594137.url(scheme.get, call_594137.host, call_594137.base,
-                         call_594137.route, valid.getOrDefault("path"),
+  let url = call_568370.url(scheme.get, call_568370.host, call_568370.base,
+                         call_568370.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594137, url, valid)
+  result = hook(call_568370, url, valid)
 
-proc call*(call_594138: Call_GetMAMUserFlaggedEnrolledApps_594128;
+proc call*(call_568371: Call_GetMAMUserFlaggedEnrolledApps_568361;
           apiVersion: string; hostName: string; userName: string; Top: int = 0;
           Select: string = ""; Filter: string = ""): Recallable =
   ## getMAMUserFlaggedEnrolledApps
@@ -1920,24 +1920,24 @@ proc call*(call_594138: Call_GetMAMUserFlaggedEnrolledApps_594128;
   ##           : User name for the tenant
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_594139 = newJObject()
-  var query_594140 = newJObject()
-  add(query_594140, "api-version", newJString(apiVersion))
-  add(query_594140, "$top", newJInt(Top))
-  add(query_594140, "$select", newJString(Select))
-  add(path_594139, "hostName", newJString(hostName))
-  add(path_594139, "userName", newJString(userName))
-  add(query_594140, "$filter", newJString(Filter))
-  result = call_594138.call(path_594139, query_594140, nil, nil, nil)
+  var path_568372 = newJObject()
+  var query_568373 = newJObject()
+  add(query_568373, "api-version", newJString(apiVersion))
+  add(query_568373, "$top", newJInt(Top))
+  add(query_568373, "$select", newJString(Select))
+  add(path_568372, "hostName", newJString(hostName))
+  add(path_568372, "userName", newJString(userName))
+  add(query_568373, "$filter", newJString(Filter))
+  result = call_568371.call(path_568372, query_568373, nil, nil, nil)
 
-var getMAMUserFlaggedEnrolledApps* = Call_GetMAMUserFlaggedEnrolledApps_594128(
+var getMAMUserFlaggedEnrolledApps* = Call_GetMAMUserFlaggedEnrolledApps_568361(
     name: "getMAMUserFlaggedEnrolledApps", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/flaggedUsers/{userName}/flaggedEnrolledApps",
-    validator: validate_GetMAMUserFlaggedEnrolledApps_594129, base: "",
-    url: url_GetMAMUserFlaggedEnrolledApps_594130, schemes: {Scheme.Https})
+    validator: validate_GetMAMUserFlaggedEnrolledApps_568362, base: "",
+    url: url_GetMAMUserFlaggedEnrolledApps_568363, schemes: {Scheme.Https})
 type
-  Call_IosGetMAMPolicies_594141 = ref object of OpenApiRestCall_593408
-proc url_IosGetMAMPolicies_594143(protocol: Scheme; host: string; base: string;
+  Call_IosGetMAMPolicies_568374 = ref object of OpenApiRestCall_567641
+proc url_IosGetMAMPolicies_568376(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1954,7 +1954,7 @@ proc url_IosGetMAMPolicies_594143(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosGetMAMPolicies_594142(path: JsonNode; query: JsonNode;
+proc validate_IosGetMAMPolicies_568375(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Returns Intune iOSPolicies.
@@ -1966,11 +1966,11 @@ proc validate_IosGetMAMPolicies_594142(path: JsonNode; query: JsonNode;
   ##           : Location hostName for the tenant
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594144 = path.getOrDefault("hostName")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  var valid_568377 = path.getOrDefault("hostName")
+  valid_568377 = validateParameter(valid_568377, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "hostName", valid_594144
+  if valid_568377 != nil:
+    section.add "hostName", valid_568377
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1983,25 +1983,25 @@ proc validate_IosGetMAMPolicies_594142(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594145 = query.getOrDefault("api-version")
-  valid_594145 = validateParameter(valid_594145, JString, required = true,
+  var valid_568378 = query.getOrDefault("api-version")
+  valid_568378 = validateParameter(valid_568378, JString, required = true,
                                  default = nil)
-  if valid_594145 != nil:
-    section.add "api-version", valid_594145
-  var valid_594146 = query.getOrDefault("$top")
-  valid_594146 = validateParameter(valid_594146, JInt, required = false, default = nil)
-  if valid_594146 != nil:
-    section.add "$top", valid_594146
-  var valid_594147 = query.getOrDefault("$select")
-  valid_594147 = validateParameter(valid_594147, JString, required = false,
+  if valid_568378 != nil:
+    section.add "api-version", valid_568378
+  var valid_568379 = query.getOrDefault("$top")
+  valid_568379 = validateParameter(valid_568379, JInt, required = false, default = nil)
+  if valid_568379 != nil:
+    section.add "$top", valid_568379
+  var valid_568380 = query.getOrDefault("$select")
+  valid_568380 = validateParameter(valid_568380, JString, required = false,
                                  default = nil)
-  if valid_594147 != nil:
-    section.add "$select", valid_594147
-  var valid_594148 = query.getOrDefault("$filter")
-  valid_594148 = validateParameter(valid_594148, JString, required = false,
+  if valid_568380 != nil:
+    section.add "$select", valid_568380
+  var valid_568381 = query.getOrDefault("$filter")
+  valid_568381 = validateParameter(valid_568381, JString, required = false,
                                  default = nil)
-  if valid_594148 != nil:
-    section.add "$filter", valid_594148
+  if valid_568381 != nil:
+    section.add "$filter", valid_568381
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2010,20 +2010,20 @@ proc validate_IosGetMAMPolicies_594142(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594149: Call_IosGetMAMPolicies_594141; path: JsonNode;
+proc call*(call_568382: Call_IosGetMAMPolicies_568374; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns Intune iOSPolicies.
   ## 
-  let valid = call_594149.validator(path, query, header, formData, body)
-  let scheme = call_594149.pickScheme
+  let valid = call_568382.validator(path, query, header, formData, body)
+  let scheme = call_568382.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594149.url(scheme.get, call_594149.host, call_594149.base,
-                         call_594149.route, valid.getOrDefault("path"),
+  let url = call_568382.url(scheme.get, call_568382.host, call_568382.base,
+                         call_568382.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594149, url, valid)
+  result = hook(call_568382, url, valid)
 
-proc call*(call_594150: Call_IosGetMAMPolicies_594141; apiVersion: string;
+proc call*(call_568383: Call_IosGetMAMPolicies_568374; apiVersion: string;
           hostName: string; Top: int = 0; Select: string = ""; Filter: string = ""): Recallable =
   ## iosGetMAMPolicies
   ## Returns Intune iOSPolicies.
@@ -2036,23 +2036,23 @@ proc call*(call_594150: Call_IosGetMAMPolicies_594141; apiVersion: string;
   ##           : Location hostName for the tenant
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_594151 = newJObject()
-  var query_594152 = newJObject()
-  add(query_594152, "api-version", newJString(apiVersion))
-  add(query_594152, "$top", newJInt(Top))
-  add(query_594152, "$select", newJString(Select))
-  add(path_594151, "hostName", newJString(hostName))
-  add(query_594152, "$filter", newJString(Filter))
-  result = call_594150.call(path_594151, query_594152, nil, nil, nil)
+  var path_568384 = newJObject()
+  var query_568385 = newJObject()
+  add(query_568385, "api-version", newJString(apiVersion))
+  add(query_568385, "$top", newJInt(Top))
+  add(query_568385, "$select", newJString(Select))
+  add(path_568384, "hostName", newJString(hostName))
+  add(query_568385, "$filter", newJString(Filter))
+  result = call_568383.call(path_568384, query_568385, nil, nil, nil)
 
-var iosGetMAMPolicies* = Call_IosGetMAMPolicies_594141(name: "iosGetMAMPolicies",
+var iosGetMAMPolicies* = Call_IosGetMAMPolicies_568374(name: "iosGetMAMPolicies",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies",
-    validator: validate_IosGetMAMPolicies_594142, base: "",
-    url: url_IosGetMAMPolicies_594143, schemes: {Scheme.Https})
+    validator: validate_IosGetMAMPolicies_568375, base: "",
+    url: url_IosGetMAMPolicies_568376, schemes: {Scheme.Https})
 type
-  Call_IosCreateOrUpdateMAMPolicy_594164 = ref object of OpenApiRestCall_593408
-proc url_IosCreateOrUpdateMAMPolicy_594166(protocol: Scheme; host: string;
+  Call_IosCreateOrUpdateMAMPolicy_568397 = ref object of OpenApiRestCall_567641
+proc url_IosCreateOrUpdateMAMPolicy_568399(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2071,7 +2071,7 @@ proc url_IosCreateOrUpdateMAMPolicy_594166(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosCreateOrUpdateMAMPolicy_594165(path: JsonNode; query: JsonNode;
+proc validate_IosCreateOrUpdateMAMPolicy_568398(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates iOSMAMPolicy.
   ## 
@@ -2084,16 +2084,16 @@ proc validate_IosCreateOrUpdateMAMPolicy_594165(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594167 = path.getOrDefault("hostName")
-  valid_594167 = validateParameter(valid_594167, JString, required = true,
+  var valid_568400 = path.getOrDefault("hostName")
+  valid_568400 = validateParameter(valid_568400, JString, required = true,
                                  default = nil)
-  if valid_594167 != nil:
-    section.add "hostName", valid_594167
-  var valid_594168 = path.getOrDefault("policyName")
-  valid_594168 = validateParameter(valid_594168, JString, required = true,
+  if valid_568400 != nil:
+    section.add "hostName", valid_568400
+  var valid_568401 = path.getOrDefault("policyName")
+  valid_568401 = validateParameter(valid_568401, JString, required = true,
                                  default = nil)
-  if valid_594168 != nil:
-    section.add "policyName", valid_594168
+  if valid_568401 != nil:
+    section.add "policyName", valid_568401
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2101,11 +2101,11 @@ proc validate_IosCreateOrUpdateMAMPolicy_594165(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594169 = query.getOrDefault("api-version")
-  valid_594169 = validateParameter(valid_594169, JString, required = true,
+  var valid_568402 = query.getOrDefault("api-version")
+  valid_568402 = validateParameter(valid_568402, JString, required = true,
                                  default = nil)
-  if valid_594169 != nil:
-    section.add "api-version", valid_594169
+  if valid_568402 != nil:
+    section.add "api-version", valid_568402
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2119,20 +2119,20 @@ proc validate_IosCreateOrUpdateMAMPolicy_594165(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594171: Call_IosCreateOrUpdateMAMPolicy_594164; path: JsonNode;
+proc call*(call_568404: Call_IosCreateOrUpdateMAMPolicy_568397; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates iOSMAMPolicy.
   ## 
-  let valid = call_594171.validator(path, query, header, formData, body)
-  let scheme = call_594171.pickScheme
+  let valid = call_568404.validator(path, query, header, formData, body)
+  let scheme = call_568404.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594171.url(scheme.get, call_594171.host, call_594171.base,
-                         call_594171.route, valid.getOrDefault("path"),
+  let url = call_568404.url(scheme.get, call_568404.host, call_568404.base,
+                         call_568404.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594171, url, valid)
+  result = hook(call_568404, url, valid)
 
-proc call*(call_594172: Call_IosCreateOrUpdateMAMPolicy_594164; apiVersion: string;
+proc call*(call_568405: Call_IosCreateOrUpdateMAMPolicy_568397; apiVersion: string;
           hostName: string; policyName: string; parameters: JsonNode): Recallable =
   ## iosCreateOrUpdateMAMPolicy
   ## Creates or updates iOSMAMPolicy.
@@ -2144,24 +2144,24 @@ proc call*(call_594172: Call_IosCreateOrUpdateMAMPolicy_594164; apiVersion: stri
   ##             : Unique name for the policy
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create or update an android policy operation.
-  var path_594173 = newJObject()
-  var query_594174 = newJObject()
-  var body_594175 = newJObject()
-  add(query_594174, "api-version", newJString(apiVersion))
-  add(path_594173, "hostName", newJString(hostName))
-  add(path_594173, "policyName", newJString(policyName))
+  var path_568406 = newJObject()
+  var query_568407 = newJObject()
+  var body_568408 = newJObject()
+  add(query_568407, "api-version", newJString(apiVersion))
+  add(path_568406, "hostName", newJString(hostName))
+  add(path_568406, "policyName", newJString(policyName))
   if parameters != nil:
-    body_594175 = parameters
-  result = call_594172.call(path_594173, query_594174, nil, nil, body_594175)
+    body_568408 = parameters
+  result = call_568405.call(path_568406, query_568407, nil, nil, body_568408)
 
-var iosCreateOrUpdateMAMPolicy* = Call_IosCreateOrUpdateMAMPolicy_594164(
+var iosCreateOrUpdateMAMPolicy* = Call_IosCreateOrUpdateMAMPolicy_568397(
     name: "iosCreateOrUpdateMAMPolicy", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies/{policyName}",
-    validator: validate_IosCreateOrUpdateMAMPolicy_594165, base: "",
-    url: url_IosCreateOrUpdateMAMPolicy_594166, schemes: {Scheme.Https})
+    validator: validate_IosCreateOrUpdateMAMPolicy_568398, base: "",
+    url: url_IosCreateOrUpdateMAMPolicy_568399, schemes: {Scheme.Https})
 type
-  Call_IosGetMAMPolicyByName_594153 = ref object of OpenApiRestCall_593408
-proc url_IosGetMAMPolicyByName_594155(protocol: Scheme; host: string; base: string;
+  Call_IosGetMAMPolicyByName_568386 = ref object of OpenApiRestCall_567641
+proc url_IosGetMAMPolicyByName_568388(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2180,7 +2180,7 @@ proc url_IosGetMAMPolicyByName_594155(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosGetMAMPolicyByName_594154(path: JsonNode; query: JsonNode;
+proc validate_IosGetMAMPolicyByName_568387(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns Intune iOS policies.
   ## 
@@ -2193,16 +2193,16 @@ proc validate_IosGetMAMPolicyByName_594154(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594156 = path.getOrDefault("hostName")
-  valid_594156 = validateParameter(valid_594156, JString, required = true,
+  var valid_568389 = path.getOrDefault("hostName")
+  valid_568389 = validateParameter(valid_568389, JString, required = true,
                                  default = nil)
-  if valid_594156 != nil:
-    section.add "hostName", valid_594156
-  var valid_594157 = path.getOrDefault("policyName")
-  valid_594157 = validateParameter(valid_594157, JString, required = true,
+  if valid_568389 != nil:
+    section.add "hostName", valid_568389
+  var valid_568390 = path.getOrDefault("policyName")
+  valid_568390 = validateParameter(valid_568390, JString, required = true,
                                  default = nil)
-  if valid_594157 != nil:
-    section.add "policyName", valid_594157
+  if valid_568390 != nil:
+    section.add "policyName", valid_568390
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2212,16 +2212,16 @@ proc validate_IosGetMAMPolicyByName_594154(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594158 = query.getOrDefault("api-version")
-  valid_594158 = validateParameter(valid_594158, JString, required = true,
+  var valid_568391 = query.getOrDefault("api-version")
+  valid_568391 = validateParameter(valid_568391, JString, required = true,
                                  default = nil)
-  if valid_594158 != nil:
-    section.add "api-version", valid_594158
-  var valid_594159 = query.getOrDefault("$select")
-  valid_594159 = validateParameter(valid_594159, JString, required = false,
+  if valid_568391 != nil:
+    section.add "api-version", valid_568391
+  var valid_568392 = query.getOrDefault("$select")
+  valid_568392 = validateParameter(valid_568392, JString, required = false,
                                  default = nil)
-  if valid_594159 != nil:
-    section.add "$select", valid_594159
+  if valid_568392 != nil:
+    section.add "$select", valid_568392
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2230,20 +2230,20 @@ proc validate_IosGetMAMPolicyByName_594154(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594160: Call_IosGetMAMPolicyByName_594153; path: JsonNode;
+proc call*(call_568393: Call_IosGetMAMPolicyByName_568386; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns Intune iOS policies.
   ## 
-  let valid = call_594160.validator(path, query, header, formData, body)
-  let scheme = call_594160.pickScheme
+  let valid = call_568393.validator(path, query, header, formData, body)
+  let scheme = call_568393.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594160.url(scheme.get, call_594160.host, call_594160.base,
-                         call_594160.route, valid.getOrDefault("path"),
+  let url = call_568393.url(scheme.get, call_568393.host, call_568393.base,
+                         call_568393.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594160, url, valid)
+  result = hook(call_568393, url, valid)
 
-proc call*(call_594161: Call_IosGetMAMPolicyByName_594153; apiVersion: string;
+proc call*(call_568394: Call_IosGetMAMPolicyByName_568386; apiVersion: string;
           hostName: string; policyName: string; Select: string = ""): Recallable =
   ## iosGetMAMPolicyByName
   ## Returns Intune iOS policies.
@@ -2255,22 +2255,22 @@ proc call*(call_594161: Call_IosGetMAMPolicyByName_594153; apiVersion: string;
   ##           : Location hostName for the tenant
   ##   policyName: string (required)
   ##             : Unique name for the policy
-  var path_594162 = newJObject()
-  var query_594163 = newJObject()
-  add(query_594163, "api-version", newJString(apiVersion))
-  add(query_594163, "$select", newJString(Select))
-  add(path_594162, "hostName", newJString(hostName))
-  add(path_594162, "policyName", newJString(policyName))
-  result = call_594161.call(path_594162, query_594163, nil, nil, nil)
+  var path_568395 = newJObject()
+  var query_568396 = newJObject()
+  add(query_568396, "api-version", newJString(apiVersion))
+  add(query_568396, "$select", newJString(Select))
+  add(path_568395, "hostName", newJString(hostName))
+  add(path_568395, "policyName", newJString(policyName))
+  result = call_568394.call(path_568395, query_568396, nil, nil, nil)
 
-var iosGetMAMPolicyByName* = Call_IosGetMAMPolicyByName_594153(
+var iosGetMAMPolicyByName* = Call_IosGetMAMPolicyByName_568386(
     name: "iosGetMAMPolicyByName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies/{policyName}",
-    validator: validate_IosGetMAMPolicyByName_594154, base: "",
-    url: url_IosGetMAMPolicyByName_594155, schemes: {Scheme.Https})
+    validator: validate_IosGetMAMPolicyByName_568387, base: "",
+    url: url_IosGetMAMPolicyByName_568388, schemes: {Scheme.Https})
 type
-  Call_IosPatchMAMPolicy_594186 = ref object of OpenApiRestCall_593408
-proc url_IosPatchMAMPolicy_594188(protocol: Scheme; host: string; base: string;
+  Call_IosPatchMAMPolicy_568419 = ref object of OpenApiRestCall_567641
+proc url_IosPatchMAMPolicy_568421(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2289,7 +2289,7 @@ proc url_IosPatchMAMPolicy_594188(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosPatchMAMPolicy_594187(path: JsonNode; query: JsonNode;
+proc validate_IosPatchMAMPolicy_568420(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ##  patch an iOSMAMPolicy.
@@ -2303,16 +2303,16 @@ proc validate_IosPatchMAMPolicy_594187(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594189 = path.getOrDefault("hostName")
-  valid_594189 = validateParameter(valid_594189, JString, required = true,
+  var valid_568422 = path.getOrDefault("hostName")
+  valid_568422 = validateParameter(valid_568422, JString, required = true,
                                  default = nil)
-  if valid_594189 != nil:
-    section.add "hostName", valid_594189
-  var valid_594190 = path.getOrDefault("policyName")
-  valid_594190 = validateParameter(valid_594190, JString, required = true,
+  if valid_568422 != nil:
+    section.add "hostName", valid_568422
+  var valid_568423 = path.getOrDefault("policyName")
+  valid_568423 = validateParameter(valid_568423, JString, required = true,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "policyName", valid_594190
+  if valid_568423 != nil:
+    section.add "policyName", valid_568423
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2320,11 +2320,11 @@ proc validate_IosPatchMAMPolicy_594187(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594191 = query.getOrDefault("api-version")
-  valid_594191 = validateParameter(valid_594191, JString, required = true,
+  var valid_568424 = query.getOrDefault("api-version")
+  valid_568424 = validateParameter(valid_568424, JString, required = true,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "api-version", valid_594191
+  if valid_568424 != nil:
+    section.add "api-version", valid_568424
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2338,20 +2338,20 @@ proc validate_IosPatchMAMPolicy_594187(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594193: Call_IosPatchMAMPolicy_594186; path: JsonNode;
+proc call*(call_568426: Call_IosPatchMAMPolicy_568419; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ##  patch an iOSMAMPolicy.
   ## 
-  let valid = call_594193.validator(path, query, header, formData, body)
-  let scheme = call_594193.pickScheme
+  let valid = call_568426.validator(path, query, header, formData, body)
+  let scheme = call_568426.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594193.url(scheme.get, call_594193.host, call_594193.base,
-                         call_594193.route, valid.getOrDefault("path"),
+  let url = call_568426.url(scheme.get, call_568426.host, call_568426.base,
+                         call_568426.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594193, url, valid)
+  result = hook(call_568426, url, valid)
 
-proc call*(call_594194: Call_IosPatchMAMPolicy_594186; apiVersion: string;
+proc call*(call_568427: Call_IosPatchMAMPolicy_568419; apiVersion: string;
           hostName: string; policyName: string; parameters: JsonNode): Recallable =
   ## iosPatchMAMPolicy
   ##  patch an iOSMAMPolicy.
@@ -2363,23 +2363,23 @@ proc call*(call_594194: Call_IosPatchMAMPolicy_594186; apiVersion: string;
   ##             : Unique name for the policy
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create or update an android policy operation.
-  var path_594195 = newJObject()
-  var query_594196 = newJObject()
-  var body_594197 = newJObject()
-  add(query_594196, "api-version", newJString(apiVersion))
-  add(path_594195, "hostName", newJString(hostName))
-  add(path_594195, "policyName", newJString(policyName))
+  var path_568428 = newJObject()
+  var query_568429 = newJObject()
+  var body_568430 = newJObject()
+  add(query_568429, "api-version", newJString(apiVersion))
+  add(path_568428, "hostName", newJString(hostName))
+  add(path_568428, "policyName", newJString(policyName))
   if parameters != nil:
-    body_594197 = parameters
-  result = call_594194.call(path_594195, query_594196, nil, nil, body_594197)
+    body_568430 = parameters
+  result = call_568427.call(path_568428, query_568429, nil, nil, body_568430)
 
-var iosPatchMAMPolicy* = Call_IosPatchMAMPolicy_594186(name: "iosPatchMAMPolicy",
+var iosPatchMAMPolicy* = Call_IosPatchMAMPolicy_568419(name: "iosPatchMAMPolicy",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies/{policyName}",
-    validator: validate_IosPatchMAMPolicy_594187, base: "",
-    url: url_IosPatchMAMPolicy_594188, schemes: {Scheme.Https})
+    validator: validate_IosPatchMAMPolicy_568420, base: "",
+    url: url_IosPatchMAMPolicy_568421, schemes: {Scheme.Https})
 type
-  Call_IosDeleteMAMPolicy_594176 = ref object of OpenApiRestCall_593408
-proc url_IosDeleteMAMPolicy_594178(protocol: Scheme; host: string; base: string;
+  Call_IosDeleteMAMPolicy_568409 = ref object of OpenApiRestCall_567641
+proc url_IosDeleteMAMPolicy_568411(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2398,7 +2398,7 @@ proc url_IosDeleteMAMPolicy_594178(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosDeleteMAMPolicy_594177(path: JsonNode; query: JsonNode;
+proc validate_IosDeleteMAMPolicy_568410(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Delete Ios Policy
@@ -2412,16 +2412,16 @@ proc validate_IosDeleteMAMPolicy_594177(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594179 = path.getOrDefault("hostName")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  var valid_568412 = path.getOrDefault("hostName")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "hostName", valid_594179
-  var valid_594180 = path.getOrDefault("policyName")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  if valid_568412 != nil:
+    section.add "hostName", valid_568412
+  var valid_568413 = path.getOrDefault("policyName")
+  valid_568413 = validateParameter(valid_568413, JString, required = true,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "policyName", valid_594180
+  if valid_568413 != nil:
+    section.add "policyName", valid_568413
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2429,11 +2429,11 @@ proc validate_IosDeleteMAMPolicy_594177(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594181 = query.getOrDefault("api-version")
-  valid_594181 = validateParameter(valid_594181, JString, required = true,
+  var valid_568414 = query.getOrDefault("api-version")
+  valid_568414 = validateParameter(valid_568414, JString, required = true,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "api-version", valid_594181
+  if valid_568414 != nil:
+    section.add "api-version", valid_568414
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2442,20 +2442,20 @@ proc validate_IosDeleteMAMPolicy_594177(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594182: Call_IosDeleteMAMPolicy_594176; path: JsonNode;
+proc call*(call_568415: Call_IosDeleteMAMPolicy_568409; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete Ios Policy
   ## 
-  let valid = call_594182.validator(path, query, header, formData, body)
-  let scheme = call_594182.pickScheme
+  let valid = call_568415.validator(path, query, header, formData, body)
+  let scheme = call_568415.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594182.url(scheme.get, call_594182.host, call_594182.base,
-                         call_594182.route, valid.getOrDefault("path"),
+  let url = call_568415.url(scheme.get, call_568415.host, call_568415.base,
+                         call_568415.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594182, url, valid)
+  result = hook(call_568415, url, valid)
 
-proc call*(call_594183: Call_IosDeleteMAMPolicy_594176; apiVersion: string;
+proc call*(call_568416: Call_IosDeleteMAMPolicy_568409; apiVersion: string;
           hostName: string; policyName: string): Recallable =
   ## iosDeleteMAMPolicy
   ## Delete Ios Policy
@@ -2465,21 +2465,21 @@ proc call*(call_594183: Call_IosDeleteMAMPolicy_594176; apiVersion: string;
   ##           : Location hostName for the tenant
   ##   policyName: string (required)
   ##             : Unique name for the policy
-  var path_594184 = newJObject()
-  var query_594185 = newJObject()
-  add(query_594185, "api-version", newJString(apiVersion))
-  add(path_594184, "hostName", newJString(hostName))
-  add(path_594184, "policyName", newJString(policyName))
-  result = call_594183.call(path_594184, query_594185, nil, nil, nil)
+  var path_568417 = newJObject()
+  var query_568418 = newJObject()
+  add(query_568418, "api-version", newJString(apiVersion))
+  add(path_568417, "hostName", newJString(hostName))
+  add(path_568417, "policyName", newJString(policyName))
+  result = call_568416.call(path_568417, query_568418, nil, nil, nil)
 
-var iosDeleteMAMPolicy* = Call_IosDeleteMAMPolicy_594176(
+var iosDeleteMAMPolicy* = Call_IosDeleteMAMPolicy_568409(
     name: "iosDeleteMAMPolicy", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies/{policyName}",
-    validator: validate_IosDeleteMAMPolicy_594177, base: "",
-    url: url_IosDeleteMAMPolicy_594178, schemes: {Scheme.Https})
+    validator: validate_IosDeleteMAMPolicy_568410, base: "",
+    url: url_IosDeleteMAMPolicy_568411, schemes: {Scheme.Https})
 type
-  Call_IosGetAppForMAMPolicy_594198 = ref object of OpenApiRestCall_593408
-proc url_IosGetAppForMAMPolicy_594200(protocol: Scheme; host: string; base: string;
+  Call_IosGetAppForMAMPolicy_568431 = ref object of OpenApiRestCall_567641
+proc url_IosGetAppForMAMPolicy_568433(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2499,7 +2499,7 @@ proc url_IosGetAppForMAMPolicy_594200(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosGetAppForMAMPolicy_594199(path: JsonNode; query: JsonNode;
+proc validate_IosGetAppForMAMPolicy_568432(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get apps for an iOSMAMPolicy.
   ## 
@@ -2512,16 +2512,16 @@ proc validate_IosGetAppForMAMPolicy_594199(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594201 = path.getOrDefault("hostName")
-  valid_594201 = validateParameter(valid_594201, JString, required = true,
+  var valid_568434 = path.getOrDefault("hostName")
+  valid_568434 = validateParameter(valid_568434, JString, required = true,
                                  default = nil)
-  if valid_594201 != nil:
-    section.add "hostName", valid_594201
-  var valid_594202 = path.getOrDefault("policyName")
-  valid_594202 = validateParameter(valid_594202, JString, required = true,
+  if valid_568434 != nil:
+    section.add "hostName", valid_568434
+  var valid_568435 = path.getOrDefault("policyName")
+  valid_568435 = validateParameter(valid_568435, JString, required = true,
                                  default = nil)
-  if valid_594202 != nil:
-    section.add "policyName", valid_594202
+  if valid_568435 != nil:
+    section.add "policyName", valid_568435
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2534,25 +2534,25 @@ proc validate_IosGetAppForMAMPolicy_594199(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594203 = query.getOrDefault("api-version")
-  valid_594203 = validateParameter(valid_594203, JString, required = true,
+  var valid_568436 = query.getOrDefault("api-version")
+  valid_568436 = validateParameter(valid_568436, JString, required = true,
                                  default = nil)
-  if valid_594203 != nil:
-    section.add "api-version", valid_594203
-  var valid_594204 = query.getOrDefault("$top")
-  valid_594204 = validateParameter(valid_594204, JInt, required = false, default = nil)
-  if valid_594204 != nil:
-    section.add "$top", valid_594204
-  var valid_594205 = query.getOrDefault("$select")
-  valid_594205 = validateParameter(valid_594205, JString, required = false,
+  if valid_568436 != nil:
+    section.add "api-version", valid_568436
+  var valid_568437 = query.getOrDefault("$top")
+  valid_568437 = validateParameter(valid_568437, JInt, required = false, default = nil)
+  if valid_568437 != nil:
+    section.add "$top", valid_568437
+  var valid_568438 = query.getOrDefault("$select")
+  valid_568438 = validateParameter(valid_568438, JString, required = false,
                                  default = nil)
-  if valid_594205 != nil:
-    section.add "$select", valid_594205
-  var valid_594206 = query.getOrDefault("$filter")
-  valid_594206 = validateParameter(valid_594206, JString, required = false,
+  if valid_568438 != nil:
+    section.add "$select", valid_568438
+  var valid_568439 = query.getOrDefault("$filter")
+  valid_568439 = validateParameter(valid_568439, JString, required = false,
                                  default = nil)
-  if valid_594206 != nil:
-    section.add "$filter", valid_594206
+  if valid_568439 != nil:
+    section.add "$filter", valid_568439
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2561,20 +2561,20 @@ proc validate_IosGetAppForMAMPolicy_594199(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594207: Call_IosGetAppForMAMPolicy_594198; path: JsonNode;
+proc call*(call_568440: Call_IosGetAppForMAMPolicy_568431; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get apps for an iOSMAMPolicy.
   ## 
-  let valid = call_594207.validator(path, query, header, formData, body)
-  let scheme = call_594207.pickScheme
+  let valid = call_568440.validator(path, query, header, formData, body)
+  let scheme = call_568440.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594207.url(scheme.get, call_594207.host, call_594207.base,
-                         call_594207.route, valid.getOrDefault("path"),
+  let url = call_568440.url(scheme.get, call_568440.host, call_568440.base,
+                         call_568440.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594207, url, valid)
+  result = hook(call_568440, url, valid)
 
-proc call*(call_594208: Call_IosGetAppForMAMPolicy_594198; apiVersion: string;
+proc call*(call_568441: Call_IosGetAppForMAMPolicy_568431; apiVersion: string;
           hostName: string; policyName: string; Top: int = 0; Select: string = "";
           Filter: string = ""): Recallable =
   ## iosGetAppForMAMPolicy
@@ -2590,24 +2590,24 @@ proc call*(call_594208: Call_IosGetAppForMAMPolicy_594198; apiVersion: string;
   ##             : Unique name for the policy
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_594209 = newJObject()
-  var query_594210 = newJObject()
-  add(query_594210, "api-version", newJString(apiVersion))
-  add(query_594210, "$top", newJInt(Top))
-  add(query_594210, "$select", newJString(Select))
-  add(path_594209, "hostName", newJString(hostName))
-  add(path_594209, "policyName", newJString(policyName))
-  add(query_594210, "$filter", newJString(Filter))
-  result = call_594208.call(path_594209, query_594210, nil, nil, nil)
+  var path_568442 = newJObject()
+  var query_568443 = newJObject()
+  add(query_568443, "api-version", newJString(apiVersion))
+  add(query_568443, "$top", newJInt(Top))
+  add(query_568443, "$select", newJString(Select))
+  add(path_568442, "hostName", newJString(hostName))
+  add(path_568442, "policyName", newJString(policyName))
+  add(query_568443, "$filter", newJString(Filter))
+  result = call_568441.call(path_568442, query_568443, nil, nil, nil)
 
-var iosGetAppForMAMPolicy* = Call_IosGetAppForMAMPolicy_594198(
+var iosGetAppForMAMPolicy* = Call_IosGetAppForMAMPolicy_568431(
     name: "iosGetAppForMAMPolicy", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies/{policyName}/apps",
-    validator: validate_IosGetAppForMAMPolicy_594199, base: "",
-    url: url_IosGetAppForMAMPolicy_594200, schemes: {Scheme.Https})
+    validator: validate_IosGetAppForMAMPolicy_568432, base: "",
+    url: url_IosGetAppForMAMPolicy_568433, schemes: {Scheme.Https})
 type
-  Call_IosAddAppForMAMPolicy_594211 = ref object of OpenApiRestCall_593408
-proc url_IosAddAppForMAMPolicy_594213(protocol: Scheme; host: string; base: string;
+  Call_IosAddAppForMAMPolicy_568444 = ref object of OpenApiRestCall_567641
+proc url_IosAddAppForMAMPolicy_568446(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2629,7 +2629,7 @@ proc url_IosAddAppForMAMPolicy_594213(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosAddAppForMAMPolicy_594212(path: JsonNode; query: JsonNode;
+proc validate_IosAddAppForMAMPolicy_568445(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add app to an iOSMAMPolicy.
   ## 
@@ -2644,21 +2644,21 @@ proc validate_IosAddAppForMAMPolicy_594212(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `appName` field"
-  var valid_594214 = path.getOrDefault("appName")
-  valid_594214 = validateParameter(valid_594214, JString, required = true,
+  var valid_568447 = path.getOrDefault("appName")
+  valid_568447 = validateParameter(valid_568447, JString, required = true,
                                  default = nil)
-  if valid_594214 != nil:
-    section.add "appName", valid_594214
-  var valid_594215 = path.getOrDefault("hostName")
-  valid_594215 = validateParameter(valid_594215, JString, required = true,
+  if valid_568447 != nil:
+    section.add "appName", valid_568447
+  var valid_568448 = path.getOrDefault("hostName")
+  valid_568448 = validateParameter(valid_568448, JString, required = true,
                                  default = nil)
-  if valid_594215 != nil:
-    section.add "hostName", valid_594215
-  var valid_594216 = path.getOrDefault("policyName")
-  valid_594216 = validateParameter(valid_594216, JString, required = true,
+  if valid_568448 != nil:
+    section.add "hostName", valid_568448
+  var valid_568449 = path.getOrDefault("policyName")
+  valid_568449 = validateParameter(valid_568449, JString, required = true,
                                  default = nil)
-  if valid_594216 != nil:
-    section.add "policyName", valid_594216
+  if valid_568449 != nil:
+    section.add "policyName", valid_568449
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2666,11 +2666,11 @@ proc validate_IosAddAppForMAMPolicy_594212(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594217 = query.getOrDefault("api-version")
-  valid_594217 = validateParameter(valid_594217, JString, required = true,
+  var valid_568450 = query.getOrDefault("api-version")
+  valid_568450 = validateParameter(valid_568450, JString, required = true,
                                  default = nil)
-  if valid_594217 != nil:
-    section.add "api-version", valid_594217
+  if valid_568450 != nil:
+    section.add "api-version", valid_568450
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2684,20 +2684,20 @@ proc validate_IosAddAppForMAMPolicy_594212(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594219: Call_IosAddAppForMAMPolicy_594211; path: JsonNode;
+proc call*(call_568452: Call_IosAddAppForMAMPolicy_568444; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add app to an iOSMAMPolicy.
   ## 
-  let valid = call_594219.validator(path, query, header, formData, body)
-  let scheme = call_594219.pickScheme
+  let valid = call_568452.validator(path, query, header, formData, body)
+  let scheme = call_568452.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594219.url(scheme.get, call_594219.host, call_594219.base,
-                         call_594219.route, valid.getOrDefault("path"),
+  let url = call_568452.url(scheme.get, call_568452.host, call_568452.base,
+                         call_568452.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594219, url, valid)
+  result = hook(call_568452, url, valid)
 
-proc call*(call_594220: Call_IosAddAppForMAMPolicy_594211; apiVersion: string;
+proc call*(call_568453: Call_IosAddAppForMAMPolicy_568444; apiVersion: string;
           appName: string; hostName: string; policyName: string; parameters: JsonNode): Recallable =
   ## iosAddAppForMAMPolicy
   ## Add app to an iOSMAMPolicy.
@@ -2711,25 +2711,25 @@ proc call*(call_594220: Call_IosAddAppForMAMPolicy_594211; apiVersion: string;
   ##             : Unique name for the policy
   ##   parameters: JObject (required)
   ##             : Parameters supplied to add an app to an ios policy.
-  var path_594221 = newJObject()
-  var query_594222 = newJObject()
-  var body_594223 = newJObject()
-  add(query_594222, "api-version", newJString(apiVersion))
-  add(path_594221, "appName", newJString(appName))
-  add(path_594221, "hostName", newJString(hostName))
-  add(path_594221, "policyName", newJString(policyName))
+  var path_568454 = newJObject()
+  var query_568455 = newJObject()
+  var body_568456 = newJObject()
+  add(query_568455, "api-version", newJString(apiVersion))
+  add(path_568454, "appName", newJString(appName))
+  add(path_568454, "hostName", newJString(hostName))
+  add(path_568454, "policyName", newJString(policyName))
   if parameters != nil:
-    body_594223 = parameters
-  result = call_594220.call(path_594221, query_594222, nil, nil, body_594223)
+    body_568456 = parameters
+  result = call_568453.call(path_568454, query_568455, nil, nil, body_568456)
 
-var iosAddAppForMAMPolicy* = Call_IosAddAppForMAMPolicy_594211(
+var iosAddAppForMAMPolicy* = Call_IosAddAppForMAMPolicy_568444(
     name: "iosAddAppForMAMPolicy", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies/{policyName}/apps/{appName}",
-    validator: validate_IosAddAppForMAMPolicy_594212, base: "",
-    url: url_IosAddAppForMAMPolicy_594213, schemes: {Scheme.Https})
+    validator: validate_IosAddAppForMAMPolicy_568445, base: "",
+    url: url_IosAddAppForMAMPolicy_568446, schemes: {Scheme.Https})
 type
-  Call_IosDeleteAppForMAMPolicy_594224 = ref object of OpenApiRestCall_593408
-proc url_IosDeleteAppForMAMPolicy_594226(protocol: Scheme; host: string;
+  Call_IosDeleteAppForMAMPolicy_568457 = ref object of OpenApiRestCall_567641
+proc url_IosDeleteAppForMAMPolicy_568459(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2752,7 +2752,7 @@ proc url_IosDeleteAppForMAMPolicy_594226(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosDeleteAppForMAMPolicy_594225(path: JsonNode; query: JsonNode;
+proc validate_IosDeleteAppForMAMPolicy_568458(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete App for Ios Policy
   ## 
@@ -2767,21 +2767,21 @@ proc validate_IosDeleteAppForMAMPolicy_594225(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `appName` field"
-  var valid_594227 = path.getOrDefault("appName")
-  valid_594227 = validateParameter(valid_594227, JString, required = true,
+  var valid_568460 = path.getOrDefault("appName")
+  valid_568460 = validateParameter(valid_568460, JString, required = true,
                                  default = nil)
-  if valid_594227 != nil:
-    section.add "appName", valid_594227
-  var valid_594228 = path.getOrDefault("hostName")
-  valid_594228 = validateParameter(valid_594228, JString, required = true,
+  if valid_568460 != nil:
+    section.add "appName", valid_568460
+  var valid_568461 = path.getOrDefault("hostName")
+  valid_568461 = validateParameter(valid_568461, JString, required = true,
                                  default = nil)
-  if valid_594228 != nil:
-    section.add "hostName", valid_594228
-  var valid_594229 = path.getOrDefault("policyName")
-  valid_594229 = validateParameter(valid_594229, JString, required = true,
+  if valid_568461 != nil:
+    section.add "hostName", valid_568461
+  var valid_568462 = path.getOrDefault("policyName")
+  valid_568462 = validateParameter(valid_568462, JString, required = true,
                                  default = nil)
-  if valid_594229 != nil:
-    section.add "policyName", valid_594229
+  if valid_568462 != nil:
+    section.add "policyName", valid_568462
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2789,11 +2789,11 @@ proc validate_IosDeleteAppForMAMPolicy_594225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594230 = query.getOrDefault("api-version")
-  valid_594230 = validateParameter(valid_594230, JString, required = true,
+  var valid_568463 = query.getOrDefault("api-version")
+  valid_568463 = validateParameter(valid_568463, JString, required = true,
                                  default = nil)
-  if valid_594230 != nil:
-    section.add "api-version", valid_594230
+  if valid_568463 != nil:
+    section.add "api-version", valid_568463
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2802,20 +2802,20 @@ proc validate_IosDeleteAppForMAMPolicy_594225(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594231: Call_IosDeleteAppForMAMPolicy_594224; path: JsonNode;
+proc call*(call_568464: Call_IosDeleteAppForMAMPolicy_568457; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete App for Ios Policy
   ## 
-  let valid = call_594231.validator(path, query, header, formData, body)
-  let scheme = call_594231.pickScheme
+  let valid = call_568464.validator(path, query, header, formData, body)
+  let scheme = call_568464.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594231.url(scheme.get, call_594231.host, call_594231.base,
-                         call_594231.route, valid.getOrDefault("path"),
+  let url = call_568464.url(scheme.get, call_568464.host, call_568464.base,
+                         call_568464.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594231, url, valid)
+  result = hook(call_568464, url, valid)
 
-proc call*(call_594232: Call_IosDeleteAppForMAMPolicy_594224; apiVersion: string;
+proc call*(call_568465: Call_IosDeleteAppForMAMPolicy_568457; apiVersion: string;
           appName: string; hostName: string; policyName: string): Recallable =
   ## iosDeleteAppForMAMPolicy
   ## Delete App for Ios Policy
@@ -2827,22 +2827,22 @@ proc call*(call_594232: Call_IosDeleteAppForMAMPolicy_594224; apiVersion: string
   ##           : Location hostName for the tenant
   ##   policyName: string (required)
   ##             : Unique name for the policy
-  var path_594233 = newJObject()
-  var query_594234 = newJObject()
-  add(query_594234, "api-version", newJString(apiVersion))
-  add(path_594233, "appName", newJString(appName))
-  add(path_594233, "hostName", newJString(hostName))
-  add(path_594233, "policyName", newJString(policyName))
-  result = call_594232.call(path_594233, query_594234, nil, nil, nil)
+  var path_568466 = newJObject()
+  var query_568467 = newJObject()
+  add(query_568467, "api-version", newJString(apiVersion))
+  add(path_568466, "appName", newJString(appName))
+  add(path_568466, "hostName", newJString(hostName))
+  add(path_568466, "policyName", newJString(policyName))
+  result = call_568465.call(path_568466, query_568467, nil, nil, nil)
 
-var iosDeleteAppForMAMPolicy* = Call_IosDeleteAppForMAMPolicy_594224(
+var iosDeleteAppForMAMPolicy* = Call_IosDeleteAppForMAMPolicy_568457(
     name: "iosDeleteAppForMAMPolicy", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies/{policyName}/apps/{appName}",
-    validator: validate_IosDeleteAppForMAMPolicy_594225, base: "",
-    url: url_IosDeleteAppForMAMPolicy_594226, schemes: {Scheme.Https})
+    validator: validate_IosDeleteAppForMAMPolicy_568458, base: "",
+    url: url_IosDeleteAppForMAMPolicy_568459, schemes: {Scheme.Https})
 type
-  Call_IosGetGroupsForMAMPolicy_594235 = ref object of OpenApiRestCall_593408
-proc url_IosGetGroupsForMAMPolicy_594237(protocol: Scheme; host: string;
+  Call_IosGetGroupsForMAMPolicy_568468 = ref object of OpenApiRestCall_567641
+proc url_IosGetGroupsForMAMPolicy_568470(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2863,7 +2863,7 @@ proc url_IosGetGroupsForMAMPolicy_594237(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosGetGroupsForMAMPolicy_594236(path: JsonNode; query: JsonNode;
+proc validate_IosGetGroupsForMAMPolicy_568469(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns groups for a given iOSMAMPolicy.
   ## 
@@ -2876,16 +2876,16 @@ proc validate_IosGetGroupsForMAMPolicy_594236(path: JsonNode; query: JsonNode;
   ##             : policy name for the tenant
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594238 = path.getOrDefault("hostName")
-  valid_594238 = validateParameter(valid_594238, JString, required = true,
+  var valid_568471 = path.getOrDefault("hostName")
+  valid_568471 = validateParameter(valid_568471, JString, required = true,
                                  default = nil)
-  if valid_594238 != nil:
-    section.add "hostName", valid_594238
-  var valid_594239 = path.getOrDefault("policyName")
-  valid_594239 = validateParameter(valid_594239, JString, required = true,
+  if valid_568471 != nil:
+    section.add "hostName", valid_568471
+  var valid_568472 = path.getOrDefault("policyName")
+  valid_568472 = validateParameter(valid_568472, JString, required = true,
                                  default = nil)
-  if valid_594239 != nil:
-    section.add "policyName", valid_594239
+  if valid_568472 != nil:
+    section.add "policyName", valid_568472
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2893,11 +2893,11 @@ proc validate_IosGetGroupsForMAMPolicy_594236(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594240 = query.getOrDefault("api-version")
-  valid_594240 = validateParameter(valid_594240, JString, required = true,
+  var valid_568473 = query.getOrDefault("api-version")
+  valid_568473 = validateParameter(valid_568473, JString, required = true,
                                  default = nil)
-  if valid_594240 != nil:
-    section.add "api-version", valid_594240
+  if valid_568473 != nil:
+    section.add "api-version", valid_568473
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2906,20 +2906,20 @@ proc validate_IosGetGroupsForMAMPolicy_594236(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594241: Call_IosGetGroupsForMAMPolicy_594235; path: JsonNode;
+proc call*(call_568474: Call_IosGetGroupsForMAMPolicy_568468; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns groups for a given iOSMAMPolicy.
   ## 
-  let valid = call_594241.validator(path, query, header, formData, body)
-  let scheme = call_594241.pickScheme
+  let valid = call_568474.validator(path, query, header, formData, body)
+  let scheme = call_568474.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594241.url(scheme.get, call_594241.host, call_594241.base,
-                         call_594241.route, valid.getOrDefault("path"),
+  let url = call_568474.url(scheme.get, call_568474.host, call_568474.base,
+                         call_568474.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594241, url, valid)
+  result = hook(call_568474, url, valid)
 
-proc call*(call_594242: Call_IosGetGroupsForMAMPolicy_594235; apiVersion: string;
+proc call*(call_568475: Call_IosGetGroupsForMAMPolicy_568468; apiVersion: string;
           hostName: string; policyName: string): Recallable =
   ## iosGetGroupsForMAMPolicy
   ## Returns groups for a given iOSMAMPolicy.
@@ -2929,21 +2929,21 @@ proc call*(call_594242: Call_IosGetGroupsForMAMPolicy_594235; apiVersion: string
   ##           : Location hostName for the tenant
   ##   policyName: string (required)
   ##             : policy name for the tenant
-  var path_594243 = newJObject()
-  var query_594244 = newJObject()
-  add(query_594244, "api-version", newJString(apiVersion))
-  add(path_594243, "hostName", newJString(hostName))
-  add(path_594243, "policyName", newJString(policyName))
-  result = call_594242.call(path_594243, query_594244, nil, nil, nil)
+  var path_568476 = newJObject()
+  var query_568477 = newJObject()
+  add(query_568477, "api-version", newJString(apiVersion))
+  add(path_568476, "hostName", newJString(hostName))
+  add(path_568476, "policyName", newJString(policyName))
+  result = call_568475.call(path_568476, query_568477, nil, nil, nil)
 
-var iosGetGroupsForMAMPolicy* = Call_IosGetGroupsForMAMPolicy_594235(
+var iosGetGroupsForMAMPolicy* = Call_IosGetGroupsForMAMPolicy_568468(
     name: "iosGetGroupsForMAMPolicy", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies/{policyName}/groups",
-    validator: validate_IosGetGroupsForMAMPolicy_594236, base: "",
-    url: url_IosGetGroupsForMAMPolicy_594237, schemes: {Scheme.Https})
+    validator: validate_IosGetGroupsForMAMPolicy_568469, base: "",
+    url: url_IosGetGroupsForMAMPolicy_568470, schemes: {Scheme.Https})
 type
-  Call_IosAddGroupForMAMPolicy_594245 = ref object of OpenApiRestCall_593408
-proc url_IosAddGroupForMAMPolicy_594247(protocol: Scheme; host: string; base: string;
+  Call_IosAddGroupForMAMPolicy_568478 = ref object of OpenApiRestCall_567641
+proc url_IosAddGroupForMAMPolicy_568480(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2966,7 +2966,7 @@ proc url_IosAddGroupForMAMPolicy_594247(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosAddGroupForMAMPolicy_594246(path: JsonNode; query: JsonNode;
+proc validate_IosAddGroupForMAMPolicy_568479(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add group to an iOSMAMPolicy.
   ## 
@@ -2981,21 +2981,21 @@ proc validate_IosAddGroupForMAMPolicy_594246(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_594248 = path.getOrDefault("groupId")
-  valid_594248 = validateParameter(valid_594248, JString, required = true,
+  var valid_568481 = path.getOrDefault("groupId")
+  valid_568481 = validateParameter(valid_568481, JString, required = true,
                                  default = nil)
-  if valid_594248 != nil:
-    section.add "groupId", valid_594248
-  var valid_594249 = path.getOrDefault("hostName")
-  valid_594249 = validateParameter(valid_594249, JString, required = true,
+  if valid_568481 != nil:
+    section.add "groupId", valid_568481
+  var valid_568482 = path.getOrDefault("hostName")
+  valid_568482 = validateParameter(valid_568482, JString, required = true,
                                  default = nil)
-  if valid_594249 != nil:
-    section.add "hostName", valid_594249
-  var valid_594250 = path.getOrDefault("policyName")
-  valid_594250 = validateParameter(valid_594250, JString, required = true,
+  if valid_568482 != nil:
+    section.add "hostName", valid_568482
+  var valid_568483 = path.getOrDefault("policyName")
+  valid_568483 = validateParameter(valid_568483, JString, required = true,
                                  default = nil)
-  if valid_594250 != nil:
-    section.add "policyName", valid_594250
+  if valid_568483 != nil:
+    section.add "policyName", valid_568483
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3003,11 +3003,11 @@ proc validate_IosAddGroupForMAMPolicy_594246(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594251 = query.getOrDefault("api-version")
-  valid_594251 = validateParameter(valid_594251, JString, required = true,
+  var valid_568484 = query.getOrDefault("api-version")
+  valid_568484 = validateParameter(valid_568484, JString, required = true,
                                  default = nil)
-  if valid_594251 != nil:
-    section.add "api-version", valid_594251
+  if valid_568484 != nil:
+    section.add "api-version", valid_568484
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3021,20 +3021,20 @@ proc validate_IosAddGroupForMAMPolicy_594246(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594253: Call_IosAddGroupForMAMPolicy_594245; path: JsonNode;
+proc call*(call_568486: Call_IosAddGroupForMAMPolicy_568478; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add group to an iOSMAMPolicy.
   ## 
-  let valid = call_594253.validator(path, query, header, formData, body)
-  let scheme = call_594253.pickScheme
+  let valid = call_568486.validator(path, query, header, formData, body)
+  let scheme = call_568486.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594253.url(scheme.get, call_594253.host, call_594253.base,
-                         call_594253.route, valid.getOrDefault("path"),
+  let url = call_568486.url(scheme.get, call_568486.host, call_568486.base,
+                         call_568486.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594253, url, valid)
+  result = hook(call_568486, url, valid)
 
-proc call*(call_594254: Call_IosAddGroupForMAMPolicy_594245; groupId: string;
+proc call*(call_568487: Call_IosAddGroupForMAMPolicy_568478; groupId: string;
           apiVersion: string; hostName: string; policyName: string;
           parameters: JsonNode): Recallable =
   ## iosAddGroupForMAMPolicy
@@ -3049,25 +3049,25 @@ proc call*(call_594254: Call_IosAddGroupForMAMPolicy_594245; groupId: string;
   ##             : Unique name for the policy
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create or update app to an android policy operation.
-  var path_594255 = newJObject()
-  var query_594256 = newJObject()
-  var body_594257 = newJObject()
-  add(path_594255, "groupId", newJString(groupId))
-  add(query_594256, "api-version", newJString(apiVersion))
-  add(path_594255, "hostName", newJString(hostName))
-  add(path_594255, "policyName", newJString(policyName))
+  var path_568488 = newJObject()
+  var query_568489 = newJObject()
+  var body_568490 = newJObject()
+  add(path_568488, "groupId", newJString(groupId))
+  add(query_568489, "api-version", newJString(apiVersion))
+  add(path_568488, "hostName", newJString(hostName))
+  add(path_568488, "policyName", newJString(policyName))
   if parameters != nil:
-    body_594257 = parameters
-  result = call_594254.call(path_594255, query_594256, nil, nil, body_594257)
+    body_568490 = parameters
+  result = call_568487.call(path_568488, query_568489, nil, nil, body_568490)
 
-var iosAddGroupForMAMPolicy* = Call_IosAddGroupForMAMPolicy_594245(
+var iosAddGroupForMAMPolicy* = Call_IosAddGroupForMAMPolicy_568478(
     name: "iosAddGroupForMAMPolicy", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies/{policyName}/groups/{groupId}",
-    validator: validate_IosAddGroupForMAMPolicy_594246, base: "",
-    url: url_IosAddGroupForMAMPolicy_594247, schemes: {Scheme.Https})
+    validator: validate_IosAddGroupForMAMPolicy_568479, base: "",
+    url: url_IosAddGroupForMAMPolicy_568480, schemes: {Scheme.Https})
 type
-  Call_IosDeleteGroupForMAMPolicy_594258 = ref object of OpenApiRestCall_593408
-proc url_IosDeleteGroupForMAMPolicy_594260(protocol: Scheme; host: string;
+  Call_IosDeleteGroupForMAMPolicy_568491 = ref object of OpenApiRestCall_567641
+proc url_IosDeleteGroupForMAMPolicy_568493(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3089,7 +3089,7 @@ proc url_IosDeleteGroupForMAMPolicy_594260(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IosDeleteGroupForMAMPolicy_594259(path: JsonNode; query: JsonNode;
+proc validate_IosDeleteGroupForMAMPolicy_568492(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete Group for iOS Policy
   ## 
@@ -3104,21 +3104,21 @@ proc validate_IosDeleteGroupForMAMPolicy_594259(path: JsonNode; query: JsonNode;
   ##             : Unique name for the policy
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_594261 = path.getOrDefault("groupId")
-  valid_594261 = validateParameter(valid_594261, JString, required = true,
+  var valid_568494 = path.getOrDefault("groupId")
+  valid_568494 = validateParameter(valid_568494, JString, required = true,
                                  default = nil)
-  if valid_594261 != nil:
-    section.add "groupId", valid_594261
-  var valid_594262 = path.getOrDefault("hostName")
-  valid_594262 = validateParameter(valid_594262, JString, required = true,
+  if valid_568494 != nil:
+    section.add "groupId", valid_568494
+  var valid_568495 = path.getOrDefault("hostName")
+  valid_568495 = validateParameter(valid_568495, JString, required = true,
                                  default = nil)
-  if valid_594262 != nil:
-    section.add "hostName", valid_594262
-  var valid_594263 = path.getOrDefault("policyName")
-  valid_594263 = validateParameter(valid_594263, JString, required = true,
+  if valid_568495 != nil:
+    section.add "hostName", valid_568495
+  var valid_568496 = path.getOrDefault("policyName")
+  valid_568496 = validateParameter(valid_568496, JString, required = true,
                                  default = nil)
-  if valid_594263 != nil:
-    section.add "policyName", valid_594263
+  if valid_568496 != nil:
+    section.add "policyName", valid_568496
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3126,11 +3126,11 @@ proc validate_IosDeleteGroupForMAMPolicy_594259(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594264 = query.getOrDefault("api-version")
-  valid_594264 = validateParameter(valid_594264, JString, required = true,
+  var valid_568497 = query.getOrDefault("api-version")
+  valid_568497 = validateParameter(valid_568497, JString, required = true,
                                  default = nil)
-  if valid_594264 != nil:
-    section.add "api-version", valid_594264
+  if valid_568497 != nil:
+    section.add "api-version", valid_568497
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3139,20 +3139,20 @@ proc validate_IosDeleteGroupForMAMPolicy_594259(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594265: Call_IosDeleteGroupForMAMPolicy_594258; path: JsonNode;
+proc call*(call_568498: Call_IosDeleteGroupForMAMPolicy_568491; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete Group for iOS Policy
   ## 
-  let valid = call_594265.validator(path, query, header, formData, body)
-  let scheme = call_594265.pickScheme
+  let valid = call_568498.validator(path, query, header, formData, body)
+  let scheme = call_568498.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594265.url(scheme.get, call_594265.host, call_594265.base,
-                         call_594265.route, valid.getOrDefault("path"),
+  let url = call_568498.url(scheme.get, call_568498.host, call_568498.base,
+                         call_568498.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594265, url, valid)
+  result = hook(call_568498, url, valid)
 
-proc call*(call_594266: Call_IosDeleteGroupForMAMPolicy_594258; groupId: string;
+proc call*(call_568499: Call_IosDeleteGroupForMAMPolicy_568491; groupId: string;
           apiVersion: string; hostName: string; policyName: string): Recallable =
   ## iosDeleteGroupForMAMPolicy
   ## Delete Group for iOS Policy
@@ -3164,22 +3164,22 @@ proc call*(call_594266: Call_IosDeleteGroupForMAMPolicy_594258; groupId: string;
   ##           : Location hostName for the tenant
   ##   policyName: string (required)
   ##             : Unique name for the policy
-  var path_594267 = newJObject()
-  var query_594268 = newJObject()
-  add(path_594267, "groupId", newJString(groupId))
-  add(query_594268, "api-version", newJString(apiVersion))
-  add(path_594267, "hostName", newJString(hostName))
-  add(path_594267, "policyName", newJString(policyName))
-  result = call_594266.call(path_594267, query_594268, nil, nil, nil)
+  var path_568500 = newJObject()
+  var query_568501 = newJObject()
+  add(path_568500, "groupId", newJString(groupId))
+  add(query_568501, "api-version", newJString(apiVersion))
+  add(path_568500, "hostName", newJString(hostName))
+  add(path_568500, "policyName", newJString(policyName))
+  result = call_568499.call(path_568500, query_568501, nil, nil, nil)
 
-var iosDeleteGroupForMAMPolicy* = Call_IosDeleteGroupForMAMPolicy_594258(
+var iosDeleteGroupForMAMPolicy* = Call_IosDeleteGroupForMAMPolicy_568491(
     name: "iosDeleteGroupForMAMPolicy", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/iosPolicies/{policyName}/groups/{groupId}",
-    validator: validate_IosDeleteGroupForMAMPolicy_594259, base: "",
-    url: url_IosDeleteGroupForMAMPolicy_594260, schemes: {Scheme.Https})
+    validator: validate_IosDeleteGroupForMAMPolicy_568492, base: "",
+    url: url_IosDeleteGroupForMAMPolicy_568493, schemes: {Scheme.Https})
 type
-  Call_GetOperationResults_594269 = ref object of OpenApiRestCall_593408
-proc url_GetOperationResults_594271(protocol: Scheme; host: string; base: string;
+  Call_GetOperationResults_568502 = ref object of OpenApiRestCall_567641
+proc url_GetOperationResults_568504(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3196,7 +3196,7 @@ proc url_GetOperationResults_594271(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetOperationResults_594270(path: JsonNode; query: JsonNode;
+proc validate_GetOperationResults_568503(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Returns operationResults.
@@ -3208,11 +3208,11 @@ proc validate_GetOperationResults_594270(path: JsonNode; query: JsonNode;
   ##           : Location hostName for the tenant
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594272 = path.getOrDefault("hostName")
-  valid_594272 = validateParameter(valid_594272, JString, required = true,
+  var valid_568505 = path.getOrDefault("hostName")
+  valid_568505 = validateParameter(valid_568505, JString, required = true,
                                  default = nil)
-  if valid_594272 != nil:
-    section.add "hostName", valid_594272
+  if valid_568505 != nil:
+    section.add "hostName", valid_568505
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3225,25 +3225,25 @@ proc validate_GetOperationResults_594270(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594273 = query.getOrDefault("api-version")
-  valid_594273 = validateParameter(valid_594273, JString, required = true,
+  var valid_568506 = query.getOrDefault("api-version")
+  valid_568506 = validateParameter(valid_568506, JString, required = true,
                                  default = nil)
-  if valid_594273 != nil:
-    section.add "api-version", valid_594273
-  var valid_594274 = query.getOrDefault("$top")
-  valid_594274 = validateParameter(valid_594274, JInt, required = false, default = nil)
-  if valid_594274 != nil:
-    section.add "$top", valid_594274
-  var valid_594275 = query.getOrDefault("$select")
-  valid_594275 = validateParameter(valid_594275, JString, required = false,
+  if valid_568506 != nil:
+    section.add "api-version", valid_568506
+  var valid_568507 = query.getOrDefault("$top")
+  valid_568507 = validateParameter(valid_568507, JInt, required = false, default = nil)
+  if valid_568507 != nil:
+    section.add "$top", valid_568507
+  var valid_568508 = query.getOrDefault("$select")
+  valid_568508 = validateParameter(valid_568508, JString, required = false,
                                  default = nil)
-  if valid_594275 != nil:
-    section.add "$select", valid_594275
-  var valid_594276 = query.getOrDefault("$filter")
-  valid_594276 = validateParameter(valid_594276, JString, required = false,
+  if valid_568508 != nil:
+    section.add "$select", valid_568508
+  var valid_568509 = query.getOrDefault("$filter")
+  valid_568509 = validateParameter(valid_568509, JString, required = false,
                                  default = nil)
-  if valid_594276 != nil:
-    section.add "$filter", valid_594276
+  if valid_568509 != nil:
+    section.add "$filter", valid_568509
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3252,20 +3252,20 @@ proc validate_GetOperationResults_594270(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594277: Call_GetOperationResults_594269; path: JsonNode;
+proc call*(call_568510: Call_GetOperationResults_568502; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns operationResults.
   ## 
-  let valid = call_594277.validator(path, query, header, formData, body)
-  let scheme = call_594277.pickScheme
+  let valid = call_568510.validator(path, query, header, formData, body)
+  let scheme = call_568510.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594277.url(scheme.get, call_594277.host, call_594277.base,
-                         call_594277.route, valid.getOrDefault("path"),
+  let url = call_568510.url(scheme.get, call_568510.host, call_568510.base,
+                         call_568510.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594277, url, valid)
+  result = hook(call_568510, url, valid)
 
-proc call*(call_594278: Call_GetOperationResults_594269; apiVersion: string;
+proc call*(call_568511: Call_GetOperationResults_568502; apiVersion: string;
           hostName: string; Top: int = 0; Select: string = ""; Filter: string = ""): Recallable =
   ## getOperationResults
   ## Returns operationResults.
@@ -3278,24 +3278,24 @@ proc call*(call_594278: Call_GetOperationResults_594269; apiVersion: string;
   ##           : Location hostName for the tenant
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_594279 = newJObject()
-  var query_594280 = newJObject()
-  add(query_594280, "api-version", newJString(apiVersion))
-  add(query_594280, "$top", newJInt(Top))
-  add(query_594280, "$select", newJString(Select))
-  add(path_594279, "hostName", newJString(hostName))
-  add(query_594280, "$filter", newJString(Filter))
-  result = call_594278.call(path_594279, query_594280, nil, nil, nil)
+  var path_568512 = newJObject()
+  var query_568513 = newJObject()
+  add(query_568513, "api-version", newJString(apiVersion))
+  add(query_568513, "$top", newJInt(Top))
+  add(query_568513, "$select", newJString(Select))
+  add(path_568512, "hostName", newJString(hostName))
+  add(query_568513, "$filter", newJString(Filter))
+  result = call_568511.call(path_568512, query_568513, nil, nil, nil)
 
-var getOperationResults* = Call_GetOperationResults_594269(
+var getOperationResults* = Call_GetOperationResults_568502(
     name: "getOperationResults", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Intune/locations/{hostName}/operationResults",
-    validator: validate_GetOperationResults_594270, base: "",
-    url: url_GetOperationResults_594271, schemes: {Scheme.Https})
+    validator: validate_GetOperationResults_568503, base: "",
+    url: url_GetOperationResults_568504, schemes: {Scheme.Https})
 type
-  Call_GetMAMStatuses_594281 = ref object of OpenApiRestCall_593408
-proc url_GetMAMStatuses_594283(protocol: Scheme; host: string; base: string;
+  Call_GetMAMStatuses_568514 = ref object of OpenApiRestCall_567641
+proc url_GetMAMStatuses_568516(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3312,7 +3312,7 @@ proc url_GetMAMStatuses_594283(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetMAMStatuses_594282(path: JsonNode; query: JsonNode;
+proc validate_GetMAMStatuses_568515(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Returns Intune Tenant level statuses.
@@ -3324,11 +3324,11 @@ proc validate_GetMAMStatuses_594282(path: JsonNode; query: JsonNode;
   ##           : Location hostName for the tenant
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594284 = path.getOrDefault("hostName")
-  valid_594284 = validateParameter(valid_594284, JString, required = true,
+  var valid_568517 = path.getOrDefault("hostName")
+  valid_568517 = validateParameter(valid_568517, JString, required = true,
                                  default = nil)
-  if valid_594284 != nil:
-    section.add "hostName", valid_594284
+  if valid_568517 != nil:
+    section.add "hostName", valid_568517
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3336,11 +3336,11 @@ proc validate_GetMAMStatuses_594282(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594285 = query.getOrDefault("api-version")
-  valid_594285 = validateParameter(valid_594285, JString, required = true,
+  var valid_568518 = query.getOrDefault("api-version")
+  valid_568518 = validateParameter(valid_568518, JString, required = true,
                                  default = nil)
-  if valid_594285 != nil:
-    section.add "api-version", valid_594285
+  if valid_568518 != nil:
+    section.add "api-version", valid_568518
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3349,20 +3349,20 @@ proc validate_GetMAMStatuses_594282(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594286: Call_GetMAMStatuses_594281; path: JsonNode; query: JsonNode;
+proc call*(call_568519: Call_GetMAMStatuses_568514; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns Intune Tenant level statuses.
   ## 
-  let valid = call_594286.validator(path, query, header, formData, body)
-  let scheme = call_594286.pickScheme
+  let valid = call_568519.validator(path, query, header, formData, body)
+  let scheme = call_568519.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594286.url(scheme.get, call_594286.host, call_594286.base,
-                         call_594286.route, valid.getOrDefault("path"),
+  let url = call_568519.url(scheme.get, call_568519.host, call_568519.base,
+                         call_568519.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594286, url, valid)
+  result = hook(call_568519, url, valid)
 
-proc call*(call_594287: Call_GetMAMStatuses_594281; apiVersion: string;
+proc call*(call_568520: Call_GetMAMStatuses_568514; apiVersion: string;
           hostName: string): Recallable =
   ## getMAMStatuses
   ## Returns Intune Tenant level statuses.
@@ -3370,20 +3370,20 @@ proc call*(call_594287: Call_GetMAMStatuses_594281; apiVersion: string;
   ##             : Service Api Version.
   ##   hostName: string (required)
   ##           : Location hostName for the tenant
-  var path_594288 = newJObject()
-  var query_594289 = newJObject()
-  add(query_594289, "api-version", newJString(apiVersion))
-  add(path_594288, "hostName", newJString(hostName))
-  result = call_594287.call(path_594288, query_594289, nil, nil, nil)
+  var path_568521 = newJObject()
+  var query_568522 = newJObject()
+  add(query_568522, "api-version", newJString(apiVersion))
+  add(path_568521, "hostName", newJString(hostName))
+  result = call_568520.call(path_568521, query_568522, nil, nil, nil)
 
-var getMAMStatuses* = Call_GetMAMStatuses_594281(name: "getMAMStatuses",
+var getMAMStatuses* = Call_GetMAMStatuses_568514(name: "getMAMStatuses",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Intune/locations/{hostName}/statuses/default",
-    validator: validate_GetMAMStatuses_594282, base: "", url: url_GetMAMStatuses_594283,
+    validator: validate_GetMAMStatuses_568515, base: "", url: url_GetMAMStatuses_568516,
     schemes: {Scheme.Https})
 type
-  Call_GetMAMUserDevices_594290 = ref object of OpenApiRestCall_593408
-proc url_GetMAMUserDevices_594292(protocol: Scheme; host: string; base: string;
+  Call_GetMAMUserDevices_568523 = ref object of OpenApiRestCall_567641
+proc url_GetMAMUserDevices_568525(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3403,7 +3403,7 @@ proc url_GetMAMUserDevices_594292(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetMAMUserDevices_594291(path: JsonNode; query: JsonNode;
+proc validate_GetMAMUserDevices_568524(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get devices for a user.
@@ -3417,16 +3417,16 @@ proc validate_GetMAMUserDevices_594291(path: JsonNode; query: JsonNode;
   ##           : user unique Name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594293 = path.getOrDefault("hostName")
-  valid_594293 = validateParameter(valid_594293, JString, required = true,
+  var valid_568526 = path.getOrDefault("hostName")
+  valid_568526 = validateParameter(valid_568526, JString, required = true,
                                  default = nil)
-  if valid_594293 != nil:
-    section.add "hostName", valid_594293
-  var valid_594294 = path.getOrDefault("userName")
-  valid_594294 = validateParameter(valid_594294, JString, required = true,
+  if valid_568526 != nil:
+    section.add "hostName", valid_568526
+  var valid_568527 = path.getOrDefault("userName")
+  valid_568527 = validateParameter(valid_568527, JString, required = true,
                                  default = nil)
-  if valid_594294 != nil:
-    section.add "userName", valid_594294
+  if valid_568527 != nil:
+    section.add "userName", valid_568527
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3439,25 +3439,25 @@ proc validate_GetMAMUserDevices_594291(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594295 = query.getOrDefault("api-version")
-  valid_594295 = validateParameter(valid_594295, JString, required = true,
+  var valid_568528 = query.getOrDefault("api-version")
+  valid_568528 = validateParameter(valid_568528, JString, required = true,
                                  default = nil)
-  if valid_594295 != nil:
-    section.add "api-version", valid_594295
-  var valid_594296 = query.getOrDefault("$top")
-  valid_594296 = validateParameter(valid_594296, JInt, required = false, default = nil)
-  if valid_594296 != nil:
-    section.add "$top", valid_594296
-  var valid_594297 = query.getOrDefault("$select")
-  valid_594297 = validateParameter(valid_594297, JString, required = false,
+  if valid_568528 != nil:
+    section.add "api-version", valid_568528
+  var valid_568529 = query.getOrDefault("$top")
+  valid_568529 = validateParameter(valid_568529, JInt, required = false, default = nil)
+  if valid_568529 != nil:
+    section.add "$top", valid_568529
+  var valid_568530 = query.getOrDefault("$select")
+  valid_568530 = validateParameter(valid_568530, JString, required = false,
                                  default = nil)
-  if valid_594297 != nil:
-    section.add "$select", valid_594297
-  var valid_594298 = query.getOrDefault("$filter")
-  valid_594298 = validateParameter(valid_594298, JString, required = false,
+  if valid_568530 != nil:
+    section.add "$select", valid_568530
+  var valid_568531 = query.getOrDefault("$filter")
+  valid_568531 = validateParameter(valid_568531, JString, required = false,
                                  default = nil)
-  if valid_594298 != nil:
-    section.add "$filter", valid_594298
+  if valid_568531 != nil:
+    section.add "$filter", valid_568531
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3466,20 +3466,20 @@ proc validate_GetMAMUserDevices_594291(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594299: Call_GetMAMUserDevices_594290; path: JsonNode;
+proc call*(call_568532: Call_GetMAMUserDevices_568523; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get devices for a user.
   ## 
-  let valid = call_594299.validator(path, query, header, formData, body)
-  let scheme = call_594299.pickScheme
+  let valid = call_568532.validator(path, query, header, formData, body)
+  let scheme = call_568532.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594299.url(scheme.get, call_594299.host, call_594299.base,
-                         call_594299.route, valid.getOrDefault("path"),
+  let url = call_568532.url(scheme.get, call_568532.host, call_568532.base,
+                         call_568532.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594299, url, valid)
+  result = hook(call_568532, url, valid)
 
-proc call*(call_594300: Call_GetMAMUserDevices_594290; apiVersion: string;
+proc call*(call_568533: Call_GetMAMUserDevices_568523; apiVersion: string;
           hostName: string; userName: string; Top: int = 0; Select: string = "";
           Filter: string = ""): Recallable =
   ## getMAMUserDevices
@@ -3495,23 +3495,23 @@ proc call*(call_594300: Call_GetMAMUserDevices_594290; apiVersion: string;
   ##           : user unique Name
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_594301 = newJObject()
-  var query_594302 = newJObject()
-  add(query_594302, "api-version", newJString(apiVersion))
-  add(query_594302, "$top", newJInt(Top))
-  add(query_594302, "$select", newJString(Select))
-  add(path_594301, "hostName", newJString(hostName))
-  add(path_594301, "userName", newJString(userName))
-  add(query_594302, "$filter", newJString(Filter))
-  result = call_594300.call(path_594301, query_594302, nil, nil, nil)
+  var path_568534 = newJObject()
+  var query_568535 = newJObject()
+  add(query_568535, "api-version", newJString(apiVersion))
+  add(query_568535, "$top", newJInt(Top))
+  add(query_568535, "$select", newJString(Select))
+  add(path_568534, "hostName", newJString(hostName))
+  add(path_568534, "userName", newJString(userName))
+  add(query_568535, "$filter", newJString(Filter))
+  result = call_568533.call(path_568534, query_568535, nil, nil, nil)
 
-var getMAMUserDevices* = Call_GetMAMUserDevices_594290(name: "getMAMUserDevices",
+var getMAMUserDevices* = Call_GetMAMUserDevices_568523(name: "getMAMUserDevices",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/users/{userName}/devices",
-    validator: validate_GetMAMUserDevices_594291, base: "",
-    url: url_GetMAMUserDevices_594292, schemes: {Scheme.Https})
+    validator: validate_GetMAMUserDevices_568524, base: "",
+    url: url_GetMAMUserDevices_568525, schemes: {Scheme.Https})
 type
-  Call_GetMAMUserDeviceByDeviceName_594303 = ref object of OpenApiRestCall_593408
-proc url_GetMAMUserDeviceByDeviceName_594305(protocol: Scheme; host: string;
+  Call_GetMAMUserDeviceByDeviceName_568536 = ref object of OpenApiRestCall_567641
+proc url_GetMAMUserDeviceByDeviceName_568538(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3533,7 +3533,7 @@ proc url_GetMAMUserDeviceByDeviceName_594305(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetMAMUserDeviceByDeviceName_594304(path: JsonNode; query: JsonNode;
+proc validate_GetMAMUserDeviceByDeviceName_568537(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a unique device for a user.
   ## 
@@ -3548,21 +3548,21 @@ proc validate_GetMAMUserDeviceByDeviceName_594304(path: JsonNode; query: JsonNod
   ##             : device name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594306 = path.getOrDefault("hostName")
-  valid_594306 = validateParameter(valid_594306, JString, required = true,
+  var valid_568539 = path.getOrDefault("hostName")
+  valid_568539 = validateParameter(valid_568539, JString, required = true,
                                  default = nil)
-  if valid_594306 != nil:
-    section.add "hostName", valid_594306
-  var valid_594307 = path.getOrDefault("userName")
-  valid_594307 = validateParameter(valid_594307, JString, required = true,
+  if valid_568539 != nil:
+    section.add "hostName", valid_568539
+  var valid_568540 = path.getOrDefault("userName")
+  valid_568540 = validateParameter(valid_568540, JString, required = true,
                                  default = nil)
-  if valid_594307 != nil:
-    section.add "userName", valid_594307
-  var valid_594308 = path.getOrDefault("deviceName")
-  valid_594308 = validateParameter(valid_594308, JString, required = true,
+  if valid_568540 != nil:
+    section.add "userName", valid_568540
+  var valid_568541 = path.getOrDefault("deviceName")
+  valid_568541 = validateParameter(valid_568541, JString, required = true,
                                  default = nil)
-  if valid_594308 != nil:
-    section.add "deviceName", valid_594308
+  if valid_568541 != nil:
+    section.add "deviceName", valid_568541
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3572,16 +3572,16 @@ proc validate_GetMAMUserDeviceByDeviceName_594304(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594309 = query.getOrDefault("api-version")
-  valid_594309 = validateParameter(valid_594309, JString, required = true,
+  var valid_568542 = query.getOrDefault("api-version")
+  valid_568542 = validateParameter(valid_568542, JString, required = true,
                                  default = nil)
-  if valid_594309 != nil:
-    section.add "api-version", valid_594309
-  var valid_594310 = query.getOrDefault("$select")
-  valid_594310 = validateParameter(valid_594310, JString, required = false,
+  if valid_568542 != nil:
+    section.add "api-version", valid_568542
+  var valid_568543 = query.getOrDefault("$select")
+  valid_568543 = validateParameter(valid_568543, JString, required = false,
                                  default = nil)
-  if valid_594310 != nil:
-    section.add "$select", valid_594310
+  if valid_568543 != nil:
+    section.add "$select", valid_568543
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3590,20 +3590,20 @@ proc validate_GetMAMUserDeviceByDeviceName_594304(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594311: Call_GetMAMUserDeviceByDeviceName_594303; path: JsonNode;
+proc call*(call_568544: Call_GetMAMUserDeviceByDeviceName_568536; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a unique device for a user.
   ## 
-  let valid = call_594311.validator(path, query, header, formData, body)
-  let scheme = call_594311.pickScheme
+  let valid = call_568544.validator(path, query, header, formData, body)
+  let scheme = call_568544.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594311.url(scheme.get, call_594311.host, call_594311.base,
-                         call_594311.route, valid.getOrDefault("path"),
+  let url = call_568544.url(scheme.get, call_568544.host, call_568544.base,
+                         call_568544.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594311, url, valid)
+  result = hook(call_568544, url, valid)
 
-proc call*(call_594312: Call_GetMAMUserDeviceByDeviceName_594303;
+proc call*(call_568545: Call_GetMAMUserDeviceByDeviceName_568536;
           apiVersion: string; hostName: string; userName: string; deviceName: string;
           Select: string = ""): Recallable =
   ## getMAMUserDeviceByDeviceName
@@ -3618,23 +3618,23 @@ proc call*(call_594312: Call_GetMAMUserDeviceByDeviceName_594303;
   ##           : unique user name
   ##   deviceName: string (required)
   ##             : device name
-  var path_594313 = newJObject()
-  var query_594314 = newJObject()
-  add(query_594314, "api-version", newJString(apiVersion))
-  add(query_594314, "$select", newJString(Select))
-  add(path_594313, "hostName", newJString(hostName))
-  add(path_594313, "userName", newJString(userName))
-  add(path_594313, "deviceName", newJString(deviceName))
-  result = call_594312.call(path_594313, query_594314, nil, nil, nil)
+  var path_568546 = newJObject()
+  var query_568547 = newJObject()
+  add(query_568547, "api-version", newJString(apiVersion))
+  add(query_568547, "$select", newJString(Select))
+  add(path_568546, "hostName", newJString(hostName))
+  add(path_568546, "userName", newJString(userName))
+  add(path_568546, "deviceName", newJString(deviceName))
+  result = call_568545.call(path_568546, query_568547, nil, nil, nil)
 
-var getMAMUserDeviceByDeviceName* = Call_GetMAMUserDeviceByDeviceName_594303(
+var getMAMUserDeviceByDeviceName* = Call_GetMAMUserDeviceByDeviceName_568536(
     name: "getMAMUserDeviceByDeviceName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/users/{userName}/devices/{deviceName}",
-    validator: validate_GetMAMUserDeviceByDeviceName_594304, base: "",
-    url: url_GetMAMUserDeviceByDeviceName_594305, schemes: {Scheme.Https})
+    validator: validate_GetMAMUserDeviceByDeviceName_568537, base: "",
+    url: url_GetMAMUserDeviceByDeviceName_568538, schemes: {Scheme.Https})
 type
-  Call_WipeMAMUserDevice_594315 = ref object of OpenApiRestCall_593408
-proc url_WipeMAMUserDevice_594317(protocol: Scheme; host: string; base: string;
+  Call_WipeMAMUserDevice_568548 = ref object of OpenApiRestCall_567641
+proc url_WipeMAMUserDevice_568550(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3657,7 +3657,7 @@ proc url_WipeMAMUserDevice_594317(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WipeMAMUserDevice_594316(path: JsonNode; query: JsonNode;
+proc validate_WipeMAMUserDevice_568549(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Wipe a device for a user.
@@ -3673,21 +3673,21 @@ proc validate_WipeMAMUserDevice_594316(path: JsonNode; query: JsonNode;
   ##             : device name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `hostName` field"
-  var valid_594318 = path.getOrDefault("hostName")
-  valid_594318 = validateParameter(valid_594318, JString, required = true,
+  var valid_568551 = path.getOrDefault("hostName")
+  valid_568551 = validateParameter(valid_568551, JString, required = true,
                                  default = nil)
-  if valid_594318 != nil:
-    section.add "hostName", valid_594318
-  var valid_594319 = path.getOrDefault("userName")
-  valid_594319 = validateParameter(valid_594319, JString, required = true,
+  if valid_568551 != nil:
+    section.add "hostName", valid_568551
+  var valid_568552 = path.getOrDefault("userName")
+  valid_568552 = validateParameter(valid_568552, JString, required = true,
                                  default = nil)
-  if valid_594319 != nil:
-    section.add "userName", valid_594319
-  var valid_594320 = path.getOrDefault("deviceName")
-  valid_594320 = validateParameter(valid_594320, JString, required = true,
+  if valid_568552 != nil:
+    section.add "userName", valid_568552
+  var valid_568553 = path.getOrDefault("deviceName")
+  valid_568553 = validateParameter(valid_568553, JString, required = true,
                                  default = nil)
-  if valid_594320 != nil:
-    section.add "deviceName", valid_594320
+  if valid_568553 != nil:
+    section.add "deviceName", valid_568553
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3695,11 +3695,11 @@ proc validate_WipeMAMUserDevice_594316(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594321 = query.getOrDefault("api-version")
-  valid_594321 = validateParameter(valid_594321, JString, required = true,
+  var valid_568554 = query.getOrDefault("api-version")
+  valid_568554 = validateParameter(valid_568554, JString, required = true,
                                  default = nil)
-  if valid_594321 != nil:
-    section.add "api-version", valid_594321
+  if valid_568554 != nil:
+    section.add "api-version", valid_568554
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3708,20 +3708,20 @@ proc validate_WipeMAMUserDevice_594316(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594322: Call_WipeMAMUserDevice_594315; path: JsonNode;
+proc call*(call_568555: Call_WipeMAMUserDevice_568548; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Wipe a device for a user.
   ## 
-  let valid = call_594322.validator(path, query, header, formData, body)
-  let scheme = call_594322.pickScheme
+  let valid = call_568555.validator(path, query, header, formData, body)
+  let scheme = call_568555.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594322.url(scheme.get, call_594322.host, call_594322.base,
-                         call_594322.route, valid.getOrDefault("path"),
+  let url = call_568555.url(scheme.get, call_568555.host, call_568555.base,
+                         call_568555.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594322, url, valid)
+  result = hook(call_568555, url, valid)
 
-proc call*(call_594323: Call_WipeMAMUserDevice_594315; apiVersion: string;
+proc call*(call_568556: Call_WipeMAMUserDevice_568548; apiVersion: string;
           hostName: string; userName: string; deviceName: string): Recallable =
   ## wipeMAMUserDevice
   ## Wipe a device for a user.
@@ -3733,18 +3733,18 @@ proc call*(call_594323: Call_WipeMAMUserDevice_594315; apiVersion: string;
   ##           : unique user name
   ##   deviceName: string (required)
   ##             : device name
-  var path_594324 = newJObject()
-  var query_594325 = newJObject()
-  add(query_594325, "api-version", newJString(apiVersion))
-  add(path_594324, "hostName", newJString(hostName))
-  add(path_594324, "userName", newJString(userName))
-  add(path_594324, "deviceName", newJString(deviceName))
-  result = call_594323.call(path_594324, query_594325, nil, nil, nil)
+  var path_568557 = newJObject()
+  var query_568558 = newJObject()
+  add(query_568558, "api-version", newJString(apiVersion))
+  add(path_568557, "hostName", newJString(hostName))
+  add(path_568557, "userName", newJString(userName))
+  add(path_568557, "deviceName", newJString(deviceName))
+  result = call_568556.call(path_568557, query_568558, nil, nil, nil)
 
-var wipeMAMUserDevice* = Call_WipeMAMUserDevice_594315(name: "wipeMAMUserDevice",
+var wipeMAMUserDevice* = Call_WipeMAMUserDevice_568548(name: "wipeMAMUserDevice",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.Intune/locations/{hostName}/users/{userName}/devices/{deviceName}/wipe",
-    validator: validate_WipeMAMUserDevice_594316, base: "",
-    url: url_WipeMAMUserDevice_594317, schemes: {Scheme.Https})
+    validator: validate_WipeMAMUserDevice_568549, base: "",
+    url: url_WipeMAMUserDevice_568550, schemes: {Scheme.Https})
 export
   rest
 

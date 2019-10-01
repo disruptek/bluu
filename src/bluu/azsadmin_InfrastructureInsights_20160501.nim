@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: InfrastructureInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_574442 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574442](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574442): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "azsadmin-InfrastructureInsights"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593631 = ref object of OpenApiRestCall_593409
-proc url_OperationsList_593633(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_574664 = ref object of OpenApiRestCall_574442
+proc url_OperationsList_574666(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593632(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_574665(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Returns a list of support REST operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593805 = query.getOrDefault("api-version")
-  valid_593805 = validateParameter(valid_593805, JString, required = true,
+  var valid_574838 = query.getOrDefault("api-version")
+  valid_574838 = validateParameter(valid_574838, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593805 != nil:
-    section.add "api-version", valid_593805
+  if valid_574838 != nil:
+    section.add "api-version", valid_574838
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,33 +139,33 @@ proc validate_OperationsList_593632(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593828: Call_OperationsList_593631; path: JsonNode; query: JsonNode;
+proc call*(call_574861: Call_OperationsList_574664; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of support REST operations.
   ## 
-  let valid = call_593828.validator(path, query, header, formData, body)
-  let scheme = call_593828.pickScheme
+  let valid = call_574861.validator(path, query, header, formData, body)
+  let scheme = call_574861.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593828.url(scheme.get, call_593828.host, call_593828.base,
-                         call_593828.route, valid.getOrDefault("path"),
+  let url = call_574861.url(scheme.get, call_574861.host, call_574861.base,
+                         call_574861.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593828, url, valid)
+  result = hook(call_574861, url, valid)
 
-proc call*(call_593899: Call_OperationsList_593631;
+proc call*(call_574932: Call_OperationsList_574664;
           apiVersion: string = "2016-05-01"): Recallable =
   ## operationsList
   ## Returns a list of support REST operations.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var query_593900 = newJObject()
-  add(query_593900, "api-version", newJString(apiVersion))
-  result = call_593899.call(nil, query_593900, nil, nil, nil)
+  var query_574933 = newJObject()
+  add(query_574933, "api-version", newJString(apiVersion))
+  result = call_574932.call(nil, query_574933, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593631(name: "operationsList",
+var operationsList* = Call_OperationsList_574664(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external",
     route: "/providers/Microsoft.InfrastructureInsights.Admin/operations",
-    validator: validate_OperationsList_593632, base: "", url: url_OperationsList_593633,
+    validator: validate_OperationsList_574665, base: "", url: url_OperationsList_574666,
     schemes: {Scheme.Https})
 export
   rest

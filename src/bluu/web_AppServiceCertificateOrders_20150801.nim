@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: AppServiceCertificateOrders API Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "web-AppServiceCertificateOrders"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AppServiceCertificateOrdersList_593646 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersList_593648(protocol: Scheme; host: string;
+  Call_AppServiceCertificateOrdersList_567879 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersList_567881(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_AppServiceCertificateOrdersList_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersList_593647(path: JsonNode;
+proc validate_AppServiceCertificateOrdersList_567880(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all certificate orders in a subscription.
   ## 
@@ -133,11 +133,11 @@ proc validate_AppServiceCertificateOrdersList_593647(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593821 = path.getOrDefault("subscriptionId")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("subscriptionId")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "subscriptionId", valid_593821
+  if valid_568054 != nil:
+    section.add "subscriptionId", valid_568054
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_AppServiceCertificateOrdersList_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593822 = query.getOrDefault("api-version")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = query.getOrDefault("api-version")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "api-version", valid_593822
+  if valid_568055 != nil:
+    section.add "api-version", valid_568055
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,21 +158,21 @@ proc validate_AppServiceCertificateOrdersList_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593845: Call_AppServiceCertificateOrdersList_593646;
+proc call*(call_568078: Call_AppServiceCertificateOrdersList_567879;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all certificate orders in a subscription.
   ## 
-  let valid = call_593845.validator(path, query, header, formData, body)
-  let scheme = call_593845.pickScheme
+  let valid = call_568078.validator(path, query, header, formData, body)
+  let scheme = call_568078.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593845.url(scheme.get, call_593845.host, call_593845.base,
-                         call_593845.route, valid.getOrDefault("path"),
+  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
+                         call_568078.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593845, url, valid)
+  result = hook(call_568078, url, valid)
 
-proc call*(call_593916: Call_AppServiceCertificateOrdersList_593646;
+proc call*(call_568149: Call_AppServiceCertificateOrdersList_567879;
           apiVersion: string; subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersList
   ## List all certificate orders in a subscription.
@@ -180,20 +180,20 @@ proc call*(call_593916: Call_AppServiceCertificateOrdersList_593646;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_593917 = newJObject()
-  var query_593919 = newJObject()
-  add(query_593919, "api-version", newJString(apiVersion))
-  add(path_593917, "subscriptionId", newJString(subscriptionId))
-  result = call_593916.call(path_593917, query_593919, nil, nil, nil)
+  var path_568150 = newJObject()
+  var query_568152 = newJObject()
+  add(query_568152, "api-version", newJString(apiVersion))
+  add(path_568150, "subscriptionId", newJString(subscriptionId))
+  result = call_568149.call(path_568150, query_568152, nil, nil, nil)
 
-var appServiceCertificateOrdersList* = Call_AppServiceCertificateOrdersList_593646(
+var appServiceCertificateOrdersList* = Call_AppServiceCertificateOrdersList_567879(
     name: "appServiceCertificateOrdersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.CertificateRegistration/certificateOrders",
-    validator: validate_AppServiceCertificateOrdersList_593647, base: "",
-    url: url_AppServiceCertificateOrdersList_593648, schemes: {Scheme.Https})
+    validator: validate_AppServiceCertificateOrdersList_567880, base: "",
+    url: url_AppServiceCertificateOrdersList_567881, schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersValidatePurchaseInformation_593958 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersValidatePurchaseInformation_593960(
+  Call_AppServiceCertificateOrdersValidatePurchaseInformation_568191 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersValidatePurchaseInformation_568193(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -210,7 +210,7 @@ proc url_AppServiceCertificateOrdersValidatePurchaseInformation_593960(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersValidatePurchaseInformation_593959(
+proc validate_AppServiceCertificateOrdersValidatePurchaseInformation_568192(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Validate information for a certificate order.
@@ -223,11 +223,11 @@ proc validate_AppServiceCertificateOrdersValidatePurchaseInformation_593959(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593961 = path.getOrDefault("subscriptionId")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = path.getOrDefault("subscriptionId")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "subscriptionId", valid_593961
+  if valid_568194 != nil:
+    section.add "subscriptionId", valid_568194
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -235,11 +235,11 @@ proc validate_AppServiceCertificateOrdersValidatePurchaseInformation_593959(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593962 = query.getOrDefault("api-version")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_568195 = query.getOrDefault("api-version")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "api-version", valid_593962
+  if valid_568195 != nil:
+    section.add "api-version", valid_568195
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -253,21 +253,21 @@ proc validate_AppServiceCertificateOrdersValidatePurchaseInformation_593959(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593964: Call_AppServiceCertificateOrdersValidatePurchaseInformation_593958;
+proc call*(call_568197: Call_AppServiceCertificateOrdersValidatePurchaseInformation_568191;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Validate information for a certificate order.
   ## 
-  let valid = call_593964.validator(path, query, header, formData, body)
-  let scheme = call_593964.pickScheme
+  let valid = call_568197.validator(path, query, header, formData, body)
+  let scheme = call_568197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593964.url(scheme.get, call_593964.host, call_593964.base,
-                         call_593964.route, valid.getOrDefault("path"),
+  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
+                         call_568197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593964, url, valid)
+  result = hook(call_568197, url, valid)
 
-proc call*(call_593965: Call_AppServiceCertificateOrdersValidatePurchaseInformation_593958;
+proc call*(call_568198: Call_AppServiceCertificateOrdersValidatePurchaseInformation_568191;
           apiVersion: string; subscriptionId: string;
           appServiceCertificateOrder: JsonNode): Recallable =
   ## appServiceCertificateOrdersValidatePurchaseInformation
@@ -278,24 +278,24 @@ proc call*(call_593965: Call_AppServiceCertificateOrdersValidatePurchaseInformat
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   appServiceCertificateOrder: JObject (required)
   ##                             : Information for a certificate order.
-  var path_593966 = newJObject()
-  var query_593967 = newJObject()
-  var body_593968 = newJObject()
-  add(query_593967, "api-version", newJString(apiVersion))
-  add(path_593966, "subscriptionId", newJString(subscriptionId))
+  var path_568199 = newJObject()
+  var query_568200 = newJObject()
+  var body_568201 = newJObject()
+  add(query_568200, "api-version", newJString(apiVersion))
+  add(path_568199, "subscriptionId", newJString(subscriptionId))
   if appServiceCertificateOrder != nil:
-    body_593968 = appServiceCertificateOrder
-  result = call_593965.call(path_593966, query_593967, nil, nil, body_593968)
+    body_568201 = appServiceCertificateOrder
+  result = call_568198.call(path_568199, query_568200, nil, nil, body_568201)
 
-var appServiceCertificateOrdersValidatePurchaseInformation* = Call_AppServiceCertificateOrdersValidatePurchaseInformation_593958(
+var appServiceCertificateOrdersValidatePurchaseInformation* = Call_AppServiceCertificateOrdersValidatePurchaseInformation_568191(
     name: "appServiceCertificateOrdersValidatePurchaseInformation",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.CertificateRegistration/validateCertificateRegistrationInformation",
-    validator: validate_AppServiceCertificateOrdersValidatePurchaseInformation_593959,
-    base: "", url: url_AppServiceCertificateOrdersValidatePurchaseInformation_593960,
+    validator: validate_AppServiceCertificateOrdersValidatePurchaseInformation_568192,
+    base: "", url: url_AppServiceCertificateOrdersValidatePurchaseInformation_568193,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersListByResourceGroup_593969 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersListByResourceGroup_593971(protocol: Scheme;
+  Call_AppServiceCertificateOrdersListByResourceGroup_568202 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersListByResourceGroup_568204(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -316,7 +316,7 @@ proc url_AppServiceCertificateOrdersListByResourceGroup_593971(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersListByResourceGroup_593970(
+proc validate_AppServiceCertificateOrdersListByResourceGroup_568203(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get certificate orders in a resource group.
@@ -331,16 +331,16 @@ proc validate_AppServiceCertificateOrdersListByResourceGroup_593970(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593972 = path.getOrDefault("resourceGroupName")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_568205 = path.getOrDefault("resourceGroupName")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "resourceGroupName", valid_593972
-  var valid_593973 = path.getOrDefault("subscriptionId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  if valid_568205 != nil:
+    section.add "resourceGroupName", valid_568205
+  var valid_568206 = path.getOrDefault("subscriptionId")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "subscriptionId", valid_593973
+  if valid_568206 != nil:
+    section.add "subscriptionId", valid_568206
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -348,11 +348,11 @@ proc validate_AppServiceCertificateOrdersListByResourceGroup_593970(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593974 = query.getOrDefault("api-version")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_568207 = query.getOrDefault("api-version")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "api-version", valid_593974
+  if valid_568207 != nil:
+    section.add "api-version", valid_568207
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -361,21 +361,21 @@ proc validate_AppServiceCertificateOrdersListByResourceGroup_593970(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593975: Call_AppServiceCertificateOrdersListByResourceGroup_593969;
+proc call*(call_568208: Call_AppServiceCertificateOrdersListByResourceGroup_568202;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get certificate orders in a resource group.
   ## 
-  let valid = call_593975.validator(path, query, header, formData, body)
-  let scheme = call_593975.pickScheme
+  let valid = call_568208.validator(path, query, header, formData, body)
+  let scheme = call_568208.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593975.url(scheme.get, call_593975.host, call_593975.base,
-                         call_593975.route, valid.getOrDefault("path"),
+  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
+                         call_568208.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593975, url, valid)
+  result = hook(call_568208, url, valid)
 
-proc call*(call_593976: Call_AppServiceCertificateOrdersListByResourceGroup_593969;
+proc call*(call_568209: Call_AppServiceCertificateOrdersListByResourceGroup_568202;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersListByResourceGroup
   ## Get certificate orders in a resource group.
@@ -385,22 +385,22 @@ proc call*(call_593976: Call_AppServiceCertificateOrdersListByResourceGroup_5939
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_593977 = newJObject()
-  var query_593978 = newJObject()
-  add(path_593977, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593978, "api-version", newJString(apiVersion))
-  add(path_593977, "subscriptionId", newJString(subscriptionId))
-  result = call_593976.call(path_593977, query_593978, nil, nil, nil)
+  var path_568210 = newJObject()
+  var query_568211 = newJObject()
+  add(path_568210, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568211, "api-version", newJString(apiVersion))
+  add(path_568210, "subscriptionId", newJString(subscriptionId))
+  result = call_568209.call(path_568210, query_568211, nil, nil, nil)
 
-var appServiceCertificateOrdersListByResourceGroup* = Call_AppServiceCertificateOrdersListByResourceGroup_593969(
+var appServiceCertificateOrdersListByResourceGroup* = Call_AppServiceCertificateOrdersListByResourceGroup_568202(
     name: "appServiceCertificateOrdersListByResourceGroup",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders",
-    validator: validate_AppServiceCertificateOrdersListByResourceGroup_593970,
-    base: "", url: url_AppServiceCertificateOrdersListByResourceGroup_593971,
+    validator: validate_AppServiceCertificateOrdersListByResourceGroup_568203,
+    base: "", url: url_AppServiceCertificateOrdersListByResourceGroup_568204,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersCreateOrUpdate_593990 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersCreateOrUpdate_593992(protocol: Scheme;
+  Call_AppServiceCertificateOrdersCreateOrUpdate_568223 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersCreateOrUpdate_568225(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -423,7 +423,7 @@ proc url_AppServiceCertificateOrdersCreateOrUpdate_593992(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersCreateOrUpdate_593991(path: JsonNode;
+proc validate_AppServiceCertificateOrdersCreateOrUpdate_568224(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a certificate purchase order.
   ## 
@@ -438,21 +438,21 @@ proc validate_AppServiceCertificateOrdersCreateOrUpdate_593991(path: JsonNode;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_593993 = path.getOrDefault("certificateOrderName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568226 = path.getOrDefault("certificateOrderName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "certificateOrderName", valid_593993
-  var valid_593994 = path.getOrDefault("resourceGroupName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "certificateOrderName", valid_568226
+  var valid_568227 = path.getOrDefault("resourceGroupName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "resourceGroupName", valid_593994
-  var valid_593995 = path.getOrDefault("subscriptionId")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_568227 != nil:
+    section.add "resourceGroupName", valid_568227
+  var valid_568228 = path.getOrDefault("subscriptionId")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "subscriptionId", valid_593995
+  if valid_568228 != nil:
+    section.add "subscriptionId", valid_568228
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -460,11 +460,11 @@ proc validate_AppServiceCertificateOrdersCreateOrUpdate_593991(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593996 = query.getOrDefault("api-version")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_568229 = query.getOrDefault("api-version")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "api-version", valid_593996
+  if valid_568229 != nil:
+    section.add "api-version", valid_568229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -478,21 +478,21 @@ proc validate_AppServiceCertificateOrdersCreateOrUpdate_593991(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593998: Call_AppServiceCertificateOrdersCreateOrUpdate_593990;
+proc call*(call_568231: Call_AppServiceCertificateOrdersCreateOrUpdate_568223;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a certificate purchase order.
   ## 
-  let valid = call_593998.validator(path, query, header, formData, body)
-  let scheme = call_593998.pickScheme
+  let valid = call_568231.validator(path, query, header, formData, body)
+  let scheme = call_568231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593998.url(scheme.get, call_593998.host, call_593998.base,
-                         call_593998.route, valid.getOrDefault("path"),
+  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
+                         call_568231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593998, url, valid)
+  result = hook(call_568231, url, valid)
 
-proc call*(call_593999: Call_AppServiceCertificateOrdersCreateOrUpdate_593990;
+proc call*(call_568232: Call_AppServiceCertificateOrdersCreateOrUpdate_568223;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string;
           certificateDistinguishedName: JsonNode): Recallable =
@@ -508,26 +508,26 @@ proc call*(call_593999: Call_AppServiceCertificateOrdersCreateOrUpdate_593990;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   certificateDistinguishedName: JObject (required)
   ##                               : Distinguished name to use for the certificate order.
-  var path_594000 = newJObject()
-  var query_594001 = newJObject()
-  var body_594002 = newJObject()
-  add(path_594000, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594000, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594001, "api-version", newJString(apiVersion))
-  add(path_594000, "subscriptionId", newJString(subscriptionId))
+  var path_568233 = newJObject()
+  var query_568234 = newJObject()
+  var body_568235 = newJObject()
+  add(path_568233, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568233, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568234, "api-version", newJString(apiVersion))
+  add(path_568233, "subscriptionId", newJString(subscriptionId))
   if certificateDistinguishedName != nil:
-    body_594002 = certificateDistinguishedName
-  result = call_593999.call(path_594000, query_594001, nil, nil, body_594002)
+    body_568235 = certificateDistinguishedName
+  result = call_568232.call(path_568233, query_568234, nil, nil, body_568235)
 
-var appServiceCertificateOrdersCreateOrUpdate* = Call_AppServiceCertificateOrdersCreateOrUpdate_593990(
+var appServiceCertificateOrdersCreateOrUpdate* = Call_AppServiceCertificateOrdersCreateOrUpdate_568223(
     name: "appServiceCertificateOrdersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}",
-    validator: validate_AppServiceCertificateOrdersCreateOrUpdate_593991,
-    base: "", url: url_AppServiceCertificateOrdersCreateOrUpdate_593992,
+    validator: validate_AppServiceCertificateOrdersCreateOrUpdate_568224,
+    base: "", url: url_AppServiceCertificateOrdersCreateOrUpdate_568225,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersGet_593979 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersGet_593981(protocol: Scheme; host: string;
+  Call_AppServiceCertificateOrdersGet_568212 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersGet_568214(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -550,7 +550,7 @@ proc url_AppServiceCertificateOrdersGet_593981(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersGet_593980(path: JsonNode;
+proc validate_AppServiceCertificateOrdersGet_568213(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a certificate order.
   ## 
@@ -565,21 +565,21 @@ proc validate_AppServiceCertificateOrdersGet_593980(path: JsonNode;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_593982 = path.getOrDefault("certificateOrderName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568215 = path.getOrDefault("certificateOrderName")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "certificateOrderName", valid_593982
-  var valid_593983 = path.getOrDefault("resourceGroupName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_568215 != nil:
+    section.add "certificateOrderName", valid_568215
+  var valid_568216 = path.getOrDefault("resourceGroupName")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "resourceGroupName", valid_593983
-  var valid_593984 = path.getOrDefault("subscriptionId")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_568216 != nil:
+    section.add "resourceGroupName", valid_568216
+  var valid_568217 = path.getOrDefault("subscriptionId")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "subscriptionId", valid_593984
+  if valid_568217 != nil:
+    section.add "subscriptionId", valid_568217
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -587,11 +587,11 @@ proc validate_AppServiceCertificateOrdersGet_593980(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568218 = query.getOrDefault("api-version")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_568218 != nil:
+    section.add "api-version", valid_568218
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -600,20 +600,20 @@ proc validate_AppServiceCertificateOrdersGet_593980(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593986: Call_AppServiceCertificateOrdersGet_593979; path: JsonNode;
+proc call*(call_568219: Call_AppServiceCertificateOrdersGet_568212; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a certificate order.
   ## 
-  let valid = call_593986.validator(path, query, header, formData, body)
-  let scheme = call_593986.pickScheme
+  let valid = call_568219.validator(path, query, header, formData, body)
+  let scheme = call_568219.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593986.url(scheme.get, call_593986.host, call_593986.base,
-                         call_593986.route, valid.getOrDefault("path"),
+  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
+                         call_568219.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593986, url, valid)
+  result = hook(call_568219, url, valid)
 
-proc call*(call_593987: Call_AppServiceCertificateOrdersGet_593979;
+proc call*(call_568220: Call_AppServiceCertificateOrdersGet_568212;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersGet
@@ -626,22 +626,22 @@ proc call*(call_593987: Call_AppServiceCertificateOrdersGet_593979;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_593988 = newJObject()
-  var query_593989 = newJObject()
-  add(path_593988, "certificateOrderName", newJString(certificateOrderName))
-  add(path_593988, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593989, "api-version", newJString(apiVersion))
-  add(path_593988, "subscriptionId", newJString(subscriptionId))
-  result = call_593987.call(path_593988, query_593989, nil, nil, nil)
+  var path_568221 = newJObject()
+  var query_568222 = newJObject()
+  add(path_568221, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568221, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568222, "api-version", newJString(apiVersion))
+  add(path_568221, "subscriptionId", newJString(subscriptionId))
+  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
 
-var appServiceCertificateOrdersGet* = Call_AppServiceCertificateOrdersGet_593979(
+var appServiceCertificateOrdersGet* = Call_AppServiceCertificateOrdersGet_568212(
     name: "appServiceCertificateOrdersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}",
-    validator: validate_AppServiceCertificateOrdersGet_593980, base: "",
-    url: url_AppServiceCertificateOrdersGet_593981, schemes: {Scheme.Https})
+    validator: validate_AppServiceCertificateOrdersGet_568213, base: "",
+    url: url_AppServiceCertificateOrdersGet_568214, schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersUpdate_594014 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersUpdate_594016(protocol: Scheme; host: string;
+  Call_AppServiceCertificateOrdersUpdate_568247 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersUpdate_568249(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -664,7 +664,7 @@ proc url_AppServiceCertificateOrdersUpdate_594016(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersUpdate_594015(path: JsonNode;
+proc validate_AppServiceCertificateOrdersUpdate_568248(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a certificate purchase order.
   ## 
@@ -679,21 +679,21 @@ proc validate_AppServiceCertificateOrdersUpdate_594015(path: JsonNode;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594017 = path.getOrDefault("certificateOrderName")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  var valid_568250 = path.getOrDefault("certificateOrderName")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "certificateOrderName", valid_594017
-  var valid_594018 = path.getOrDefault("resourceGroupName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  if valid_568250 != nil:
+    section.add "certificateOrderName", valid_568250
+  var valid_568251 = path.getOrDefault("resourceGroupName")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "resourceGroupName", valid_594018
-  var valid_594019 = path.getOrDefault("subscriptionId")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  if valid_568251 != nil:
+    section.add "resourceGroupName", valid_568251
+  var valid_568252 = path.getOrDefault("subscriptionId")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "subscriptionId", valid_594019
+  if valid_568252 != nil:
+    section.add "subscriptionId", valid_568252
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -701,11 +701,11 @@ proc validate_AppServiceCertificateOrdersUpdate_594015(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594020 = query.getOrDefault("api-version")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  var valid_568253 = query.getOrDefault("api-version")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "api-version", valid_594020
+  if valid_568253 != nil:
+    section.add "api-version", valid_568253
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -719,21 +719,21 @@ proc validate_AppServiceCertificateOrdersUpdate_594015(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594022: Call_AppServiceCertificateOrdersUpdate_594014;
+proc call*(call_568255: Call_AppServiceCertificateOrdersUpdate_568247;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a certificate purchase order.
   ## 
-  let valid = call_594022.validator(path, query, header, formData, body)
-  let scheme = call_594022.pickScheme
+  let valid = call_568255.validator(path, query, header, formData, body)
+  let scheme = call_568255.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594022.url(scheme.get, call_594022.host, call_594022.base,
-                         call_594022.route, valid.getOrDefault("path"),
+  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
+                         call_568255.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594022, url, valid)
+  result = hook(call_568255, url, valid)
 
-proc call*(call_594023: Call_AppServiceCertificateOrdersUpdate_594014;
+proc call*(call_568256: Call_AppServiceCertificateOrdersUpdate_568247;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string;
           certificateDistinguishedName: JsonNode): Recallable =
@@ -749,25 +749,25 @@ proc call*(call_594023: Call_AppServiceCertificateOrdersUpdate_594014;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   certificateDistinguishedName: JObject (required)
   ##                               : Distinguished name to use for the certificate order.
-  var path_594024 = newJObject()
-  var query_594025 = newJObject()
-  var body_594026 = newJObject()
-  add(path_594024, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594024, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594025, "api-version", newJString(apiVersion))
-  add(path_594024, "subscriptionId", newJString(subscriptionId))
+  var path_568257 = newJObject()
+  var query_568258 = newJObject()
+  var body_568259 = newJObject()
+  add(path_568257, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568257, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568258, "api-version", newJString(apiVersion))
+  add(path_568257, "subscriptionId", newJString(subscriptionId))
   if certificateDistinguishedName != nil:
-    body_594026 = certificateDistinguishedName
-  result = call_594023.call(path_594024, query_594025, nil, nil, body_594026)
+    body_568259 = certificateDistinguishedName
+  result = call_568256.call(path_568257, query_568258, nil, nil, body_568259)
 
-var appServiceCertificateOrdersUpdate* = Call_AppServiceCertificateOrdersUpdate_594014(
+var appServiceCertificateOrdersUpdate* = Call_AppServiceCertificateOrdersUpdate_568247(
     name: "appServiceCertificateOrdersUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}",
-    validator: validate_AppServiceCertificateOrdersUpdate_594015, base: "",
-    url: url_AppServiceCertificateOrdersUpdate_594016, schemes: {Scheme.Https})
+    validator: validate_AppServiceCertificateOrdersUpdate_568248, base: "",
+    url: url_AppServiceCertificateOrdersUpdate_568249, schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersDelete_594003 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersDelete_594005(protocol: Scheme; host: string;
+  Call_AppServiceCertificateOrdersDelete_568236 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersDelete_568238(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -790,7 +790,7 @@ proc url_AppServiceCertificateOrdersDelete_594005(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersDelete_594004(path: JsonNode;
+proc validate_AppServiceCertificateOrdersDelete_568237(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an existing certificate order.
   ## 
@@ -805,21 +805,21 @@ proc validate_AppServiceCertificateOrdersDelete_594004(path: JsonNode;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594006 = path.getOrDefault("certificateOrderName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_568239 = path.getOrDefault("certificateOrderName")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "certificateOrderName", valid_594006
-  var valid_594007 = path.getOrDefault("resourceGroupName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "certificateOrderName", valid_568239
+  var valid_568240 = path.getOrDefault("resourceGroupName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "resourceGroupName", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568240 != nil:
+    section.add "resourceGroupName", valid_568240
+  var valid_568241 = path.getOrDefault("subscriptionId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
+  if valid_568241 != nil:
+    section.add "subscriptionId", valid_568241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -827,11 +827,11 @@ proc validate_AppServiceCertificateOrdersDelete_594004(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594009 = query.getOrDefault("api-version")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_568242 = query.getOrDefault("api-version")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "api-version", valid_594009
+  if valid_568242 != nil:
+    section.add "api-version", valid_568242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -840,21 +840,21 @@ proc validate_AppServiceCertificateOrdersDelete_594004(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594010: Call_AppServiceCertificateOrdersDelete_594003;
+proc call*(call_568243: Call_AppServiceCertificateOrdersDelete_568236;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete an existing certificate order.
   ## 
-  let valid = call_594010.validator(path, query, header, formData, body)
-  let scheme = call_594010.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594010.url(scheme.get, call_594010.host, call_594010.base,
-                         call_594010.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594010, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594011: Call_AppServiceCertificateOrdersDelete_594003;
+proc call*(call_568244: Call_AppServiceCertificateOrdersDelete_568236;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersDelete
@@ -867,22 +867,22 @@ proc call*(call_594011: Call_AppServiceCertificateOrdersDelete_594003;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594012 = newJObject()
-  var query_594013 = newJObject()
-  add(path_594012, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594012, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594013, "api-version", newJString(apiVersion))
-  add(path_594012, "subscriptionId", newJString(subscriptionId))
-  result = call_594011.call(path_594012, query_594013, nil, nil, nil)
+  var path_568245 = newJObject()
+  var query_568246 = newJObject()
+  add(path_568245, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568246, "api-version", newJString(apiVersion))
+  add(path_568245, "subscriptionId", newJString(subscriptionId))
+  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
 
-var appServiceCertificateOrdersDelete* = Call_AppServiceCertificateOrdersDelete_594003(
+var appServiceCertificateOrdersDelete* = Call_AppServiceCertificateOrdersDelete_568236(
     name: "appServiceCertificateOrdersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}",
-    validator: validate_AppServiceCertificateOrdersDelete_594004, base: "",
-    url: url_AppServiceCertificateOrdersDelete_594005, schemes: {Scheme.Https})
+    validator: validate_AppServiceCertificateOrdersDelete_568237, base: "",
+    url: url_AppServiceCertificateOrdersDelete_568238, schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersListCertificates_594027 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersListCertificates_594029(protocol: Scheme;
+  Call_AppServiceCertificateOrdersListCertificates_568260 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersListCertificates_568262(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -906,7 +906,7 @@ proc url_AppServiceCertificateOrdersListCertificates_594029(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersListCertificates_594028(path: JsonNode;
+proc validate_AppServiceCertificateOrdersListCertificates_568261(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all certificates associated with a certificate order.
   ## 
@@ -921,21 +921,21 @@ proc validate_AppServiceCertificateOrdersListCertificates_594028(path: JsonNode;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594030 = path.getOrDefault("certificateOrderName")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  var valid_568263 = path.getOrDefault("certificateOrderName")
+  valid_568263 = validateParameter(valid_568263, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "certificateOrderName", valid_594030
-  var valid_594031 = path.getOrDefault("resourceGroupName")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  if valid_568263 != nil:
+    section.add "certificateOrderName", valid_568263
+  var valid_568264 = path.getOrDefault("resourceGroupName")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "resourceGroupName", valid_594031
-  var valid_594032 = path.getOrDefault("subscriptionId")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  if valid_568264 != nil:
+    section.add "resourceGroupName", valid_568264
+  var valid_568265 = path.getOrDefault("subscriptionId")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "subscriptionId", valid_594032
+  if valid_568265 != nil:
+    section.add "subscriptionId", valid_568265
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -943,11 +943,11 @@ proc validate_AppServiceCertificateOrdersListCertificates_594028(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594033 = query.getOrDefault("api-version")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  var valid_568266 = query.getOrDefault("api-version")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "api-version", valid_594033
+  if valid_568266 != nil:
+    section.add "api-version", valid_568266
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -956,21 +956,21 @@ proc validate_AppServiceCertificateOrdersListCertificates_594028(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594034: Call_AppServiceCertificateOrdersListCertificates_594027;
+proc call*(call_568267: Call_AppServiceCertificateOrdersListCertificates_568260;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all certificates associated with a certificate order.
   ## 
-  let valid = call_594034.validator(path, query, header, formData, body)
-  let scheme = call_594034.pickScheme
+  let valid = call_568267.validator(path, query, header, formData, body)
+  let scheme = call_568267.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594034.url(scheme.get, call_594034.host, call_594034.base,
-                         call_594034.route, valid.getOrDefault("path"),
+  let url = call_568267.url(scheme.get, call_568267.host, call_568267.base,
+                         call_568267.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594034, url, valid)
+  result = hook(call_568267, url, valid)
 
-proc call*(call_594035: Call_AppServiceCertificateOrdersListCertificates_594027;
+proc call*(call_568268: Call_AppServiceCertificateOrdersListCertificates_568260;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersListCertificates
@@ -983,23 +983,23 @@ proc call*(call_594035: Call_AppServiceCertificateOrdersListCertificates_594027;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594036 = newJObject()
-  var query_594037 = newJObject()
-  add(path_594036, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594036, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594037, "api-version", newJString(apiVersion))
-  add(path_594036, "subscriptionId", newJString(subscriptionId))
-  result = call_594035.call(path_594036, query_594037, nil, nil, nil)
+  var path_568269 = newJObject()
+  var query_568270 = newJObject()
+  add(path_568269, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568269, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568270, "api-version", newJString(apiVersion))
+  add(path_568269, "subscriptionId", newJString(subscriptionId))
+  result = call_568268.call(path_568269, query_568270, nil, nil, nil)
 
-var appServiceCertificateOrdersListCertificates* = Call_AppServiceCertificateOrdersListCertificates_594027(
+var appServiceCertificateOrdersListCertificates* = Call_AppServiceCertificateOrdersListCertificates_568260(
     name: "appServiceCertificateOrdersListCertificates", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/certificates",
-    validator: validate_AppServiceCertificateOrdersListCertificates_594028,
-    base: "", url: url_AppServiceCertificateOrdersListCertificates_594029,
+    validator: validate_AppServiceCertificateOrdersListCertificates_568261,
+    base: "", url: url_AppServiceCertificateOrdersListCertificates_568262,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersCreateOrUpdateCertificate_594050 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersCreateOrUpdateCertificate_594052(
+  Call_AppServiceCertificateOrdersCreateOrUpdateCertificate_568283 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersCreateOrUpdateCertificate_568285(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1026,7 +1026,7 @@ proc url_AppServiceCertificateOrdersCreateOrUpdateCertificate_594052(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersCreateOrUpdateCertificate_594051(
+proc validate_AppServiceCertificateOrdersCreateOrUpdateCertificate_568284(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Creates or updates a certificate and associates with key vault secret.
@@ -1044,26 +1044,26 @@ proc validate_AppServiceCertificateOrdersCreateOrUpdateCertificate_594051(
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594053 = path.getOrDefault("certificateOrderName")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_568286 = path.getOrDefault("certificateOrderName")
+  valid_568286 = validateParameter(valid_568286, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "certificateOrderName", valid_594053
-  var valid_594054 = path.getOrDefault("resourceGroupName")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  if valid_568286 != nil:
+    section.add "certificateOrderName", valid_568286
+  var valid_568287 = path.getOrDefault("resourceGroupName")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "resourceGroupName", valid_594054
-  var valid_594055 = path.getOrDefault("name")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  if valid_568287 != nil:
+    section.add "resourceGroupName", valid_568287
+  var valid_568288 = path.getOrDefault("name")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "name", valid_594055
-  var valid_594056 = path.getOrDefault("subscriptionId")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  if valid_568288 != nil:
+    section.add "name", valid_568288
+  var valid_568289 = path.getOrDefault("subscriptionId")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "subscriptionId", valid_594056
+  if valid_568289 != nil:
+    section.add "subscriptionId", valid_568289
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1071,11 +1071,11 @@ proc validate_AppServiceCertificateOrdersCreateOrUpdateCertificate_594051(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594057 = query.getOrDefault("api-version")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  var valid_568290 = query.getOrDefault("api-version")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "api-version", valid_594057
+  if valid_568290 != nil:
+    section.add "api-version", valid_568290
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1089,21 +1089,21 @@ proc validate_AppServiceCertificateOrdersCreateOrUpdateCertificate_594051(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594059: Call_AppServiceCertificateOrdersCreateOrUpdateCertificate_594050;
+proc call*(call_568292: Call_AppServiceCertificateOrdersCreateOrUpdateCertificate_568283;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a certificate and associates with key vault secret.
   ## 
-  let valid = call_594059.validator(path, query, header, formData, body)
-  let scheme = call_594059.pickScheme
+  let valid = call_568292.validator(path, query, header, formData, body)
+  let scheme = call_568292.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594059.url(scheme.get, call_594059.host, call_594059.base,
-                         call_594059.route, valid.getOrDefault("path"),
+  let url = call_568292.url(scheme.get, call_568292.host, call_568292.base,
+                         call_568292.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594059, url, valid)
+  result = hook(call_568292, url, valid)
 
-proc call*(call_594060: Call_AppServiceCertificateOrdersCreateOrUpdateCertificate_594050;
+proc call*(call_568293: Call_AppServiceCertificateOrdersCreateOrUpdateCertificate_568283;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; name: string; keyVaultCertificate: JsonNode;
           subscriptionId: string): Recallable =
@@ -1121,27 +1121,27 @@ proc call*(call_594060: Call_AppServiceCertificateOrdersCreateOrUpdateCertificat
   ##                      : Key vault certificate resource Id.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594061 = newJObject()
-  var query_594062 = newJObject()
-  var body_594063 = newJObject()
-  add(path_594061, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594061, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594062, "api-version", newJString(apiVersion))
-  add(path_594061, "name", newJString(name))
+  var path_568294 = newJObject()
+  var query_568295 = newJObject()
+  var body_568296 = newJObject()
+  add(path_568294, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568294, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568295, "api-version", newJString(apiVersion))
+  add(path_568294, "name", newJString(name))
   if keyVaultCertificate != nil:
-    body_594063 = keyVaultCertificate
-  add(path_594061, "subscriptionId", newJString(subscriptionId))
-  result = call_594060.call(path_594061, query_594062, nil, nil, body_594063)
+    body_568296 = keyVaultCertificate
+  add(path_568294, "subscriptionId", newJString(subscriptionId))
+  result = call_568293.call(path_568294, query_568295, nil, nil, body_568296)
 
-var appServiceCertificateOrdersCreateOrUpdateCertificate* = Call_AppServiceCertificateOrdersCreateOrUpdateCertificate_594050(
+var appServiceCertificateOrdersCreateOrUpdateCertificate* = Call_AppServiceCertificateOrdersCreateOrUpdateCertificate_568283(
     name: "appServiceCertificateOrdersCreateOrUpdateCertificate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/certificates/{name}",
-    validator: validate_AppServiceCertificateOrdersCreateOrUpdateCertificate_594051,
-    base: "", url: url_AppServiceCertificateOrdersCreateOrUpdateCertificate_594052,
+    validator: validate_AppServiceCertificateOrdersCreateOrUpdateCertificate_568284,
+    base: "", url: url_AppServiceCertificateOrdersCreateOrUpdateCertificate_568285,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersGetCertificate_594038 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersGetCertificate_594040(protocol: Scheme;
+  Call_AppServiceCertificateOrdersGetCertificate_568271 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersGetCertificate_568273(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1167,7 +1167,7 @@ proc url_AppServiceCertificateOrdersGetCertificate_594040(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersGetCertificate_594039(path: JsonNode;
+proc validate_AppServiceCertificateOrdersGetCertificate_568272(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the certificate associated with a certificate order.
   ## 
@@ -1184,26 +1184,26 @@ proc validate_AppServiceCertificateOrdersGetCertificate_594039(path: JsonNode;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594041 = path.getOrDefault("certificateOrderName")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_568274 = path.getOrDefault("certificateOrderName")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "certificateOrderName", valid_594041
-  var valid_594042 = path.getOrDefault("resourceGroupName")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  if valid_568274 != nil:
+    section.add "certificateOrderName", valid_568274
+  var valid_568275 = path.getOrDefault("resourceGroupName")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "resourceGroupName", valid_594042
-  var valid_594043 = path.getOrDefault("name")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  if valid_568275 != nil:
+    section.add "resourceGroupName", valid_568275
+  var valid_568276 = path.getOrDefault("name")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "name", valid_594043
-  var valid_594044 = path.getOrDefault("subscriptionId")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  if valid_568276 != nil:
+    section.add "name", valid_568276
+  var valid_568277 = path.getOrDefault("subscriptionId")
+  valid_568277 = validateParameter(valid_568277, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "subscriptionId", valid_594044
+  if valid_568277 != nil:
+    section.add "subscriptionId", valid_568277
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1211,11 +1211,11 @@ proc validate_AppServiceCertificateOrdersGetCertificate_594039(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594045 = query.getOrDefault("api-version")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  var valid_568278 = query.getOrDefault("api-version")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "api-version", valid_594045
+  if valid_568278 != nil:
+    section.add "api-version", valid_568278
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1224,21 +1224,21 @@ proc validate_AppServiceCertificateOrdersGetCertificate_594039(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594046: Call_AppServiceCertificateOrdersGetCertificate_594038;
+proc call*(call_568279: Call_AppServiceCertificateOrdersGetCertificate_568271;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the certificate associated with a certificate order.
   ## 
-  let valid = call_594046.validator(path, query, header, formData, body)
-  let scheme = call_594046.pickScheme
+  let valid = call_568279.validator(path, query, header, formData, body)
+  let scheme = call_568279.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594046.url(scheme.get, call_594046.host, call_594046.base,
-                         call_594046.route, valid.getOrDefault("path"),
+  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
+                         call_568279.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594046, url, valid)
+  result = hook(call_568279, url, valid)
 
-proc call*(call_594047: Call_AppServiceCertificateOrdersGetCertificate_594038;
+proc call*(call_568280: Call_AppServiceCertificateOrdersGetCertificate_568271;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; name: string; subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersGetCertificate
@@ -1253,24 +1253,24 @@ proc call*(call_594047: Call_AppServiceCertificateOrdersGetCertificate_594038;
   ##       : Name of the certificate.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594048 = newJObject()
-  var query_594049 = newJObject()
-  add(path_594048, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594048, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594049, "api-version", newJString(apiVersion))
-  add(path_594048, "name", newJString(name))
-  add(path_594048, "subscriptionId", newJString(subscriptionId))
-  result = call_594047.call(path_594048, query_594049, nil, nil, nil)
+  var path_568281 = newJObject()
+  var query_568282 = newJObject()
+  add(path_568281, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568281, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568282, "api-version", newJString(apiVersion))
+  add(path_568281, "name", newJString(name))
+  add(path_568281, "subscriptionId", newJString(subscriptionId))
+  result = call_568280.call(path_568281, query_568282, nil, nil, nil)
 
-var appServiceCertificateOrdersGetCertificate* = Call_AppServiceCertificateOrdersGetCertificate_594038(
+var appServiceCertificateOrdersGetCertificate* = Call_AppServiceCertificateOrdersGetCertificate_568271(
     name: "appServiceCertificateOrdersGetCertificate", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/certificates/{name}",
-    validator: validate_AppServiceCertificateOrdersGetCertificate_594039,
-    base: "", url: url_AppServiceCertificateOrdersGetCertificate_594040,
+    validator: validate_AppServiceCertificateOrdersGetCertificate_568272,
+    base: "", url: url_AppServiceCertificateOrdersGetCertificate_568273,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersUpdateCertificate_594076 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersUpdateCertificate_594078(protocol: Scheme;
+  Call_AppServiceCertificateOrdersUpdateCertificate_568309 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersUpdateCertificate_568311(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1296,7 +1296,7 @@ proc url_AppServiceCertificateOrdersUpdateCertificate_594078(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersUpdateCertificate_594077(path: JsonNode;
+proc validate_AppServiceCertificateOrdersUpdateCertificate_568310(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a certificate and associates with key vault secret.
   ## 
@@ -1313,26 +1313,26 @@ proc validate_AppServiceCertificateOrdersUpdateCertificate_594077(path: JsonNode
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594079 = path.getOrDefault("certificateOrderName")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+  var valid_568312 = path.getOrDefault("certificateOrderName")
+  valid_568312 = validateParameter(valid_568312, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "certificateOrderName", valid_594079
-  var valid_594080 = path.getOrDefault("resourceGroupName")
-  valid_594080 = validateParameter(valid_594080, JString, required = true,
+  if valid_568312 != nil:
+    section.add "certificateOrderName", valid_568312
+  var valid_568313 = path.getOrDefault("resourceGroupName")
+  valid_568313 = validateParameter(valid_568313, JString, required = true,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "resourceGroupName", valid_594080
-  var valid_594081 = path.getOrDefault("name")
-  valid_594081 = validateParameter(valid_594081, JString, required = true,
+  if valid_568313 != nil:
+    section.add "resourceGroupName", valid_568313
+  var valid_568314 = path.getOrDefault("name")
+  valid_568314 = validateParameter(valid_568314, JString, required = true,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "name", valid_594081
-  var valid_594082 = path.getOrDefault("subscriptionId")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  if valid_568314 != nil:
+    section.add "name", valid_568314
+  var valid_568315 = path.getOrDefault("subscriptionId")
+  valid_568315 = validateParameter(valid_568315, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "subscriptionId", valid_594082
+  if valid_568315 != nil:
+    section.add "subscriptionId", valid_568315
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1340,11 +1340,11 @@ proc validate_AppServiceCertificateOrdersUpdateCertificate_594077(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594083 = query.getOrDefault("api-version")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
+  var valid_568316 = query.getOrDefault("api-version")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = nil)
-  if valid_594083 != nil:
-    section.add "api-version", valid_594083
+  if valid_568316 != nil:
+    section.add "api-version", valid_568316
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1358,21 +1358,21 @@ proc validate_AppServiceCertificateOrdersUpdateCertificate_594077(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594085: Call_AppServiceCertificateOrdersUpdateCertificate_594076;
+proc call*(call_568318: Call_AppServiceCertificateOrdersUpdateCertificate_568309;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a certificate and associates with key vault secret.
   ## 
-  let valid = call_594085.validator(path, query, header, formData, body)
-  let scheme = call_594085.pickScheme
+  let valid = call_568318.validator(path, query, header, formData, body)
+  let scheme = call_568318.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594085.url(scheme.get, call_594085.host, call_594085.base,
-                         call_594085.route, valid.getOrDefault("path"),
+  let url = call_568318.url(scheme.get, call_568318.host, call_568318.base,
+                         call_568318.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594085, url, valid)
+  result = hook(call_568318, url, valid)
 
-proc call*(call_594086: Call_AppServiceCertificateOrdersUpdateCertificate_594076;
+proc call*(call_568319: Call_AppServiceCertificateOrdersUpdateCertificate_568309;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; name: string; keyVaultCertificate: JsonNode;
           subscriptionId: string): Recallable =
@@ -1390,27 +1390,27 @@ proc call*(call_594086: Call_AppServiceCertificateOrdersUpdateCertificate_594076
   ##                      : Key vault certificate resource Id.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594087 = newJObject()
-  var query_594088 = newJObject()
-  var body_594089 = newJObject()
-  add(path_594087, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594087, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594088, "api-version", newJString(apiVersion))
-  add(path_594087, "name", newJString(name))
+  var path_568320 = newJObject()
+  var query_568321 = newJObject()
+  var body_568322 = newJObject()
+  add(path_568320, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568320, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568321, "api-version", newJString(apiVersion))
+  add(path_568320, "name", newJString(name))
   if keyVaultCertificate != nil:
-    body_594089 = keyVaultCertificate
-  add(path_594087, "subscriptionId", newJString(subscriptionId))
-  result = call_594086.call(path_594087, query_594088, nil, nil, body_594089)
+    body_568322 = keyVaultCertificate
+  add(path_568320, "subscriptionId", newJString(subscriptionId))
+  result = call_568319.call(path_568320, query_568321, nil, nil, body_568322)
 
-var appServiceCertificateOrdersUpdateCertificate* = Call_AppServiceCertificateOrdersUpdateCertificate_594076(
+var appServiceCertificateOrdersUpdateCertificate* = Call_AppServiceCertificateOrdersUpdateCertificate_568309(
     name: "appServiceCertificateOrdersUpdateCertificate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/certificates/{name}",
-    validator: validate_AppServiceCertificateOrdersUpdateCertificate_594077,
-    base: "", url: url_AppServiceCertificateOrdersUpdateCertificate_594078,
+    validator: validate_AppServiceCertificateOrdersUpdateCertificate_568310,
+    base: "", url: url_AppServiceCertificateOrdersUpdateCertificate_568311,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersDeleteCertificate_594064 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersDeleteCertificate_594066(protocol: Scheme;
+  Call_AppServiceCertificateOrdersDeleteCertificate_568297 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersDeleteCertificate_568299(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1436,7 +1436,7 @@ proc url_AppServiceCertificateOrdersDeleteCertificate_594066(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersDeleteCertificate_594065(path: JsonNode;
+proc validate_AppServiceCertificateOrdersDeleteCertificate_568298(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the certificate associated with a certificate order.
   ## 
@@ -1453,26 +1453,26 @@ proc validate_AppServiceCertificateOrdersDeleteCertificate_594065(path: JsonNode
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594067 = path.getOrDefault("certificateOrderName")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  var valid_568300 = path.getOrDefault("certificateOrderName")
+  valid_568300 = validateParameter(valid_568300, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "certificateOrderName", valid_594067
-  var valid_594068 = path.getOrDefault("resourceGroupName")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  if valid_568300 != nil:
+    section.add "certificateOrderName", valid_568300
+  var valid_568301 = path.getOrDefault("resourceGroupName")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "resourceGroupName", valid_594068
-  var valid_594069 = path.getOrDefault("name")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  if valid_568301 != nil:
+    section.add "resourceGroupName", valid_568301
+  var valid_568302 = path.getOrDefault("name")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "name", valid_594069
-  var valid_594070 = path.getOrDefault("subscriptionId")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  if valid_568302 != nil:
+    section.add "name", valid_568302
+  var valid_568303 = path.getOrDefault("subscriptionId")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "subscriptionId", valid_594070
+  if valid_568303 != nil:
+    section.add "subscriptionId", valid_568303
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1480,11 +1480,11 @@ proc validate_AppServiceCertificateOrdersDeleteCertificate_594065(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594071 = query.getOrDefault("api-version")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  var valid_568304 = query.getOrDefault("api-version")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "api-version", valid_594071
+  if valid_568304 != nil:
+    section.add "api-version", valid_568304
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1493,21 +1493,21 @@ proc validate_AppServiceCertificateOrdersDeleteCertificate_594065(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594072: Call_AppServiceCertificateOrdersDeleteCertificate_594064;
+proc call*(call_568305: Call_AppServiceCertificateOrdersDeleteCertificate_568297;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete the certificate associated with a certificate order.
   ## 
-  let valid = call_594072.validator(path, query, header, formData, body)
-  let scheme = call_594072.pickScheme
+  let valid = call_568305.validator(path, query, header, formData, body)
+  let scheme = call_568305.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594072.url(scheme.get, call_594072.host, call_594072.base,
-                         call_594072.route, valid.getOrDefault("path"),
+  let url = call_568305.url(scheme.get, call_568305.host, call_568305.base,
+                         call_568305.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594072, url, valid)
+  result = hook(call_568305, url, valid)
 
-proc call*(call_594073: Call_AppServiceCertificateOrdersDeleteCertificate_594064;
+proc call*(call_568306: Call_AppServiceCertificateOrdersDeleteCertificate_568297;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; name: string; subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersDeleteCertificate
@@ -1522,24 +1522,24 @@ proc call*(call_594073: Call_AppServiceCertificateOrdersDeleteCertificate_594064
   ##       : Name of the certificate.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594074 = newJObject()
-  var query_594075 = newJObject()
-  add(path_594074, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594074, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594075, "api-version", newJString(apiVersion))
-  add(path_594074, "name", newJString(name))
-  add(path_594074, "subscriptionId", newJString(subscriptionId))
-  result = call_594073.call(path_594074, query_594075, nil, nil, nil)
+  var path_568307 = newJObject()
+  var query_568308 = newJObject()
+  add(path_568307, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568307, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568308, "api-version", newJString(apiVersion))
+  add(path_568307, "name", newJString(name))
+  add(path_568307, "subscriptionId", newJString(subscriptionId))
+  result = call_568306.call(path_568307, query_568308, nil, nil, nil)
 
-var appServiceCertificateOrdersDeleteCertificate* = Call_AppServiceCertificateOrdersDeleteCertificate_594064(
+var appServiceCertificateOrdersDeleteCertificate* = Call_AppServiceCertificateOrdersDeleteCertificate_568297(
     name: "appServiceCertificateOrdersDeleteCertificate",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/certificates/{name}",
-    validator: validate_AppServiceCertificateOrdersDeleteCertificate_594065,
-    base: "", url: url_AppServiceCertificateOrdersDeleteCertificate_594066,
+    validator: validate_AppServiceCertificateOrdersDeleteCertificate_568298,
+    base: "", url: url_AppServiceCertificateOrdersDeleteCertificate_568299,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersReissue_594090 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersReissue_594092(protocol: Scheme; host: string;
+  Call_AppServiceCertificateOrdersReissue_568323 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersReissue_568325(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1563,7 +1563,7 @@ proc url_AppServiceCertificateOrdersReissue_594092(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersReissue_594091(path: JsonNode;
+proc validate_AppServiceCertificateOrdersReissue_568324(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reissue an existing certificate order.
   ## 
@@ -1578,21 +1578,21 @@ proc validate_AppServiceCertificateOrdersReissue_594091(path: JsonNode;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594093 = path.getOrDefault("certificateOrderName")
-  valid_594093 = validateParameter(valid_594093, JString, required = true,
+  var valid_568326 = path.getOrDefault("certificateOrderName")
+  valid_568326 = validateParameter(valid_568326, JString, required = true,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "certificateOrderName", valid_594093
-  var valid_594094 = path.getOrDefault("resourceGroupName")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  if valid_568326 != nil:
+    section.add "certificateOrderName", valid_568326
+  var valid_568327 = path.getOrDefault("resourceGroupName")
+  valid_568327 = validateParameter(valid_568327, JString, required = true,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "resourceGroupName", valid_594094
-  var valid_594095 = path.getOrDefault("subscriptionId")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  if valid_568327 != nil:
+    section.add "resourceGroupName", valid_568327
+  var valid_568328 = path.getOrDefault("subscriptionId")
+  valid_568328 = validateParameter(valid_568328, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "subscriptionId", valid_594095
+  if valid_568328 != nil:
+    section.add "subscriptionId", valid_568328
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1600,11 +1600,11 @@ proc validate_AppServiceCertificateOrdersReissue_594091(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594096 = query.getOrDefault("api-version")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
+  var valid_568329 = query.getOrDefault("api-version")
+  valid_568329 = validateParameter(valid_568329, JString, required = true,
                                  default = nil)
-  if valid_594096 != nil:
-    section.add "api-version", valid_594096
+  if valid_568329 != nil:
+    section.add "api-version", valid_568329
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1618,21 +1618,21 @@ proc validate_AppServiceCertificateOrdersReissue_594091(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594098: Call_AppServiceCertificateOrdersReissue_594090;
+proc call*(call_568331: Call_AppServiceCertificateOrdersReissue_568323;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Reissue an existing certificate order.
   ## 
-  let valid = call_594098.validator(path, query, header, formData, body)
-  let scheme = call_594098.pickScheme
+  let valid = call_568331.validator(path, query, header, formData, body)
+  let scheme = call_568331.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594098.url(scheme.get, call_594098.host, call_594098.base,
-                         call_594098.route, valid.getOrDefault("path"),
+  let url = call_568331.url(scheme.get, call_568331.host, call_568331.base,
+                         call_568331.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594098, url, valid)
+  result = hook(call_568331, url, valid)
 
-proc call*(call_594099: Call_AppServiceCertificateOrdersReissue_594090;
+proc call*(call_568332: Call_AppServiceCertificateOrdersReissue_568323;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; reissueCertificateOrderRequest: JsonNode;
           subscriptionId: string): Recallable =
@@ -1648,25 +1648,25 @@ proc call*(call_594099: Call_AppServiceCertificateOrdersReissue_594090;
   ##                                 : Parameters for the reissue.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594100 = newJObject()
-  var query_594101 = newJObject()
-  var body_594102 = newJObject()
-  add(path_594100, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594100, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594101, "api-version", newJString(apiVersion))
+  var path_568333 = newJObject()
+  var query_568334 = newJObject()
+  var body_568335 = newJObject()
+  add(path_568333, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568333, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568334, "api-version", newJString(apiVersion))
   if reissueCertificateOrderRequest != nil:
-    body_594102 = reissueCertificateOrderRequest
-  add(path_594100, "subscriptionId", newJString(subscriptionId))
-  result = call_594099.call(path_594100, query_594101, nil, nil, body_594102)
+    body_568335 = reissueCertificateOrderRequest
+  add(path_568333, "subscriptionId", newJString(subscriptionId))
+  result = call_568332.call(path_568333, query_568334, nil, nil, body_568335)
 
-var appServiceCertificateOrdersReissue* = Call_AppServiceCertificateOrdersReissue_594090(
+var appServiceCertificateOrdersReissue* = Call_AppServiceCertificateOrdersReissue_568323(
     name: "appServiceCertificateOrdersReissue", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/reissue",
-    validator: validate_AppServiceCertificateOrdersReissue_594091, base: "",
-    url: url_AppServiceCertificateOrdersReissue_594092, schemes: {Scheme.Https})
+    validator: validate_AppServiceCertificateOrdersReissue_568324, base: "",
+    url: url_AppServiceCertificateOrdersReissue_568325, schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersRenew_594103 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersRenew_594105(protocol: Scheme; host: string;
+  Call_AppServiceCertificateOrdersRenew_568336 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersRenew_568338(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1690,7 +1690,7 @@ proc url_AppServiceCertificateOrdersRenew_594105(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersRenew_594104(path: JsonNode;
+proc validate_AppServiceCertificateOrdersRenew_568337(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Renew an existing certificate order.
   ## 
@@ -1705,21 +1705,21 @@ proc validate_AppServiceCertificateOrdersRenew_594104(path: JsonNode;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594106 = path.getOrDefault("certificateOrderName")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  var valid_568339 = path.getOrDefault("certificateOrderName")
+  valid_568339 = validateParameter(valid_568339, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "certificateOrderName", valid_594106
-  var valid_594107 = path.getOrDefault("resourceGroupName")
-  valid_594107 = validateParameter(valid_594107, JString, required = true,
+  if valid_568339 != nil:
+    section.add "certificateOrderName", valid_568339
+  var valid_568340 = path.getOrDefault("resourceGroupName")
+  valid_568340 = validateParameter(valid_568340, JString, required = true,
                                  default = nil)
-  if valid_594107 != nil:
-    section.add "resourceGroupName", valid_594107
-  var valid_594108 = path.getOrDefault("subscriptionId")
-  valid_594108 = validateParameter(valid_594108, JString, required = true,
+  if valid_568340 != nil:
+    section.add "resourceGroupName", valid_568340
+  var valid_568341 = path.getOrDefault("subscriptionId")
+  valid_568341 = validateParameter(valid_568341, JString, required = true,
                                  default = nil)
-  if valid_594108 != nil:
-    section.add "subscriptionId", valid_594108
+  if valid_568341 != nil:
+    section.add "subscriptionId", valid_568341
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1727,11 +1727,11 @@ proc validate_AppServiceCertificateOrdersRenew_594104(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594109 = query.getOrDefault("api-version")
-  valid_594109 = validateParameter(valid_594109, JString, required = true,
+  var valid_568342 = query.getOrDefault("api-version")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = nil)
-  if valid_594109 != nil:
-    section.add "api-version", valid_594109
+  if valid_568342 != nil:
+    section.add "api-version", valid_568342
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1745,21 +1745,21 @@ proc validate_AppServiceCertificateOrdersRenew_594104(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594111: Call_AppServiceCertificateOrdersRenew_594103;
+proc call*(call_568344: Call_AppServiceCertificateOrdersRenew_568336;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Renew an existing certificate order.
   ## 
-  let valid = call_594111.validator(path, query, header, formData, body)
-  let scheme = call_594111.pickScheme
+  let valid = call_568344.validator(path, query, header, formData, body)
+  let scheme = call_568344.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594111.url(scheme.get, call_594111.host, call_594111.base,
-                         call_594111.route, valid.getOrDefault("path"),
+  let url = call_568344.url(scheme.get, call_568344.host, call_568344.base,
+                         call_568344.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594111, url, valid)
+  result = hook(call_568344, url, valid)
 
-proc call*(call_594112: Call_AppServiceCertificateOrdersRenew_594103;
+proc call*(call_568345: Call_AppServiceCertificateOrdersRenew_568336;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string;
           renewCertificateOrderRequest: JsonNode): Recallable =
@@ -1775,25 +1775,25 @@ proc call*(call_594112: Call_AppServiceCertificateOrdersRenew_594103;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   renewCertificateOrderRequest: JObject (required)
   ##                               : Renew parameters
-  var path_594113 = newJObject()
-  var query_594114 = newJObject()
-  var body_594115 = newJObject()
-  add(path_594113, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594113, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594114, "api-version", newJString(apiVersion))
-  add(path_594113, "subscriptionId", newJString(subscriptionId))
+  var path_568346 = newJObject()
+  var query_568347 = newJObject()
+  var body_568348 = newJObject()
+  add(path_568346, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568346, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568347, "api-version", newJString(apiVersion))
+  add(path_568346, "subscriptionId", newJString(subscriptionId))
   if renewCertificateOrderRequest != nil:
-    body_594115 = renewCertificateOrderRequest
-  result = call_594112.call(path_594113, query_594114, nil, nil, body_594115)
+    body_568348 = renewCertificateOrderRequest
+  result = call_568345.call(path_568346, query_568347, nil, nil, body_568348)
 
-var appServiceCertificateOrdersRenew* = Call_AppServiceCertificateOrdersRenew_594103(
+var appServiceCertificateOrdersRenew* = Call_AppServiceCertificateOrdersRenew_568336(
     name: "appServiceCertificateOrdersRenew", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/renew",
-    validator: validate_AppServiceCertificateOrdersRenew_594104, base: "",
-    url: url_AppServiceCertificateOrdersRenew_594105, schemes: {Scheme.Https})
+    validator: validate_AppServiceCertificateOrdersRenew_568337, base: "",
+    url: url_AppServiceCertificateOrdersRenew_568338, schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersResendEmail_594116 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersResendEmail_594118(protocol: Scheme;
+  Call_AppServiceCertificateOrdersResendEmail_568349 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersResendEmail_568351(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1817,7 +1817,7 @@ proc url_AppServiceCertificateOrdersResendEmail_594118(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersResendEmail_594117(path: JsonNode;
+proc validate_AppServiceCertificateOrdersResendEmail_568350(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Resend certificate email.
   ## 
@@ -1832,21 +1832,21 @@ proc validate_AppServiceCertificateOrdersResendEmail_594117(path: JsonNode;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594119 = path.getOrDefault("certificateOrderName")
-  valid_594119 = validateParameter(valid_594119, JString, required = true,
+  var valid_568352 = path.getOrDefault("certificateOrderName")
+  valid_568352 = validateParameter(valid_568352, JString, required = true,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "certificateOrderName", valid_594119
-  var valid_594120 = path.getOrDefault("resourceGroupName")
-  valid_594120 = validateParameter(valid_594120, JString, required = true,
+  if valid_568352 != nil:
+    section.add "certificateOrderName", valid_568352
+  var valid_568353 = path.getOrDefault("resourceGroupName")
+  valid_568353 = validateParameter(valid_568353, JString, required = true,
                                  default = nil)
-  if valid_594120 != nil:
-    section.add "resourceGroupName", valid_594120
-  var valid_594121 = path.getOrDefault("subscriptionId")
-  valid_594121 = validateParameter(valid_594121, JString, required = true,
+  if valid_568353 != nil:
+    section.add "resourceGroupName", valid_568353
+  var valid_568354 = path.getOrDefault("subscriptionId")
+  valid_568354 = validateParameter(valid_568354, JString, required = true,
                                  default = nil)
-  if valid_594121 != nil:
-    section.add "subscriptionId", valid_594121
+  if valid_568354 != nil:
+    section.add "subscriptionId", valid_568354
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1854,11 +1854,11 @@ proc validate_AppServiceCertificateOrdersResendEmail_594117(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594122 = query.getOrDefault("api-version")
-  valid_594122 = validateParameter(valid_594122, JString, required = true,
+  var valid_568355 = query.getOrDefault("api-version")
+  valid_568355 = validateParameter(valid_568355, JString, required = true,
                                  default = nil)
-  if valid_594122 != nil:
-    section.add "api-version", valid_594122
+  if valid_568355 != nil:
+    section.add "api-version", valid_568355
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1867,21 +1867,21 @@ proc validate_AppServiceCertificateOrdersResendEmail_594117(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594123: Call_AppServiceCertificateOrdersResendEmail_594116;
+proc call*(call_568356: Call_AppServiceCertificateOrdersResendEmail_568349;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Resend certificate email.
   ## 
-  let valid = call_594123.validator(path, query, header, formData, body)
-  let scheme = call_594123.pickScheme
+  let valid = call_568356.validator(path, query, header, formData, body)
+  let scheme = call_568356.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594123.url(scheme.get, call_594123.host, call_594123.base,
-                         call_594123.route, valid.getOrDefault("path"),
+  let url = call_568356.url(scheme.get, call_568356.host, call_568356.base,
+                         call_568356.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594123, url, valid)
+  result = hook(call_568356, url, valid)
 
-proc call*(call_594124: Call_AppServiceCertificateOrdersResendEmail_594116;
+proc call*(call_568357: Call_AppServiceCertificateOrdersResendEmail_568349;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersResendEmail
@@ -1894,23 +1894,23 @@ proc call*(call_594124: Call_AppServiceCertificateOrdersResendEmail_594116;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594125 = newJObject()
-  var query_594126 = newJObject()
-  add(path_594125, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594125, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594126, "api-version", newJString(apiVersion))
-  add(path_594125, "subscriptionId", newJString(subscriptionId))
-  result = call_594124.call(path_594125, query_594126, nil, nil, nil)
+  var path_568358 = newJObject()
+  var query_568359 = newJObject()
+  add(path_568358, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568358, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568359, "api-version", newJString(apiVersion))
+  add(path_568358, "subscriptionId", newJString(subscriptionId))
+  result = call_568357.call(path_568358, query_568359, nil, nil, nil)
 
-var appServiceCertificateOrdersResendEmail* = Call_AppServiceCertificateOrdersResendEmail_594116(
+var appServiceCertificateOrdersResendEmail* = Call_AppServiceCertificateOrdersResendEmail_568349(
     name: "appServiceCertificateOrdersResendEmail", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/resendEmail",
-    validator: validate_AppServiceCertificateOrdersResendEmail_594117, base: "",
-    url: url_AppServiceCertificateOrdersResendEmail_594118,
+    validator: validate_AppServiceCertificateOrdersResendEmail_568350, base: "",
+    url: url_AppServiceCertificateOrdersResendEmail_568351,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersResendRequestEmails_594127 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersResendRequestEmails_594129(protocol: Scheme;
+  Call_AppServiceCertificateOrdersResendRequestEmails_568360 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersResendRequestEmails_568362(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1934,7 +1934,7 @@ proc url_AppServiceCertificateOrdersResendRequestEmails_594129(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersResendRequestEmails_594128(
+proc validate_AppServiceCertificateOrdersResendRequestEmails_568361(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Verify domain ownership for this certificate order.
@@ -1950,21 +1950,21 @@ proc validate_AppServiceCertificateOrdersResendRequestEmails_594128(
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594130 = path.getOrDefault("certificateOrderName")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  var valid_568363 = path.getOrDefault("certificateOrderName")
+  valid_568363 = validateParameter(valid_568363, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "certificateOrderName", valid_594130
-  var valid_594131 = path.getOrDefault("resourceGroupName")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  if valid_568363 != nil:
+    section.add "certificateOrderName", valid_568363
+  var valid_568364 = path.getOrDefault("resourceGroupName")
+  valid_568364 = validateParameter(valid_568364, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "resourceGroupName", valid_594131
-  var valid_594132 = path.getOrDefault("subscriptionId")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  if valid_568364 != nil:
+    section.add "resourceGroupName", valid_568364
+  var valid_568365 = path.getOrDefault("subscriptionId")
+  valid_568365 = validateParameter(valid_568365, JString, required = true,
                                  default = nil)
-  if valid_594132 != nil:
-    section.add "subscriptionId", valid_594132
+  if valid_568365 != nil:
+    section.add "subscriptionId", valid_568365
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1972,11 +1972,11 @@ proc validate_AppServiceCertificateOrdersResendRequestEmails_594128(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594133 = query.getOrDefault("api-version")
-  valid_594133 = validateParameter(valid_594133, JString, required = true,
+  var valid_568366 = query.getOrDefault("api-version")
+  valid_568366 = validateParameter(valid_568366, JString, required = true,
                                  default = nil)
-  if valid_594133 != nil:
-    section.add "api-version", valid_594133
+  if valid_568366 != nil:
+    section.add "api-version", valid_568366
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1990,21 +1990,21 @@ proc validate_AppServiceCertificateOrdersResendRequestEmails_594128(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594135: Call_AppServiceCertificateOrdersResendRequestEmails_594127;
+proc call*(call_568368: Call_AppServiceCertificateOrdersResendRequestEmails_568360;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Verify domain ownership for this certificate order.
   ## 
-  let valid = call_594135.validator(path, query, header, formData, body)
-  let scheme = call_594135.pickScheme
+  let valid = call_568368.validator(path, query, header, formData, body)
+  let scheme = call_568368.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594135.url(scheme.get, call_594135.host, call_594135.base,
-                         call_594135.route, valid.getOrDefault("path"),
+  let url = call_568368.url(scheme.get, call_568368.host, call_568368.base,
+                         call_568368.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594135, url, valid)
+  result = hook(call_568368, url, valid)
 
-proc call*(call_594136: Call_AppServiceCertificateOrdersResendRequestEmails_594127;
+proc call*(call_568369: Call_AppServiceCertificateOrdersResendRequestEmails_568360;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; nameIdentifier: JsonNode): Recallable =
   ## appServiceCertificateOrdersResendRequestEmails
@@ -2019,26 +2019,26 @@ proc call*(call_594136: Call_AppServiceCertificateOrdersResendRequestEmails_5941
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   nameIdentifier: JObject (required)
   ##                 : Email address
-  var path_594137 = newJObject()
-  var query_594138 = newJObject()
-  var body_594139 = newJObject()
-  add(path_594137, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594137, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594138, "api-version", newJString(apiVersion))
-  add(path_594137, "subscriptionId", newJString(subscriptionId))
+  var path_568370 = newJObject()
+  var query_568371 = newJObject()
+  var body_568372 = newJObject()
+  add(path_568370, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568370, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568371, "api-version", newJString(apiVersion))
+  add(path_568370, "subscriptionId", newJString(subscriptionId))
   if nameIdentifier != nil:
-    body_594139 = nameIdentifier
-  result = call_594136.call(path_594137, query_594138, nil, nil, body_594139)
+    body_568372 = nameIdentifier
+  result = call_568369.call(path_568370, query_568371, nil, nil, body_568372)
 
-var appServiceCertificateOrdersResendRequestEmails* = Call_AppServiceCertificateOrdersResendRequestEmails_594127(
+var appServiceCertificateOrdersResendRequestEmails* = Call_AppServiceCertificateOrdersResendRequestEmails_568360(
     name: "appServiceCertificateOrdersResendRequestEmails",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/resendRequestEmails",
-    validator: validate_AppServiceCertificateOrdersResendRequestEmails_594128,
-    base: "", url: url_AppServiceCertificateOrdersResendRequestEmails_594129,
+    validator: validate_AppServiceCertificateOrdersResendRequestEmails_568361,
+    base: "", url: url_AppServiceCertificateOrdersResendRequestEmails_568362,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersRetrieveSiteSeal_594140 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersRetrieveSiteSeal_594142(protocol: Scheme;
+  Call_AppServiceCertificateOrdersRetrieveSiteSeal_568373 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersRetrieveSiteSeal_568375(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2062,7 +2062,7 @@ proc url_AppServiceCertificateOrdersRetrieveSiteSeal_594142(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersRetrieveSiteSeal_594141(path: JsonNode;
+proc validate_AppServiceCertificateOrdersRetrieveSiteSeal_568374(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Verify domain ownership for this certificate order.
   ## 
@@ -2077,21 +2077,21 @@ proc validate_AppServiceCertificateOrdersRetrieveSiteSeal_594141(path: JsonNode;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594143 = path.getOrDefault("certificateOrderName")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+  var valid_568376 = path.getOrDefault("certificateOrderName")
+  valid_568376 = validateParameter(valid_568376, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "certificateOrderName", valid_594143
-  var valid_594144 = path.getOrDefault("resourceGroupName")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  if valid_568376 != nil:
+    section.add "certificateOrderName", valid_568376
+  var valid_568377 = path.getOrDefault("resourceGroupName")
+  valid_568377 = validateParameter(valid_568377, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "resourceGroupName", valid_594144
-  var valid_594145 = path.getOrDefault("subscriptionId")
-  valid_594145 = validateParameter(valid_594145, JString, required = true,
+  if valid_568377 != nil:
+    section.add "resourceGroupName", valid_568377
+  var valid_568378 = path.getOrDefault("subscriptionId")
+  valid_568378 = validateParameter(valid_568378, JString, required = true,
                                  default = nil)
-  if valid_594145 != nil:
-    section.add "subscriptionId", valid_594145
+  if valid_568378 != nil:
+    section.add "subscriptionId", valid_568378
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2099,11 +2099,11 @@ proc validate_AppServiceCertificateOrdersRetrieveSiteSeal_594141(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594146 = query.getOrDefault("api-version")
-  valid_594146 = validateParameter(valid_594146, JString, required = true,
+  var valid_568379 = query.getOrDefault("api-version")
+  valid_568379 = validateParameter(valid_568379, JString, required = true,
                                  default = nil)
-  if valid_594146 != nil:
-    section.add "api-version", valid_594146
+  if valid_568379 != nil:
+    section.add "api-version", valid_568379
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2117,21 +2117,21 @@ proc validate_AppServiceCertificateOrdersRetrieveSiteSeal_594141(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594148: Call_AppServiceCertificateOrdersRetrieveSiteSeal_594140;
+proc call*(call_568381: Call_AppServiceCertificateOrdersRetrieveSiteSeal_568373;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Verify domain ownership for this certificate order.
   ## 
-  let valid = call_594148.validator(path, query, header, formData, body)
-  let scheme = call_594148.pickScheme
+  let valid = call_568381.validator(path, query, header, formData, body)
+  let scheme = call_568381.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594148.url(scheme.get, call_594148.host, call_594148.base,
-                         call_594148.route, valid.getOrDefault("path"),
+  let url = call_568381.url(scheme.get, call_568381.host, call_568381.base,
+                         call_568381.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594148, url, valid)
+  result = hook(call_568381, url, valid)
 
-proc call*(call_594149: Call_AppServiceCertificateOrdersRetrieveSiteSeal_594140;
+proc call*(call_568382: Call_AppServiceCertificateOrdersRetrieveSiteSeal_568373;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; siteSealRequest: JsonNode): Recallable =
   ## appServiceCertificateOrdersRetrieveSiteSeal
@@ -2146,26 +2146,26 @@ proc call*(call_594149: Call_AppServiceCertificateOrdersRetrieveSiteSeal_594140;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   siteSealRequest: JObject (required)
   ##                  : Site seal request.
-  var path_594150 = newJObject()
-  var query_594151 = newJObject()
-  var body_594152 = newJObject()
-  add(path_594150, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594150, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594151, "api-version", newJString(apiVersion))
-  add(path_594150, "subscriptionId", newJString(subscriptionId))
+  var path_568383 = newJObject()
+  var query_568384 = newJObject()
+  var body_568385 = newJObject()
+  add(path_568383, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568383, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568384, "api-version", newJString(apiVersion))
+  add(path_568383, "subscriptionId", newJString(subscriptionId))
   if siteSealRequest != nil:
-    body_594152 = siteSealRequest
-  result = call_594149.call(path_594150, query_594151, nil, nil, body_594152)
+    body_568385 = siteSealRequest
+  result = call_568382.call(path_568383, query_568384, nil, nil, body_568385)
 
-var appServiceCertificateOrdersRetrieveSiteSeal* = Call_AppServiceCertificateOrdersRetrieveSiteSeal_594140(
+var appServiceCertificateOrdersRetrieveSiteSeal* = Call_AppServiceCertificateOrdersRetrieveSiteSeal_568373(
     name: "appServiceCertificateOrdersRetrieveSiteSeal",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/retrieveSiteSeal",
-    validator: validate_AppServiceCertificateOrdersRetrieveSiteSeal_594141,
-    base: "", url: url_AppServiceCertificateOrdersRetrieveSiteSeal_594142,
+    validator: validate_AppServiceCertificateOrdersRetrieveSiteSeal_568374,
+    base: "", url: url_AppServiceCertificateOrdersRetrieveSiteSeal_568375,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersVerifyDomainOwnership_594153 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersVerifyDomainOwnership_594155(
+  Call_AppServiceCertificateOrdersVerifyDomainOwnership_568386 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersVerifyDomainOwnership_568388(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2190,7 +2190,7 @@ proc url_AppServiceCertificateOrdersVerifyDomainOwnership_594155(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersVerifyDomainOwnership_594154(
+proc validate_AppServiceCertificateOrdersVerifyDomainOwnership_568387(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Verify domain ownership for this certificate order.
@@ -2206,21 +2206,21 @@ proc validate_AppServiceCertificateOrdersVerifyDomainOwnership_594154(
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `certificateOrderName` field"
-  var valid_594156 = path.getOrDefault("certificateOrderName")
-  valid_594156 = validateParameter(valid_594156, JString, required = true,
+  var valid_568389 = path.getOrDefault("certificateOrderName")
+  valid_568389 = validateParameter(valid_568389, JString, required = true,
                                  default = nil)
-  if valid_594156 != nil:
-    section.add "certificateOrderName", valid_594156
-  var valid_594157 = path.getOrDefault("resourceGroupName")
-  valid_594157 = validateParameter(valid_594157, JString, required = true,
+  if valid_568389 != nil:
+    section.add "certificateOrderName", valid_568389
+  var valid_568390 = path.getOrDefault("resourceGroupName")
+  valid_568390 = validateParameter(valid_568390, JString, required = true,
                                  default = nil)
-  if valid_594157 != nil:
-    section.add "resourceGroupName", valid_594157
-  var valid_594158 = path.getOrDefault("subscriptionId")
-  valid_594158 = validateParameter(valid_594158, JString, required = true,
+  if valid_568390 != nil:
+    section.add "resourceGroupName", valid_568390
+  var valid_568391 = path.getOrDefault("subscriptionId")
+  valid_568391 = validateParameter(valid_568391, JString, required = true,
                                  default = nil)
-  if valid_594158 != nil:
-    section.add "subscriptionId", valid_594158
+  if valid_568391 != nil:
+    section.add "subscriptionId", valid_568391
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2228,11 +2228,11 @@ proc validate_AppServiceCertificateOrdersVerifyDomainOwnership_594154(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594159 = query.getOrDefault("api-version")
-  valid_594159 = validateParameter(valid_594159, JString, required = true,
+  var valid_568392 = query.getOrDefault("api-version")
+  valid_568392 = validateParameter(valid_568392, JString, required = true,
                                  default = nil)
-  if valid_594159 != nil:
-    section.add "api-version", valid_594159
+  if valid_568392 != nil:
+    section.add "api-version", valid_568392
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2241,21 +2241,21 @@ proc validate_AppServiceCertificateOrdersVerifyDomainOwnership_594154(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594160: Call_AppServiceCertificateOrdersVerifyDomainOwnership_594153;
+proc call*(call_568393: Call_AppServiceCertificateOrdersVerifyDomainOwnership_568386;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Verify domain ownership for this certificate order.
   ## 
-  let valid = call_594160.validator(path, query, header, formData, body)
-  let scheme = call_594160.pickScheme
+  let valid = call_568393.validator(path, query, header, formData, body)
+  let scheme = call_568393.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594160.url(scheme.get, call_594160.host, call_594160.base,
-                         call_594160.route, valid.getOrDefault("path"),
+  let url = call_568393.url(scheme.get, call_568393.host, call_568393.base,
+                         call_568393.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594160, url, valid)
+  result = hook(call_568393, url, valid)
 
-proc call*(call_594161: Call_AppServiceCertificateOrdersVerifyDomainOwnership_594153;
+proc call*(call_568394: Call_AppServiceCertificateOrdersVerifyDomainOwnership_568386;
           certificateOrderName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersVerifyDomainOwnership
@@ -2268,23 +2268,23 @@ proc call*(call_594161: Call_AppServiceCertificateOrdersVerifyDomainOwnership_59
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594162 = newJObject()
-  var query_594163 = newJObject()
-  add(path_594162, "certificateOrderName", newJString(certificateOrderName))
-  add(path_594162, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594163, "api-version", newJString(apiVersion))
-  add(path_594162, "subscriptionId", newJString(subscriptionId))
-  result = call_594161.call(path_594162, query_594163, nil, nil, nil)
+  var path_568395 = newJObject()
+  var query_568396 = newJObject()
+  add(path_568395, "certificateOrderName", newJString(certificateOrderName))
+  add(path_568395, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568396, "api-version", newJString(apiVersion))
+  add(path_568395, "subscriptionId", newJString(subscriptionId))
+  result = call_568394.call(path_568395, query_568396, nil, nil, nil)
 
-var appServiceCertificateOrdersVerifyDomainOwnership* = Call_AppServiceCertificateOrdersVerifyDomainOwnership_594153(
+var appServiceCertificateOrdersVerifyDomainOwnership* = Call_AppServiceCertificateOrdersVerifyDomainOwnership_568386(
     name: "appServiceCertificateOrdersVerifyDomainOwnership",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{certificateOrderName}/verifyDomainOwnership",
-    validator: validate_AppServiceCertificateOrdersVerifyDomainOwnership_594154,
-    base: "", url: url_AppServiceCertificateOrdersVerifyDomainOwnership_594155,
+    validator: validate_AppServiceCertificateOrdersVerifyDomainOwnership_568387,
+    base: "", url: url_AppServiceCertificateOrdersVerifyDomainOwnership_568388,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersRetrieveCertificateActions_594164 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersRetrieveCertificateActions_594166(
+  Call_AppServiceCertificateOrdersRetrieveCertificateActions_568397 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersRetrieveCertificateActions_568399(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2308,7 +2308,7 @@ proc url_AppServiceCertificateOrdersRetrieveCertificateActions_594166(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersRetrieveCertificateActions_594165(
+proc validate_AppServiceCertificateOrdersRetrieveCertificateActions_568398(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Retrieve the list of certificate actions.
@@ -2325,21 +2325,21 @@ proc validate_AppServiceCertificateOrdersRetrieveCertificateActions_594165(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594167 = path.getOrDefault("resourceGroupName")
-  valid_594167 = validateParameter(valid_594167, JString, required = true,
+  var valid_568400 = path.getOrDefault("resourceGroupName")
+  valid_568400 = validateParameter(valid_568400, JString, required = true,
                                  default = nil)
-  if valid_594167 != nil:
-    section.add "resourceGroupName", valid_594167
-  var valid_594168 = path.getOrDefault("name")
-  valid_594168 = validateParameter(valid_594168, JString, required = true,
+  if valid_568400 != nil:
+    section.add "resourceGroupName", valid_568400
+  var valid_568401 = path.getOrDefault("name")
+  valid_568401 = validateParameter(valid_568401, JString, required = true,
                                  default = nil)
-  if valid_594168 != nil:
-    section.add "name", valid_594168
-  var valid_594169 = path.getOrDefault("subscriptionId")
-  valid_594169 = validateParameter(valid_594169, JString, required = true,
+  if valid_568401 != nil:
+    section.add "name", valid_568401
+  var valid_568402 = path.getOrDefault("subscriptionId")
+  valid_568402 = validateParameter(valid_568402, JString, required = true,
                                  default = nil)
-  if valid_594169 != nil:
-    section.add "subscriptionId", valid_594169
+  if valid_568402 != nil:
+    section.add "subscriptionId", valid_568402
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2347,11 +2347,11 @@ proc validate_AppServiceCertificateOrdersRetrieveCertificateActions_594165(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594170 = query.getOrDefault("api-version")
-  valid_594170 = validateParameter(valid_594170, JString, required = true,
+  var valid_568403 = query.getOrDefault("api-version")
+  valid_568403 = validateParameter(valid_568403, JString, required = true,
                                  default = nil)
-  if valid_594170 != nil:
-    section.add "api-version", valid_594170
+  if valid_568403 != nil:
+    section.add "api-version", valid_568403
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2360,21 +2360,21 @@ proc validate_AppServiceCertificateOrdersRetrieveCertificateActions_594165(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594171: Call_AppServiceCertificateOrdersRetrieveCertificateActions_594164;
+proc call*(call_568404: Call_AppServiceCertificateOrdersRetrieveCertificateActions_568397;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve the list of certificate actions.
   ## 
-  let valid = call_594171.validator(path, query, header, formData, body)
-  let scheme = call_594171.pickScheme
+  let valid = call_568404.validator(path, query, header, formData, body)
+  let scheme = call_568404.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594171.url(scheme.get, call_594171.host, call_594171.base,
-                         call_594171.route, valid.getOrDefault("path"),
+  let url = call_568404.url(scheme.get, call_568404.host, call_568404.base,
+                         call_568404.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594171, url, valid)
+  result = hook(call_568404, url, valid)
 
-proc call*(call_594172: Call_AppServiceCertificateOrdersRetrieveCertificateActions_594164;
+proc call*(call_568405: Call_AppServiceCertificateOrdersRetrieveCertificateActions_568397;
           resourceGroupName: string; apiVersion: string; name: string;
           subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersRetrieveCertificateActions
@@ -2387,23 +2387,23 @@ proc call*(call_594172: Call_AppServiceCertificateOrdersRetrieveCertificateActio
   ##       : Name of the certificate order.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594173 = newJObject()
-  var query_594174 = newJObject()
-  add(path_594173, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594174, "api-version", newJString(apiVersion))
-  add(path_594173, "name", newJString(name))
-  add(path_594173, "subscriptionId", newJString(subscriptionId))
-  result = call_594172.call(path_594173, query_594174, nil, nil, nil)
+  var path_568406 = newJObject()
+  var query_568407 = newJObject()
+  add(path_568406, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568407, "api-version", newJString(apiVersion))
+  add(path_568406, "name", newJString(name))
+  add(path_568406, "subscriptionId", newJString(subscriptionId))
+  result = call_568405.call(path_568406, query_568407, nil, nil, nil)
 
-var appServiceCertificateOrdersRetrieveCertificateActions* = Call_AppServiceCertificateOrdersRetrieveCertificateActions_594164(
+var appServiceCertificateOrdersRetrieveCertificateActions* = Call_AppServiceCertificateOrdersRetrieveCertificateActions_568397(
     name: "appServiceCertificateOrdersRetrieveCertificateActions",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{name}/retrieveCertificateActions",
-    validator: validate_AppServiceCertificateOrdersRetrieveCertificateActions_594165,
-    base: "", url: url_AppServiceCertificateOrdersRetrieveCertificateActions_594166,
+    validator: validate_AppServiceCertificateOrdersRetrieveCertificateActions_568398,
+    base: "", url: url_AppServiceCertificateOrdersRetrieveCertificateActions_568399,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594175 = ref object of OpenApiRestCall_593424
-proc url_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594177(
+  Call_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_568408 = ref object of OpenApiRestCall_567657
+proc url_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_568410(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2427,7 +2427,7 @@ proc url_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594177(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594176(
+proc validate_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_568409(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Retrieve email history.
@@ -2444,21 +2444,21 @@ proc validate_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594176(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594178 = path.getOrDefault("resourceGroupName")
-  valid_594178 = validateParameter(valid_594178, JString, required = true,
+  var valid_568411 = path.getOrDefault("resourceGroupName")
+  valid_568411 = validateParameter(valid_568411, JString, required = true,
                                  default = nil)
-  if valid_594178 != nil:
-    section.add "resourceGroupName", valid_594178
-  var valid_594179 = path.getOrDefault("name")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  if valid_568411 != nil:
+    section.add "resourceGroupName", valid_568411
+  var valid_568412 = path.getOrDefault("name")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "name", valid_594179
-  var valid_594180 = path.getOrDefault("subscriptionId")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  if valid_568412 != nil:
+    section.add "name", valid_568412
+  var valid_568413 = path.getOrDefault("subscriptionId")
+  valid_568413 = validateParameter(valid_568413, JString, required = true,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "subscriptionId", valid_594180
+  if valid_568413 != nil:
+    section.add "subscriptionId", valid_568413
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2466,11 +2466,11 @@ proc validate_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594176(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594181 = query.getOrDefault("api-version")
-  valid_594181 = validateParameter(valid_594181, JString, required = true,
+  var valid_568414 = query.getOrDefault("api-version")
+  valid_568414 = validateParameter(valid_568414, JString, required = true,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "api-version", valid_594181
+  if valid_568414 != nil:
+    section.add "api-version", valid_568414
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2479,21 +2479,21 @@ proc validate_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594176(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594182: Call_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594175;
+proc call*(call_568415: Call_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_568408;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve email history.
   ## 
-  let valid = call_594182.validator(path, query, header, formData, body)
-  let scheme = call_594182.pickScheme
+  let valid = call_568415.validator(path, query, header, formData, body)
+  let scheme = call_568415.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594182.url(scheme.get, call_594182.host, call_594182.base,
-                         call_594182.route, valid.getOrDefault("path"),
+  let url = call_568415.url(scheme.get, call_568415.host, call_568415.base,
+                         call_568415.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594182, url, valid)
+  result = hook(call_568415, url, valid)
 
-proc call*(call_594183: Call_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594175;
+proc call*(call_568416: Call_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_568408;
           resourceGroupName: string; apiVersion: string; name: string;
           subscriptionId: string): Recallable =
   ## appServiceCertificateOrdersRetrieveCertificateEmailHistory
@@ -2506,18 +2506,18 @@ proc call*(call_594183: Call_AppServiceCertificateOrdersRetrieveCertificateEmail
   ##       : Name of the certificate order.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594184 = newJObject()
-  var query_594185 = newJObject()
-  add(path_594184, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594185, "api-version", newJString(apiVersion))
-  add(path_594184, "name", newJString(name))
-  add(path_594184, "subscriptionId", newJString(subscriptionId))
-  result = call_594183.call(path_594184, query_594185, nil, nil, nil)
+  var path_568417 = newJObject()
+  var query_568418 = newJObject()
+  add(path_568417, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568418, "api-version", newJString(apiVersion))
+  add(path_568417, "name", newJString(name))
+  add(path_568417, "subscriptionId", newJString(subscriptionId))
+  result = call_568416.call(path_568417, query_568418, nil, nil, nil)
 
-var appServiceCertificateOrdersRetrieveCertificateEmailHistory* = Call_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594175(
+var appServiceCertificateOrdersRetrieveCertificateEmailHistory* = Call_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_568408(
     name: "appServiceCertificateOrdersRetrieveCertificateEmailHistory",
-    meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{name}/retrieveEmailHistory", validator: validate_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594176,
-    base: "", url: url_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_594177,
+    meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CertificateRegistration/certificateOrders/{name}/retrieveEmailHistory", validator: validate_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_568409,
+    base: "", url: url_AppServiceCertificateOrdersRetrieveCertificateEmailHistory_568410,
     schemes: {Scheme.Https})
 export
   rest

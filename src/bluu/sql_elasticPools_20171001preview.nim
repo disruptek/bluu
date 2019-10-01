@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593426 = ref object of OpenApiRestCall
+  OpenApiRestCall_567659 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593426](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567659](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593426): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567659): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-elasticPools"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ElasticPoolsListByServer_593648 = ref object of OpenApiRestCall_593426
-proc url_ElasticPoolsListByServer_593650(protocol: Scheme; host: string;
+  Call_ElasticPoolsListByServer_567881 = ref object of OpenApiRestCall_567659
+proc url_ElasticPoolsListByServer_567883(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -128,7 +128,7 @@ proc url_ElasticPoolsListByServer_593650(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ElasticPoolsListByServer_593649(path: JsonNode; query: JsonNode;
+proc validate_ElasticPoolsListByServer_567882(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all elastic pools in a server.
   ## 
@@ -144,21 +144,21 @@ proc validate_ElasticPoolsListByServer_593649(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593824 = path.getOrDefault("resourceGroupName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  var valid_568057 = path.getOrDefault("resourceGroupName")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "resourceGroupName", valid_593824
-  var valid_593825 = path.getOrDefault("serverName")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_568057 != nil:
+    section.add "resourceGroupName", valid_568057
+  var valid_568058 = path.getOrDefault("serverName")
+  valid_568058 = validateParameter(valid_568058, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "serverName", valid_593825
-  var valid_593826 = path.getOrDefault("subscriptionId")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  if valid_568058 != nil:
+    section.add "serverName", valid_568058
+  var valid_568059 = path.getOrDefault("subscriptionId")
+  valid_568059 = validateParameter(valid_568059, JString, required = true,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "subscriptionId", valid_593826
+  if valid_568059 != nil:
+    section.add "subscriptionId", valid_568059
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -168,15 +168,15 @@ proc validate_ElasticPoolsListByServer_593649(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593827 = query.getOrDefault("api-version")
-  valid_593827 = validateParameter(valid_593827, JString, required = true,
+  var valid_568060 = query.getOrDefault("api-version")
+  valid_568060 = validateParameter(valid_568060, JString, required = true,
                                  default = nil)
-  if valid_593827 != nil:
-    section.add "api-version", valid_593827
-  var valid_593828 = query.getOrDefault("$skip")
-  valid_593828 = validateParameter(valid_593828, JInt, required = false, default = nil)
-  if valid_593828 != nil:
-    section.add "$skip", valid_593828
+  if valid_568060 != nil:
+    section.add "api-version", valid_568060
+  var valid_568061 = query.getOrDefault("$skip")
+  valid_568061 = validateParameter(valid_568061, JInt, required = false, default = nil)
+  if valid_568061 != nil:
+    section.add "$skip", valid_568061
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -185,20 +185,20 @@ proc validate_ElasticPoolsListByServer_593649(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593851: Call_ElasticPoolsListByServer_593648; path: JsonNode;
+proc call*(call_568084: Call_ElasticPoolsListByServer_567881; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all elastic pools in a server.
   ## 
-  let valid = call_593851.validator(path, query, header, formData, body)
-  let scheme = call_593851.pickScheme
+  let valid = call_568084.validator(path, query, header, formData, body)
+  let scheme = call_568084.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593851.url(scheme.get, call_593851.host, call_593851.base,
-                         call_593851.route, valid.getOrDefault("path"),
+  let url = call_568084.url(scheme.get, call_568084.host, call_568084.base,
+                         call_568084.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593851, url, valid)
+  result = hook(call_568084, url, valid)
 
-proc call*(call_593922: Call_ElasticPoolsListByServer_593648;
+proc call*(call_568155: Call_ElasticPoolsListByServer_567881;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; Skip: int = 0): Recallable =
   ## elasticPoolsListByServer
@@ -213,23 +213,23 @@ proc call*(call_593922: Call_ElasticPoolsListByServer_593648;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   Skip: int
   ##       : The number of elements in the collection to skip.
-  var path_593923 = newJObject()
-  var query_593925 = newJObject()
-  add(path_593923, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593925, "api-version", newJString(apiVersion))
-  add(path_593923, "serverName", newJString(serverName))
-  add(path_593923, "subscriptionId", newJString(subscriptionId))
-  add(query_593925, "$skip", newJInt(Skip))
-  result = call_593922.call(path_593923, query_593925, nil, nil, nil)
+  var path_568156 = newJObject()
+  var query_568158 = newJObject()
+  add(path_568156, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568158, "api-version", newJString(apiVersion))
+  add(path_568156, "serverName", newJString(serverName))
+  add(path_568156, "subscriptionId", newJString(subscriptionId))
+  add(query_568158, "$skip", newJInt(Skip))
+  result = call_568155.call(path_568156, query_568158, nil, nil, nil)
 
-var elasticPoolsListByServer* = Call_ElasticPoolsListByServer_593648(
+var elasticPoolsListByServer* = Call_ElasticPoolsListByServer_567881(
     name: "elasticPoolsListByServer", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/elasticPools",
-    validator: validate_ElasticPoolsListByServer_593649, base: "",
-    url: url_ElasticPoolsListByServer_593650, schemes: {Scheme.Https})
+    validator: validate_ElasticPoolsListByServer_567882, base: "",
+    url: url_ElasticPoolsListByServer_567883, schemes: {Scheme.Https})
 type
-  Call_ElasticPoolsCreateOrUpdate_593976 = ref object of OpenApiRestCall_593426
-proc url_ElasticPoolsCreateOrUpdate_593978(protocol: Scheme; host: string;
+  Call_ElasticPoolsCreateOrUpdate_568209 = ref object of OpenApiRestCall_567659
+proc url_ElasticPoolsCreateOrUpdate_568211(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -254,7 +254,7 @@ proc url_ElasticPoolsCreateOrUpdate_593978(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ElasticPoolsCreateOrUpdate_593977(path: JsonNode; query: JsonNode;
+proc validate_ElasticPoolsCreateOrUpdate_568210(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an elastic pool.
   ## 
@@ -272,26 +272,26 @@ proc validate_ElasticPoolsCreateOrUpdate_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593979 = path.getOrDefault("resourceGroupName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_568212 = path.getOrDefault("resourceGroupName")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "resourceGroupName", valid_593979
-  var valid_593980 = path.getOrDefault("serverName")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_568212 != nil:
+    section.add "resourceGroupName", valid_568212
+  var valid_568213 = path.getOrDefault("serverName")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "serverName", valid_593980
-  var valid_593981 = path.getOrDefault("elasticPoolName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_568213 != nil:
+    section.add "serverName", valid_568213
+  var valid_568214 = path.getOrDefault("elasticPoolName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "elasticPoolName", valid_593981
-  var valid_593982 = path.getOrDefault("subscriptionId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568214 != nil:
+    section.add "elasticPoolName", valid_568214
+  var valid_568215 = path.getOrDefault("subscriptionId")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "subscriptionId", valid_593982
+  if valid_568215 != nil:
+    section.add "subscriptionId", valid_568215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -299,11 +299,11 @@ proc validate_ElasticPoolsCreateOrUpdate_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = query.getOrDefault("api-version")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_568216 != nil:
+    section.add "api-version", valid_568216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -317,20 +317,20 @@ proc validate_ElasticPoolsCreateOrUpdate_593977(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_ElasticPoolsCreateOrUpdate_593976; path: JsonNode;
+proc call*(call_568218: Call_ElasticPoolsCreateOrUpdate_568209; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates an elastic pool.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_568218.validator(path, query, header, formData, body)
+  let scheme = call_568218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_568218.url(scheme.get, call_568218.host, call_568218.base,
+                         call_568218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_568218, url, valid)
 
-proc call*(call_593986: Call_ElasticPoolsCreateOrUpdate_593976;
+proc call*(call_568219: Call_ElasticPoolsCreateOrUpdate_568209;
           resourceGroupName: string; apiVersion: string; serverName: string;
           elasticPoolName: string; subscriptionId: string; parameters: JsonNode): Recallable =
   ## elasticPoolsCreateOrUpdate
@@ -347,26 +347,26 @@ proc call*(call_593986: Call_ElasticPoolsCreateOrUpdate_593976;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   parameters: JObject (required)
   ##             : The elastic pool parameters.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  var body_593989 = newJObject()
-  add(path_593987, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "serverName", newJString(serverName))
-  add(path_593987, "elasticPoolName", newJString(elasticPoolName))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
+  var path_568220 = newJObject()
+  var query_568221 = newJObject()
+  var body_568222 = newJObject()
+  add(path_568220, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568221, "api-version", newJString(apiVersion))
+  add(path_568220, "serverName", newJString(serverName))
+  add(path_568220, "elasticPoolName", newJString(elasticPoolName))
+  add(path_568220, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593989 = parameters
-  result = call_593986.call(path_593987, query_593988, nil, nil, body_593989)
+    body_568222 = parameters
+  result = call_568219.call(path_568220, query_568221, nil, nil, body_568222)
 
-var elasticPoolsCreateOrUpdate* = Call_ElasticPoolsCreateOrUpdate_593976(
+var elasticPoolsCreateOrUpdate* = Call_ElasticPoolsCreateOrUpdate_568209(
     name: "elasticPoolsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/elasticPools/{elasticPoolName}",
-    validator: validate_ElasticPoolsCreateOrUpdate_593977, base: "",
-    url: url_ElasticPoolsCreateOrUpdate_593978, schemes: {Scheme.Https})
+    validator: validate_ElasticPoolsCreateOrUpdate_568210, base: "",
+    url: url_ElasticPoolsCreateOrUpdate_568211, schemes: {Scheme.Https})
 type
-  Call_ElasticPoolsGet_593964 = ref object of OpenApiRestCall_593426
-proc url_ElasticPoolsGet_593966(protocol: Scheme; host: string; base: string;
+  Call_ElasticPoolsGet_568197 = ref object of OpenApiRestCall_567659
+proc url_ElasticPoolsGet_568199(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -391,7 +391,7 @@ proc url_ElasticPoolsGet_593966(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ElasticPoolsGet_593965(path: JsonNode; query: JsonNode;
+proc validate_ElasticPoolsGet_568198(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets an elastic pool.
@@ -410,26 +410,26 @@ proc validate_ElasticPoolsGet_593965(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593967 = path.getOrDefault("resourceGroupName")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  var valid_568200 = path.getOrDefault("resourceGroupName")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "resourceGroupName", valid_593967
-  var valid_593968 = path.getOrDefault("serverName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  if valid_568200 != nil:
+    section.add "resourceGroupName", valid_568200
+  var valid_568201 = path.getOrDefault("serverName")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "serverName", valid_593968
-  var valid_593969 = path.getOrDefault("elasticPoolName")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  if valid_568201 != nil:
+    section.add "serverName", valid_568201
+  var valid_568202 = path.getOrDefault("elasticPoolName")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "elasticPoolName", valid_593969
-  var valid_593970 = path.getOrDefault("subscriptionId")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_568202 != nil:
+    section.add "elasticPoolName", valid_568202
+  var valid_568203 = path.getOrDefault("subscriptionId")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "subscriptionId", valid_593970
+  if valid_568203 != nil:
+    section.add "subscriptionId", valid_568203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -437,11 +437,11 @@ proc validate_ElasticPoolsGet_593965(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568204 = query.getOrDefault("api-version")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
+  if valid_568204 != nil:
+    section.add "api-version", valid_568204
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -450,20 +450,20 @@ proc validate_ElasticPoolsGet_593965(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593972: Call_ElasticPoolsGet_593964; path: JsonNode; query: JsonNode;
+proc call*(call_568205: Call_ElasticPoolsGet_568197; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an elastic pool.
   ## 
-  let valid = call_593972.validator(path, query, header, formData, body)
-  let scheme = call_593972.pickScheme
+  let valid = call_568205.validator(path, query, header, formData, body)
+  let scheme = call_568205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593972.url(scheme.get, call_593972.host, call_593972.base,
-                         call_593972.route, valid.getOrDefault("path"),
+  let url = call_568205.url(scheme.get, call_568205.host, call_568205.base,
+                         call_568205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593972, url, valid)
+  result = hook(call_568205, url, valid)
 
-proc call*(call_593973: Call_ElasticPoolsGet_593964; resourceGroupName: string;
+proc call*(call_568206: Call_ElasticPoolsGet_568197; resourceGroupName: string;
           apiVersion: string; serverName: string; elasticPoolName: string;
           subscriptionId: string): Recallable =
   ## elasticPoolsGet
@@ -478,22 +478,22 @@ proc call*(call_593973: Call_ElasticPoolsGet_593964; resourceGroupName: string;
   ##                  : The name of the elastic pool.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_593974 = newJObject()
-  var query_593975 = newJObject()
-  add(path_593974, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593975, "api-version", newJString(apiVersion))
-  add(path_593974, "serverName", newJString(serverName))
-  add(path_593974, "elasticPoolName", newJString(elasticPoolName))
-  add(path_593974, "subscriptionId", newJString(subscriptionId))
-  result = call_593973.call(path_593974, query_593975, nil, nil, nil)
+  var path_568207 = newJObject()
+  var query_568208 = newJObject()
+  add(path_568207, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568208, "api-version", newJString(apiVersion))
+  add(path_568207, "serverName", newJString(serverName))
+  add(path_568207, "elasticPoolName", newJString(elasticPoolName))
+  add(path_568207, "subscriptionId", newJString(subscriptionId))
+  result = call_568206.call(path_568207, query_568208, nil, nil, nil)
 
-var elasticPoolsGet* = Call_ElasticPoolsGet_593964(name: "elasticPoolsGet",
+var elasticPoolsGet* = Call_ElasticPoolsGet_568197(name: "elasticPoolsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/elasticPools/{elasticPoolName}",
-    validator: validate_ElasticPoolsGet_593965, base: "", url: url_ElasticPoolsGet_593966,
+    validator: validate_ElasticPoolsGet_568198, base: "", url: url_ElasticPoolsGet_568199,
     schemes: {Scheme.Https})
 type
-  Call_ElasticPoolsUpdate_594002 = ref object of OpenApiRestCall_593426
-proc url_ElasticPoolsUpdate_594004(protocol: Scheme; host: string; base: string;
+  Call_ElasticPoolsUpdate_568235 = ref object of OpenApiRestCall_567659
+proc url_ElasticPoolsUpdate_568237(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -518,7 +518,7 @@ proc url_ElasticPoolsUpdate_594004(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ElasticPoolsUpdate_594003(path: JsonNode; query: JsonNode;
+proc validate_ElasticPoolsUpdate_568236(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Updates an elastic pool.
@@ -537,26 +537,26 @@ proc validate_ElasticPoolsUpdate_594003(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594005 = path.getOrDefault("resourceGroupName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_568238 = path.getOrDefault("resourceGroupName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "resourceGroupName", valid_594005
-  var valid_594006 = path.getOrDefault("serverName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_568238 != nil:
+    section.add "resourceGroupName", valid_568238
+  var valid_568239 = path.getOrDefault("serverName")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "serverName", valid_594006
-  var valid_594007 = path.getOrDefault("elasticPoolName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "serverName", valid_568239
+  var valid_568240 = path.getOrDefault("elasticPoolName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "elasticPoolName", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568240 != nil:
+    section.add "elasticPoolName", valid_568240
+  var valid_568241 = path.getOrDefault("subscriptionId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
+  if valid_568241 != nil:
+    section.add "subscriptionId", valid_568241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -564,11 +564,11 @@ proc validate_ElasticPoolsUpdate_594003(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594009 = query.getOrDefault("api-version")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_568242 = query.getOrDefault("api-version")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "api-version", valid_594009
+  if valid_568242 != nil:
+    section.add "api-version", valid_568242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -582,20 +582,20 @@ proc validate_ElasticPoolsUpdate_594003(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594011: Call_ElasticPoolsUpdate_594002; path: JsonNode;
+proc call*(call_568244: Call_ElasticPoolsUpdate_568235; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an elastic pool.
   ## 
-  let valid = call_594011.validator(path, query, header, formData, body)
-  let scheme = call_594011.pickScheme
+  let valid = call_568244.validator(path, query, header, formData, body)
+  let scheme = call_568244.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594011.url(scheme.get, call_594011.host, call_594011.base,
-                         call_594011.route, valid.getOrDefault("path"),
+  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
+                         call_568244.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594011, url, valid)
+  result = hook(call_568244, url, valid)
 
-proc call*(call_594012: Call_ElasticPoolsUpdate_594002; resourceGroupName: string;
+proc call*(call_568245: Call_ElasticPoolsUpdate_568235; resourceGroupName: string;
           apiVersion: string; serverName: string; elasticPoolName: string;
           subscriptionId: string; parameters: JsonNode): Recallable =
   ## elasticPoolsUpdate
@@ -612,26 +612,26 @@ proc call*(call_594012: Call_ElasticPoolsUpdate_594002; resourceGroupName: strin
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   parameters: JObject (required)
   ##             : The elastic pool update parameters.
-  var path_594013 = newJObject()
-  var query_594014 = newJObject()
-  var body_594015 = newJObject()
-  add(path_594013, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594014, "api-version", newJString(apiVersion))
-  add(path_594013, "serverName", newJString(serverName))
-  add(path_594013, "elasticPoolName", newJString(elasticPoolName))
-  add(path_594013, "subscriptionId", newJString(subscriptionId))
+  var path_568246 = newJObject()
+  var query_568247 = newJObject()
+  var body_568248 = newJObject()
+  add(path_568246, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568247, "api-version", newJString(apiVersion))
+  add(path_568246, "serverName", newJString(serverName))
+  add(path_568246, "elasticPoolName", newJString(elasticPoolName))
+  add(path_568246, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594015 = parameters
-  result = call_594012.call(path_594013, query_594014, nil, nil, body_594015)
+    body_568248 = parameters
+  result = call_568245.call(path_568246, query_568247, nil, nil, body_568248)
 
-var elasticPoolsUpdate* = Call_ElasticPoolsUpdate_594002(
+var elasticPoolsUpdate* = Call_ElasticPoolsUpdate_568235(
     name: "elasticPoolsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/elasticPools/{elasticPoolName}",
-    validator: validate_ElasticPoolsUpdate_594003, base: "",
-    url: url_ElasticPoolsUpdate_594004, schemes: {Scheme.Https})
+    validator: validate_ElasticPoolsUpdate_568236, base: "",
+    url: url_ElasticPoolsUpdate_568237, schemes: {Scheme.Https})
 type
-  Call_ElasticPoolsDelete_593990 = ref object of OpenApiRestCall_593426
-proc url_ElasticPoolsDelete_593992(protocol: Scheme; host: string; base: string;
+  Call_ElasticPoolsDelete_568223 = ref object of OpenApiRestCall_567659
+proc url_ElasticPoolsDelete_568225(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -656,7 +656,7 @@ proc url_ElasticPoolsDelete_593992(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ElasticPoolsDelete_593991(path: JsonNode; query: JsonNode;
+proc validate_ElasticPoolsDelete_568224(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes an elastic pool.
@@ -675,26 +675,26 @@ proc validate_ElasticPoolsDelete_593991(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593993 = path.getOrDefault("resourceGroupName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568226 = path.getOrDefault("resourceGroupName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "resourceGroupName", valid_593993
-  var valid_593994 = path.getOrDefault("serverName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "resourceGroupName", valid_568226
+  var valid_568227 = path.getOrDefault("serverName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "serverName", valid_593994
-  var valid_593995 = path.getOrDefault("elasticPoolName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_568227 != nil:
+    section.add "serverName", valid_568227
+  var valid_568228 = path.getOrDefault("elasticPoolName")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "elasticPoolName", valid_593995
-  var valid_593996 = path.getOrDefault("subscriptionId")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_568228 != nil:
+    section.add "elasticPoolName", valid_568228
+  var valid_568229 = path.getOrDefault("subscriptionId")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "subscriptionId", valid_593996
+  if valid_568229 != nil:
+    section.add "subscriptionId", valid_568229
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -702,11 +702,11 @@ proc validate_ElasticPoolsDelete_593991(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593997 = query.getOrDefault("api-version")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  var valid_568230 = query.getOrDefault("api-version")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "api-version", valid_593997
+  if valid_568230 != nil:
+    section.add "api-version", valid_568230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -715,20 +715,20 @@ proc validate_ElasticPoolsDelete_593991(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593998: Call_ElasticPoolsDelete_593990; path: JsonNode;
+proc call*(call_568231: Call_ElasticPoolsDelete_568223; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an elastic pool.
   ## 
-  let valid = call_593998.validator(path, query, header, formData, body)
-  let scheme = call_593998.pickScheme
+  let valid = call_568231.validator(path, query, header, formData, body)
+  let scheme = call_568231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593998.url(scheme.get, call_593998.host, call_593998.base,
-                         call_593998.route, valid.getOrDefault("path"),
+  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
+                         call_568231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593998, url, valid)
+  result = hook(call_568231, url, valid)
 
-proc call*(call_593999: Call_ElasticPoolsDelete_593990; resourceGroupName: string;
+proc call*(call_568232: Call_ElasticPoolsDelete_568223; resourceGroupName: string;
           apiVersion: string; serverName: string; elasticPoolName: string;
           subscriptionId: string): Recallable =
   ## elasticPoolsDelete
@@ -743,20 +743,20 @@ proc call*(call_593999: Call_ElasticPoolsDelete_593990; resourceGroupName: strin
   ##                  : The name of the elastic pool.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_594000 = newJObject()
-  var query_594001 = newJObject()
-  add(path_594000, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594001, "api-version", newJString(apiVersion))
-  add(path_594000, "serverName", newJString(serverName))
-  add(path_594000, "elasticPoolName", newJString(elasticPoolName))
-  add(path_594000, "subscriptionId", newJString(subscriptionId))
-  result = call_593999.call(path_594000, query_594001, nil, nil, nil)
+  var path_568233 = newJObject()
+  var query_568234 = newJObject()
+  add(path_568233, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568234, "api-version", newJString(apiVersion))
+  add(path_568233, "serverName", newJString(serverName))
+  add(path_568233, "elasticPoolName", newJString(elasticPoolName))
+  add(path_568233, "subscriptionId", newJString(subscriptionId))
+  result = call_568232.call(path_568233, query_568234, nil, nil, nil)
 
-var elasticPoolsDelete* = Call_ElasticPoolsDelete_593990(
+var elasticPoolsDelete* = Call_ElasticPoolsDelete_568223(
     name: "elasticPoolsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/elasticPools/{elasticPoolName}",
-    validator: validate_ElasticPoolsDelete_593991, base: "",
-    url: url_ElasticPoolsDelete_593992, schemes: {Scheme.Https})
+    validator: validate_ElasticPoolsDelete_568224, base: "",
+    url: url_ElasticPoolsDelete_568225, schemes: {Scheme.Https})
 export
   rest
 

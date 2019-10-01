@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "network-azureFirewallFqdnTag"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AzureFirewallFqdnTagsListAll_593630 = ref object of OpenApiRestCall_593408
-proc url_AzureFirewallFqdnTagsListAll_593632(protocol: Scheme; host: string;
+  Call_AzureFirewallFqdnTagsListAll_567863 = ref object of OpenApiRestCall_567641
+proc url_AzureFirewallFqdnTagsListAll_567865(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_AzureFirewallFqdnTagsListAll_593632(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AzureFirewallFqdnTagsListAll_593631(path: JsonNode; query: JsonNode;
+proc validate_AzureFirewallFqdnTagsListAll_567864(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the Azure Firewall FQDN Tags in a subscription.
   ## 
@@ -133,11 +133,11 @@ proc validate_AzureFirewallFqdnTagsListAll_593631(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593792 = path.getOrDefault("subscriptionId")
-  valid_593792 = validateParameter(valid_593792, JString, required = true,
+  var valid_568025 = path.getOrDefault("subscriptionId")
+  valid_568025 = validateParameter(valid_568025, JString, required = true,
                                  default = nil)
-  if valid_593792 != nil:
-    section.add "subscriptionId", valid_593792
+  if valid_568025 != nil:
+    section.add "subscriptionId", valid_568025
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_AzureFirewallFqdnTagsListAll_593631(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593793 = query.getOrDefault("api-version")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  var valid_568026 = query.getOrDefault("api-version")
+  valid_568026 = validateParameter(valid_568026, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "api-version", valid_593793
+  if valid_568026 != nil:
+    section.add "api-version", valid_568026
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_AzureFirewallFqdnTagsListAll_593631(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593820: Call_AzureFirewallFqdnTagsListAll_593630; path: JsonNode;
+proc call*(call_568053: Call_AzureFirewallFqdnTagsListAll_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the Azure Firewall FQDN Tags in a subscription.
   ## 
-  let valid = call_593820.validator(path, query, header, formData, body)
-  let scheme = call_593820.pickScheme
+  let valid = call_568053.validator(path, query, header, formData, body)
+  let scheme = call_568053.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593820.url(scheme.get, call_593820.host, call_593820.base,
-                         call_593820.route, valid.getOrDefault("path"),
+  let url = call_568053.url(scheme.get, call_568053.host, call_568053.base,
+                         call_568053.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593820, url, valid)
+  result = hook(call_568053, url, valid)
 
-proc call*(call_593891: Call_AzureFirewallFqdnTagsListAll_593630;
+proc call*(call_568124: Call_AzureFirewallFqdnTagsListAll_567863;
           apiVersion: string; subscriptionId: string): Recallable =
   ## azureFirewallFqdnTagsListAll
   ## Gets all the Azure Firewall FQDN Tags in a subscription.
@@ -179,17 +179,17 @@ proc call*(call_593891: Call_AzureFirewallFqdnTagsListAll_593630;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593892 = newJObject()
-  var query_593894 = newJObject()
-  add(query_593894, "api-version", newJString(apiVersion))
-  add(path_593892, "subscriptionId", newJString(subscriptionId))
-  result = call_593891.call(path_593892, query_593894, nil, nil, nil)
+  var path_568125 = newJObject()
+  var query_568127 = newJObject()
+  add(query_568127, "api-version", newJString(apiVersion))
+  add(path_568125, "subscriptionId", newJString(subscriptionId))
+  result = call_568124.call(path_568125, query_568127, nil, nil, nil)
 
-var azureFirewallFqdnTagsListAll* = Call_AzureFirewallFqdnTagsListAll_593630(
+var azureFirewallFqdnTagsListAll* = Call_AzureFirewallFqdnTagsListAll_567863(
     name: "azureFirewallFqdnTagsListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/azureFirewallFqdnTags",
-    validator: validate_AzureFirewallFqdnTagsListAll_593631, base: "",
-    url: url_AzureFirewallFqdnTagsListAll_593632, schemes: {Scheme.Https})
+    validator: validate_AzureFirewallFqdnTagsListAll_567864, base: "",
+    url: url_AzureFirewallFqdnTagsListAll_567865, schemes: {Scheme.Https})
 export
   rest
 

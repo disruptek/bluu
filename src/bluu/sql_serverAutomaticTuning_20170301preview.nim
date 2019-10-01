@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-serverAutomaticTuning"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServerAutomaticTuningGet_593646 = ref object of OpenApiRestCall_593424
-proc url_ServerAutomaticTuningGet_593648(protocol: Scheme; host: string;
+  Call_ServerAutomaticTuningGet_567879 = ref object of OpenApiRestCall_567657
+proc url_ServerAutomaticTuningGet_567881(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -128,7 +128,7 @@ proc url_ServerAutomaticTuningGet_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerAutomaticTuningGet_593647(path: JsonNode; query: JsonNode;
+proc validate_ServerAutomaticTuningGet_567880(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves server automatic tuning options.
   ## 
@@ -144,21 +144,21 @@ proc validate_ServerAutomaticTuningGet_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593821 = path.getOrDefault("resourceGroupName")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("resourceGroupName")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "resourceGroupName", valid_593821
-  var valid_593822 = path.getOrDefault("serverName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_568054 != nil:
+    section.add "resourceGroupName", valid_568054
+  var valid_568055 = path.getOrDefault("serverName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "serverName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "serverName", valid_568055
+  var valid_568056 = path.getOrDefault("subscriptionId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
+  if valid_568056 != nil:
+    section.add "subscriptionId", valid_568056
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -166,11 +166,11 @@ proc validate_ServerAutomaticTuningGet_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593824 = query.getOrDefault("api-version")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  var valid_568057 = query.getOrDefault("api-version")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "api-version", valid_593824
+  if valid_568057 != nil:
+    section.add "api-version", valid_568057
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -179,20 +179,20 @@ proc validate_ServerAutomaticTuningGet_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593847: Call_ServerAutomaticTuningGet_593646; path: JsonNode;
+proc call*(call_568080: Call_ServerAutomaticTuningGet_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves server automatic tuning options.
   ## 
-  let valid = call_593847.validator(path, query, header, formData, body)
-  let scheme = call_593847.pickScheme
+  let valid = call_568080.validator(path, query, header, formData, body)
+  let scheme = call_568080.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593847.url(scheme.get, call_593847.host, call_593847.base,
-                         call_593847.route, valid.getOrDefault("path"),
+  let url = call_568080.url(scheme.get, call_568080.host, call_568080.base,
+                         call_568080.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593847, url, valid)
+  result = hook(call_568080, url, valid)
 
-proc call*(call_593918: Call_ServerAutomaticTuningGet_593646;
+proc call*(call_568151: Call_ServerAutomaticTuningGet_567879;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string): Recallable =
   ## serverAutomaticTuningGet
@@ -205,22 +205,22 @@ proc call*(call_593918: Call_ServerAutomaticTuningGet_593646;
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_593919 = newJObject()
-  var query_593921 = newJObject()
-  add(path_593919, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593921, "api-version", newJString(apiVersion))
-  add(path_593919, "serverName", newJString(serverName))
-  add(path_593919, "subscriptionId", newJString(subscriptionId))
-  result = call_593918.call(path_593919, query_593921, nil, nil, nil)
+  var path_568152 = newJObject()
+  var query_568154 = newJObject()
+  add(path_568152, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568154, "api-version", newJString(apiVersion))
+  add(path_568152, "serverName", newJString(serverName))
+  add(path_568152, "subscriptionId", newJString(subscriptionId))
+  result = call_568151.call(path_568152, query_568154, nil, nil, nil)
 
-var serverAutomaticTuningGet* = Call_ServerAutomaticTuningGet_593646(
+var serverAutomaticTuningGet* = Call_ServerAutomaticTuningGet_567879(
     name: "serverAutomaticTuningGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/automaticTuning/current",
-    validator: validate_ServerAutomaticTuningGet_593647, base: "",
-    url: url_ServerAutomaticTuningGet_593648, schemes: {Scheme.Https})
+    validator: validate_ServerAutomaticTuningGet_567880, base: "",
+    url: url_ServerAutomaticTuningGet_567881, schemes: {Scheme.Https})
 type
-  Call_ServerAutomaticTuningUpdate_593960 = ref object of OpenApiRestCall_593424
-proc url_ServerAutomaticTuningUpdate_593962(protocol: Scheme; host: string;
+  Call_ServerAutomaticTuningUpdate_568193 = ref object of OpenApiRestCall_567657
+proc url_ServerAutomaticTuningUpdate_568195(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -243,7 +243,7 @@ proc url_ServerAutomaticTuningUpdate_593962(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerAutomaticTuningUpdate_593961(path: JsonNode; query: JsonNode;
+proc validate_ServerAutomaticTuningUpdate_568194(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update automatic tuning options on server.
   ## 
@@ -259,21 +259,21 @@ proc validate_ServerAutomaticTuningUpdate_593961(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593963 = path.getOrDefault("resourceGroupName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = path.getOrDefault("resourceGroupName")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "resourceGroupName", valid_593963
-  var valid_593964 = path.getOrDefault("serverName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_568196 != nil:
+    section.add "resourceGroupName", valid_568196
+  var valid_568197 = path.getOrDefault("serverName")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "serverName", valid_593964
-  var valid_593965 = path.getOrDefault("subscriptionId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "serverName", valid_568197
+  var valid_568198 = path.getOrDefault("subscriptionId")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "subscriptionId", valid_593965
+  if valid_568198 != nil:
+    section.add "subscriptionId", valid_568198
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -281,11 +281,11 @@ proc validate_ServerAutomaticTuningUpdate_593961(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593966 = query.getOrDefault("api-version")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_568199 = query.getOrDefault("api-version")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "api-version", valid_593966
+  if valid_568199 != nil:
+    section.add "api-version", valid_568199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -299,20 +299,20 @@ proc validate_ServerAutomaticTuningUpdate_593961(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_ServerAutomaticTuningUpdate_593960; path: JsonNode;
+proc call*(call_568201: Call_ServerAutomaticTuningUpdate_568193; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update automatic tuning options on server.
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_568201.validator(path, query, header, formData, body)
+  let scheme = call_568201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
+                         call_568201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_568201, url, valid)
 
-proc call*(call_593969: Call_ServerAutomaticTuningUpdate_593960;
+proc call*(call_568202: Call_ServerAutomaticTuningUpdate_568193;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; parameters: JsonNode): Recallable =
   ## serverAutomaticTuningUpdate
@@ -327,22 +327,22 @@ proc call*(call_593969: Call_ServerAutomaticTuningUpdate_593960;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   parameters: JObject (required)
   ##             : The requested automatic tuning resource state.
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  var body_593972 = newJObject()
-  add(path_593970, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(path_593970, "serverName", newJString(serverName))
-  add(path_593970, "subscriptionId", newJString(subscriptionId))
+  var path_568203 = newJObject()
+  var query_568204 = newJObject()
+  var body_568205 = newJObject()
+  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568204, "api-version", newJString(apiVersion))
+  add(path_568203, "serverName", newJString(serverName))
+  add(path_568203, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593972 = parameters
-  result = call_593969.call(path_593970, query_593971, nil, nil, body_593972)
+    body_568205 = parameters
+  result = call_568202.call(path_568203, query_568204, nil, nil, body_568205)
 
-var serverAutomaticTuningUpdate* = Call_ServerAutomaticTuningUpdate_593960(
+var serverAutomaticTuningUpdate* = Call_ServerAutomaticTuningUpdate_568193(
     name: "serverAutomaticTuningUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/automaticTuning/current",
-    validator: validate_ServerAutomaticTuningUpdate_593961, base: "",
-    url: url_ServerAutomaticTuningUpdate_593962, schemes: {Scheme.Https})
+    validator: validate_ServerAutomaticTuningUpdate_568194, base: "",
+    url: url_ServerAutomaticTuningUpdate_568195, schemes: {Scheme.Https})
 export
   rest
 

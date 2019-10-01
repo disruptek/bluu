@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: FabricAdminClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_574457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-IpPool"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_IpPoolsList_593646 = ref object of OpenApiRestCall_593424
-proc url_IpPoolsList_593648(protocol: Scheme; host: string; base: string;
+  Call_IpPoolsList_574679 = ref object of OpenApiRestCall_574457
+proc url_IpPoolsList_574681(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +128,7 @@ proc url_IpPoolsList_593648(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IpPoolsList_593647(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IpPoolsList_574680(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of all IP pools at a certain location.
   ## 
@@ -144,21 +144,21 @@ proc validate_IpPoolsList_593647(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_574842 = path.getOrDefault("resourceGroupName")
+  valid_574842 = validateParameter(valid_574842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_574842 != nil:
+    section.add "resourceGroupName", valid_574842
+  var valid_574843 = path.getOrDefault("subscriptionId")
+  valid_574843 = validateParameter(valid_574843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593811 = path.getOrDefault("location")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_574843 != nil:
+    section.add "subscriptionId", valid_574843
+  var valid_574844 = path.getOrDefault("location")
+  valid_574844 = validateParameter(valid_574844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "location", valid_593811
+  if valid_574844 != nil:
+    section.add "location", valid_574844
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -168,16 +168,16 @@ proc validate_IpPoolsList_593647(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_574858 = query.getOrDefault("api-version")
+  valid_574858 = validateParameter(valid_574858, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
-  var valid_593826 = query.getOrDefault("$filter")
-  valid_593826 = validateParameter(valid_593826, JString, required = false,
+  if valid_574858 != nil:
+    section.add "api-version", valid_574858
+  var valid_574859 = query.getOrDefault("$filter")
+  valid_574859 = validateParameter(valid_574859, JString, required = false,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "$filter", valid_593826
+  if valid_574859 != nil:
+    section.add "$filter", valid_574859
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -186,20 +186,20 @@ proc validate_IpPoolsList_593647(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593853: Call_IpPoolsList_593646; path: JsonNode; query: JsonNode;
+proc call*(call_574886: Call_IpPoolsList_574679; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all IP pools at a certain location.
   ## 
-  let valid = call_593853.validator(path, query, header, formData, body)
-  let scheme = call_593853.pickScheme
+  let valid = call_574886.validator(path, query, header, formData, body)
+  let scheme = call_574886.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593853.url(scheme.get, call_593853.host, call_593853.base,
-                         call_593853.route, valid.getOrDefault("path"),
+  let url = call_574886.url(scheme.get, call_574886.host, call_574886.base,
+                         call_574886.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593853, url, valid)
+  result = hook(call_574886, url, valid)
 
-proc call*(call_593924: Call_IpPoolsList_593646; resourceGroupName: string;
+proc call*(call_574957: Call_IpPoolsList_574679; resourceGroupName: string;
           subscriptionId: string; location: string;
           apiVersion: string = "2016-05-01"; Filter: string = ""): Recallable =
   ## ipPoolsList
@@ -214,23 +214,23 @@ proc call*(call_593924: Call_IpPoolsList_593646; resourceGroupName: string;
   ##           : Location of the resource.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_593925 = newJObject()
-  var query_593927 = newJObject()
-  add(path_593925, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593927, "api-version", newJString(apiVersion))
-  add(path_593925, "subscriptionId", newJString(subscriptionId))
-  add(path_593925, "location", newJString(location))
-  add(query_593927, "$filter", newJString(Filter))
-  result = call_593924.call(path_593925, query_593927, nil, nil, nil)
+  var path_574958 = newJObject()
+  var query_574960 = newJObject()
+  add(path_574958, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574960, "api-version", newJString(apiVersion))
+  add(path_574958, "subscriptionId", newJString(subscriptionId))
+  add(path_574958, "location", newJString(location))
+  add(query_574960, "$filter", newJString(Filter))
+  result = call_574957.call(path_574958, query_574960, nil, nil, nil)
 
-var ipPoolsList* = Call_IpPoolsList_593646(name: "ipPoolsList",
+var ipPoolsList* = Call_IpPoolsList_574679(name: "ipPoolsList",
                                         meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/ipPools",
-                                        validator: validate_IpPoolsList_593647,
-                                        base: "", url: url_IpPoolsList_593648,
+                                        validator: validate_IpPoolsList_574680,
+                                        base: "", url: url_IpPoolsList_574681,
                                         schemes: {Scheme.Https})
 type
-  Call_IpPoolsCreateOrUpdate_593987 = ref object of OpenApiRestCall_593424
-proc url_IpPoolsCreateOrUpdate_593989(protocol: Scheme; host: string; base: string;
+  Call_IpPoolsCreateOrUpdate_575020 = ref object of OpenApiRestCall_574457
+proc url_IpPoolsCreateOrUpdate_575022(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -256,7 +256,7 @@ proc url_IpPoolsCreateOrUpdate_593989(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IpPoolsCreateOrUpdate_593988(path: JsonNode; query: JsonNode;
+proc validate_IpPoolsCreateOrUpdate_575021(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create an IP pool.  Once created an IP pool cannot be deleted.
   ## 
@@ -274,26 +274,26 @@ proc validate_IpPoolsCreateOrUpdate_593988(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593990 = path.getOrDefault("resourceGroupName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_575023 = path.getOrDefault("resourceGroupName")
+  valid_575023 = validateParameter(valid_575023, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "resourceGroupName", valid_593990
-  var valid_593991 = path.getOrDefault("subscriptionId")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_575023 != nil:
+    section.add "resourceGroupName", valid_575023
+  var valid_575024 = path.getOrDefault("subscriptionId")
+  valid_575024 = validateParameter(valid_575024, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "subscriptionId", valid_593991
-  var valid_593992 = path.getOrDefault("ipPool")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_575024 != nil:
+    section.add "subscriptionId", valid_575024
+  var valid_575025 = path.getOrDefault("ipPool")
+  valid_575025 = validateParameter(valid_575025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "ipPool", valid_593992
-  var valid_593993 = path.getOrDefault("location")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_575025 != nil:
+    section.add "ipPool", valid_575025
+  var valid_575026 = path.getOrDefault("location")
+  valid_575026 = validateParameter(valid_575026, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "location", valid_593993
+  if valid_575026 != nil:
+    section.add "location", valid_575026
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -301,11 +301,11 @@ proc validate_IpPoolsCreateOrUpdate_593988(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_575027 = query.getOrDefault("api-version")
+  valid_575027 = validateParameter(valid_575027, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
+  if valid_575027 != nil:
+    section.add "api-version", valid_575027
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -319,20 +319,20 @@ proc validate_IpPoolsCreateOrUpdate_593988(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593996: Call_IpPoolsCreateOrUpdate_593987; path: JsonNode;
+proc call*(call_575029: Call_IpPoolsCreateOrUpdate_575020; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create an IP pool.  Once created an IP pool cannot be deleted.
   ## 
-  let valid = call_593996.validator(path, query, header, formData, body)
-  let scheme = call_593996.pickScheme
+  let valid = call_575029.validator(path, query, header, formData, body)
+  let scheme = call_575029.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593996.url(scheme.get, call_593996.host, call_593996.base,
-                         call_593996.route, valid.getOrDefault("path"),
+  let url = call_575029.url(scheme.get, call_575029.host, call_575029.base,
+                         call_575029.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593996, url, valid)
+  result = hook(call_575029, url, valid)
 
-proc call*(call_593997: Call_IpPoolsCreateOrUpdate_593987; pool: JsonNode;
+proc call*(call_575030: Call_IpPoolsCreateOrUpdate_575020; pool: JsonNode;
           resourceGroupName: string; subscriptionId: string; ipPool: string;
           location: string; apiVersion: string = "2016-05-01"): Recallable =
   ## ipPoolsCreateOrUpdate
@@ -349,26 +349,26 @@ proc call*(call_593997: Call_IpPoolsCreateOrUpdate_593987; pool: JsonNode;
   ##         : IP pool name.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593998 = newJObject()
-  var query_593999 = newJObject()
-  var body_594000 = newJObject()
+  var path_575031 = newJObject()
+  var query_575032 = newJObject()
+  var body_575033 = newJObject()
   if pool != nil:
-    body_594000 = pool
-  add(path_593998, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593999, "api-version", newJString(apiVersion))
-  add(path_593998, "subscriptionId", newJString(subscriptionId))
-  add(path_593998, "ipPool", newJString(ipPool))
-  add(path_593998, "location", newJString(location))
-  result = call_593997.call(path_593998, query_593999, nil, nil, body_594000)
+    body_575033 = pool
+  add(path_575031, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575032, "api-version", newJString(apiVersion))
+  add(path_575031, "subscriptionId", newJString(subscriptionId))
+  add(path_575031, "ipPool", newJString(ipPool))
+  add(path_575031, "location", newJString(location))
+  result = call_575030.call(path_575031, query_575032, nil, nil, body_575033)
 
-var ipPoolsCreateOrUpdate* = Call_IpPoolsCreateOrUpdate_593987(
+var ipPoolsCreateOrUpdate* = Call_IpPoolsCreateOrUpdate_575020(
     name: "ipPoolsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/ipPools/{ipPool}",
-    validator: validate_IpPoolsCreateOrUpdate_593988, base: "",
-    url: url_IpPoolsCreateOrUpdate_593989, schemes: {Scheme.Https})
+    validator: validate_IpPoolsCreateOrUpdate_575021, base: "",
+    url: url_IpPoolsCreateOrUpdate_575022, schemes: {Scheme.Https})
 type
-  Call_IpPoolsGet_593966 = ref object of OpenApiRestCall_593424
-proc url_IpPoolsGet_593968(protocol: Scheme; host: string; base: string; route: string;
+  Call_IpPoolsGet_574999 = ref object of OpenApiRestCall_574457
+proc url_IpPoolsGet_575001(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -394,7 +394,7 @@ proc url_IpPoolsGet_593968(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IpPoolsGet_593967(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IpPoolsGet_575000(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Return the requested IP pool.
   ## 
@@ -412,26 +412,26 @@ proc validate_IpPoolsGet_593967(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593978 = path.getOrDefault("resourceGroupName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_575011 = path.getOrDefault("resourceGroupName")
+  valid_575011 = validateParameter(valid_575011, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "resourceGroupName", valid_593978
-  var valid_593979 = path.getOrDefault("subscriptionId")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_575011 != nil:
+    section.add "resourceGroupName", valid_575011
+  var valid_575012 = path.getOrDefault("subscriptionId")
+  valid_575012 = validateParameter(valid_575012, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "subscriptionId", valid_593979
-  var valid_593980 = path.getOrDefault("ipPool")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_575012 != nil:
+    section.add "subscriptionId", valid_575012
+  var valid_575013 = path.getOrDefault("ipPool")
+  valid_575013 = validateParameter(valid_575013, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "ipPool", valid_593980
-  var valid_593981 = path.getOrDefault("location")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_575013 != nil:
+    section.add "ipPool", valid_575013
+  var valid_575014 = path.getOrDefault("location")
+  valid_575014 = validateParameter(valid_575014, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "location", valid_593981
+  if valid_575014 != nil:
+    section.add "location", valid_575014
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -439,11 +439,11 @@ proc validate_IpPoolsGet_593967(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593982 = query.getOrDefault("api-version")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_575015 = query.getOrDefault("api-version")
+  valid_575015 = validateParameter(valid_575015, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593982 != nil:
-    section.add "api-version", valid_593982
+  if valid_575015 != nil:
+    section.add "api-version", valid_575015
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -452,20 +452,20 @@ proc validate_IpPoolsGet_593967(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593983: Call_IpPoolsGet_593966; path: JsonNode; query: JsonNode;
+proc call*(call_575016: Call_IpPoolsGet_574999; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Return the requested IP pool.
   ## 
-  let valid = call_593983.validator(path, query, header, formData, body)
-  let scheme = call_593983.pickScheme
+  let valid = call_575016.validator(path, query, header, formData, body)
+  let scheme = call_575016.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593983.url(scheme.get, call_593983.host, call_593983.base,
-                         call_593983.route, valid.getOrDefault("path"),
+  let url = call_575016.url(scheme.get, call_575016.host, call_575016.base,
+                         call_575016.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593983, url, valid)
+  result = hook(call_575016, url, valid)
 
-proc call*(call_593984: Call_IpPoolsGet_593966; resourceGroupName: string;
+proc call*(call_575017: Call_IpPoolsGet_574999; resourceGroupName: string;
           subscriptionId: string; ipPool: string; location: string;
           apiVersion: string = "2016-05-01"): Recallable =
   ## ipPoolsGet
@@ -480,19 +480,19 @@ proc call*(call_593984: Call_IpPoolsGet_593966; resourceGroupName: string;
   ##         : IP pool name.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593985 = newJObject()
-  var query_593986 = newJObject()
-  add(path_593985, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593986, "api-version", newJString(apiVersion))
-  add(path_593985, "subscriptionId", newJString(subscriptionId))
-  add(path_593985, "ipPool", newJString(ipPool))
-  add(path_593985, "location", newJString(location))
-  result = call_593984.call(path_593985, query_593986, nil, nil, nil)
+  var path_575018 = newJObject()
+  var query_575019 = newJObject()
+  add(path_575018, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575019, "api-version", newJString(apiVersion))
+  add(path_575018, "subscriptionId", newJString(subscriptionId))
+  add(path_575018, "ipPool", newJString(ipPool))
+  add(path_575018, "location", newJString(location))
+  result = call_575017.call(path_575018, query_575019, nil, nil, nil)
 
-var ipPoolsGet* = Call_IpPoolsGet_593966(name: "ipPoolsGet",
+var ipPoolsGet* = Call_IpPoolsGet_574999(name: "ipPoolsGet",
                                       meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/ipPools/{ipPool}",
-                                      validator: validate_IpPoolsGet_593967,
-                                      base: "", url: url_IpPoolsGet_593968,
+                                      validator: validate_IpPoolsGet_575000,
+                                      base: "", url: url_IpPoolsGet_575001,
                                       schemes: {Scheme.Https})
 export
   rest

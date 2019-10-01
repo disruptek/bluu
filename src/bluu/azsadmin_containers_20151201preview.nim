@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: StorageManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_574458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-containers"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ContainersCancelMigration_593953 = ref object of OpenApiRestCall_593425
-proc url_ContainersCancelMigration_593955(protocol: Scheme; host: string;
+  Call_ContainersCancelMigration_574986 = ref object of OpenApiRestCall_574458
+proc url_ContainersCancelMigration_574988(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +129,7 @@ proc url_ContainersCancelMigration_593955(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainersCancelMigration_593954(path: JsonNode; query: JsonNode;
+proc validate_ContainersCancelMigration_574987(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancel a container migration job.
   ## 
@@ -147,26 +147,26 @@ proc validate_ContainersCancelMigration_593954(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593956 = path.getOrDefault("resourceGroupName")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  var valid_574989 = path.getOrDefault("resourceGroupName")
+  valid_574989 = validateParameter(valid_574989, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "resourceGroupName", valid_593956
-  var valid_593957 = path.getOrDefault("farmId")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  if valid_574989 != nil:
+    section.add "resourceGroupName", valid_574989
+  var valid_574990 = path.getOrDefault("farmId")
+  valid_574990 = validateParameter(valid_574990, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "farmId", valid_593957
-  var valid_593958 = path.getOrDefault("subscriptionId")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  if valid_574990 != nil:
+    section.add "farmId", valid_574990
+  var valid_574991 = path.getOrDefault("subscriptionId")
+  valid_574991 = validateParameter(valid_574991, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "subscriptionId", valid_593958
-  var valid_593959 = path.getOrDefault("operationId")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_574991 != nil:
+    section.add "subscriptionId", valid_574991
+  var valid_574992 = path.getOrDefault("operationId")
+  valid_574992 = validateParameter(valid_574992, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "operationId", valid_593959
+  if valid_574992 != nil:
+    section.add "operationId", valid_574992
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -174,11 +174,11 @@ proc validate_ContainersCancelMigration_593954(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593960 = query.getOrDefault("api-version")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_574993 = query.getOrDefault("api-version")
+  valid_574993 = validateParameter(valid_574993, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "api-version", valid_593960
+  if valid_574993 != nil:
+    section.add "api-version", valid_574993
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -187,20 +187,20 @@ proc validate_ContainersCancelMigration_593954(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593961: Call_ContainersCancelMigration_593953; path: JsonNode;
+proc call*(call_574994: Call_ContainersCancelMigration_574986; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Cancel a container migration job.
   ## 
-  let valid = call_593961.validator(path, query, header, formData, body)
-  let scheme = call_593961.pickScheme
+  let valid = call_574994.validator(path, query, header, formData, body)
+  let scheme = call_574994.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593961.url(scheme.get, call_593961.host, call_593961.base,
-                         call_593961.route, valid.getOrDefault("path"),
+  let url = call_574994.url(scheme.get, call_574994.host, call_574994.base,
+                         call_574994.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593961, url, valid)
+  result = hook(call_574994, url, valid)
 
-proc call*(call_593962: Call_ContainersCancelMigration_593953;
+proc call*(call_574995: Call_ContainersCancelMigration_574986;
           resourceGroupName: string; apiVersion: string; farmId: string;
           subscriptionId: string; operationId: string): Recallable =
   ## containersCancelMigration
@@ -215,23 +215,23 @@ proc call*(call_593962: Call_ContainersCancelMigration_593953;
   ##                 : Subscription Id.
   ##   operationId: string (required)
   ##              : Operation Id.
-  var path_593963 = newJObject()
-  var query_593964 = newJObject()
-  add(path_593963, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593964, "api-version", newJString(apiVersion))
-  add(path_593963, "farmId", newJString(farmId))
-  add(path_593963, "subscriptionId", newJString(subscriptionId))
-  add(path_593963, "operationId", newJString(operationId))
-  result = call_593962.call(path_593963, query_593964, nil, nil, nil)
+  var path_574996 = newJObject()
+  var query_574997 = newJObject()
+  add(path_574996, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574997, "api-version", newJString(apiVersion))
+  add(path_574996, "farmId", newJString(farmId))
+  add(path_574996, "subscriptionId", newJString(subscriptionId))
+  add(path_574996, "operationId", newJString(operationId))
+  result = call_574995.call(path_574996, query_574997, nil, nil, nil)
 
-var containersCancelMigration* = Call_ContainersCancelMigration_593953(
+var containersCancelMigration* = Call_ContainersCancelMigration_574986(
     name: "containersCancelMigration", meth: HttpMethod.HttpPost,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/shares/operationresults/{operationId}",
-    validator: validate_ContainersCancelMigration_593954, base: "",
-    url: url_ContainersCancelMigration_593955, schemes: {Scheme.Https})
+    validator: validate_ContainersCancelMigration_574987, base: "",
+    url: url_ContainersCancelMigration_574988, schemes: {Scheme.Https})
 type
-  Call_ContainersMigrationStatus_593647 = ref object of OpenApiRestCall_593425
-proc url_ContainersMigrationStatus_593649(protocol: Scheme; host: string;
+  Call_ContainersMigrationStatus_574680 = ref object of OpenApiRestCall_574458
+proc url_ContainersMigrationStatus_574682(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -256,7 +256,7 @@ proc url_ContainersMigrationStatus_593649(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainersMigrationStatus_593648(path: JsonNode; query: JsonNode;
+proc validate_ContainersMigrationStatus_574681(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the status of a container migration job.
   ## 
@@ -274,26 +274,26 @@ proc validate_ContainersMigrationStatus_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_574842 = path.getOrDefault("resourceGroupName")
+  valid_574842 = validateParameter(valid_574842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("farmId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_574842 != nil:
+    section.add "resourceGroupName", valid_574842
+  var valid_574843 = path.getOrDefault("farmId")
+  valid_574843 = validateParameter(valid_574843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "farmId", valid_593810
-  var valid_593811 = path.getOrDefault("subscriptionId")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_574843 != nil:
+    section.add "farmId", valid_574843
+  var valid_574844 = path.getOrDefault("subscriptionId")
+  valid_574844 = validateParameter(valid_574844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "subscriptionId", valid_593811
-  var valid_593812 = path.getOrDefault("operationId")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  if valid_574844 != nil:
+    section.add "subscriptionId", valid_574844
+  var valid_574845 = path.getOrDefault("operationId")
+  valid_574845 = validateParameter(valid_574845, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "operationId", valid_593812
+  if valid_574845 != nil:
+    section.add "operationId", valid_574845
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -301,11 +301,11 @@ proc validate_ContainersMigrationStatus_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593813 = query.getOrDefault("api-version")
-  valid_593813 = validateParameter(valid_593813, JString, required = true,
+  var valid_574846 = query.getOrDefault("api-version")
+  valid_574846 = validateParameter(valid_574846, JString, required = true,
                                  default = nil)
-  if valid_593813 != nil:
-    section.add "api-version", valid_593813
+  if valid_574846 != nil:
+    section.add "api-version", valid_574846
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -314,20 +314,20 @@ proc validate_ContainersMigrationStatus_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593840: Call_ContainersMigrationStatus_593647; path: JsonNode;
+proc call*(call_574873: Call_ContainersMigrationStatus_574680; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the status of a container migration job.
   ## 
-  let valid = call_593840.validator(path, query, header, formData, body)
-  let scheme = call_593840.pickScheme
+  let valid = call_574873.validator(path, query, header, formData, body)
+  let scheme = call_574873.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593840.url(scheme.get, call_593840.host, call_593840.base,
-                         call_593840.route, valid.getOrDefault("path"),
+  let url = call_574873.url(scheme.get, call_574873.host, call_574873.base,
+                         call_574873.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593840, url, valid)
+  result = hook(call_574873, url, valid)
 
-proc call*(call_593911: Call_ContainersMigrationStatus_593647;
+proc call*(call_574944: Call_ContainersMigrationStatus_574680;
           resourceGroupName: string; apiVersion: string; farmId: string;
           subscriptionId: string; operationId: string): Recallable =
   ## containersMigrationStatus
@@ -342,23 +342,23 @@ proc call*(call_593911: Call_ContainersMigrationStatus_593647;
   ##                 : Subscription Id.
   ##   operationId: string (required)
   ##              : Operation Id.
-  var path_593912 = newJObject()
-  var query_593914 = newJObject()
-  add(path_593912, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593914, "api-version", newJString(apiVersion))
-  add(path_593912, "farmId", newJString(farmId))
-  add(path_593912, "subscriptionId", newJString(subscriptionId))
-  add(path_593912, "operationId", newJString(operationId))
-  result = call_593911.call(path_593912, query_593914, nil, nil, nil)
+  var path_574945 = newJObject()
+  var query_574947 = newJObject()
+  add(path_574945, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574947, "api-version", newJString(apiVersion))
+  add(path_574945, "farmId", newJString(farmId))
+  add(path_574945, "subscriptionId", newJString(subscriptionId))
+  add(path_574945, "operationId", newJString(operationId))
+  result = call_574944.call(path_574945, query_574947, nil, nil, nil)
 
-var containersMigrationStatus* = Call_ContainersMigrationStatus_593647(
+var containersMigrationStatus* = Call_ContainersMigrationStatus_574680(
     name: "containersMigrationStatus", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/shares/operationresults/{operationId}",
-    validator: validate_ContainersMigrationStatus_593648, base: "",
-    url: url_ContainersMigrationStatus_593649, schemes: {Scheme.Https})
+    validator: validate_ContainersMigrationStatus_574681, base: "",
+    url: url_ContainersMigrationStatus_574682, schemes: {Scheme.Https})
 type
-  Call_ContainersList_593965 = ref object of OpenApiRestCall_593425
-proc url_ContainersList_593967(protocol: Scheme; host: string; base: string;
+  Call_ContainersList_574998 = ref object of OpenApiRestCall_574458
+proc url_ContainersList_575000(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -384,7 +384,7 @@ proc url_ContainersList_593967(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainersList_593966(path: JsonNode; query: JsonNode;
+proc validate_ContainersList_574999(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Returns the list of containers which can be migrated in the specified share.
@@ -403,26 +403,26 @@ proc validate_ContainersList_593966(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593977 = path.getOrDefault("resourceGroupName")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  var valid_575010 = path.getOrDefault("resourceGroupName")
+  valid_575010 = validateParameter(valid_575010, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "resourceGroupName", valid_593977
-  var valid_593978 = path.getOrDefault("farmId")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  if valid_575010 != nil:
+    section.add "resourceGroupName", valid_575010
+  var valid_575011 = path.getOrDefault("farmId")
+  valid_575011 = validateParameter(valid_575011, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "farmId", valid_593978
-  var valid_593979 = path.getOrDefault("subscriptionId")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_575011 != nil:
+    section.add "farmId", valid_575011
+  var valid_575012 = path.getOrDefault("subscriptionId")
+  valid_575012 = validateParameter(valid_575012, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "subscriptionId", valid_593979
-  var valid_593980 = path.getOrDefault("shareName")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_575012 != nil:
+    section.add "subscriptionId", valid_575012
+  var valid_575013 = path.getOrDefault("shareName")
+  valid_575013 = validateParameter(valid_575013, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "shareName", valid_593980
+  if valid_575013 != nil:
+    section.add "shareName", valid_575013
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -436,24 +436,24 @@ proc validate_ContainersList_593966(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593981 = query.getOrDefault("api-version")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_575014 = query.getOrDefault("api-version")
+  valid_575014 = validateParameter(valid_575014, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "api-version", valid_593981
-  var valid_593982 = query.getOrDefault("MaxCount")
-  valid_593982 = validateParameter(valid_593982, JInt, required = false, default = nil)
-  if valid_593982 != nil:
-    section.add "MaxCount", valid_593982
-  var valid_593983 = query.getOrDefault("StartIndex")
-  valid_593983 = validateParameter(valid_593983, JInt, required = false, default = nil)
-  if valid_593983 != nil:
-    section.add "StartIndex", valid_593983
-  var valid_593984 = query.getOrDefault("Intent")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_575014 != nil:
+    section.add "api-version", valid_575014
+  var valid_575015 = query.getOrDefault("MaxCount")
+  valid_575015 = validateParameter(valid_575015, JInt, required = false, default = nil)
+  if valid_575015 != nil:
+    section.add "MaxCount", valid_575015
+  var valid_575016 = query.getOrDefault("StartIndex")
+  valid_575016 = validateParameter(valid_575016, JInt, required = false, default = nil)
+  if valid_575016 != nil:
+    section.add "StartIndex", valid_575016
+  var valid_575017 = query.getOrDefault("Intent")
+  valid_575017 = validateParameter(valid_575017, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "Intent", valid_593984
+  if valid_575017 != nil:
+    section.add "Intent", valid_575017
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -462,20 +462,20 @@ proc validate_ContainersList_593966(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_ContainersList_593965; path: JsonNode; query: JsonNode;
+proc call*(call_575018: Call_ContainersList_574998; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of containers which can be migrated in the specified share.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_575018.validator(path, query, header, formData, body)
+  let scheme = call_575018.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_575018.url(scheme.get, call_575018.host, call_575018.base,
+                         call_575018.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_575018, url, valid)
 
-proc call*(call_593986: Call_ContainersList_593965; resourceGroupName: string;
+proc call*(call_575019: Call_ContainersList_574998; resourceGroupName: string;
           apiVersion: string; farmId: string; subscriptionId: string;
           shareName: string; Intent: string; MaxCount: int = 0; StartIndex: int = 0): Recallable =
   ## containersList
@@ -496,25 +496,25 @@ proc call*(call_593986: Call_ContainersList_593965; resourceGroupName: string;
   ##             : The starting index the resource provider uses.
   ##   Intent: string (required)
   ##         : The container migration intent.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  add(path_593987, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "farmId", newJString(farmId))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
-  add(path_593987, "shareName", newJString(shareName))
-  add(query_593988, "MaxCount", newJInt(MaxCount))
-  add(query_593988, "StartIndex", newJInt(StartIndex))
-  add(query_593988, "Intent", newJString(Intent))
-  result = call_593986.call(path_593987, query_593988, nil, nil, nil)
+  var path_575020 = newJObject()
+  var query_575021 = newJObject()
+  add(path_575020, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575021, "api-version", newJString(apiVersion))
+  add(path_575020, "farmId", newJString(farmId))
+  add(path_575020, "subscriptionId", newJString(subscriptionId))
+  add(path_575020, "shareName", newJString(shareName))
+  add(query_575021, "MaxCount", newJInt(MaxCount))
+  add(query_575021, "StartIndex", newJInt(StartIndex))
+  add(query_575021, "Intent", newJString(Intent))
+  result = call_575019.call(path_575020, query_575021, nil, nil, nil)
 
-var containersList* = Call_ContainersList_593965(name: "containersList",
+var containersList* = Call_ContainersList_574998(name: "containersList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/shares/{shareName}/containers",
-    validator: validate_ContainersList_593966, base: "", url: url_ContainersList_593967,
+    validator: validate_ContainersList_574999, base: "", url: url_ContainersList_575000,
     schemes: {Scheme.Https})
 type
-  Call_ContainersListDestinationShares_593989 = ref object of OpenApiRestCall_593425
-proc url_ContainersListDestinationShares_593991(protocol: Scheme; host: string;
+  Call_ContainersListDestinationShares_575022 = ref object of OpenApiRestCall_574458
+proc url_ContainersListDestinationShares_575024(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -540,7 +540,7 @@ proc url_ContainersListDestinationShares_593991(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainersListDestinationShares_593990(path: JsonNode;
+proc validate_ContainersListDestinationShares_575023(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of destination shares that the system considers as best candidates for migration.
   ## 
@@ -558,26 +558,26 @@ proc validate_ContainersListDestinationShares_593990(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593992 = path.getOrDefault("resourceGroupName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_575025 = path.getOrDefault("resourceGroupName")
+  valid_575025 = validateParameter(valid_575025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "resourceGroupName", valid_593992
-  var valid_593993 = path.getOrDefault("farmId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_575025 != nil:
+    section.add "resourceGroupName", valid_575025
+  var valid_575026 = path.getOrDefault("farmId")
+  valid_575026 = validateParameter(valid_575026, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "farmId", valid_593993
-  var valid_593994 = path.getOrDefault("subscriptionId")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_575026 != nil:
+    section.add "farmId", valid_575026
+  var valid_575027 = path.getOrDefault("subscriptionId")
+  valid_575027 = validateParameter(valid_575027, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "subscriptionId", valid_593994
-  var valid_593995 = path.getOrDefault("shareName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_575027 != nil:
+    section.add "subscriptionId", valid_575027
+  var valid_575028 = path.getOrDefault("shareName")
+  valid_575028 = validateParameter(valid_575028, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "shareName", valid_593995
+  if valid_575028 != nil:
+    section.add "shareName", valid_575028
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -585,11 +585,11 @@ proc validate_ContainersListDestinationShares_593990(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593996 = query.getOrDefault("api-version")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_575029 = query.getOrDefault("api-version")
+  valid_575029 = validateParameter(valid_575029, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "api-version", valid_593996
+  if valid_575029 != nil:
+    section.add "api-version", valid_575029
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -598,21 +598,21 @@ proc validate_ContainersListDestinationShares_593990(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_ContainersListDestinationShares_593989;
+proc call*(call_575030: Call_ContainersListDestinationShares_575022;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns a list of destination shares that the system considers as best candidates for migration.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_575030.validator(path, query, header, formData, body)
+  let scheme = call_575030.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_575030.url(scheme.get, call_575030.host, call_575030.base,
+                         call_575030.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_575030, url, valid)
 
-proc call*(call_593998: Call_ContainersListDestinationShares_593989;
+proc call*(call_575031: Call_ContainersListDestinationShares_575022;
           resourceGroupName: string; apiVersion: string; farmId: string;
           subscriptionId: string; shareName: string): Recallable =
   ## containersListDestinationShares
@@ -627,23 +627,23 @@ proc call*(call_593998: Call_ContainersListDestinationShares_593989;
   ##                 : Subscription Id.
   ##   shareName: string (required)
   ##            : Share name.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  add(path_593999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "farmId", newJString(farmId))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
-  add(path_593999, "shareName", newJString(shareName))
-  result = call_593998.call(path_593999, query_594000, nil, nil, nil)
+  var path_575032 = newJObject()
+  var query_575033 = newJObject()
+  add(path_575032, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575033, "api-version", newJString(apiVersion))
+  add(path_575032, "farmId", newJString(farmId))
+  add(path_575032, "subscriptionId", newJString(subscriptionId))
+  add(path_575032, "shareName", newJString(shareName))
+  result = call_575031.call(path_575032, query_575033, nil, nil, nil)
 
-var containersListDestinationShares* = Call_ContainersListDestinationShares_593989(
+var containersListDestinationShares* = Call_ContainersListDestinationShares_575022(
     name: "containersListDestinationShares", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/shares/{shareName}/destinationshares",
-    validator: validate_ContainersListDestinationShares_593990, base: "",
-    url: url_ContainersListDestinationShares_593991, schemes: {Scheme.Https})
+    validator: validate_ContainersListDestinationShares_575023, base: "",
+    url: url_ContainersListDestinationShares_575024, schemes: {Scheme.Https})
 type
-  Call_ContainersMigrate_594001 = ref object of OpenApiRestCall_593425
-proc url_ContainersMigrate_594003(protocol: Scheme; host: string; base: string;
+  Call_ContainersMigrate_575034 = ref object of OpenApiRestCall_574458
+proc url_ContainersMigrate_575036(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -669,7 +669,7 @@ proc url_ContainersMigrate_594003(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainersMigrate_594002(path: JsonNode; query: JsonNode;
+proc validate_ContainersMigrate_575035(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Starts a container migration job to migrate containers to the specified destination share.
@@ -688,26 +688,26 @@ proc validate_ContainersMigrate_594002(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594004 = path.getOrDefault("resourceGroupName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_575037 = path.getOrDefault("resourceGroupName")
+  valid_575037 = validateParameter(valid_575037, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "resourceGroupName", valid_594004
-  var valid_594005 = path.getOrDefault("farmId")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  if valid_575037 != nil:
+    section.add "resourceGroupName", valid_575037
+  var valid_575038 = path.getOrDefault("farmId")
+  valid_575038 = validateParameter(valid_575038, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "farmId", valid_594005
-  var valid_594006 = path.getOrDefault("subscriptionId")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_575038 != nil:
+    section.add "farmId", valid_575038
+  var valid_575039 = path.getOrDefault("subscriptionId")
+  valid_575039 = validateParameter(valid_575039, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "subscriptionId", valid_594006
-  var valid_594007 = path.getOrDefault("shareName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_575039 != nil:
+    section.add "subscriptionId", valid_575039
+  var valid_575040 = path.getOrDefault("shareName")
+  valid_575040 = validateParameter(valid_575040, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "shareName", valid_594007
+  if valid_575040 != nil:
+    section.add "shareName", valid_575040
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -715,11 +715,11 @@ proc validate_ContainersMigrate_594002(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594008 = query.getOrDefault("api-version")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  var valid_575041 = query.getOrDefault("api-version")
+  valid_575041 = validateParameter(valid_575041, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "api-version", valid_594008
+  if valid_575041 != nil:
+    section.add "api-version", valid_575041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -733,20 +733,20 @@ proc validate_ContainersMigrate_594002(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594010: Call_ContainersMigrate_594001; path: JsonNode;
+proc call*(call_575043: Call_ContainersMigrate_575034; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts a container migration job to migrate containers to the specified destination share.
   ## 
-  let valid = call_594010.validator(path, query, header, formData, body)
-  let scheme = call_594010.pickScheme
+  let valid = call_575043.validator(path, query, header, formData, body)
+  let scheme = call_575043.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594010.url(scheme.get, call_594010.host, call_594010.base,
-                         call_594010.route, valid.getOrDefault("path"),
+  let url = call_575043.url(scheme.get, call_575043.host, call_575043.base,
+                         call_575043.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594010, url, valid)
+  result = hook(call_575043, url, valid)
 
-proc call*(call_594011: Call_ContainersMigrate_594001; resourceGroupName: string;
+proc call*(call_575044: Call_ContainersMigrate_575034; resourceGroupName: string;
           apiVersion: string; farmId: string; migrationParameters: JsonNode;
           subscriptionId: string; shareName: string): Recallable =
   ## containersMigrate
@@ -763,22 +763,22 @@ proc call*(call_594011: Call_ContainersMigrate_594001; resourceGroupName: string
   ##                 : Subscription Id.
   ##   shareName: string (required)
   ##            : Share name.
-  var path_594012 = newJObject()
-  var query_594013 = newJObject()
-  var body_594014 = newJObject()
-  add(path_594012, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594013, "api-version", newJString(apiVersion))
-  add(path_594012, "farmId", newJString(farmId))
+  var path_575045 = newJObject()
+  var query_575046 = newJObject()
+  var body_575047 = newJObject()
+  add(path_575045, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575046, "api-version", newJString(apiVersion))
+  add(path_575045, "farmId", newJString(farmId))
   if migrationParameters != nil:
-    body_594014 = migrationParameters
-  add(path_594012, "subscriptionId", newJString(subscriptionId))
-  add(path_594012, "shareName", newJString(shareName))
-  result = call_594011.call(path_594012, query_594013, nil, nil, body_594014)
+    body_575047 = migrationParameters
+  add(path_575045, "subscriptionId", newJString(subscriptionId))
+  add(path_575045, "shareName", newJString(shareName))
+  result = call_575044.call(path_575045, query_575046, nil, nil, body_575047)
 
-var containersMigrate* = Call_ContainersMigrate_594001(name: "containersMigrate",
+var containersMigrate* = Call_ContainersMigrate_575034(name: "containersMigrate",
     meth: HttpMethod.HttpPost, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/shares/{shareName}/migrate",
-    validator: validate_ContainersMigrate_594002, base: "",
-    url: url_ContainersMigrate_594003, schemes: {Scheme.Https})
+    validator: validate_ContainersMigrate_575035, base: "",
+    url: url_ContainersMigrate_575036, schemes: {Scheme.Https})
 export
   rest
 

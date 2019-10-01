@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593437 = ref object of OpenApiRestCall
+  OpenApiRestCall_567666 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593437](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567666](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593437): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567666): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "network-applicationGateway"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ApplicationGatewaysListAvailableSslOptions_593659 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysListAvailableSslOptions_593661(protocol: Scheme;
+  Call_ApplicationGatewaysListAvailableSslOptions_567888 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysListAvailableSslOptions_567890(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +120,7 @@ proc url_ApplicationGatewaysListAvailableSslOptions_593661(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysListAvailableSslOptions_593660(path: JsonNode;
+proc validate_ApplicationGatewaysListAvailableSslOptions_567889(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists available Ssl options for configuring Ssl policy.
   ## 
@@ -132,11 +132,11 @@ proc validate_ApplicationGatewaysListAvailableSslOptions_593660(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593821 = path.getOrDefault("subscriptionId")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568050 = path.getOrDefault("subscriptionId")
+  valid_568050 = validateParameter(valid_568050, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "subscriptionId", valid_593821
+  if valid_568050 != nil:
+    section.add "subscriptionId", valid_568050
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +144,11 @@ proc validate_ApplicationGatewaysListAvailableSslOptions_593660(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593822 = query.getOrDefault("api-version")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568051 = query.getOrDefault("api-version")
+  valid_568051 = validateParameter(valid_568051, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "api-version", valid_593822
+  if valid_568051 != nil:
+    section.add "api-version", valid_568051
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,21 +157,21 @@ proc validate_ApplicationGatewaysListAvailableSslOptions_593660(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593849: Call_ApplicationGatewaysListAvailableSslOptions_593659;
+proc call*(call_568078: Call_ApplicationGatewaysListAvailableSslOptions_567888;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists available Ssl options for configuring Ssl policy.
   ## 
-  let valid = call_593849.validator(path, query, header, formData, body)
-  let scheme = call_593849.pickScheme
+  let valid = call_568078.validator(path, query, header, formData, body)
+  let scheme = call_568078.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593849.url(scheme.get, call_593849.host, call_593849.base,
-                         call_593849.route, valid.getOrDefault("path"),
+  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
+                         call_568078.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593849, url, valid)
+  result = hook(call_568078, url, valid)
 
-proc call*(call_593920: Call_ApplicationGatewaysListAvailableSslOptions_593659;
+proc call*(call_568149: Call_ApplicationGatewaysListAvailableSslOptions_567888;
           apiVersion: string; subscriptionId: string): Recallable =
   ## applicationGatewaysListAvailableSslOptions
   ## Lists available Ssl options for configuring Ssl policy.
@@ -179,21 +179,21 @@ proc call*(call_593920: Call_ApplicationGatewaysListAvailableSslOptions_593659;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593921 = newJObject()
-  var query_593923 = newJObject()
-  add(query_593923, "api-version", newJString(apiVersion))
-  add(path_593921, "subscriptionId", newJString(subscriptionId))
-  result = call_593920.call(path_593921, query_593923, nil, nil, nil)
+  var path_568150 = newJObject()
+  var query_568152 = newJObject()
+  add(query_568152, "api-version", newJString(apiVersion))
+  add(path_568150, "subscriptionId", newJString(subscriptionId))
+  result = call_568149.call(path_568150, query_568152, nil, nil, nil)
 
-var applicationGatewaysListAvailableSslOptions* = Call_ApplicationGatewaysListAvailableSslOptions_593659(
+var applicationGatewaysListAvailableSslOptions* = Call_ApplicationGatewaysListAvailableSslOptions_567888(
     name: "applicationGatewaysListAvailableSslOptions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/applicationGatewayAvailableSslOptions/default",
-    validator: validate_ApplicationGatewaysListAvailableSslOptions_593660,
-    base: "", url: url_ApplicationGatewaysListAvailableSslOptions_593661,
+    validator: validate_ApplicationGatewaysListAvailableSslOptions_567889,
+    base: "", url: url_ApplicationGatewaysListAvailableSslOptions_567890,
     schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysListAvailableSslPredefinedPolicies_593962 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysListAvailableSslPredefinedPolicies_593964(
+  Call_ApplicationGatewaysListAvailableSslPredefinedPolicies_568191 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysListAvailableSslPredefinedPolicies_568193(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -210,7 +210,7 @@ proc url_ApplicationGatewaysListAvailableSslPredefinedPolicies_593964(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysListAvailableSslPredefinedPolicies_593963(
+proc validate_ApplicationGatewaysListAvailableSslPredefinedPolicies_568192(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists all SSL predefined policies for configuring Ssl policy.
@@ -223,11 +223,11 @@ proc validate_ApplicationGatewaysListAvailableSslPredefinedPolicies_593963(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593965 = path.getOrDefault("subscriptionId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_568194 = path.getOrDefault("subscriptionId")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "subscriptionId", valid_593965
+  if valid_568194 != nil:
+    section.add "subscriptionId", valid_568194
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -235,11 +235,11 @@ proc validate_ApplicationGatewaysListAvailableSslPredefinedPolicies_593963(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593966 = query.getOrDefault("api-version")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_568195 = query.getOrDefault("api-version")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "api-version", valid_593966
+  if valid_568195 != nil:
+    section.add "api-version", valid_568195
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -248,21 +248,21 @@ proc validate_ApplicationGatewaysListAvailableSslPredefinedPolicies_593963(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593967: Call_ApplicationGatewaysListAvailableSslPredefinedPolicies_593962;
+proc call*(call_568196: Call_ApplicationGatewaysListAvailableSslPredefinedPolicies_568191;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all SSL predefined policies for configuring Ssl policy.
   ## 
-  let valid = call_593967.validator(path, query, header, formData, body)
-  let scheme = call_593967.pickScheme
+  let valid = call_568196.validator(path, query, header, formData, body)
+  let scheme = call_568196.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593967.url(scheme.get, call_593967.host, call_593967.base,
-                         call_593967.route, valid.getOrDefault("path"),
+  let url = call_568196.url(scheme.get, call_568196.host, call_568196.base,
+                         call_568196.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593967, url, valid)
+  result = hook(call_568196, url, valid)
 
-proc call*(call_593968: Call_ApplicationGatewaysListAvailableSslPredefinedPolicies_593962;
+proc call*(call_568197: Call_ApplicationGatewaysListAvailableSslPredefinedPolicies_568191;
           apiVersion: string; subscriptionId: string): Recallable =
   ## applicationGatewaysListAvailableSslPredefinedPolicies
   ## Lists all SSL predefined policies for configuring Ssl policy.
@@ -270,21 +270,21 @@ proc call*(call_593968: Call_ApplicationGatewaysListAvailableSslPredefinedPolici
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593969 = newJObject()
-  var query_593970 = newJObject()
-  add(query_593970, "api-version", newJString(apiVersion))
-  add(path_593969, "subscriptionId", newJString(subscriptionId))
-  result = call_593968.call(path_593969, query_593970, nil, nil, nil)
+  var path_568198 = newJObject()
+  var query_568199 = newJObject()
+  add(query_568199, "api-version", newJString(apiVersion))
+  add(path_568198, "subscriptionId", newJString(subscriptionId))
+  result = call_568197.call(path_568198, query_568199, nil, nil, nil)
 
-var applicationGatewaysListAvailableSslPredefinedPolicies* = Call_ApplicationGatewaysListAvailableSslPredefinedPolicies_593962(
+var applicationGatewaysListAvailableSslPredefinedPolicies* = Call_ApplicationGatewaysListAvailableSslPredefinedPolicies_568191(
     name: "applicationGatewaysListAvailableSslPredefinedPolicies",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/applicationGatewayAvailableSslOptions/default/predefinedPolicies",
-    validator: validate_ApplicationGatewaysListAvailableSslPredefinedPolicies_593963,
-    base: "", url: url_ApplicationGatewaysListAvailableSslPredefinedPolicies_593964,
+    validator: validate_ApplicationGatewaysListAvailableSslPredefinedPolicies_568192,
+    base: "", url: url_ApplicationGatewaysListAvailableSslPredefinedPolicies_568193,
     schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysGetSslPredefinedPolicy_593971 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysGetSslPredefinedPolicy_593973(protocol: Scheme;
+  Call_ApplicationGatewaysGetSslPredefinedPolicy_568200 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysGetSslPredefinedPolicy_568202(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -303,7 +303,7 @@ proc url_ApplicationGatewaysGetSslPredefinedPolicy_593973(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysGetSslPredefinedPolicy_593972(path: JsonNode;
+proc validate_ApplicationGatewaysGetSslPredefinedPolicy_568201(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets Ssl predefined policy with the specified policy name.
   ## 
@@ -317,16 +317,16 @@ proc validate_ApplicationGatewaysGetSslPredefinedPolicy_593972(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593974 = path.getOrDefault("subscriptionId")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_568203 = path.getOrDefault("subscriptionId")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "subscriptionId", valid_593974
-  var valid_593975 = path.getOrDefault("predefinedPolicyName")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  if valid_568203 != nil:
+    section.add "subscriptionId", valid_568203
+  var valid_568204 = path.getOrDefault("predefinedPolicyName")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "predefinedPolicyName", valid_593975
+  if valid_568204 != nil:
+    section.add "predefinedPolicyName", valid_568204
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -334,11 +334,11 @@ proc validate_ApplicationGatewaysGetSslPredefinedPolicy_593972(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593976 = query.getOrDefault("api-version")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  var valid_568205 = query.getOrDefault("api-version")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "api-version", valid_593976
+  if valid_568205 != nil:
+    section.add "api-version", valid_568205
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -347,21 +347,21 @@ proc validate_ApplicationGatewaysGetSslPredefinedPolicy_593972(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593977: Call_ApplicationGatewaysGetSslPredefinedPolicy_593971;
+proc call*(call_568206: Call_ApplicationGatewaysGetSslPredefinedPolicy_568200;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets Ssl predefined policy with the specified policy name.
   ## 
-  let valid = call_593977.validator(path, query, header, formData, body)
-  let scheme = call_593977.pickScheme
+  let valid = call_568206.validator(path, query, header, formData, body)
+  let scheme = call_568206.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593977.url(scheme.get, call_593977.host, call_593977.base,
-                         call_593977.route, valid.getOrDefault("path"),
+  let url = call_568206.url(scheme.get, call_568206.host, call_568206.base,
+                         call_568206.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593977, url, valid)
+  result = hook(call_568206, url, valid)
 
-proc call*(call_593978: Call_ApplicationGatewaysGetSslPredefinedPolicy_593971;
+proc call*(call_568207: Call_ApplicationGatewaysGetSslPredefinedPolicy_568200;
           apiVersion: string; subscriptionId: string; predefinedPolicyName: string): Recallable =
   ## applicationGatewaysGetSslPredefinedPolicy
   ## Gets Ssl predefined policy with the specified policy name.
@@ -371,22 +371,22 @@ proc call*(call_593978: Call_ApplicationGatewaysGetSslPredefinedPolicy_593971;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   predefinedPolicyName: string (required)
   ##                       : Name of Ssl predefined policy.
-  var path_593979 = newJObject()
-  var query_593980 = newJObject()
-  add(query_593980, "api-version", newJString(apiVersion))
-  add(path_593979, "subscriptionId", newJString(subscriptionId))
-  add(path_593979, "predefinedPolicyName", newJString(predefinedPolicyName))
-  result = call_593978.call(path_593979, query_593980, nil, nil, nil)
+  var path_568208 = newJObject()
+  var query_568209 = newJObject()
+  add(query_568209, "api-version", newJString(apiVersion))
+  add(path_568208, "subscriptionId", newJString(subscriptionId))
+  add(path_568208, "predefinedPolicyName", newJString(predefinedPolicyName))
+  result = call_568207.call(path_568208, query_568209, nil, nil, nil)
 
-var applicationGatewaysGetSslPredefinedPolicy* = Call_ApplicationGatewaysGetSslPredefinedPolicy_593971(
+var applicationGatewaysGetSslPredefinedPolicy* = Call_ApplicationGatewaysGetSslPredefinedPolicy_568200(
     name: "applicationGatewaysGetSslPredefinedPolicy", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/applicationGatewayAvailableSslOptions/default/predefinedPolicies/{predefinedPolicyName}",
-    validator: validate_ApplicationGatewaysGetSslPredefinedPolicy_593972,
-    base: "", url: url_ApplicationGatewaysGetSslPredefinedPolicy_593973,
+    validator: validate_ApplicationGatewaysGetSslPredefinedPolicy_568201,
+    base: "", url: url_ApplicationGatewaysGetSslPredefinedPolicy_568202,
     schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysListAvailableWafRuleSets_593981 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysListAvailableWafRuleSets_593983(protocol: Scheme;
+  Call_ApplicationGatewaysListAvailableWafRuleSets_568210 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysListAvailableWafRuleSets_568212(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -402,7 +402,7 @@ proc url_ApplicationGatewaysListAvailableWafRuleSets_593983(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysListAvailableWafRuleSets_593982(path: JsonNode;
+proc validate_ApplicationGatewaysListAvailableWafRuleSets_568211(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all available web application firewall rule sets.
   ## 
@@ -414,11 +414,11 @@ proc validate_ApplicationGatewaysListAvailableWafRuleSets_593982(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593984 = path.getOrDefault("subscriptionId")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568213 = path.getOrDefault("subscriptionId")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "subscriptionId", valid_593984
+  if valid_568213 != nil:
+    section.add "subscriptionId", valid_568213
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -426,11 +426,11 @@ proc validate_ApplicationGatewaysListAvailableWafRuleSets_593982(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568214 = query.getOrDefault("api-version")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_568214 != nil:
+    section.add "api-version", valid_568214
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -439,21 +439,21 @@ proc validate_ApplicationGatewaysListAvailableWafRuleSets_593982(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593986: Call_ApplicationGatewaysListAvailableWafRuleSets_593981;
+proc call*(call_568215: Call_ApplicationGatewaysListAvailableWafRuleSets_568210;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all available web application firewall rule sets.
   ## 
-  let valid = call_593986.validator(path, query, header, formData, body)
-  let scheme = call_593986.pickScheme
+  let valid = call_568215.validator(path, query, header, formData, body)
+  let scheme = call_568215.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593986.url(scheme.get, call_593986.host, call_593986.base,
-                         call_593986.route, valid.getOrDefault("path"),
+  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
+                         call_568215.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593986, url, valid)
+  result = hook(call_568215, url, valid)
 
-proc call*(call_593987: Call_ApplicationGatewaysListAvailableWafRuleSets_593981;
+proc call*(call_568216: Call_ApplicationGatewaysListAvailableWafRuleSets_568210;
           apiVersion: string; subscriptionId: string): Recallable =
   ## applicationGatewaysListAvailableWafRuleSets
   ## Lists all available web application firewall rule sets.
@@ -461,21 +461,21 @@ proc call*(call_593987: Call_ApplicationGatewaysListAvailableWafRuleSets_593981;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593988 = newJObject()
-  var query_593989 = newJObject()
-  add(query_593989, "api-version", newJString(apiVersion))
-  add(path_593988, "subscriptionId", newJString(subscriptionId))
-  result = call_593987.call(path_593988, query_593989, nil, nil, nil)
+  var path_568217 = newJObject()
+  var query_568218 = newJObject()
+  add(query_568218, "api-version", newJString(apiVersion))
+  add(path_568217, "subscriptionId", newJString(subscriptionId))
+  result = call_568216.call(path_568217, query_568218, nil, nil, nil)
 
-var applicationGatewaysListAvailableWafRuleSets* = Call_ApplicationGatewaysListAvailableWafRuleSets_593981(
+var applicationGatewaysListAvailableWafRuleSets* = Call_ApplicationGatewaysListAvailableWafRuleSets_568210(
     name: "applicationGatewaysListAvailableWafRuleSets", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/applicationGatewayAvailableWafRuleSets",
-    validator: validate_ApplicationGatewaysListAvailableWafRuleSets_593982,
-    base: "", url: url_ApplicationGatewaysListAvailableWafRuleSets_593983,
+    validator: validate_ApplicationGatewaysListAvailableWafRuleSets_568211,
+    base: "", url: url_ApplicationGatewaysListAvailableWafRuleSets_568212,
     schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysListAll_593990 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysListAll_593992(protocol: Scheme; host: string;
+  Call_ApplicationGatewaysListAll_568219 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysListAll_568221(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -492,7 +492,7 @@ proc url_ApplicationGatewaysListAll_593992(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysListAll_593991(path: JsonNode; query: JsonNode;
+proc validate_ApplicationGatewaysListAll_568220(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the application gateways in a subscription.
   ## 
@@ -504,11 +504,11 @@ proc validate_ApplicationGatewaysListAll_593991(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593993 = path.getOrDefault("subscriptionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568222 = path.getOrDefault("subscriptionId")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "subscriptionId", valid_593993
+  if valid_568222 != nil:
+    section.add "subscriptionId", valid_568222
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -516,11 +516,11 @@ proc validate_ApplicationGatewaysListAll_593991(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568223 = query.getOrDefault("api-version")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
+  if valid_568223 != nil:
+    section.add "api-version", valid_568223
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -529,20 +529,20 @@ proc validate_ApplicationGatewaysListAll_593991(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593995: Call_ApplicationGatewaysListAll_593990; path: JsonNode;
+proc call*(call_568224: Call_ApplicationGatewaysListAll_568219; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the application gateways in a subscription.
   ## 
-  let valid = call_593995.validator(path, query, header, formData, body)
-  let scheme = call_593995.pickScheme
+  let valid = call_568224.validator(path, query, header, formData, body)
+  let scheme = call_568224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593995.url(scheme.get, call_593995.host, call_593995.base,
-                         call_593995.route, valid.getOrDefault("path"),
+  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
+                         call_568224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593995, url, valid)
+  result = hook(call_568224, url, valid)
 
-proc call*(call_593996: Call_ApplicationGatewaysListAll_593990; apiVersion: string;
+proc call*(call_568225: Call_ApplicationGatewaysListAll_568219; apiVersion: string;
           subscriptionId: string): Recallable =
   ## applicationGatewaysListAll
   ## Gets all the application gateways in a subscription.
@@ -550,20 +550,20 @@ proc call*(call_593996: Call_ApplicationGatewaysListAll_593990; apiVersion: stri
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593997 = newJObject()
-  var query_593998 = newJObject()
-  add(query_593998, "api-version", newJString(apiVersion))
-  add(path_593997, "subscriptionId", newJString(subscriptionId))
-  result = call_593996.call(path_593997, query_593998, nil, nil, nil)
+  var path_568226 = newJObject()
+  var query_568227 = newJObject()
+  add(query_568227, "api-version", newJString(apiVersion))
+  add(path_568226, "subscriptionId", newJString(subscriptionId))
+  result = call_568225.call(path_568226, query_568227, nil, nil, nil)
 
-var applicationGatewaysListAll* = Call_ApplicationGatewaysListAll_593990(
+var applicationGatewaysListAll* = Call_ApplicationGatewaysListAll_568219(
     name: "applicationGatewaysListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/applicationGateways",
-    validator: validate_ApplicationGatewaysListAll_593991, base: "",
-    url: url_ApplicationGatewaysListAll_593992, schemes: {Scheme.Https})
+    validator: validate_ApplicationGatewaysListAll_568220, base: "",
+    url: url_ApplicationGatewaysListAll_568221, schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysList_593999 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysList_594001(protocol: Scheme; host: string; base: string;
+  Call_ApplicationGatewaysList_568228 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysList_568230(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -585,7 +585,7 @@ proc url_ApplicationGatewaysList_594001(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysList_594000(path: JsonNode; query: JsonNode;
+proc validate_ApplicationGatewaysList_568229(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all application gateways in a resource group.
   ## 
@@ -599,16 +599,16 @@ proc validate_ApplicationGatewaysList_594000(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594002 = path.getOrDefault("resourceGroupName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_568231 = path.getOrDefault("resourceGroupName")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "resourceGroupName", valid_594002
-  var valid_594003 = path.getOrDefault("subscriptionId")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_568231 != nil:
+    section.add "resourceGroupName", valid_568231
+  var valid_568232 = path.getOrDefault("subscriptionId")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "subscriptionId", valid_594003
+  if valid_568232 != nil:
+    section.add "subscriptionId", valid_568232
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -616,11 +616,11 @@ proc validate_ApplicationGatewaysList_594000(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594004 = query.getOrDefault("api-version")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568233 = query.getOrDefault("api-version")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "api-version", valid_594004
+  if valid_568233 != nil:
+    section.add "api-version", valid_568233
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -629,20 +629,20 @@ proc validate_ApplicationGatewaysList_594000(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594005: Call_ApplicationGatewaysList_593999; path: JsonNode;
+proc call*(call_568234: Call_ApplicationGatewaysList_568228; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all application gateways in a resource group.
   ## 
-  let valid = call_594005.validator(path, query, header, formData, body)
-  let scheme = call_594005.pickScheme
+  let valid = call_568234.validator(path, query, header, formData, body)
+  let scheme = call_568234.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594005.url(scheme.get, call_594005.host, call_594005.base,
-                         call_594005.route, valid.getOrDefault("path"),
+  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
+                         call_568234.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594005, url, valid)
+  result = hook(call_568234, url, valid)
 
-proc call*(call_594006: Call_ApplicationGatewaysList_593999;
+proc call*(call_568235: Call_ApplicationGatewaysList_568228;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## applicationGatewaysList
   ## Lists all application gateways in a resource group.
@@ -652,21 +652,21 @@ proc call*(call_594006: Call_ApplicationGatewaysList_593999;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594007 = newJObject()
-  var query_594008 = newJObject()
-  add(path_594007, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594008, "api-version", newJString(apiVersion))
-  add(path_594007, "subscriptionId", newJString(subscriptionId))
-  result = call_594006.call(path_594007, query_594008, nil, nil, nil)
+  var path_568236 = newJObject()
+  var query_568237 = newJObject()
+  add(path_568236, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568237, "api-version", newJString(apiVersion))
+  add(path_568236, "subscriptionId", newJString(subscriptionId))
+  result = call_568235.call(path_568236, query_568237, nil, nil, nil)
 
-var applicationGatewaysList* = Call_ApplicationGatewaysList_593999(
+var applicationGatewaysList* = Call_ApplicationGatewaysList_568228(
     name: "applicationGatewaysList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways",
-    validator: validate_ApplicationGatewaysList_594000, base: "",
-    url: url_ApplicationGatewaysList_594001, schemes: {Scheme.Https})
+    validator: validate_ApplicationGatewaysList_568229, base: "",
+    url: url_ApplicationGatewaysList_568230, schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysCreateOrUpdate_594020 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysCreateOrUpdate_594022(protocol: Scheme; host: string;
+  Call_ApplicationGatewaysCreateOrUpdate_568249 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysCreateOrUpdate_568251(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -690,7 +690,7 @@ proc url_ApplicationGatewaysCreateOrUpdate_594022(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysCreateOrUpdate_594021(path: JsonNode;
+proc validate_ApplicationGatewaysCreateOrUpdate_568250(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the specified application gateway.
   ## 
@@ -706,21 +706,21 @@ proc validate_ApplicationGatewaysCreateOrUpdate_594021(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594049 = path.getOrDefault("resourceGroupName")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  var valid_568278 = path.getOrDefault("resourceGroupName")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "resourceGroupName", valid_594049
-  var valid_594050 = path.getOrDefault("subscriptionId")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  if valid_568278 != nil:
+    section.add "resourceGroupName", valid_568278
+  var valid_568279 = path.getOrDefault("subscriptionId")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "subscriptionId", valid_594050
-  var valid_594051 = path.getOrDefault("applicationGatewayName")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_568279 != nil:
+    section.add "subscriptionId", valid_568279
+  var valid_568280 = path.getOrDefault("applicationGatewayName")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "applicationGatewayName", valid_594051
+  if valid_568280 != nil:
+    section.add "applicationGatewayName", valid_568280
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -728,11 +728,11 @@ proc validate_ApplicationGatewaysCreateOrUpdate_594021(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594052 = query.getOrDefault("api-version")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  var valid_568281 = query.getOrDefault("api-version")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "api-version", valid_594052
+  if valid_568281 != nil:
+    section.add "api-version", valid_568281
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -746,21 +746,21 @@ proc validate_ApplicationGatewaysCreateOrUpdate_594021(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594054: Call_ApplicationGatewaysCreateOrUpdate_594020;
+proc call*(call_568283: Call_ApplicationGatewaysCreateOrUpdate_568249;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates the specified application gateway.
   ## 
-  let valid = call_594054.validator(path, query, header, formData, body)
-  let scheme = call_594054.pickScheme
+  let valid = call_568283.validator(path, query, header, formData, body)
+  let scheme = call_568283.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594054.url(scheme.get, call_594054.host, call_594054.base,
-                         call_594054.route, valid.getOrDefault("path"),
+  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
+                         call_568283.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594054, url, valid)
+  result = hook(call_568283, url, valid)
 
-proc call*(call_594055: Call_ApplicationGatewaysCreateOrUpdate_594020;
+proc call*(call_568284: Call_ApplicationGatewaysCreateOrUpdate_568249;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; applicationGatewayName: string): Recallable =
   ## applicationGatewaysCreateOrUpdate
@@ -775,25 +775,25 @@ proc call*(call_594055: Call_ApplicationGatewaysCreateOrUpdate_594020;
   ##             : Parameters supplied to the create or update application gateway operation.
   ##   applicationGatewayName: string (required)
   ##                         : The name of the application gateway.
-  var path_594056 = newJObject()
-  var query_594057 = newJObject()
-  var body_594058 = newJObject()
-  add(path_594056, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594057, "api-version", newJString(apiVersion))
-  add(path_594056, "subscriptionId", newJString(subscriptionId))
+  var path_568285 = newJObject()
+  var query_568286 = newJObject()
+  var body_568287 = newJObject()
+  add(path_568285, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568286, "api-version", newJString(apiVersion))
+  add(path_568285, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594058 = parameters
-  add(path_594056, "applicationGatewayName", newJString(applicationGatewayName))
-  result = call_594055.call(path_594056, query_594057, nil, nil, body_594058)
+    body_568287 = parameters
+  add(path_568285, "applicationGatewayName", newJString(applicationGatewayName))
+  result = call_568284.call(path_568285, query_568286, nil, nil, body_568287)
 
-var applicationGatewaysCreateOrUpdate* = Call_ApplicationGatewaysCreateOrUpdate_594020(
+var applicationGatewaysCreateOrUpdate* = Call_ApplicationGatewaysCreateOrUpdate_568249(
     name: "applicationGatewaysCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}",
-    validator: validate_ApplicationGatewaysCreateOrUpdate_594021, base: "",
-    url: url_ApplicationGatewaysCreateOrUpdate_594022, schemes: {Scheme.Https})
+    validator: validate_ApplicationGatewaysCreateOrUpdate_568250, base: "",
+    url: url_ApplicationGatewaysCreateOrUpdate_568251, schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysGet_594009 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysGet_594011(protocol: Scheme; host: string; base: string;
+  Call_ApplicationGatewaysGet_568238 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysGet_568240(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -817,7 +817,7 @@ proc url_ApplicationGatewaysGet_594011(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysGet_594010(path: JsonNode; query: JsonNode;
+proc validate_ApplicationGatewaysGet_568239(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the specified application gateway.
   ## 
@@ -833,21 +833,21 @@ proc validate_ApplicationGatewaysGet_594010(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594012 = path.getOrDefault("resourceGroupName")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  var valid_568241 = path.getOrDefault("resourceGroupName")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "resourceGroupName", valid_594012
-  var valid_594013 = path.getOrDefault("subscriptionId")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  if valid_568241 != nil:
+    section.add "resourceGroupName", valid_568241
+  var valid_568242 = path.getOrDefault("subscriptionId")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "subscriptionId", valid_594013
-  var valid_594014 = path.getOrDefault("applicationGatewayName")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_568242 != nil:
+    section.add "subscriptionId", valid_568242
+  var valid_568243 = path.getOrDefault("applicationGatewayName")
+  valid_568243 = validateParameter(valid_568243, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "applicationGatewayName", valid_594014
+  if valid_568243 != nil:
+    section.add "applicationGatewayName", valid_568243
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -855,11 +855,11 @@ proc validate_ApplicationGatewaysGet_594010(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594015 = query.getOrDefault("api-version")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_568244 = query.getOrDefault("api-version")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "api-version", valid_594015
+  if valid_568244 != nil:
+    section.add "api-version", valid_568244
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -868,20 +868,20 @@ proc validate_ApplicationGatewaysGet_594010(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594016: Call_ApplicationGatewaysGet_594009; path: JsonNode;
+proc call*(call_568245: Call_ApplicationGatewaysGet_568238; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified application gateway.
   ## 
-  let valid = call_594016.validator(path, query, header, formData, body)
-  let scheme = call_594016.pickScheme
+  let valid = call_568245.validator(path, query, header, formData, body)
+  let scheme = call_568245.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594016.url(scheme.get, call_594016.host, call_594016.base,
-                         call_594016.route, valid.getOrDefault("path"),
+  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
+                         call_568245.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594016, url, valid)
+  result = hook(call_568245, url, valid)
 
-proc call*(call_594017: Call_ApplicationGatewaysGet_594009;
+proc call*(call_568246: Call_ApplicationGatewaysGet_568238;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           applicationGatewayName: string): Recallable =
   ## applicationGatewaysGet
@@ -894,22 +894,22 @@ proc call*(call_594017: Call_ApplicationGatewaysGet_594009;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   applicationGatewayName: string (required)
   ##                         : The name of the application gateway.
-  var path_594018 = newJObject()
-  var query_594019 = newJObject()
-  add(path_594018, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594019, "api-version", newJString(apiVersion))
-  add(path_594018, "subscriptionId", newJString(subscriptionId))
-  add(path_594018, "applicationGatewayName", newJString(applicationGatewayName))
-  result = call_594017.call(path_594018, query_594019, nil, nil, nil)
+  var path_568247 = newJObject()
+  var query_568248 = newJObject()
+  add(path_568247, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568248, "api-version", newJString(apiVersion))
+  add(path_568247, "subscriptionId", newJString(subscriptionId))
+  add(path_568247, "applicationGatewayName", newJString(applicationGatewayName))
+  result = call_568246.call(path_568247, query_568248, nil, nil, nil)
 
-var applicationGatewaysGet* = Call_ApplicationGatewaysGet_594009(
+var applicationGatewaysGet* = Call_ApplicationGatewaysGet_568238(
     name: "applicationGatewaysGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}",
-    validator: validate_ApplicationGatewaysGet_594010, base: "",
-    url: url_ApplicationGatewaysGet_594011, schemes: {Scheme.Https})
+    validator: validate_ApplicationGatewaysGet_568239, base: "",
+    url: url_ApplicationGatewaysGet_568240, schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysUpdateTags_594070 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysUpdateTags_594072(protocol: Scheme; host: string;
+  Call_ApplicationGatewaysUpdateTags_568299 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysUpdateTags_568301(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -933,7 +933,7 @@ proc url_ApplicationGatewaysUpdateTags_594072(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysUpdateTags_594071(path: JsonNode; query: JsonNode;
+proc validate_ApplicationGatewaysUpdateTags_568300(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the specified application gateway tags.
   ## 
@@ -949,21 +949,21 @@ proc validate_ApplicationGatewaysUpdateTags_594071(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594073 = path.getOrDefault("resourceGroupName")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  var valid_568302 = path.getOrDefault("resourceGroupName")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "resourceGroupName", valid_594073
-  var valid_594074 = path.getOrDefault("subscriptionId")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_568302 != nil:
+    section.add "resourceGroupName", valid_568302
+  var valid_568303 = path.getOrDefault("subscriptionId")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "subscriptionId", valid_594074
-  var valid_594075 = path.getOrDefault("applicationGatewayName")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  if valid_568303 != nil:
+    section.add "subscriptionId", valid_568303
+  var valid_568304 = path.getOrDefault("applicationGatewayName")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "applicationGatewayName", valid_594075
+  if valid_568304 != nil:
+    section.add "applicationGatewayName", valid_568304
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -971,11 +971,11 @@ proc validate_ApplicationGatewaysUpdateTags_594071(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594076 = query.getOrDefault("api-version")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  var valid_568305 = query.getOrDefault("api-version")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "api-version", valid_594076
+  if valid_568305 != nil:
+    section.add "api-version", valid_568305
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -989,20 +989,20 @@ proc validate_ApplicationGatewaysUpdateTags_594071(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594078: Call_ApplicationGatewaysUpdateTags_594070; path: JsonNode;
+proc call*(call_568307: Call_ApplicationGatewaysUpdateTags_568299; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specified application gateway tags.
   ## 
-  let valid = call_594078.validator(path, query, header, formData, body)
-  let scheme = call_594078.pickScheme
+  let valid = call_568307.validator(path, query, header, formData, body)
+  let scheme = call_568307.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594078.url(scheme.get, call_594078.host, call_594078.base,
-                         call_594078.route, valid.getOrDefault("path"),
+  let url = call_568307.url(scheme.get, call_568307.host, call_568307.base,
+                         call_568307.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594078, url, valid)
+  result = hook(call_568307, url, valid)
 
-proc call*(call_594079: Call_ApplicationGatewaysUpdateTags_594070;
+proc call*(call_568308: Call_ApplicationGatewaysUpdateTags_568299;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; applicationGatewayName: string): Recallable =
   ## applicationGatewaysUpdateTags
@@ -1017,25 +1017,25 @@ proc call*(call_594079: Call_ApplicationGatewaysUpdateTags_594070;
   ##             : Parameters supplied to update application gateway tags.
   ##   applicationGatewayName: string (required)
   ##                         : The name of the application gateway.
-  var path_594080 = newJObject()
-  var query_594081 = newJObject()
-  var body_594082 = newJObject()
-  add(path_594080, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594081, "api-version", newJString(apiVersion))
-  add(path_594080, "subscriptionId", newJString(subscriptionId))
+  var path_568309 = newJObject()
+  var query_568310 = newJObject()
+  var body_568311 = newJObject()
+  add(path_568309, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568310, "api-version", newJString(apiVersion))
+  add(path_568309, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594082 = parameters
-  add(path_594080, "applicationGatewayName", newJString(applicationGatewayName))
-  result = call_594079.call(path_594080, query_594081, nil, nil, body_594082)
+    body_568311 = parameters
+  add(path_568309, "applicationGatewayName", newJString(applicationGatewayName))
+  result = call_568308.call(path_568309, query_568310, nil, nil, body_568311)
 
-var applicationGatewaysUpdateTags* = Call_ApplicationGatewaysUpdateTags_594070(
+var applicationGatewaysUpdateTags* = Call_ApplicationGatewaysUpdateTags_568299(
     name: "applicationGatewaysUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}",
-    validator: validate_ApplicationGatewaysUpdateTags_594071, base: "",
-    url: url_ApplicationGatewaysUpdateTags_594072, schemes: {Scheme.Https})
+    validator: validate_ApplicationGatewaysUpdateTags_568300, base: "",
+    url: url_ApplicationGatewaysUpdateTags_568301, schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysDelete_594059 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysDelete_594061(protocol: Scheme; host: string;
+  Call_ApplicationGatewaysDelete_568288 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysDelete_568290(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1059,7 +1059,7 @@ proc url_ApplicationGatewaysDelete_594061(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysDelete_594060(path: JsonNode; query: JsonNode;
+proc validate_ApplicationGatewaysDelete_568289(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified application gateway.
   ## 
@@ -1075,21 +1075,21 @@ proc validate_ApplicationGatewaysDelete_594060(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594062 = path.getOrDefault("resourceGroupName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  var valid_568291 = path.getOrDefault("resourceGroupName")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "resourceGroupName", valid_594062
-  var valid_594063 = path.getOrDefault("subscriptionId")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  if valid_568291 != nil:
+    section.add "resourceGroupName", valid_568291
+  var valid_568292 = path.getOrDefault("subscriptionId")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "subscriptionId", valid_594063
-  var valid_594064 = path.getOrDefault("applicationGatewayName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_568292 != nil:
+    section.add "subscriptionId", valid_568292
+  var valid_568293 = path.getOrDefault("applicationGatewayName")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "applicationGatewayName", valid_594064
+  if valid_568293 != nil:
+    section.add "applicationGatewayName", valid_568293
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1097,11 +1097,11 @@ proc validate_ApplicationGatewaysDelete_594060(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594065 = query.getOrDefault("api-version")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  var valid_568294 = query.getOrDefault("api-version")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "api-version", valid_594065
+  if valid_568294 != nil:
+    section.add "api-version", valid_568294
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1110,20 +1110,20 @@ proc validate_ApplicationGatewaysDelete_594060(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594066: Call_ApplicationGatewaysDelete_594059; path: JsonNode;
+proc call*(call_568295: Call_ApplicationGatewaysDelete_568288; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified application gateway.
   ## 
-  let valid = call_594066.validator(path, query, header, formData, body)
-  let scheme = call_594066.pickScheme
+  let valid = call_568295.validator(path, query, header, formData, body)
+  let scheme = call_568295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594066.url(scheme.get, call_594066.host, call_594066.base,
-                         call_594066.route, valid.getOrDefault("path"),
+  let url = call_568295.url(scheme.get, call_568295.host, call_568295.base,
+                         call_568295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594066, url, valid)
+  result = hook(call_568295, url, valid)
 
-proc call*(call_594067: Call_ApplicationGatewaysDelete_594059;
+proc call*(call_568296: Call_ApplicationGatewaysDelete_568288;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           applicationGatewayName: string): Recallable =
   ## applicationGatewaysDelete
@@ -1136,22 +1136,22 @@ proc call*(call_594067: Call_ApplicationGatewaysDelete_594059;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   applicationGatewayName: string (required)
   ##                         : The name of the application gateway.
-  var path_594068 = newJObject()
-  var query_594069 = newJObject()
-  add(path_594068, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594069, "api-version", newJString(apiVersion))
-  add(path_594068, "subscriptionId", newJString(subscriptionId))
-  add(path_594068, "applicationGatewayName", newJString(applicationGatewayName))
-  result = call_594067.call(path_594068, query_594069, nil, nil, nil)
+  var path_568297 = newJObject()
+  var query_568298 = newJObject()
+  add(path_568297, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568298, "api-version", newJString(apiVersion))
+  add(path_568297, "subscriptionId", newJString(subscriptionId))
+  add(path_568297, "applicationGatewayName", newJString(applicationGatewayName))
+  result = call_568296.call(path_568297, query_568298, nil, nil, nil)
 
-var applicationGatewaysDelete* = Call_ApplicationGatewaysDelete_594059(
+var applicationGatewaysDelete* = Call_ApplicationGatewaysDelete_568288(
     name: "applicationGatewaysDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}",
-    validator: validate_ApplicationGatewaysDelete_594060, base: "",
-    url: url_ApplicationGatewaysDelete_594061, schemes: {Scheme.Https})
+    validator: validate_ApplicationGatewaysDelete_568289, base: "",
+    url: url_ApplicationGatewaysDelete_568290, schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysBackendHealth_594083 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysBackendHealth_594085(protocol: Scheme; host: string;
+  Call_ApplicationGatewaysBackendHealth_568312 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysBackendHealth_568314(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1176,7 +1176,7 @@ proc url_ApplicationGatewaysBackendHealth_594085(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysBackendHealth_594084(path: JsonNode;
+proc validate_ApplicationGatewaysBackendHealth_568313(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the backend health of the specified application gateway in a resource group.
   ## 
@@ -1192,21 +1192,21 @@ proc validate_ApplicationGatewaysBackendHealth_594084(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594087 = path.getOrDefault("resourceGroupName")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  var valid_568316 = path.getOrDefault("resourceGroupName")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "resourceGroupName", valid_594087
-  var valid_594088 = path.getOrDefault("subscriptionId")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  if valid_568316 != nil:
+    section.add "resourceGroupName", valid_568316
+  var valid_568317 = path.getOrDefault("subscriptionId")
+  valid_568317 = validateParameter(valid_568317, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "subscriptionId", valid_594088
-  var valid_594089 = path.getOrDefault("applicationGatewayName")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  if valid_568317 != nil:
+    section.add "subscriptionId", valid_568317
+  var valid_568318 = path.getOrDefault("applicationGatewayName")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "applicationGatewayName", valid_594089
+  if valid_568318 != nil:
+    section.add "applicationGatewayName", valid_568318
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1216,16 +1216,16 @@ proc validate_ApplicationGatewaysBackendHealth_594084(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594090 = query.getOrDefault("api-version")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  var valid_568319 = query.getOrDefault("api-version")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "api-version", valid_594090
-  var valid_594091 = query.getOrDefault("$expand")
-  valid_594091 = validateParameter(valid_594091, JString, required = false,
+  if valid_568319 != nil:
+    section.add "api-version", valid_568319
+  var valid_568320 = query.getOrDefault("$expand")
+  valid_568320 = validateParameter(valid_568320, JString, required = false,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "$expand", valid_594091
+  if valid_568320 != nil:
+    section.add "$expand", valid_568320
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1234,21 +1234,21 @@ proc validate_ApplicationGatewaysBackendHealth_594084(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594092: Call_ApplicationGatewaysBackendHealth_594083;
+proc call*(call_568321: Call_ApplicationGatewaysBackendHealth_568312;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the backend health of the specified application gateway in a resource group.
   ## 
-  let valid = call_594092.validator(path, query, header, formData, body)
-  let scheme = call_594092.pickScheme
+  let valid = call_568321.validator(path, query, header, formData, body)
+  let scheme = call_568321.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594092.url(scheme.get, call_594092.host, call_594092.base,
-                         call_594092.route, valid.getOrDefault("path"),
+  let url = call_568321.url(scheme.get, call_568321.host, call_568321.base,
+                         call_568321.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594092, url, valid)
+  result = hook(call_568321, url, valid)
 
-proc call*(call_594093: Call_ApplicationGatewaysBackendHealth_594083;
+proc call*(call_568322: Call_ApplicationGatewaysBackendHealth_568312;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           applicationGatewayName: string; Expand: string = ""): Recallable =
   ## applicationGatewaysBackendHealth
@@ -1263,23 +1263,23 @@ proc call*(call_594093: Call_ApplicationGatewaysBackendHealth_594083;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   applicationGatewayName: string (required)
   ##                         : The name of the application gateway.
-  var path_594094 = newJObject()
-  var query_594095 = newJObject()
-  add(path_594094, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594095, "api-version", newJString(apiVersion))
-  add(query_594095, "$expand", newJString(Expand))
-  add(path_594094, "subscriptionId", newJString(subscriptionId))
-  add(path_594094, "applicationGatewayName", newJString(applicationGatewayName))
-  result = call_594093.call(path_594094, query_594095, nil, nil, nil)
+  var path_568323 = newJObject()
+  var query_568324 = newJObject()
+  add(path_568323, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568324, "api-version", newJString(apiVersion))
+  add(query_568324, "$expand", newJString(Expand))
+  add(path_568323, "subscriptionId", newJString(subscriptionId))
+  add(path_568323, "applicationGatewayName", newJString(applicationGatewayName))
+  result = call_568322.call(path_568323, query_568324, nil, nil, nil)
 
-var applicationGatewaysBackendHealth* = Call_ApplicationGatewaysBackendHealth_594083(
+var applicationGatewaysBackendHealth* = Call_ApplicationGatewaysBackendHealth_568312(
     name: "applicationGatewaysBackendHealth", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/backendhealth",
-    validator: validate_ApplicationGatewaysBackendHealth_594084, base: "",
-    url: url_ApplicationGatewaysBackendHealth_594085, schemes: {Scheme.Https})
+    validator: validate_ApplicationGatewaysBackendHealth_568313, base: "",
+    url: url_ApplicationGatewaysBackendHealth_568314, schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysStart_594096 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysStart_594098(protocol: Scheme; host: string;
+  Call_ApplicationGatewaysStart_568325 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysStart_568327(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1305,7 +1305,7 @@ proc url_ApplicationGatewaysStart_594098(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysStart_594097(path: JsonNode; query: JsonNode;
+proc validate_ApplicationGatewaysStart_568326(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Starts the specified application gateway.
   ## 
@@ -1321,21 +1321,21 @@ proc validate_ApplicationGatewaysStart_594097(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594099 = path.getOrDefault("resourceGroupName")
-  valid_594099 = validateParameter(valid_594099, JString, required = true,
+  var valid_568328 = path.getOrDefault("resourceGroupName")
+  valid_568328 = validateParameter(valid_568328, JString, required = true,
                                  default = nil)
-  if valid_594099 != nil:
-    section.add "resourceGroupName", valid_594099
-  var valid_594100 = path.getOrDefault("subscriptionId")
-  valid_594100 = validateParameter(valid_594100, JString, required = true,
+  if valid_568328 != nil:
+    section.add "resourceGroupName", valid_568328
+  var valid_568329 = path.getOrDefault("subscriptionId")
+  valid_568329 = validateParameter(valid_568329, JString, required = true,
                                  default = nil)
-  if valid_594100 != nil:
-    section.add "subscriptionId", valid_594100
-  var valid_594101 = path.getOrDefault("applicationGatewayName")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  if valid_568329 != nil:
+    section.add "subscriptionId", valid_568329
+  var valid_568330 = path.getOrDefault("applicationGatewayName")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "applicationGatewayName", valid_594101
+  if valid_568330 != nil:
+    section.add "applicationGatewayName", valid_568330
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1343,11 +1343,11 @@ proc validate_ApplicationGatewaysStart_594097(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594102 = query.getOrDefault("api-version")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  var valid_568331 = query.getOrDefault("api-version")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "api-version", valid_594102
+  if valid_568331 != nil:
+    section.add "api-version", valid_568331
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1356,20 +1356,20 @@ proc validate_ApplicationGatewaysStart_594097(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594103: Call_ApplicationGatewaysStart_594096; path: JsonNode;
+proc call*(call_568332: Call_ApplicationGatewaysStart_568325; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts the specified application gateway.
   ## 
-  let valid = call_594103.validator(path, query, header, formData, body)
-  let scheme = call_594103.pickScheme
+  let valid = call_568332.validator(path, query, header, formData, body)
+  let scheme = call_568332.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594103.url(scheme.get, call_594103.host, call_594103.base,
-                         call_594103.route, valid.getOrDefault("path"),
+  let url = call_568332.url(scheme.get, call_568332.host, call_568332.base,
+                         call_568332.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594103, url, valid)
+  result = hook(call_568332, url, valid)
 
-proc call*(call_594104: Call_ApplicationGatewaysStart_594096;
+proc call*(call_568333: Call_ApplicationGatewaysStart_568325;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           applicationGatewayName: string): Recallable =
   ## applicationGatewaysStart
@@ -1382,22 +1382,22 @@ proc call*(call_594104: Call_ApplicationGatewaysStart_594096;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   applicationGatewayName: string (required)
   ##                         : The name of the application gateway.
-  var path_594105 = newJObject()
-  var query_594106 = newJObject()
-  add(path_594105, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594106, "api-version", newJString(apiVersion))
-  add(path_594105, "subscriptionId", newJString(subscriptionId))
-  add(path_594105, "applicationGatewayName", newJString(applicationGatewayName))
-  result = call_594104.call(path_594105, query_594106, nil, nil, nil)
+  var path_568334 = newJObject()
+  var query_568335 = newJObject()
+  add(path_568334, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568335, "api-version", newJString(apiVersion))
+  add(path_568334, "subscriptionId", newJString(subscriptionId))
+  add(path_568334, "applicationGatewayName", newJString(applicationGatewayName))
+  result = call_568333.call(path_568334, query_568335, nil, nil, nil)
 
-var applicationGatewaysStart* = Call_ApplicationGatewaysStart_594096(
+var applicationGatewaysStart* = Call_ApplicationGatewaysStart_568325(
     name: "applicationGatewaysStart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/start",
-    validator: validate_ApplicationGatewaysStart_594097, base: "",
-    url: url_ApplicationGatewaysStart_594098, schemes: {Scheme.Https})
+    validator: validate_ApplicationGatewaysStart_568326, base: "",
+    url: url_ApplicationGatewaysStart_568327, schemes: {Scheme.Https})
 type
-  Call_ApplicationGatewaysStop_594107 = ref object of OpenApiRestCall_593437
-proc url_ApplicationGatewaysStop_594109(protocol: Scheme; host: string; base: string;
+  Call_ApplicationGatewaysStop_568336 = ref object of OpenApiRestCall_567666
+proc url_ApplicationGatewaysStop_568338(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1423,7 +1423,7 @@ proc url_ApplicationGatewaysStop_594109(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGatewaysStop_594108(path: JsonNode; query: JsonNode;
+proc validate_ApplicationGatewaysStop_568337(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Stops the specified application gateway in a resource group.
   ## 
@@ -1439,21 +1439,21 @@ proc validate_ApplicationGatewaysStop_594108(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594110 = path.getOrDefault("resourceGroupName")
-  valid_594110 = validateParameter(valid_594110, JString, required = true,
+  var valid_568339 = path.getOrDefault("resourceGroupName")
+  valid_568339 = validateParameter(valid_568339, JString, required = true,
                                  default = nil)
-  if valid_594110 != nil:
-    section.add "resourceGroupName", valid_594110
-  var valid_594111 = path.getOrDefault("subscriptionId")
-  valid_594111 = validateParameter(valid_594111, JString, required = true,
+  if valid_568339 != nil:
+    section.add "resourceGroupName", valid_568339
+  var valid_568340 = path.getOrDefault("subscriptionId")
+  valid_568340 = validateParameter(valid_568340, JString, required = true,
                                  default = nil)
-  if valid_594111 != nil:
-    section.add "subscriptionId", valid_594111
-  var valid_594112 = path.getOrDefault("applicationGatewayName")
-  valid_594112 = validateParameter(valid_594112, JString, required = true,
+  if valid_568340 != nil:
+    section.add "subscriptionId", valid_568340
+  var valid_568341 = path.getOrDefault("applicationGatewayName")
+  valid_568341 = validateParameter(valid_568341, JString, required = true,
                                  default = nil)
-  if valid_594112 != nil:
-    section.add "applicationGatewayName", valid_594112
+  if valid_568341 != nil:
+    section.add "applicationGatewayName", valid_568341
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1461,11 +1461,11 @@ proc validate_ApplicationGatewaysStop_594108(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594113 = query.getOrDefault("api-version")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  var valid_568342 = query.getOrDefault("api-version")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = nil)
-  if valid_594113 != nil:
-    section.add "api-version", valid_594113
+  if valid_568342 != nil:
+    section.add "api-version", valid_568342
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1474,20 +1474,20 @@ proc validate_ApplicationGatewaysStop_594108(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594114: Call_ApplicationGatewaysStop_594107; path: JsonNode;
+proc call*(call_568343: Call_ApplicationGatewaysStop_568336; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stops the specified application gateway in a resource group.
   ## 
-  let valid = call_594114.validator(path, query, header, formData, body)
-  let scheme = call_594114.pickScheme
+  let valid = call_568343.validator(path, query, header, formData, body)
+  let scheme = call_568343.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594114.url(scheme.get, call_594114.host, call_594114.base,
-                         call_594114.route, valid.getOrDefault("path"),
+  let url = call_568343.url(scheme.get, call_568343.host, call_568343.base,
+                         call_568343.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594114, url, valid)
+  result = hook(call_568343, url, valid)
 
-proc call*(call_594115: Call_ApplicationGatewaysStop_594107;
+proc call*(call_568344: Call_ApplicationGatewaysStop_568336;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           applicationGatewayName: string): Recallable =
   ## applicationGatewaysStop
@@ -1500,19 +1500,19 @@ proc call*(call_594115: Call_ApplicationGatewaysStop_594107;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   applicationGatewayName: string (required)
   ##                         : The name of the application gateway.
-  var path_594116 = newJObject()
-  var query_594117 = newJObject()
-  add(path_594116, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594117, "api-version", newJString(apiVersion))
-  add(path_594116, "subscriptionId", newJString(subscriptionId))
-  add(path_594116, "applicationGatewayName", newJString(applicationGatewayName))
-  result = call_594115.call(path_594116, query_594117, nil, nil, nil)
+  var path_568345 = newJObject()
+  var query_568346 = newJObject()
+  add(path_568345, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568346, "api-version", newJString(apiVersion))
+  add(path_568345, "subscriptionId", newJString(subscriptionId))
+  add(path_568345, "applicationGatewayName", newJString(applicationGatewayName))
+  result = call_568344.call(path_568345, query_568346, nil, nil, nil)
 
-var applicationGatewaysStop* = Call_ApplicationGatewaysStop_594107(
+var applicationGatewaysStop* = Call_ApplicationGatewaysStop_568336(
     name: "applicationGatewaysStop", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/stop",
-    validator: validate_ApplicationGatewaysStop_594108, base: "",
-    url: url_ApplicationGatewaysStop_594109, schemes: {Scheme.Https})
+    validator: validate_ApplicationGatewaysStop_568337, base: "",
+    url: url_ApplicationGatewaysStop_568338, schemes: {Scheme.Https})
 export
   rest
 

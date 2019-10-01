@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-ManagedRestorableDroppedDatabaseBackupShortTermRetenion"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_593646 = ref object of OpenApiRestCall_593424
-proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_593648(
+  Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_567879 = ref object of OpenApiRestCall_567657
+proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_567881(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -133,7 +133,7 @@ proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByR
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_593647(
+proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_567880(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets a dropped database's short term retention policy list.
@@ -151,26 +151,26 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesLi
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593821 = path.getOrDefault("resourceGroupName")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("resourceGroupName")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "resourceGroupName", valid_593821
-  var valid_593822 = path.getOrDefault("managedInstanceName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_568054 != nil:
+    section.add "resourceGroupName", valid_568054
+  var valid_568055 = path.getOrDefault("managedInstanceName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "managedInstanceName", valid_593822
-  var valid_593823 = path.getOrDefault("restorableDroppedDatabaseId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "managedInstanceName", valid_568055
+  var valid_568056 = path.getOrDefault("restorableDroppedDatabaseId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "restorableDroppedDatabaseId", valid_593823
-  var valid_593824 = path.getOrDefault("subscriptionId")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_568056 != nil:
+    section.add "restorableDroppedDatabaseId", valid_568056
+  var valid_568057 = path.getOrDefault("subscriptionId")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "subscriptionId", valid_593824
+  if valid_568057 != nil:
+    section.add "subscriptionId", valid_568057
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -178,11 +178,11 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesLi
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_568058 = query.getOrDefault("api-version")
+  valid_568058 = validateParameter(valid_568058, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
+  if valid_568058 != nil:
+    section.add "api-version", valid_568058
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -191,21 +191,21 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesLi
   if body != nil:
     result.add "body", body
 
-proc call*(call_593848: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_593646;
+proc call*(call_568081: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_567879;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a dropped database's short term retention policy list.
   ## 
-  let valid = call_593848.validator(path, query, header, formData, body)
-  let scheme = call_593848.pickScheme
+  let valid = call_568081.validator(path, query, header, formData, body)
+  let scheme = call_568081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593848.url(scheme.get, call_593848.host, call_593848.base,
-                         call_593848.route, valid.getOrDefault("path"),
+  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
+                         call_568081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593848, url, valid)
+  result = hook(call_568081, url, valid)
 
-proc call*(call_593919: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_593646;
+proc call*(call_568152: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_567879;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; restorableDroppedDatabaseId: string;
           subscriptionId: string): Recallable =
@@ -220,23 +220,23 @@ proc call*(call_593919: Call_ManagedRestorableDroppedDatabaseBackupShortTermRete
   ##   restorableDroppedDatabaseId: string (required)
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_593920 = newJObject()
-  var query_593922 = newJObject()
-  add(path_593920, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593922, "api-version", newJString(apiVersion))
-  add(path_593920, "managedInstanceName", newJString(managedInstanceName))
-  add(path_593920, "restorableDroppedDatabaseId",
+  var path_568153 = newJObject()
+  var query_568155 = newJObject()
+  add(path_568153, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568155, "api-version", newJString(apiVersion))
+  add(path_568153, "managedInstanceName", newJString(managedInstanceName))
+  add(path_568153, "restorableDroppedDatabaseId",
       newJString(restorableDroppedDatabaseId))
-  add(path_593920, "subscriptionId", newJString(subscriptionId))
-  result = call_593919.call(path_593920, query_593922, nil, nil, nil)
+  add(path_568153, "subscriptionId", newJString(subscriptionId))
+  result = call_568152.call(path_568153, query_568155, nil, nil, nil)
 
-var managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase* = Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_593646(name: "managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/restorableDroppedDatabases/{restorableDroppedDatabaseId}/backupShortTermRetentionPolicies", validator: validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_593647,
-    base: "", url: url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_593648,
+var managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase* = Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_567879(name: "managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase",
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/restorableDroppedDatabases/{restorableDroppedDatabaseId}/backupShortTermRetentionPolicies", validator: validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_567880,
+    base: "", url: url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesListByRestorableDroppedDatabase_567881,
     schemes: {Scheme.Https})
 type
-  Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_593987 = ref object of OpenApiRestCall_593424
-proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_593989(
+  Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_568220 = ref object of OpenApiRestCall_567657
+proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_568222(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -267,7 +267,7 @@ proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateO
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_593988(
+proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_568221(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Sets a database's long term retention policy.
@@ -287,31 +287,31 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCr
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593990 = path.getOrDefault("resourceGroupName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568223 = path.getOrDefault("resourceGroupName")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "resourceGroupName", valid_593990
-  var valid_593991 = path.getOrDefault("managedInstanceName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_568223 != nil:
+    section.add "resourceGroupName", valid_568223
+  var valid_568224 = path.getOrDefault("managedInstanceName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "managedInstanceName", valid_593991
-  var valid_593992 = path.getOrDefault("restorableDroppedDatabaseId")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_568224 != nil:
+    section.add "managedInstanceName", valid_568224
+  var valid_568225 = path.getOrDefault("restorableDroppedDatabaseId")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "restorableDroppedDatabaseId", valid_593992
-  var valid_593993 = path.getOrDefault("subscriptionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "restorableDroppedDatabaseId", valid_568225
+  var valid_568226 = path.getOrDefault("subscriptionId")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "subscriptionId", valid_593993
-  var valid_593994 = path.getOrDefault("policyName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "subscriptionId", valid_568226
+  var valid_568227 = path.getOrDefault("policyName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = newJString("default"))
-  if valid_593994 != nil:
-    section.add "policyName", valid_593994
+  if valid_568227 != nil:
+    section.add "policyName", valid_568227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -319,11 +319,11 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCr
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593995 = query.getOrDefault("api-version")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_568228 = query.getOrDefault("api-version")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "api-version", valid_593995
+  if valid_568228 != nil:
+    section.add "api-version", valid_568228
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -337,21 +337,21 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCr
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_593987;
+proc call*(call_568230: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_568220;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Sets a database's long term retention policy.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_593987;
+proc call*(call_568231: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_568220;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; restorableDroppedDatabaseId: string;
           subscriptionId: string; parameters: JsonNode;
@@ -371,27 +371,27 @@ proc call*(call_593998: Call_ManagedRestorableDroppedDatabaseBackupShortTermRete
   ##             : The policy name. Should always be "default".
   ##   parameters: JObject (required)
   ##             : The long term retention policy info.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  var body_594001 = newJObject()
-  add(path_593999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "managedInstanceName", newJString(managedInstanceName))
-  add(path_593999, "restorableDroppedDatabaseId",
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  var body_568234 = newJObject()
+  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "managedInstanceName", newJString(managedInstanceName))
+  add(path_568232, "restorableDroppedDatabaseId",
       newJString(restorableDroppedDatabaseId))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
-  add(path_593999, "policyName", newJString(policyName))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
+  add(path_568232, "policyName", newJString(policyName))
   if parameters != nil:
-    body_594001 = parameters
-  result = call_593998.call(path_593999, query_594000, nil, nil, body_594001)
+    body_568234 = parameters
+  result = call_568231.call(path_568232, query_568233, nil, nil, body_568234)
 
-var managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate* = Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_593987(name: "managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate",
-    meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/restorableDroppedDatabases/{restorableDroppedDatabaseId}/backupShortTermRetentionPolicies/{policyName}", validator: validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_593988,
-    base: "", url: url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_593989,
+var managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate* = Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_568220(name: "managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate",
+    meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/restorableDroppedDatabases/{restorableDroppedDatabaseId}/backupShortTermRetentionPolicies/{policyName}", validator: validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_568221,
+    base: "", url: url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate_568222,
     schemes: {Scheme.Https})
 type
-  Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_593961 = ref object of OpenApiRestCall_593424
-proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_593963(
+  Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_568194 = ref object of OpenApiRestCall_567657
+proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_568196(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -422,7 +422,7 @@ proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_593
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_593962(
+proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_568195(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets a dropped database's short term retention policy.
@@ -442,31 +442,31 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGe
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593964 = path.getOrDefault("resourceGroupName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_568197 = path.getOrDefault("resourceGroupName")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "resourceGroupName", valid_593964
-  var valid_593965 = path.getOrDefault("managedInstanceName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "resourceGroupName", valid_568197
+  var valid_568198 = path.getOrDefault("managedInstanceName")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "managedInstanceName", valid_593965
-  var valid_593966 = path.getOrDefault("restorableDroppedDatabaseId")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_568198 != nil:
+    section.add "managedInstanceName", valid_568198
+  var valid_568199 = path.getOrDefault("restorableDroppedDatabaseId")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "restorableDroppedDatabaseId", valid_593966
-  var valid_593967 = path.getOrDefault("subscriptionId")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_568199 != nil:
+    section.add "restorableDroppedDatabaseId", valid_568199
+  var valid_568200 = path.getOrDefault("subscriptionId")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "subscriptionId", valid_593967
-  var valid_593981 = path.getOrDefault("policyName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_568200 != nil:
+    section.add "subscriptionId", valid_568200
+  var valid_568214 = path.getOrDefault("policyName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = newJString("default"))
-  if valid_593981 != nil:
-    section.add "policyName", valid_593981
+  if valid_568214 != nil:
+    section.add "policyName", valid_568214
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -474,11 +474,11 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGe
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593982 = query.getOrDefault("api-version")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568215 = query.getOrDefault("api-version")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "api-version", valid_593982
+  if valid_568215 != nil:
+    section.add "api-version", valid_568215
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -487,21 +487,21 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGe
   if body != nil:
     result.add "body", body
 
-proc call*(call_593983: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_593961;
+proc call*(call_568216: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_568194;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a dropped database's short term retention policy.
   ## 
-  let valid = call_593983.validator(path, query, header, formData, body)
-  let scheme = call_593983.pickScheme
+  let valid = call_568216.validator(path, query, header, formData, body)
+  let scheme = call_568216.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593983.url(scheme.get, call_593983.host, call_593983.base,
-                         call_593983.route, valid.getOrDefault("path"),
+  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
+                         call_568216.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593983, url, valid)
+  result = hook(call_568216, url, valid)
 
-proc call*(call_593984: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_593961;
+proc call*(call_568217: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_568194;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; restorableDroppedDatabaseId: string;
           subscriptionId: string; policyName: string = "default"): Recallable =
@@ -518,24 +518,24 @@ proc call*(call_593984: Call_ManagedRestorableDroppedDatabaseBackupShortTermRete
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   policyName: string (required)
   ##             : The policy name.
-  var path_593985 = newJObject()
-  var query_593986 = newJObject()
-  add(path_593985, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593986, "api-version", newJString(apiVersion))
-  add(path_593985, "managedInstanceName", newJString(managedInstanceName))
-  add(path_593985, "restorableDroppedDatabaseId",
+  var path_568218 = newJObject()
+  var query_568219 = newJObject()
+  add(path_568218, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568219, "api-version", newJString(apiVersion))
+  add(path_568218, "managedInstanceName", newJString(managedInstanceName))
+  add(path_568218, "restorableDroppedDatabaseId",
       newJString(restorableDroppedDatabaseId))
-  add(path_593985, "subscriptionId", newJString(subscriptionId))
-  add(path_593985, "policyName", newJString(policyName))
-  result = call_593984.call(path_593985, query_593986, nil, nil, nil)
+  add(path_568218, "subscriptionId", newJString(subscriptionId))
+  add(path_568218, "policyName", newJString(policyName))
+  result = call_568217.call(path_568218, query_568219, nil, nil, nil)
 
-var managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet* = Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_593961(name: "managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/restorableDroppedDatabases/{restorableDroppedDatabaseId}/backupShortTermRetentionPolicies/{policyName}", validator: validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_593962,
-    base: "", url: url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_593963,
+var managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet* = Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_568194(name: "managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet",
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/restorableDroppedDatabases/{restorableDroppedDatabaseId}/backupShortTermRetentionPolicies/{policyName}", validator: validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_568195,
+    base: "", url: url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesGet_568196,
     schemes: {Scheme.Https})
 type
-  Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_594002 = ref object of OpenApiRestCall_593424
-proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_594004(
+  Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_568235 = ref object of OpenApiRestCall_567657
+proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_568237(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -566,7 +566,7 @@ proc url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_594003(
+proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_568236(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Sets a database's long term retention policy.
@@ -586,31 +586,31 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUp
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594005 = path.getOrDefault("resourceGroupName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_568238 = path.getOrDefault("resourceGroupName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "resourceGroupName", valid_594005
-  var valid_594006 = path.getOrDefault("managedInstanceName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_568238 != nil:
+    section.add "resourceGroupName", valid_568238
+  var valid_568239 = path.getOrDefault("managedInstanceName")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "managedInstanceName", valid_594006
-  var valid_594007 = path.getOrDefault("restorableDroppedDatabaseId")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "managedInstanceName", valid_568239
+  var valid_568240 = path.getOrDefault("restorableDroppedDatabaseId")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "restorableDroppedDatabaseId", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568240 != nil:
+    section.add "restorableDroppedDatabaseId", valid_568240
+  var valid_568241 = path.getOrDefault("subscriptionId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
-  var valid_594009 = path.getOrDefault("policyName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_568241 != nil:
+    section.add "subscriptionId", valid_568241
+  var valid_568242 = path.getOrDefault("policyName")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = newJString("default"))
-  if valid_594009 != nil:
-    section.add "policyName", valid_594009
+  if valid_568242 != nil:
+    section.add "policyName", valid_568242
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -618,11 +618,11 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUp
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594010 = query.getOrDefault("api-version")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  var valid_568243 = query.getOrDefault("api-version")
+  valid_568243 = validateParameter(valid_568243, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "api-version", valid_594010
+  if valid_568243 != nil:
+    section.add "api-version", valid_568243
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -636,21 +636,21 @@ proc validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUp
   if body != nil:
     result.add "body", body
 
-proc call*(call_594012: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_594002;
+proc call*(call_568245: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_568235;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Sets a database's long term retention policy.
   ## 
-  let valid = call_594012.validator(path, query, header, formData, body)
-  let scheme = call_594012.pickScheme
+  let valid = call_568245.validator(path, query, header, formData, body)
+  let scheme = call_568245.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594012.url(scheme.get, call_594012.host, call_594012.base,
-                         call_594012.route, valid.getOrDefault("path"),
+  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
+                         call_568245.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594012, url, valid)
+  result = hook(call_568245, url, valid)
 
-proc call*(call_594013: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_594002;
+proc call*(call_568246: Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_568235;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; restorableDroppedDatabaseId: string;
           subscriptionId: string; parameters: JsonNode;
@@ -670,23 +670,23 @@ proc call*(call_594013: Call_ManagedRestorableDroppedDatabaseBackupShortTermRete
   ##             : The policy name. Should always be "default".
   ##   parameters: JObject (required)
   ##             : The long term retention policy info.
-  var path_594014 = newJObject()
-  var query_594015 = newJObject()
-  var body_594016 = newJObject()
-  add(path_594014, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594015, "api-version", newJString(apiVersion))
-  add(path_594014, "managedInstanceName", newJString(managedInstanceName))
-  add(path_594014, "restorableDroppedDatabaseId",
+  var path_568247 = newJObject()
+  var query_568248 = newJObject()
+  var body_568249 = newJObject()
+  add(path_568247, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568248, "api-version", newJString(apiVersion))
+  add(path_568247, "managedInstanceName", newJString(managedInstanceName))
+  add(path_568247, "restorableDroppedDatabaseId",
       newJString(restorableDroppedDatabaseId))
-  add(path_594014, "subscriptionId", newJString(subscriptionId))
-  add(path_594014, "policyName", newJString(policyName))
+  add(path_568247, "subscriptionId", newJString(subscriptionId))
+  add(path_568247, "policyName", newJString(policyName))
   if parameters != nil:
-    body_594016 = parameters
-  result = call_594013.call(path_594014, query_594015, nil, nil, body_594016)
+    body_568249 = parameters
+  result = call_568246.call(path_568247, query_568248, nil, nil, body_568249)
 
-var managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate* = Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_594002(name: "managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate",
-    meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/restorableDroppedDatabases/{restorableDroppedDatabaseId}/backupShortTermRetentionPolicies/{policyName}", validator: validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_594003,
-    base: "", url: url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_594004,
+var managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate* = Call_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_568235(name: "managedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate",
+    meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/restorableDroppedDatabases/{restorableDroppedDatabaseId}/backupShortTermRetentionPolicies/{policyName}", validator: validate_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_568236,
+    base: "", url: url_ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesUpdate_568237,
     schemes: {Scheme.Https})
 export
   rest

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-ManagedServerSecurityAlertPolicy"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ManagedServerSecurityAlertPoliciesListByInstance_593646 = ref object of OpenApiRestCall_593424
-proc url_ManagedServerSecurityAlertPoliciesListByInstance_593648(
+  Call_ManagedServerSecurityAlertPoliciesListByInstance_567879 = ref object of OpenApiRestCall_567657
+proc url_ManagedServerSecurityAlertPoliciesListByInstance_567881(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -129,7 +129,7 @@ proc url_ManagedServerSecurityAlertPoliciesListByInstance_593648(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedServerSecurityAlertPoliciesListByInstance_593647(
+proc validate_ManagedServerSecurityAlertPoliciesListByInstance_567880(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get the managed server's threat detection policies.
@@ -146,21 +146,21 @@ proc validate_ManagedServerSecurityAlertPoliciesListByInstance_593647(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593821 = path.getOrDefault("resourceGroupName")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("resourceGroupName")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "resourceGroupName", valid_593821
-  var valid_593822 = path.getOrDefault("managedInstanceName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_568054 != nil:
+    section.add "resourceGroupName", valid_568054
+  var valid_568055 = path.getOrDefault("managedInstanceName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "managedInstanceName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "managedInstanceName", valid_568055
+  var valid_568056 = path.getOrDefault("subscriptionId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
+  if valid_568056 != nil:
+    section.add "subscriptionId", valid_568056
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -168,11 +168,11 @@ proc validate_ManagedServerSecurityAlertPoliciesListByInstance_593647(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593824 = query.getOrDefault("api-version")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  var valid_568057 = query.getOrDefault("api-version")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "api-version", valid_593824
+  if valid_568057 != nil:
+    section.add "api-version", valid_568057
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -181,21 +181,21 @@ proc validate_ManagedServerSecurityAlertPoliciesListByInstance_593647(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593847: Call_ManagedServerSecurityAlertPoliciesListByInstance_593646;
+proc call*(call_568080: Call_ManagedServerSecurityAlertPoliciesListByInstance_567879;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the managed server's threat detection policies.
   ## 
-  let valid = call_593847.validator(path, query, header, formData, body)
-  let scheme = call_593847.pickScheme
+  let valid = call_568080.validator(path, query, header, formData, body)
+  let scheme = call_568080.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593847.url(scheme.get, call_593847.host, call_593847.base,
-                         call_593847.route, valid.getOrDefault("path"),
+  let url = call_568080.url(scheme.get, call_568080.host, call_568080.base,
+                         call_568080.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593847, url, valid)
+  result = hook(call_568080, url, valid)
 
-proc call*(call_593918: Call_ManagedServerSecurityAlertPoliciesListByInstance_593646;
+proc call*(call_568151: Call_ManagedServerSecurityAlertPoliciesListByInstance_567879;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; subscriptionId: string): Recallable =
   ## managedServerSecurityAlertPoliciesListByInstance
@@ -208,23 +208,23 @@ proc call*(call_593918: Call_ManagedServerSecurityAlertPoliciesListByInstance_59
   ##                      : The name of the managed instance.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_593919 = newJObject()
-  var query_593921 = newJObject()
-  add(path_593919, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593921, "api-version", newJString(apiVersion))
-  add(path_593919, "managedInstanceName", newJString(managedInstanceName))
-  add(path_593919, "subscriptionId", newJString(subscriptionId))
-  result = call_593918.call(path_593919, query_593921, nil, nil, nil)
+  var path_568152 = newJObject()
+  var query_568154 = newJObject()
+  add(path_568152, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568154, "api-version", newJString(apiVersion))
+  add(path_568152, "managedInstanceName", newJString(managedInstanceName))
+  add(path_568152, "subscriptionId", newJString(subscriptionId))
+  result = call_568151.call(path_568152, query_568154, nil, nil, nil)
 
-var managedServerSecurityAlertPoliciesListByInstance* = Call_ManagedServerSecurityAlertPoliciesListByInstance_593646(
+var managedServerSecurityAlertPoliciesListByInstance* = Call_ManagedServerSecurityAlertPoliciesListByInstance_567879(
     name: "managedServerSecurityAlertPoliciesListByInstance",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/securityAlertPolicies",
-    validator: validate_ManagedServerSecurityAlertPoliciesListByInstance_593647,
-    base: "", url: url_ManagedServerSecurityAlertPoliciesListByInstance_593648,
+    validator: validate_ManagedServerSecurityAlertPoliciesListByInstance_567880,
+    base: "", url: url_ManagedServerSecurityAlertPoliciesListByInstance_567881,
     schemes: {Scheme.Https})
 type
-  Call_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593985 = ref object of OpenApiRestCall_593424
-proc url_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593987(
+  Call_ManagedServerSecurityAlertPoliciesCreateOrUpdate_568218 = ref object of OpenApiRestCall_567657
+proc url_ManagedServerSecurityAlertPoliciesCreateOrUpdate_568220(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -252,7 +252,7 @@ proc url_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593987(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593986(
+proc validate_ManagedServerSecurityAlertPoliciesCreateOrUpdate_568219(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Creates or updates a threat detection policy.
@@ -271,26 +271,26 @@ proc validate_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593986(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593988 = path.getOrDefault("resourceGroupName")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_568221 = path.getOrDefault("resourceGroupName")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "resourceGroupName", valid_593988
-  var valid_593989 = path.getOrDefault("managedInstanceName")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_568221 != nil:
+    section.add "resourceGroupName", valid_568221
+  var valid_568222 = path.getOrDefault("managedInstanceName")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "managedInstanceName", valid_593989
-  var valid_593990 = path.getOrDefault("subscriptionId")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  if valid_568222 != nil:
+    section.add "managedInstanceName", valid_568222
+  var valid_568223 = path.getOrDefault("subscriptionId")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "subscriptionId", valid_593990
-  var valid_593991 = path.getOrDefault("securityAlertPolicyName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_568223 != nil:
+    section.add "subscriptionId", valid_568223
+  var valid_568224 = path.getOrDefault("securityAlertPolicyName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = newJString("Default"))
-  if valid_593991 != nil:
-    section.add "securityAlertPolicyName", valid_593991
+  if valid_568224 != nil:
+    section.add "securityAlertPolicyName", valid_568224
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -298,11 +298,11 @@ proc validate_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593986(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593992 = query.getOrDefault("api-version")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568225 = query.getOrDefault("api-version")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "api-version", valid_593992
+  if valid_568225 != nil:
+    section.add "api-version", valid_568225
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -316,21 +316,21 @@ proc validate_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593986(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593994: Call_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593985;
+proc call*(call_568227: Call_ManagedServerSecurityAlertPoliciesCreateOrUpdate_568218;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a threat detection policy.
   ## 
-  let valid = call_593994.validator(path, query, header, formData, body)
-  let scheme = call_593994.pickScheme
+  let valid = call_568227.validator(path, query, header, formData, body)
+  let scheme = call_568227.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593994.url(scheme.get, call_593994.host, call_593994.base,
-                         call_593994.route, valid.getOrDefault("path"),
+  let url = call_568227.url(scheme.get, call_568227.host, call_568227.base,
+                         call_568227.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593994, url, valid)
+  result = hook(call_568227, url, valid)
 
-proc call*(call_593995: Call_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593985;
+proc call*(call_568228: Call_ManagedServerSecurityAlertPoliciesCreateOrUpdate_568218;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; subscriptionId: string; parameters: JsonNode;
           securityAlertPolicyName: string = "Default"): Recallable =
@@ -348,27 +348,27 @@ proc call*(call_593995: Call_ManagedServerSecurityAlertPoliciesCreateOrUpdate_59
   ##                          : The name of the security alert policy.
   ##   parameters: JObject (required)
   ##             : The managed server security alert policy.
-  var path_593996 = newJObject()
-  var query_593997 = newJObject()
-  var body_593998 = newJObject()
-  add(path_593996, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593997, "api-version", newJString(apiVersion))
-  add(path_593996, "managedInstanceName", newJString(managedInstanceName))
-  add(path_593996, "subscriptionId", newJString(subscriptionId))
-  add(path_593996, "securityAlertPolicyName", newJString(securityAlertPolicyName))
+  var path_568229 = newJObject()
+  var query_568230 = newJObject()
+  var body_568231 = newJObject()
+  add(path_568229, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568230, "api-version", newJString(apiVersion))
+  add(path_568229, "managedInstanceName", newJString(managedInstanceName))
+  add(path_568229, "subscriptionId", newJString(subscriptionId))
+  add(path_568229, "securityAlertPolicyName", newJString(securityAlertPolicyName))
   if parameters != nil:
-    body_593998 = parameters
-  result = call_593995.call(path_593996, query_593997, nil, nil, body_593998)
+    body_568231 = parameters
+  result = call_568228.call(path_568229, query_568230, nil, nil, body_568231)
 
-var managedServerSecurityAlertPoliciesCreateOrUpdate* = Call_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593985(
+var managedServerSecurityAlertPoliciesCreateOrUpdate* = Call_ManagedServerSecurityAlertPoliciesCreateOrUpdate_568218(
     name: "managedServerSecurityAlertPoliciesCreateOrUpdate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/securityAlertPolicies/{securityAlertPolicyName}",
-    validator: validate_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593986,
-    base: "", url: url_ManagedServerSecurityAlertPoliciesCreateOrUpdate_593987,
+    validator: validate_ManagedServerSecurityAlertPoliciesCreateOrUpdate_568219,
+    base: "", url: url_ManagedServerSecurityAlertPoliciesCreateOrUpdate_568220,
     schemes: {Scheme.Https})
 type
-  Call_ManagedServerSecurityAlertPoliciesGet_593960 = ref object of OpenApiRestCall_593424
-proc url_ManagedServerSecurityAlertPoliciesGet_593962(protocol: Scheme;
+  Call_ManagedServerSecurityAlertPoliciesGet_568193 = ref object of OpenApiRestCall_567657
+proc url_ManagedServerSecurityAlertPoliciesGet_568195(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -395,7 +395,7 @@ proc url_ManagedServerSecurityAlertPoliciesGet_593962(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedServerSecurityAlertPoliciesGet_593961(path: JsonNode;
+proc validate_ManagedServerSecurityAlertPoliciesGet_568194(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a managed server's threat detection policy.
   ## 
@@ -413,26 +413,26 @@ proc validate_ManagedServerSecurityAlertPoliciesGet_593961(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593963 = path.getOrDefault("resourceGroupName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = path.getOrDefault("resourceGroupName")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "resourceGroupName", valid_593963
-  var valid_593964 = path.getOrDefault("managedInstanceName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_568196 != nil:
+    section.add "resourceGroupName", valid_568196
+  var valid_568197 = path.getOrDefault("managedInstanceName")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "managedInstanceName", valid_593964
-  var valid_593965 = path.getOrDefault("subscriptionId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "managedInstanceName", valid_568197
+  var valid_568198 = path.getOrDefault("subscriptionId")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "subscriptionId", valid_593965
-  var valid_593979 = path.getOrDefault("securityAlertPolicyName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_568198 != nil:
+    section.add "subscriptionId", valid_568198
+  var valid_568212 = path.getOrDefault("securityAlertPolicyName")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = newJString("Default"))
-  if valid_593979 != nil:
-    section.add "securityAlertPolicyName", valid_593979
+  if valid_568212 != nil:
+    section.add "securityAlertPolicyName", valid_568212
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -440,11 +440,11 @@ proc validate_ManagedServerSecurityAlertPoliciesGet_593961(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593980 = query.getOrDefault("api-version")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_568213 = query.getOrDefault("api-version")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "api-version", valid_593980
+  if valid_568213 != nil:
+    section.add "api-version", valid_568213
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -453,21 +453,21 @@ proc validate_ManagedServerSecurityAlertPoliciesGet_593961(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593981: Call_ManagedServerSecurityAlertPoliciesGet_593960;
+proc call*(call_568214: Call_ManagedServerSecurityAlertPoliciesGet_568193;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a managed server's threat detection policy.
   ## 
-  let valid = call_593981.validator(path, query, header, formData, body)
-  let scheme = call_593981.pickScheme
+  let valid = call_568214.validator(path, query, header, formData, body)
+  let scheme = call_568214.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593981.url(scheme.get, call_593981.host, call_593981.base,
-                         call_593981.route, valid.getOrDefault("path"),
+  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
+                         call_568214.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593981, url, valid)
+  result = hook(call_568214, url, valid)
 
-proc call*(call_593982: Call_ManagedServerSecurityAlertPoliciesGet_593960;
+proc call*(call_568215: Call_ManagedServerSecurityAlertPoliciesGet_568193;
           resourceGroupName: string; apiVersion: string;
           managedInstanceName: string; subscriptionId: string;
           securityAlertPolicyName: string = "Default"): Recallable =
@@ -483,20 +483,20 @@ proc call*(call_593982: Call_ManagedServerSecurityAlertPoliciesGet_593960;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   securityAlertPolicyName: string (required)
   ##                          : The name of the security alert policy.
-  var path_593983 = newJObject()
-  var query_593984 = newJObject()
-  add(path_593983, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593984, "api-version", newJString(apiVersion))
-  add(path_593983, "managedInstanceName", newJString(managedInstanceName))
-  add(path_593983, "subscriptionId", newJString(subscriptionId))
-  add(path_593983, "securityAlertPolicyName", newJString(securityAlertPolicyName))
-  result = call_593982.call(path_593983, query_593984, nil, nil, nil)
+  var path_568216 = newJObject()
+  var query_568217 = newJObject()
+  add(path_568216, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568217, "api-version", newJString(apiVersion))
+  add(path_568216, "managedInstanceName", newJString(managedInstanceName))
+  add(path_568216, "subscriptionId", newJString(subscriptionId))
+  add(path_568216, "securityAlertPolicyName", newJString(securityAlertPolicyName))
+  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
 
-var managedServerSecurityAlertPoliciesGet* = Call_ManagedServerSecurityAlertPoliciesGet_593960(
+var managedServerSecurityAlertPoliciesGet* = Call_ManagedServerSecurityAlertPoliciesGet_568193(
     name: "managedServerSecurityAlertPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/securityAlertPolicies/{securityAlertPolicyName}",
-    validator: validate_ManagedServerSecurityAlertPoliciesGet_593961, base: "",
-    url: url_ManagedServerSecurityAlertPoliciesGet_593962, schemes: {Scheme.Https})
+    validator: validate_ManagedServerSecurityAlertPoliciesGet_568194, base: "",
+    url: url_ManagedServerSecurityAlertPoliciesGet_568195, schemes: {Scheme.Https})
 export
   rest
 

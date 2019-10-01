@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ConsumptionManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593439 = ref object of OpenApiRestCall
+  OpenApiRestCall_567668 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593439](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567668](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593439): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567668): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "consumption"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BalancesGetForBillingPeriodByBillingAccount_593661 = ref object of OpenApiRestCall_593439
-proc url_BalancesGetForBillingPeriodByBillingAccount_593663(protocol: Scheme;
+  Call_BalancesGetForBillingPeriodByBillingAccount_567890 = ref object of OpenApiRestCall_567668
+proc url_BalancesGetForBillingPeriodByBillingAccount_567892(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_BalancesGetForBillingPeriodByBillingAccount_593663(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BalancesGetForBillingPeriodByBillingAccount_593662(path: JsonNode;
+proc validate_BalancesGetForBillingPeriodByBillingAccount_567891(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the balances for a scope by billing period and billingAccountId. Balances are available via this API only for May 1, 2014 or later.
   ## 
@@ -142,16 +142,16 @@ proc validate_BalancesGetForBillingPeriodByBillingAccount_593662(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingPeriodName` field"
-  var valid_593836 = path.getOrDefault("billingPeriodName")
-  valid_593836 = validateParameter(valid_593836, JString, required = true,
+  var valid_568065 = path.getOrDefault("billingPeriodName")
+  valid_568065 = validateParameter(valid_568065, JString, required = true,
                                  default = nil)
-  if valid_593836 != nil:
-    section.add "billingPeriodName", valid_593836
-  var valid_593837 = path.getOrDefault("billingAccountId")
-  valid_593837 = validateParameter(valid_593837, JString, required = true,
+  if valid_568065 != nil:
+    section.add "billingPeriodName", valid_568065
+  var valid_568066 = path.getOrDefault("billingAccountId")
+  valid_568066 = validateParameter(valid_568066, JString, required = true,
                                  default = nil)
-  if valid_593837 != nil:
-    section.add "billingAccountId", valid_593837
+  if valid_568066 != nil:
+    section.add "billingAccountId", valid_568066
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -159,11 +159,11 @@ proc validate_BalancesGetForBillingPeriodByBillingAccount_593662(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593838 = query.getOrDefault("api-version")
-  valid_593838 = validateParameter(valid_593838, JString, required = true,
+  var valid_568067 = query.getOrDefault("api-version")
+  valid_568067 = validateParameter(valid_568067, JString, required = true,
                                  default = nil)
-  if valid_593838 != nil:
-    section.add "api-version", valid_593838
+  if valid_568067 != nil:
+    section.add "api-version", valid_568067
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -172,22 +172,22 @@ proc validate_BalancesGetForBillingPeriodByBillingAccount_593662(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593861: Call_BalancesGetForBillingPeriodByBillingAccount_593661;
+proc call*(call_568090: Call_BalancesGetForBillingPeriodByBillingAccount_567890;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the balances for a scope by billing period and billingAccountId. Balances are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_593861.validator(path, query, header, formData, body)
-  let scheme = call_593861.pickScheme
+  let valid = call_568090.validator(path, query, header, formData, body)
+  let scheme = call_568090.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593861.url(scheme.get, call_593861.host, call_593861.base,
-                         call_593861.route, valid.getOrDefault("path"),
+  let url = call_568090.url(scheme.get, call_568090.host, call_568090.base,
+                         call_568090.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593861, url, valid)
+  result = hook(call_568090, url, valid)
 
-proc call*(call_593932: Call_BalancesGetForBillingPeriodByBillingAccount_593661;
+proc call*(call_568161: Call_BalancesGetForBillingPeriodByBillingAccount_567890;
           apiVersion: string; billingPeriodName: string; billingAccountId: string): Recallable =
   ## balancesGetForBillingPeriodByBillingAccount
   ## Gets the balances for a scope by billing period and billingAccountId. Balances are available via this API only for May 1, 2014 or later.
@@ -198,22 +198,22 @@ proc call*(call_593932: Call_BalancesGetForBillingPeriodByBillingAccount_593661;
   ##                    : Billing Period Name.
   ##   billingAccountId: string (required)
   ##                   : BillingAccount ID
-  var path_593933 = newJObject()
-  var query_593935 = newJObject()
-  add(query_593935, "api-version", newJString(apiVersion))
-  add(path_593933, "billingPeriodName", newJString(billingPeriodName))
-  add(path_593933, "billingAccountId", newJString(billingAccountId))
-  result = call_593932.call(path_593933, query_593935, nil, nil, nil)
+  var path_568162 = newJObject()
+  var query_568164 = newJObject()
+  add(query_568164, "api-version", newJString(apiVersion))
+  add(path_568162, "billingPeriodName", newJString(billingPeriodName))
+  add(path_568162, "billingAccountId", newJString(billingAccountId))
+  result = call_568161.call(path_568162, query_568164, nil, nil, nil)
 
-var balancesGetForBillingPeriodByBillingAccount* = Call_BalancesGetForBillingPeriodByBillingAccount_593661(
+var balancesGetForBillingPeriodByBillingAccount* = Call_BalancesGetForBillingPeriodByBillingAccount_567890(
     name: "balancesGetForBillingPeriodByBillingAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/balances",
-    validator: validate_BalancesGetForBillingPeriodByBillingAccount_593662,
-    base: "", url: url_BalancesGetForBillingPeriodByBillingAccount_593663,
+    validator: validate_BalancesGetForBillingPeriodByBillingAccount_567891,
+    base: "", url: url_BalancesGetForBillingPeriodByBillingAccount_567892,
     schemes: {Scheme.Https})
 type
-  Call_MarketplacesListForBillingPeriodByBillingAccount_593974 = ref object of OpenApiRestCall_593439
-proc url_MarketplacesListForBillingPeriodByBillingAccount_593976(
+  Call_MarketplacesListForBillingPeriodByBillingAccount_568203 = ref object of OpenApiRestCall_567668
+proc url_MarketplacesListForBillingPeriodByBillingAccount_568205(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -238,7 +238,7 @@ proc url_MarketplacesListForBillingPeriodByBillingAccount_593976(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplacesListForBillingPeriodByBillingAccount_593975(
+proc validate_MarketplacesListForBillingPeriodByBillingAccount_568204(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists the marketplaces for a scope by billing period and billingAccountId. Marketplaces are available via this API only for May 1, 2014 or later.
@@ -254,16 +254,16 @@ proc validate_MarketplacesListForBillingPeriodByBillingAccount_593975(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingPeriodName` field"
-  var valid_593978 = path.getOrDefault("billingPeriodName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_568207 = path.getOrDefault("billingPeriodName")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "billingPeriodName", valid_593978
-  var valid_593979 = path.getOrDefault("billingAccountId")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_568207 != nil:
+    section.add "billingPeriodName", valid_568207
+  var valid_568208 = path.getOrDefault("billingAccountId")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "billingAccountId", valid_593979
+  if valid_568208 != nil:
+    section.add "billingAccountId", valid_568208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -277,25 +277,25 @@ proc validate_MarketplacesListForBillingPeriodByBillingAccount_593975(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593980 = query.getOrDefault("api-version")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  var valid_568209 = query.getOrDefault("api-version")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "api-version", valid_593980
-  var valid_593981 = query.getOrDefault("$top")
-  valid_593981 = validateParameter(valid_593981, JInt, required = false, default = nil)
-  if valid_593981 != nil:
-    section.add "$top", valid_593981
-  var valid_593982 = query.getOrDefault("$skiptoken")
-  valid_593982 = validateParameter(valid_593982, JString, required = false,
+  if valid_568209 != nil:
+    section.add "api-version", valid_568209
+  var valid_568210 = query.getOrDefault("$top")
+  valid_568210 = validateParameter(valid_568210, JInt, required = false, default = nil)
+  if valid_568210 != nil:
+    section.add "$top", valid_568210
+  var valid_568211 = query.getOrDefault("$skiptoken")
+  valid_568211 = validateParameter(valid_568211, JString, required = false,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "$skiptoken", valid_593982
-  var valid_593983 = query.getOrDefault("$filter")
-  valid_593983 = validateParameter(valid_593983, JString, required = false,
+  if valid_568211 != nil:
+    section.add "$skiptoken", valid_568211
+  var valid_568212 = query.getOrDefault("$filter")
+  valid_568212 = validateParameter(valid_568212, JString, required = false,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "$filter", valid_593983
+  if valid_568212 != nil:
+    section.add "$filter", valid_568212
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -304,22 +304,22 @@ proc validate_MarketplacesListForBillingPeriodByBillingAccount_593975(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_MarketplacesListForBillingPeriodByBillingAccount_593974;
+proc call*(call_568213: Call_MarketplacesListForBillingPeriodByBillingAccount_568203;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the marketplaces for a scope by billing period and billingAccountId. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_568213.validator(path, query, header, formData, body)
+  let scheme = call_568213.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
+                         call_568213.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_568213, url, valid)
 
-proc call*(call_593985: Call_MarketplacesListForBillingPeriodByBillingAccount_593974;
+proc call*(call_568214: Call_MarketplacesListForBillingPeriodByBillingAccount_568203;
           apiVersion: string; billingPeriodName: string; billingAccountId: string;
           Top: int = 0; Skiptoken: string = ""; Filter: string = ""): Recallable =
   ## marketplacesListForBillingPeriodByBillingAccount
@@ -337,25 +337,25 @@ proc call*(call_593985: Call_MarketplacesListForBillingPeriodByBillingAccount_59
   ##                   : BillingAccount ID
   ##   Filter: string
   ##         : May be used to filter marketplaces by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'.
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(query_593987, "$top", newJInt(Top))
-  add(query_593987, "$skiptoken", newJString(Skiptoken))
-  add(path_593986, "billingPeriodName", newJString(billingPeriodName))
-  add(path_593986, "billingAccountId", newJString(billingAccountId))
-  add(query_593987, "$filter", newJString(Filter))
-  result = call_593985.call(path_593986, query_593987, nil, nil, nil)
+  var path_568215 = newJObject()
+  var query_568216 = newJObject()
+  add(query_568216, "api-version", newJString(apiVersion))
+  add(query_568216, "$top", newJInt(Top))
+  add(query_568216, "$skiptoken", newJString(Skiptoken))
+  add(path_568215, "billingPeriodName", newJString(billingPeriodName))
+  add(path_568215, "billingAccountId", newJString(billingAccountId))
+  add(query_568216, "$filter", newJString(Filter))
+  result = call_568214.call(path_568215, query_568216, nil, nil, nil)
 
-var marketplacesListForBillingPeriodByBillingAccount* = Call_MarketplacesListForBillingPeriodByBillingAccount_593974(
+var marketplacesListForBillingPeriodByBillingAccount* = Call_MarketplacesListForBillingPeriodByBillingAccount_568203(
     name: "marketplacesListForBillingPeriodByBillingAccount",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/marketplaces",
-    validator: validate_MarketplacesListForBillingPeriodByBillingAccount_593975,
-    base: "", url: url_MarketplacesListForBillingPeriodByBillingAccount_593976,
+    validator: validate_MarketplacesListForBillingPeriodByBillingAccount_568204,
+    base: "", url: url_MarketplacesListForBillingPeriodByBillingAccount_568205,
     schemes: {Scheme.Https})
 type
-  Call_UsageDetailsListForBillingPeriodByBillingAccount_593988 = ref object of OpenApiRestCall_593439
-proc url_UsageDetailsListForBillingPeriodByBillingAccount_593990(
+  Call_UsageDetailsListForBillingPeriodByBillingAccount_568217 = ref object of OpenApiRestCall_567668
+proc url_UsageDetailsListForBillingPeriodByBillingAccount_568219(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -380,7 +380,7 @@ proc url_UsageDetailsListForBillingPeriodByBillingAccount_593990(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageDetailsListForBillingPeriodByBillingAccount_593989(
+proc validate_UsageDetailsListForBillingPeriodByBillingAccount_568218(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists the usage details based on billingAccountId for a scope by billing period. Usage details are available via this API only for May 1, 2014 or later.
@@ -396,16 +396,16 @@ proc validate_UsageDetailsListForBillingPeriodByBillingAccount_593989(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingPeriodName` field"
-  var valid_593991 = path.getOrDefault("billingPeriodName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_568220 = path.getOrDefault("billingPeriodName")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "billingPeriodName", valid_593991
-  var valid_593992 = path.getOrDefault("billingAccountId")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_568220 != nil:
+    section.add "billingPeriodName", valid_568220
+  var valid_568221 = path.getOrDefault("billingAccountId")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "billingAccountId", valid_593992
+  if valid_568221 != nil:
+    section.add "billingAccountId", valid_568221
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -421,37 +421,37 @@ proc validate_UsageDetailsListForBillingPeriodByBillingAccount_593989(
   ##   $filter: JString
   ##          : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   section = newJObject()
-  var valid_593993 = query.getOrDefault("$expand")
-  valid_593993 = validateParameter(valid_593993, JString, required = false,
+  var valid_568222 = query.getOrDefault("$expand")
+  valid_568222 = validateParameter(valid_568222, JString, required = false,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "$expand", valid_593993
+  if valid_568222 != nil:
+    section.add "$expand", valid_568222
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568223 = query.getOrDefault("api-version")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
-  var valid_593995 = query.getOrDefault("$top")
-  valid_593995 = validateParameter(valid_593995, JInt, required = false, default = nil)
-  if valid_593995 != nil:
-    section.add "$top", valid_593995
-  var valid_593996 = query.getOrDefault("$skiptoken")
-  valid_593996 = validateParameter(valid_593996, JString, required = false,
+  if valid_568223 != nil:
+    section.add "api-version", valid_568223
+  var valid_568224 = query.getOrDefault("$top")
+  valid_568224 = validateParameter(valid_568224, JInt, required = false, default = nil)
+  if valid_568224 != nil:
+    section.add "$top", valid_568224
+  var valid_568225 = query.getOrDefault("$skiptoken")
+  valid_568225 = validateParameter(valid_568225, JString, required = false,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "$skiptoken", valid_593996
-  var valid_593997 = query.getOrDefault("$apply")
-  valid_593997 = validateParameter(valid_593997, JString, required = false,
+  if valid_568225 != nil:
+    section.add "$skiptoken", valid_568225
+  var valid_568226 = query.getOrDefault("$apply")
+  valid_568226 = validateParameter(valid_568226, JString, required = false,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "$apply", valid_593997
-  var valid_593998 = query.getOrDefault("$filter")
-  valid_593998 = validateParameter(valid_593998, JString, required = false,
+  if valid_568226 != nil:
+    section.add "$apply", valid_568226
+  var valid_568227 = query.getOrDefault("$filter")
+  valid_568227 = validateParameter(valid_568227, JString, required = false,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "$filter", valid_593998
+  if valid_568227 != nil:
+    section.add "$filter", valid_568227
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -460,22 +460,22 @@ proc validate_UsageDetailsListForBillingPeriodByBillingAccount_593989(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593999: Call_UsageDetailsListForBillingPeriodByBillingAccount_593988;
+proc call*(call_568228: Call_UsageDetailsListForBillingPeriodByBillingAccount_568217;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the usage details based on billingAccountId for a scope by billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_593999.validator(path, query, header, formData, body)
-  let scheme = call_593999.pickScheme
+  let valid = call_568228.validator(path, query, header, formData, body)
+  let scheme = call_568228.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593999.url(scheme.get, call_593999.host, call_593999.base,
-                         call_593999.route, valid.getOrDefault("path"),
+  let url = call_568228.url(scheme.get, call_568228.host, call_568228.base,
+                         call_568228.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593999, url, valid)
+  result = hook(call_568228, url, valid)
 
-proc call*(call_594000: Call_UsageDetailsListForBillingPeriodByBillingAccount_593988;
+proc call*(call_568229: Call_UsageDetailsListForBillingPeriodByBillingAccount_568217;
           apiVersion: string; billingPeriodName: string; billingAccountId: string;
           Expand: string = ""; Top: int = 0; Skiptoken: string = ""; Apply: string = "";
           Filter: string = ""): Recallable =
@@ -498,27 +498,27 @@ proc call*(call_594000: Call_UsageDetailsListForBillingPeriodByBillingAccount_59
   ##        : OData apply expression to aggregate usageDetails by tags or (tags and properties/usageStart) for specified billing period
   ##   Filter: string
   ##         : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_594001 = newJObject()
-  var query_594002 = newJObject()
-  add(query_594002, "$expand", newJString(Expand))
-  add(query_594002, "api-version", newJString(apiVersion))
-  add(query_594002, "$top", newJInt(Top))
-  add(query_594002, "$skiptoken", newJString(Skiptoken))
-  add(path_594001, "billingPeriodName", newJString(billingPeriodName))
-  add(path_594001, "billingAccountId", newJString(billingAccountId))
-  add(query_594002, "$apply", newJString(Apply))
-  add(query_594002, "$filter", newJString(Filter))
-  result = call_594000.call(path_594001, query_594002, nil, nil, nil)
+  var path_568230 = newJObject()
+  var query_568231 = newJObject()
+  add(query_568231, "$expand", newJString(Expand))
+  add(query_568231, "api-version", newJString(apiVersion))
+  add(query_568231, "$top", newJInt(Top))
+  add(query_568231, "$skiptoken", newJString(Skiptoken))
+  add(path_568230, "billingPeriodName", newJString(billingPeriodName))
+  add(path_568230, "billingAccountId", newJString(billingAccountId))
+  add(query_568231, "$apply", newJString(Apply))
+  add(query_568231, "$filter", newJString(Filter))
+  result = call_568229.call(path_568230, query_568231, nil, nil, nil)
 
-var usageDetailsListForBillingPeriodByBillingAccount* = Call_UsageDetailsListForBillingPeriodByBillingAccount_593988(
+var usageDetailsListForBillingPeriodByBillingAccount* = Call_UsageDetailsListForBillingPeriodByBillingAccount_568217(
     name: "usageDetailsListForBillingPeriodByBillingAccount",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/usageDetails",
-    validator: validate_UsageDetailsListForBillingPeriodByBillingAccount_593989,
-    base: "", url: url_UsageDetailsListForBillingPeriodByBillingAccount_593990,
+    validator: validate_UsageDetailsListForBillingPeriodByBillingAccount_568218,
+    base: "", url: url_UsageDetailsListForBillingPeriodByBillingAccount_568219,
     schemes: {Scheme.Https})
 type
-  Call_BalancesGetByBillingAccount_594003 = ref object of OpenApiRestCall_593439
-proc url_BalancesGetByBillingAccount_594005(protocol: Scheme; host: string;
+  Call_BalancesGetByBillingAccount_568232 = ref object of OpenApiRestCall_567668
+proc url_BalancesGetByBillingAccount_568234(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -536,7 +536,7 @@ proc url_BalancesGetByBillingAccount_594005(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BalancesGetByBillingAccount_594004(path: JsonNode; query: JsonNode;
+proc validate_BalancesGetByBillingAccount_568233(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the balances for a scope by billingAccountId. Balances are available via this API only for May 1, 2014 or later.
   ## 
@@ -549,11 +549,11 @@ proc validate_BalancesGetByBillingAccount_594004(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountId` field"
-  var valid_594006 = path.getOrDefault("billingAccountId")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_568235 = path.getOrDefault("billingAccountId")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "billingAccountId", valid_594006
+  if valid_568235 != nil:
+    section.add "billingAccountId", valid_568235
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -561,11 +561,11 @@ proc validate_BalancesGetByBillingAccount_594004(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594007 = query.getOrDefault("api-version")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  var valid_568236 = query.getOrDefault("api-version")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "api-version", valid_594007
+  if valid_568236 != nil:
+    section.add "api-version", valid_568236
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -574,21 +574,21 @@ proc validate_BalancesGetByBillingAccount_594004(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594008: Call_BalancesGetByBillingAccount_594003; path: JsonNode;
+proc call*(call_568237: Call_BalancesGetByBillingAccount_568232; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the balances for a scope by billingAccountId. Balances are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594008.validator(path, query, header, formData, body)
-  let scheme = call_594008.pickScheme
+  let valid = call_568237.validator(path, query, header, formData, body)
+  let scheme = call_568237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594008.url(scheme.get, call_594008.host, call_594008.base,
-                         call_594008.route, valid.getOrDefault("path"),
+  let url = call_568237.url(scheme.get, call_568237.host, call_568237.base,
+                         call_568237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594008, url, valid)
+  result = hook(call_568237, url, valid)
 
-proc call*(call_594009: Call_BalancesGetByBillingAccount_594003;
+proc call*(call_568238: Call_BalancesGetByBillingAccount_568232;
           apiVersion: string; billingAccountId: string): Recallable =
   ## balancesGetByBillingAccount
   ## Gets the balances for a scope by billingAccountId. Balances are available via this API only for May 1, 2014 or later.
@@ -597,20 +597,20 @@ proc call*(call_594009: Call_BalancesGetByBillingAccount_594003;
   ##             : Version of the API to be used with the client request. The current version is 2018-06-30.
   ##   billingAccountId: string (required)
   ##                   : BillingAccount ID
-  var path_594010 = newJObject()
-  var query_594011 = newJObject()
-  add(query_594011, "api-version", newJString(apiVersion))
-  add(path_594010, "billingAccountId", newJString(billingAccountId))
-  result = call_594009.call(path_594010, query_594011, nil, nil, nil)
+  var path_568239 = newJObject()
+  var query_568240 = newJObject()
+  add(query_568240, "api-version", newJString(apiVersion))
+  add(path_568239, "billingAccountId", newJString(billingAccountId))
+  result = call_568238.call(path_568239, query_568240, nil, nil, nil)
 
-var balancesGetByBillingAccount* = Call_BalancesGetByBillingAccount_594003(
+var balancesGetByBillingAccount* = Call_BalancesGetByBillingAccount_568232(
     name: "balancesGetByBillingAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Consumption/balances",
-    validator: validate_BalancesGetByBillingAccount_594004, base: "",
-    url: url_BalancesGetByBillingAccount_594005, schemes: {Scheme.Https})
+    validator: validate_BalancesGetByBillingAccount_568233, base: "",
+    url: url_BalancesGetByBillingAccount_568234, schemes: {Scheme.Https})
 type
-  Call_CostTagsCreateOrUpdate_594021 = ref object of OpenApiRestCall_593439
-proc url_CostTagsCreateOrUpdate_594023(protocol: Scheme; host: string; base: string;
+  Call_CostTagsCreateOrUpdate_568250 = ref object of OpenApiRestCall_567668
+proc url_CostTagsCreateOrUpdate_568252(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -628,7 +628,7 @@ proc url_CostTagsCreateOrUpdate_594023(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CostTagsCreateOrUpdate_594022(path: JsonNode; query: JsonNode;
+proc validate_CostTagsCreateOrUpdate_568251(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create or update cost tags associated with a billing account. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
@@ -641,11 +641,11 @@ proc validate_CostTagsCreateOrUpdate_594022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountId` field"
-  var valid_594024 = path.getOrDefault("billingAccountId")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_568253 = path.getOrDefault("billingAccountId")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "billingAccountId", valid_594024
+  if valid_568253 != nil:
+    section.add "billingAccountId", valid_568253
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -653,11 +653,11 @@ proc validate_CostTagsCreateOrUpdate_594022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594025 = query.getOrDefault("api-version")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_568254 = query.getOrDefault("api-version")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "api-version", valid_594025
+  if valid_568254 != nil:
+    section.add "api-version", valid_568254
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -671,21 +671,21 @@ proc validate_CostTagsCreateOrUpdate_594022(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594027: Call_CostTagsCreateOrUpdate_594021; path: JsonNode;
+proc call*(call_568256: Call_CostTagsCreateOrUpdate_568250; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to create or update cost tags associated with a billing account. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594027.validator(path, query, header, formData, body)
-  let scheme = call_594027.pickScheme
+  let valid = call_568256.validator(path, query, header, formData, body)
+  let scheme = call_568256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594027.url(scheme.get, call_594027.host, call_594027.base,
-                         call_594027.route, valid.getOrDefault("path"),
+  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
+                         call_568256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594027, url, valid)
+  result = hook(call_568256, url, valid)
 
-proc call*(call_594028: Call_CostTagsCreateOrUpdate_594021; apiVersion: string;
+proc call*(call_568257: Call_CostTagsCreateOrUpdate_568250; apiVersion: string;
           billingAccountId: string; parameters: JsonNode): Recallable =
   ## costTagsCreateOrUpdate
   ## The operation to create or update cost tags associated with a billing account. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
@@ -696,23 +696,23 @@ proc call*(call_594028: Call_CostTagsCreateOrUpdate_594021; apiVersion: string;
   ##                   : BillingAccount ID
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create cost tags operation.
-  var path_594029 = newJObject()
-  var query_594030 = newJObject()
-  var body_594031 = newJObject()
-  add(query_594030, "api-version", newJString(apiVersion))
-  add(path_594029, "billingAccountId", newJString(billingAccountId))
+  var path_568258 = newJObject()
+  var query_568259 = newJObject()
+  var body_568260 = newJObject()
+  add(query_568259, "api-version", newJString(apiVersion))
+  add(path_568258, "billingAccountId", newJString(billingAccountId))
   if parameters != nil:
-    body_594031 = parameters
-  result = call_594028.call(path_594029, query_594030, nil, nil, body_594031)
+    body_568260 = parameters
+  result = call_568257.call(path_568258, query_568259, nil, nil, body_568260)
 
-var costTagsCreateOrUpdate* = Call_CostTagsCreateOrUpdate_594021(
+var costTagsCreateOrUpdate* = Call_CostTagsCreateOrUpdate_568250(
     name: "costTagsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Consumption/costTags",
-    validator: validate_CostTagsCreateOrUpdate_594022, base: "",
-    url: url_CostTagsCreateOrUpdate_594023, schemes: {Scheme.Https})
+    validator: validate_CostTagsCreateOrUpdate_568251, base: "",
+    url: url_CostTagsCreateOrUpdate_568252, schemes: {Scheme.Https})
 type
-  Call_CostTagsGet_594012 = ref object of OpenApiRestCall_593439
-proc url_CostTagsGet_594014(protocol: Scheme; host: string; base: string;
+  Call_CostTagsGet_568241 = ref object of OpenApiRestCall_567668
+proc url_CostTagsGet_568243(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -730,7 +730,7 @@ proc url_CostTagsGet_594014(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CostTagsGet_594013(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_CostTagsGet_568242(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get cost tags for a billing account.
   ## 
@@ -743,11 +743,11 @@ proc validate_CostTagsGet_594013(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountId` field"
-  var valid_594015 = path.getOrDefault("billingAccountId")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_568244 = path.getOrDefault("billingAccountId")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "billingAccountId", valid_594015
+  if valid_568244 != nil:
+    section.add "billingAccountId", valid_568244
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -755,11 +755,11 @@ proc validate_CostTagsGet_594013(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594016 = query.getOrDefault("api-version")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_568245 = query.getOrDefault("api-version")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "api-version", valid_594016
+  if valid_568245 != nil:
+    section.add "api-version", valid_568245
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -768,21 +768,21 @@ proc validate_CostTagsGet_594013(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594017: Call_CostTagsGet_594012; path: JsonNode; query: JsonNode;
+proc call*(call_568246: Call_CostTagsGet_568241; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get cost tags for a billing account.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594017.validator(path, query, header, formData, body)
-  let scheme = call_594017.pickScheme
+  let valid = call_568246.validator(path, query, header, formData, body)
+  let scheme = call_568246.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594017.url(scheme.get, call_594017.host, call_594017.base,
-                         call_594017.route, valid.getOrDefault("path"),
+  let url = call_568246.url(scheme.get, call_568246.host, call_568246.base,
+                         call_568246.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594017, url, valid)
+  result = hook(call_568246, url, valid)
 
-proc call*(call_594018: Call_CostTagsGet_594012; apiVersion: string;
+proc call*(call_568247: Call_CostTagsGet_568241; apiVersion: string;
           billingAccountId: string): Recallable =
   ## costTagsGet
   ## Get cost tags for a billing account.
@@ -791,21 +791,21 @@ proc call*(call_594018: Call_CostTagsGet_594012; apiVersion: string;
   ##             : Version of the API to be used with the client request. The current version is 2018-06-30.
   ##   billingAccountId: string (required)
   ##                   : BillingAccount ID
-  var path_594019 = newJObject()
-  var query_594020 = newJObject()
-  add(query_594020, "api-version", newJString(apiVersion))
-  add(path_594019, "billingAccountId", newJString(billingAccountId))
-  result = call_594018.call(path_594019, query_594020, nil, nil, nil)
+  var path_568248 = newJObject()
+  var query_568249 = newJObject()
+  add(query_568249, "api-version", newJString(apiVersion))
+  add(path_568248, "billingAccountId", newJString(billingAccountId))
+  result = call_568247.call(path_568248, query_568249, nil, nil, nil)
 
-var costTagsGet* = Call_CostTagsGet_594012(name: "costTagsGet",
+var costTagsGet* = Call_CostTagsGet_568241(name: "costTagsGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Consumption/costTags",
-                                        validator: validate_CostTagsGet_594013,
-                                        base: "", url: url_CostTagsGet_594014,
+                                        validator: validate_CostTagsGet_568242,
+                                        base: "", url: url_CostTagsGet_568243,
                                         schemes: {Scheme.Https})
 type
-  Call_MarketplacesListByBillingAccount_594032 = ref object of OpenApiRestCall_593439
-proc url_MarketplacesListByBillingAccount_594034(protocol: Scheme; host: string;
+  Call_MarketplacesListByBillingAccount_568261 = ref object of OpenApiRestCall_567668
+proc url_MarketplacesListByBillingAccount_568263(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -824,7 +824,7 @@ proc url_MarketplacesListByBillingAccount_594034(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplacesListByBillingAccount_594033(path: JsonNode;
+proc validate_MarketplacesListByBillingAccount_568262(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the marketplaces for a scope by billingAccountId and current billing period. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
@@ -837,11 +837,11 @@ proc validate_MarketplacesListByBillingAccount_594033(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountId` field"
-  var valid_594035 = path.getOrDefault("billingAccountId")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  var valid_568264 = path.getOrDefault("billingAccountId")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "billingAccountId", valid_594035
+  if valid_568264 != nil:
+    section.add "billingAccountId", valid_568264
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -855,25 +855,25 @@ proc validate_MarketplacesListByBillingAccount_594033(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594036 = query.getOrDefault("api-version")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  var valid_568265 = query.getOrDefault("api-version")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "api-version", valid_594036
-  var valid_594037 = query.getOrDefault("$top")
-  valid_594037 = validateParameter(valid_594037, JInt, required = false, default = nil)
-  if valid_594037 != nil:
-    section.add "$top", valid_594037
-  var valid_594038 = query.getOrDefault("$skiptoken")
-  valid_594038 = validateParameter(valid_594038, JString, required = false,
+  if valid_568265 != nil:
+    section.add "api-version", valid_568265
+  var valid_568266 = query.getOrDefault("$top")
+  valid_568266 = validateParameter(valid_568266, JInt, required = false, default = nil)
+  if valid_568266 != nil:
+    section.add "$top", valid_568266
+  var valid_568267 = query.getOrDefault("$skiptoken")
+  valid_568267 = validateParameter(valid_568267, JString, required = false,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "$skiptoken", valid_594038
-  var valid_594039 = query.getOrDefault("$filter")
-  valid_594039 = validateParameter(valid_594039, JString, required = false,
+  if valid_568267 != nil:
+    section.add "$skiptoken", valid_568267
+  var valid_568268 = query.getOrDefault("$filter")
+  valid_568268 = validateParameter(valid_568268, JString, required = false,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "$filter", valid_594039
+  if valid_568268 != nil:
+    section.add "$filter", valid_568268
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -882,22 +882,22 @@ proc validate_MarketplacesListByBillingAccount_594033(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594040: Call_MarketplacesListByBillingAccount_594032;
+proc call*(call_568269: Call_MarketplacesListByBillingAccount_568261;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the marketplaces for a scope by billingAccountId and current billing period. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594040.validator(path, query, header, formData, body)
-  let scheme = call_594040.pickScheme
+  let valid = call_568269.validator(path, query, header, formData, body)
+  let scheme = call_568269.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594040.url(scheme.get, call_594040.host, call_594040.base,
-                         call_594040.route, valid.getOrDefault("path"),
+  let url = call_568269.url(scheme.get, call_568269.host, call_568269.base,
+                         call_568269.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594040, url, valid)
+  result = hook(call_568269, url, valid)
 
-proc call*(call_594041: Call_MarketplacesListByBillingAccount_594032;
+proc call*(call_568270: Call_MarketplacesListByBillingAccount_568261;
           apiVersion: string; billingAccountId: string; Top: int = 0;
           Skiptoken: string = ""; Filter: string = ""): Recallable =
   ## marketplacesListByBillingAccount
@@ -913,23 +913,23 @@ proc call*(call_594041: Call_MarketplacesListByBillingAccount_594032;
   ##                   : BillingAccount ID
   ##   Filter: string
   ##         : May be used to filter marketplaces by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'.
-  var path_594042 = newJObject()
-  var query_594043 = newJObject()
-  add(query_594043, "api-version", newJString(apiVersion))
-  add(query_594043, "$top", newJInt(Top))
-  add(query_594043, "$skiptoken", newJString(Skiptoken))
-  add(path_594042, "billingAccountId", newJString(billingAccountId))
-  add(query_594043, "$filter", newJString(Filter))
-  result = call_594041.call(path_594042, query_594043, nil, nil, nil)
+  var path_568271 = newJObject()
+  var query_568272 = newJObject()
+  add(query_568272, "api-version", newJString(apiVersion))
+  add(query_568272, "$top", newJInt(Top))
+  add(query_568272, "$skiptoken", newJString(Skiptoken))
+  add(path_568271, "billingAccountId", newJString(billingAccountId))
+  add(query_568272, "$filter", newJString(Filter))
+  result = call_568270.call(path_568271, query_568272, nil, nil, nil)
 
-var marketplacesListByBillingAccount* = Call_MarketplacesListByBillingAccount_594032(
+var marketplacesListByBillingAccount* = Call_MarketplacesListByBillingAccount_568261(
     name: "marketplacesListByBillingAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Consumption/marketplaces",
-    validator: validate_MarketplacesListByBillingAccount_594033, base: "",
-    url: url_MarketplacesListByBillingAccount_594034, schemes: {Scheme.Https})
+    validator: validate_MarketplacesListByBillingAccount_568262, base: "",
+    url: url_MarketplacesListByBillingAccount_568263, schemes: {Scheme.Https})
 type
-  Call_UsageDetailsListByBillingAccount_594044 = ref object of OpenApiRestCall_593439
-proc url_UsageDetailsListByBillingAccount_594046(protocol: Scheme; host: string;
+  Call_UsageDetailsListByBillingAccount_568273 = ref object of OpenApiRestCall_567668
+proc url_UsageDetailsListByBillingAccount_568275(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -948,7 +948,7 @@ proc url_UsageDetailsListByBillingAccount_594046(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageDetailsListByBillingAccount_594045(path: JsonNode;
+proc validate_UsageDetailsListByBillingAccount_568274(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the usage details by billingAccountId for a scope by current billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
@@ -961,11 +961,11 @@ proc validate_UsageDetailsListByBillingAccount_594045(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountId` field"
-  var valid_594047 = path.getOrDefault("billingAccountId")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  var valid_568276 = path.getOrDefault("billingAccountId")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "billingAccountId", valid_594047
+  if valid_568276 != nil:
+    section.add "billingAccountId", valid_568276
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -981,37 +981,37 @@ proc validate_UsageDetailsListByBillingAccount_594045(path: JsonNode;
   ##   $filter: JString
   ##          : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName, properties/instanceId or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   section = newJObject()
-  var valid_594048 = query.getOrDefault("$expand")
-  valid_594048 = validateParameter(valid_594048, JString, required = false,
+  var valid_568277 = query.getOrDefault("$expand")
+  valid_568277 = validateParameter(valid_568277, JString, required = false,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "$expand", valid_594048
+  if valid_568277 != nil:
+    section.add "$expand", valid_568277
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594049 = query.getOrDefault("api-version")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  var valid_568278 = query.getOrDefault("api-version")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "api-version", valid_594049
-  var valid_594050 = query.getOrDefault("$top")
-  valid_594050 = validateParameter(valid_594050, JInt, required = false, default = nil)
-  if valid_594050 != nil:
-    section.add "$top", valid_594050
-  var valid_594051 = query.getOrDefault("$skiptoken")
-  valid_594051 = validateParameter(valid_594051, JString, required = false,
+  if valid_568278 != nil:
+    section.add "api-version", valid_568278
+  var valid_568279 = query.getOrDefault("$top")
+  valid_568279 = validateParameter(valid_568279, JInt, required = false, default = nil)
+  if valid_568279 != nil:
+    section.add "$top", valid_568279
+  var valid_568280 = query.getOrDefault("$skiptoken")
+  valid_568280 = validateParameter(valid_568280, JString, required = false,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "$skiptoken", valid_594051
-  var valid_594052 = query.getOrDefault("$apply")
-  valid_594052 = validateParameter(valid_594052, JString, required = false,
+  if valid_568280 != nil:
+    section.add "$skiptoken", valid_568280
+  var valid_568281 = query.getOrDefault("$apply")
+  valid_568281 = validateParameter(valid_568281, JString, required = false,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "$apply", valid_594052
-  var valid_594053 = query.getOrDefault("$filter")
-  valid_594053 = validateParameter(valid_594053, JString, required = false,
+  if valid_568281 != nil:
+    section.add "$apply", valid_568281
+  var valid_568282 = query.getOrDefault("$filter")
+  valid_568282 = validateParameter(valid_568282, JString, required = false,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "$filter", valid_594053
+  if valid_568282 != nil:
+    section.add "$filter", valid_568282
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1020,22 +1020,22 @@ proc validate_UsageDetailsListByBillingAccount_594045(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594054: Call_UsageDetailsListByBillingAccount_594044;
+proc call*(call_568283: Call_UsageDetailsListByBillingAccount_568273;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the usage details by billingAccountId for a scope by current billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594054.validator(path, query, header, formData, body)
-  let scheme = call_594054.pickScheme
+  let valid = call_568283.validator(path, query, header, formData, body)
+  let scheme = call_568283.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594054.url(scheme.get, call_594054.host, call_594054.base,
-                         call_594054.route, valid.getOrDefault("path"),
+  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
+                         call_568283.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594054, url, valid)
+  result = hook(call_568283, url, valid)
 
-proc call*(call_594055: Call_UsageDetailsListByBillingAccount_594044;
+proc call*(call_568284: Call_UsageDetailsListByBillingAccount_568273;
           apiVersion: string; billingAccountId: string; Expand: string = "";
           Top: int = 0; Skiptoken: string = ""; Apply: string = ""; Filter: string = ""): Recallable =
   ## usageDetailsListByBillingAccount
@@ -1055,25 +1055,25 @@ proc call*(call_594055: Call_UsageDetailsListByBillingAccount_594044;
   ##        : OData apply expression to aggregate usageDetails by tags or (tags and properties/usageStart)
   ##   Filter: string
   ##         : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName, properties/instanceId or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_594056 = newJObject()
-  var query_594057 = newJObject()
-  add(query_594057, "$expand", newJString(Expand))
-  add(query_594057, "api-version", newJString(apiVersion))
-  add(query_594057, "$top", newJInt(Top))
-  add(query_594057, "$skiptoken", newJString(Skiptoken))
-  add(path_594056, "billingAccountId", newJString(billingAccountId))
-  add(query_594057, "$apply", newJString(Apply))
-  add(query_594057, "$filter", newJString(Filter))
-  result = call_594055.call(path_594056, query_594057, nil, nil, nil)
+  var path_568285 = newJObject()
+  var query_568286 = newJObject()
+  add(query_568286, "$expand", newJString(Expand))
+  add(query_568286, "api-version", newJString(apiVersion))
+  add(query_568286, "$top", newJInt(Top))
+  add(query_568286, "$skiptoken", newJString(Skiptoken))
+  add(path_568285, "billingAccountId", newJString(billingAccountId))
+  add(query_568286, "$apply", newJString(Apply))
+  add(query_568286, "$filter", newJString(Filter))
+  result = call_568284.call(path_568285, query_568286, nil, nil, nil)
 
-var usageDetailsListByBillingAccount* = Call_UsageDetailsListByBillingAccount_594044(
+var usageDetailsListByBillingAccount* = Call_UsageDetailsListByBillingAccount_568273(
     name: "usageDetailsListByBillingAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Consumption/usageDetails",
-    validator: validate_UsageDetailsListByBillingAccount_594045, base: "",
-    url: url_UsageDetailsListByBillingAccount_594046, schemes: {Scheme.Https})
+    validator: validate_UsageDetailsListByBillingAccount_568274, base: "",
+    url: url_UsageDetailsListByBillingAccount_568275, schemes: {Scheme.Https})
 type
-  Call_MarketplacesListForBillingPeriodByDepartment_594058 = ref object of OpenApiRestCall_593439
-proc url_MarketplacesListForBillingPeriodByDepartment_594060(protocol: Scheme;
+  Call_MarketplacesListForBillingPeriodByDepartment_568287 = ref object of OpenApiRestCall_567668
+proc url_MarketplacesListForBillingPeriodByDepartment_568289(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1096,7 +1096,7 @@ proc url_MarketplacesListForBillingPeriodByDepartment_594060(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplacesListForBillingPeriodByDepartment_594059(path: JsonNode;
+proc validate_MarketplacesListForBillingPeriodByDepartment_568288(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the marketplaces for a scope by billing period and departmentId. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
@@ -1111,16 +1111,16 @@ proc validate_MarketplacesListForBillingPeriodByDepartment_594059(path: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingPeriodName` field"
-  var valid_594061 = path.getOrDefault("billingPeriodName")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  var valid_568290 = path.getOrDefault("billingPeriodName")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "billingPeriodName", valid_594061
-  var valid_594062 = path.getOrDefault("departmentId")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  if valid_568290 != nil:
+    section.add "billingPeriodName", valid_568290
+  var valid_568291 = path.getOrDefault("departmentId")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "departmentId", valid_594062
+  if valid_568291 != nil:
+    section.add "departmentId", valid_568291
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1134,25 +1134,25 @@ proc validate_MarketplacesListForBillingPeriodByDepartment_594059(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594063 = query.getOrDefault("api-version")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  var valid_568292 = query.getOrDefault("api-version")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "api-version", valid_594063
-  var valid_594064 = query.getOrDefault("$top")
-  valid_594064 = validateParameter(valid_594064, JInt, required = false, default = nil)
-  if valid_594064 != nil:
-    section.add "$top", valid_594064
-  var valid_594065 = query.getOrDefault("$skiptoken")
-  valid_594065 = validateParameter(valid_594065, JString, required = false,
+  if valid_568292 != nil:
+    section.add "api-version", valid_568292
+  var valid_568293 = query.getOrDefault("$top")
+  valid_568293 = validateParameter(valid_568293, JInt, required = false, default = nil)
+  if valid_568293 != nil:
+    section.add "$top", valid_568293
+  var valid_568294 = query.getOrDefault("$skiptoken")
+  valid_568294 = validateParameter(valid_568294, JString, required = false,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "$skiptoken", valid_594065
-  var valid_594066 = query.getOrDefault("$filter")
-  valid_594066 = validateParameter(valid_594066, JString, required = false,
+  if valid_568294 != nil:
+    section.add "$skiptoken", valid_568294
+  var valid_568295 = query.getOrDefault("$filter")
+  valid_568295 = validateParameter(valid_568295, JString, required = false,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "$filter", valid_594066
+  if valid_568295 != nil:
+    section.add "$filter", valid_568295
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1161,22 +1161,22 @@ proc validate_MarketplacesListForBillingPeriodByDepartment_594059(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594067: Call_MarketplacesListForBillingPeriodByDepartment_594058;
+proc call*(call_568296: Call_MarketplacesListForBillingPeriodByDepartment_568287;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the marketplaces for a scope by billing period and departmentId. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594067.validator(path, query, header, formData, body)
-  let scheme = call_594067.pickScheme
+  let valid = call_568296.validator(path, query, header, formData, body)
+  let scheme = call_568296.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594067.url(scheme.get, call_594067.host, call_594067.base,
-                         call_594067.route, valid.getOrDefault("path"),
+  let url = call_568296.url(scheme.get, call_568296.host, call_568296.base,
+                         call_568296.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594067, url, valid)
+  result = hook(call_568296, url, valid)
 
-proc call*(call_594068: Call_MarketplacesListForBillingPeriodByDepartment_594058;
+proc call*(call_568297: Call_MarketplacesListForBillingPeriodByDepartment_568287;
           apiVersion: string; billingPeriodName: string; departmentId: string;
           Top: int = 0; Skiptoken: string = ""; Filter: string = ""): Recallable =
   ## marketplacesListForBillingPeriodByDepartment
@@ -1194,25 +1194,25 @@ proc call*(call_594068: Call_MarketplacesListForBillingPeriodByDepartment_594058
   ##               : Department ID
   ##   Filter: string
   ##         : May be used to filter marketplaces by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'.
-  var path_594069 = newJObject()
-  var query_594070 = newJObject()
-  add(query_594070, "api-version", newJString(apiVersion))
-  add(query_594070, "$top", newJInt(Top))
-  add(query_594070, "$skiptoken", newJString(Skiptoken))
-  add(path_594069, "billingPeriodName", newJString(billingPeriodName))
-  add(path_594069, "departmentId", newJString(departmentId))
-  add(query_594070, "$filter", newJString(Filter))
-  result = call_594068.call(path_594069, query_594070, nil, nil, nil)
+  var path_568298 = newJObject()
+  var query_568299 = newJObject()
+  add(query_568299, "api-version", newJString(apiVersion))
+  add(query_568299, "$top", newJInt(Top))
+  add(query_568299, "$skiptoken", newJString(Skiptoken))
+  add(path_568298, "billingPeriodName", newJString(billingPeriodName))
+  add(path_568298, "departmentId", newJString(departmentId))
+  add(query_568299, "$filter", newJString(Filter))
+  result = call_568297.call(path_568298, query_568299, nil, nil, nil)
 
-var marketplacesListForBillingPeriodByDepartment* = Call_MarketplacesListForBillingPeriodByDepartment_594058(
+var marketplacesListForBillingPeriodByDepartment* = Call_MarketplacesListForBillingPeriodByDepartment_568287(
     name: "marketplacesListForBillingPeriodByDepartment",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/departments/{departmentId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/marketplaces",
-    validator: validate_MarketplacesListForBillingPeriodByDepartment_594059,
-    base: "", url: url_MarketplacesListForBillingPeriodByDepartment_594060,
+    validator: validate_MarketplacesListForBillingPeriodByDepartment_568288,
+    base: "", url: url_MarketplacesListForBillingPeriodByDepartment_568289,
     schemes: {Scheme.Https})
 type
-  Call_UsageDetailsListForBillingPeriodByDepartment_594071 = ref object of OpenApiRestCall_593439
-proc url_UsageDetailsListForBillingPeriodByDepartment_594073(protocol: Scheme;
+  Call_UsageDetailsListForBillingPeriodByDepartment_568300 = ref object of OpenApiRestCall_567668
+proc url_UsageDetailsListForBillingPeriodByDepartment_568302(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1235,7 +1235,7 @@ proc url_UsageDetailsListForBillingPeriodByDepartment_594073(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageDetailsListForBillingPeriodByDepartment_594072(path: JsonNode;
+proc validate_UsageDetailsListForBillingPeriodByDepartment_568301(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the usage details based on departmentId for a scope by billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
@@ -1250,16 +1250,16 @@ proc validate_UsageDetailsListForBillingPeriodByDepartment_594072(path: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingPeriodName` field"
-  var valid_594074 = path.getOrDefault("billingPeriodName")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  var valid_568303 = path.getOrDefault("billingPeriodName")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "billingPeriodName", valid_594074
-  var valid_594075 = path.getOrDefault("departmentId")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  if valid_568303 != nil:
+    section.add "billingPeriodName", valid_568303
+  var valid_568304 = path.getOrDefault("departmentId")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "departmentId", valid_594075
+  if valid_568304 != nil:
+    section.add "departmentId", valid_568304
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -1275,37 +1275,37 @@ proc validate_UsageDetailsListForBillingPeriodByDepartment_594072(path: JsonNode
   ##   $filter: JString
   ##          : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   section = newJObject()
-  var valid_594076 = query.getOrDefault("$expand")
-  valid_594076 = validateParameter(valid_594076, JString, required = false,
+  var valid_568305 = query.getOrDefault("$expand")
+  valid_568305 = validateParameter(valid_568305, JString, required = false,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "$expand", valid_594076
+  if valid_568305 != nil:
+    section.add "$expand", valid_568305
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594077 = query.getOrDefault("api-version")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  var valid_568306 = query.getOrDefault("api-version")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "api-version", valid_594077
-  var valid_594078 = query.getOrDefault("$top")
-  valid_594078 = validateParameter(valid_594078, JInt, required = false, default = nil)
-  if valid_594078 != nil:
-    section.add "$top", valid_594078
-  var valid_594079 = query.getOrDefault("$skiptoken")
-  valid_594079 = validateParameter(valid_594079, JString, required = false,
+  if valid_568306 != nil:
+    section.add "api-version", valid_568306
+  var valid_568307 = query.getOrDefault("$top")
+  valid_568307 = validateParameter(valid_568307, JInt, required = false, default = nil)
+  if valid_568307 != nil:
+    section.add "$top", valid_568307
+  var valid_568308 = query.getOrDefault("$skiptoken")
+  valid_568308 = validateParameter(valid_568308, JString, required = false,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "$skiptoken", valid_594079
-  var valid_594080 = query.getOrDefault("$apply")
-  valid_594080 = validateParameter(valid_594080, JString, required = false,
+  if valid_568308 != nil:
+    section.add "$skiptoken", valid_568308
+  var valid_568309 = query.getOrDefault("$apply")
+  valid_568309 = validateParameter(valid_568309, JString, required = false,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "$apply", valid_594080
-  var valid_594081 = query.getOrDefault("$filter")
-  valid_594081 = validateParameter(valid_594081, JString, required = false,
+  if valid_568309 != nil:
+    section.add "$apply", valid_568309
+  var valid_568310 = query.getOrDefault("$filter")
+  valid_568310 = validateParameter(valid_568310, JString, required = false,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "$filter", valid_594081
+  if valid_568310 != nil:
+    section.add "$filter", valid_568310
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1314,22 +1314,22 @@ proc validate_UsageDetailsListForBillingPeriodByDepartment_594072(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594082: Call_UsageDetailsListForBillingPeriodByDepartment_594071;
+proc call*(call_568311: Call_UsageDetailsListForBillingPeriodByDepartment_568300;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the usage details based on departmentId for a scope by billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594082.validator(path, query, header, formData, body)
-  let scheme = call_594082.pickScheme
+  let valid = call_568311.validator(path, query, header, formData, body)
+  let scheme = call_568311.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594082.url(scheme.get, call_594082.host, call_594082.base,
-                         call_594082.route, valid.getOrDefault("path"),
+  let url = call_568311.url(scheme.get, call_568311.host, call_568311.base,
+                         call_568311.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594082, url, valid)
+  result = hook(call_568311, url, valid)
 
-proc call*(call_594083: Call_UsageDetailsListForBillingPeriodByDepartment_594071;
+proc call*(call_568312: Call_UsageDetailsListForBillingPeriodByDepartment_568300;
           apiVersion: string; billingPeriodName: string; departmentId: string;
           Expand: string = ""; Top: int = 0; Skiptoken: string = ""; Apply: string = "";
           Filter: string = ""): Recallable =
@@ -1352,27 +1352,27 @@ proc call*(call_594083: Call_UsageDetailsListForBillingPeriodByDepartment_594071
   ##        : OData apply expression to aggregate usageDetails by tags or (tags and properties/usageStart) for specified billing period
   ##   Filter: string
   ##         : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_594084 = newJObject()
-  var query_594085 = newJObject()
-  add(query_594085, "$expand", newJString(Expand))
-  add(query_594085, "api-version", newJString(apiVersion))
-  add(query_594085, "$top", newJInt(Top))
-  add(query_594085, "$skiptoken", newJString(Skiptoken))
-  add(path_594084, "billingPeriodName", newJString(billingPeriodName))
-  add(path_594084, "departmentId", newJString(departmentId))
-  add(query_594085, "$apply", newJString(Apply))
-  add(query_594085, "$filter", newJString(Filter))
-  result = call_594083.call(path_594084, query_594085, nil, nil, nil)
+  var path_568313 = newJObject()
+  var query_568314 = newJObject()
+  add(query_568314, "$expand", newJString(Expand))
+  add(query_568314, "api-version", newJString(apiVersion))
+  add(query_568314, "$top", newJInt(Top))
+  add(query_568314, "$skiptoken", newJString(Skiptoken))
+  add(path_568313, "billingPeriodName", newJString(billingPeriodName))
+  add(path_568313, "departmentId", newJString(departmentId))
+  add(query_568314, "$apply", newJString(Apply))
+  add(query_568314, "$filter", newJString(Filter))
+  result = call_568312.call(path_568313, query_568314, nil, nil, nil)
 
-var usageDetailsListForBillingPeriodByDepartment* = Call_UsageDetailsListForBillingPeriodByDepartment_594071(
+var usageDetailsListForBillingPeriodByDepartment* = Call_UsageDetailsListForBillingPeriodByDepartment_568300(
     name: "usageDetailsListForBillingPeriodByDepartment",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/departments/{departmentId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/usageDetails",
-    validator: validate_UsageDetailsListForBillingPeriodByDepartment_594072,
-    base: "", url: url_UsageDetailsListForBillingPeriodByDepartment_594073,
+    validator: validate_UsageDetailsListForBillingPeriodByDepartment_568301,
+    base: "", url: url_UsageDetailsListForBillingPeriodByDepartment_568302,
     schemes: {Scheme.Https})
 type
-  Call_MarketplacesListByDepartment_594086 = ref object of OpenApiRestCall_593439
-proc url_MarketplacesListByDepartment_594088(protocol: Scheme; host: string;
+  Call_MarketplacesListByDepartment_568315 = ref object of OpenApiRestCall_567668
+proc url_MarketplacesListByDepartment_568317(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1390,7 +1390,7 @@ proc url_MarketplacesListByDepartment_594088(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplacesListByDepartment_594087(path: JsonNode; query: JsonNode;
+proc validate_MarketplacesListByDepartment_568316(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the marketplaces for a scope by departmentId and current billing period. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
@@ -1403,11 +1403,11 @@ proc validate_MarketplacesListByDepartment_594087(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `departmentId` field"
-  var valid_594089 = path.getOrDefault("departmentId")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_568318 = path.getOrDefault("departmentId")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "departmentId", valid_594089
+  if valid_568318 != nil:
+    section.add "departmentId", valid_568318
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1421,25 +1421,25 @@ proc validate_MarketplacesListByDepartment_594087(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594090 = query.getOrDefault("api-version")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  var valid_568319 = query.getOrDefault("api-version")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "api-version", valid_594090
-  var valid_594091 = query.getOrDefault("$top")
-  valid_594091 = validateParameter(valid_594091, JInt, required = false, default = nil)
-  if valid_594091 != nil:
-    section.add "$top", valid_594091
-  var valid_594092 = query.getOrDefault("$skiptoken")
-  valid_594092 = validateParameter(valid_594092, JString, required = false,
+  if valid_568319 != nil:
+    section.add "api-version", valid_568319
+  var valid_568320 = query.getOrDefault("$top")
+  valid_568320 = validateParameter(valid_568320, JInt, required = false, default = nil)
+  if valid_568320 != nil:
+    section.add "$top", valid_568320
+  var valid_568321 = query.getOrDefault("$skiptoken")
+  valid_568321 = validateParameter(valid_568321, JString, required = false,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "$skiptoken", valid_594092
-  var valid_594093 = query.getOrDefault("$filter")
-  valid_594093 = validateParameter(valid_594093, JString, required = false,
+  if valid_568321 != nil:
+    section.add "$skiptoken", valid_568321
+  var valid_568322 = query.getOrDefault("$filter")
+  valid_568322 = validateParameter(valid_568322, JString, required = false,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "$filter", valid_594093
+  if valid_568322 != nil:
+    section.add "$filter", valid_568322
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1448,21 +1448,21 @@ proc validate_MarketplacesListByDepartment_594087(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594094: Call_MarketplacesListByDepartment_594086; path: JsonNode;
+proc call*(call_568323: Call_MarketplacesListByDepartment_568315; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the marketplaces for a scope by departmentId and current billing period. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594094.validator(path, query, header, formData, body)
-  let scheme = call_594094.pickScheme
+  let valid = call_568323.validator(path, query, header, formData, body)
+  let scheme = call_568323.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594094.url(scheme.get, call_594094.host, call_594094.base,
-                         call_594094.route, valid.getOrDefault("path"),
+  let url = call_568323.url(scheme.get, call_568323.host, call_568323.base,
+                         call_568323.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594094, url, valid)
+  result = hook(call_568323, url, valid)
 
-proc call*(call_594095: Call_MarketplacesListByDepartment_594086;
+proc call*(call_568324: Call_MarketplacesListByDepartment_568315;
           apiVersion: string; departmentId: string; Top: int = 0;
           Skiptoken: string = ""; Filter: string = ""): Recallable =
   ## marketplacesListByDepartment
@@ -1478,23 +1478,23 @@ proc call*(call_594095: Call_MarketplacesListByDepartment_594086;
   ##               : Department ID
   ##   Filter: string
   ##         : May be used to filter marketplaces by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'.
-  var path_594096 = newJObject()
-  var query_594097 = newJObject()
-  add(query_594097, "api-version", newJString(apiVersion))
-  add(query_594097, "$top", newJInt(Top))
-  add(query_594097, "$skiptoken", newJString(Skiptoken))
-  add(path_594096, "departmentId", newJString(departmentId))
-  add(query_594097, "$filter", newJString(Filter))
-  result = call_594095.call(path_594096, query_594097, nil, nil, nil)
+  var path_568325 = newJObject()
+  var query_568326 = newJObject()
+  add(query_568326, "api-version", newJString(apiVersion))
+  add(query_568326, "$top", newJInt(Top))
+  add(query_568326, "$skiptoken", newJString(Skiptoken))
+  add(path_568325, "departmentId", newJString(departmentId))
+  add(query_568326, "$filter", newJString(Filter))
+  result = call_568324.call(path_568325, query_568326, nil, nil, nil)
 
-var marketplacesListByDepartment* = Call_MarketplacesListByDepartment_594086(
+var marketplacesListByDepartment* = Call_MarketplacesListByDepartment_568315(
     name: "marketplacesListByDepartment", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/departments/{departmentId}/providers/Microsoft.Consumption/marketplaces",
-    validator: validate_MarketplacesListByDepartment_594087, base: "",
-    url: url_MarketplacesListByDepartment_594088, schemes: {Scheme.Https})
+    validator: validate_MarketplacesListByDepartment_568316, base: "",
+    url: url_MarketplacesListByDepartment_568317, schemes: {Scheme.Https})
 type
-  Call_UsageDetailsListByDepartment_594098 = ref object of OpenApiRestCall_593439
-proc url_UsageDetailsListByDepartment_594100(protocol: Scheme; host: string;
+  Call_UsageDetailsListByDepartment_568327 = ref object of OpenApiRestCall_567668
+proc url_UsageDetailsListByDepartment_568329(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1512,7 +1512,7 @@ proc url_UsageDetailsListByDepartment_594100(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageDetailsListByDepartment_594099(path: JsonNode; query: JsonNode;
+proc validate_UsageDetailsListByDepartment_568328(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the usage details by departmentId for a scope by current billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
@@ -1525,11 +1525,11 @@ proc validate_UsageDetailsListByDepartment_594099(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `departmentId` field"
-  var valid_594101 = path.getOrDefault("departmentId")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  var valid_568330 = path.getOrDefault("departmentId")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "departmentId", valid_594101
+  if valid_568330 != nil:
+    section.add "departmentId", valid_568330
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -1545,37 +1545,37 @@ proc validate_UsageDetailsListByDepartment_594099(path: JsonNode; query: JsonNod
   ##   $filter: JString
   ##          : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName, properties/instanceId or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   section = newJObject()
-  var valid_594102 = query.getOrDefault("$expand")
-  valid_594102 = validateParameter(valid_594102, JString, required = false,
+  var valid_568331 = query.getOrDefault("$expand")
+  valid_568331 = validateParameter(valid_568331, JString, required = false,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "$expand", valid_594102
+  if valid_568331 != nil:
+    section.add "$expand", valid_568331
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594103 = query.getOrDefault("api-version")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  var valid_568332 = query.getOrDefault("api-version")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "api-version", valid_594103
-  var valid_594104 = query.getOrDefault("$top")
-  valid_594104 = validateParameter(valid_594104, JInt, required = false, default = nil)
-  if valid_594104 != nil:
-    section.add "$top", valid_594104
-  var valid_594105 = query.getOrDefault("$skiptoken")
-  valid_594105 = validateParameter(valid_594105, JString, required = false,
+  if valid_568332 != nil:
+    section.add "api-version", valid_568332
+  var valid_568333 = query.getOrDefault("$top")
+  valid_568333 = validateParameter(valid_568333, JInt, required = false, default = nil)
+  if valid_568333 != nil:
+    section.add "$top", valid_568333
+  var valid_568334 = query.getOrDefault("$skiptoken")
+  valid_568334 = validateParameter(valid_568334, JString, required = false,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "$skiptoken", valid_594105
-  var valid_594106 = query.getOrDefault("$apply")
-  valid_594106 = validateParameter(valid_594106, JString, required = false,
+  if valid_568334 != nil:
+    section.add "$skiptoken", valid_568334
+  var valid_568335 = query.getOrDefault("$apply")
+  valid_568335 = validateParameter(valid_568335, JString, required = false,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "$apply", valid_594106
-  var valid_594107 = query.getOrDefault("$filter")
-  valid_594107 = validateParameter(valid_594107, JString, required = false,
+  if valid_568335 != nil:
+    section.add "$apply", valid_568335
+  var valid_568336 = query.getOrDefault("$filter")
+  valid_568336 = validateParameter(valid_568336, JString, required = false,
                                  default = nil)
-  if valid_594107 != nil:
-    section.add "$filter", valid_594107
+  if valid_568336 != nil:
+    section.add "$filter", valid_568336
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1584,21 +1584,21 @@ proc validate_UsageDetailsListByDepartment_594099(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594108: Call_UsageDetailsListByDepartment_594098; path: JsonNode;
+proc call*(call_568337: Call_UsageDetailsListByDepartment_568327; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the usage details by departmentId for a scope by current billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594108.validator(path, query, header, formData, body)
-  let scheme = call_594108.pickScheme
+  let valid = call_568337.validator(path, query, header, formData, body)
+  let scheme = call_568337.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594108.url(scheme.get, call_594108.host, call_594108.base,
-                         call_594108.route, valid.getOrDefault("path"),
+  let url = call_568337.url(scheme.get, call_568337.host, call_568337.base,
+                         call_568337.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594108, url, valid)
+  result = hook(call_568337, url, valid)
 
-proc call*(call_594109: Call_UsageDetailsListByDepartment_594098;
+proc call*(call_568338: Call_UsageDetailsListByDepartment_568327;
           apiVersion: string; departmentId: string; Expand: string = ""; Top: int = 0;
           Skiptoken: string = ""; Apply: string = ""; Filter: string = ""): Recallable =
   ## usageDetailsListByDepartment
@@ -1618,25 +1618,25 @@ proc call*(call_594109: Call_UsageDetailsListByDepartment_594098;
   ##        : OData apply expression to aggregate usageDetails by tags or (tags and properties/usageStart)
   ##   Filter: string
   ##         : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName, properties/instanceId or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_594110 = newJObject()
-  var query_594111 = newJObject()
-  add(query_594111, "$expand", newJString(Expand))
-  add(query_594111, "api-version", newJString(apiVersion))
-  add(query_594111, "$top", newJInt(Top))
-  add(query_594111, "$skiptoken", newJString(Skiptoken))
-  add(path_594110, "departmentId", newJString(departmentId))
-  add(query_594111, "$apply", newJString(Apply))
-  add(query_594111, "$filter", newJString(Filter))
-  result = call_594109.call(path_594110, query_594111, nil, nil, nil)
+  var path_568339 = newJObject()
+  var query_568340 = newJObject()
+  add(query_568340, "$expand", newJString(Expand))
+  add(query_568340, "api-version", newJString(apiVersion))
+  add(query_568340, "$top", newJInt(Top))
+  add(query_568340, "$skiptoken", newJString(Skiptoken))
+  add(path_568339, "departmentId", newJString(departmentId))
+  add(query_568340, "$apply", newJString(Apply))
+  add(query_568340, "$filter", newJString(Filter))
+  result = call_568338.call(path_568339, query_568340, nil, nil, nil)
 
-var usageDetailsListByDepartment* = Call_UsageDetailsListByDepartment_594098(
+var usageDetailsListByDepartment* = Call_UsageDetailsListByDepartment_568327(
     name: "usageDetailsListByDepartment", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/departments/{departmentId}/providers/Microsoft.Consumption/usageDetails",
-    validator: validate_UsageDetailsListByDepartment_594099, base: "",
-    url: url_UsageDetailsListByDepartment_594100, schemes: {Scheme.Https})
+    validator: validate_UsageDetailsListByDepartment_568328, base: "",
+    url: url_UsageDetailsListByDepartment_568329, schemes: {Scheme.Https})
 type
-  Call_MarketplacesListForBillingPeriodByEnrollmentAccount_594112 = ref object of OpenApiRestCall_593439
-proc url_MarketplacesListForBillingPeriodByEnrollmentAccount_594114(
+  Call_MarketplacesListForBillingPeriodByEnrollmentAccount_568341 = ref object of OpenApiRestCall_567668
+proc url_MarketplacesListForBillingPeriodByEnrollmentAccount_568343(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1661,7 +1661,7 @@ proc url_MarketplacesListForBillingPeriodByEnrollmentAccount_594114(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplacesListForBillingPeriodByEnrollmentAccount_594113(
+proc validate_MarketplacesListForBillingPeriodByEnrollmentAccount_568342(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists the marketplaces for a scope by billing period and enrollmentAccountId. Marketplaces are available via this API only for May 1, 2014 or later.
@@ -1676,16 +1676,16 @@ proc validate_MarketplacesListForBillingPeriodByEnrollmentAccount_594113(
   ##                    : Billing Period Name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `enrollmentAccountId` field"
-  var valid_594115 = path.getOrDefault("enrollmentAccountId")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  var valid_568344 = path.getOrDefault("enrollmentAccountId")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "enrollmentAccountId", valid_594115
-  var valid_594116 = path.getOrDefault("billingPeriodName")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_568344 != nil:
+    section.add "enrollmentAccountId", valid_568344
+  var valid_568345 = path.getOrDefault("billingPeriodName")
+  valid_568345 = validateParameter(valid_568345, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "billingPeriodName", valid_594116
+  if valid_568345 != nil:
+    section.add "billingPeriodName", valid_568345
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1699,25 +1699,25 @@ proc validate_MarketplacesListForBillingPeriodByEnrollmentAccount_594113(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594117 = query.getOrDefault("api-version")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  var valid_568346 = query.getOrDefault("api-version")
+  valid_568346 = validateParameter(valid_568346, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "api-version", valid_594117
-  var valid_594118 = query.getOrDefault("$top")
-  valid_594118 = validateParameter(valid_594118, JInt, required = false, default = nil)
-  if valid_594118 != nil:
-    section.add "$top", valid_594118
-  var valid_594119 = query.getOrDefault("$skiptoken")
-  valid_594119 = validateParameter(valid_594119, JString, required = false,
+  if valid_568346 != nil:
+    section.add "api-version", valid_568346
+  var valid_568347 = query.getOrDefault("$top")
+  valid_568347 = validateParameter(valid_568347, JInt, required = false, default = nil)
+  if valid_568347 != nil:
+    section.add "$top", valid_568347
+  var valid_568348 = query.getOrDefault("$skiptoken")
+  valid_568348 = validateParameter(valid_568348, JString, required = false,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "$skiptoken", valid_594119
-  var valid_594120 = query.getOrDefault("$filter")
-  valid_594120 = validateParameter(valid_594120, JString, required = false,
+  if valid_568348 != nil:
+    section.add "$skiptoken", valid_568348
+  var valid_568349 = query.getOrDefault("$filter")
+  valid_568349 = validateParameter(valid_568349, JString, required = false,
                                  default = nil)
-  if valid_594120 != nil:
-    section.add "$filter", valid_594120
+  if valid_568349 != nil:
+    section.add "$filter", valid_568349
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1726,22 +1726,22 @@ proc validate_MarketplacesListForBillingPeriodByEnrollmentAccount_594113(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594121: Call_MarketplacesListForBillingPeriodByEnrollmentAccount_594112;
+proc call*(call_568350: Call_MarketplacesListForBillingPeriodByEnrollmentAccount_568341;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the marketplaces for a scope by billing period and enrollmentAccountId. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594121.validator(path, query, header, formData, body)
-  let scheme = call_594121.pickScheme
+  let valid = call_568350.validator(path, query, header, formData, body)
+  let scheme = call_568350.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594121.url(scheme.get, call_594121.host, call_594121.base,
-                         call_594121.route, valid.getOrDefault("path"),
+  let url = call_568350.url(scheme.get, call_568350.host, call_568350.base,
+                         call_568350.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594121, url, valid)
+  result = hook(call_568350, url, valid)
 
-proc call*(call_594122: Call_MarketplacesListForBillingPeriodByEnrollmentAccount_594112;
+proc call*(call_568351: Call_MarketplacesListForBillingPeriodByEnrollmentAccount_568341;
           apiVersion: string; enrollmentAccountId: string;
           billingPeriodName: string; Top: int = 0; Skiptoken: string = "";
           Filter: string = ""): Recallable =
@@ -1760,25 +1760,25 @@ proc call*(call_594122: Call_MarketplacesListForBillingPeriodByEnrollmentAccount
   ##                    : Billing Period Name.
   ##   Filter: string
   ##         : May be used to filter marketplaces by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'.
-  var path_594123 = newJObject()
-  var query_594124 = newJObject()
-  add(query_594124, "api-version", newJString(apiVersion))
-  add(query_594124, "$top", newJInt(Top))
-  add(query_594124, "$skiptoken", newJString(Skiptoken))
-  add(path_594123, "enrollmentAccountId", newJString(enrollmentAccountId))
-  add(path_594123, "billingPeriodName", newJString(billingPeriodName))
-  add(query_594124, "$filter", newJString(Filter))
-  result = call_594122.call(path_594123, query_594124, nil, nil, nil)
+  var path_568352 = newJObject()
+  var query_568353 = newJObject()
+  add(query_568353, "api-version", newJString(apiVersion))
+  add(query_568353, "$top", newJInt(Top))
+  add(query_568353, "$skiptoken", newJString(Skiptoken))
+  add(path_568352, "enrollmentAccountId", newJString(enrollmentAccountId))
+  add(path_568352, "billingPeriodName", newJString(billingPeriodName))
+  add(query_568353, "$filter", newJString(Filter))
+  result = call_568351.call(path_568352, query_568353, nil, nil, nil)
 
-var marketplacesListForBillingPeriodByEnrollmentAccount* = Call_MarketplacesListForBillingPeriodByEnrollmentAccount_594112(
+var marketplacesListForBillingPeriodByEnrollmentAccount* = Call_MarketplacesListForBillingPeriodByEnrollmentAccount_568341(
     name: "marketplacesListForBillingPeriodByEnrollmentAccount",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/enrollmentAccounts/{enrollmentAccountId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/marketplaces",
-    validator: validate_MarketplacesListForBillingPeriodByEnrollmentAccount_594113,
-    base: "", url: url_MarketplacesListForBillingPeriodByEnrollmentAccount_594114,
+    validator: validate_MarketplacesListForBillingPeriodByEnrollmentAccount_568342,
+    base: "", url: url_MarketplacesListForBillingPeriodByEnrollmentAccount_568343,
     schemes: {Scheme.Https})
 type
-  Call_UsageDetailsListForBillingPeriodByEnrollmentAccount_594125 = ref object of OpenApiRestCall_593439
-proc url_UsageDetailsListForBillingPeriodByEnrollmentAccount_594127(
+  Call_UsageDetailsListForBillingPeriodByEnrollmentAccount_568354 = ref object of OpenApiRestCall_567668
+proc url_UsageDetailsListForBillingPeriodByEnrollmentAccount_568356(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1803,7 +1803,7 @@ proc url_UsageDetailsListForBillingPeriodByEnrollmentAccount_594127(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageDetailsListForBillingPeriodByEnrollmentAccount_594126(
+proc validate_UsageDetailsListForBillingPeriodByEnrollmentAccount_568355(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists the usage details based on enrollmentAccountId for a scope by billing period. Usage details are available via this API only for May 1, 2014 or later.
@@ -1818,16 +1818,16 @@ proc validate_UsageDetailsListForBillingPeriodByEnrollmentAccount_594126(
   ##                    : Billing Period Name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `enrollmentAccountId` field"
-  var valid_594128 = path.getOrDefault("enrollmentAccountId")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  var valid_568357 = path.getOrDefault("enrollmentAccountId")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "enrollmentAccountId", valid_594128
-  var valid_594129 = path.getOrDefault("billingPeriodName")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  if valid_568357 != nil:
+    section.add "enrollmentAccountId", valid_568357
+  var valid_568358 = path.getOrDefault("billingPeriodName")
+  valid_568358 = validateParameter(valid_568358, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "billingPeriodName", valid_594129
+  if valid_568358 != nil:
+    section.add "billingPeriodName", valid_568358
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -1843,37 +1843,37 @@ proc validate_UsageDetailsListForBillingPeriodByEnrollmentAccount_594126(
   ##   $filter: JString
   ##          : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   section = newJObject()
-  var valid_594130 = query.getOrDefault("$expand")
-  valid_594130 = validateParameter(valid_594130, JString, required = false,
+  var valid_568359 = query.getOrDefault("$expand")
+  valid_568359 = validateParameter(valid_568359, JString, required = false,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "$expand", valid_594130
+  if valid_568359 != nil:
+    section.add "$expand", valid_568359
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594131 = query.getOrDefault("api-version")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  var valid_568360 = query.getOrDefault("api-version")
+  valid_568360 = validateParameter(valid_568360, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "api-version", valid_594131
-  var valid_594132 = query.getOrDefault("$top")
-  valid_594132 = validateParameter(valid_594132, JInt, required = false, default = nil)
-  if valid_594132 != nil:
-    section.add "$top", valid_594132
-  var valid_594133 = query.getOrDefault("$skiptoken")
-  valid_594133 = validateParameter(valid_594133, JString, required = false,
+  if valid_568360 != nil:
+    section.add "api-version", valid_568360
+  var valid_568361 = query.getOrDefault("$top")
+  valid_568361 = validateParameter(valid_568361, JInt, required = false, default = nil)
+  if valid_568361 != nil:
+    section.add "$top", valid_568361
+  var valid_568362 = query.getOrDefault("$skiptoken")
+  valid_568362 = validateParameter(valid_568362, JString, required = false,
                                  default = nil)
-  if valid_594133 != nil:
-    section.add "$skiptoken", valid_594133
-  var valid_594134 = query.getOrDefault("$apply")
-  valid_594134 = validateParameter(valid_594134, JString, required = false,
+  if valid_568362 != nil:
+    section.add "$skiptoken", valid_568362
+  var valid_568363 = query.getOrDefault("$apply")
+  valid_568363 = validateParameter(valid_568363, JString, required = false,
                                  default = nil)
-  if valid_594134 != nil:
-    section.add "$apply", valid_594134
-  var valid_594135 = query.getOrDefault("$filter")
-  valid_594135 = validateParameter(valid_594135, JString, required = false,
+  if valid_568363 != nil:
+    section.add "$apply", valid_568363
+  var valid_568364 = query.getOrDefault("$filter")
+  valid_568364 = validateParameter(valid_568364, JString, required = false,
                                  default = nil)
-  if valid_594135 != nil:
-    section.add "$filter", valid_594135
+  if valid_568364 != nil:
+    section.add "$filter", valid_568364
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1882,22 +1882,22 @@ proc validate_UsageDetailsListForBillingPeriodByEnrollmentAccount_594126(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594136: Call_UsageDetailsListForBillingPeriodByEnrollmentAccount_594125;
+proc call*(call_568365: Call_UsageDetailsListForBillingPeriodByEnrollmentAccount_568354;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the usage details based on enrollmentAccountId for a scope by billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594136.validator(path, query, header, formData, body)
-  let scheme = call_594136.pickScheme
+  let valid = call_568365.validator(path, query, header, formData, body)
+  let scheme = call_568365.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594136.url(scheme.get, call_594136.host, call_594136.base,
-                         call_594136.route, valid.getOrDefault("path"),
+  let url = call_568365.url(scheme.get, call_568365.host, call_568365.base,
+                         call_568365.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594136, url, valid)
+  result = hook(call_568365, url, valid)
 
-proc call*(call_594137: Call_UsageDetailsListForBillingPeriodByEnrollmentAccount_594125;
+proc call*(call_568366: Call_UsageDetailsListForBillingPeriodByEnrollmentAccount_568354;
           apiVersion: string; enrollmentAccountId: string;
           billingPeriodName: string; Expand: string = ""; Top: int = 0;
           Skiptoken: string = ""; Apply: string = ""; Filter: string = ""): Recallable =
@@ -1920,27 +1920,27 @@ proc call*(call_594137: Call_UsageDetailsListForBillingPeriodByEnrollmentAccount
   ##        : OData apply expression to aggregate usageDetails by tags or (tags and properties/usageStart) for specified billing period
   ##   Filter: string
   ##         : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_594138 = newJObject()
-  var query_594139 = newJObject()
-  add(query_594139, "$expand", newJString(Expand))
-  add(query_594139, "api-version", newJString(apiVersion))
-  add(query_594139, "$top", newJInt(Top))
-  add(query_594139, "$skiptoken", newJString(Skiptoken))
-  add(path_594138, "enrollmentAccountId", newJString(enrollmentAccountId))
-  add(path_594138, "billingPeriodName", newJString(billingPeriodName))
-  add(query_594139, "$apply", newJString(Apply))
-  add(query_594139, "$filter", newJString(Filter))
-  result = call_594137.call(path_594138, query_594139, nil, nil, nil)
+  var path_568367 = newJObject()
+  var query_568368 = newJObject()
+  add(query_568368, "$expand", newJString(Expand))
+  add(query_568368, "api-version", newJString(apiVersion))
+  add(query_568368, "$top", newJInt(Top))
+  add(query_568368, "$skiptoken", newJString(Skiptoken))
+  add(path_568367, "enrollmentAccountId", newJString(enrollmentAccountId))
+  add(path_568367, "billingPeriodName", newJString(billingPeriodName))
+  add(query_568368, "$apply", newJString(Apply))
+  add(query_568368, "$filter", newJString(Filter))
+  result = call_568366.call(path_568367, query_568368, nil, nil, nil)
 
-var usageDetailsListForBillingPeriodByEnrollmentAccount* = Call_UsageDetailsListForBillingPeriodByEnrollmentAccount_594125(
+var usageDetailsListForBillingPeriodByEnrollmentAccount* = Call_UsageDetailsListForBillingPeriodByEnrollmentAccount_568354(
     name: "usageDetailsListForBillingPeriodByEnrollmentAccount",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/enrollmentAccounts/{enrollmentAccountId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/usageDetails",
-    validator: validate_UsageDetailsListForBillingPeriodByEnrollmentAccount_594126,
-    base: "", url: url_UsageDetailsListForBillingPeriodByEnrollmentAccount_594127,
+    validator: validate_UsageDetailsListForBillingPeriodByEnrollmentAccount_568355,
+    base: "", url: url_UsageDetailsListForBillingPeriodByEnrollmentAccount_568356,
     schemes: {Scheme.Https})
 type
-  Call_MarketplacesListByEnrollmentAccount_594140 = ref object of OpenApiRestCall_593439
-proc url_MarketplacesListByEnrollmentAccount_594142(protocol: Scheme; host: string;
+  Call_MarketplacesListByEnrollmentAccount_568369 = ref object of OpenApiRestCall_567668
+proc url_MarketplacesListByEnrollmentAccount_568371(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1959,7 +1959,7 @@ proc url_MarketplacesListByEnrollmentAccount_594142(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplacesListByEnrollmentAccount_594141(path: JsonNode;
+proc validate_MarketplacesListByEnrollmentAccount_568370(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the marketplaces for a scope by enrollmentAccountId and current billing period. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
@@ -1971,11 +1971,11 @@ proc validate_MarketplacesListByEnrollmentAccount_594141(path: JsonNode;
   ##                      : EnrollmentAccount ID
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `enrollmentAccountId` field"
-  var valid_594143 = path.getOrDefault("enrollmentAccountId")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+  var valid_568372 = path.getOrDefault("enrollmentAccountId")
+  valid_568372 = validateParameter(valid_568372, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "enrollmentAccountId", valid_594143
+  if valid_568372 != nil:
+    section.add "enrollmentAccountId", valid_568372
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1989,25 +1989,25 @@ proc validate_MarketplacesListByEnrollmentAccount_594141(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594144 = query.getOrDefault("api-version")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  var valid_568373 = query.getOrDefault("api-version")
+  valid_568373 = validateParameter(valid_568373, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "api-version", valid_594144
-  var valid_594145 = query.getOrDefault("$top")
-  valid_594145 = validateParameter(valid_594145, JInt, required = false, default = nil)
-  if valid_594145 != nil:
-    section.add "$top", valid_594145
-  var valid_594146 = query.getOrDefault("$skiptoken")
-  valid_594146 = validateParameter(valid_594146, JString, required = false,
+  if valid_568373 != nil:
+    section.add "api-version", valid_568373
+  var valid_568374 = query.getOrDefault("$top")
+  valid_568374 = validateParameter(valid_568374, JInt, required = false, default = nil)
+  if valid_568374 != nil:
+    section.add "$top", valid_568374
+  var valid_568375 = query.getOrDefault("$skiptoken")
+  valid_568375 = validateParameter(valid_568375, JString, required = false,
                                  default = nil)
-  if valid_594146 != nil:
-    section.add "$skiptoken", valid_594146
-  var valid_594147 = query.getOrDefault("$filter")
-  valid_594147 = validateParameter(valid_594147, JString, required = false,
+  if valid_568375 != nil:
+    section.add "$skiptoken", valid_568375
+  var valid_568376 = query.getOrDefault("$filter")
+  valid_568376 = validateParameter(valid_568376, JString, required = false,
                                  default = nil)
-  if valid_594147 != nil:
-    section.add "$filter", valid_594147
+  if valid_568376 != nil:
+    section.add "$filter", valid_568376
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2016,22 +2016,22 @@ proc validate_MarketplacesListByEnrollmentAccount_594141(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594148: Call_MarketplacesListByEnrollmentAccount_594140;
+proc call*(call_568377: Call_MarketplacesListByEnrollmentAccount_568369;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the marketplaces for a scope by enrollmentAccountId and current billing period. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594148.validator(path, query, header, formData, body)
-  let scheme = call_594148.pickScheme
+  let valid = call_568377.validator(path, query, header, formData, body)
+  let scheme = call_568377.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594148.url(scheme.get, call_594148.host, call_594148.base,
-                         call_594148.route, valid.getOrDefault("path"),
+  let url = call_568377.url(scheme.get, call_568377.host, call_568377.base,
+                         call_568377.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594148, url, valid)
+  result = hook(call_568377, url, valid)
 
-proc call*(call_594149: Call_MarketplacesListByEnrollmentAccount_594140;
+proc call*(call_568378: Call_MarketplacesListByEnrollmentAccount_568369;
           apiVersion: string; enrollmentAccountId: string; Top: int = 0;
           Skiptoken: string = ""; Filter: string = ""): Recallable =
   ## marketplacesListByEnrollmentAccount
@@ -2047,23 +2047,23 @@ proc call*(call_594149: Call_MarketplacesListByEnrollmentAccount_594140;
   ##                      : EnrollmentAccount ID
   ##   Filter: string
   ##         : May be used to filter marketplaces by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'.
-  var path_594150 = newJObject()
-  var query_594151 = newJObject()
-  add(query_594151, "api-version", newJString(apiVersion))
-  add(query_594151, "$top", newJInt(Top))
-  add(query_594151, "$skiptoken", newJString(Skiptoken))
-  add(path_594150, "enrollmentAccountId", newJString(enrollmentAccountId))
-  add(query_594151, "$filter", newJString(Filter))
-  result = call_594149.call(path_594150, query_594151, nil, nil, nil)
+  var path_568379 = newJObject()
+  var query_568380 = newJObject()
+  add(query_568380, "api-version", newJString(apiVersion))
+  add(query_568380, "$top", newJInt(Top))
+  add(query_568380, "$skiptoken", newJString(Skiptoken))
+  add(path_568379, "enrollmentAccountId", newJString(enrollmentAccountId))
+  add(query_568380, "$filter", newJString(Filter))
+  result = call_568378.call(path_568379, query_568380, nil, nil, nil)
 
-var marketplacesListByEnrollmentAccount* = Call_MarketplacesListByEnrollmentAccount_594140(
+var marketplacesListByEnrollmentAccount* = Call_MarketplacesListByEnrollmentAccount_568369(
     name: "marketplacesListByEnrollmentAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/enrollmentAccounts/{enrollmentAccountId}/providers/Microsoft.Consumption/marketplaces",
-    validator: validate_MarketplacesListByEnrollmentAccount_594141, base: "",
-    url: url_MarketplacesListByEnrollmentAccount_594142, schemes: {Scheme.Https})
+    validator: validate_MarketplacesListByEnrollmentAccount_568370, base: "",
+    url: url_MarketplacesListByEnrollmentAccount_568371, schemes: {Scheme.Https})
 type
-  Call_UsageDetailsListByEnrollmentAccount_594152 = ref object of OpenApiRestCall_593439
-proc url_UsageDetailsListByEnrollmentAccount_594154(protocol: Scheme; host: string;
+  Call_UsageDetailsListByEnrollmentAccount_568381 = ref object of OpenApiRestCall_567668
+proc url_UsageDetailsListByEnrollmentAccount_568383(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2082,7 +2082,7 @@ proc url_UsageDetailsListByEnrollmentAccount_594154(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageDetailsListByEnrollmentAccount_594153(path: JsonNode;
+proc validate_UsageDetailsListByEnrollmentAccount_568382(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the usage details by enrollmentAccountId for a scope by current billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
@@ -2094,11 +2094,11 @@ proc validate_UsageDetailsListByEnrollmentAccount_594153(path: JsonNode;
   ##                      : EnrollmentAccount ID
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `enrollmentAccountId` field"
-  var valid_594155 = path.getOrDefault("enrollmentAccountId")
-  valid_594155 = validateParameter(valid_594155, JString, required = true,
+  var valid_568384 = path.getOrDefault("enrollmentAccountId")
+  valid_568384 = validateParameter(valid_568384, JString, required = true,
                                  default = nil)
-  if valid_594155 != nil:
-    section.add "enrollmentAccountId", valid_594155
+  if valid_568384 != nil:
+    section.add "enrollmentAccountId", valid_568384
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -2114,37 +2114,37 @@ proc validate_UsageDetailsListByEnrollmentAccount_594153(path: JsonNode;
   ##   $filter: JString
   ##          : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName, properties/instanceId or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   section = newJObject()
-  var valid_594156 = query.getOrDefault("$expand")
-  valid_594156 = validateParameter(valid_594156, JString, required = false,
+  var valid_568385 = query.getOrDefault("$expand")
+  valid_568385 = validateParameter(valid_568385, JString, required = false,
                                  default = nil)
-  if valid_594156 != nil:
-    section.add "$expand", valid_594156
+  if valid_568385 != nil:
+    section.add "$expand", valid_568385
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594157 = query.getOrDefault("api-version")
-  valid_594157 = validateParameter(valid_594157, JString, required = true,
+  var valid_568386 = query.getOrDefault("api-version")
+  valid_568386 = validateParameter(valid_568386, JString, required = true,
                                  default = nil)
-  if valid_594157 != nil:
-    section.add "api-version", valid_594157
-  var valid_594158 = query.getOrDefault("$top")
-  valid_594158 = validateParameter(valid_594158, JInt, required = false, default = nil)
-  if valid_594158 != nil:
-    section.add "$top", valid_594158
-  var valid_594159 = query.getOrDefault("$skiptoken")
-  valid_594159 = validateParameter(valid_594159, JString, required = false,
+  if valid_568386 != nil:
+    section.add "api-version", valid_568386
+  var valid_568387 = query.getOrDefault("$top")
+  valid_568387 = validateParameter(valid_568387, JInt, required = false, default = nil)
+  if valid_568387 != nil:
+    section.add "$top", valid_568387
+  var valid_568388 = query.getOrDefault("$skiptoken")
+  valid_568388 = validateParameter(valid_568388, JString, required = false,
                                  default = nil)
-  if valid_594159 != nil:
-    section.add "$skiptoken", valid_594159
-  var valid_594160 = query.getOrDefault("$apply")
-  valid_594160 = validateParameter(valid_594160, JString, required = false,
+  if valid_568388 != nil:
+    section.add "$skiptoken", valid_568388
+  var valid_568389 = query.getOrDefault("$apply")
+  valid_568389 = validateParameter(valid_568389, JString, required = false,
                                  default = nil)
-  if valid_594160 != nil:
-    section.add "$apply", valid_594160
-  var valid_594161 = query.getOrDefault("$filter")
-  valid_594161 = validateParameter(valid_594161, JString, required = false,
+  if valid_568389 != nil:
+    section.add "$apply", valid_568389
+  var valid_568390 = query.getOrDefault("$filter")
+  valid_568390 = validateParameter(valid_568390, JString, required = false,
                                  default = nil)
-  if valid_594161 != nil:
-    section.add "$filter", valid_594161
+  if valid_568390 != nil:
+    section.add "$filter", valid_568390
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2153,22 +2153,22 @@ proc validate_UsageDetailsListByEnrollmentAccount_594153(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594162: Call_UsageDetailsListByEnrollmentAccount_594152;
+proc call*(call_568391: Call_UsageDetailsListByEnrollmentAccount_568381;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the usage details by enrollmentAccountId for a scope by current billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594162.validator(path, query, header, formData, body)
-  let scheme = call_594162.pickScheme
+  let valid = call_568391.validator(path, query, header, formData, body)
+  let scheme = call_568391.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594162.url(scheme.get, call_594162.host, call_594162.base,
-                         call_594162.route, valid.getOrDefault("path"),
+  let url = call_568391.url(scheme.get, call_568391.host, call_568391.base,
+                         call_568391.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594162, url, valid)
+  result = hook(call_568391, url, valid)
 
-proc call*(call_594163: Call_UsageDetailsListByEnrollmentAccount_594152;
+proc call*(call_568392: Call_UsageDetailsListByEnrollmentAccount_568381;
           apiVersion: string; enrollmentAccountId: string; Expand: string = "";
           Top: int = 0; Skiptoken: string = ""; Apply: string = ""; Filter: string = ""): Recallable =
   ## usageDetailsListByEnrollmentAccount
@@ -2188,25 +2188,25 @@ proc call*(call_594163: Call_UsageDetailsListByEnrollmentAccount_594152;
   ##        : OData apply expression to aggregate usageDetails by tags or (tags and properties/usageStart)
   ##   Filter: string
   ##         : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName, properties/instanceId or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_594164 = newJObject()
-  var query_594165 = newJObject()
-  add(query_594165, "$expand", newJString(Expand))
-  add(query_594165, "api-version", newJString(apiVersion))
-  add(query_594165, "$top", newJInt(Top))
-  add(query_594165, "$skiptoken", newJString(Skiptoken))
-  add(path_594164, "enrollmentAccountId", newJString(enrollmentAccountId))
-  add(query_594165, "$apply", newJString(Apply))
-  add(query_594165, "$filter", newJString(Filter))
-  result = call_594163.call(path_594164, query_594165, nil, nil, nil)
+  var path_568393 = newJObject()
+  var query_568394 = newJObject()
+  add(query_568394, "$expand", newJString(Expand))
+  add(query_568394, "api-version", newJString(apiVersion))
+  add(query_568394, "$top", newJInt(Top))
+  add(query_568394, "$skiptoken", newJString(Skiptoken))
+  add(path_568393, "enrollmentAccountId", newJString(enrollmentAccountId))
+  add(query_568394, "$apply", newJString(Apply))
+  add(query_568394, "$filter", newJString(Filter))
+  result = call_568392.call(path_568393, query_568394, nil, nil, nil)
 
-var usageDetailsListByEnrollmentAccount* = Call_UsageDetailsListByEnrollmentAccount_594152(
+var usageDetailsListByEnrollmentAccount* = Call_UsageDetailsListByEnrollmentAccount_568381(
     name: "usageDetailsListByEnrollmentAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/enrollmentAccounts/{enrollmentAccountId}/providers/Microsoft.Consumption/usageDetails",
-    validator: validate_UsageDetailsListByEnrollmentAccount_594153, base: "",
-    url: url_UsageDetailsListByEnrollmentAccount_594154, schemes: {Scheme.Https})
+    validator: validate_UsageDetailsListByEnrollmentAccount_568382, base: "",
+    url: url_UsageDetailsListByEnrollmentAccount_568383, schemes: {Scheme.Https})
 type
-  Call_ReservationsDetailsListByReservationOrder_594166 = ref object of OpenApiRestCall_593439
-proc url_ReservationsDetailsListByReservationOrder_594168(protocol: Scheme;
+  Call_ReservationsDetailsListByReservationOrder_568395 = ref object of OpenApiRestCall_567668
+proc url_ReservationsDetailsListByReservationOrder_568397(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2225,7 +2225,7 @@ proc url_ReservationsDetailsListByReservationOrder_594168(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationsDetailsListByReservationOrder_594167(path: JsonNode;
+proc validate_ReservationsDetailsListByReservationOrder_568396(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the reservations details for provided date range.
   ## 
@@ -2238,11 +2238,11 @@ proc validate_ReservationsDetailsListByReservationOrder_594167(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_594169 = path.getOrDefault("reservationOrderId")
-  valid_594169 = validateParameter(valid_594169, JString, required = true,
+  var valid_568398 = path.getOrDefault("reservationOrderId")
+  valid_568398 = validateParameter(valid_568398, JString, required = true,
                                  default = nil)
-  if valid_594169 != nil:
-    section.add "reservationOrderId", valid_594169
+  if valid_568398 != nil:
+    section.add "reservationOrderId", valid_568398
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2252,16 +2252,16 @@ proc validate_ReservationsDetailsListByReservationOrder_594167(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594170 = query.getOrDefault("api-version")
-  valid_594170 = validateParameter(valid_594170, JString, required = true,
+  var valid_568399 = query.getOrDefault("api-version")
+  valid_568399 = validateParameter(valid_568399, JString, required = true,
                                  default = nil)
-  if valid_594170 != nil:
-    section.add "api-version", valid_594170
-  var valid_594171 = query.getOrDefault("$filter")
-  valid_594171 = validateParameter(valid_594171, JString, required = true,
+  if valid_568399 != nil:
+    section.add "api-version", valid_568399
+  var valid_568400 = query.getOrDefault("$filter")
+  valid_568400 = validateParameter(valid_568400, JString, required = true,
                                  default = nil)
-  if valid_594171 != nil:
-    section.add "$filter", valid_594171
+  if valid_568400 != nil:
+    section.add "$filter", valid_568400
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2270,22 +2270,22 @@ proc validate_ReservationsDetailsListByReservationOrder_594167(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594172: Call_ReservationsDetailsListByReservationOrder_594166;
+proc call*(call_568401: Call_ReservationsDetailsListByReservationOrder_568395;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the reservations details for provided date range.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594172.validator(path, query, header, formData, body)
-  let scheme = call_594172.pickScheme
+  let valid = call_568401.validator(path, query, header, formData, body)
+  let scheme = call_568401.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594172.url(scheme.get, call_594172.host, call_594172.base,
-                         call_594172.route, valid.getOrDefault("path"),
+  let url = call_568401.url(scheme.get, call_568401.host, call_568401.base,
+                         call_568401.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594172, url, valid)
+  result = hook(call_568401, url, valid)
 
-proc call*(call_594173: Call_ReservationsDetailsListByReservationOrder_594166;
+proc call*(call_568402: Call_ReservationsDetailsListByReservationOrder_568395;
           apiVersion: string; reservationOrderId: string; Filter: string): Recallable =
   ## reservationsDetailsListByReservationOrder
   ## Lists the reservations details for provided date range.
@@ -2296,22 +2296,22 @@ proc call*(call_594173: Call_ReservationsDetailsListByReservationOrder_594166;
   ##                     : Order Id of the reservation
   ##   Filter: string (required)
   ##         : Filter reservation details by date range. The properties/UsageDate for start date and end date. The filter supports 'le' and  'ge' 
-  var path_594174 = newJObject()
-  var query_594175 = newJObject()
-  add(query_594175, "api-version", newJString(apiVersion))
-  add(path_594174, "reservationOrderId", newJString(reservationOrderId))
-  add(query_594175, "$filter", newJString(Filter))
-  result = call_594173.call(path_594174, query_594175, nil, nil, nil)
+  var path_568403 = newJObject()
+  var query_568404 = newJObject()
+  add(query_568404, "api-version", newJString(apiVersion))
+  add(path_568403, "reservationOrderId", newJString(reservationOrderId))
+  add(query_568404, "$filter", newJString(Filter))
+  result = call_568402.call(path_568403, query_568404, nil, nil, nil)
 
-var reservationsDetailsListByReservationOrder* = Call_ReservationsDetailsListByReservationOrder_594166(
+var reservationsDetailsListByReservationOrder* = Call_ReservationsDetailsListByReservationOrder_568395(
     name: "reservationsDetailsListByReservationOrder", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationorders/{reservationOrderId}/providers/Microsoft.Consumption/reservationDetails",
-    validator: validate_ReservationsDetailsListByReservationOrder_594167,
-    base: "", url: url_ReservationsDetailsListByReservationOrder_594168,
+    validator: validate_ReservationsDetailsListByReservationOrder_568396,
+    base: "", url: url_ReservationsDetailsListByReservationOrder_568397,
     schemes: {Scheme.Https})
 type
-  Call_ReservationsSummariesListByReservationOrder_594176 = ref object of OpenApiRestCall_593439
-proc url_ReservationsSummariesListByReservationOrder_594178(protocol: Scheme;
+  Call_ReservationsSummariesListByReservationOrder_568405 = ref object of OpenApiRestCall_567668
+proc url_ReservationsSummariesListByReservationOrder_568407(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2330,7 +2330,7 @@ proc url_ReservationsSummariesListByReservationOrder_594178(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationsSummariesListByReservationOrder_594177(path: JsonNode;
+proc validate_ReservationsSummariesListByReservationOrder_568406(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the reservations summaries for daily or monthly grain.
   ## 
@@ -2343,11 +2343,11 @@ proc validate_ReservationsSummariesListByReservationOrder_594177(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_594179 = path.getOrDefault("reservationOrderId")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  var valid_568408 = path.getOrDefault("reservationOrderId")
+  valid_568408 = validateParameter(valid_568408, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "reservationOrderId", valid_594179
+  if valid_568408 != nil:
+    section.add "reservationOrderId", valid_568408
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2359,21 +2359,21 @@ proc validate_ReservationsSummariesListByReservationOrder_594177(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594180 = query.getOrDefault("api-version")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  var valid_568409 = query.getOrDefault("api-version")
+  valid_568409 = validateParameter(valid_568409, JString, required = true,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "api-version", valid_594180
-  var valid_594181 = query.getOrDefault("$filter")
-  valid_594181 = validateParameter(valid_594181, JString, required = false,
+  if valid_568409 != nil:
+    section.add "api-version", valid_568409
+  var valid_568410 = query.getOrDefault("$filter")
+  valid_568410 = validateParameter(valid_568410, JString, required = false,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "$filter", valid_594181
-  var valid_594195 = query.getOrDefault("grain")
-  valid_594195 = validateParameter(valid_594195, JString, required = true,
+  if valid_568410 != nil:
+    section.add "$filter", valid_568410
+  var valid_568424 = query.getOrDefault("grain")
+  valid_568424 = validateParameter(valid_568424, JString, required = true,
                                  default = newJString("daily"))
-  if valid_594195 != nil:
-    section.add "grain", valid_594195
+  if valid_568424 != nil:
+    section.add "grain", valid_568424
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2382,22 +2382,22 @@ proc validate_ReservationsSummariesListByReservationOrder_594177(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594196: Call_ReservationsSummariesListByReservationOrder_594176;
+proc call*(call_568425: Call_ReservationsSummariesListByReservationOrder_568405;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the reservations summaries for daily or monthly grain.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594196.validator(path, query, header, formData, body)
-  let scheme = call_594196.pickScheme
+  let valid = call_568425.validator(path, query, header, formData, body)
+  let scheme = call_568425.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594196.url(scheme.get, call_594196.host, call_594196.base,
-                         call_594196.route, valid.getOrDefault("path"),
+  let url = call_568425.url(scheme.get, call_568425.host, call_568425.base,
+                         call_568425.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594196, url, valid)
+  result = hook(call_568425, url, valid)
 
-proc call*(call_594197: Call_ReservationsSummariesListByReservationOrder_594176;
+proc call*(call_568426: Call_ReservationsSummariesListByReservationOrder_568405;
           apiVersion: string; reservationOrderId: string; Filter: string = "";
           grain: string = "daily"): Recallable =
   ## reservationsSummariesListByReservationOrder
@@ -2411,23 +2411,23 @@ proc call*(call_594197: Call_ReservationsSummariesListByReservationOrder_594176;
   ##         : Required only for daily grain. The properties/UsageDate for start date and end date. The filter supports 'le' and  'ge'
   ##   grain: string (required)
   ##        : Can be daily or monthly
-  var path_594198 = newJObject()
-  var query_594199 = newJObject()
-  add(query_594199, "api-version", newJString(apiVersion))
-  add(path_594198, "reservationOrderId", newJString(reservationOrderId))
-  add(query_594199, "$filter", newJString(Filter))
-  add(query_594199, "grain", newJString(grain))
-  result = call_594197.call(path_594198, query_594199, nil, nil, nil)
+  var path_568427 = newJObject()
+  var query_568428 = newJObject()
+  add(query_568428, "api-version", newJString(apiVersion))
+  add(path_568427, "reservationOrderId", newJString(reservationOrderId))
+  add(query_568428, "$filter", newJString(Filter))
+  add(query_568428, "grain", newJString(grain))
+  result = call_568426.call(path_568427, query_568428, nil, nil, nil)
 
-var reservationsSummariesListByReservationOrder* = Call_ReservationsSummariesListByReservationOrder_594176(
+var reservationsSummariesListByReservationOrder* = Call_ReservationsSummariesListByReservationOrder_568405(
     name: "reservationsSummariesListByReservationOrder", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationorders/{reservationOrderId}/providers/Microsoft.Consumption/reservationSummaries",
-    validator: validate_ReservationsSummariesListByReservationOrder_594177,
-    base: "", url: url_ReservationsSummariesListByReservationOrder_594178,
+    validator: validate_ReservationsSummariesListByReservationOrder_568406,
+    base: "", url: url_ReservationsSummariesListByReservationOrder_568407,
     schemes: {Scheme.Https})
 type
-  Call_ReservationsDetailsListByReservationOrderAndReservation_594200 = ref object of OpenApiRestCall_593439
-proc url_ReservationsDetailsListByReservationOrderAndReservation_594202(
+  Call_ReservationsDetailsListByReservationOrderAndReservation_568429 = ref object of OpenApiRestCall_567668
+proc url_ReservationsDetailsListByReservationOrderAndReservation_568431(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2450,7 +2450,7 @@ proc url_ReservationsDetailsListByReservationOrderAndReservation_594202(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationsDetailsListByReservationOrderAndReservation_594201(
+proc validate_ReservationsDetailsListByReservationOrderAndReservation_568430(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists the reservations details for provided date range.
@@ -2466,16 +2466,16 @@ proc validate_ReservationsDetailsListByReservationOrderAndReservation_594201(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_594203 = path.getOrDefault("reservationOrderId")
-  valid_594203 = validateParameter(valid_594203, JString, required = true,
+  var valid_568432 = path.getOrDefault("reservationOrderId")
+  valid_568432 = validateParameter(valid_568432, JString, required = true,
                                  default = nil)
-  if valid_594203 != nil:
-    section.add "reservationOrderId", valid_594203
-  var valid_594204 = path.getOrDefault("reservationId")
-  valid_594204 = validateParameter(valid_594204, JString, required = true,
+  if valid_568432 != nil:
+    section.add "reservationOrderId", valid_568432
+  var valid_568433 = path.getOrDefault("reservationId")
+  valid_568433 = validateParameter(valid_568433, JString, required = true,
                                  default = nil)
-  if valid_594204 != nil:
-    section.add "reservationId", valid_594204
+  if valid_568433 != nil:
+    section.add "reservationId", valid_568433
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2485,16 +2485,16 @@ proc validate_ReservationsDetailsListByReservationOrderAndReservation_594201(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594205 = query.getOrDefault("api-version")
-  valid_594205 = validateParameter(valid_594205, JString, required = true,
+  var valid_568434 = query.getOrDefault("api-version")
+  valid_568434 = validateParameter(valid_568434, JString, required = true,
                                  default = nil)
-  if valid_594205 != nil:
-    section.add "api-version", valid_594205
-  var valid_594206 = query.getOrDefault("$filter")
-  valid_594206 = validateParameter(valid_594206, JString, required = true,
+  if valid_568434 != nil:
+    section.add "api-version", valid_568434
+  var valid_568435 = query.getOrDefault("$filter")
+  valid_568435 = validateParameter(valid_568435, JString, required = true,
                                  default = nil)
-  if valid_594206 != nil:
-    section.add "$filter", valid_594206
+  if valid_568435 != nil:
+    section.add "$filter", valid_568435
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2503,22 +2503,22 @@ proc validate_ReservationsDetailsListByReservationOrderAndReservation_594201(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594207: Call_ReservationsDetailsListByReservationOrderAndReservation_594200;
+proc call*(call_568436: Call_ReservationsDetailsListByReservationOrderAndReservation_568429;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the reservations details for provided date range.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594207.validator(path, query, header, formData, body)
-  let scheme = call_594207.pickScheme
+  let valid = call_568436.validator(path, query, header, formData, body)
+  let scheme = call_568436.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594207.url(scheme.get, call_594207.host, call_594207.base,
-                         call_594207.route, valid.getOrDefault("path"),
+  let url = call_568436.url(scheme.get, call_568436.host, call_568436.base,
+                         call_568436.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594207, url, valid)
+  result = hook(call_568436, url, valid)
 
-proc call*(call_594208: Call_ReservationsDetailsListByReservationOrderAndReservation_594200;
+proc call*(call_568437: Call_ReservationsDetailsListByReservationOrderAndReservation_568429;
           apiVersion: string; reservationOrderId: string; reservationId: string;
           Filter: string): Recallable =
   ## reservationsDetailsListByReservationOrderAndReservation
@@ -2532,22 +2532,22 @@ proc call*(call_594208: Call_ReservationsDetailsListByReservationOrderAndReserva
   ##                : Id of the reservation
   ##   Filter: string (required)
   ##         : Filter reservation details by date range. The properties/UsageDate for start date and end date. The filter supports 'le' and  'ge' 
-  var path_594209 = newJObject()
-  var query_594210 = newJObject()
-  add(query_594210, "api-version", newJString(apiVersion))
-  add(path_594209, "reservationOrderId", newJString(reservationOrderId))
-  add(path_594209, "reservationId", newJString(reservationId))
-  add(query_594210, "$filter", newJString(Filter))
-  result = call_594208.call(path_594209, query_594210, nil, nil, nil)
+  var path_568438 = newJObject()
+  var query_568439 = newJObject()
+  add(query_568439, "api-version", newJString(apiVersion))
+  add(path_568438, "reservationOrderId", newJString(reservationOrderId))
+  add(path_568438, "reservationId", newJString(reservationId))
+  add(query_568439, "$filter", newJString(Filter))
+  result = call_568437.call(path_568438, query_568439, nil, nil, nil)
 
-var reservationsDetailsListByReservationOrderAndReservation* = Call_ReservationsDetailsListByReservationOrderAndReservation_594200(
+var reservationsDetailsListByReservationOrderAndReservation* = Call_ReservationsDetailsListByReservationOrderAndReservation_568429(
     name: "reservationsDetailsListByReservationOrderAndReservation",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationorders/{reservationOrderId}/reservations/{reservationId}/providers/Microsoft.Consumption/reservationDetails", validator: validate_ReservationsDetailsListByReservationOrderAndReservation_594201,
-    base: "", url: url_ReservationsDetailsListByReservationOrderAndReservation_594202,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationorders/{reservationOrderId}/reservations/{reservationId}/providers/Microsoft.Consumption/reservationDetails", validator: validate_ReservationsDetailsListByReservationOrderAndReservation_568430,
+    base: "", url: url_ReservationsDetailsListByReservationOrderAndReservation_568431,
     schemes: {Scheme.Https})
 type
-  Call_ReservationsSummariesListByReservationOrderAndReservation_594211 = ref object of OpenApiRestCall_593439
-proc url_ReservationsSummariesListByReservationOrderAndReservation_594213(
+  Call_ReservationsSummariesListByReservationOrderAndReservation_568440 = ref object of OpenApiRestCall_567668
+proc url_ReservationsSummariesListByReservationOrderAndReservation_568442(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2570,7 +2570,7 @@ proc url_ReservationsSummariesListByReservationOrderAndReservation_594213(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationsSummariesListByReservationOrderAndReservation_594212(
+proc validate_ReservationsSummariesListByReservationOrderAndReservation_568441(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists the reservations summaries for daily or monthly grain.
@@ -2586,16 +2586,16 @@ proc validate_ReservationsSummariesListByReservationOrderAndReservation_594212(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_594214 = path.getOrDefault("reservationOrderId")
-  valid_594214 = validateParameter(valid_594214, JString, required = true,
+  var valid_568443 = path.getOrDefault("reservationOrderId")
+  valid_568443 = validateParameter(valid_568443, JString, required = true,
                                  default = nil)
-  if valid_594214 != nil:
-    section.add "reservationOrderId", valid_594214
-  var valid_594215 = path.getOrDefault("reservationId")
-  valid_594215 = validateParameter(valid_594215, JString, required = true,
+  if valid_568443 != nil:
+    section.add "reservationOrderId", valid_568443
+  var valid_568444 = path.getOrDefault("reservationId")
+  valid_568444 = validateParameter(valid_568444, JString, required = true,
                                  default = nil)
-  if valid_594215 != nil:
-    section.add "reservationId", valid_594215
+  if valid_568444 != nil:
+    section.add "reservationId", valid_568444
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2607,21 +2607,21 @@ proc validate_ReservationsSummariesListByReservationOrderAndReservation_594212(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594216 = query.getOrDefault("api-version")
-  valid_594216 = validateParameter(valid_594216, JString, required = true,
+  var valid_568445 = query.getOrDefault("api-version")
+  valid_568445 = validateParameter(valid_568445, JString, required = true,
                                  default = nil)
-  if valid_594216 != nil:
-    section.add "api-version", valid_594216
-  var valid_594217 = query.getOrDefault("$filter")
-  valid_594217 = validateParameter(valid_594217, JString, required = false,
+  if valid_568445 != nil:
+    section.add "api-version", valid_568445
+  var valid_568446 = query.getOrDefault("$filter")
+  valid_568446 = validateParameter(valid_568446, JString, required = false,
                                  default = nil)
-  if valid_594217 != nil:
-    section.add "$filter", valid_594217
-  var valid_594218 = query.getOrDefault("grain")
-  valid_594218 = validateParameter(valid_594218, JString, required = true,
+  if valid_568446 != nil:
+    section.add "$filter", valid_568446
+  var valid_568447 = query.getOrDefault("grain")
+  valid_568447 = validateParameter(valid_568447, JString, required = true,
                                  default = newJString("daily"))
-  if valid_594218 != nil:
-    section.add "grain", valid_594218
+  if valid_568447 != nil:
+    section.add "grain", valid_568447
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2630,22 +2630,22 @@ proc validate_ReservationsSummariesListByReservationOrderAndReservation_594212(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594219: Call_ReservationsSummariesListByReservationOrderAndReservation_594211;
+proc call*(call_568448: Call_ReservationsSummariesListByReservationOrderAndReservation_568440;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the reservations summaries for daily or monthly grain.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594219.validator(path, query, header, formData, body)
-  let scheme = call_594219.pickScheme
+  let valid = call_568448.validator(path, query, header, formData, body)
+  let scheme = call_568448.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594219.url(scheme.get, call_594219.host, call_594219.base,
-                         call_594219.route, valid.getOrDefault("path"),
+  let url = call_568448.url(scheme.get, call_568448.host, call_568448.base,
+                         call_568448.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594219, url, valid)
+  result = hook(call_568448, url, valid)
 
-proc call*(call_594220: Call_ReservationsSummariesListByReservationOrderAndReservation_594211;
+proc call*(call_568449: Call_ReservationsSummariesListByReservationOrderAndReservation_568440;
           apiVersion: string; reservationOrderId: string; reservationId: string;
           Filter: string = ""; grain: string = "daily"): Recallable =
   ## reservationsSummariesListByReservationOrderAndReservation
@@ -2661,30 +2661,30 @@ proc call*(call_594220: Call_ReservationsSummariesListByReservationOrderAndReser
   ##         : Required only for daily grain. The properties/UsageDate for start date and end date. The filter supports 'le' and  'ge'
   ##   grain: string (required)
   ##        : Can be daily or monthly
-  var path_594221 = newJObject()
-  var query_594222 = newJObject()
-  add(query_594222, "api-version", newJString(apiVersion))
-  add(path_594221, "reservationOrderId", newJString(reservationOrderId))
-  add(path_594221, "reservationId", newJString(reservationId))
-  add(query_594222, "$filter", newJString(Filter))
-  add(query_594222, "grain", newJString(grain))
-  result = call_594220.call(path_594221, query_594222, nil, nil, nil)
+  var path_568450 = newJObject()
+  var query_568451 = newJObject()
+  add(query_568451, "api-version", newJString(apiVersion))
+  add(path_568450, "reservationOrderId", newJString(reservationOrderId))
+  add(path_568450, "reservationId", newJString(reservationId))
+  add(query_568451, "$filter", newJString(Filter))
+  add(query_568451, "grain", newJString(grain))
+  result = call_568449.call(path_568450, query_568451, nil, nil, nil)
 
-var reservationsSummariesListByReservationOrderAndReservation* = Call_ReservationsSummariesListByReservationOrderAndReservation_594211(
+var reservationsSummariesListByReservationOrderAndReservation* = Call_ReservationsSummariesListByReservationOrderAndReservation_568440(
     name: "reservationsSummariesListByReservationOrderAndReservation",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationorders/{reservationOrderId}/reservations/{reservationId}/providers/Microsoft.Consumption/reservationSummaries", validator: validate_ReservationsSummariesListByReservationOrderAndReservation_594212,
-    base: "", url: url_ReservationsSummariesListByReservationOrderAndReservation_594213,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationorders/{reservationOrderId}/reservations/{reservationId}/providers/Microsoft.Consumption/reservationSummaries", validator: validate_ReservationsSummariesListByReservationOrderAndReservation_568441,
+    base: "", url: url_ReservationsSummariesListByReservationOrderAndReservation_568442,
     schemes: {Scheme.Https})
 type
-  Call_OperationsList_594223 = ref object of OpenApiRestCall_593439
-proc url_OperationsList_594225(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_568452 = ref object of OpenApiRestCall_567668
+proc url_OperationsList_568454(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_594224(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_568453(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available consumption REST API operations.
@@ -2699,11 +2699,11 @@ proc validate_OperationsList_594224(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594226 = query.getOrDefault("api-version")
-  valid_594226 = validateParameter(valid_594226, JString, required = true,
+  var valid_568455 = query.getOrDefault("api-version")
+  valid_568455 = validateParameter(valid_568455, JString, required = true,
                                  default = nil)
-  if valid_594226 != nil:
-    section.add "api-version", valid_594226
+  if valid_568455 != nil:
+    section.add "api-version", valid_568455
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2712,36 +2712,36 @@ proc validate_OperationsList_594224(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594227: Call_OperationsList_594223; path: JsonNode; query: JsonNode;
+proc call*(call_568456: Call_OperationsList_568452; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available consumption REST API operations.
   ## 
-  let valid = call_594227.validator(path, query, header, formData, body)
-  let scheme = call_594227.pickScheme
+  let valid = call_568456.validator(path, query, header, formData, body)
+  let scheme = call_568456.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594227.url(scheme.get, call_594227.host, call_594227.base,
-                         call_594227.route, valid.getOrDefault("path"),
+  let url = call_568456.url(scheme.get, call_568456.host, call_568456.base,
+                         call_568456.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594227, url, valid)
+  result = hook(call_568456, url, valid)
 
-proc call*(call_594228: Call_OperationsList_594223; apiVersion: string): Recallable =
+proc call*(call_568457: Call_OperationsList_568452; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available consumption REST API operations.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-06-30.
-  var query_594229 = newJObject()
-  add(query_594229, "api-version", newJString(apiVersion))
-  result = call_594228.call(nil, query_594229, nil, nil, nil)
+  var query_568458 = newJObject()
+  add(query_568458, "api-version", newJString(apiVersion))
+  result = call_568457.call(nil, query_568458, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_594223(name: "operationsList",
+var operationsList* = Call_OperationsList_568452(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Consumption/operations",
-    validator: validate_OperationsList_594224, base: "", url: url_OperationsList_594225,
+    validator: validate_OperationsList_568453, base: "", url: url_OperationsList_568454,
     schemes: {Scheme.Https})
 type
-  Call_TagsGet_594230 = ref object of OpenApiRestCall_593439
-proc url_TagsGet_594232(protocol: Scheme; host: string; base: string; route: string;
+  Call_TagsGet_568459 = ref object of OpenApiRestCall_567668
+proc url_TagsGet_568461(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2759,7 +2759,7 @@ proc url_TagsGet_594232(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagsGet_594231(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TagsGet_568460(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all available tag keys for a billing account.
   ## 
@@ -2772,11 +2772,11 @@ proc validate_TagsGet_594231(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountId` field"
-  var valid_594233 = path.getOrDefault("billingAccountId")
-  valid_594233 = validateParameter(valid_594233, JString, required = true,
+  var valid_568462 = path.getOrDefault("billingAccountId")
+  valid_568462 = validateParameter(valid_568462, JString, required = true,
                                  default = nil)
-  if valid_594233 != nil:
-    section.add "billingAccountId", valid_594233
+  if valid_568462 != nil:
+    section.add "billingAccountId", valid_568462
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2784,11 +2784,11 @@ proc validate_TagsGet_594231(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594234 = query.getOrDefault("api-version")
-  valid_594234 = validateParameter(valid_594234, JString, required = true,
+  var valid_568463 = query.getOrDefault("api-version")
+  valid_568463 = validateParameter(valid_568463, JString, required = true,
                                  default = nil)
-  if valid_594234 != nil:
-    section.add "api-version", valid_594234
+  if valid_568463 != nil:
+    section.add "api-version", valid_568463
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2797,21 +2797,21 @@ proc validate_TagsGet_594231(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594235: Call_TagsGet_594230; path: JsonNode; query: JsonNode;
+proc call*(call_568464: Call_TagsGet_568459; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all available tag keys for a billing account.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594235.validator(path, query, header, formData, body)
-  let scheme = call_594235.pickScheme
+  let valid = call_568464.validator(path, query, header, formData, body)
+  let scheme = call_568464.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594235.url(scheme.get, call_594235.host, call_594235.base,
-                         call_594235.route, valid.getOrDefault("path"),
+  let url = call_568464.url(scheme.get, call_568464.host, call_568464.base,
+                         call_568464.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594235, url, valid)
+  result = hook(call_568464, url, valid)
 
-proc call*(call_594236: Call_TagsGet_594230; apiVersion: string;
+proc call*(call_568465: Call_TagsGet_568459; apiVersion: string;
           billingAccountId: string): Recallable =
   ## tagsGet
   ## Get all available tag keys for a billing account.
@@ -2820,19 +2820,19 @@ proc call*(call_594236: Call_TagsGet_594230; apiVersion: string;
   ##             : Version of the API to be used with the client request. The current version is 2018-06-30.
   ##   billingAccountId: string (required)
   ##                   : BillingAccount ID
-  var path_594237 = newJObject()
-  var query_594238 = newJObject()
-  add(query_594238, "api-version", newJString(apiVersion))
-  add(path_594237, "billingAccountId", newJString(billingAccountId))
-  result = call_594236.call(path_594237, query_594238, nil, nil, nil)
+  var path_568466 = newJObject()
+  var query_568467 = newJObject()
+  add(query_568467, "api-version", newJString(apiVersion))
+  add(path_568466, "billingAccountId", newJString(billingAccountId))
+  result = call_568465.call(path_568466, query_568467, nil, nil, nil)
 
-var tagsGet* = Call_TagsGet_594230(name: "tagsGet", meth: HttpMethod.HttpGet,
+var tagsGet* = Call_TagsGet_568459(name: "tagsGet", meth: HttpMethod.HttpGet,
                                 host: "management.azure.com", route: "/providers/Microsoft.CostManagement/billingAccounts/{billingAccountId}/providers/Microsoft.Consumption/tags",
-                                validator: validate_TagsGet_594231, base: "",
-                                url: url_TagsGet_594232, schemes: {Scheme.Https})
+                                validator: validate_TagsGet_568460, base: "",
+                                url: url_TagsGet_568461, schemes: {Scheme.Https})
 type
-  Call_AggregatedCostGetForBillingPeriodByManagementGroup_594239 = ref object of OpenApiRestCall_593439
-proc url_AggregatedCostGetForBillingPeriodByManagementGroup_594241(
+  Call_AggregatedCostGetForBillingPeriodByManagementGroup_568468 = ref object of OpenApiRestCall_567668
+proc url_AggregatedCostGetForBillingPeriodByManagementGroup_568470(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2856,7 +2856,7 @@ proc url_AggregatedCostGetForBillingPeriodByManagementGroup_594241(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AggregatedCostGetForBillingPeriodByManagementGroup_594240(
+proc validate_AggregatedCostGetForBillingPeriodByManagementGroup_568469(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Provides the aggregate cost of a management group and all child management groups by specified billing period
@@ -2872,16 +2872,16 @@ proc validate_AggregatedCostGetForBillingPeriodByManagementGroup_594240(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `managementGroupId` field"
-  var valid_594242 = path.getOrDefault("managementGroupId")
-  valid_594242 = validateParameter(valid_594242, JString, required = true,
+  var valid_568471 = path.getOrDefault("managementGroupId")
+  valid_568471 = validateParameter(valid_568471, JString, required = true,
                                  default = nil)
-  if valid_594242 != nil:
-    section.add "managementGroupId", valid_594242
-  var valid_594243 = path.getOrDefault("billingPeriodName")
-  valid_594243 = validateParameter(valid_594243, JString, required = true,
+  if valid_568471 != nil:
+    section.add "managementGroupId", valid_568471
+  var valid_568472 = path.getOrDefault("billingPeriodName")
+  valid_568472 = validateParameter(valid_568472, JString, required = true,
                                  default = nil)
-  if valid_594243 != nil:
-    section.add "billingPeriodName", valid_594243
+  if valid_568472 != nil:
+    section.add "billingPeriodName", valid_568472
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2889,11 +2889,11 @@ proc validate_AggregatedCostGetForBillingPeriodByManagementGroup_594240(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594244 = query.getOrDefault("api-version")
-  valid_594244 = validateParameter(valid_594244, JString, required = true,
+  var valid_568473 = query.getOrDefault("api-version")
+  valid_568473 = validateParameter(valid_568473, JString, required = true,
                                  default = nil)
-  if valid_594244 != nil:
-    section.add "api-version", valid_594244
+  if valid_568473 != nil:
+    section.add "api-version", valid_568473
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2902,22 +2902,22 @@ proc validate_AggregatedCostGetForBillingPeriodByManagementGroup_594240(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594245: Call_AggregatedCostGetForBillingPeriodByManagementGroup_594239;
+proc call*(call_568474: Call_AggregatedCostGetForBillingPeriodByManagementGroup_568468;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Provides the aggregate cost of a management group and all child management groups by specified billing period
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594245.validator(path, query, header, formData, body)
-  let scheme = call_594245.pickScheme
+  let valid = call_568474.validator(path, query, header, formData, body)
+  let scheme = call_568474.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594245.url(scheme.get, call_594245.host, call_594245.base,
-                         call_594245.route, valid.getOrDefault("path"),
+  let url = call_568474.url(scheme.get, call_568474.host, call_568474.base,
+                         call_568474.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594245, url, valid)
+  result = hook(call_568474, url, valid)
 
-proc call*(call_594246: Call_AggregatedCostGetForBillingPeriodByManagementGroup_594239;
+proc call*(call_568475: Call_AggregatedCostGetForBillingPeriodByManagementGroup_568468;
           apiVersion: string; managementGroupId: string; billingPeriodName: string): Recallable =
   ## aggregatedCostGetForBillingPeriodByManagementGroup
   ## Provides the aggregate cost of a management group and all child management groups by specified billing period
@@ -2928,22 +2928,22 @@ proc call*(call_594246: Call_AggregatedCostGetForBillingPeriodByManagementGroup_
   ##                    : Azure Management Group ID.
   ##   billingPeriodName: string (required)
   ##                    : Billing Period Name.
-  var path_594247 = newJObject()
-  var query_594248 = newJObject()
-  add(query_594248, "api-version", newJString(apiVersion))
-  add(path_594247, "managementGroupId", newJString(managementGroupId))
-  add(path_594247, "billingPeriodName", newJString(billingPeriodName))
-  result = call_594246.call(path_594247, query_594248, nil, nil, nil)
+  var path_568476 = newJObject()
+  var query_568477 = newJObject()
+  add(query_568477, "api-version", newJString(apiVersion))
+  add(path_568476, "managementGroupId", newJString(managementGroupId))
+  add(path_568476, "billingPeriodName", newJString(billingPeriodName))
+  result = call_568475.call(path_568476, query_568477, nil, nil, nil)
 
-var aggregatedCostGetForBillingPeriodByManagementGroup* = Call_AggregatedCostGetForBillingPeriodByManagementGroup_594239(
+var aggregatedCostGetForBillingPeriodByManagementGroup* = Call_AggregatedCostGetForBillingPeriodByManagementGroup_568468(
     name: "aggregatedCostGetForBillingPeriodByManagementGroup",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/Microsoft.Consumption/aggregatedcost",
-    validator: validate_AggregatedCostGetForBillingPeriodByManagementGroup_594240,
-    base: "", url: url_AggregatedCostGetForBillingPeriodByManagementGroup_594241,
+    validator: validate_AggregatedCostGetForBillingPeriodByManagementGroup_568469,
+    base: "", url: url_AggregatedCostGetForBillingPeriodByManagementGroup_568470,
     schemes: {Scheme.Https})
 type
-  Call_UsageDetailsListForBillingPeriodByManagementGroup_594249 = ref object of OpenApiRestCall_593439
-proc url_UsageDetailsListForBillingPeriodByManagementGroup_594251(
+  Call_UsageDetailsListForBillingPeriodByManagementGroup_568478 = ref object of OpenApiRestCall_567668
+proc url_UsageDetailsListForBillingPeriodByManagementGroup_568480(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2968,7 +2968,7 @@ proc url_UsageDetailsListForBillingPeriodByManagementGroup_594251(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageDetailsListForBillingPeriodByManagementGroup_594250(
+proc validate_UsageDetailsListForBillingPeriodByManagementGroup_568479(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists the usage detail records for all subscriptions belonging to a management group scope by specified billing period. Usage details are available via this API only for May 1, 2014 or later.
@@ -2984,16 +2984,16 @@ proc validate_UsageDetailsListForBillingPeriodByManagementGroup_594250(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `managementGroupId` field"
-  var valid_594252 = path.getOrDefault("managementGroupId")
-  valid_594252 = validateParameter(valid_594252, JString, required = true,
+  var valid_568481 = path.getOrDefault("managementGroupId")
+  valid_568481 = validateParameter(valid_568481, JString, required = true,
                                  default = nil)
-  if valid_594252 != nil:
-    section.add "managementGroupId", valid_594252
-  var valid_594253 = path.getOrDefault("billingPeriodName")
-  valid_594253 = validateParameter(valid_594253, JString, required = true,
+  if valid_568481 != nil:
+    section.add "managementGroupId", valid_568481
+  var valid_568482 = path.getOrDefault("billingPeriodName")
+  valid_568482 = validateParameter(valid_568482, JString, required = true,
                                  default = nil)
-  if valid_594253 != nil:
-    section.add "billingPeriodName", valid_594253
+  if valid_568482 != nil:
+    section.add "billingPeriodName", valid_568482
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -3009,37 +3009,37 @@ proc validate_UsageDetailsListForBillingPeriodByManagementGroup_594250(
   ##   $filter: JString
   ##          : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   section = newJObject()
-  var valid_594254 = query.getOrDefault("$expand")
-  valid_594254 = validateParameter(valid_594254, JString, required = false,
+  var valid_568483 = query.getOrDefault("$expand")
+  valid_568483 = validateParameter(valid_568483, JString, required = false,
                                  default = nil)
-  if valid_594254 != nil:
-    section.add "$expand", valid_594254
+  if valid_568483 != nil:
+    section.add "$expand", valid_568483
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594255 = query.getOrDefault("api-version")
-  valid_594255 = validateParameter(valid_594255, JString, required = true,
+  var valid_568484 = query.getOrDefault("api-version")
+  valid_568484 = validateParameter(valid_568484, JString, required = true,
                                  default = nil)
-  if valid_594255 != nil:
-    section.add "api-version", valid_594255
-  var valid_594256 = query.getOrDefault("$top")
-  valid_594256 = validateParameter(valid_594256, JInt, required = false, default = nil)
-  if valid_594256 != nil:
-    section.add "$top", valid_594256
-  var valid_594257 = query.getOrDefault("$skiptoken")
-  valid_594257 = validateParameter(valid_594257, JString, required = false,
+  if valid_568484 != nil:
+    section.add "api-version", valid_568484
+  var valid_568485 = query.getOrDefault("$top")
+  valid_568485 = validateParameter(valid_568485, JInt, required = false, default = nil)
+  if valid_568485 != nil:
+    section.add "$top", valid_568485
+  var valid_568486 = query.getOrDefault("$skiptoken")
+  valid_568486 = validateParameter(valid_568486, JString, required = false,
                                  default = nil)
-  if valid_594257 != nil:
-    section.add "$skiptoken", valid_594257
-  var valid_594258 = query.getOrDefault("$apply")
-  valid_594258 = validateParameter(valid_594258, JString, required = false,
+  if valid_568486 != nil:
+    section.add "$skiptoken", valid_568486
+  var valid_568487 = query.getOrDefault("$apply")
+  valid_568487 = validateParameter(valid_568487, JString, required = false,
                                  default = nil)
-  if valid_594258 != nil:
-    section.add "$apply", valid_594258
-  var valid_594259 = query.getOrDefault("$filter")
-  valid_594259 = validateParameter(valid_594259, JString, required = false,
+  if valid_568487 != nil:
+    section.add "$apply", valid_568487
+  var valid_568488 = query.getOrDefault("$filter")
+  valid_568488 = validateParameter(valid_568488, JString, required = false,
                                  default = nil)
-  if valid_594259 != nil:
-    section.add "$filter", valid_594259
+  if valid_568488 != nil:
+    section.add "$filter", valid_568488
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3048,22 +3048,22 @@ proc validate_UsageDetailsListForBillingPeriodByManagementGroup_594250(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594260: Call_UsageDetailsListForBillingPeriodByManagementGroup_594249;
+proc call*(call_568489: Call_UsageDetailsListForBillingPeriodByManagementGroup_568478;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the usage detail records for all subscriptions belonging to a management group scope by specified billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594260.validator(path, query, header, formData, body)
-  let scheme = call_594260.pickScheme
+  let valid = call_568489.validator(path, query, header, formData, body)
+  let scheme = call_568489.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594260.url(scheme.get, call_594260.host, call_594260.base,
-                         call_594260.route, valid.getOrDefault("path"),
+  let url = call_568489.url(scheme.get, call_568489.host, call_568489.base,
+                         call_568489.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594260, url, valid)
+  result = hook(call_568489, url, valid)
 
-proc call*(call_594261: Call_UsageDetailsListForBillingPeriodByManagementGroup_594249;
+proc call*(call_568490: Call_UsageDetailsListForBillingPeriodByManagementGroup_568478;
           apiVersion: string; managementGroupId: string; billingPeriodName: string;
           Expand: string = ""; Top: int = 0; Skiptoken: string = ""; Apply: string = "";
           Filter: string = ""): Recallable =
@@ -3086,27 +3086,27 @@ proc call*(call_594261: Call_UsageDetailsListForBillingPeriodByManagementGroup_5
   ##        : OData apply expression to aggregate usageDetails by tags or (tags and properties/usageStart) for specified billing period
   ##   Filter: string
   ##         : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_594262 = newJObject()
-  var query_594263 = newJObject()
-  add(query_594263, "$expand", newJString(Expand))
-  add(query_594263, "api-version", newJString(apiVersion))
-  add(path_594262, "managementGroupId", newJString(managementGroupId))
-  add(query_594263, "$top", newJInt(Top))
-  add(query_594263, "$skiptoken", newJString(Skiptoken))
-  add(path_594262, "billingPeriodName", newJString(billingPeriodName))
-  add(query_594263, "$apply", newJString(Apply))
-  add(query_594263, "$filter", newJString(Filter))
-  result = call_594261.call(path_594262, query_594263, nil, nil, nil)
+  var path_568491 = newJObject()
+  var query_568492 = newJObject()
+  add(query_568492, "$expand", newJString(Expand))
+  add(query_568492, "api-version", newJString(apiVersion))
+  add(path_568491, "managementGroupId", newJString(managementGroupId))
+  add(query_568492, "$top", newJInt(Top))
+  add(query_568492, "$skiptoken", newJString(Skiptoken))
+  add(path_568491, "billingPeriodName", newJString(billingPeriodName))
+  add(query_568492, "$apply", newJString(Apply))
+  add(query_568492, "$filter", newJString(Filter))
+  result = call_568490.call(path_568491, query_568492, nil, nil, nil)
 
-var usageDetailsListForBillingPeriodByManagementGroup* = Call_UsageDetailsListForBillingPeriodByManagementGroup_594249(
+var usageDetailsListForBillingPeriodByManagementGroup* = Call_UsageDetailsListForBillingPeriodByManagementGroup_568478(
     name: "usageDetailsListForBillingPeriodByManagementGroup",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/usageDetails",
-    validator: validate_UsageDetailsListForBillingPeriodByManagementGroup_594250,
-    base: "", url: url_UsageDetailsListForBillingPeriodByManagementGroup_594251,
+    validator: validate_UsageDetailsListForBillingPeriodByManagementGroup_568479,
+    base: "", url: url_UsageDetailsListForBillingPeriodByManagementGroup_568480,
     schemes: {Scheme.Https})
 type
-  Call_AggregatedCostGetByManagementGroup_594264 = ref object of OpenApiRestCall_593439
-proc url_AggregatedCostGetByManagementGroup_594266(protocol: Scheme; host: string;
+  Call_AggregatedCostGetByManagementGroup_568493 = ref object of OpenApiRestCall_567668
+proc url_AggregatedCostGetByManagementGroup_568495(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3125,7 +3125,7 @@ proc url_AggregatedCostGetByManagementGroup_594266(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AggregatedCostGetByManagementGroup_594265(path: JsonNode;
+proc validate_AggregatedCostGetByManagementGroup_568494(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Provides the aggregate cost of a management group and all child management groups by current billing period.
   ## 
@@ -3138,11 +3138,11 @@ proc validate_AggregatedCostGetByManagementGroup_594265(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `managementGroupId` field"
-  var valid_594267 = path.getOrDefault("managementGroupId")
-  valid_594267 = validateParameter(valid_594267, JString, required = true,
+  var valid_568496 = path.getOrDefault("managementGroupId")
+  valid_568496 = validateParameter(valid_568496, JString, required = true,
                                  default = nil)
-  if valid_594267 != nil:
-    section.add "managementGroupId", valid_594267
+  if valid_568496 != nil:
+    section.add "managementGroupId", valid_568496
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3150,11 +3150,11 @@ proc validate_AggregatedCostGetByManagementGroup_594265(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594268 = query.getOrDefault("api-version")
-  valid_594268 = validateParameter(valid_594268, JString, required = true,
+  var valid_568497 = query.getOrDefault("api-version")
+  valid_568497 = validateParameter(valid_568497, JString, required = true,
                                  default = nil)
-  if valid_594268 != nil:
-    section.add "api-version", valid_594268
+  if valid_568497 != nil:
+    section.add "api-version", valid_568497
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3163,22 +3163,22 @@ proc validate_AggregatedCostGetByManagementGroup_594265(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594269: Call_AggregatedCostGetByManagementGroup_594264;
+proc call*(call_568498: Call_AggregatedCostGetByManagementGroup_568493;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Provides the aggregate cost of a management group and all child management groups by current billing period.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594269.validator(path, query, header, formData, body)
-  let scheme = call_594269.pickScheme
+  let valid = call_568498.validator(path, query, header, formData, body)
+  let scheme = call_568498.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594269.url(scheme.get, call_594269.host, call_594269.base,
-                         call_594269.route, valid.getOrDefault("path"),
+  let url = call_568498.url(scheme.get, call_568498.host, call_568498.base,
+                         call_568498.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594269, url, valid)
+  result = hook(call_568498, url, valid)
 
-proc call*(call_594270: Call_AggregatedCostGetByManagementGroup_594264;
+proc call*(call_568499: Call_AggregatedCostGetByManagementGroup_568493;
           apiVersion: string; managementGroupId: string): Recallable =
   ## aggregatedCostGetByManagementGroup
   ## Provides the aggregate cost of a management group and all child management groups by current billing period.
@@ -3187,20 +3187,20 @@ proc call*(call_594270: Call_AggregatedCostGetByManagementGroup_594264;
   ##             : Version of the API to be used with the client request. The current version is 2018-06-30.
   ##   managementGroupId: string (required)
   ##                    : Azure Management Group ID.
-  var path_594271 = newJObject()
-  var query_594272 = newJObject()
-  add(query_594272, "api-version", newJString(apiVersion))
-  add(path_594271, "managementGroupId", newJString(managementGroupId))
-  result = call_594270.call(path_594271, query_594272, nil, nil, nil)
+  var path_568500 = newJObject()
+  var query_568501 = newJObject()
+  add(query_568501, "api-version", newJString(apiVersion))
+  add(path_568500, "managementGroupId", newJString(managementGroupId))
+  result = call_568499.call(path_568500, query_568501, nil, nil, nil)
 
-var aggregatedCostGetByManagementGroup* = Call_AggregatedCostGetByManagementGroup_594264(
+var aggregatedCostGetByManagementGroup* = Call_AggregatedCostGetByManagementGroup_568493(
     name: "aggregatedCostGetByManagementGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Consumption/aggregatedcost",
-    validator: validate_AggregatedCostGetByManagementGroup_594265, base: "",
-    url: url_AggregatedCostGetByManagementGroup_594266, schemes: {Scheme.Https})
+    validator: validate_AggregatedCostGetByManagementGroup_568494, base: "",
+    url: url_AggregatedCostGetByManagementGroup_568495, schemes: {Scheme.Https})
 type
-  Call_UsageDetailsListByManagementGroup_594273 = ref object of OpenApiRestCall_593439
-proc url_UsageDetailsListByManagementGroup_594275(protocol: Scheme; host: string;
+  Call_UsageDetailsListByManagementGroup_568502 = ref object of OpenApiRestCall_567668
+proc url_UsageDetailsListByManagementGroup_568504(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3219,7 +3219,7 @@ proc url_UsageDetailsListByManagementGroup_594275(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageDetailsListByManagementGroup_594274(path: JsonNode;
+proc validate_UsageDetailsListByManagementGroup_568503(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the usage detail records for all subscriptions belonging to a management group scope by current billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
@@ -3232,11 +3232,11 @@ proc validate_UsageDetailsListByManagementGroup_594274(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `managementGroupId` field"
-  var valid_594276 = path.getOrDefault("managementGroupId")
-  valid_594276 = validateParameter(valid_594276, JString, required = true,
+  var valid_568505 = path.getOrDefault("managementGroupId")
+  valid_568505 = validateParameter(valid_568505, JString, required = true,
                                  default = nil)
-  if valid_594276 != nil:
-    section.add "managementGroupId", valid_594276
+  if valid_568505 != nil:
+    section.add "managementGroupId", valid_568505
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -3252,37 +3252,37 @@ proc validate_UsageDetailsListByManagementGroup_594274(path: JsonNode;
   ##   $filter: JString
   ##          : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName, properties/instanceId or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   section = newJObject()
-  var valid_594277 = query.getOrDefault("$expand")
-  valid_594277 = validateParameter(valid_594277, JString, required = false,
+  var valid_568506 = query.getOrDefault("$expand")
+  valid_568506 = validateParameter(valid_568506, JString, required = false,
                                  default = nil)
-  if valid_594277 != nil:
-    section.add "$expand", valid_594277
+  if valid_568506 != nil:
+    section.add "$expand", valid_568506
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594278 = query.getOrDefault("api-version")
-  valid_594278 = validateParameter(valid_594278, JString, required = true,
+  var valid_568507 = query.getOrDefault("api-version")
+  valid_568507 = validateParameter(valid_568507, JString, required = true,
                                  default = nil)
-  if valid_594278 != nil:
-    section.add "api-version", valid_594278
-  var valid_594279 = query.getOrDefault("$top")
-  valid_594279 = validateParameter(valid_594279, JInt, required = false, default = nil)
-  if valid_594279 != nil:
-    section.add "$top", valid_594279
-  var valid_594280 = query.getOrDefault("$skiptoken")
-  valid_594280 = validateParameter(valid_594280, JString, required = false,
+  if valid_568507 != nil:
+    section.add "api-version", valid_568507
+  var valid_568508 = query.getOrDefault("$top")
+  valid_568508 = validateParameter(valid_568508, JInt, required = false, default = nil)
+  if valid_568508 != nil:
+    section.add "$top", valid_568508
+  var valid_568509 = query.getOrDefault("$skiptoken")
+  valid_568509 = validateParameter(valid_568509, JString, required = false,
                                  default = nil)
-  if valid_594280 != nil:
-    section.add "$skiptoken", valid_594280
-  var valid_594281 = query.getOrDefault("$apply")
-  valid_594281 = validateParameter(valid_594281, JString, required = false,
+  if valid_568509 != nil:
+    section.add "$skiptoken", valid_568509
+  var valid_568510 = query.getOrDefault("$apply")
+  valid_568510 = validateParameter(valid_568510, JString, required = false,
                                  default = nil)
-  if valid_594281 != nil:
-    section.add "$apply", valid_594281
-  var valid_594282 = query.getOrDefault("$filter")
-  valid_594282 = validateParameter(valid_594282, JString, required = false,
+  if valid_568510 != nil:
+    section.add "$apply", valid_568510
+  var valid_568511 = query.getOrDefault("$filter")
+  valid_568511 = validateParameter(valid_568511, JString, required = false,
                                  default = nil)
-  if valid_594282 != nil:
-    section.add "$filter", valid_594282
+  if valid_568511 != nil:
+    section.add "$filter", valid_568511
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3291,22 +3291,22 @@ proc validate_UsageDetailsListByManagementGroup_594274(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594283: Call_UsageDetailsListByManagementGroup_594273;
+proc call*(call_568512: Call_UsageDetailsListByManagementGroup_568502;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the usage detail records for all subscriptions belonging to a management group scope by current billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594283.validator(path, query, header, formData, body)
-  let scheme = call_594283.pickScheme
+  let valid = call_568512.validator(path, query, header, formData, body)
+  let scheme = call_568512.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594283.url(scheme.get, call_594283.host, call_594283.base,
-                         call_594283.route, valid.getOrDefault("path"),
+  let url = call_568512.url(scheme.get, call_568512.host, call_568512.base,
+                         call_568512.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594283, url, valid)
+  result = hook(call_568512, url, valid)
 
-proc call*(call_594284: Call_UsageDetailsListByManagementGroup_594273;
+proc call*(call_568513: Call_UsageDetailsListByManagementGroup_568502;
           apiVersion: string; managementGroupId: string; Expand: string = "";
           Top: int = 0; Skiptoken: string = ""; Apply: string = ""; Filter: string = ""): Recallable =
   ## usageDetailsListByManagementGroup
@@ -3326,25 +3326,25 @@ proc call*(call_594284: Call_UsageDetailsListByManagementGroup_594273;
   ##        : OData apply expression to aggregate usageDetails by tags or (tags and properties/usageStart)
   ##   Filter: string
   ##         : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName, properties/instanceId or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_594285 = newJObject()
-  var query_594286 = newJObject()
-  add(query_594286, "$expand", newJString(Expand))
-  add(query_594286, "api-version", newJString(apiVersion))
-  add(path_594285, "managementGroupId", newJString(managementGroupId))
-  add(query_594286, "$top", newJInt(Top))
-  add(query_594286, "$skiptoken", newJString(Skiptoken))
-  add(query_594286, "$apply", newJString(Apply))
-  add(query_594286, "$filter", newJString(Filter))
-  result = call_594284.call(path_594285, query_594286, nil, nil, nil)
+  var path_568514 = newJObject()
+  var query_568515 = newJObject()
+  add(query_568515, "$expand", newJString(Expand))
+  add(query_568515, "api-version", newJString(apiVersion))
+  add(path_568514, "managementGroupId", newJString(managementGroupId))
+  add(query_568515, "$top", newJInt(Top))
+  add(query_568515, "$skiptoken", newJString(Skiptoken))
+  add(query_568515, "$apply", newJString(Apply))
+  add(query_568515, "$filter", newJString(Filter))
+  result = call_568513.call(path_568514, query_568515, nil, nil, nil)
 
-var usageDetailsListByManagementGroup* = Call_UsageDetailsListByManagementGroup_594273(
+var usageDetailsListByManagementGroup* = Call_UsageDetailsListByManagementGroup_568502(
     name: "usageDetailsListByManagementGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Consumption/usageDetails",
-    validator: validate_UsageDetailsListByManagementGroup_594274, base: "",
-    url: url_UsageDetailsListByManagementGroup_594275, schemes: {Scheme.Https})
+    validator: validate_UsageDetailsListByManagementGroup_568503, base: "",
+    url: url_UsageDetailsListByManagementGroup_568504, schemes: {Scheme.Https})
 type
-  Call_MarketplacesListByBillingPeriod_594287 = ref object of OpenApiRestCall_593439
-proc url_MarketplacesListByBillingPeriod_594289(protocol: Scheme; host: string;
+  Call_MarketplacesListByBillingPeriod_568516 = ref object of OpenApiRestCall_567668
+proc url_MarketplacesListByBillingPeriod_568518(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3366,7 +3366,7 @@ proc url_MarketplacesListByBillingPeriod_594289(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplacesListByBillingPeriod_594288(path: JsonNode;
+proc validate_MarketplacesListByBillingPeriod_568517(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the marketplaces for a scope by billing period and subscriptionId. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
@@ -3381,16 +3381,16 @@ proc validate_MarketplacesListByBillingPeriod_594288(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594290 = path.getOrDefault("subscriptionId")
-  valid_594290 = validateParameter(valid_594290, JString, required = true,
+  var valid_568519 = path.getOrDefault("subscriptionId")
+  valid_568519 = validateParameter(valid_568519, JString, required = true,
                                  default = nil)
-  if valid_594290 != nil:
-    section.add "subscriptionId", valid_594290
-  var valid_594291 = path.getOrDefault("billingPeriodName")
-  valid_594291 = validateParameter(valid_594291, JString, required = true,
+  if valid_568519 != nil:
+    section.add "subscriptionId", valid_568519
+  var valid_568520 = path.getOrDefault("billingPeriodName")
+  valid_568520 = validateParameter(valid_568520, JString, required = true,
                                  default = nil)
-  if valid_594291 != nil:
-    section.add "billingPeriodName", valid_594291
+  if valid_568520 != nil:
+    section.add "billingPeriodName", valid_568520
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3404,25 +3404,25 @@ proc validate_MarketplacesListByBillingPeriod_594288(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594292 = query.getOrDefault("api-version")
-  valid_594292 = validateParameter(valid_594292, JString, required = true,
+  var valid_568521 = query.getOrDefault("api-version")
+  valid_568521 = validateParameter(valid_568521, JString, required = true,
                                  default = nil)
-  if valid_594292 != nil:
-    section.add "api-version", valid_594292
-  var valid_594293 = query.getOrDefault("$top")
-  valid_594293 = validateParameter(valid_594293, JInt, required = false, default = nil)
-  if valid_594293 != nil:
-    section.add "$top", valid_594293
-  var valid_594294 = query.getOrDefault("$skiptoken")
-  valid_594294 = validateParameter(valid_594294, JString, required = false,
+  if valid_568521 != nil:
+    section.add "api-version", valid_568521
+  var valid_568522 = query.getOrDefault("$top")
+  valid_568522 = validateParameter(valid_568522, JInt, required = false, default = nil)
+  if valid_568522 != nil:
+    section.add "$top", valid_568522
+  var valid_568523 = query.getOrDefault("$skiptoken")
+  valid_568523 = validateParameter(valid_568523, JString, required = false,
                                  default = nil)
-  if valid_594294 != nil:
-    section.add "$skiptoken", valid_594294
-  var valid_594295 = query.getOrDefault("$filter")
-  valid_594295 = validateParameter(valid_594295, JString, required = false,
+  if valid_568523 != nil:
+    section.add "$skiptoken", valid_568523
+  var valid_568524 = query.getOrDefault("$filter")
+  valid_568524 = validateParameter(valid_568524, JString, required = false,
                                  default = nil)
-  if valid_594295 != nil:
-    section.add "$filter", valid_594295
+  if valid_568524 != nil:
+    section.add "$filter", valid_568524
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3431,22 +3431,22 @@ proc validate_MarketplacesListByBillingPeriod_594288(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594296: Call_MarketplacesListByBillingPeriod_594287;
+proc call*(call_568525: Call_MarketplacesListByBillingPeriod_568516;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the marketplaces for a scope by billing period and subscriptionId. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594296.validator(path, query, header, formData, body)
-  let scheme = call_594296.pickScheme
+  let valid = call_568525.validator(path, query, header, formData, body)
+  let scheme = call_568525.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594296.url(scheme.get, call_594296.host, call_594296.base,
-                         call_594296.route, valid.getOrDefault("path"),
+  let url = call_568525.url(scheme.get, call_568525.host, call_568525.base,
+                         call_568525.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594296, url, valid)
+  result = hook(call_568525, url, valid)
 
-proc call*(call_594297: Call_MarketplacesListByBillingPeriod_594287;
+proc call*(call_568526: Call_MarketplacesListByBillingPeriod_568516;
           apiVersion: string; subscriptionId: string; billingPeriodName: string;
           Top: int = 0; Skiptoken: string = ""; Filter: string = ""): Recallable =
   ## marketplacesListByBillingPeriod
@@ -3464,24 +3464,24 @@ proc call*(call_594297: Call_MarketplacesListByBillingPeriod_594287;
   ##                    : Billing Period Name.
   ##   Filter: string
   ##         : May be used to filter marketplaces by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'.
-  var path_594298 = newJObject()
-  var query_594299 = newJObject()
-  add(query_594299, "api-version", newJString(apiVersion))
-  add(path_594298, "subscriptionId", newJString(subscriptionId))
-  add(query_594299, "$top", newJInt(Top))
-  add(query_594299, "$skiptoken", newJString(Skiptoken))
-  add(path_594298, "billingPeriodName", newJString(billingPeriodName))
-  add(query_594299, "$filter", newJString(Filter))
-  result = call_594297.call(path_594298, query_594299, nil, nil, nil)
+  var path_568527 = newJObject()
+  var query_568528 = newJObject()
+  add(query_568528, "api-version", newJString(apiVersion))
+  add(path_568527, "subscriptionId", newJString(subscriptionId))
+  add(query_568528, "$top", newJInt(Top))
+  add(query_568528, "$skiptoken", newJString(Skiptoken))
+  add(path_568527, "billingPeriodName", newJString(billingPeriodName))
+  add(query_568528, "$filter", newJString(Filter))
+  result = call_568526.call(path_568527, query_568528, nil, nil, nil)
 
-var marketplacesListByBillingPeriod* = Call_MarketplacesListByBillingPeriod_594287(
+var marketplacesListByBillingPeriod* = Call_MarketplacesListByBillingPeriod_568516(
     name: "marketplacesListByBillingPeriod", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/marketplaces",
-    validator: validate_MarketplacesListByBillingPeriod_594288, base: "",
-    url: url_MarketplacesListByBillingPeriod_594289, schemes: {Scheme.Https})
+    validator: validate_MarketplacesListByBillingPeriod_568517, base: "",
+    url: url_MarketplacesListByBillingPeriod_568518, schemes: {Scheme.Https})
 type
-  Call_PriceSheetGetByBillingPeriod_594300 = ref object of OpenApiRestCall_593439
-proc url_PriceSheetGetByBillingPeriod_594302(protocol: Scheme; host: string;
+  Call_PriceSheetGetByBillingPeriod_568529 = ref object of OpenApiRestCall_567668
+proc url_PriceSheetGetByBillingPeriod_568531(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3503,7 +3503,7 @@ proc url_PriceSheetGetByBillingPeriod_594302(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PriceSheetGetByBillingPeriod_594301(path: JsonNode; query: JsonNode;
+proc validate_PriceSheetGetByBillingPeriod_568530(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the price sheet for a scope by subscriptionId and billing period. Price sheet is available via this API only for May 1, 2014 or later.
   ## 
@@ -3518,16 +3518,16 @@ proc validate_PriceSheetGetByBillingPeriod_594301(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594303 = path.getOrDefault("subscriptionId")
-  valid_594303 = validateParameter(valid_594303, JString, required = true,
+  var valid_568532 = path.getOrDefault("subscriptionId")
+  valid_568532 = validateParameter(valid_568532, JString, required = true,
                                  default = nil)
-  if valid_594303 != nil:
-    section.add "subscriptionId", valid_594303
-  var valid_594304 = path.getOrDefault("billingPeriodName")
-  valid_594304 = validateParameter(valid_594304, JString, required = true,
+  if valid_568532 != nil:
+    section.add "subscriptionId", valid_568532
+  var valid_568533 = path.getOrDefault("billingPeriodName")
+  valid_568533 = validateParameter(valid_568533, JString, required = true,
                                  default = nil)
-  if valid_594304 != nil:
-    section.add "billingPeriodName", valid_594304
+  if valid_568533 != nil:
+    section.add "billingPeriodName", valid_568533
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -3539,27 +3539,27 @@ proc validate_PriceSheetGetByBillingPeriod_594301(path: JsonNode; query: JsonNod
   ##   $skiptoken: JString
   ##             : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
   section = newJObject()
-  var valid_594305 = query.getOrDefault("$expand")
-  valid_594305 = validateParameter(valid_594305, JString, required = false,
+  var valid_568534 = query.getOrDefault("$expand")
+  valid_568534 = validateParameter(valid_568534, JString, required = false,
                                  default = nil)
-  if valid_594305 != nil:
-    section.add "$expand", valid_594305
+  if valid_568534 != nil:
+    section.add "$expand", valid_568534
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594306 = query.getOrDefault("api-version")
-  valid_594306 = validateParameter(valid_594306, JString, required = true,
+  var valid_568535 = query.getOrDefault("api-version")
+  valid_568535 = validateParameter(valid_568535, JString, required = true,
                                  default = nil)
-  if valid_594306 != nil:
-    section.add "api-version", valid_594306
-  var valid_594307 = query.getOrDefault("$top")
-  valid_594307 = validateParameter(valid_594307, JInt, required = false, default = nil)
-  if valid_594307 != nil:
-    section.add "$top", valid_594307
-  var valid_594308 = query.getOrDefault("$skiptoken")
-  valid_594308 = validateParameter(valid_594308, JString, required = false,
+  if valid_568535 != nil:
+    section.add "api-version", valid_568535
+  var valid_568536 = query.getOrDefault("$top")
+  valid_568536 = validateParameter(valid_568536, JInt, required = false, default = nil)
+  if valid_568536 != nil:
+    section.add "$top", valid_568536
+  var valid_568537 = query.getOrDefault("$skiptoken")
+  valid_568537 = validateParameter(valid_568537, JString, required = false,
                                  default = nil)
-  if valid_594308 != nil:
-    section.add "$skiptoken", valid_594308
+  if valid_568537 != nil:
+    section.add "$skiptoken", valid_568537
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3568,21 +3568,21 @@ proc validate_PriceSheetGetByBillingPeriod_594301(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594309: Call_PriceSheetGetByBillingPeriod_594300; path: JsonNode;
+proc call*(call_568538: Call_PriceSheetGetByBillingPeriod_568529; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the price sheet for a scope by subscriptionId and billing period. Price sheet is available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594309.validator(path, query, header, formData, body)
-  let scheme = call_594309.pickScheme
+  let valid = call_568538.validator(path, query, header, formData, body)
+  let scheme = call_568538.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594309.url(scheme.get, call_594309.host, call_594309.base,
-                         call_594309.route, valid.getOrDefault("path"),
+  let url = call_568538.url(scheme.get, call_568538.host, call_568538.base,
+                         call_568538.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594309, url, valid)
+  result = hook(call_568538, url, valid)
 
-proc call*(call_594310: Call_PriceSheetGetByBillingPeriod_594300;
+proc call*(call_568539: Call_PriceSheetGetByBillingPeriod_568529;
           apiVersion: string; subscriptionId: string; billingPeriodName: string;
           Expand: string = ""; Top: int = 0; Skiptoken: string = ""): Recallable =
   ## priceSheetGetByBillingPeriod
@@ -3600,24 +3600,24 @@ proc call*(call_594310: Call_PriceSheetGetByBillingPeriod_594300;
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
   ##   billingPeriodName: string (required)
   ##                    : Billing Period Name.
-  var path_594311 = newJObject()
-  var query_594312 = newJObject()
-  add(query_594312, "$expand", newJString(Expand))
-  add(query_594312, "api-version", newJString(apiVersion))
-  add(path_594311, "subscriptionId", newJString(subscriptionId))
-  add(query_594312, "$top", newJInt(Top))
-  add(query_594312, "$skiptoken", newJString(Skiptoken))
-  add(path_594311, "billingPeriodName", newJString(billingPeriodName))
-  result = call_594310.call(path_594311, query_594312, nil, nil, nil)
+  var path_568540 = newJObject()
+  var query_568541 = newJObject()
+  add(query_568541, "$expand", newJString(Expand))
+  add(query_568541, "api-version", newJString(apiVersion))
+  add(path_568540, "subscriptionId", newJString(subscriptionId))
+  add(query_568541, "$top", newJInt(Top))
+  add(query_568541, "$skiptoken", newJString(Skiptoken))
+  add(path_568540, "billingPeriodName", newJString(billingPeriodName))
+  result = call_568539.call(path_568540, query_568541, nil, nil, nil)
 
-var priceSheetGetByBillingPeriod* = Call_PriceSheetGetByBillingPeriod_594300(
+var priceSheetGetByBillingPeriod* = Call_PriceSheetGetByBillingPeriod_568529(
     name: "priceSheetGetByBillingPeriod", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/pricesheets/default",
-    validator: validate_PriceSheetGetByBillingPeriod_594301, base: "",
-    url: url_PriceSheetGetByBillingPeriod_594302, schemes: {Scheme.Https})
+    validator: validate_PriceSheetGetByBillingPeriod_568530, base: "",
+    url: url_PriceSheetGetByBillingPeriod_568531, schemes: {Scheme.Https})
 type
-  Call_UsageDetailsListByBillingPeriod_594313 = ref object of OpenApiRestCall_593439
-proc url_UsageDetailsListByBillingPeriod_594315(protocol: Scheme; host: string;
+  Call_UsageDetailsListByBillingPeriod_568542 = ref object of OpenApiRestCall_567668
+proc url_UsageDetailsListByBillingPeriod_568544(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3639,7 +3639,7 @@ proc url_UsageDetailsListByBillingPeriod_594315(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageDetailsListByBillingPeriod_594314(path: JsonNode;
+proc validate_UsageDetailsListByBillingPeriod_568543(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the usage details for a scope by billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
@@ -3654,16 +3654,16 @@ proc validate_UsageDetailsListByBillingPeriod_594314(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594316 = path.getOrDefault("subscriptionId")
-  valid_594316 = validateParameter(valid_594316, JString, required = true,
+  var valid_568545 = path.getOrDefault("subscriptionId")
+  valid_568545 = validateParameter(valid_568545, JString, required = true,
                                  default = nil)
-  if valid_594316 != nil:
-    section.add "subscriptionId", valid_594316
-  var valid_594317 = path.getOrDefault("billingPeriodName")
-  valid_594317 = validateParameter(valid_594317, JString, required = true,
+  if valid_568545 != nil:
+    section.add "subscriptionId", valid_568545
+  var valid_568546 = path.getOrDefault("billingPeriodName")
+  valid_568546 = validateParameter(valid_568546, JString, required = true,
                                  default = nil)
-  if valid_594317 != nil:
-    section.add "billingPeriodName", valid_594317
+  if valid_568546 != nil:
+    section.add "billingPeriodName", valid_568546
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -3679,37 +3679,37 @@ proc validate_UsageDetailsListByBillingPeriod_594314(path: JsonNode;
   ##   $filter: JString
   ##          : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   section = newJObject()
-  var valid_594318 = query.getOrDefault("$expand")
-  valid_594318 = validateParameter(valid_594318, JString, required = false,
+  var valid_568547 = query.getOrDefault("$expand")
+  valid_568547 = validateParameter(valid_568547, JString, required = false,
                                  default = nil)
-  if valid_594318 != nil:
-    section.add "$expand", valid_594318
+  if valid_568547 != nil:
+    section.add "$expand", valid_568547
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594319 = query.getOrDefault("api-version")
-  valid_594319 = validateParameter(valid_594319, JString, required = true,
+  var valid_568548 = query.getOrDefault("api-version")
+  valid_568548 = validateParameter(valid_568548, JString, required = true,
                                  default = nil)
-  if valid_594319 != nil:
-    section.add "api-version", valid_594319
-  var valid_594320 = query.getOrDefault("$top")
-  valid_594320 = validateParameter(valid_594320, JInt, required = false, default = nil)
-  if valid_594320 != nil:
-    section.add "$top", valid_594320
-  var valid_594321 = query.getOrDefault("$skiptoken")
-  valid_594321 = validateParameter(valid_594321, JString, required = false,
+  if valid_568548 != nil:
+    section.add "api-version", valid_568548
+  var valid_568549 = query.getOrDefault("$top")
+  valid_568549 = validateParameter(valid_568549, JInt, required = false, default = nil)
+  if valid_568549 != nil:
+    section.add "$top", valid_568549
+  var valid_568550 = query.getOrDefault("$skiptoken")
+  valid_568550 = validateParameter(valid_568550, JString, required = false,
                                  default = nil)
-  if valid_594321 != nil:
-    section.add "$skiptoken", valid_594321
-  var valid_594322 = query.getOrDefault("$apply")
-  valid_594322 = validateParameter(valid_594322, JString, required = false,
+  if valid_568550 != nil:
+    section.add "$skiptoken", valid_568550
+  var valid_568551 = query.getOrDefault("$apply")
+  valid_568551 = validateParameter(valid_568551, JString, required = false,
                                  default = nil)
-  if valid_594322 != nil:
-    section.add "$apply", valid_594322
-  var valid_594323 = query.getOrDefault("$filter")
-  valid_594323 = validateParameter(valid_594323, JString, required = false,
+  if valid_568551 != nil:
+    section.add "$apply", valid_568551
+  var valid_568552 = query.getOrDefault("$filter")
+  valid_568552 = validateParameter(valid_568552, JString, required = false,
                                  default = nil)
-  if valid_594323 != nil:
-    section.add "$filter", valid_594323
+  if valid_568552 != nil:
+    section.add "$filter", valid_568552
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3718,22 +3718,22 @@ proc validate_UsageDetailsListByBillingPeriod_594314(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594324: Call_UsageDetailsListByBillingPeriod_594313;
+proc call*(call_568553: Call_UsageDetailsListByBillingPeriod_568542;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the usage details for a scope by billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594324.validator(path, query, header, formData, body)
-  let scheme = call_594324.pickScheme
+  let valid = call_568553.validator(path, query, header, formData, body)
+  let scheme = call_568553.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594324.url(scheme.get, call_594324.host, call_594324.base,
-                         call_594324.route, valid.getOrDefault("path"),
+  let url = call_568553.url(scheme.get, call_568553.host, call_568553.base,
+                         call_568553.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594324, url, valid)
+  result = hook(call_568553, url, valid)
 
-proc call*(call_594325: Call_UsageDetailsListByBillingPeriod_594313;
+proc call*(call_568554: Call_UsageDetailsListByBillingPeriod_568542;
           apiVersion: string; subscriptionId: string; billingPeriodName: string;
           Expand: string = ""; Top: int = 0; Skiptoken: string = ""; Apply: string = "";
           Filter: string = ""): Recallable =
@@ -3756,26 +3756,26 @@ proc call*(call_594325: Call_UsageDetailsListByBillingPeriod_594313;
   ##        : OData apply expression to aggregate usageDetails by tags or (tags and properties/usageStart) for specified billing period
   ##   Filter: string
   ##         : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_594326 = newJObject()
-  var query_594327 = newJObject()
-  add(query_594327, "$expand", newJString(Expand))
-  add(query_594327, "api-version", newJString(apiVersion))
-  add(path_594326, "subscriptionId", newJString(subscriptionId))
-  add(query_594327, "$top", newJInt(Top))
-  add(query_594327, "$skiptoken", newJString(Skiptoken))
-  add(path_594326, "billingPeriodName", newJString(billingPeriodName))
-  add(query_594327, "$apply", newJString(Apply))
-  add(query_594327, "$filter", newJString(Filter))
-  result = call_594325.call(path_594326, query_594327, nil, nil, nil)
+  var path_568555 = newJObject()
+  var query_568556 = newJObject()
+  add(query_568556, "$expand", newJString(Expand))
+  add(query_568556, "api-version", newJString(apiVersion))
+  add(path_568555, "subscriptionId", newJString(subscriptionId))
+  add(query_568556, "$top", newJInt(Top))
+  add(query_568556, "$skiptoken", newJString(Skiptoken))
+  add(path_568555, "billingPeriodName", newJString(billingPeriodName))
+  add(query_568556, "$apply", newJString(Apply))
+  add(query_568556, "$filter", newJString(Filter))
+  result = call_568554.call(path_568555, query_568556, nil, nil, nil)
 
-var usageDetailsListByBillingPeriod* = Call_UsageDetailsListByBillingPeriod_594313(
+var usageDetailsListByBillingPeriod* = Call_UsageDetailsListByBillingPeriod_568542(
     name: "usageDetailsListByBillingPeriod", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/usageDetails",
-    validator: validate_UsageDetailsListByBillingPeriod_594314, base: "",
-    url: url_UsageDetailsListByBillingPeriod_594315, schemes: {Scheme.Https})
+    validator: validate_UsageDetailsListByBillingPeriod_568543, base: "",
+    url: url_UsageDetailsListByBillingPeriod_568544, schemes: {Scheme.Https})
 type
-  Call_BudgetsList_594328 = ref object of OpenApiRestCall_593439
-proc url_BudgetsList_594330(protocol: Scheme; host: string; base: string;
+  Call_BudgetsList_568557 = ref object of OpenApiRestCall_567668
+proc url_BudgetsList_568559(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3791,7 +3791,7 @@ proc url_BudgetsList_594330(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetsList_594329(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BudgetsList_568558(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all budgets for a subscription.
   ## 
@@ -3804,11 +3804,11 @@ proc validate_BudgetsList_594329(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594331 = path.getOrDefault("subscriptionId")
-  valid_594331 = validateParameter(valid_594331, JString, required = true,
+  var valid_568560 = path.getOrDefault("subscriptionId")
+  valid_568560 = validateParameter(valid_568560, JString, required = true,
                                  default = nil)
-  if valid_594331 != nil:
-    section.add "subscriptionId", valid_594331
+  if valid_568560 != nil:
+    section.add "subscriptionId", valid_568560
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3816,11 +3816,11 @@ proc validate_BudgetsList_594329(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594332 = query.getOrDefault("api-version")
-  valid_594332 = validateParameter(valid_594332, JString, required = true,
+  var valid_568561 = query.getOrDefault("api-version")
+  valid_568561 = validateParameter(valid_568561, JString, required = true,
                                  default = nil)
-  if valid_594332 != nil:
-    section.add "api-version", valid_594332
+  if valid_568561 != nil:
+    section.add "api-version", valid_568561
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3829,21 +3829,21 @@ proc validate_BudgetsList_594329(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594333: Call_BudgetsList_594328; path: JsonNode; query: JsonNode;
+proc call*(call_568562: Call_BudgetsList_568557; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all budgets for a subscription.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594333.validator(path, query, header, formData, body)
-  let scheme = call_594333.pickScheme
+  let valid = call_568562.validator(path, query, header, formData, body)
+  let scheme = call_568562.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594333.url(scheme.get, call_594333.host, call_594333.base,
-                         call_594333.route, valid.getOrDefault("path"),
+  let url = call_568562.url(scheme.get, call_568562.host, call_568562.base,
+                         call_568562.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594333, url, valid)
+  result = hook(call_568562, url, valid)
 
-proc call*(call_594334: Call_BudgetsList_594328; apiVersion: string;
+proc call*(call_568563: Call_BudgetsList_568557; apiVersion: string;
           subscriptionId: string): Recallable =
   ## budgetsList
   ## Lists all budgets for a subscription.
@@ -3852,21 +3852,21 @@ proc call*(call_594334: Call_BudgetsList_594328; apiVersion: string;
   ##             : Version of the API to be used with the client request. The current version is 2018-06-30.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_594335 = newJObject()
-  var query_594336 = newJObject()
-  add(query_594336, "api-version", newJString(apiVersion))
-  add(path_594335, "subscriptionId", newJString(subscriptionId))
-  result = call_594334.call(path_594335, query_594336, nil, nil, nil)
+  var path_568564 = newJObject()
+  var query_568565 = newJObject()
+  add(query_568565, "api-version", newJString(apiVersion))
+  add(path_568564, "subscriptionId", newJString(subscriptionId))
+  result = call_568563.call(path_568564, query_568565, nil, nil, nil)
 
-var budgetsList* = Call_BudgetsList_594328(name: "budgetsList",
+var budgetsList* = Call_BudgetsList_568557(name: "budgetsList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/budgets",
-                                        validator: validate_BudgetsList_594329,
-                                        base: "", url: url_BudgetsList_594330,
+                                        validator: validate_BudgetsList_568558,
+                                        base: "", url: url_BudgetsList_568559,
                                         schemes: {Scheme.Https})
 type
-  Call_BudgetsCreateOrUpdate_594347 = ref object of OpenApiRestCall_593439
-proc url_BudgetsCreateOrUpdate_594349(protocol: Scheme; host: string; base: string;
+  Call_BudgetsCreateOrUpdate_568576 = ref object of OpenApiRestCall_567668
+proc url_BudgetsCreateOrUpdate_568578(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3884,7 +3884,7 @@ proc url_BudgetsCreateOrUpdate_594349(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetsCreateOrUpdate_594348(path: JsonNode; query: JsonNode;
+proc validate_BudgetsCreateOrUpdate_568577(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create or update a budget. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
@@ -3899,16 +3899,16 @@ proc validate_BudgetsCreateOrUpdate_594348(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594350 = path.getOrDefault("subscriptionId")
-  valid_594350 = validateParameter(valid_594350, JString, required = true,
+  var valid_568579 = path.getOrDefault("subscriptionId")
+  valid_568579 = validateParameter(valid_568579, JString, required = true,
                                  default = nil)
-  if valid_594350 != nil:
-    section.add "subscriptionId", valid_594350
-  var valid_594351 = path.getOrDefault("budgetName")
-  valid_594351 = validateParameter(valid_594351, JString, required = true,
+  if valid_568579 != nil:
+    section.add "subscriptionId", valid_568579
+  var valid_568580 = path.getOrDefault("budgetName")
+  valid_568580 = validateParameter(valid_568580, JString, required = true,
                                  default = nil)
-  if valid_594351 != nil:
-    section.add "budgetName", valid_594351
+  if valid_568580 != nil:
+    section.add "budgetName", valid_568580
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3916,11 +3916,11 @@ proc validate_BudgetsCreateOrUpdate_594348(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594352 = query.getOrDefault("api-version")
-  valid_594352 = validateParameter(valid_594352, JString, required = true,
+  var valid_568581 = query.getOrDefault("api-version")
+  valid_568581 = validateParameter(valid_568581, JString, required = true,
                                  default = nil)
-  if valid_594352 != nil:
-    section.add "api-version", valid_594352
+  if valid_568581 != nil:
+    section.add "api-version", valid_568581
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3934,21 +3934,21 @@ proc validate_BudgetsCreateOrUpdate_594348(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594354: Call_BudgetsCreateOrUpdate_594347; path: JsonNode;
+proc call*(call_568583: Call_BudgetsCreateOrUpdate_568576; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to create or update a budget. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594354.validator(path, query, header, formData, body)
-  let scheme = call_594354.pickScheme
+  let valid = call_568583.validator(path, query, header, formData, body)
+  let scheme = call_568583.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594354.url(scheme.get, call_594354.host, call_594354.base,
-                         call_594354.route, valid.getOrDefault("path"),
+  let url = call_568583.url(scheme.get, call_568583.host, call_568583.base,
+                         call_568583.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594354, url, valid)
+  result = hook(call_568583, url, valid)
 
-proc call*(call_594355: Call_BudgetsCreateOrUpdate_594347; apiVersion: string;
+proc call*(call_568584: Call_BudgetsCreateOrUpdate_568576; apiVersion: string;
           subscriptionId: string; parameters: JsonNode; budgetName: string): Recallable =
   ## budgetsCreateOrUpdate
   ## The operation to create or update a budget. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
@@ -3961,24 +3961,24 @@ proc call*(call_594355: Call_BudgetsCreateOrUpdate_594347; apiVersion: string;
   ##             : Parameters supplied to the Create Budget operation.
   ##   budgetName: string (required)
   ##             : Budget Name.
-  var path_594356 = newJObject()
-  var query_594357 = newJObject()
-  var body_594358 = newJObject()
-  add(query_594357, "api-version", newJString(apiVersion))
-  add(path_594356, "subscriptionId", newJString(subscriptionId))
+  var path_568585 = newJObject()
+  var query_568586 = newJObject()
+  var body_568587 = newJObject()
+  add(query_568586, "api-version", newJString(apiVersion))
+  add(path_568585, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594358 = parameters
-  add(path_594356, "budgetName", newJString(budgetName))
-  result = call_594355.call(path_594356, query_594357, nil, nil, body_594358)
+    body_568587 = parameters
+  add(path_568585, "budgetName", newJString(budgetName))
+  result = call_568584.call(path_568585, query_568586, nil, nil, body_568587)
 
-var budgetsCreateOrUpdate* = Call_BudgetsCreateOrUpdate_594347(
+var budgetsCreateOrUpdate* = Call_BudgetsCreateOrUpdate_568576(
     name: "budgetsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/budgets/{budgetName}",
-    validator: validate_BudgetsCreateOrUpdate_594348, base: "",
-    url: url_BudgetsCreateOrUpdate_594349, schemes: {Scheme.Https})
+    validator: validate_BudgetsCreateOrUpdate_568577, base: "",
+    url: url_BudgetsCreateOrUpdate_568578, schemes: {Scheme.Https})
 type
-  Call_BudgetsGet_594337 = ref object of OpenApiRestCall_593439
-proc url_BudgetsGet_594339(protocol: Scheme; host: string; base: string; route: string;
+  Call_BudgetsGet_568566 = ref object of OpenApiRestCall_567668
+proc url_BudgetsGet_568568(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3996,7 +3996,7 @@ proc url_BudgetsGet_594339(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetsGet_594338(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BudgetsGet_568567(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the budget for a subscription by budget name.
   ## 
@@ -4011,16 +4011,16 @@ proc validate_BudgetsGet_594338(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594340 = path.getOrDefault("subscriptionId")
-  valid_594340 = validateParameter(valid_594340, JString, required = true,
+  var valid_568569 = path.getOrDefault("subscriptionId")
+  valid_568569 = validateParameter(valid_568569, JString, required = true,
                                  default = nil)
-  if valid_594340 != nil:
-    section.add "subscriptionId", valid_594340
-  var valid_594341 = path.getOrDefault("budgetName")
-  valid_594341 = validateParameter(valid_594341, JString, required = true,
+  if valid_568569 != nil:
+    section.add "subscriptionId", valid_568569
+  var valid_568570 = path.getOrDefault("budgetName")
+  valid_568570 = validateParameter(valid_568570, JString, required = true,
                                  default = nil)
-  if valid_594341 != nil:
-    section.add "budgetName", valid_594341
+  if valid_568570 != nil:
+    section.add "budgetName", valid_568570
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4028,11 +4028,11 @@ proc validate_BudgetsGet_594338(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594342 = query.getOrDefault("api-version")
-  valid_594342 = validateParameter(valid_594342, JString, required = true,
+  var valid_568571 = query.getOrDefault("api-version")
+  valid_568571 = validateParameter(valid_568571, JString, required = true,
                                  default = nil)
-  if valid_594342 != nil:
-    section.add "api-version", valid_594342
+  if valid_568571 != nil:
+    section.add "api-version", valid_568571
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4041,21 +4041,21 @@ proc validate_BudgetsGet_594338(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594343: Call_BudgetsGet_594337; path: JsonNode; query: JsonNode;
+proc call*(call_568572: Call_BudgetsGet_568566; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the budget for a subscription by budget name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594343.validator(path, query, header, formData, body)
-  let scheme = call_594343.pickScheme
+  let valid = call_568572.validator(path, query, header, formData, body)
+  let scheme = call_568572.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594343.url(scheme.get, call_594343.host, call_594343.base,
-                         call_594343.route, valid.getOrDefault("path"),
+  let url = call_568572.url(scheme.get, call_568572.host, call_568572.base,
+                         call_568572.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594343, url, valid)
+  result = hook(call_568572, url, valid)
 
-proc call*(call_594344: Call_BudgetsGet_594337; apiVersion: string;
+proc call*(call_568573: Call_BudgetsGet_568566; apiVersion: string;
           subscriptionId: string; budgetName: string): Recallable =
   ## budgetsGet
   ## Gets the budget for a subscription by budget name.
@@ -4066,22 +4066,22 @@ proc call*(call_594344: Call_BudgetsGet_594337; apiVersion: string;
   ##                 : Azure Subscription ID.
   ##   budgetName: string (required)
   ##             : Budget Name.
-  var path_594345 = newJObject()
-  var query_594346 = newJObject()
-  add(query_594346, "api-version", newJString(apiVersion))
-  add(path_594345, "subscriptionId", newJString(subscriptionId))
-  add(path_594345, "budgetName", newJString(budgetName))
-  result = call_594344.call(path_594345, query_594346, nil, nil, nil)
+  var path_568574 = newJObject()
+  var query_568575 = newJObject()
+  add(query_568575, "api-version", newJString(apiVersion))
+  add(path_568574, "subscriptionId", newJString(subscriptionId))
+  add(path_568574, "budgetName", newJString(budgetName))
+  result = call_568573.call(path_568574, query_568575, nil, nil, nil)
 
-var budgetsGet* = Call_BudgetsGet_594337(name: "budgetsGet",
+var budgetsGet* = Call_BudgetsGet_568566(name: "budgetsGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/budgets/{budgetName}",
-                                      validator: validate_BudgetsGet_594338,
-                                      base: "", url: url_BudgetsGet_594339,
+                                      validator: validate_BudgetsGet_568567,
+                                      base: "", url: url_BudgetsGet_568568,
                                       schemes: {Scheme.Https})
 type
-  Call_BudgetsDelete_594359 = ref object of OpenApiRestCall_593439
-proc url_BudgetsDelete_594361(protocol: Scheme; host: string; base: string;
+  Call_BudgetsDelete_568588 = ref object of OpenApiRestCall_567668
+proc url_BudgetsDelete_568590(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4099,7 +4099,7 @@ proc url_BudgetsDelete_594361(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetsDelete_594360(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BudgetsDelete_568589(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to delete a budget.
   ## 
@@ -4114,16 +4114,16 @@ proc validate_BudgetsDelete_594360(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594362 = path.getOrDefault("subscriptionId")
-  valid_594362 = validateParameter(valid_594362, JString, required = true,
+  var valid_568591 = path.getOrDefault("subscriptionId")
+  valid_568591 = validateParameter(valid_568591, JString, required = true,
                                  default = nil)
-  if valid_594362 != nil:
-    section.add "subscriptionId", valid_594362
-  var valid_594363 = path.getOrDefault("budgetName")
-  valid_594363 = validateParameter(valid_594363, JString, required = true,
+  if valid_568591 != nil:
+    section.add "subscriptionId", valid_568591
+  var valid_568592 = path.getOrDefault("budgetName")
+  valid_568592 = validateParameter(valid_568592, JString, required = true,
                                  default = nil)
-  if valid_594363 != nil:
-    section.add "budgetName", valid_594363
+  if valid_568592 != nil:
+    section.add "budgetName", valid_568592
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4131,11 +4131,11 @@ proc validate_BudgetsDelete_594360(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594364 = query.getOrDefault("api-version")
-  valid_594364 = validateParameter(valid_594364, JString, required = true,
+  var valid_568593 = query.getOrDefault("api-version")
+  valid_568593 = validateParameter(valid_568593, JString, required = true,
                                  default = nil)
-  if valid_594364 != nil:
-    section.add "api-version", valid_594364
+  if valid_568593 != nil:
+    section.add "api-version", valid_568593
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4144,21 +4144,21 @@ proc validate_BudgetsDelete_594360(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594365: Call_BudgetsDelete_594359; path: JsonNode; query: JsonNode;
+proc call*(call_568594: Call_BudgetsDelete_568588; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to delete a budget.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594365.validator(path, query, header, formData, body)
-  let scheme = call_594365.pickScheme
+  let valid = call_568594.validator(path, query, header, formData, body)
+  let scheme = call_568594.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594365.url(scheme.get, call_594365.host, call_594365.base,
-                         call_594365.route, valid.getOrDefault("path"),
+  let url = call_568594.url(scheme.get, call_568594.host, call_568594.base,
+                         call_568594.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594365, url, valid)
+  result = hook(call_568594, url, valid)
 
-proc call*(call_594366: Call_BudgetsDelete_594359; apiVersion: string;
+proc call*(call_568595: Call_BudgetsDelete_568588; apiVersion: string;
           subscriptionId: string; budgetName: string): Recallable =
   ## budgetsDelete
   ## The operation to delete a budget.
@@ -4169,20 +4169,20 @@ proc call*(call_594366: Call_BudgetsDelete_594359; apiVersion: string;
   ##                 : Azure Subscription ID.
   ##   budgetName: string (required)
   ##             : Budget Name.
-  var path_594367 = newJObject()
-  var query_594368 = newJObject()
-  add(query_594368, "api-version", newJString(apiVersion))
-  add(path_594367, "subscriptionId", newJString(subscriptionId))
-  add(path_594367, "budgetName", newJString(budgetName))
-  result = call_594366.call(path_594367, query_594368, nil, nil, nil)
+  var path_568596 = newJObject()
+  var query_568597 = newJObject()
+  add(query_568597, "api-version", newJString(apiVersion))
+  add(path_568596, "subscriptionId", newJString(subscriptionId))
+  add(path_568596, "budgetName", newJString(budgetName))
+  result = call_568595.call(path_568596, query_568597, nil, nil, nil)
 
-var budgetsDelete* = Call_BudgetsDelete_594359(name: "budgetsDelete",
+var budgetsDelete* = Call_BudgetsDelete_568588(name: "budgetsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/budgets/{budgetName}",
-    validator: validate_BudgetsDelete_594360, base: "", url: url_BudgetsDelete_594361,
+    validator: validate_BudgetsDelete_568589, base: "", url: url_BudgetsDelete_568590,
     schemes: {Scheme.Https})
 type
-  Call_ForecastsList_594369 = ref object of OpenApiRestCall_593439
-proc url_ForecastsList_594371(protocol: Scheme; host: string; base: string;
+  Call_ForecastsList_568598 = ref object of OpenApiRestCall_567668
+proc url_ForecastsList_568600(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4198,7 +4198,7 @@ proc url_ForecastsList_594371(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ForecastsList_594370(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ForecastsList_568599(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the forecast charges by subscriptionId.
   ## 
@@ -4211,11 +4211,11 @@ proc validate_ForecastsList_594370(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594372 = path.getOrDefault("subscriptionId")
-  valid_594372 = validateParameter(valid_594372, JString, required = true,
+  var valid_568601 = path.getOrDefault("subscriptionId")
+  valid_568601 = validateParameter(valid_568601, JString, required = true,
                                  default = nil)
-  if valid_594372 != nil:
-    section.add "subscriptionId", valid_594372
+  if valid_568601 != nil:
+    section.add "subscriptionId", valid_568601
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4225,16 +4225,16 @@ proc validate_ForecastsList_594370(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594373 = query.getOrDefault("api-version")
-  valid_594373 = validateParameter(valid_594373, JString, required = true,
+  var valid_568602 = query.getOrDefault("api-version")
+  valid_568602 = validateParameter(valid_568602, JString, required = true,
                                  default = nil)
-  if valid_594373 != nil:
-    section.add "api-version", valid_594373
-  var valid_594374 = query.getOrDefault("$filter")
-  valid_594374 = validateParameter(valid_594374, JString, required = false,
+  if valid_568602 != nil:
+    section.add "api-version", valid_568602
+  var valid_568603 = query.getOrDefault("$filter")
+  valid_568603 = validateParameter(valid_568603, JString, required = false,
                                  default = nil)
-  if valid_594374 != nil:
-    section.add "$filter", valid_594374
+  if valid_568603 != nil:
+    section.add "$filter", valid_568603
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4243,21 +4243,21 @@ proc validate_ForecastsList_594370(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594375: Call_ForecastsList_594369; path: JsonNode; query: JsonNode;
+proc call*(call_568604: Call_ForecastsList_568598; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the forecast charges by subscriptionId.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594375.validator(path, query, header, formData, body)
-  let scheme = call_594375.pickScheme
+  let valid = call_568604.validator(path, query, header, formData, body)
+  let scheme = call_568604.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594375.url(scheme.get, call_594375.host, call_594375.base,
-                         call_594375.route, valid.getOrDefault("path"),
+  let url = call_568604.url(scheme.get, call_568604.host, call_568604.base,
+                         call_568604.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594375, url, valid)
+  result = hook(call_568604, url, valid)
 
-proc call*(call_594376: Call_ForecastsList_594369; apiVersion: string;
+proc call*(call_568605: Call_ForecastsList_568598; apiVersion: string;
           subscriptionId: string; Filter: string = ""): Recallable =
   ## forecastsList
   ## Lists the forecast charges by subscriptionId.
@@ -4268,20 +4268,20 @@ proc call*(call_594376: Call_ForecastsList_594369; apiVersion: string;
   ##                 : Azure Subscription ID.
   ##   Filter: string
   ##         : May be used to filter forecasts by properties/usageDate (Utc time), properties/chargeType or properties/grain. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'.
-  var path_594377 = newJObject()
-  var query_594378 = newJObject()
-  add(query_594378, "api-version", newJString(apiVersion))
-  add(path_594377, "subscriptionId", newJString(subscriptionId))
-  add(query_594378, "$filter", newJString(Filter))
-  result = call_594376.call(path_594377, query_594378, nil, nil, nil)
+  var path_568606 = newJObject()
+  var query_568607 = newJObject()
+  add(query_568607, "api-version", newJString(apiVersion))
+  add(path_568606, "subscriptionId", newJString(subscriptionId))
+  add(query_568607, "$filter", newJString(Filter))
+  result = call_568605.call(path_568606, query_568607, nil, nil, nil)
 
-var forecastsList* = Call_ForecastsList_594369(name: "forecastsList",
+var forecastsList* = Call_ForecastsList_568598(name: "forecastsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/forecasts",
-    validator: validate_ForecastsList_594370, base: "", url: url_ForecastsList_594371,
+    validator: validate_ForecastsList_568599, base: "", url: url_ForecastsList_568600,
     schemes: {Scheme.Https})
 type
-  Call_MarketplacesList_594379 = ref object of OpenApiRestCall_593439
-proc url_MarketplacesList_594381(protocol: Scheme; host: string; base: string;
+  Call_MarketplacesList_568608 = ref object of OpenApiRestCall_567668
+proc url_MarketplacesList_568610(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4298,7 +4298,7 @@ proc url_MarketplacesList_594381(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplacesList_594380(path: JsonNode; query: JsonNode;
+proc validate_MarketplacesList_568609(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Lists the marketplaces for a scope by subscriptionId and current billing period. Marketplaces are available via this API only for May 1, 2014 or later.
@@ -4312,11 +4312,11 @@ proc validate_MarketplacesList_594380(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594382 = path.getOrDefault("subscriptionId")
-  valid_594382 = validateParameter(valid_594382, JString, required = true,
+  var valid_568611 = path.getOrDefault("subscriptionId")
+  valid_568611 = validateParameter(valid_568611, JString, required = true,
                                  default = nil)
-  if valid_594382 != nil:
-    section.add "subscriptionId", valid_594382
+  if valid_568611 != nil:
+    section.add "subscriptionId", valid_568611
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4330,25 +4330,25 @@ proc validate_MarketplacesList_594380(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594383 = query.getOrDefault("api-version")
-  valid_594383 = validateParameter(valid_594383, JString, required = true,
+  var valid_568612 = query.getOrDefault("api-version")
+  valid_568612 = validateParameter(valid_568612, JString, required = true,
                                  default = nil)
-  if valid_594383 != nil:
-    section.add "api-version", valid_594383
-  var valid_594384 = query.getOrDefault("$top")
-  valid_594384 = validateParameter(valid_594384, JInt, required = false, default = nil)
-  if valid_594384 != nil:
-    section.add "$top", valid_594384
-  var valid_594385 = query.getOrDefault("$skiptoken")
-  valid_594385 = validateParameter(valid_594385, JString, required = false,
+  if valid_568612 != nil:
+    section.add "api-version", valid_568612
+  var valid_568613 = query.getOrDefault("$top")
+  valid_568613 = validateParameter(valid_568613, JInt, required = false, default = nil)
+  if valid_568613 != nil:
+    section.add "$top", valid_568613
+  var valid_568614 = query.getOrDefault("$skiptoken")
+  valid_568614 = validateParameter(valid_568614, JString, required = false,
                                  default = nil)
-  if valid_594385 != nil:
-    section.add "$skiptoken", valid_594385
-  var valid_594386 = query.getOrDefault("$filter")
-  valid_594386 = validateParameter(valid_594386, JString, required = false,
+  if valid_568614 != nil:
+    section.add "$skiptoken", valid_568614
+  var valid_568615 = query.getOrDefault("$filter")
+  valid_568615 = validateParameter(valid_568615, JString, required = false,
                                  default = nil)
-  if valid_594386 != nil:
-    section.add "$filter", valid_594386
+  if valid_568615 != nil:
+    section.add "$filter", valid_568615
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4357,21 +4357,21 @@ proc validate_MarketplacesList_594380(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594387: Call_MarketplacesList_594379; path: JsonNode;
+proc call*(call_568616: Call_MarketplacesList_568608; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the marketplaces for a scope by subscriptionId and current billing period. Marketplaces are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594387.validator(path, query, header, formData, body)
-  let scheme = call_594387.pickScheme
+  let valid = call_568616.validator(path, query, header, formData, body)
+  let scheme = call_568616.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594387.url(scheme.get, call_594387.host, call_594387.base,
-                         call_594387.route, valid.getOrDefault("path"),
+  let url = call_568616.url(scheme.get, call_568616.host, call_568616.base,
+                         call_568616.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594387, url, valid)
+  result = hook(call_568616, url, valid)
 
-proc call*(call_594388: Call_MarketplacesList_594379; apiVersion: string;
+proc call*(call_568617: Call_MarketplacesList_568608; apiVersion: string;
           subscriptionId: string; Top: int = 0; Skiptoken: string = "";
           Filter: string = ""): Recallable =
   ## marketplacesList
@@ -4387,22 +4387,22 @@ proc call*(call_594388: Call_MarketplacesList_594379; apiVersion: string;
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
   ##   Filter: string
   ##         : May be used to filter marketplaces by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'.
-  var path_594389 = newJObject()
-  var query_594390 = newJObject()
-  add(query_594390, "api-version", newJString(apiVersion))
-  add(path_594389, "subscriptionId", newJString(subscriptionId))
-  add(query_594390, "$top", newJInt(Top))
-  add(query_594390, "$skiptoken", newJString(Skiptoken))
-  add(query_594390, "$filter", newJString(Filter))
-  result = call_594388.call(path_594389, query_594390, nil, nil, nil)
+  var path_568618 = newJObject()
+  var query_568619 = newJObject()
+  add(query_568619, "api-version", newJString(apiVersion))
+  add(path_568618, "subscriptionId", newJString(subscriptionId))
+  add(query_568619, "$top", newJInt(Top))
+  add(query_568619, "$skiptoken", newJString(Skiptoken))
+  add(query_568619, "$filter", newJString(Filter))
+  result = call_568617.call(path_568618, query_568619, nil, nil, nil)
 
-var marketplacesList* = Call_MarketplacesList_594379(name: "marketplacesList",
+var marketplacesList* = Call_MarketplacesList_568608(name: "marketplacesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/marketplaces",
-    validator: validate_MarketplacesList_594380, base: "",
-    url: url_MarketplacesList_594381, schemes: {Scheme.Https})
+    validator: validate_MarketplacesList_568609, base: "",
+    url: url_MarketplacesList_568610, schemes: {Scheme.Https})
 type
-  Call_PriceSheetGet_594391 = ref object of OpenApiRestCall_593439
-proc url_PriceSheetGet_594393(protocol: Scheme; host: string; base: string;
+  Call_PriceSheetGet_568620 = ref object of OpenApiRestCall_567668
+proc url_PriceSheetGet_568622(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4419,7 +4419,7 @@ proc url_PriceSheetGet_594393(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PriceSheetGet_594392(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PriceSheetGet_568621(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the price sheet for a scope by subscriptionId. Price sheet is available via this API only for May 1, 2014 or later.
   ## 
@@ -4432,11 +4432,11 @@ proc validate_PriceSheetGet_594392(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594394 = path.getOrDefault("subscriptionId")
-  valid_594394 = validateParameter(valid_594394, JString, required = true,
+  var valid_568623 = path.getOrDefault("subscriptionId")
+  valid_568623 = validateParameter(valid_568623, JString, required = true,
                                  default = nil)
-  if valid_594394 != nil:
-    section.add "subscriptionId", valid_594394
+  if valid_568623 != nil:
+    section.add "subscriptionId", valid_568623
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -4448,27 +4448,27 @@ proc validate_PriceSheetGet_594392(path: JsonNode; query: JsonNode; header: Json
   ##   $skiptoken: JString
   ##             : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
   section = newJObject()
-  var valid_594395 = query.getOrDefault("$expand")
-  valid_594395 = validateParameter(valid_594395, JString, required = false,
+  var valid_568624 = query.getOrDefault("$expand")
+  valid_568624 = validateParameter(valid_568624, JString, required = false,
                                  default = nil)
-  if valid_594395 != nil:
-    section.add "$expand", valid_594395
+  if valid_568624 != nil:
+    section.add "$expand", valid_568624
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594396 = query.getOrDefault("api-version")
-  valid_594396 = validateParameter(valid_594396, JString, required = true,
+  var valid_568625 = query.getOrDefault("api-version")
+  valid_568625 = validateParameter(valid_568625, JString, required = true,
                                  default = nil)
-  if valid_594396 != nil:
-    section.add "api-version", valid_594396
-  var valid_594397 = query.getOrDefault("$top")
-  valid_594397 = validateParameter(valid_594397, JInt, required = false, default = nil)
-  if valid_594397 != nil:
-    section.add "$top", valid_594397
-  var valid_594398 = query.getOrDefault("$skiptoken")
-  valid_594398 = validateParameter(valid_594398, JString, required = false,
+  if valid_568625 != nil:
+    section.add "api-version", valid_568625
+  var valid_568626 = query.getOrDefault("$top")
+  valid_568626 = validateParameter(valid_568626, JInt, required = false, default = nil)
+  if valid_568626 != nil:
+    section.add "$top", valid_568626
+  var valid_568627 = query.getOrDefault("$skiptoken")
+  valid_568627 = validateParameter(valid_568627, JString, required = false,
                                  default = nil)
-  if valid_594398 != nil:
-    section.add "$skiptoken", valid_594398
+  if valid_568627 != nil:
+    section.add "$skiptoken", valid_568627
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4477,21 +4477,21 @@ proc validate_PriceSheetGet_594392(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594399: Call_PriceSheetGet_594391; path: JsonNode; query: JsonNode;
+proc call*(call_568628: Call_PriceSheetGet_568620; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the price sheet for a scope by subscriptionId. Price sheet is available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594399.validator(path, query, header, formData, body)
-  let scheme = call_594399.pickScheme
+  let valid = call_568628.validator(path, query, header, formData, body)
+  let scheme = call_568628.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594399.url(scheme.get, call_594399.host, call_594399.base,
-                         call_594399.route, valid.getOrDefault("path"),
+  let url = call_568628.url(scheme.get, call_568628.host, call_568628.base,
+                         call_568628.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594399, url, valid)
+  result = hook(call_568628, url, valid)
 
-proc call*(call_594400: Call_PriceSheetGet_594391; apiVersion: string;
+proc call*(call_568629: Call_PriceSheetGet_568620; apiVersion: string;
           subscriptionId: string; Expand: string = ""; Top: int = 0;
           Skiptoken: string = ""): Recallable =
   ## priceSheetGet
@@ -4507,22 +4507,22 @@ proc call*(call_594400: Call_PriceSheetGet_594391; apiVersion: string;
   ##      : May be used to limit the number of results to the top N results.
   ##   Skiptoken: string
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
-  var path_594401 = newJObject()
-  var query_594402 = newJObject()
-  add(query_594402, "$expand", newJString(Expand))
-  add(query_594402, "api-version", newJString(apiVersion))
-  add(path_594401, "subscriptionId", newJString(subscriptionId))
-  add(query_594402, "$top", newJInt(Top))
-  add(query_594402, "$skiptoken", newJString(Skiptoken))
-  result = call_594400.call(path_594401, query_594402, nil, nil, nil)
+  var path_568630 = newJObject()
+  var query_568631 = newJObject()
+  add(query_568631, "$expand", newJString(Expand))
+  add(query_568631, "api-version", newJString(apiVersion))
+  add(path_568630, "subscriptionId", newJString(subscriptionId))
+  add(query_568631, "$top", newJInt(Top))
+  add(query_568631, "$skiptoken", newJString(Skiptoken))
+  result = call_568629.call(path_568630, query_568631, nil, nil, nil)
 
-var priceSheetGet* = Call_PriceSheetGet_594391(name: "priceSheetGet",
+var priceSheetGet* = Call_PriceSheetGet_568620(name: "priceSheetGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/pricesheets/default",
-    validator: validate_PriceSheetGet_594392, base: "", url: url_PriceSheetGet_594393,
+    validator: validate_PriceSheetGet_568621, base: "", url: url_PriceSheetGet_568622,
     schemes: {Scheme.Https})
 type
-  Call_ReservationRecommendationsList_594403 = ref object of OpenApiRestCall_593439
-proc url_ReservationRecommendationsList_594405(protocol: Scheme; host: string;
+  Call_ReservationRecommendationsList_568632 = ref object of OpenApiRestCall_567668
+proc url_ReservationRecommendationsList_568634(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4539,7 +4539,7 @@ proc url_ReservationRecommendationsList_594405(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationRecommendationsList_594404(path: JsonNode;
+proc validate_ReservationRecommendationsList_568633(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List of recommendations for purchasing reserved instances.
   ## 
@@ -4552,11 +4552,11 @@ proc validate_ReservationRecommendationsList_594404(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594406 = path.getOrDefault("subscriptionId")
-  valid_594406 = validateParameter(valid_594406, JString, required = true,
+  var valid_568635 = path.getOrDefault("subscriptionId")
+  valid_568635 = validateParameter(valid_568635, JString, required = true,
                                  default = nil)
-  if valid_594406 != nil:
-    section.add "subscriptionId", valid_594406
+  if valid_568635 != nil:
+    section.add "subscriptionId", valid_568635
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4566,16 +4566,16 @@ proc validate_ReservationRecommendationsList_594404(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594407 = query.getOrDefault("api-version")
-  valid_594407 = validateParameter(valid_594407, JString, required = true,
+  var valid_568636 = query.getOrDefault("api-version")
+  valid_568636 = validateParameter(valid_568636, JString, required = true,
                                  default = nil)
-  if valid_594407 != nil:
-    section.add "api-version", valid_594407
-  var valid_594408 = query.getOrDefault("$filter")
-  valid_594408 = validateParameter(valid_594408, JString, required = false,
+  if valid_568636 != nil:
+    section.add "api-version", valid_568636
+  var valid_568637 = query.getOrDefault("$filter")
+  valid_568637 = validateParameter(valid_568637, JString, required = false,
                                  default = nil)
-  if valid_594408 != nil:
-    section.add "$filter", valid_594408
+  if valid_568637 != nil:
+    section.add "$filter", valid_568637
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4584,21 +4584,21 @@ proc validate_ReservationRecommendationsList_594404(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594409: Call_ReservationRecommendationsList_594403; path: JsonNode;
+proc call*(call_568638: Call_ReservationRecommendationsList_568632; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List of recommendations for purchasing reserved instances.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594409.validator(path, query, header, formData, body)
-  let scheme = call_594409.pickScheme
+  let valid = call_568638.validator(path, query, header, formData, body)
+  let scheme = call_568638.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594409.url(scheme.get, call_594409.host, call_594409.base,
-                         call_594409.route, valid.getOrDefault("path"),
+  let url = call_568638.url(scheme.get, call_568638.host, call_568638.base,
+                         call_568638.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594409, url, valid)
+  result = hook(call_568638, url, valid)
 
-proc call*(call_594410: Call_ReservationRecommendationsList_594403;
+proc call*(call_568639: Call_ReservationRecommendationsList_568632;
           apiVersion: string; subscriptionId: string; Filter: string = ""): Recallable =
   ## reservationRecommendationsList
   ## List of recommendations for purchasing reserved instances.
@@ -4609,21 +4609,21 @@ proc call*(call_594410: Call_ReservationRecommendationsList_594403;
   ##                 : Azure Subscription ID.
   ##   Filter: string
   ##         : May be used to filter reservationRecommendations by properties/scope and properties/lookBackPeriod.
-  var path_594411 = newJObject()
-  var query_594412 = newJObject()
-  add(query_594412, "api-version", newJString(apiVersion))
-  add(path_594411, "subscriptionId", newJString(subscriptionId))
-  add(query_594412, "$filter", newJString(Filter))
-  result = call_594410.call(path_594411, query_594412, nil, nil, nil)
+  var path_568640 = newJObject()
+  var query_568641 = newJObject()
+  add(query_568641, "api-version", newJString(apiVersion))
+  add(path_568640, "subscriptionId", newJString(subscriptionId))
+  add(query_568641, "$filter", newJString(Filter))
+  result = call_568639.call(path_568640, query_568641, nil, nil, nil)
 
-var reservationRecommendationsList* = Call_ReservationRecommendationsList_594403(
+var reservationRecommendationsList* = Call_ReservationRecommendationsList_568632(
     name: "reservationRecommendationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/reservationRecommendations",
-    validator: validate_ReservationRecommendationsList_594404, base: "",
-    url: url_ReservationRecommendationsList_594405, schemes: {Scheme.Https})
+    validator: validate_ReservationRecommendationsList_568633, base: "",
+    url: url_ReservationRecommendationsList_568634, schemes: {Scheme.Https})
 type
-  Call_UsageDetailsList_594413 = ref object of OpenApiRestCall_593439
-proc url_UsageDetailsList_594415(protocol: Scheme; host: string; base: string;
+  Call_UsageDetailsList_568642 = ref object of OpenApiRestCall_567668
+proc url_UsageDetailsList_568644(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4640,7 +4640,7 @@ proc url_UsageDetailsList_594415(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageDetailsList_594414(path: JsonNode; query: JsonNode;
+proc validate_UsageDetailsList_568643(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Lists the usage details for a scope by current billing period. Usage details are available via this API only for May 1, 2014 or later.
@@ -4654,11 +4654,11 @@ proc validate_UsageDetailsList_594414(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594416 = path.getOrDefault("subscriptionId")
-  valid_594416 = validateParameter(valid_594416, JString, required = true,
+  var valid_568645 = path.getOrDefault("subscriptionId")
+  valid_568645 = validateParameter(valid_568645, JString, required = true,
                                  default = nil)
-  if valid_594416 != nil:
-    section.add "subscriptionId", valid_594416
+  if valid_568645 != nil:
+    section.add "subscriptionId", valid_568645
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -4674,37 +4674,37 @@ proc validate_UsageDetailsList_594414(path: JsonNode; query: JsonNode;
   ##   $filter: JString
   ##          : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName, properties/instanceId or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   section = newJObject()
-  var valid_594417 = query.getOrDefault("$expand")
-  valid_594417 = validateParameter(valid_594417, JString, required = false,
+  var valid_568646 = query.getOrDefault("$expand")
+  valid_568646 = validateParameter(valid_568646, JString, required = false,
                                  default = nil)
-  if valid_594417 != nil:
-    section.add "$expand", valid_594417
+  if valid_568646 != nil:
+    section.add "$expand", valid_568646
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594418 = query.getOrDefault("api-version")
-  valid_594418 = validateParameter(valid_594418, JString, required = true,
+  var valid_568647 = query.getOrDefault("api-version")
+  valid_568647 = validateParameter(valid_568647, JString, required = true,
                                  default = nil)
-  if valid_594418 != nil:
-    section.add "api-version", valid_594418
-  var valid_594419 = query.getOrDefault("$top")
-  valid_594419 = validateParameter(valid_594419, JInt, required = false, default = nil)
-  if valid_594419 != nil:
-    section.add "$top", valid_594419
-  var valid_594420 = query.getOrDefault("$skiptoken")
-  valid_594420 = validateParameter(valid_594420, JString, required = false,
+  if valid_568647 != nil:
+    section.add "api-version", valid_568647
+  var valid_568648 = query.getOrDefault("$top")
+  valid_568648 = validateParameter(valid_568648, JInt, required = false, default = nil)
+  if valid_568648 != nil:
+    section.add "$top", valid_568648
+  var valid_568649 = query.getOrDefault("$skiptoken")
+  valid_568649 = validateParameter(valid_568649, JString, required = false,
                                  default = nil)
-  if valid_594420 != nil:
-    section.add "$skiptoken", valid_594420
-  var valid_594421 = query.getOrDefault("$apply")
-  valid_594421 = validateParameter(valid_594421, JString, required = false,
+  if valid_568649 != nil:
+    section.add "$skiptoken", valid_568649
+  var valid_568650 = query.getOrDefault("$apply")
+  valid_568650 = validateParameter(valid_568650, JString, required = false,
                                  default = nil)
-  if valid_594421 != nil:
-    section.add "$apply", valid_594421
-  var valid_594422 = query.getOrDefault("$filter")
-  valid_594422 = validateParameter(valid_594422, JString, required = false,
+  if valid_568650 != nil:
+    section.add "$apply", valid_568650
+  var valid_568651 = query.getOrDefault("$filter")
+  valid_568651 = validateParameter(valid_568651, JString, required = false,
                                  default = nil)
-  if valid_594422 != nil:
-    section.add "$filter", valid_594422
+  if valid_568651 != nil:
+    section.add "$filter", valid_568651
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4713,21 +4713,21 @@ proc validate_UsageDetailsList_594414(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594423: Call_UsageDetailsList_594413; path: JsonNode;
+proc call*(call_568652: Call_UsageDetailsList_568642; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the usage details for a scope by current billing period. Usage details are available via this API only for May 1, 2014 or later.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594423.validator(path, query, header, formData, body)
-  let scheme = call_594423.pickScheme
+  let valid = call_568652.validator(path, query, header, formData, body)
+  let scheme = call_568652.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594423.url(scheme.get, call_594423.host, call_594423.base,
-                         call_594423.route, valid.getOrDefault("path"),
+  let url = call_568652.url(scheme.get, call_568652.host, call_568652.base,
+                         call_568652.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594423, url, valid)
+  result = hook(call_568652, url, valid)
 
-proc call*(call_594424: Call_UsageDetailsList_594413; apiVersion: string;
+proc call*(call_568653: Call_UsageDetailsList_568642; apiVersion: string;
           subscriptionId: string; Expand: string = ""; Top: int = 0;
           Skiptoken: string = ""; Apply: string = ""; Filter: string = ""): Recallable =
   ## usageDetailsList
@@ -4747,24 +4747,24 @@ proc call*(call_594424: Call_UsageDetailsList_594413; apiVersion: string;
   ##        : OData apply expression to aggregate usageDetails by tags or (tags and properties/usageStart)
   ##   Filter: string
   ##         : May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName, properties/instanceId or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_594425 = newJObject()
-  var query_594426 = newJObject()
-  add(query_594426, "$expand", newJString(Expand))
-  add(query_594426, "api-version", newJString(apiVersion))
-  add(path_594425, "subscriptionId", newJString(subscriptionId))
-  add(query_594426, "$top", newJInt(Top))
-  add(query_594426, "$skiptoken", newJString(Skiptoken))
-  add(query_594426, "$apply", newJString(Apply))
-  add(query_594426, "$filter", newJString(Filter))
-  result = call_594424.call(path_594425, query_594426, nil, nil, nil)
+  var path_568654 = newJObject()
+  var query_568655 = newJObject()
+  add(query_568655, "$expand", newJString(Expand))
+  add(query_568655, "api-version", newJString(apiVersion))
+  add(path_568654, "subscriptionId", newJString(subscriptionId))
+  add(query_568655, "$top", newJInt(Top))
+  add(query_568655, "$skiptoken", newJString(Skiptoken))
+  add(query_568655, "$apply", newJString(Apply))
+  add(query_568655, "$filter", newJString(Filter))
+  result = call_568653.call(path_568654, query_568655, nil, nil, nil)
 
-var usageDetailsList* = Call_UsageDetailsList_594413(name: "usageDetailsList",
+var usageDetailsList* = Call_UsageDetailsList_568642(name: "usageDetailsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/usageDetails",
-    validator: validate_UsageDetailsList_594414, base: "",
-    url: url_UsageDetailsList_594415, schemes: {Scheme.Https})
+    validator: validate_UsageDetailsList_568643, base: "",
+    url: url_UsageDetailsList_568644, schemes: {Scheme.Https})
 type
-  Call_BudgetsListByResourceGroupName_594427 = ref object of OpenApiRestCall_593439
-proc url_BudgetsListByResourceGroupName_594429(protocol: Scheme; host: string;
+  Call_BudgetsListByResourceGroupName_568656 = ref object of OpenApiRestCall_567668
+proc url_BudgetsListByResourceGroupName_568658(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4784,7 +4784,7 @@ proc url_BudgetsListByResourceGroupName_594429(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetsListByResourceGroupName_594428(path: JsonNode;
+proc validate_BudgetsListByResourceGroupName_568657(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all budgets for a resource group under a subscription.
   ## 
@@ -4799,16 +4799,16 @@ proc validate_BudgetsListByResourceGroupName_594428(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594430 = path.getOrDefault("resourceGroupName")
-  valid_594430 = validateParameter(valid_594430, JString, required = true,
+  var valid_568659 = path.getOrDefault("resourceGroupName")
+  valid_568659 = validateParameter(valid_568659, JString, required = true,
                                  default = nil)
-  if valid_594430 != nil:
-    section.add "resourceGroupName", valid_594430
-  var valid_594431 = path.getOrDefault("subscriptionId")
-  valid_594431 = validateParameter(valid_594431, JString, required = true,
+  if valid_568659 != nil:
+    section.add "resourceGroupName", valid_568659
+  var valid_568660 = path.getOrDefault("subscriptionId")
+  valid_568660 = validateParameter(valid_568660, JString, required = true,
                                  default = nil)
-  if valid_594431 != nil:
-    section.add "subscriptionId", valid_594431
+  if valid_568660 != nil:
+    section.add "subscriptionId", valid_568660
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4816,11 +4816,11 @@ proc validate_BudgetsListByResourceGroupName_594428(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594432 = query.getOrDefault("api-version")
-  valid_594432 = validateParameter(valid_594432, JString, required = true,
+  var valid_568661 = query.getOrDefault("api-version")
+  valid_568661 = validateParameter(valid_568661, JString, required = true,
                                  default = nil)
-  if valid_594432 != nil:
-    section.add "api-version", valid_594432
+  if valid_568661 != nil:
+    section.add "api-version", valid_568661
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4829,21 +4829,21 @@ proc validate_BudgetsListByResourceGroupName_594428(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594433: Call_BudgetsListByResourceGroupName_594427; path: JsonNode;
+proc call*(call_568662: Call_BudgetsListByResourceGroupName_568656; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all budgets for a resource group under a subscription.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594433.validator(path, query, header, formData, body)
-  let scheme = call_594433.pickScheme
+  let valid = call_568662.validator(path, query, header, formData, body)
+  let scheme = call_568662.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594433.url(scheme.get, call_594433.host, call_594433.base,
-                         call_594433.route, valid.getOrDefault("path"),
+  let url = call_568662.url(scheme.get, call_568662.host, call_568662.base,
+                         call_568662.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594433, url, valid)
+  result = hook(call_568662, url, valid)
 
-proc call*(call_594434: Call_BudgetsListByResourceGroupName_594427;
+proc call*(call_568663: Call_BudgetsListByResourceGroupName_568656;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## budgetsListByResourceGroupName
   ## Lists all budgets for a resource group under a subscription.
@@ -4854,21 +4854,21 @@ proc call*(call_594434: Call_BudgetsListByResourceGroupName_594427;
   ##             : Version of the API to be used with the client request. The current version is 2018-06-30.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_594435 = newJObject()
-  var query_594436 = newJObject()
-  add(path_594435, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594436, "api-version", newJString(apiVersion))
-  add(path_594435, "subscriptionId", newJString(subscriptionId))
-  result = call_594434.call(path_594435, query_594436, nil, nil, nil)
+  var path_568664 = newJObject()
+  var query_568665 = newJObject()
+  add(path_568664, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568665, "api-version", newJString(apiVersion))
+  add(path_568664, "subscriptionId", newJString(subscriptionId))
+  result = call_568663.call(path_568664, query_568665, nil, nil, nil)
 
-var budgetsListByResourceGroupName* = Call_BudgetsListByResourceGroupName_594427(
+var budgetsListByResourceGroupName* = Call_BudgetsListByResourceGroupName_568656(
     name: "budgetsListByResourceGroupName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Consumption/budgets",
-    validator: validate_BudgetsListByResourceGroupName_594428, base: "",
-    url: url_BudgetsListByResourceGroupName_594429, schemes: {Scheme.Https})
+    validator: validate_BudgetsListByResourceGroupName_568657, base: "",
+    url: url_BudgetsListByResourceGroupName_568658, schemes: {Scheme.Https})
 type
-  Call_BudgetsCreateOrUpdateByResourceGroupName_594448 = ref object of OpenApiRestCall_593439
-proc url_BudgetsCreateOrUpdateByResourceGroupName_594450(protocol: Scheme;
+  Call_BudgetsCreateOrUpdateByResourceGroupName_568677 = ref object of OpenApiRestCall_567668
+proc url_BudgetsCreateOrUpdateByResourceGroupName_568679(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4890,7 +4890,7 @@ proc url_BudgetsCreateOrUpdateByResourceGroupName_594450(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetsCreateOrUpdateByResourceGroupName_594449(path: JsonNode;
+proc validate_BudgetsCreateOrUpdateByResourceGroupName_568678(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create or update a budget. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
@@ -4907,21 +4907,21 @@ proc validate_BudgetsCreateOrUpdateByResourceGroupName_594449(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594451 = path.getOrDefault("resourceGroupName")
-  valid_594451 = validateParameter(valid_594451, JString, required = true,
+  var valid_568680 = path.getOrDefault("resourceGroupName")
+  valid_568680 = validateParameter(valid_568680, JString, required = true,
                                  default = nil)
-  if valid_594451 != nil:
-    section.add "resourceGroupName", valid_594451
-  var valid_594452 = path.getOrDefault("subscriptionId")
-  valid_594452 = validateParameter(valid_594452, JString, required = true,
+  if valid_568680 != nil:
+    section.add "resourceGroupName", valid_568680
+  var valid_568681 = path.getOrDefault("subscriptionId")
+  valid_568681 = validateParameter(valid_568681, JString, required = true,
                                  default = nil)
-  if valid_594452 != nil:
-    section.add "subscriptionId", valid_594452
-  var valid_594453 = path.getOrDefault("budgetName")
-  valid_594453 = validateParameter(valid_594453, JString, required = true,
+  if valid_568681 != nil:
+    section.add "subscriptionId", valid_568681
+  var valid_568682 = path.getOrDefault("budgetName")
+  valid_568682 = validateParameter(valid_568682, JString, required = true,
                                  default = nil)
-  if valid_594453 != nil:
-    section.add "budgetName", valid_594453
+  if valid_568682 != nil:
+    section.add "budgetName", valid_568682
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4929,11 +4929,11 @@ proc validate_BudgetsCreateOrUpdateByResourceGroupName_594449(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594454 = query.getOrDefault("api-version")
-  valid_594454 = validateParameter(valid_594454, JString, required = true,
+  var valid_568683 = query.getOrDefault("api-version")
+  valid_568683 = validateParameter(valid_568683, JString, required = true,
                                  default = nil)
-  if valid_594454 != nil:
-    section.add "api-version", valid_594454
+  if valid_568683 != nil:
+    section.add "api-version", valid_568683
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4947,22 +4947,22 @@ proc validate_BudgetsCreateOrUpdateByResourceGroupName_594449(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594456: Call_BudgetsCreateOrUpdateByResourceGroupName_594448;
+proc call*(call_568685: Call_BudgetsCreateOrUpdateByResourceGroupName_568677;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The operation to create or update a budget. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594456.validator(path, query, header, formData, body)
-  let scheme = call_594456.pickScheme
+  let valid = call_568685.validator(path, query, header, formData, body)
+  let scheme = call_568685.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594456.url(scheme.get, call_594456.host, call_594456.base,
-                         call_594456.route, valid.getOrDefault("path"),
+  let url = call_568685.url(scheme.get, call_568685.host, call_568685.base,
+                         call_568685.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594456, url, valid)
+  result = hook(call_568685, url, valid)
 
-proc call*(call_594457: Call_BudgetsCreateOrUpdateByResourceGroupName_594448;
+proc call*(call_568686: Call_BudgetsCreateOrUpdateByResourceGroupName_568677;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode; budgetName: string): Recallable =
   ## budgetsCreateOrUpdateByResourceGroupName
@@ -4978,26 +4978,26 @@ proc call*(call_594457: Call_BudgetsCreateOrUpdateByResourceGroupName_594448;
   ##             : Parameters supplied to the Create Budget operation.
   ##   budgetName: string (required)
   ##             : Budget Name.
-  var path_594458 = newJObject()
-  var query_594459 = newJObject()
-  var body_594460 = newJObject()
-  add(path_594458, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594459, "api-version", newJString(apiVersion))
-  add(path_594458, "subscriptionId", newJString(subscriptionId))
+  var path_568687 = newJObject()
+  var query_568688 = newJObject()
+  var body_568689 = newJObject()
+  add(path_568687, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568688, "api-version", newJString(apiVersion))
+  add(path_568687, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594460 = parameters
-  add(path_594458, "budgetName", newJString(budgetName))
-  result = call_594457.call(path_594458, query_594459, nil, nil, body_594460)
+    body_568689 = parameters
+  add(path_568687, "budgetName", newJString(budgetName))
+  result = call_568686.call(path_568687, query_568688, nil, nil, body_568689)
 
-var budgetsCreateOrUpdateByResourceGroupName* = Call_BudgetsCreateOrUpdateByResourceGroupName_594448(
+var budgetsCreateOrUpdateByResourceGroupName* = Call_BudgetsCreateOrUpdateByResourceGroupName_568677(
     name: "budgetsCreateOrUpdateByResourceGroupName", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Consumption/budgets/{budgetName}",
-    validator: validate_BudgetsCreateOrUpdateByResourceGroupName_594449, base: "",
-    url: url_BudgetsCreateOrUpdateByResourceGroupName_594450,
+    validator: validate_BudgetsCreateOrUpdateByResourceGroupName_568678, base: "",
+    url: url_BudgetsCreateOrUpdateByResourceGroupName_568679,
     schemes: {Scheme.Https})
 type
-  Call_BudgetsGetByResourceGroupName_594437 = ref object of OpenApiRestCall_593439
-proc url_BudgetsGetByResourceGroupName_594439(protocol: Scheme; host: string;
+  Call_BudgetsGetByResourceGroupName_568666 = ref object of OpenApiRestCall_567668
+proc url_BudgetsGetByResourceGroupName_568668(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5019,7 +5019,7 @@ proc url_BudgetsGetByResourceGroupName_594439(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetsGetByResourceGroupName_594438(path: JsonNode; query: JsonNode;
+proc validate_BudgetsGetByResourceGroupName_568667(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the budget for a resource group under a subscription by budget name.
   ## 
@@ -5036,21 +5036,21 @@ proc validate_BudgetsGetByResourceGroupName_594438(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594440 = path.getOrDefault("resourceGroupName")
-  valid_594440 = validateParameter(valid_594440, JString, required = true,
+  var valid_568669 = path.getOrDefault("resourceGroupName")
+  valid_568669 = validateParameter(valid_568669, JString, required = true,
                                  default = nil)
-  if valid_594440 != nil:
-    section.add "resourceGroupName", valid_594440
-  var valid_594441 = path.getOrDefault("subscriptionId")
-  valid_594441 = validateParameter(valid_594441, JString, required = true,
+  if valid_568669 != nil:
+    section.add "resourceGroupName", valid_568669
+  var valid_568670 = path.getOrDefault("subscriptionId")
+  valid_568670 = validateParameter(valid_568670, JString, required = true,
                                  default = nil)
-  if valid_594441 != nil:
-    section.add "subscriptionId", valid_594441
-  var valid_594442 = path.getOrDefault("budgetName")
-  valid_594442 = validateParameter(valid_594442, JString, required = true,
+  if valid_568670 != nil:
+    section.add "subscriptionId", valid_568670
+  var valid_568671 = path.getOrDefault("budgetName")
+  valid_568671 = validateParameter(valid_568671, JString, required = true,
                                  default = nil)
-  if valid_594442 != nil:
-    section.add "budgetName", valid_594442
+  if valid_568671 != nil:
+    section.add "budgetName", valid_568671
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5058,11 +5058,11 @@ proc validate_BudgetsGetByResourceGroupName_594438(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594443 = query.getOrDefault("api-version")
-  valid_594443 = validateParameter(valid_594443, JString, required = true,
+  var valid_568672 = query.getOrDefault("api-version")
+  valid_568672 = validateParameter(valid_568672, JString, required = true,
                                  default = nil)
-  if valid_594443 != nil:
-    section.add "api-version", valid_594443
+  if valid_568672 != nil:
+    section.add "api-version", valid_568672
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5071,21 +5071,21 @@ proc validate_BudgetsGetByResourceGroupName_594438(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594444: Call_BudgetsGetByResourceGroupName_594437; path: JsonNode;
+proc call*(call_568673: Call_BudgetsGetByResourceGroupName_568666; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the budget for a resource group under a subscription by budget name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594444.validator(path, query, header, formData, body)
-  let scheme = call_594444.pickScheme
+  let valid = call_568673.validator(path, query, header, formData, body)
+  let scheme = call_568673.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594444.url(scheme.get, call_594444.host, call_594444.base,
-                         call_594444.route, valid.getOrDefault("path"),
+  let url = call_568673.url(scheme.get, call_568673.host, call_568673.base,
+                         call_568673.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594444, url, valid)
+  result = hook(call_568673, url, valid)
 
-proc call*(call_594445: Call_BudgetsGetByResourceGroupName_594437;
+proc call*(call_568674: Call_BudgetsGetByResourceGroupName_568666;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           budgetName: string): Recallable =
   ## budgetsGetByResourceGroupName
@@ -5099,22 +5099,22 @@ proc call*(call_594445: Call_BudgetsGetByResourceGroupName_594437;
   ##                 : Azure Subscription ID.
   ##   budgetName: string (required)
   ##             : Budget Name.
-  var path_594446 = newJObject()
-  var query_594447 = newJObject()
-  add(path_594446, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594447, "api-version", newJString(apiVersion))
-  add(path_594446, "subscriptionId", newJString(subscriptionId))
-  add(path_594446, "budgetName", newJString(budgetName))
-  result = call_594445.call(path_594446, query_594447, nil, nil, nil)
+  var path_568675 = newJObject()
+  var query_568676 = newJObject()
+  add(path_568675, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568676, "api-version", newJString(apiVersion))
+  add(path_568675, "subscriptionId", newJString(subscriptionId))
+  add(path_568675, "budgetName", newJString(budgetName))
+  result = call_568674.call(path_568675, query_568676, nil, nil, nil)
 
-var budgetsGetByResourceGroupName* = Call_BudgetsGetByResourceGroupName_594437(
+var budgetsGetByResourceGroupName* = Call_BudgetsGetByResourceGroupName_568666(
     name: "budgetsGetByResourceGroupName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Consumption/budgets/{budgetName}",
-    validator: validate_BudgetsGetByResourceGroupName_594438, base: "",
-    url: url_BudgetsGetByResourceGroupName_594439, schemes: {Scheme.Https})
+    validator: validate_BudgetsGetByResourceGroupName_568667, base: "",
+    url: url_BudgetsGetByResourceGroupName_568668, schemes: {Scheme.Https})
 type
-  Call_BudgetsDeleteByResourceGroupName_594461 = ref object of OpenApiRestCall_593439
-proc url_BudgetsDeleteByResourceGroupName_594463(protocol: Scheme; host: string;
+  Call_BudgetsDeleteByResourceGroupName_568690 = ref object of OpenApiRestCall_567668
+proc url_BudgetsDeleteByResourceGroupName_568692(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5136,7 +5136,7 @@ proc url_BudgetsDeleteByResourceGroupName_594463(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetsDeleteByResourceGroupName_594462(path: JsonNode;
+proc validate_BudgetsDeleteByResourceGroupName_568691(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to delete a budget.
   ## 
@@ -5153,21 +5153,21 @@ proc validate_BudgetsDeleteByResourceGroupName_594462(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594464 = path.getOrDefault("resourceGroupName")
-  valid_594464 = validateParameter(valid_594464, JString, required = true,
+  var valid_568693 = path.getOrDefault("resourceGroupName")
+  valid_568693 = validateParameter(valid_568693, JString, required = true,
                                  default = nil)
-  if valid_594464 != nil:
-    section.add "resourceGroupName", valid_594464
-  var valid_594465 = path.getOrDefault("subscriptionId")
-  valid_594465 = validateParameter(valid_594465, JString, required = true,
+  if valid_568693 != nil:
+    section.add "resourceGroupName", valid_568693
+  var valid_568694 = path.getOrDefault("subscriptionId")
+  valid_568694 = validateParameter(valid_568694, JString, required = true,
                                  default = nil)
-  if valid_594465 != nil:
-    section.add "subscriptionId", valid_594465
-  var valid_594466 = path.getOrDefault("budgetName")
-  valid_594466 = validateParameter(valid_594466, JString, required = true,
+  if valid_568694 != nil:
+    section.add "subscriptionId", valid_568694
+  var valid_568695 = path.getOrDefault("budgetName")
+  valid_568695 = validateParameter(valid_568695, JString, required = true,
                                  default = nil)
-  if valid_594466 != nil:
-    section.add "budgetName", valid_594466
+  if valid_568695 != nil:
+    section.add "budgetName", valid_568695
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5175,11 +5175,11 @@ proc validate_BudgetsDeleteByResourceGroupName_594462(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594467 = query.getOrDefault("api-version")
-  valid_594467 = validateParameter(valid_594467, JString, required = true,
+  var valid_568696 = query.getOrDefault("api-version")
+  valid_568696 = validateParameter(valid_568696, JString, required = true,
                                  default = nil)
-  if valid_594467 != nil:
-    section.add "api-version", valid_594467
+  if valid_568696 != nil:
+    section.add "api-version", valid_568696
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5188,22 +5188,22 @@ proc validate_BudgetsDeleteByResourceGroupName_594462(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594468: Call_BudgetsDeleteByResourceGroupName_594461;
+proc call*(call_568697: Call_BudgetsDeleteByResourceGroupName_568690;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The operation to delete a budget.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_594468.validator(path, query, header, formData, body)
-  let scheme = call_594468.pickScheme
+  let valid = call_568697.validator(path, query, header, formData, body)
+  let scheme = call_568697.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594468.url(scheme.get, call_594468.host, call_594468.base,
-                         call_594468.route, valid.getOrDefault("path"),
+  let url = call_568697.url(scheme.get, call_568697.host, call_568697.base,
+                         call_568697.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594468, url, valid)
+  result = hook(call_568697, url, valid)
 
-proc call*(call_594469: Call_BudgetsDeleteByResourceGroupName_594461;
+proc call*(call_568698: Call_BudgetsDeleteByResourceGroupName_568690;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           budgetName: string): Recallable =
   ## budgetsDeleteByResourceGroupName
@@ -5217,19 +5217,19 @@ proc call*(call_594469: Call_BudgetsDeleteByResourceGroupName_594461;
   ##                 : Azure Subscription ID.
   ##   budgetName: string (required)
   ##             : Budget Name.
-  var path_594470 = newJObject()
-  var query_594471 = newJObject()
-  add(path_594470, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594471, "api-version", newJString(apiVersion))
-  add(path_594470, "subscriptionId", newJString(subscriptionId))
-  add(path_594470, "budgetName", newJString(budgetName))
-  result = call_594469.call(path_594470, query_594471, nil, nil, nil)
+  var path_568699 = newJObject()
+  var query_568700 = newJObject()
+  add(path_568699, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568700, "api-version", newJString(apiVersion))
+  add(path_568699, "subscriptionId", newJString(subscriptionId))
+  add(path_568699, "budgetName", newJString(budgetName))
+  result = call_568698.call(path_568699, query_568700, nil, nil, nil)
 
-var budgetsDeleteByResourceGroupName* = Call_BudgetsDeleteByResourceGroupName_594461(
+var budgetsDeleteByResourceGroupName* = Call_BudgetsDeleteByResourceGroupName_568690(
     name: "budgetsDeleteByResourceGroupName", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Consumption/budgets/{budgetName}",
-    validator: validate_BudgetsDeleteByResourceGroupName_594462, base: "",
-    url: url_BudgetsDeleteByResourceGroupName_594463, schemes: {Scheme.Https})
+    validator: validate_BudgetsDeleteByResourceGroupName_568691, base: "",
+    url: url_BudgetsDeleteByResourceGroupName_568692, schemes: {Scheme.Https})
 export
   rest
 

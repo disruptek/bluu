@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: FabricAdminClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_582441 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_582441](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_582441): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-ComputeOperationResults"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ComputeOperationResultsList_593630 = ref object of OpenApiRestCall_593408
-proc url_ComputeOperationResultsList_593632(protocol: Scheme; host: string;
+  Call_ComputeOperationResultsList_582663 = ref object of OpenApiRestCall_582441
+proc url_ComputeOperationResultsList_582665(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +128,7 @@ proc url_ComputeOperationResultsList_593632(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeOperationResultsList_593631(path: JsonNode; query: JsonNode;
+proc validate_ComputeOperationResultsList_582664(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of all compute operation results at a location.
   ## 
@@ -144,21 +144,21 @@ proc validate_ComputeOperationResultsList_593631(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593793 = path.getOrDefault("resourceGroupName")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  var valid_582826 = path.getOrDefault("resourceGroupName")
+  valid_582826 = validateParameter(valid_582826, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "resourceGroupName", valid_593793
-  var valid_593794 = path.getOrDefault("subscriptionId")
-  valid_593794 = validateParameter(valid_593794, JString, required = true,
+  if valid_582826 != nil:
+    section.add "resourceGroupName", valid_582826
+  var valid_582827 = path.getOrDefault("subscriptionId")
+  valid_582827 = validateParameter(valid_582827, JString, required = true,
                                  default = nil)
-  if valid_593794 != nil:
-    section.add "subscriptionId", valid_593794
-  var valid_593795 = path.getOrDefault("location")
-  valid_593795 = validateParameter(valid_593795, JString, required = true,
+  if valid_582827 != nil:
+    section.add "subscriptionId", valid_582827
+  var valid_582828 = path.getOrDefault("location")
+  valid_582828 = validateParameter(valid_582828, JString, required = true,
                                  default = nil)
-  if valid_593795 != nil:
-    section.add "location", valid_593795
+  if valid_582828 != nil:
+    section.add "location", valid_582828
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -168,16 +168,16 @@ proc validate_ComputeOperationResultsList_593631(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593809 = query.getOrDefault("api-version")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_582842 = query.getOrDefault("api-version")
+  valid_582842 = validateParameter(valid_582842, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593809 != nil:
-    section.add "api-version", valid_593809
-  var valid_593810 = query.getOrDefault("$filter")
-  valid_593810 = validateParameter(valid_593810, JString, required = false,
+  if valid_582842 != nil:
+    section.add "api-version", valid_582842
+  var valid_582843 = query.getOrDefault("$filter")
+  valid_582843 = validateParameter(valid_582843, JString, required = false,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "$filter", valid_593810
+  if valid_582843 != nil:
+    section.add "$filter", valid_582843
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -186,20 +186,20 @@ proc validate_ComputeOperationResultsList_593631(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593837: Call_ComputeOperationResultsList_593630; path: JsonNode;
+proc call*(call_582870: Call_ComputeOperationResultsList_582663; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all compute operation results at a location.
   ## 
-  let valid = call_593837.validator(path, query, header, formData, body)
-  let scheme = call_593837.pickScheme
+  let valid = call_582870.validator(path, query, header, formData, body)
+  let scheme = call_582870.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593837.url(scheme.get, call_593837.host, call_593837.base,
-                         call_593837.route, valid.getOrDefault("path"),
+  let url = call_582870.url(scheme.get, call_582870.host, call_582870.base,
+                         call_582870.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593837, url, valid)
+  result = hook(call_582870, url, valid)
 
-proc call*(call_593908: Call_ComputeOperationResultsList_593630;
+proc call*(call_582941: Call_ComputeOperationResultsList_582663;
           resourceGroupName: string; subscriptionId: string; location: string;
           apiVersion: string = "2016-05-01"; Filter: string = ""): Recallable =
   ## computeOperationResultsList
@@ -214,23 +214,23 @@ proc call*(call_593908: Call_ComputeOperationResultsList_593630;
   ##           : Location of the resource.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_593909 = newJObject()
-  var query_593911 = newJObject()
-  add(path_593909, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593911, "api-version", newJString(apiVersion))
-  add(path_593909, "subscriptionId", newJString(subscriptionId))
-  add(path_593909, "location", newJString(location))
-  add(query_593911, "$filter", newJString(Filter))
-  result = call_593908.call(path_593909, query_593911, nil, nil, nil)
+  var path_582942 = newJObject()
+  var query_582944 = newJObject()
+  add(path_582942, "resourceGroupName", newJString(resourceGroupName))
+  add(query_582944, "api-version", newJString(apiVersion))
+  add(path_582942, "subscriptionId", newJString(subscriptionId))
+  add(path_582942, "location", newJString(location))
+  add(query_582944, "$filter", newJString(Filter))
+  result = call_582941.call(path_582942, query_582944, nil, nil, nil)
 
-var computeOperationResultsList* = Call_ComputeOperationResultsList_593630(
+var computeOperationResultsList* = Call_ComputeOperationResultsList_582663(
     name: "computeOperationResultsList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/computeOperationResults",
-    validator: validate_ComputeOperationResultsList_593631, base: "",
-    url: url_ComputeOperationResultsList_593632, schemes: {Scheme.Https})
+    validator: validate_ComputeOperationResultsList_582664, base: "",
+    url: url_ComputeOperationResultsList_582665, schemes: {Scheme.Https})
 type
-  Call_ComputeOperationResultsGet_593950 = ref object of OpenApiRestCall_593408
-proc url_ComputeOperationResultsGet_593952(protocol: Scheme; host: string;
+  Call_ComputeOperationResultsGet_582983 = ref object of OpenApiRestCall_582441
+proc url_ComputeOperationResultsGet_582985(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -256,7 +256,7 @@ proc url_ComputeOperationResultsGet_593952(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeOperationResultsGet_593951(path: JsonNode; query: JsonNode;
+proc validate_ComputeOperationResultsGet_582984(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the status of a compute operation.
   ## 
@@ -274,26 +274,26 @@ proc validate_ComputeOperationResultsGet_593951(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593962 = path.getOrDefault("resourceGroupName")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_582995 = path.getOrDefault("resourceGroupName")
+  valid_582995 = validateParameter(valid_582995, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "resourceGroupName", valid_593962
-  var valid_593963 = path.getOrDefault("operation")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_582995 != nil:
+    section.add "resourceGroupName", valid_582995
+  var valid_582996 = path.getOrDefault("operation")
+  valid_582996 = validateParameter(valid_582996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "operation", valid_593963
-  var valid_593964 = path.getOrDefault("subscriptionId")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_582996 != nil:
+    section.add "operation", valid_582996
+  var valid_582997 = path.getOrDefault("subscriptionId")
+  valid_582997 = validateParameter(valid_582997, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "subscriptionId", valid_593964
-  var valid_593965 = path.getOrDefault("location")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_582997 != nil:
+    section.add "subscriptionId", valid_582997
+  var valid_582998 = path.getOrDefault("location")
+  valid_582998 = validateParameter(valid_582998, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "location", valid_593965
+  if valid_582998 != nil:
+    section.add "location", valid_582998
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -301,11 +301,11 @@ proc validate_ComputeOperationResultsGet_593951(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593966 = query.getOrDefault("api-version")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_582999 = query.getOrDefault("api-version")
+  valid_582999 = validateParameter(valid_582999, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593966 != nil:
-    section.add "api-version", valid_593966
+  if valid_582999 != nil:
+    section.add "api-version", valid_582999
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -314,20 +314,20 @@ proc validate_ComputeOperationResultsGet_593951(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593967: Call_ComputeOperationResultsGet_593950; path: JsonNode;
+proc call*(call_583000: Call_ComputeOperationResultsGet_582983; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the status of a compute operation.
   ## 
-  let valid = call_593967.validator(path, query, header, formData, body)
-  let scheme = call_593967.pickScheme
+  let valid = call_583000.validator(path, query, header, formData, body)
+  let scheme = call_583000.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593967.url(scheme.get, call_593967.host, call_593967.base,
-                         call_593967.route, valid.getOrDefault("path"),
+  let url = call_583000.url(scheme.get, call_583000.host, call_583000.base,
+                         call_583000.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593967, url, valid)
+  result = hook(call_583000, url, valid)
 
-proc call*(call_593968: Call_ComputeOperationResultsGet_593950;
+proc call*(call_583001: Call_ComputeOperationResultsGet_582983;
           resourceGroupName: string; operation: string; subscriptionId: string;
           location: string; apiVersion: string = "2016-05-01"): Recallable =
   ## computeOperationResultsGet
@@ -342,20 +342,20 @@ proc call*(call_593968: Call_ComputeOperationResultsGet_593950;
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593969 = newJObject()
-  var query_593970 = newJObject()
-  add(path_593969, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593970, "api-version", newJString(apiVersion))
-  add(path_593969, "operation", newJString(operation))
-  add(path_593969, "subscriptionId", newJString(subscriptionId))
-  add(path_593969, "location", newJString(location))
-  result = call_593968.call(path_593969, query_593970, nil, nil, nil)
+  var path_583002 = newJObject()
+  var query_583003 = newJObject()
+  add(path_583002, "resourceGroupName", newJString(resourceGroupName))
+  add(query_583003, "api-version", newJString(apiVersion))
+  add(path_583002, "operation", newJString(operation))
+  add(path_583002, "subscriptionId", newJString(subscriptionId))
+  add(path_583002, "location", newJString(location))
+  result = call_583001.call(path_583002, query_583003, nil, nil, nil)
 
-var computeOperationResultsGet* = Call_ComputeOperationResultsGet_593950(
+var computeOperationResultsGet* = Call_ComputeOperationResultsGet_582983(
     name: "computeOperationResultsGet", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/computeOperationResults/{operation}",
-    validator: validate_ComputeOperationResultsGet_593951, base: "",
-    url: url_ComputeOperationResultsGet_593952, schemes: {Scheme.Https})
+    validator: validate_ComputeOperationResultsGet_582984, base: "",
+    url: url_ComputeOperationResultsGet_582985, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593438 = ref object of OpenApiRestCall
+  OpenApiRestCall_567667 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593438](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567667](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593438): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567667): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "network-networkWatcher"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_NetworkWatchersListAll_593660 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersListAll_593662(protocol: Scheme; host: string; base: string;
+  Call_NetworkWatchersListAll_567889 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersListAll_567891(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_NetworkWatchersListAll_593662(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersListAll_593661(path: JsonNode; query: JsonNode;
+proc validate_NetworkWatchersListAll_567890(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all network watchers by subscription.
   ## 
@@ -133,11 +133,11 @@ proc validate_NetworkWatchersListAll_593661(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593835 = path.getOrDefault("subscriptionId")
-  valid_593835 = validateParameter(valid_593835, JString, required = true,
+  var valid_568064 = path.getOrDefault("subscriptionId")
+  valid_568064 = validateParameter(valid_568064, JString, required = true,
                                  default = nil)
-  if valid_593835 != nil:
-    section.add "subscriptionId", valid_593835
+  if valid_568064 != nil:
+    section.add "subscriptionId", valid_568064
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_NetworkWatchersListAll_593661(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593836 = query.getOrDefault("api-version")
-  valid_593836 = validateParameter(valid_593836, JString, required = true,
+  var valid_568065 = query.getOrDefault("api-version")
+  valid_568065 = validateParameter(valid_568065, JString, required = true,
                                  default = nil)
-  if valid_593836 != nil:
-    section.add "api-version", valid_593836
+  if valid_568065 != nil:
+    section.add "api-version", valid_568065
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_NetworkWatchersListAll_593661(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593859: Call_NetworkWatchersListAll_593660; path: JsonNode;
+proc call*(call_568088: Call_NetworkWatchersListAll_567889; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all network watchers by subscription.
   ## 
-  let valid = call_593859.validator(path, query, header, formData, body)
-  let scheme = call_593859.pickScheme
+  let valid = call_568088.validator(path, query, header, formData, body)
+  let scheme = call_568088.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593859.url(scheme.get, call_593859.host, call_593859.base,
-                         call_593859.route, valid.getOrDefault("path"),
+  let url = call_568088.url(scheme.get, call_568088.host, call_568088.base,
+                         call_568088.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593859, url, valid)
+  result = hook(call_568088, url, valid)
 
-proc call*(call_593930: Call_NetworkWatchersListAll_593660; apiVersion: string;
+proc call*(call_568159: Call_NetworkWatchersListAll_567889; apiVersion: string;
           subscriptionId: string): Recallable =
   ## networkWatchersListAll
   ## Gets all network watchers by subscription.
@@ -179,20 +179,20 @@ proc call*(call_593930: Call_NetworkWatchersListAll_593660; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593931 = newJObject()
-  var query_593933 = newJObject()
-  add(query_593933, "api-version", newJString(apiVersion))
-  add(path_593931, "subscriptionId", newJString(subscriptionId))
-  result = call_593930.call(path_593931, query_593933, nil, nil, nil)
+  var path_568160 = newJObject()
+  var query_568162 = newJObject()
+  add(query_568162, "api-version", newJString(apiVersion))
+  add(path_568160, "subscriptionId", newJString(subscriptionId))
+  result = call_568159.call(path_568160, query_568162, nil, nil, nil)
 
-var networkWatchersListAll* = Call_NetworkWatchersListAll_593660(
+var networkWatchersListAll* = Call_NetworkWatchersListAll_567889(
     name: "networkWatchersListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/networkWatchers",
-    validator: validate_NetworkWatchersListAll_593661, base: "",
-    url: url_NetworkWatchersListAll_593662, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersListAll_567890, base: "",
+    url: url_NetworkWatchersListAll_567891, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersList_593972 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersList_593974(protocol: Scheme; host: string; base: string;
+  Call_NetworkWatchersList_568201 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersList_568203(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -213,7 +213,7 @@ proc url_NetworkWatchersList_593974(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersList_593973(path: JsonNode; query: JsonNode;
+proc validate_NetworkWatchersList_568202(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets all network watchers by resource group.
@@ -228,16 +228,16 @@ proc validate_NetworkWatchersList_593973(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593975 = path.getOrDefault("resourceGroupName")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_568204 = path.getOrDefault("resourceGroupName")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "resourceGroupName", valid_593975
-  var valid_593976 = path.getOrDefault("subscriptionId")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  if valid_568204 != nil:
+    section.add "resourceGroupName", valid_568204
+  var valid_568205 = path.getOrDefault("subscriptionId")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "subscriptionId", valid_593976
+  if valid_568205 != nil:
+    section.add "subscriptionId", valid_568205
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -245,11 +245,11 @@ proc validate_NetworkWatchersList_593973(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593977 = query.getOrDefault("api-version")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  var valid_568206 = query.getOrDefault("api-version")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "api-version", valid_593977
+  if valid_568206 != nil:
+    section.add "api-version", valid_568206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -258,20 +258,20 @@ proc validate_NetworkWatchersList_593973(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593978: Call_NetworkWatchersList_593972; path: JsonNode;
+proc call*(call_568207: Call_NetworkWatchersList_568201; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all network watchers by resource group.
   ## 
-  let valid = call_593978.validator(path, query, header, formData, body)
-  let scheme = call_593978.pickScheme
+  let valid = call_568207.validator(path, query, header, formData, body)
+  let scheme = call_568207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593978.url(scheme.get, call_593978.host, call_593978.base,
-                         call_593978.route, valid.getOrDefault("path"),
+  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
+                         call_568207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593978, url, valid)
+  result = hook(call_568207, url, valid)
 
-proc call*(call_593979: Call_NetworkWatchersList_593972; resourceGroupName: string;
+proc call*(call_568208: Call_NetworkWatchersList_568201; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## networkWatchersList
   ## Gets all network watchers by resource group.
@@ -281,21 +281,21 @@ proc call*(call_593979: Call_NetworkWatchersList_593972; resourceGroupName: stri
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593980 = newJObject()
-  var query_593981 = newJObject()
-  add(path_593980, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593981, "api-version", newJString(apiVersion))
-  add(path_593980, "subscriptionId", newJString(subscriptionId))
-  result = call_593979.call(path_593980, query_593981, nil, nil, nil)
+  var path_568209 = newJObject()
+  var query_568210 = newJObject()
+  add(path_568209, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568210, "api-version", newJString(apiVersion))
+  add(path_568209, "subscriptionId", newJString(subscriptionId))
+  result = call_568208.call(path_568209, query_568210, nil, nil, nil)
 
-var networkWatchersList* = Call_NetworkWatchersList_593972(
+var networkWatchersList* = Call_NetworkWatchersList_568201(
     name: "networkWatchersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers",
-    validator: validate_NetworkWatchersList_593973, base: "",
-    url: url_NetworkWatchersList_593974, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersList_568202, base: "",
+    url: url_NetworkWatchersList_568203, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersCreateOrUpdate_593993 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersCreateOrUpdate_593995(protocol: Scheme; host: string;
+  Call_NetworkWatchersCreateOrUpdate_568222 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersCreateOrUpdate_568224(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -319,7 +319,7 @@ proc url_NetworkWatchersCreateOrUpdate_593995(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersCreateOrUpdate_593994(path: JsonNode; query: JsonNode;
+proc validate_NetworkWatchersCreateOrUpdate_568223(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a network watcher in the specified resource group.
   ## 
@@ -335,21 +335,21 @@ proc validate_NetworkWatchersCreateOrUpdate_593994(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594013 = path.getOrDefault("resourceGroupName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  var valid_568242 = path.getOrDefault("resourceGroupName")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "resourceGroupName", valid_594013
-  var valid_594014 = path.getOrDefault("subscriptionId")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_568242 != nil:
+    section.add "resourceGroupName", valid_568242
+  var valid_568243 = path.getOrDefault("subscriptionId")
+  valid_568243 = validateParameter(valid_568243, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "subscriptionId", valid_594014
-  var valid_594015 = path.getOrDefault("networkWatcherName")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_568243 != nil:
+    section.add "subscriptionId", valid_568243
+  var valid_568244 = path.getOrDefault("networkWatcherName")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "networkWatcherName", valid_594015
+  if valid_568244 != nil:
+    section.add "networkWatcherName", valid_568244
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +357,11 @@ proc validate_NetworkWatchersCreateOrUpdate_593994(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594016 = query.getOrDefault("api-version")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_568245 = query.getOrDefault("api-version")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "api-version", valid_594016
+  if valid_568245 != nil:
+    section.add "api-version", valid_568245
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -375,20 +375,20 @@ proc validate_NetworkWatchersCreateOrUpdate_593994(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_NetworkWatchersCreateOrUpdate_593993; path: JsonNode;
+proc call*(call_568247: Call_NetworkWatchersCreateOrUpdate_568222; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a network watcher in the specified resource group.
   ## 
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_568247.validator(path, query, header, formData, body)
+  let scheme = call_568247.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_568247.url(scheme.get, call_568247.host, call_568247.base,
+                         call_568247.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_568247, url, valid)
 
-proc call*(call_594019: Call_NetworkWatchersCreateOrUpdate_593993;
+proc call*(call_568248: Call_NetworkWatchersCreateOrUpdate_568222;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersCreateOrUpdate
@@ -403,25 +403,25 @@ proc call*(call_594019: Call_NetworkWatchersCreateOrUpdate_593993;
   ##                     : The name of the network watcher.
   ##   parameters: JObject (required)
   ##             : Parameters that define the network watcher resource.
-  var path_594020 = newJObject()
-  var query_594021 = newJObject()
-  var body_594022 = newJObject()
-  add(path_594020, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594021, "api-version", newJString(apiVersion))
-  add(path_594020, "subscriptionId", newJString(subscriptionId))
-  add(path_594020, "networkWatcherName", newJString(networkWatcherName))
+  var path_568249 = newJObject()
+  var query_568250 = newJObject()
+  var body_568251 = newJObject()
+  add(path_568249, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568250, "api-version", newJString(apiVersion))
+  add(path_568249, "subscriptionId", newJString(subscriptionId))
+  add(path_568249, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594022 = parameters
-  result = call_594019.call(path_594020, query_594021, nil, nil, body_594022)
+    body_568251 = parameters
+  result = call_568248.call(path_568249, query_568250, nil, nil, body_568251)
 
-var networkWatchersCreateOrUpdate* = Call_NetworkWatchersCreateOrUpdate_593993(
+var networkWatchersCreateOrUpdate* = Call_NetworkWatchersCreateOrUpdate_568222(
     name: "networkWatchersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}",
-    validator: validate_NetworkWatchersCreateOrUpdate_593994, base: "",
-    url: url_NetworkWatchersCreateOrUpdate_593995, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersCreateOrUpdate_568223, base: "",
+    url: url_NetworkWatchersCreateOrUpdate_568224, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersGet_593982 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersGet_593984(protocol: Scheme; host: string; base: string;
+  Call_NetworkWatchersGet_568211 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersGet_568213(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -445,7 +445,7 @@ proc url_NetworkWatchersGet_593984(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersGet_593983(path: JsonNode; query: JsonNode;
+proc validate_NetworkWatchersGet_568212(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the specified network watcher by resource group.
@@ -462,21 +462,21 @@ proc validate_NetworkWatchersGet_593983(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593985 = path.getOrDefault("resourceGroupName")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568214 = path.getOrDefault("resourceGroupName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "resourceGroupName", valid_593985
-  var valid_593986 = path.getOrDefault("subscriptionId")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  if valid_568214 != nil:
+    section.add "resourceGroupName", valid_568214
+  var valid_568215 = path.getOrDefault("subscriptionId")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "subscriptionId", valid_593986
-  var valid_593987 = path.getOrDefault("networkWatcherName")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+  if valid_568215 != nil:
+    section.add "subscriptionId", valid_568215
+  var valid_568216 = path.getOrDefault("networkWatcherName")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "networkWatcherName", valid_593987
+  if valid_568216 != nil:
+    section.add "networkWatcherName", valid_568216
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -484,11 +484,11 @@ proc validate_NetworkWatchersGet_593983(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593988 = query.getOrDefault("api-version")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_568217 = query.getOrDefault("api-version")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "api-version", valid_593988
+  if valid_568217 != nil:
+    section.add "api-version", valid_568217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -497,20 +497,20 @@ proc validate_NetworkWatchersGet_593983(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593989: Call_NetworkWatchersGet_593982; path: JsonNode;
+proc call*(call_568218: Call_NetworkWatchersGet_568211; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified network watcher by resource group.
   ## 
-  let valid = call_593989.validator(path, query, header, formData, body)
-  let scheme = call_593989.pickScheme
+  let valid = call_568218.validator(path, query, header, formData, body)
+  let scheme = call_568218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593989.url(scheme.get, call_593989.host, call_593989.base,
-                         call_593989.route, valid.getOrDefault("path"),
+  let url = call_568218.url(scheme.get, call_568218.host, call_568218.base,
+                         call_568218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593989, url, valid)
+  result = hook(call_568218, url, valid)
 
-proc call*(call_593990: Call_NetworkWatchersGet_593982; resourceGroupName: string;
+proc call*(call_568219: Call_NetworkWatchersGet_568211; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; networkWatcherName: string): Recallable =
   ## networkWatchersGet
   ## Gets the specified network watcher by resource group.
@@ -522,22 +522,22 @@ proc call*(call_593990: Call_NetworkWatchersGet_593982; resourceGroupName: strin
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   networkWatcherName: string (required)
   ##                     : The name of the network watcher.
-  var path_593991 = newJObject()
-  var query_593992 = newJObject()
-  add(path_593991, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593992, "api-version", newJString(apiVersion))
-  add(path_593991, "subscriptionId", newJString(subscriptionId))
-  add(path_593991, "networkWatcherName", newJString(networkWatcherName))
-  result = call_593990.call(path_593991, query_593992, nil, nil, nil)
+  var path_568220 = newJObject()
+  var query_568221 = newJObject()
+  add(path_568220, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568221, "api-version", newJString(apiVersion))
+  add(path_568220, "subscriptionId", newJString(subscriptionId))
+  add(path_568220, "networkWatcherName", newJString(networkWatcherName))
+  result = call_568219.call(path_568220, query_568221, nil, nil, nil)
 
-var networkWatchersGet* = Call_NetworkWatchersGet_593982(
+var networkWatchersGet* = Call_NetworkWatchersGet_568211(
     name: "networkWatchersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}",
-    validator: validate_NetworkWatchersGet_593983, base: "",
-    url: url_NetworkWatchersGet_593984, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersGet_568212, base: "",
+    url: url_NetworkWatchersGet_568213, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersUpdateTags_594034 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersUpdateTags_594036(protocol: Scheme; host: string;
+  Call_NetworkWatchersUpdateTags_568263 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersUpdateTags_568265(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -561,7 +561,7 @@ proc url_NetworkWatchersUpdateTags_594036(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersUpdateTags_594035(path: JsonNode; query: JsonNode;
+proc validate_NetworkWatchersUpdateTags_568264(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a network watcher tags.
   ## 
@@ -577,21 +577,21 @@ proc validate_NetworkWatchersUpdateTags_594035(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594037 = path.getOrDefault("resourceGroupName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  var valid_568266 = path.getOrDefault("resourceGroupName")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "resourceGroupName", valid_594037
-  var valid_594038 = path.getOrDefault("subscriptionId")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_568266 != nil:
+    section.add "resourceGroupName", valid_568266
+  var valid_568267 = path.getOrDefault("subscriptionId")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "subscriptionId", valid_594038
-  var valid_594039 = path.getOrDefault("networkWatcherName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_568267 != nil:
+    section.add "subscriptionId", valid_568267
+  var valid_568268 = path.getOrDefault("networkWatcherName")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "networkWatcherName", valid_594039
+  if valid_568268 != nil:
+    section.add "networkWatcherName", valid_568268
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -599,11 +599,11 @@ proc validate_NetworkWatchersUpdateTags_594035(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594040 = query.getOrDefault("api-version")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  var valid_568269 = query.getOrDefault("api-version")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "api-version", valid_594040
+  if valid_568269 != nil:
+    section.add "api-version", valid_568269
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -617,20 +617,20 @@ proc validate_NetworkWatchersUpdateTags_594035(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594042: Call_NetworkWatchersUpdateTags_594034; path: JsonNode;
+proc call*(call_568271: Call_NetworkWatchersUpdateTags_568263; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a network watcher tags.
   ## 
-  let valid = call_594042.validator(path, query, header, formData, body)
-  let scheme = call_594042.pickScheme
+  let valid = call_568271.validator(path, query, header, formData, body)
+  let scheme = call_568271.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594042.url(scheme.get, call_594042.host, call_594042.base,
-                         call_594042.route, valid.getOrDefault("path"),
+  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
+                         call_568271.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594042, url, valid)
+  result = hook(call_568271, url, valid)
 
-proc call*(call_594043: Call_NetworkWatchersUpdateTags_594034;
+proc call*(call_568272: Call_NetworkWatchersUpdateTags_568263;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersUpdateTags
@@ -645,25 +645,25 @@ proc call*(call_594043: Call_NetworkWatchersUpdateTags_594034;
   ##                     : The name of the network watcher.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to update network watcher tags.
-  var path_594044 = newJObject()
-  var query_594045 = newJObject()
-  var body_594046 = newJObject()
-  add(path_594044, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594045, "api-version", newJString(apiVersion))
-  add(path_594044, "subscriptionId", newJString(subscriptionId))
-  add(path_594044, "networkWatcherName", newJString(networkWatcherName))
+  var path_568273 = newJObject()
+  var query_568274 = newJObject()
+  var body_568275 = newJObject()
+  add(path_568273, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568274, "api-version", newJString(apiVersion))
+  add(path_568273, "subscriptionId", newJString(subscriptionId))
+  add(path_568273, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594046 = parameters
-  result = call_594043.call(path_594044, query_594045, nil, nil, body_594046)
+    body_568275 = parameters
+  result = call_568272.call(path_568273, query_568274, nil, nil, body_568275)
 
-var networkWatchersUpdateTags* = Call_NetworkWatchersUpdateTags_594034(
+var networkWatchersUpdateTags* = Call_NetworkWatchersUpdateTags_568263(
     name: "networkWatchersUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}",
-    validator: validate_NetworkWatchersUpdateTags_594035, base: "",
-    url: url_NetworkWatchersUpdateTags_594036, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersUpdateTags_568264, base: "",
+    url: url_NetworkWatchersUpdateTags_568265, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersDelete_594023 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersDelete_594025(protocol: Scheme; host: string; base: string;
+  Call_NetworkWatchersDelete_568252 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersDelete_568254(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -687,7 +687,7 @@ proc url_NetworkWatchersDelete_594025(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersDelete_594024(path: JsonNode; query: JsonNode;
+proc validate_NetworkWatchersDelete_568253(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified network watcher resource.
   ## 
@@ -703,21 +703,21 @@ proc validate_NetworkWatchersDelete_594024(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594026 = path.getOrDefault("resourceGroupName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_568255 = path.getOrDefault("resourceGroupName")
+  valid_568255 = validateParameter(valid_568255, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "resourceGroupName", valid_594026
-  var valid_594027 = path.getOrDefault("subscriptionId")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_568255 != nil:
+    section.add "resourceGroupName", valid_568255
+  var valid_568256 = path.getOrDefault("subscriptionId")
+  valid_568256 = validateParameter(valid_568256, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "subscriptionId", valid_594027
-  var valid_594028 = path.getOrDefault("networkWatcherName")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  if valid_568256 != nil:
+    section.add "subscriptionId", valid_568256
+  var valid_568257 = path.getOrDefault("networkWatcherName")
+  valid_568257 = validateParameter(valid_568257, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "networkWatcherName", valid_594028
+  if valid_568257 != nil:
+    section.add "networkWatcherName", valid_568257
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -725,11 +725,11 @@ proc validate_NetworkWatchersDelete_594024(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594029 = query.getOrDefault("api-version")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_568258 = query.getOrDefault("api-version")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "api-version", valid_594029
+  if valid_568258 != nil:
+    section.add "api-version", valid_568258
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -738,20 +738,20 @@ proc validate_NetworkWatchersDelete_594024(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594030: Call_NetworkWatchersDelete_594023; path: JsonNode;
+proc call*(call_568259: Call_NetworkWatchersDelete_568252; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified network watcher resource.
   ## 
-  let valid = call_594030.validator(path, query, header, formData, body)
-  let scheme = call_594030.pickScheme
+  let valid = call_568259.validator(path, query, header, formData, body)
+  let scheme = call_568259.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594030.url(scheme.get, call_594030.host, call_594030.base,
-                         call_594030.route, valid.getOrDefault("path"),
+  let url = call_568259.url(scheme.get, call_568259.host, call_568259.base,
+                         call_568259.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594030, url, valid)
+  result = hook(call_568259, url, valid)
 
-proc call*(call_594031: Call_NetworkWatchersDelete_594023;
+proc call*(call_568260: Call_NetworkWatchersDelete_568252;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string): Recallable =
   ## networkWatchersDelete
@@ -764,22 +764,22 @@ proc call*(call_594031: Call_NetworkWatchersDelete_594023;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   networkWatcherName: string (required)
   ##                     : The name of the network watcher.
-  var path_594032 = newJObject()
-  var query_594033 = newJObject()
-  add(path_594032, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594033, "api-version", newJString(apiVersion))
-  add(path_594032, "subscriptionId", newJString(subscriptionId))
-  add(path_594032, "networkWatcherName", newJString(networkWatcherName))
-  result = call_594031.call(path_594032, query_594033, nil, nil, nil)
+  var path_568261 = newJObject()
+  var query_568262 = newJObject()
+  add(path_568261, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568262, "api-version", newJString(apiVersion))
+  add(path_568261, "subscriptionId", newJString(subscriptionId))
+  add(path_568261, "networkWatcherName", newJString(networkWatcherName))
+  result = call_568260.call(path_568261, query_568262, nil, nil, nil)
 
-var networkWatchersDelete* = Call_NetworkWatchersDelete_594023(
+var networkWatchersDelete* = Call_NetworkWatchersDelete_568252(
     name: "networkWatchersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}",
-    validator: validate_NetworkWatchersDelete_594024, base: "",
-    url: url_NetworkWatchersDelete_594025, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersDelete_568253, base: "",
+    url: url_NetworkWatchersDelete_568254, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersListAvailableProviders_594047 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersListAvailableProviders_594049(protocol: Scheme;
+  Call_NetworkWatchersListAvailableProviders_568276 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersListAvailableProviders_568278(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -804,7 +804,7 @@ proc url_NetworkWatchersListAvailableProviders_594049(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersListAvailableProviders_594048(path: JsonNode;
+proc validate_NetworkWatchersListAvailableProviders_568277(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all available internet service providers for a specified Azure region.
   ## 
@@ -820,21 +820,21 @@ proc validate_NetworkWatchersListAvailableProviders_594048(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594050 = path.getOrDefault("resourceGroupName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  var valid_568279 = path.getOrDefault("resourceGroupName")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "resourceGroupName", valid_594050
-  var valid_594051 = path.getOrDefault("subscriptionId")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_568279 != nil:
+    section.add "resourceGroupName", valid_568279
+  var valid_568280 = path.getOrDefault("subscriptionId")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "subscriptionId", valid_594051
-  var valid_594052 = path.getOrDefault("networkWatcherName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_568280 != nil:
+    section.add "subscriptionId", valid_568280
+  var valid_568281 = path.getOrDefault("networkWatcherName")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "networkWatcherName", valid_594052
+  if valid_568281 != nil:
+    section.add "networkWatcherName", valid_568281
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -842,11 +842,11 @@ proc validate_NetworkWatchersListAvailableProviders_594048(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594053 = query.getOrDefault("api-version")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_568282 = query.getOrDefault("api-version")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "api-version", valid_594053
+  if valid_568282 != nil:
+    section.add "api-version", valid_568282
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -860,21 +860,21 @@ proc validate_NetworkWatchersListAvailableProviders_594048(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594055: Call_NetworkWatchersListAvailableProviders_594047;
+proc call*(call_568284: Call_NetworkWatchersListAvailableProviders_568276;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all available internet service providers for a specified Azure region.
   ## 
-  let valid = call_594055.validator(path, query, header, formData, body)
-  let scheme = call_594055.pickScheme
+  let valid = call_568284.validator(path, query, header, formData, body)
+  let scheme = call_568284.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594055.url(scheme.get, call_594055.host, call_594055.base,
-                         call_594055.route, valid.getOrDefault("path"),
+  let url = call_568284.url(scheme.get, call_568284.host, call_568284.base,
+                         call_568284.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594055, url, valid)
+  result = hook(call_568284, url, valid)
 
-proc call*(call_594056: Call_NetworkWatchersListAvailableProviders_594047;
+proc call*(call_568285: Call_NetworkWatchersListAvailableProviders_568276;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersListAvailableProviders
@@ -889,25 +889,25 @@ proc call*(call_594056: Call_NetworkWatchersListAvailableProviders_594047;
   ##                     : The name of the network watcher resource.
   ##   parameters: JObject (required)
   ##             : Parameters that scope the list of available providers.
-  var path_594057 = newJObject()
-  var query_594058 = newJObject()
-  var body_594059 = newJObject()
-  add(path_594057, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594058, "api-version", newJString(apiVersion))
-  add(path_594057, "subscriptionId", newJString(subscriptionId))
-  add(path_594057, "networkWatcherName", newJString(networkWatcherName))
+  var path_568286 = newJObject()
+  var query_568287 = newJObject()
+  var body_568288 = newJObject()
+  add(path_568286, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568287, "api-version", newJString(apiVersion))
+  add(path_568286, "subscriptionId", newJString(subscriptionId))
+  add(path_568286, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594059 = parameters
-  result = call_594056.call(path_594057, query_594058, nil, nil, body_594059)
+    body_568288 = parameters
+  result = call_568285.call(path_568286, query_568287, nil, nil, body_568288)
 
-var networkWatchersListAvailableProviders* = Call_NetworkWatchersListAvailableProviders_594047(
+var networkWatchersListAvailableProviders* = Call_NetworkWatchersListAvailableProviders_568276(
     name: "networkWatchersListAvailableProviders", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/availableProvidersList",
-    validator: validate_NetworkWatchersListAvailableProviders_594048, base: "",
-    url: url_NetworkWatchersListAvailableProviders_594049, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersListAvailableProviders_568277, base: "",
+    url: url_NetworkWatchersListAvailableProviders_568278, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersGetAzureReachabilityReport_594060 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersGetAzureReachabilityReport_594062(protocol: Scheme;
+  Call_NetworkWatchersGetAzureReachabilityReport_568289 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersGetAzureReachabilityReport_568291(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -932,7 +932,7 @@ proc url_NetworkWatchersGetAzureReachabilityReport_594062(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersGetAzureReachabilityReport_594061(path: JsonNode;
+proc validate_NetworkWatchersGetAzureReachabilityReport_568290(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the relative latency score for internet service providers from a specified location to Azure regions.
   ## 
@@ -948,21 +948,21 @@ proc validate_NetworkWatchersGetAzureReachabilityReport_594061(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594063 = path.getOrDefault("resourceGroupName")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  var valid_568292 = path.getOrDefault("resourceGroupName")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "resourceGroupName", valid_594063
-  var valid_594064 = path.getOrDefault("subscriptionId")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_568292 != nil:
+    section.add "resourceGroupName", valid_568292
+  var valid_568293 = path.getOrDefault("subscriptionId")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "subscriptionId", valid_594064
-  var valid_594065 = path.getOrDefault("networkWatcherName")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  if valid_568293 != nil:
+    section.add "subscriptionId", valid_568293
+  var valid_568294 = path.getOrDefault("networkWatcherName")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "networkWatcherName", valid_594065
+  if valid_568294 != nil:
+    section.add "networkWatcherName", valid_568294
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -970,11 +970,11 @@ proc validate_NetworkWatchersGetAzureReachabilityReport_594061(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594066 = query.getOrDefault("api-version")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  var valid_568295 = query.getOrDefault("api-version")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "api-version", valid_594066
+  if valid_568295 != nil:
+    section.add "api-version", valid_568295
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -988,21 +988,21 @@ proc validate_NetworkWatchersGetAzureReachabilityReport_594061(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594068: Call_NetworkWatchersGetAzureReachabilityReport_594060;
+proc call*(call_568297: Call_NetworkWatchersGetAzureReachabilityReport_568289;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the relative latency score for internet service providers from a specified location to Azure regions.
   ## 
-  let valid = call_594068.validator(path, query, header, formData, body)
-  let scheme = call_594068.pickScheme
+  let valid = call_568297.validator(path, query, header, formData, body)
+  let scheme = call_568297.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594068.url(scheme.get, call_594068.host, call_594068.base,
-                         call_594068.route, valid.getOrDefault("path"),
+  let url = call_568297.url(scheme.get, call_568297.host, call_568297.base,
+                         call_568297.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594068, url, valid)
+  result = hook(call_568297, url, valid)
 
-proc call*(call_594069: Call_NetworkWatchersGetAzureReachabilityReport_594060;
+proc call*(call_568298: Call_NetworkWatchersGetAzureReachabilityReport_568289;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersGetAzureReachabilityReport
@@ -1017,26 +1017,26 @@ proc call*(call_594069: Call_NetworkWatchersGetAzureReachabilityReport_594060;
   ##                     : The name of the network watcher resource.
   ##   parameters: JObject (required)
   ##             : Parameters that determine Azure reachability report configuration.
-  var path_594070 = newJObject()
-  var query_594071 = newJObject()
-  var body_594072 = newJObject()
-  add(path_594070, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594071, "api-version", newJString(apiVersion))
-  add(path_594070, "subscriptionId", newJString(subscriptionId))
-  add(path_594070, "networkWatcherName", newJString(networkWatcherName))
+  var path_568299 = newJObject()
+  var query_568300 = newJObject()
+  var body_568301 = newJObject()
+  add(path_568299, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568300, "api-version", newJString(apiVersion))
+  add(path_568299, "subscriptionId", newJString(subscriptionId))
+  add(path_568299, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594072 = parameters
-  result = call_594069.call(path_594070, query_594071, nil, nil, body_594072)
+    body_568301 = parameters
+  result = call_568298.call(path_568299, query_568300, nil, nil, body_568301)
 
-var networkWatchersGetAzureReachabilityReport* = Call_NetworkWatchersGetAzureReachabilityReport_594060(
+var networkWatchersGetAzureReachabilityReport* = Call_NetworkWatchersGetAzureReachabilityReport_568289(
     name: "networkWatchersGetAzureReachabilityReport", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/azureReachabilityReport",
-    validator: validate_NetworkWatchersGetAzureReachabilityReport_594061,
-    base: "", url: url_NetworkWatchersGetAzureReachabilityReport_594062,
+    validator: validate_NetworkWatchersGetAzureReachabilityReport_568290,
+    base: "", url: url_NetworkWatchersGetAzureReachabilityReport_568291,
     schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersSetFlowLogConfiguration_594073 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersSetFlowLogConfiguration_594075(protocol: Scheme;
+  Call_NetworkWatchersSetFlowLogConfiguration_568302 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersSetFlowLogConfiguration_568304(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1061,7 +1061,7 @@ proc url_NetworkWatchersSetFlowLogConfiguration_594075(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersSetFlowLogConfiguration_594074(path: JsonNode;
+proc validate_NetworkWatchersSetFlowLogConfiguration_568303(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Configures flow log and traffic analytics (optional) on a specified resource.
   ## 
@@ -1077,21 +1077,21 @@ proc validate_NetworkWatchersSetFlowLogConfiguration_594074(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594076 = path.getOrDefault("resourceGroupName")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  var valid_568305 = path.getOrDefault("resourceGroupName")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "resourceGroupName", valid_594076
-  var valid_594077 = path.getOrDefault("subscriptionId")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  if valid_568305 != nil:
+    section.add "resourceGroupName", valid_568305
+  var valid_568306 = path.getOrDefault("subscriptionId")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "subscriptionId", valid_594077
-  var valid_594078 = path.getOrDefault("networkWatcherName")
-  valid_594078 = validateParameter(valid_594078, JString, required = true,
+  if valid_568306 != nil:
+    section.add "subscriptionId", valid_568306
+  var valid_568307 = path.getOrDefault("networkWatcherName")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "networkWatcherName", valid_594078
+  if valid_568307 != nil:
+    section.add "networkWatcherName", valid_568307
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1099,11 +1099,11 @@ proc validate_NetworkWatchersSetFlowLogConfiguration_594074(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594079 = query.getOrDefault("api-version")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+  var valid_568308 = query.getOrDefault("api-version")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "api-version", valid_594079
+  if valid_568308 != nil:
+    section.add "api-version", valid_568308
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1117,21 +1117,21 @@ proc validate_NetworkWatchersSetFlowLogConfiguration_594074(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594081: Call_NetworkWatchersSetFlowLogConfiguration_594073;
+proc call*(call_568310: Call_NetworkWatchersSetFlowLogConfiguration_568302;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Configures flow log and traffic analytics (optional) on a specified resource.
   ## 
-  let valid = call_594081.validator(path, query, header, formData, body)
-  let scheme = call_594081.pickScheme
+  let valid = call_568310.validator(path, query, header, formData, body)
+  let scheme = call_568310.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594081.url(scheme.get, call_594081.host, call_594081.base,
-                         call_594081.route, valid.getOrDefault("path"),
+  let url = call_568310.url(scheme.get, call_568310.host, call_568310.base,
+                         call_568310.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594081, url, valid)
+  result = hook(call_568310, url, valid)
 
-proc call*(call_594082: Call_NetworkWatchersSetFlowLogConfiguration_594073;
+proc call*(call_568311: Call_NetworkWatchersSetFlowLogConfiguration_568302;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersSetFlowLogConfiguration
@@ -1146,26 +1146,26 @@ proc call*(call_594082: Call_NetworkWatchersSetFlowLogConfiguration_594073;
   ##                     : The name of the network watcher resource.
   ##   parameters: JObject (required)
   ##             : Parameters that define the configuration of flow log.
-  var path_594083 = newJObject()
-  var query_594084 = newJObject()
-  var body_594085 = newJObject()
-  add(path_594083, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594084, "api-version", newJString(apiVersion))
-  add(path_594083, "subscriptionId", newJString(subscriptionId))
-  add(path_594083, "networkWatcherName", newJString(networkWatcherName))
+  var path_568312 = newJObject()
+  var query_568313 = newJObject()
+  var body_568314 = newJObject()
+  add(path_568312, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568313, "api-version", newJString(apiVersion))
+  add(path_568312, "subscriptionId", newJString(subscriptionId))
+  add(path_568312, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594085 = parameters
-  result = call_594082.call(path_594083, query_594084, nil, nil, body_594085)
+    body_568314 = parameters
+  result = call_568311.call(path_568312, query_568313, nil, nil, body_568314)
 
-var networkWatchersSetFlowLogConfiguration* = Call_NetworkWatchersSetFlowLogConfiguration_594073(
+var networkWatchersSetFlowLogConfiguration* = Call_NetworkWatchersSetFlowLogConfiguration_568302(
     name: "networkWatchersSetFlowLogConfiguration", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/configureFlowLog",
-    validator: validate_NetworkWatchersSetFlowLogConfiguration_594074, base: "",
-    url: url_NetworkWatchersSetFlowLogConfiguration_594075,
+    validator: validate_NetworkWatchersSetFlowLogConfiguration_568303, base: "",
+    url: url_NetworkWatchersSetFlowLogConfiguration_568304,
     schemes: {Scheme.Https})
 type
-  Call_ConnectionMonitorsList_594086 = ref object of OpenApiRestCall_593438
-proc url_ConnectionMonitorsList_594088(protocol: Scheme; host: string; base: string;
+  Call_ConnectionMonitorsList_568315 = ref object of OpenApiRestCall_567667
+proc url_ConnectionMonitorsList_568317(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1190,7 +1190,7 @@ proc url_ConnectionMonitorsList_594088(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionMonitorsList_594087(path: JsonNode; query: JsonNode;
+proc validate_ConnectionMonitorsList_568316(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all connection monitors for the specified Network Watcher.
   ## 
@@ -1206,21 +1206,21 @@ proc validate_ConnectionMonitorsList_594087(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594089 = path.getOrDefault("resourceGroupName")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_568318 = path.getOrDefault("resourceGroupName")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "resourceGroupName", valid_594089
-  var valid_594090 = path.getOrDefault("subscriptionId")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  if valid_568318 != nil:
+    section.add "resourceGroupName", valid_568318
+  var valid_568319 = path.getOrDefault("subscriptionId")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "subscriptionId", valid_594090
-  var valid_594091 = path.getOrDefault("networkWatcherName")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  if valid_568319 != nil:
+    section.add "subscriptionId", valid_568319
+  var valid_568320 = path.getOrDefault("networkWatcherName")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "networkWatcherName", valid_594091
+  if valid_568320 != nil:
+    section.add "networkWatcherName", valid_568320
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1228,11 +1228,11 @@ proc validate_ConnectionMonitorsList_594087(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594092 = query.getOrDefault("api-version")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  var valid_568321 = query.getOrDefault("api-version")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "api-version", valid_594092
+  if valid_568321 != nil:
+    section.add "api-version", valid_568321
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1241,20 +1241,20 @@ proc validate_ConnectionMonitorsList_594087(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594093: Call_ConnectionMonitorsList_594086; path: JsonNode;
+proc call*(call_568322: Call_ConnectionMonitorsList_568315; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all connection monitors for the specified Network Watcher.
   ## 
-  let valid = call_594093.validator(path, query, header, formData, body)
-  let scheme = call_594093.pickScheme
+  let valid = call_568322.validator(path, query, header, formData, body)
+  let scheme = call_568322.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594093.url(scheme.get, call_594093.host, call_594093.base,
-                         call_594093.route, valid.getOrDefault("path"),
+  let url = call_568322.url(scheme.get, call_568322.host, call_568322.base,
+                         call_568322.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594093, url, valid)
+  result = hook(call_568322, url, valid)
 
-proc call*(call_594094: Call_ConnectionMonitorsList_594086;
+proc call*(call_568323: Call_ConnectionMonitorsList_568315;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string): Recallable =
   ## connectionMonitorsList
@@ -1267,22 +1267,22 @@ proc call*(call_594094: Call_ConnectionMonitorsList_594086;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   networkWatcherName: string (required)
   ##                     : The name of the Network Watcher resource.
-  var path_594095 = newJObject()
-  var query_594096 = newJObject()
-  add(path_594095, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594096, "api-version", newJString(apiVersion))
-  add(path_594095, "subscriptionId", newJString(subscriptionId))
-  add(path_594095, "networkWatcherName", newJString(networkWatcherName))
-  result = call_594094.call(path_594095, query_594096, nil, nil, nil)
+  var path_568324 = newJObject()
+  var query_568325 = newJObject()
+  add(path_568324, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568325, "api-version", newJString(apiVersion))
+  add(path_568324, "subscriptionId", newJString(subscriptionId))
+  add(path_568324, "networkWatcherName", newJString(networkWatcherName))
+  result = call_568323.call(path_568324, query_568325, nil, nil, nil)
 
-var connectionMonitorsList* = Call_ConnectionMonitorsList_594086(
+var connectionMonitorsList* = Call_ConnectionMonitorsList_568315(
     name: "connectionMonitorsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectionMonitors",
-    validator: validate_ConnectionMonitorsList_594087, base: "",
-    url: url_ConnectionMonitorsList_594088, schemes: {Scheme.Https})
+    validator: validate_ConnectionMonitorsList_568316, base: "",
+    url: url_ConnectionMonitorsList_568317, schemes: {Scheme.Https})
 type
-  Call_ConnectionMonitorsCreateOrUpdate_594109 = ref object of OpenApiRestCall_593438
-proc url_ConnectionMonitorsCreateOrUpdate_594111(protocol: Scheme; host: string;
+  Call_ConnectionMonitorsCreateOrUpdate_568338 = ref object of OpenApiRestCall_567667
+proc url_ConnectionMonitorsCreateOrUpdate_568340(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1310,7 +1310,7 @@ proc url_ConnectionMonitorsCreateOrUpdate_594111(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionMonitorsCreateOrUpdate_594110(path: JsonNode;
+proc validate_ConnectionMonitorsCreateOrUpdate_568339(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a connection monitor.
   ## 
@@ -1328,26 +1328,26 @@ proc validate_ConnectionMonitorsCreateOrUpdate_594110(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594112 = path.getOrDefault("resourceGroupName")
-  valid_594112 = validateParameter(valid_594112, JString, required = true,
+  var valid_568341 = path.getOrDefault("resourceGroupName")
+  valid_568341 = validateParameter(valid_568341, JString, required = true,
                                  default = nil)
-  if valid_594112 != nil:
-    section.add "resourceGroupName", valid_594112
-  var valid_594113 = path.getOrDefault("subscriptionId")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  if valid_568341 != nil:
+    section.add "resourceGroupName", valid_568341
+  var valid_568342 = path.getOrDefault("subscriptionId")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = nil)
-  if valid_594113 != nil:
-    section.add "subscriptionId", valid_594113
-  var valid_594114 = path.getOrDefault("networkWatcherName")
-  valid_594114 = validateParameter(valid_594114, JString, required = true,
+  if valid_568342 != nil:
+    section.add "subscriptionId", valid_568342
+  var valid_568343 = path.getOrDefault("networkWatcherName")
+  valid_568343 = validateParameter(valid_568343, JString, required = true,
                                  default = nil)
-  if valid_594114 != nil:
-    section.add "networkWatcherName", valid_594114
-  var valid_594115 = path.getOrDefault("connectionMonitorName")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  if valid_568343 != nil:
+    section.add "networkWatcherName", valid_568343
+  var valid_568344 = path.getOrDefault("connectionMonitorName")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "connectionMonitorName", valid_594115
+  if valid_568344 != nil:
+    section.add "connectionMonitorName", valid_568344
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1355,11 +1355,11 @@ proc validate_ConnectionMonitorsCreateOrUpdate_594110(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594116 = query.getOrDefault("api-version")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  var valid_568345 = query.getOrDefault("api-version")
+  valid_568345 = validateParameter(valid_568345, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "api-version", valid_594116
+  if valid_568345 != nil:
+    section.add "api-version", valid_568345
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1373,21 +1373,21 @@ proc validate_ConnectionMonitorsCreateOrUpdate_594110(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594118: Call_ConnectionMonitorsCreateOrUpdate_594109;
+proc call*(call_568347: Call_ConnectionMonitorsCreateOrUpdate_568338;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a connection monitor.
   ## 
-  let valid = call_594118.validator(path, query, header, formData, body)
-  let scheme = call_594118.pickScheme
+  let valid = call_568347.validator(path, query, header, formData, body)
+  let scheme = call_568347.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594118.url(scheme.get, call_594118.host, call_594118.base,
-                         call_594118.route, valid.getOrDefault("path"),
+  let url = call_568347.url(scheme.get, call_568347.host, call_568347.base,
+                         call_568347.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594118, url, valid)
+  result = hook(call_568347, url, valid)
 
-proc call*(call_594119: Call_ConnectionMonitorsCreateOrUpdate_594109;
+proc call*(call_568348: Call_ConnectionMonitorsCreateOrUpdate_568338;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; connectionMonitorName: string;
           parameters: JsonNode): Recallable =
@@ -1405,26 +1405,26 @@ proc call*(call_594119: Call_ConnectionMonitorsCreateOrUpdate_594109;
   ##                        : The name of the connection monitor.
   ##   parameters: JObject (required)
   ##             : Parameters that define the operation to create a connection monitor.
-  var path_594120 = newJObject()
-  var query_594121 = newJObject()
-  var body_594122 = newJObject()
-  add(path_594120, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594121, "api-version", newJString(apiVersion))
-  add(path_594120, "subscriptionId", newJString(subscriptionId))
-  add(path_594120, "networkWatcherName", newJString(networkWatcherName))
-  add(path_594120, "connectionMonitorName", newJString(connectionMonitorName))
+  var path_568349 = newJObject()
+  var query_568350 = newJObject()
+  var body_568351 = newJObject()
+  add(path_568349, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568350, "api-version", newJString(apiVersion))
+  add(path_568349, "subscriptionId", newJString(subscriptionId))
+  add(path_568349, "networkWatcherName", newJString(networkWatcherName))
+  add(path_568349, "connectionMonitorName", newJString(connectionMonitorName))
   if parameters != nil:
-    body_594122 = parameters
-  result = call_594119.call(path_594120, query_594121, nil, nil, body_594122)
+    body_568351 = parameters
+  result = call_568348.call(path_568349, query_568350, nil, nil, body_568351)
 
-var connectionMonitorsCreateOrUpdate* = Call_ConnectionMonitorsCreateOrUpdate_594109(
+var connectionMonitorsCreateOrUpdate* = Call_ConnectionMonitorsCreateOrUpdate_568338(
     name: "connectionMonitorsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectionMonitors/{connectionMonitorName}",
-    validator: validate_ConnectionMonitorsCreateOrUpdate_594110, base: "",
-    url: url_ConnectionMonitorsCreateOrUpdate_594111, schemes: {Scheme.Https})
+    validator: validate_ConnectionMonitorsCreateOrUpdate_568339, base: "",
+    url: url_ConnectionMonitorsCreateOrUpdate_568340, schemes: {Scheme.Https})
 type
-  Call_ConnectionMonitorsGet_594097 = ref object of OpenApiRestCall_593438
-proc url_ConnectionMonitorsGet_594099(protocol: Scheme; host: string; base: string;
+  Call_ConnectionMonitorsGet_568326 = ref object of OpenApiRestCall_567667
+proc url_ConnectionMonitorsGet_568328(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1452,7 +1452,7 @@ proc url_ConnectionMonitorsGet_594099(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionMonitorsGet_594098(path: JsonNode; query: JsonNode;
+proc validate_ConnectionMonitorsGet_568327(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a connection monitor by name.
   ## 
@@ -1470,26 +1470,26 @@ proc validate_ConnectionMonitorsGet_594098(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594100 = path.getOrDefault("resourceGroupName")
-  valid_594100 = validateParameter(valid_594100, JString, required = true,
+  var valid_568329 = path.getOrDefault("resourceGroupName")
+  valid_568329 = validateParameter(valid_568329, JString, required = true,
                                  default = nil)
-  if valid_594100 != nil:
-    section.add "resourceGroupName", valid_594100
-  var valid_594101 = path.getOrDefault("subscriptionId")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  if valid_568329 != nil:
+    section.add "resourceGroupName", valid_568329
+  var valid_568330 = path.getOrDefault("subscriptionId")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "subscriptionId", valid_594101
-  var valid_594102 = path.getOrDefault("networkWatcherName")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  if valid_568330 != nil:
+    section.add "subscriptionId", valid_568330
+  var valid_568331 = path.getOrDefault("networkWatcherName")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "networkWatcherName", valid_594102
-  var valid_594103 = path.getOrDefault("connectionMonitorName")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  if valid_568331 != nil:
+    section.add "networkWatcherName", valid_568331
+  var valid_568332 = path.getOrDefault("connectionMonitorName")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "connectionMonitorName", valid_594103
+  if valid_568332 != nil:
+    section.add "connectionMonitorName", valid_568332
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1497,11 +1497,11 @@ proc validate_ConnectionMonitorsGet_594098(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594104 = query.getOrDefault("api-version")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  var valid_568333 = query.getOrDefault("api-version")
+  valid_568333 = validateParameter(valid_568333, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "api-version", valid_594104
+  if valid_568333 != nil:
+    section.add "api-version", valid_568333
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1510,20 +1510,20 @@ proc validate_ConnectionMonitorsGet_594098(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594105: Call_ConnectionMonitorsGet_594097; path: JsonNode;
+proc call*(call_568334: Call_ConnectionMonitorsGet_568326; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a connection monitor by name.
   ## 
-  let valid = call_594105.validator(path, query, header, formData, body)
-  let scheme = call_594105.pickScheme
+  let valid = call_568334.validator(path, query, header, formData, body)
+  let scheme = call_568334.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594105.url(scheme.get, call_594105.host, call_594105.base,
-                         call_594105.route, valid.getOrDefault("path"),
+  let url = call_568334.url(scheme.get, call_568334.host, call_568334.base,
+                         call_568334.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594105, url, valid)
+  result = hook(call_568334, url, valid)
 
-proc call*(call_594106: Call_ConnectionMonitorsGet_594097;
+proc call*(call_568335: Call_ConnectionMonitorsGet_568326;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; connectionMonitorName: string): Recallable =
   ## connectionMonitorsGet
@@ -1538,23 +1538,23 @@ proc call*(call_594106: Call_ConnectionMonitorsGet_594097;
   ##                     : The name of the Network Watcher resource.
   ##   connectionMonitorName: string (required)
   ##                        : The name of the connection monitor.
-  var path_594107 = newJObject()
-  var query_594108 = newJObject()
-  add(path_594107, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594108, "api-version", newJString(apiVersion))
-  add(path_594107, "subscriptionId", newJString(subscriptionId))
-  add(path_594107, "networkWatcherName", newJString(networkWatcherName))
-  add(path_594107, "connectionMonitorName", newJString(connectionMonitorName))
-  result = call_594106.call(path_594107, query_594108, nil, nil, nil)
+  var path_568336 = newJObject()
+  var query_568337 = newJObject()
+  add(path_568336, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568337, "api-version", newJString(apiVersion))
+  add(path_568336, "subscriptionId", newJString(subscriptionId))
+  add(path_568336, "networkWatcherName", newJString(networkWatcherName))
+  add(path_568336, "connectionMonitorName", newJString(connectionMonitorName))
+  result = call_568335.call(path_568336, query_568337, nil, nil, nil)
 
-var connectionMonitorsGet* = Call_ConnectionMonitorsGet_594097(
+var connectionMonitorsGet* = Call_ConnectionMonitorsGet_568326(
     name: "connectionMonitorsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectionMonitors/{connectionMonitorName}",
-    validator: validate_ConnectionMonitorsGet_594098, base: "",
-    url: url_ConnectionMonitorsGet_594099, schemes: {Scheme.Https})
+    validator: validate_ConnectionMonitorsGet_568327, base: "",
+    url: url_ConnectionMonitorsGet_568328, schemes: {Scheme.Https})
 type
-  Call_ConnectionMonitorsDelete_594123 = ref object of OpenApiRestCall_593438
-proc url_ConnectionMonitorsDelete_594125(protocol: Scheme; host: string;
+  Call_ConnectionMonitorsDelete_568352 = ref object of OpenApiRestCall_567667
+proc url_ConnectionMonitorsDelete_568354(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1583,7 +1583,7 @@ proc url_ConnectionMonitorsDelete_594125(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionMonitorsDelete_594124(path: JsonNode; query: JsonNode;
+proc validate_ConnectionMonitorsDelete_568353(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified connection monitor.
   ## 
@@ -1601,26 +1601,26 @@ proc validate_ConnectionMonitorsDelete_594124(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594126 = path.getOrDefault("resourceGroupName")
-  valid_594126 = validateParameter(valid_594126, JString, required = true,
+  var valid_568355 = path.getOrDefault("resourceGroupName")
+  valid_568355 = validateParameter(valid_568355, JString, required = true,
                                  default = nil)
-  if valid_594126 != nil:
-    section.add "resourceGroupName", valid_594126
-  var valid_594127 = path.getOrDefault("subscriptionId")
-  valid_594127 = validateParameter(valid_594127, JString, required = true,
+  if valid_568355 != nil:
+    section.add "resourceGroupName", valid_568355
+  var valid_568356 = path.getOrDefault("subscriptionId")
+  valid_568356 = validateParameter(valid_568356, JString, required = true,
                                  default = nil)
-  if valid_594127 != nil:
-    section.add "subscriptionId", valid_594127
-  var valid_594128 = path.getOrDefault("networkWatcherName")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  if valid_568356 != nil:
+    section.add "subscriptionId", valid_568356
+  var valid_568357 = path.getOrDefault("networkWatcherName")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "networkWatcherName", valid_594128
-  var valid_594129 = path.getOrDefault("connectionMonitorName")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  if valid_568357 != nil:
+    section.add "networkWatcherName", valid_568357
+  var valid_568358 = path.getOrDefault("connectionMonitorName")
+  valid_568358 = validateParameter(valid_568358, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "connectionMonitorName", valid_594129
+  if valid_568358 != nil:
+    section.add "connectionMonitorName", valid_568358
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1628,11 +1628,11 @@ proc validate_ConnectionMonitorsDelete_594124(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594130 = query.getOrDefault("api-version")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  var valid_568359 = query.getOrDefault("api-version")
+  valid_568359 = validateParameter(valid_568359, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "api-version", valid_594130
+  if valid_568359 != nil:
+    section.add "api-version", valid_568359
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1641,20 +1641,20 @@ proc validate_ConnectionMonitorsDelete_594124(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594131: Call_ConnectionMonitorsDelete_594123; path: JsonNode;
+proc call*(call_568360: Call_ConnectionMonitorsDelete_568352; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified connection monitor.
   ## 
-  let valid = call_594131.validator(path, query, header, formData, body)
-  let scheme = call_594131.pickScheme
+  let valid = call_568360.validator(path, query, header, formData, body)
+  let scheme = call_568360.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594131.url(scheme.get, call_594131.host, call_594131.base,
-                         call_594131.route, valid.getOrDefault("path"),
+  let url = call_568360.url(scheme.get, call_568360.host, call_568360.base,
+                         call_568360.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594131, url, valid)
+  result = hook(call_568360, url, valid)
 
-proc call*(call_594132: Call_ConnectionMonitorsDelete_594123;
+proc call*(call_568361: Call_ConnectionMonitorsDelete_568352;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; connectionMonitorName: string): Recallable =
   ## connectionMonitorsDelete
@@ -1669,23 +1669,23 @@ proc call*(call_594132: Call_ConnectionMonitorsDelete_594123;
   ##                     : The name of the Network Watcher resource.
   ##   connectionMonitorName: string (required)
   ##                        : The name of the connection monitor.
-  var path_594133 = newJObject()
-  var query_594134 = newJObject()
-  add(path_594133, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594134, "api-version", newJString(apiVersion))
-  add(path_594133, "subscriptionId", newJString(subscriptionId))
-  add(path_594133, "networkWatcherName", newJString(networkWatcherName))
-  add(path_594133, "connectionMonitorName", newJString(connectionMonitorName))
-  result = call_594132.call(path_594133, query_594134, nil, nil, nil)
+  var path_568362 = newJObject()
+  var query_568363 = newJObject()
+  add(path_568362, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568363, "api-version", newJString(apiVersion))
+  add(path_568362, "subscriptionId", newJString(subscriptionId))
+  add(path_568362, "networkWatcherName", newJString(networkWatcherName))
+  add(path_568362, "connectionMonitorName", newJString(connectionMonitorName))
+  result = call_568361.call(path_568362, query_568363, nil, nil, nil)
 
-var connectionMonitorsDelete* = Call_ConnectionMonitorsDelete_594123(
+var connectionMonitorsDelete* = Call_ConnectionMonitorsDelete_568352(
     name: "connectionMonitorsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectionMonitors/{connectionMonitorName}",
-    validator: validate_ConnectionMonitorsDelete_594124, base: "",
-    url: url_ConnectionMonitorsDelete_594125, schemes: {Scheme.Https})
+    validator: validate_ConnectionMonitorsDelete_568353, base: "",
+    url: url_ConnectionMonitorsDelete_568354, schemes: {Scheme.Https})
 type
-  Call_ConnectionMonitorsQuery_594135 = ref object of OpenApiRestCall_593438
-proc url_ConnectionMonitorsQuery_594137(protocol: Scheme; host: string; base: string;
+  Call_ConnectionMonitorsQuery_568364 = ref object of OpenApiRestCall_567667
+proc url_ConnectionMonitorsQuery_568366(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1715,7 +1715,7 @@ proc url_ConnectionMonitorsQuery_594137(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionMonitorsQuery_594136(path: JsonNode; query: JsonNode;
+proc validate_ConnectionMonitorsQuery_568365(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Query a snapshot of the most recent connection states.
   ## 
@@ -1733,26 +1733,26 @@ proc validate_ConnectionMonitorsQuery_594136(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594138 = path.getOrDefault("resourceGroupName")
-  valid_594138 = validateParameter(valid_594138, JString, required = true,
+  var valid_568367 = path.getOrDefault("resourceGroupName")
+  valid_568367 = validateParameter(valid_568367, JString, required = true,
                                  default = nil)
-  if valid_594138 != nil:
-    section.add "resourceGroupName", valid_594138
-  var valid_594139 = path.getOrDefault("subscriptionId")
-  valid_594139 = validateParameter(valid_594139, JString, required = true,
+  if valid_568367 != nil:
+    section.add "resourceGroupName", valid_568367
+  var valid_568368 = path.getOrDefault("subscriptionId")
+  valid_568368 = validateParameter(valid_568368, JString, required = true,
                                  default = nil)
-  if valid_594139 != nil:
-    section.add "subscriptionId", valid_594139
-  var valid_594140 = path.getOrDefault("networkWatcherName")
-  valid_594140 = validateParameter(valid_594140, JString, required = true,
+  if valid_568368 != nil:
+    section.add "subscriptionId", valid_568368
+  var valid_568369 = path.getOrDefault("networkWatcherName")
+  valid_568369 = validateParameter(valid_568369, JString, required = true,
                                  default = nil)
-  if valid_594140 != nil:
-    section.add "networkWatcherName", valid_594140
-  var valid_594141 = path.getOrDefault("connectionMonitorName")
-  valid_594141 = validateParameter(valid_594141, JString, required = true,
+  if valid_568369 != nil:
+    section.add "networkWatcherName", valid_568369
+  var valid_568370 = path.getOrDefault("connectionMonitorName")
+  valid_568370 = validateParameter(valid_568370, JString, required = true,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "connectionMonitorName", valid_594141
+  if valid_568370 != nil:
+    section.add "connectionMonitorName", valid_568370
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1760,11 +1760,11 @@ proc validate_ConnectionMonitorsQuery_594136(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594142 = query.getOrDefault("api-version")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  var valid_568371 = query.getOrDefault("api-version")
+  valid_568371 = validateParameter(valid_568371, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "api-version", valid_594142
+  if valid_568371 != nil:
+    section.add "api-version", valid_568371
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1773,20 +1773,20 @@ proc validate_ConnectionMonitorsQuery_594136(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594143: Call_ConnectionMonitorsQuery_594135; path: JsonNode;
+proc call*(call_568372: Call_ConnectionMonitorsQuery_568364; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Query a snapshot of the most recent connection states.
   ## 
-  let valid = call_594143.validator(path, query, header, formData, body)
-  let scheme = call_594143.pickScheme
+  let valid = call_568372.validator(path, query, header, formData, body)
+  let scheme = call_568372.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594143.url(scheme.get, call_594143.host, call_594143.base,
-                         call_594143.route, valid.getOrDefault("path"),
+  let url = call_568372.url(scheme.get, call_568372.host, call_568372.base,
+                         call_568372.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594143, url, valid)
+  result = hook(call_568372, url, valid)
 
-proc call*(call_594144: Call_ConnectionMonitorsQuery_594135;
+proc call*(call_568373: Call_ConnectionMonitorsQuery_568364;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; connectionMonitorName: string): Recallable =
   ## connectionMonitorsQuery
@@ -1801,23 +1801,23 @@ proc call*(call_594144: Call_ConnectionMonitorsQuery_594135;
   ##                     : The name of the Network Watcher resource.
   ##   connectionMonitorName: string (required)
   ##                        : The name given to the connection monitor.
-  var path_594145 = newJObject()
-  var query_594146 = newJObject()
-  add(path_594145, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594146, "api-version", newJString(apiVersion))
-  add(path_594145, "subscriptionId", newJString(subscriptionId))
-  add(path_594145, "networkWatcherName", newJString(networkWatcherName))
-  add(path_594145, "connectionMonitorName", newJString(connectionMonitorName))
-  result = call_594144.call(path_594145, query_594146, nil, nil, nil)
+  var path_568374 = newJObject()
+  var query_568375 = newJObject()
+  add(path_568374, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568375, "api-version", newJString(apiVersion))
+  add(path_568374, "subscriptionId", newJString(subscriptionId))
+  add(path_568374, "networkWatcherName", newJString(networkWatcherName))
+  add(path_568374, "connectionMonitorName", newJString(connectionMonitorName))
+  result = call_568373.call(path_568374, query_568375, nil, nil, nil)
 
-var connectionMonitorsQuery* = Call_ConnectionMonitorsQuery_594135(
+var connectionMonitorsQuery* = Call_ConnectionMonitorsQuery_568364(
     name: "connectionMonitorsQuery", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectionMonitors/{connectionMonitorName}/query",
-    validator: validate_ConnectionMonitorsQuery_594136, base: "",
-    url: url_ConnectionMonitorsQuery_594137, schemes: {Scheme.Https})
+    validator: validate_ConnectionMonitorsQuery_568365, base: "",
+    url: url_ConnectionMonitorsQuery_568366, schemes: {Scheme.Https})
 type
-  Call_ConnectionMonitorsStart_594147 = ref object of OpenApiRestCall_593438
-proc url_ConnectionMonitorsStart_594149(protocol: Scheme; host: string; base: string;
+  Call_ConnectionMonitorsStart_568376 = ref object of OpenApiRestCall_567667
+proc url_ConnectionMonitorsStart_568378(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1847,7 +1847,7 @@ proc url_ConnectionMonitorsStart_594149(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionMonitorsStart_594148(path: JsonNode; query: JsonNode;
+proc validate_ConnectionMonitorsStart_568377(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Starts the specified connection monitor.
   ## 
@@ -1865,26 +1865,26 @@ proc validate_ConnectionMonitorsStart_594148(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594150 = path.getOrDefault("resourceGroupName")
-  valid_594150 = validateParameter(valid_594150, JString, required = true,
+  var valid_568379 = path.getOrDefault("resourceGroupName")
+  valid_568379 = validateParameter(valid_568379, JString, required = true,
                                  default = nil)
-  if valid_594150 != nil:
-    section.add "resourceGroupName", valid_594150
-  var valid_594151 = path.getOrDefault("subscriptionId")
-  valid_594151 = validateParameter(valid_594151, JString, required = true,
+  if valid_568379 != nil:
+    section.add "resourceGroupName", valid_568379
+  var valid_568380 = path.getOrDefault("subscriptionId")
+  valid_568380 = validateParameter(valid_568380, JString, required = true,
                                  default = nil)
-  if valid_594151 != nil:
-    section.add "subscriptionId", valid_594151
-  var valid_594152 = path.getOrDefault("networkWatcherName")
-  valid_594152 = validateParameter(valid_594152, JString, required = true,
+  if valid_568380 != nil:
+    section.add "subscriptionId", valid_568380
+  var valid_568381 = path.getOrDefault("networkWatcherName")
+  valid_568381 = validateParameter(valid_568381, JString, required = true,
                                  default = nil)
-  if valid_594152 != nil:
-    section.add "networkWatcherName", valid_594152
-  var valid_594153 = path.getOrDefault("connectionMonitorName")
-  valid_594153 = validateParameter(valid_594153, JString, required = true,
+  if valid_568381 != nil:
+    section.add "networkWatcherName", valid_568381
+  var valid_568382 = path.getOrDefault("connectionMonitorName")
+  valid_568382 = validateParameter(valid_568382, JString, required = true,
                                  default = nil)
-  if valid_594153 != nil:
-    section.add "connectionMonitorName", valid_594153
+  if valid_568382 != nil:
+    section.add "connectionMonitorName", valid_568382
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1892,11 +1892,11 @@ proc validate_ConnectionMonitorsStart_594148(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594154 = query.getOrDefault("api-version")
-  valid_594154 = validateParameter(valid_594154, JString, required = true,
+  var valid_568383 = query.getOrDefault("api-version")
+  valid_568383 = validateParameter(valid_568383, JString, required = true,
                                  default = nil)
-  if valid_594154 != nil:
-    section.add "api-version", valid_594154
+  if valid_568383 != nil:
+    section.add "api-version", valid_568383
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1905,20 +1905,20 @@ proc validate_ConnectionMonitorsStart_594148(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594155: Call_ConnectionMonitorsStart_594147; path: JsonNode;
+proc call*(call_568384: Call_ConnectionMonitorsStart_568376; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts the specified connection monitor.
   ## 
-  let valid = call_594155.validator(path, query, header, formData, body)
-  let scheme = call_594155.pickScheme
+  let valid = call_568384.validator(path, query, header, formData, body)
+  let scheme = call_568384.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594155.url(scheme.get, call_594155.host, call_594155.base,
-                         call_594155.route, valid.getOrDefault("path"),
+  let url = call_568384.url(scheme.get, call_568384.host, call_568384.base,
+                         call_568384.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594155, url, valid)
+  result = hook(call_568384, url, valid)
 
-proc call*(call_594156: Call_ConnectionMonitorsStart_594147;
+proc call*(call_568385: Call_ConnectionMonitorsStart_568376;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; connectionMonitorName: string): Recallable =
   ## connectionMonitorsStart
@@ -1933,23 +1933,23 @@ proc call*(call_594156: Call_ConnectionMonitorsStart_594147;
   ##                     : The name of the Network Watcher resource.
   ##   connectionMonitorName: string (required)
   ##                        : The name of the connection monitor.
-  var path_594157 = newJObject()
-  var query_594158 = newJObject()
-  add(path_594157, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594158, "api-version", newJString(apiVersion))
-  add(path_594157, "subscriptionId", newJString(subscriptionId))
-  add(path_594157, "networkWatcherName", newJString(networkWatcherName))
-  add(path_594157, "connectionMonitorName", newJString(connectionMonitorName))
-  result = call_594156.call(path_594157, query_594158, nil, nil, nil)
+  var path_568386 = newJObject()
+  var query_568387 = newJObject()
+  add(path_568386, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568387, "api-version", newJString(apiVersion))
+  add(path_568386, "subscriptionId", newJString(subscriptionId))
+  add(path_568386, "networkWatcherName", newJString(networkWatcherName))
+  add(path_568386, "connectionMonitorName", newJString(connectionMonitorName))
+  result = call_568385.call(path_568386, query_568387, nil, nil, nil)
 
-var connectionMonitorsStart* = Call_ConnectionMonitorsStart_594147(
+var connectionMonitorsStart* = Call_ConnectionMonitorsStart_568376(
     name: "connectionMonitorsStart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectionMonitors/{connectionMonitorName}/start",
-    validator: validate_ConnectionMonitorsStart_594148, base: "",
-    url: url_ConnectionMonitorsStart_594149, schemes: {Scheme.Https})
+    validator: validate_ConnectionMonitorsStart_568377, base: "",
+    url: url_ConnectionMonitorsStart_568378, schemes: {Scheme.Https})
 type
-  Call_ConnectionMonitorsStop_594159 = ref object of OpenApiRestCall_593438
-proc url_ConnectionMonitorsStop_594161(protocol: Scheme; host: string; base: string;
+  Call_ConnectionMonitorsStop_568388 = ref object of OpenApiRestCall_567667
+proc url_ConnectionMonitorsStop_568390(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1978,7 +1978,7 @@ proc url_ConnectionMonitorsStop_594161(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConnectionMonitorsStop_594160(path: JsonNode; query: JsonNode;
+proc validate_ConnectionMonitorsStop_568389(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Stops the specified connection monitor.
   ## 
@@ -1996,26 +1996,26 @@ proc validate_ConnectionMonitorsStop_594160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594162 = path.getOrDefault("resourceGroupName")
-  valid_594162 = validateParameter(valid_594162, JString, required = true,
+  var valid_568391 = path.getOrDefault("resourceGroupName")
+  valid_568391 = validateParameter(valid_568391, JString, required = true,
                                  default = nil)
-  if valid_594162 != nil:
-    section.add "resourceGroupName", valid_594162
-  var valid_594163 = path.getOrDefault("subscriptionId")
-  valid_594163 = validateParameter(valid_594163, JString, required = true,
+  if valid_568391 != nil:
+    section.add "resourceGroupName", valid_568391
+  var valid_568392 = path.getOrDefault("subscriptionId")
+  valid_568392 = validateParameter(valid_568392, JString, required = true,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "subscriptionId", valid_594163
-  var valid_594164 = path.getOrDefault("networkWatcherName")
-  valid_594164 = validateParameter(valid_594164, JString, required = true,
+  if valid_568392 != nil:
+    section.add "subscriptionId", valid_568392
+  var valid_568393 = path.getOrDefault("networkWatcherName")
+  valid_568393 = validateParameter(valid_568393, JString, required = true,
                                  default = nil)
-  if valid_594164 != nil:
-    section.add "networkWatcherName", valid_594164
-  var valid_594165 = path.getOrDefault("connectionMonitorName")
-  valid_594165 = validateParameter(valid_594165, JString, required = true,
+  if valid_568393 != nil:
+    section.add "networkWatcherName", valid_568393
+  var valid_568394 = path.getOrDefault("connectionMonitorName")
+  valid_568394 = validateParameter(valid_568394, JString, required = true,
                                  default = nil)
-  if valid_594165 != nil:
-    section.add "connectionMonitorName", valid_594165
+  if valid_568394 != nil:
+    section.add "connectionMonitorName", valid_568394
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2023,11 +2023,11 @@ proc validate_ConnectionMonitorsStop_594160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594166 = query.getOrDefault("api-version")
-  valid_594166 = validateParameter(valid_594166, JString, required = true,
+  var valid_568395 = query.getOrDefault("api-version")
+  valid_568395 = validateParameter(valid_568395, JString, required = true,
                                  default = nil)
-  if valid_594166 != nil:
-    section.add "api-version", valid_594166
+  if valid_568395 != nil:
+    section.add "api-version", valid_568395
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2036,20 +2036,20 @@ proc validate_ConnectionMonitorsStop_594160(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594167: Call_ConnectionMonitorsStop_594159; path: JsonNode;
+proc call*(call_568396: Call_ConnectionMonitorsStop_568388; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stops the specified connection monitor.
   ## 
-  let valid = call_594167.validator(path, query, header, formData, body)
-  let scheme = call_594167.pickScheme
+  let valid = call_568396.validator(path, query, header, formData, body)
+  let scheme = call_568396.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594167.url(scheme.get, call_594167.host, call_594167.base,
-                         call_594167.route, valid.getOrDefault("path"),
+  let url = call_568396.url(scheme.get, call_568396.host, call_568396.base,
+                         call_568396.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594167, url, valid)
+  result = hook(call_568396, url, valid)
 
-proc call*(call_594168: Call_ConnectionMonitorsStop_594159;
+proc call*(call_568397: Call_ConnectionMonitorsStop_568388;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; connectionMonitorName: string): Recallable =
   ## connectionMonitorsStop
@@ -2064,23 +2064,23 @@ proc call*(call_594168: Call_ConnectionMonitorsStop_594159;
   ##                     : The name of the Network Watcher resource.
   ##   connectionMonitorName: string (required)
   ##                        : The name of the connection monitor.
-  var path_594169 = newJObject()
-  var query_594170 = newJObject()
-  add(path_594169, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594170, "api-version", newJString(apiVersion))
-  add(path_594169, "subscriptionId", newJString(subscriptionId))
-  add(path_594169, "networkWatcherName", newJString(networkWatcherName))
-  add(path_594169, "connectionMonitorName", newJString(connectionMonitorName))
-  result = call_594168.call(path_594169, query_594170, nil, nil, nil)
+  var path_568398 = newJObject()
+  var query_568399 = newJObject()
+  add(path_568398, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568399, "api-version", newJString(apiVersion))
+  add(path_568398, "subscriptionId", newJString(subscriptionId))
+  add(path_568398, "networkWatcherName", newJString(networkWatcherName))
+  add(path_568398, "connectionMonitorName", newJString(connectionMonitorName))
+  result = call_568397.call(path_568398, query_568399, nil, nil, nil)
 
-var connectionMonitorsStop* = Call_ConnectionMonitorsStop_594159(
+var connectionMonitorsStop* = Call_ConnectionMonitorsStop_568388(
     name: "connectionMonitorsStop", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectionMonitors/{connectionMonitorName}/stop",
-    validator: validate_ConnectionMonitorsStop_594160, base: "",
-    url: url_ConnectionMonitorsStop_594161, schemes: {Scheme.Https})
+    validator: validate_ConnectionMonitorsStop_568389, base: "",
+    url: url_ConnectionMonitorsStop_568390, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersCheckConnectivity_594171 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersCheckConnectivity_594173(protocol: Scheme; host: string;
+  Call_NetworkWatchersCheckConnectivity_568400 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersCheckConnectivity_568402(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2105,7 +2105,7 @@ proc url_NetworkWatchersCheckConnectivity_594173(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersCheckConnectivity_594172(path: JsonNode;
+proc validate_NetworkWatchersCheckConnectivity_568401(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Verifies the possibility of establishing a direct TCP connection from a virtual machine to a given endpoint including another VM or an arbitrary remote server.
   ## 
@@ -2121,21 +2121,21 @@ proc validate_NetworkWatchersCheckConnectivity_594172(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594174 = path.getOrDefault("resourceGroupName")
-  valid_594174 = validateParameter(valid_594174, JString, required = true,
+  var valid_568403 = path.getOrDefault("resourceGroupName")
+  valid_568403 = validateParameter(valid_568403, JString, required = true,
                                  default = nil)
-  if valid_594174 != nil:
-    section.add "resourceGroupName", valid_594174
-  var valid_594175 = path.getOrDefault("subscriptionId")
-  valid_594175 = validateParameter(valid_594175, JString, required = true,
+  if valid_568403 != nil:
+    section.add "resourceGroupName", valid_568403
+  var valid_568404 = path.getOrDefault("subscriptionId")
+  valid_568404 = validateParameter(valid_568404, JString, required = true,
                                  default = nil)
-  if valid_594175 != nil:
-    section.add "subscriptionId", valid_594175
-  var valid_594176 = path.getOrDefault("networkWatcherName")
-  valid_594176 = validateParameter(valid_594176, JString, required = true,
+  if valid_568404 != nil:
+    section.add "subscriptionId", valid_568404
+  var valid_568405 = path.getOrDefault("networkWatcherName")
+  valid_568405 = validateParameter(valid_568405, JString, required = true,
                                  default = nil)
-  if valid_594176 != nil:
-    section.add "networkWatcherName", valid_594176
+  if valid_568405 != nil:
+    section.add "networkWatcherName", valid_568405
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2143,11 +2143,11 @@ proc validate_NetworkWatchersCheckConnectivity_594172(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594177 = query.getOrDefault("api-version")
-  valid_594177 = validateParameter(valid_594177, JString, required = true,
+  var valid_568406 = query.getOrDefault("api-version")
+  valid_568406 = validateParameter(valid_568406, JString, required = true,
                                  default = nil)
-  if valid_594177 != nil:
-    section.add "api-version", valid_594177
+  if valid_568406 != nil:
+    section.add "api-version", valid_568406
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2161,21 +2161,21 @@ proc validate_NetworkWatchersCheckConnectivity_594172(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594179: Call_NetworkWatchersCheckConnectivity_594171;
+proc call*(call_568408: Call_NetworkWatchersCheckConnectivity_568400;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Verifies the possibility of establishing a direct TCP connection from a virtual machine to a given endpoint including another VM or an arbitrary remote server.
   ## 
-  let valid = call_594179.validator(path, query, header, formData, body)
-  let scheme = call_594179.pickScheme
+  let valid = call_568408.validator(path, query, header, formData, body)
+  let scheme = call_568408.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594179.url(scheme.get, call_594179.host, call_594179.base,
-                         call_594179.route, valid.getOrDefault("path"),
+  let url = call_568408.url(scheme.get, call_568408.host, call_568408.base,
+                         call_568408.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594179, url, valid)
+  result = hook(call_568408, url, valid)
 
-proc call*(call_594180: Call_NetworkWatchersCheckConnectivity_594171;
+proc call*(call_568409: Call_NetworkWatchersCheckConnectivity_568400;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersCheckConnectivity
@@ -2190,25 +2190,25 @@ proc call*(call_594180: Call_NetworkWatchersCheckConnectivity_594171;
   ##                     : The name of the network watcher resource.
   ##   parameters: JObject (required)
   ##             : Parameters that determine how the connectivity check will be performed.
-  var path_594181 = newJObject()
-  var query_594182 = newJObject()
-  var body_594183 = newJObject()
-  add(path_594181, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594182, "api-version", newJString(apiVersion))
-  add(path_594181, "subscriptionId", newJString(subscriptionId))
-  add(path_594181, "networkWatcherName", newJString(networkWatcherName))
+  var path_568410 = newJObject()
+  var query_568411 = newJObject()
+  var body_568412 = newJObject()
+  add(path_568410, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568411, "api-version", newJString(apiVersion))
+  add(path_568410, "subscriptionId", newJString(subscriptionId))
+  add(path_568410, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594183 = parameters
-  result = call_594180.call(path_594181, query_594182, nil, nil, body_594183)
+    body_568412 = parameters
+  result = call_568409.call(path_568410, query_568411, nil, nil, body_568412)
 
-var networkWatchersCheckConnectivity* = Call_NetworkWatchersCheckConnectivity_594171(
+var networkWatchersCheckConnectivity* = Call_NetworkWatchersCheckConnectivity_568400(
     name: "networkWatchersCheckConnectivity", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectivityCheck",
-    validator: validate_NetworkWatchersCheckConnectivity_594172, base: "",
-    url: url_NetworkWatchersCheckConnectivity_594173, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersCheckConnectivity_568401, base: "",
+    url: url_NetworkWatchersCheckConnectivity_568402, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersVerifyIPFlow_594184 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersVerifyIPFlow_594186(protocol: Scheme; host: string;
+  Call_NetworkWatchersVerifyIPFlow_568413 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersVerifyIPFlow_568415(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2233,7 +2233,7 @@ proc url_NetworkWatchersVerifyIPFlow_594186(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersVerifyIPFlow_594185(path: JsonNode; query: JsonNode;
+proc validate_NetworkWatchersVerifyIPFlow_568414(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Verify IP flow from the specified VM to a location given the currently configured NSG rules.
   ## 
@@ -2249,21 +2249,21 @@ proc validate_NetworkWatchersVerifyIPFlow_594185(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594187 = path.getOrDefault("resourceGroupName")
-  valid_594187 = validateParameter(valid_594187, JString, required = true,
+  var valid_568416 = path.getOrDefault("resourceGroupName")
+  valid_568416 = validateParameter(valid_568416, JString, required = true,
                                  default = nil)
-  if valid_594187 != nil:
-    section.add "resourceGroupName", valid_594187
-  var valid_594188 = path.getOrDefault("subscriptionId")
-  valid_594188 = validateParameter(valid_594188, JString, required = true,
+  if valid_568416 != nil:
+    section.add "resourceGroupName", valid_568416
+  var valid_568417 = path.getOrDefault("subscriptionId")
+  valid_568417 = validateParameter(valid_568417, JString, required = true,
                                  default = nil)
-  if valid_594188 != nil:
-    section.add "subscriptionId", valid_594188
-  var valid_594189 = path.getOrDefault("networkWatcherName")
-  valid_594189 = validateParameter(valid_594189, JString, required = true,
+  if valid_568417 != nil:
+    section.add "subscriptionId", valid_568417
+  var valid_568418 = path.getOrDefault("networkWatcherName")
+  valid_568418 = validateParameter(valid_568418, JString, required = true,
                                  default = nil)
-  if valid_594189 != nil:
-    section.add "networkWatcherName", valid_594189
+  if valid_568418 != nil:
+    section.add "networkWatcherName", valid_568418
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2271,11 +2271,11 @@ proc validate_NetworkWatchersVerifyIPFlow_594185(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594190 = query.getOrDefault("api-version")
-  valid_594190 = validateParameter(valid_594190, JString, required = true,
+  var valid_568419 = query.getOrDefault("api-version")
+  valid_568419 = validateParameter(valid_568419, JString, required = true,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "api-version", valid_594190
+  if valid_568419 != nil:
+    section.add "api-version", valid_568419
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2289,20 +2289,20 @@ proc validate_NetworkWatchersVerifyIPFlow_594185(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594192: Call_NetworkWatchersVerifyIPFlow_594184; path: JsonNode;
+proc call*(call_568421: Call_NetworkWatchersVerifyIPFlow_568413; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Verify IP flow from the specified VM to a location given the currently configured NSG rules.
   ## 
-  let valid = call_594192.validator(path, query, header, formData, body)
-  let scheme = call_594192.pickScheme
+  let valid = call_568421.validator(path, query, header, formData, body)
+  let scheme = call_568421.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594192.url(scheme.get, call_594192.host, call_594192.base,
-                         call_594192.route, valid.getOrDefault("path"),
+  let url = call_568421.url(scheme.get, call_568421.host, call_568421.base,
+                         call_568421.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594192, url, valid)
+  result = hook(call_568421, url, valid)
 
-proc call*(call_594193: Call_NetworkWatchersVerifyIPFlow_594184;
+proc call*(call_568422: Call_NetworkWatchersVerifyIPFlow_568413;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersVerifyIPFlow
@@ -2317,25 +2317,25 @@ proc call*(call_594193: Call_NetworkWatchersVerifyIPFlow_594184;
   ##                     : The name of the network watcher.
   ##   parameters: JObject (required)
   ##             : Parameters that define the IP flow to be verified.
-  var path_594194 = newJObject()
-  var query_594195 = newJObject()
-  var body_594196 = newJObject()
-  add(path_594194, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594195, "api-version", newJString(apiVersion))
-  add(path_594194, "subscriptionId", newJString(subscriptionId))
-  add(path_594194, "networkWatcherName", newJString(networkWatcherName))
+  var path_568423 = newJObject()
+  var query_568424 = newJObject()
+  var body_568425 = newJObject()
+  add(path_568423, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568424, "api-version", newJString(apiVersion))
+  add(path_568423, "subscriptionId", newJString(subscriptionId))
+  add(path_568423, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594196 = parameters
-  result = call_594193.call(path_594194, query_594195, nil, nil, body_594196)
+    body_568425 = parameters
+  result = call_568422.call(path_568423, query_568424, nil, nil, body_568425)
 
-var networkWatchersVerifyIPFlow* = Call_NetworkWatchersVerifyIPFlow_594184(
+var networkWatchersVerifyIPFlow* = Call_NetworkWatchersVerifyIPFlow_568413(
     name: "networkWatchersVerifyIPFlow", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/ipFlowVerify",
-    validator: validate_NetworkWatchersVerifyIPFlow_594185, base: "",
-    url: url_NetworkWatchersVerifyIPFlow_594186, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersVerifyIPFlow_568414, base: "",
+    url: url_NetworkWatchersVerifyIPFlow_568415, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersGetNextHop_594197 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersGetNextHop_594199(protocol: Scheme; host: string;
+  Call_NetworkWatchersGetNextHop_568426 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersGetNextHop_568428(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2360,7 +2360,7 @@ proc url_NetworkWatchersGetNextHop_594199(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersGetNextHop_594198(path: JsonNode; query: JsonNode;
+proc validate_NetworkWatchersGetNextHop_568427(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the next hop from the specified VM.
   ## 
@@ -2376,21 +2376,21 @@ proc validate_NetworkWatchersGetNextHop_594198(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594200 = path.getOrDefault("resourceGroupName")
-  valid_594200 = validateParameter(valid_594200, JString, required = true,
+  var valid_568429 = path.getOrDefault("resourceGroupName")
+  valid_568429 = validateParameter(valid_568429, JString, required = true,
                                  default = nil)
-  if valid_594200 != nil:
-    section.add "resourceGroupName", valid_594200
-  var valid_594201 = path.getOrDefault("subscriptionId")
-  valid_594201 = validateParameter(valid_594201, JString, required = true,
+  if valid_568429 != nil:
+    section.add "resourceGroupName", valid_568429
+  var valid_568430 = path.getOrDefault("subscriptionId")
+  valid_568430 = validateParameter(valid_568430, JString, required = true,
                                  default = nil)
-  if valid_594201 != nil:
-    section.add "subscriptionId", valid_594201
-  var valid_594202 = path.getOrDefault("networkWatcherName")
-  valid_594202 = validateParameter(valid_594202, JString, required = true,
+  if valid_568430 != nil:
+    section.add "subscriptionId", valid_568430
+  var valid_568431 = path.getOrDefault("networkWatcherName")
+  valid_568431 = validateParameter(valid_568431, JString, required = true,
                                  default = nil)
-  if valid_594202 != nil:
-    section.add "networkWatcherName", valid_594202
+  if valid_568431 != nil:
+    section.add "networkWatcherName", valid_568431
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2398,11 +2398,11 @@ proc validate_NetworkWatchersGetNextHop_594198(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594203 = query.getOrDefault("api-version")
-  valid_594203 = validateParameter(valid_594203, JString, required = true,
+  var valid_568432 = query.getOrDefault("api-version")
+  valid_568432 = validateParameter(valid_568432, JString, required = true,
                                  default = nil)
-  if valid_594203 != nil:
-    section.add "api-version", valid_594203
+  if valid_568432 != nil:
+    section.add "api-version", valid_568432
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2416,20 +2416,20 @@ proc validate_NetworkWatchersGetNextHop_594198(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594205: Call_NetworkWatchersGetNextHop_594197; path: JsonNode;
+proc call*(call_568434: Call_NetworkWatchersGetNextHop_568426; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the next hop from the specified VM.
   ## 
-  let valid = call_594205.validator(path, query, header, formData, body)
-  let scheme = call_594205.pickScheme
+  let valid = call_568434.validator(path, query, header, formData, body)
+  let scheme = call_568434.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594205.url(scheme.get, call_594205.host, call_594205.base,
-                         call_594205.route, valid.getOrDefault("path"),
+  let url = call_568434.url(scheme.get, call_568434.host, call_568434.base,
+                         call_568434.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594205, url, valid)
+  result = hook(call_568434, url, valid)
 
-proc call*(call_594206: Call_NetworkWatchersGetNextHop_594197;
+proc call*(call_568435: Call_NetworkWatchersGetNextHop_568426;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersGetNextHop
@@ -2444,25 +2444,25 @@ proc call*(call_594206: Call_NetworkWatchersGetNextHop_594197;
   ##                     : The name of the network watcher.
   ##   parameters: JObject (required)
   ##             : Parameters that define the source and destination endpoint.
-  var path_594207 = newJObject()
-  var query_594208 = newJObject()
-  var body_594209 = newJObject()
-  add(path_594207, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594208, "api-version", newJString(apiVersion))
-  add(path_594207, "subscriptionId", newJString(subscriptionId))
-  add(path_594207, "networkWatcherName", newJString(networkWatcherName))
+  var path_568436 = newJObject()
+  var query_568437 = newJObject()
+  var body_568438 = newJObject()
+  add(path_568436, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568437, "api-version", newJString(apiVersion))
+  add(path_568436, "subscriptionId", newJString(subscriptionId))
+  add(path_568436, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594209 = parameters
-  result = call_594206.call(path_594207, query_594208, nil, nil, body_594209)
+    body_568438 = parameters
+  result = call_568435.call(path_568436, query_568437, nil, nil, body_568438)
 
-var networkWatchersGetNextHop* = Call_NetworkWatchersGetNextHop_594197(
+var networkWatchersGetNextHop* = Call_NetworkWatchersGetNextHop_568426(
     name: "networkWatchersGetNextHop", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/nextHop",
-    validator: validate_NetworkWatchersGetNextHop_594198, base: "",
-    url: url_NetworkWatchersGetNextHop_594199, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersGetNextHop_568427, base: "",
+    url: url_NetworkWatchersGetNextHop_568428, schemes: {Scheme.Https})
 type
-  Call_PacketCapturesList_594210 = ref object of OpenApiRestCall_593438
-proc url_PacketCapturesList_594212(protocol: Scheme; host: string; base: string;
+  Call_PacketCapturesList_568439 = ref object of OpenApiRestCall_567667
+proc url_PacketCapturesList_568441(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2487,7 +2487,7 @@ proc url_PacketCapturesList_594212(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PacketCapturesList_594211(path: JsonNode; query: JsonNode;
+proc validate_PacketCapturesList_568440(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Lists all packet capture sessions within the specified resource group.
@@ -2504,21 +2504,21 @@ proc validate_PacketCapturesList_594211(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594213 = path.getOrDefault("resourceGroupName")
-  valid_594213 = validateParameter(valid_594213, JString, required = true,
+  var valid_568442 = path.getOrDefault("resourceGroupName")
+  valid_568442 = validateParameter(valid_568442, JString, required = true,
                                  default = nil)
-  if valid_594213 != nil:
-    section.add "resourceGroupName", valid_594213
-  var valid_594214 = path.getOrDefault("subscriptionId")
-  valid_594214 = validateParameter(valid_594214, JString, required = true,
+  if valid_568442 != nil:
+    section.add "resourceGroupName", valid_568442
+  var valid_568443 = path.getOrDefault("subscriptionId")
+  valid_568443 = validateParameter(valid_568443, JString, required = true,
                                  default = nil)
-  if valid_594214 != nil:
-    section.add "subscriptionId", valid_594214
-  var valid_594215 = path.getOrDefault("networkWatcherName")
-  valid_594215 = validateParameter(valid_594215, JString, required = true,
+  if valid_568443 != nil:
+    section.add "subscriptionId", valid_568443
+  var valid_568444 = path.getOrDefault("networkWatcherName")
+  valid_568444 = validateParameter(valid_568444, JString, required = true,
                                  default = nil)
-  if valid_594215 != nil:
-    section.add "networkWatcherName", valid_594215
+  if valid_568444 != nil:
+    section.add "networkWatcherName", valid_568444
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2526,11 +2526,11 @@ proc validate_PacketCapturesList_594211(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594216 = query.getOrDefault("api-version")
-  valid_594216 = validateParameter(valid_594216, JString, required = true,
+  var valid_568445 = query.getOrDefault("api-version")
+  valid_568445 = validateParameter(valid_568445, JString, required = true,
                                  default = nil)
-  if valid_594216 != nil:
-    section.add "api-version", valid_594216
+  if valid_568445 != nil:
+    section.add "api-version", valid_568445
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2539,20 +2539,20 @@ proc validate_PacketCapturesList_594211(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594217: Call_PacketCapturesList_594210; path: JsonNode;
+proc call*(call_568446: Call_PacketCapturesList_568439; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all packet capture sessions within the specified resource group.
   ## 
-  let valid = call_594217.validator(path, query, header, formData, body)
-  let scheme = call_594217.pickScheme
+  let valid = call_568446.validator(path, query, header, formData, body)
+  let scheme = call_568446.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594217.url(scheme.get, call_594217.host, call_594217.base,
-                         call_594217.route, valid.getOrDefault("path"),
+  let url = call_568446.url(scheme.get, call_568446.host, call_568446.base,
+                         call_568446.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594217, url, valid)
+  result = hook(call_568446, url, valid)
 
-proc call*(call_594218: Call_PacketCapturesList_594210; resourceGroupName: string;
+proc call*(call_568447: Call_PacketCapturesList_568439; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; networkWatcherName: string): Recallable =
   ## packetCapturesList
   ## Lists all packet capture sessions within the specified resource group.
@@ -2564,22 +2564,22 @@ proc call*(call_594218: Call_PacketCapturesList_594210; resourceGroupName: strin
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   networkWatcherName: string (required)
   ##                     : The name of the Network Watcher resource.
-  var path_594219 = newJObject()
-  var query_594220 = newJObject()
-  add(path_594219, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594220, "api-version", newJString(apiVersion))
-  add(path_594219, "subscriptionId", newJString(subscriptionId))
-  add(path_594219, "networkWatcherName", newJString(networkWatcherName))
-  result = call_594218.call(path_594219, query_594220, nil, nil, nil)
+  var path_568448 = newJObject()
+  var query_568449 = newJObject()
+  add(path_568448, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568449, "api-version", newJString(apiVersion))
+  add(path_568448, "subscriptionId", newJString(subscriptionId))
+  add(path_568448, "networkWatcherName", newJString(networkWatcherName))
+  result = call_568447.call(path_568448, query_568449, nil, nil, nil)
 
-var packetCapturesList* = Call_PacketCapturesList_594210(
+var packetCapturesList* = Call_PacketCapturesList_568439(
     name: "packetCapturesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/packetCaptures",
-    validator: validate_PacketCapturesList_594211, base: "",
-    url: url_PacketCapturesList_594212, schemes: {Scheme.Https})
+    validator: validate_PacketCapturesList_568440, base: "",
+    url: url_PacketCapturesList_568441, schemes: {Scheme.Https})
 type
-  Call_PacketCapturesCreate_594233 = ref object of OpenApiRestCall_593438
-proc url_PacketCapturesCreate_594235(protocol: Scheme; host: string; base: string;
+  Call_PacketCapturesCreate_568462 = ref object of OpenApiRestCall_567667
+proc url_PacketCapturesCreate_568464(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2607,7 +2607,7 @@ proc url_PacketCapturesCreate_594235(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PacketCapturesCreate_594234(path: JsonNode; query: JsonNode;
+proc validate_PacketCapturesCreate_568463(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create and start a packet capture on the specified VM.
   ## 
@@ -2625,26 +2625,26 @@ proc validate_PacketCapturesCreate_594234(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594236 = path.getOrDefault("resourceGroupName")
-  valid_594236 = validateParameter(valid_594236, JString, required = true,
+  var valid_568465 = path.getOrDefault("resourceGroupName")
+  valid_568465 = validateParameter(valid_568465, JString, required = true,
                                  default = nil)
-  if valid_594236 != nil:
-    section.add "resourceGroupName", valid_594236
-  var valid_594237 = path.getOrDefault("subscriptionId")
-  valid_594237 = validateParameter(valid_594237, JString, required = true,
+  if valid_568465 != nil:
+    section.add "resourceGroupName", valid_568465
+  var valid_568466 = path.getOrDefault("subscriptionId")
+  valid_568466 = validateParameter(valid_568466, JString, required = true,
                                  default = nil)
-  if valid_594237 != nil:
-    section.add "subscriptionId", valid_594237
-  var valid_594238 = path.getOrDefault("networkWatcherName")
-  valid_594238 = validateParameter(valid_594238, JString, required = true,
+  if valid_568466 != nil:
+    section.add "subscriptionId", valid_568466
+  var valid_568467 = path.getOrDefault("networkWatcherName")
+  valid_568467 = validateParameter(valid_568467, JString, required = true,
                                  default = nil)
-  if valid_594238 != nil:
-    section.add "networkWatcherName", valid_594238
-  var valid_594239 = path.getOrDefault("packetCaptureName")
-  valid_594239 = validateParameter(valid_594239, JString, required = true,
+  if valid_568467 != nil:
+    section.add "networkWatcherName", valid_568467
+  var valid_568468 = path.getOrDefault("packetCaptureName")
+  valid_568468 = validateParameter(valid_568468, JString, required = true,
                                  default = nil)
-  if valid_594239 != nil:
-    section.add "packetCaptureName", valid_594239
+  if valid_568468 != nil:
+    section.add "packetCaptureName", valid_568468
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2652,11 +2652,11 @@ proc validate_PacketCapturesCreate_594234(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594240 = query.getOrDefault("api-version")
-  valid_594240 = validateParameter(valid_594240, JString, required = true,
+  var valid_568469 = query.getOrDefault("api-version")
+  valid_568469 = validateParameter(valid_568469, JString, required = true,
                                  default = nil)
-  if valid_594240 != nil:
-    section.add "api-version", valid_594240
+  if valid_568469 != nil:
+    section.add "api-version", valid_568469
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2670,20 +2670,20 @@ proc validate_PacketCapturesCreate_594234(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594242: Call_PacketCapturesCreate_594233; path: JsonNode;
+proc call*(call_568471: Call_PacketCapturesCreate_568462; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create and start a packet capture on the specified VM.
   ## 
-  let valid = call_594242.validator(path, query, header, formData, body)
-  let scheme = call_594242.pickScheme
+  let valid = call_568471.validator(path, query, header, formData, body)
+  let scheme = call_568471.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594242.url(scheme.get, call_594242.host, call_594242.base,
-                         call_594242.route, valid.getOrDefault("path"),
+  let url = call_568471.url(scheme.get, call_568471.host, call_568471.base,
+                         call_568471.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594242, url, valid)
+  result = hook(call_568471, url, valid)
 
-proc call*(call_594243: Call_PacketCapturesCreate_594233;
+proc call*(call_568472: Call_PacketCapturesCreate_568462;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode;
           packetCaptureName: string): Recallable =
@@ -2701,26 +2701,26 @@ proc call*(call_594243: Call_PacketCapturesCreate_594233;
   ##             : Parameters that define the create packet capture operation.
   ##   packetCaptureName: string (required)
   ##                    : The name of the packet capture session.
-  var path_594244 = newJObject()
-  var query_594245 = newJObject()
-  var body_594246 = newJObject()
-  add(path_594244, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594245, "api-version", newJString(apiVersion))
-  add(path_594244, "subscriptionId", newJString(subscriptionId))
-  add(path_594244, "networkWatcherName", newJString(networkWatcherName))
+  var path_568473 = newJObject()
+  var query_568474 = newJObject()
+  var body_568475 = newJObject()
+  add(path_568473, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568474, "api-version", newJString(apiVersion))
+  add(path_568473, "subscriptionId", newJString(subscriptionId))
+  add(path_568473, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594246 = parameters
-  add(path_594244, "packetCaptureName", newJString(packetCaptureName))
-  result = call_594243.call(path_594244, query_594245, nil, nil, body_594246)
+    body_568475 = parameters
+  add(path_568473, "packetCaptureName", newJString(packetCaptureName))
+  result = call_568472.call(path_568473, query_568474, nil, nil, body_568475)
 
-var packetCapturesCreate* = Call_PacketCapturesCreate_594233(
+var packetCapturesCreate* = Call_PacketCapturesCreate_568462(
     name: "packetCapturesCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/packetCaptures/{packetCaptureName}",
-    validator: validate_PacketCapturesCreate_594234, base: "",
-    url: url_PacketCapturesCreate_594235, schemes: {Scheme.Https})
+    validator: validate_PacketCapturesCreate_568463, base: "",
+    url: url_PacketCapturesCreate_568464, schemes: {Scheme.Https})
 type
-  Call_PacketCapturesGet_594221 = ref object of OpenApiRestCall_593438
-proc url_PacketCapturesGet_594223(protocol: Scheme; host: string; base: string;
+  Call_PacketCapturesGet_568450 = ref object of OpenApiRestCall_567667
+proc url_PacketCapturesGet_568452(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2748,7 +2748,7 @@ proc url_PacketCapturesGet_594223(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PacketCapturesGet_594222(path: JsonNode; query: JsonNode;
+proc validate_PacketCapturesGet_568451(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets a packet capture session by name.
@@ -2767,26 +2767,26 @@ proc validate_PacketCapturesGet_594222(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594224 = path.getOrDefault("resourceGroupName")
-  valid_594224 = validateParameter(valid_594224, JString, required = true,
+  var valid_568453 = path.getOrDefault("resourceGroupName")
+  valid_568453 = validateParameter(valid_568453, JString, required = true,
                                  default = nil)
-  if valid_594224 != nil:
-    section.add "resourceGroupName", valid_594224
-  var valid_594225 = path.getOrDefault("subscriptionId")
-  valid_594225 = validateParameter(valid_594225, JString, required = true,
+  if valid_568453 != nil:
+    section.add "resourceGroupName", valid_568453
+  var valid_568454 = path.getOrDefault("subscriptionId")
+  valid_568454 = validateParameter(valid_568454, JString, required = true,
                                  default = nil)
-  if valid_594225 != nil:
-    section.add "subscriptionId", valid_594225
-  var valid_594226 = path.getOrDefault("networkWatcherName")
-  valid_594226 = validateParameter(valid_594226, JString, required = true,
+  if valid_568454 != nil:
+    section.add "subscriptionId", valid_568454
+  var valid_568455 = path.getOrDefault("networkWatcherName")
+  valid_568455 = validateParameter(valid_568455, JString, required = true,
                                  default = nil)
-  if valid_594226 != nil:
-    section.add "networkWatcherName", valid_594226
-  var valid_594227 = path.getOrDefault("packetCaptureName")
-  valid_594227 = validateParameter(valid_594227, JString, required = true,
+  if valid_568455 != nil:
+    section.add "networkWatcherName", valid_568455
+  var valid_568456 = path.getOrDefault("packetCaptureName")
+  valid_568456 = validateParameter(valid_568456, JString, required = true,
                                  default = nil)
-  if valid_594227 != nil:
-    section.add "packetCaptureName", valid_594227
+  if valid_568456 != nil:
+    section.add "packetCaptureName", valid_568456
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2794,11 +2794,11 @@ proc validate_PacketCapturesGet_594222(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594228 = query.getOrDefault("api-version")
-  valid_594228 = validateParameter(valid_594228, JString, required = true,
+  var valid_568457 = query.getOrDefault("api-version")
+  valid_568457 = validateParameter(valid_568457, JString, required = true,
                                  default = nil)
-  if valid_594228 != nil:
-    section.add "api-version", valid_594228
+  if valid_568457 != nil:
+    section.add "api-version", valid_568457
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2807,20 +2807,20 @@ proc validate_PacketCapturesGet_594222(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594229: Call_PacketCapturesGet_594221; path: JsonNode;
+proc call*(call_568458: Call_PacketCapturesGet_568450; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a packet capture session by name.
   ## 
-  let valid = call_594229.validator(path, query, header, formData, body)
-  let scheme = call_594229.pickScheme
+  let valid = call_568458.validator(path, query, header, formData, body)
+  let scheme = call_568458.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594229.url(scheme.get, call_594229.host, call_594229.base,
-                         call_594229.route, valid.getOrDefault("path"),
+  let url = call_568458.url(scheme.get, call_568458.host, call_568458.base,
+                         call_568458.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594229, url, valid)
+  result = hook(call_568458, url, valid)
 
-proc call*(call_594230: Call_PacketCapturesGet_594221; resourceGroupName: string;
+proc call*(call_568459: Call_PacketCapturesGet_568450; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; networkWatcherName: string;
           packetCaptureName: string): Recallable =
   ## packetCapturesGet
@@ -2835,22 +2835,22 @@ proc call*(call_594230: Call_PacketCapturesGet_594221; resourceGroupName: string
   ##                     : The name of the network watcher.
   ##   packetCaptureName: string (required)
   ##                    : The name of the packet capture session.
-  var path_594231 = newJObject()
-  var query_594232 = newJObject()
-  add(path_594231, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594232, "api-version", newJString(apiVersion))
-  add(path_594231, "subscriptionId", newJString(subscriptionId))
-  add(path_594231, "networkWatcherName", newJString(networkWatcherName))
-  add(path_594231, "packetCaptureName", newJString(packetCaptureName))
-  result = call_594230.call(path_594231, query_594232, nil, nil, nil)
+  var path_568460 = newJObject()
+  var query_568461 = newJObject()
+  add(path_568460, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568461, "api-version", newJString(apiVersion))
+  add(path_568460, "subscriptionId", newJString(subscriptionId))
+  add(path_568460, "networkWatcherName", newJString(networkWatcherName))
+  add(path_568460, "packetCaptureName", newJString(packetCaptureName))
+  result = call_568459.call(path_568460, query_568461, nil, nil, nil)
 
-var packetCapturesGet* = Call_PacketCapturesGet_594221(name: "packetCapturesGet",
+var packetCapturesGet* = Call_PacketCapturesGet_568450(name: "packetCapturesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/packetCaptures/{packetCaptureName}",
-    validator: validate_PacketCapturesGet_594222, base: "",
-    url: url_PacketCapturesGet_594223, schemes: {Scheme.Https})
+    validator: validate_PacketCapturesGet_568451, base: "",
+    url: url_PacketCapturesGet_568452, schemes: {Scheme.Https})
 type
-  Call_PacketCapturesDelete_594247 = ref object of OpenApiRestCall_593438
-proc url_PacketCapturesDelete_594249(protocol: Scheme; host: string; base: string;
+  Call_PacketCapturesDelete_568476 = ref object of OpenApiRestCall_567667
+proc url_PacketCapturesDelete_568478(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2878,7 +2878,7 @@ proc url_PacketCapturesDelete_594249(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PacketCapturesDelete_594248(path: JsonNode; query: JsonNode;
+proc validate_PacketCapturesDelete_568477(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified packet capture session.
   ## 
@@ -2896,26 +2896,26 @@ proc validate_PacketCapturesDelete_594248(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594250 = path.getOrDefault("resourceGroupName")
-  valid_594250 = validateParameter(valid_594250, JString, required = true,
+  var valid_568479 = path.getOrDefault("resourceGroupName")
+  valid_568479 = validateParameter(valid_568479, JString, required = true,
                                  default = nil)
-  if valid_594250 != nil:
-    section.add "resourceGroupName", valid_594250
-  var valid_594251 = path.getOrDefault("subscriptionId")
-  valid_594251 = validateParameter(valid_594251, JString, required = true,
+  if valid_568479 != nil:
+    section.add "resourceGroupName", valid_568479
+  var valid_568480 = path.getOrDefault("subscriptionId")
+  valid_568480 = validateParameter(valid_568480, JString, required = true,
                                  default = nil)
-  if valid_594251 != nil:
-    section.add "subscriptionId", valid_594251
-  var valid_594252 = path.getOrDefault("networkWatcherName")
-  valid_594252 = validateParameter(valid_594252, JString, required = true,
+  if valid_568480 != nil:
+    section.add "subscriptionId", valid_568480
+  var valid_568481 = path.getOrDefault("networkWatcherName")
+  valid_568481 = validateParameter(valid_568481, JString, required = true,
                                  default = nil)
-  if valid_594252 != nil:
-    section.add "networkWatcherName", valid_594252
-  var valid_594253 = path.getOrDefault("packetCaptureName")
-  valid_594253 = validateParameter(valid_594253, JString, required = true,
+  if valid_568481 != nil:
+    section.add "networkWatcherName", valid_568481
+  var valid_568482 = path.getOrDefault("packetCaptureName")
+  valid_568482 = validateParameter(valid_568482, JString, required = true,
                                  default = nil)
-  if valid_594253 != nil:
-    section.add "packetCaptureName", valid_594253
+  if valid_568482 != nil:
+    section.add "packetCaptureName", valid_568482
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2923,11 +2923,11 @@ proc validate_PacketCapturesDelete_594248(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594254 = query.getOrDefault("api-version")
-  valid_594254 = validateParameter(valid_594254, JString, required = true,
+  var valid_568483 = query.getOrDefault("api-version")
+  valid_568483 = validateParameter(valid_568483, JString, required = true,
                                  default = nil)
-  if valid_594254 != nil:
-    section.add "api-version", valid_594254
+  if valid_568483 != nil:
+    section.add "api-version", valid_568483
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2936,20 +2936,20 @@ proc validate_PacketCapturesDelete_594248(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594255: Call_PacketCapturesDelete_594247; path: JsonNode;
+proc call*(call_568484: Call_PacketCapturesDelete_568476; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified packet capture session.
   ## 
-  let valid = call_594255.validator(path, query, header, formData, body)
-  let scheme = call_594255.pickScheme
+  let valid = call_568484.validator(path, query, header, formData, body)
+  let scheme = call_568484.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594255.url(scheme.get, call_594255.host, call_594255.base,
-                         call_594255.route, valid.getOrDefault("path"),
+  let url = call_568484.url(scheme.get, call_568484.host, call_568484.base,
+                         call_568484.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594255, url, valid)
+  result = hook(call_568484, url, valid)
 
-proc call*(call_594256: Call_PacketCapturesDelete_594247;
+proc call*(call_568485: Call_PacketCapturesDelete_568476;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; packetCaptureName: string): Recallable =
   ## packetCapturesDelete
@@ -2964,23 +2964,23 @@ proc call*(call_594256: Call_PacketCapturesDelete_594247;
   ##                     : The name of the network watcher.
   ##   packetCaptureName: string (required)
   ##                    : The name of the packet capture session.
-  var path_594257 = newJObject()
-  var query_594258 = newJObject()
-  add(path_594257, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594258, "api-version", newJString(apiVersion))
-  add(path_594257, "subscriptionId", newJString(subscriptionId))
-  add(path_594257, "networkWatcherName", newJString(networkWatcherName))
-  add(path_594257, "packetCaptureName", newJString(packetCaptureName))
-  result = call_594256.call(path_594257, query_594258, nil, nil, nil)
+  var path_568486 = newJObject()
+  var query_568487 = newJObject()
+  add(path_568486, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568487, "api-version", newJString(apiVersion))
+  add(path_568486, "subscriptionId", newJString(subscriptionId))
+  add(path_568486, "networkWatcherName", newJString(networkWatcherName))
+  add(path_568486, "packetCaptureName", newJString(packetCaptureName))
+  result = call_568485.call(path_568486, query_568487, nil, nil, nil)
 
-var packetCapturesDelete* = Call_PacketCapturesDelete_594247(
+var packetCapturesDelete* = Call_PacketCapturesDelete_568476(
     name: "packetCapturesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/packetCaptures/{packetCaptureName}",
-    validator: validate_PacketCapturesDelete_594248, base: "",
-    url: url_PacketCapturesDelete_594249, schemes: {Scheme.Https})
+    validator: validate_PacketCapturesDelete_568477, base: "",
+    url: url_PacketCapturesDelete_568478, schemes: {Scheme.Https})
 type
-  Call_PacketCapturesGetStatus_594259 = ref object of OpenApiRestCall_593438
-proc url_PacketCapturesGetStatus_594261(protocol: Scheme; host: string; base: string;
+  Call_PacketCapturesGetStatus_568488 = ref object of OpenApiRestCall_567667
+proc url_PacketCapturesGetStatus_568490(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3010,7 +3010,7 @@ proc url_PacketCapturesGetStatus_594261(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PacketCapturesGetStatus_594260(path: JsonNode; query: JsonNode;
+proc validate_PacketCapturesGetStatus_568489(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Query the status of a running packet capture session.
   ## 
@@ -3028,26 +3028,26 @@ proc validate_PacketCapturesGetStatus_594260(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594262 = path.getOrDefault("resourceGroupName")
-  valid_594262 = validateParameter(valid_594262, JString, required = true,
+  var valid_568491 = path.getOrDefault("resourceGroupName")
+  valid_568491 = validateParameter(valid_568491, JString, required = true,
                                  default = nil)
-  if valid_594262 != nil:
-    section.add "resourceGroupName", valid_594262
-  var valid_594263 = path.getOrDefault("subscriptionId")
-  valid_594263 = validateParameter(valid_594263, JString, required = true,
+  if valid_568491 != nil:
+    section.add "resourceGroupName", valid_568491
+  var valid_568492 = path.getOrDefault("subscriptionId")
+  valid_568492 = validateParameter(valid_568492, JString, required = true,
                                  default = nil)
-  if valid_594263 != nil:
-    section.add "subscriptionId", valid_594263
-  var valid_594264 = path.getOrDefault("networkWatcherName")
-  valid_594264 = validateParameter(valid_594264, JString, required = true,
+  if valid_568492 != nil:
+    section.add "subscriptionId", valid_568492
+  var valid_568493 = path.getOrDefault("networkWatcherName")
+  valid_568493 = validateParameter(valid_568493, JString, required = true,
                                  default = nil)
-  if valid_594264 != nil:
-    section.add "networkWatcherName", valid_594264
-  var valid_594265 = path.getOrDefault("packetCaptureName")
-  valid_594265 = validateParameter(valid_594265, JString, required = true,
+  if valid_568493 != nil:
+    section.add "networkWatcherName", valid_568493
+  var valid_568494 = path.getOrDefault("packetCaptureName")
+  valid_568494 = validateParameter(valid_568494, JString, required = true,
                                  default = nil)
-  if valid_594265 != nil:
-    section.add "packetCaptureName", valid_594265
+  if valid_568494 != nil:
+    section.add "packetCaptureName", valid_568494
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3055,11 +3055,11 @@ proc validate_PacketCapturesGetStatus_594260(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594266 = query.getOrDefault("api-version")
-  valid_594266 = validateParameter(valid_594266, JString, required = true,
+  var valid_568495 = query.getOrDefault("api-version")
+  valid_568495 = validateParameter(valid_568495, JString, required = true,
                                  default = nil)
-  if valid_594266 != nil:
-    section.add "api-version", valid_594266
+  if valid_568495 != nil:
+    section.add "api-version", valid_568495
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3068,20 +3068,20 @@ proc validate_PacketCapturesGetStatus_594260(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594267: Call_PacketCapturesGetStatus_594259; path: JsonNode;
+proc call*(call_568496: Call_PacketCapturesGetStatus_568488; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Query the status of a running packet capture session.
   ## 
-  let valid = call_594267.validator(path, query, header, formData, body)
-  let scheme = call_594267.pickScheme
+  let valid = call_568496.validator(path, query, header, formData, body)
+  let scheme = call_568496.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594267.url(scheme.get, call_594267.host, call_594267.base,
-                         call_594267.route, valid.getOrDefault("path"),
+  let url = call_568496.url(scheme.get, call_568496.host, call_568496.base,
+                         call_568496.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594267, url, valid)
+  result = hook(call_568496, url, valid)
 
-proc call*(call_594268: Call_PacketCapturesGetStatus_594259;
+proc call*(call_568497: Call_PacketCapturesGetStatus_568488;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; packetCaptureName: string): Recallable =
   ## packetCapturesGetStatus
@@ -3096,23 +3096,23 @@ proc call*(call_594268: Call_PacketCapturesGetStatus_594259;
   ##                     : The name of the Network Watcher resource.
   ##   packetCaptureName: string (required)
   ##                    : The name given to the packet capture session.
-  var path_594269 = newJObject()
-  var query_594270 = newJObject()
-  add(path_594269, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594270, "api-version", newJString(apiVersion))
-  add(path_594269, "subscriptionId", newJString(subscriptionId))
-  add(path_594269, "networkWatcherName", newJString(networkWatcherName))
-  add(path_594269, "packetCaptureName", newJString(packetCaptureName))
-  result = call_594268.call(path_594269, query_594270, nil, nil, nil)
+  var path_568498 = newJObject()
+  var query_568499 = newJObject()
+  add(path_568498, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568499, "api-version", newJString(apiVersion))
+  add(path_568498, "subscriptionId", newJString(subscriptionId))
+  add(path_568498, "networkWatcherName", newJString(networkWatcherName))
+  add(path_568498, "packetCaptureName", newJString(packetCaptureName))
+  result = call_568497.call(path_568498, query_568499, nil, nil, nil)
 
-var packetCapturesGetStatus* = Call_PacketCapturesGetStatus_594259(
+var packetCapturesGetStatus* = Call_PacketCapturesGetStatus_568488(
     name: "packetCapturesGetStatus", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/packetCaptures/{packetCaptureName}/queryStatus",
-    validator: validate_PacketCapturesGetStatus_594260, base: "",
-    url: url_PacketCapturesGetStatus_594261, schemes: {Scheme.Https})
+    validator: validate_PacketCapturesGetStatus_568489, base: "",
+    url: url_PacketCapturesGetStatus_568490, schemes: {Scheme.Https})
 type
-  Call_PacketCapturesStop_594271 = ref object of OpenApiRestCall_593438
-proc url_PacketCapturesStop_594273(protocol: Scheme; host: string; base: string;
+  Call_PacketCapturesStop_568500 = ref object of OpenApiRestCall_567667
+proc url_PacketCapturesStop_568502(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3141,7 +3141,7 @@ proc url_PacketCapturesStop_594273(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PacketCapturesStop_594272(path: JsonNode; query: JsonNode;
+proc validate_PacketCapturesStop_568501(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Stops a specified packet capture session.
@@ -3160,26 +3160,26 @@ proc validate_PacketCapturesStop_594272(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594274 = path.getOrDefault("resourceGroupName")
-  valid_594274 = validateParameter(valid_594274, JString, required = true,
+  var valid_568503 = path.getOrDefault("resourceGroupName")
+  valid_568503 = validateParameter(valid_568503, JString, required = true,
                                  default = nil)
-  if valid_594274 != nil:
-    section.add "resourceGroupName", valid_594274
-  var valid_594275 = path.getOrDefault("subscriptionId")
-  valid_594275 = validateParameter(valid_594275, JString, required = true,
+  if valid_568503 != nil:
+    section.add "resourceGroupName", valid_568503
+  var valid_568504 = path.getOrDefault("subscriptionId")
+  valid_568504 = validateParameter(valid_568504, JString, required = true,
                                  default = nil)
-  if valid_594275 != nil:
-    section.add "subscriptionId", valid_594275
-  var valid_594276 = path.getOrDefault("networkWatcherName")
-  valid_594276 = validateParameter(valid_594276, JString, required = true,
+  if valid_568504 != nil:
+    section.add "subscriptionId", valid_568504
+  var valid_568505 = path.getOrDefault("networkWatcherName")
+  valid_568505 = validateParameter(valid_568505, JString, required = true,
                                  default = nil)
-  if valid_594276 != nil:
-    section.add "networkWatcherName", valid_594276
-  var valid_594277 = path.getOrDefault("packetCaptureName")
-  valid_594277 = validateParameter(valid_594277, JString, required = true,
+  if valid_568505 != nil:
+    section.add "networkWatcherName", valid_568505
+  var valid_568506 = path.getOrDefault("packetCaptureName")
+  valid_568506 = validateParameter(valid_568506, JString, required = true,
                                  default = nil)
-  if valid_594277 != nil:
-    section.add "packetCaptureName", valid_594277
+  if valid_568506 != nil:
+    section.add "packetCaptureName", valid_568506
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3187,11 +3187,11 @@ proc validate_PacketCapturesStop_594272(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594278 = query.getOrDefault("api-version")
-  valid_594278 = validateParameter(valid_594278, JString, required = true,
+  var valid_568507 = query.getOrDefault("api-version")
+  valid_568507 = validateParameter(valid_568507, JString, required = true,
                                  default = nil)
-  if valid_594278 != nil:
-    section.add "api-version", valid_594278
+  if valid_568507 != nil:
+    section.add "api-version", valid_568507
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3200,20 +3200,20 @@ proc validate_PacketCapturesStop_594272(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594279: Call_PacketCapturesStop_594271; path: JsonNode;
+proc call*(call_568508: Call_PacketCapturesStop_568500; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stops a specified packet capture session.
   ## 
-  let valid = call_594279.validator(path, query, header, formData, body)
-  let scheme = call_594279.pickScheme
+  let valid = call_568508.validator(path, query, header, formData, body)
+  let scheme = call_568508.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594279.url(scheme.get, call_594279.host, call_594279.base,
-                         call_594279.route, valid.getOrDefault("path"),
+  let url = call_568508.url(scheme.get, call_568508.host, call_568508.base,
+                         call_568508.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594279, url, valid)
+  result = hook(call_568508, url, valid)
 
-proc call*(call_594280: Call_PacketCapturesStop_594271; resourceGroupName: string;
+proc call*(call_568509: Call_PacketCapturesStop_568500; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; networkWatcherName: string;
           packetCaptureName: string): Recallable =
   ## packetCapturesStop
@@ -3228,23 +3228,23 @@ proc call*(call_594280: Call_PacketCapturesStop_594271; resourceGroupName: strin
   ##                     : The name of the network watcher.
   ##   packetCaptureName: string (required)
   ##                    : The name of the packet capture session.
-  var path_594281 = newJObject()
-  var query_594282 = newJObject()
-  add(path_594281, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594282, "api-version", newJString(apiVersion))
-  add(path_594281, "subscriptionId", newJString(subscriptionId))
-  add(path_594281, "networkWatcherName", newJString(networkWatcherName))
-  add(path_594281, "packetCaptureName", newJString(packetCaptureName))
-  result = call_594280.call(path_594281, query_594282, nil, nil, nil)
+  var path_568510 = newJObject()
+  var query_568511 = newJObject()
+  add(path_568510, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568511, "api-version", newJString(apiVersion))
+  add(path_568510, "subscriptionId", newJString(subscriptionId))
+  add(path_568510, "networkWatcherName", newJString(networkWatcherName))
+  add(path_568510, "packetCaptureName", newJString(packetCaptureName))
+  result = call_568509.call(path_568510, query_568511, nil, nil, nil)
 
-var packetCapturesStop* = Call_PacketCapturesStop_594271(
+var packetCapturesStop* = Call_PacketCapturesStop_568500(
     name: "packetCapturesStop", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/packetCaptures/{packetCaptureName}/stop",
-    validator: validate_PacketCapturesStop_594272, base: "",
-    url: url_PacketCapturesStop_594273, schemes: {Scheme.Https})
+    validator: validate_PacketCapturesStop_568501, base: "",
+    url: url_PacketCapturesStop_568502, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersGetFlowLogStatus_594283 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersGetFlowLogStatus_594285(protocol: Scheme; host: string;
+  Call_NetworkWatchersGetFlowLogStatus_568512 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersGetFlowLogStatus_568514(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3269,7 +3269,7 @@ proc url_NetworkWatchersGetFlowLogStatus_594285(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersGetFlowLogStatus_594284(path: JsonNode;
+proc validate_NetworkWatchersGetFlowLogStatus_568513(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Queries status of flow log and traffic analytics (optional) on a specified resource.
   ## 
@@ -3285,21 +3285,21 @@ proc validate_NetworkWatchersGetFlowLogStatus_594284(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594286 = path.getOrDefault("resourceGroupName")
-  valid_594286 = validateParameter(valid_594286, JString, required = true,
+  var valid_568515 = path.getOrDefault("resourceGroupName")
+  valid_568515 = validateParameter(valid_568515, JString, required = true,
                                  default = nil)
-  if valid_594286 != nil:
-    section.add "resourceGroupName", valid_594286
-  var valid_594287 = path.getOrDefault("subscriptionId")
-  valid_594287 = validateParameter(valid_594287, JString, required = true,
+  if valid_568515 != nil:
+    section.add "resourceGroupName", valid_568515
+  var valid_568516 = path.getOrDefault("subscriptionId")
+  valid_568516 = validateParameter(valid_568516, JString, required = true,
                                  default = nil)
-  if valid_594287 != nil:
-    section.add "subscriptionId", valid_594287
-  var valid_594288 = path.getOrDefault("networkWatcherName")
-  valid_594288 = validateParameter(valid_594288, JString, required = true,
+  if valid_568516 != nil:
+    section.add "subscriptionId", valid_568516
+  var valid_568517 = path.getOrDefault("networkWatcherName")
+  valid_568517 = validateParameter(valid_568517, JString, required = true,
                                  default = nil)
-  if valid_594288 != nil:
-    section.add "networkWatcherName", valid_594288
+  if valid_568517 != nil:
+    section.add "networkWatcherName", valid_568517
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3307,11 +3307,11 @@ proc validate_NetworkWatchersGetFlowLogStatus_594284(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594289 = query.getOrDefault("api-version")
-  valid_594289 = validateParameter(valid_594289, JString, required = true,
+  var valid_568518 = query.getOrDefault("api-version")
+  valid_568518 = validateParameter(valid_568518, JString, required = true,
                                  default = nil)
-  if valid_594289 != nil:
-    section.add "api-version", valid_594289
+  if valid_568518 != nil:
+    section.add "api-version", valid_568518
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3325,21 +3325,21 @@ proc validate_NetworkWatchersGetFlowLogStatus_594284(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594291: Call_NetworkWatchersGetFlowLogStatus_594283;
+proc call*(call_568520: Call_NetworkWatchersGetFlowLogStatus_568512;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Queries status of flow log and traffic analytics (optional) on a specified resource.
   ## 
-  let valid = call_594291.validator(path, query, header, formData, body)
-  let scheme = call_594291.pickScheme
+  let valid = call_568520.validator(path, query, header, formData, body)
+  let scheme = call_568520.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594291.url(scheme.get, call_594291.host, call_594291.base,
-                         call_594291.route, valid.getOrDefault("path"),
+  let url = call_568520.url(scheme.get, call_568520.host, call_568520.base,
+                         call_568520.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594291, url, valid)
+  result = hook(call_568520, url, valid)
 
-proc call*(call_594292: Call_NetworkWatchersGetFlowLogStatus_594283;
+proc call*(call_568521: Call_NetworkWatchersGetFlowLogStatus_568512;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersGetFlowLogStatus
@@ -3354,25 +3354,25 @@ proc call*(call_594292: Call_NetworkWatchersGetFlowLogStatus_594283;
   ##                     : The name of the network watcher resource.
   ##   parameters: JObject (required)
   ##             : Parameters that define a resource to query flow log and traffic analytics (optional) status.
-  var path_594293 = newJObject()
-  var query_594294 = newJObject()
-  var body_594295 = newJObject()
-  add(path_594293, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594294, "api-version", newJString(apiVersion))
-  add(path_594293, "subscriptionId", newJString(subscriptionId))
-  add(path_594293, "networkWatcherName", newJString(networkWatcherName))
+  var path_568522 = newJObject()
+  var query_568523 = newJObject()
+  var body_568524 = newJObject()
+  add(path_568522, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568523, "api-version", newJString(apiVersion))
+  add(path_568522, "subscriptionId", newJString(subscriptionId))
+  add(path_568522, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594295 = parameters
-  result = call_594292.call(path_594293, query_594294, nil, nil, body_594295)
+    body_568524 = parameters
+  result = call_568521.call(path_568522, query_568523, nil, nil, body_568524)
 
-var networkWatchersGetFlowLogStatus* = Call_NetworkWatchersGetFlowLogStatus_594283(
+var networkWatchersGetFlowLogStatus* = Call_NetworkWatchersGetFlowLogStatus_568512(
     name: "networkWatchersGetFlowLogStatus", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/queryFlowLogStatus",
-    validator: validate_NetworkWatchersGetFlowLogStatus_594284, base: "",
-    url: url_NetworkWatchersGetFlowLogStatus_594285, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersGetFlowLogStatus_568513, base: "",
+    url: url_NetworkWatchersGetFlowLogStatus_568514, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersGetTroubleshootingResult_594296 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersGetTroubleshootingResult_594298(protocol: Scheme;
+  Call_NetworkWatchersGetTroubleshootingResult_568525 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersGetTroubleshootingResult_568527(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3397,7 +3397,7 @@ proc url_NetworkWatchersGetTroubleshootingResult_594298(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersGetTroubleshootingResult_594297(path: JsonNode;
+proc validate_NetworkWatchersGetTroubleshootingResult_568526(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the last completed troubleshooting result on a specified resource
   ## 
@@ -3413,21 +3413,21 @@ proc validate_NetworkWatchersGetTroubleshootingResult_594297(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594299 = path.getOrDefault("resourceGroupName")
-  valid_594299 = validateParameter(valid_594299, JString, required = true,
+  var valid_568528 = path.getOrDefault("resourceGroupName")
+  valid_568528 = validateParameter(valid_568528, JString, required = true,
                                  default = nil)
-  if valid_594299 != nil:
-    section.add "resourceGroupName", valid_594299
-  var valid_594300 = path.getOrDefault("subscriptionId")
-  valid_594300 = validateParameter(valid_594300, JString, required = true,
+  if valid_568528 != nil:
+    section.add "resourceGroupName", valid_568528
+  var valid_568529 = path.getOrDefault("subscriptionId")
+  valid_568529 = validateParameter(valid_568529, JString, required = true,
                                  default = nil)
-  if valid_594300 != nil:
-    section.add "subscriptionId", valid_594300
-  var valid_594301 = path.getOrDefault("networkWatcherName")
-  valid_594301 = validateParameter(valid_594301, JString, required = true,
+  if valid_568529 != nil:
+    section.add "subscriptionId", valid_568529
+  var valid_568530 = path.getOrDefault("networkWatcherName")
+  valid_568530 = validateParameter(valid_568530, JString, required = true,
                                  default = nil)
-  if valid_594301 != nil:
-    section.add "networkWatcherName", valid_594301
+  if valid_568530 != nil:
+    section.add "networkWatcherName", valid_568530
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3435,11 +3435,11 @@ proc validate_NetworkWatchersGetTroubleshootingResult_594297(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594302 = query.getOrDefault("api-version")
-  valid_594302 = validateParameter(valid_594302, JString, required = true,
+  var valid_568531 = query.getOrDefault("api-version")
+  valid_568531 = validateParameter(valid_568531, JString, required = true,
                                  default = nil)
-  if valid_594302 != nil:
-    section.add "api-version", valid_594302
+  if valid_568531 != nil:
+    section.add "api-version", valid_568531
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3453,21 +3453,21 @@ proc validate_NetworkWatchersGetTroubleshootingResult_594297(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594304: Call_NetworkWatchersGetTroubleshootingResult_594296;
+proc call*(call_568533: Call_NetworkWatchersGetTroubleshootingResult_568525;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the last completed troubleshooting result on a specified resource
   ## 
-  let valid = call_594304.validator(path, query, header, formData, body)
-  let scheme = call_594304.pickScheme
+  let valid = call_568533.validator(path, query, header, formData, body)
+  let scheme = call_568533.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594304.url(scheme.get, call_594304.host, call_594304.base,
-                         call_594304.route, valid.getOrDefault("path"),
+  let url = call_568533.url(scheme.get, call_568533.host, call_568533.base,
+                         call_568533.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594304, url, valid)
+  result = hook(call_568533, url, valid)
 
-proc call*(call_594305: Call_NetworkWatchersGetTroubleshootingResult_594296;
+proc call*(call_568534: Call_NetworkWatchersGetTroubleshootingResult_568525;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersGetTroubleshootingResult
@@ -3482,26 +3482,26 @@ proc call*(call_594305: Call_NetworkWatchersGetTroubleshootingResult_594296;
   ##                     : The name of the network watcher resource.
   ##   parameters: JObject (required)
   ##             : Parameters that define the resource to query the troubleshooting result.
-  var path_594306 = newJObject()
-  var query_594307 = newJObject()
-  var body_594308 = newJObject()
-  add(path_594306, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594307, "api-version", newJString(apiVersion))
-  add(path_594306, "subscriptionId", newJString(subscriptionId))
-  add(path_594306, "networkWatcherName", newJString(networkWatcherName))
+  var path_568535 = newJObject()
+  var query_568536 = newJObject()
+  var body_568537 = newJObject()
+  add(path_568535, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568536, "api-version", newJString(apiVersion))
+  add(path_568535, "subscriptionId", newJString(subscriptionId))
+  add(path_568535, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594308 = parameters
-  result = call_594305.call(path_594306, query_594307, nil, nil, body_594308)
+    body_568537 = parameters
+  result = call_568534.call(path_568535, query_568536, nil, nil, body_568537)
 
-var networkWatchersGetTroubleshootingResult* = Call_NetworkWatchersGetTroubleshootingResult_594296(
+var networkWatchersGetTroubleshootingResult* = Call_NetworkWatchersGetTroubleshootingResult_568525(
     name: "networkWatchersGetTroubleshootingResult", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/queryTroubleshootResult",
-    validator: validate_NetworkWatchersGetTroubleshootingResult_594297, base: "",
-    url: url_NetworkWatchersGetTroubleshootingResult_594298,
+    validator: validate_NetworkWatchersGetTroubleshootingResult_568526, base: "",
+    url: url_NetworkWatchersGetTroubleshootingResult_568527,
     schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersGetVMSecurityRules_594309 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersGetVMSecurityRules_594311(protocol: Scheme; host: string;
+  Call_NetworkWatchersGetVMSecurityRules_568538 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersGetVMSecurityRules_568540(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3526,7 +3526,7 @@ proc url_NetworkWatchersGetVMSecurityRules_594311(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersGetVMSecurityRules_594310(path: JsonNode;
+proc validate_NetworkWatchersGetVMSecurityRules_568539(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the configured and effective security group rules on the specified VM.
   ## 
@@ -3542,21 +3542,21 @@ proc validate_NetworkWatchersGetVMSecurityRules_594310(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594312 = path.getOrDefault("resourceGroupName")
-  valid_594312 = validateParameter(valid_594312, JString, required = true,
+  var valid_568541 = path.getOrDefault("resourceGroupName")
+  valid_568541 = validateParameter(valid_568541, JString, required = true,
                                  default = nil)
-  if valid_594312 != nil:
-    section.add "resourceGroupName", valid_594312
-  var valid_594313 = path.getOrDefault("subscriptionId")
-  valid_594313 = validateParameter(valid_594313, JString, required = true,
+  if valid_568541 != nil:
+    section.add "resourceGroupName", valid_568541
+  var valid_568542 = path.getOrDefault("subscriptionId")
+  valid_568542 = validateParameter(valid_568542, JString, required = true,
                                  default = nil)
-  if valid_594313 != nil:
-    section.add "subscriptionId", valid_594313
-  var valid_594314 = path.getOrDefault("networkWatcherName")
-  valid_594314 = validateParameter(valid_594314, JString, required = true,
+  if valid_568542 != nil:
+    section.add "subscriptionId", valid_568542
+  var valid_568543 = path.getOrDefault("networkWatcherName")
+  valid_568543 = validateParameter(valid_568543, JString, required = true,
                                  default = nil)
-  if valid_594314 != nil:
-    section.add "networkWatcherName", valid_594314
+  if valid_568543 != nil:
+    section.add "networkWatcherName", valid_568543
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3564,11 +3564,11 @@ proc validate_NetworkWatchersGetVMSecurityRules_594310(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594315 = query.getOrDefault("api-version")
-  valid_594315 = validateParameter(valid_594315, JString, required = true,
+  var valid_568544 = query.getOrDefault("api-version")
+  valid_568544 = validateParameter(valid_568544, JString, required = true,
                                  default = nil)
-  if valid_594315 != nil:
-    section.add "api-version", valid_594315
+  if valid_568544 != nil:
+    section.add "api-version", valid_568544
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3582,21 +3582,21 @@ proc validate_NetworkWatchersGetVMSecurityRules_594310(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594317: Call_NetworkWatchersGetVMSecurityRules_594309;
+proc call*(call_568546: Call_NetworkWatchersGetVMSecurityRules_568538;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the configured and effective security group rules on the specified VM.
   ## 
-  let valid = call_594317.validator(path, query, header, formData, body)
-  let scheme = call_594317.pickScheme
+  let valid = call_568546.validator(path, query, header, formData, body)
+  let scheme = call_568546.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594317.url(scheme.get, call_594317.host, call_594317.base,
-                         call_594317.route, valid.getOrDefault("path"),
+  let url = call_568546.url(scheme.get, call_568546.host, call_568546.base,
+                         call_568546.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594317, url, valid)
+  result = hook(call_568546, url, valid)
 
-proc call*(call_594318: Call_NetworkWatchersGetVMSecurityRules_594309;
+proc call*(call_568547: Call_NetworkWatchersGetVMSecurityRules_568538;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersGetVMSecurityRules
@@ -3611,25 +3611,25 @@ proc call*(call_594318: Call_NetworkWatchersGetVMSecurityRules_594309;
   ##                     : The name of the network watcher.
   ##   parameters: JObject (required)
   ##             : Parameters that define the VM to check security groups for.
-  var path_594319 = newJObject()
-  var query_594320 = newJObject()
-  var body_594321 = newJObject()
-  add(path_594319, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594320, "api-version", newJString(apiVersion))
-  add(path_594319, "subscriptionId", newJString(subscriptionId))
-  add(path_594319, "networkWatcherName", newJString(networkWatcherName))
+  var path_568548 = newJObject()
+  var query_568549 = newJObject()
+  var body_568550 = newJObject()
+  add(path_568548, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568549, "api-version", newJString(apiVersion))
+  add(path_568548, "subscriptionId", newJString(subscriptionId))
+  add(path_568548, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594321 = parameters
-  result = call_594318.call(path_594319, query_594320, nil, nil, body_594321)
+    body_568550 = parameters
+  result = call_568547.call(path_568548, query_568549, nil, nil, body_568550)
 
-var networkWatchersGetVMSecurityRules* = Call_NetworkWatchersGetVMSecurityRules_594309(
+var networkWatchersGetVMSecurityRules* = Call_NetworkWatchersGetVMSecurityRules_568538(
     name: "networkWatchersGetVMSecurityRules", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/securityGroupView",
-    validator: validate_NetworkWatchersGetVMSecurityRules_594310, base: "",
-    url: url_NetworkWatchersGetVMSecurityRules_594311, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersGetVMSecurityRules_568539, base: "",
+    url: url_NetworkWatchersGetVMSecurityRules_568540, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersGetTopology_594322 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersGetTopology_594324(protocol: Scheme; host: string;
+  Call_NetworkWatchersGetTopology_568551 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersGetTopology_568553(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3654,7 +3654,7 @@ proc url_NetworkWatchersGetTopology_594324(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersGetTopology_594323(path: JsonNode; query: JsonNode;
+proc validate_NetworkWatchersGetTopology_568552(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the current network topology by resource group.
   ## 
@@ -3670,21 +3670,21 @@ proc validate_NetworkWatchersGetTopology_594323(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594325 = path.getOrDefault("resourceGroupName")
-  valid_594325 = validateParameter(valid_594325, JString, required = true,
+  var valid_568554 = path.getOrDefault("resourceGroupName")
+  valid_568554 = validateParameter(valid_568554, JString, required = true,
                                  default = nil)
-  if valid_594325 != nil:
-    section.add "resourceGroupName", valid_594325
-  var valid_594326 = path.getOrDefault("subscriptionId")
-  valid_594326 = validateParameter(valid_594326, JString, required = true,
+  if valid_568554 != nil:
+    section.add "resourceGroupName", valid_568554
+  var valid_568555 = path.getOrDefault("subscriptionId")
+  valid_568555 = validateParameter(valid_568555, JString, required = true,
                                  default = nil)
-  if valid_594326 != nil:
-    section.add "subscriptionId", valid_594326
-  var valid_594327 = path.getOrDefault("networkWatcherName")
-  valid_594327 = validateParameter(valid_594327, JString, required = true,
+  if valid_568555 != nil:
+    section.add "subscriptionId", valid_568555
+  var valid_568556 = path.getOrDefault("networkWatcherName")
+  valid_568556 = validateParameter(valid_568556, JString, required = true,
                                  default = nil)
-  if valid_594327 != nil:
-    section.add "networkWatcherName", valid_594327
+  if valid_568556 != nil:
+    section.add "networkWatcherName", valid_568556
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3692,11 +3692,11 @@ proc validate_NetworkWatchersGetTopology_594323(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594328 = query.getOrDefault("api-version")
-  valid_594328 = validateParameter(valid_594328, JString, required = true,
+  var valid_568557 = query.getOrDefault("api-version")
+  valid_568557 = validateParameter(valid_568557, JString, required = true,
                                  default = nil)
-  if valid_594328 != nil:
-    section.add "api-version", valid_594328
+  if valid_568557 != nil:
+    section.add "api-version", valid_568557
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3710,20 +3710,20 @@ proc validate_NetworkWatchersGetTopology_594323(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594330: Call_NetworkWatchersGetTopology_594322; path: JsonNode;
+proc call*(call_568559: Call_NetworkWatchersGetTopology_568551; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the current network topology by resource group.
   ## 
-  let valid = call_594330.validator(path, query, header, formData, body)
-  let scheme = call_594330.pickScheme
+  let valid = call_568559.validator(path, query, header, formData, body)
+  let scheme = call_568559.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594330.url(scheme.get, call_594330.host, call_594330.base,
-                         call_594330.route, valid.getOrDefault("path"),
+  let url = call_568559.url(scheme.get, call_568559.host, call_568559.base,
+                         call_568559.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594330, url, valid)
+  result = hook(call_568559, url, valid)
 
-proc call*(call_594331: Call_NetworkWatchersGetTopology_594322;
+proc call*(call_568560: Call_NetworkWatchersGetTopology_568551;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersGetTopology
@@ -3738,25 +3738,25 @@ proc call*(call_594331: Call_NetworkWatchersGetTopology_594322;
   ##                     : The name of the network watcher.
   ##   parameters: JObject (required)
   ##             : Parameters that define the representation of topology.
-  var path_594332 = newJObject()
-  var query_594333 = newJObject()
-  var body_594334 = newJObject()
-  add(path_594332, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594333, "api-version", newJString(apiVersion))
-  add(path_594332, "subscriptionId", newJString(subscriptionId))
-  add(path_594332, "networkWatcherName", newJString(networkWatcherName))
+  var path_568561 = newJObject()
+  var query_568562 = newJObject()
+  var body_568563 = newJObject()
+  add(path_568561, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568562, "api-version", newJString(apiVersion))
+  add(path_568561, "subscriptionId", newJString(subscriptionId))
+  add(path_568561, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594334 = parameters
-  result = call_594331.call(path_594332, query_594333, nil, nil, body_594334)
+    body_568563 = parameters
+  result = call_568560.call(path_568561, query_568562, nil, nil, body_568563)
 
-var networkWatchersGetTopology* = Call_NetworkWatchersGetTopology_594322(
+var networkWatchersGetTopology* = Call_NetworkWatchersGetTopology_568551(
     name: "networkWatchersGetTopology", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/topology",
-    validator: validate_NetworkWatchersGetTopology_594323, base: "",
-    url: url_NetworkWatchersGetTopology_594324, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersGetTopology_568552, base: "",
+    url: url_NetworkWatchersGetTopology_568553, schemes: {Scheme.Https})
 type
-  Call_NetworkWatchersGetTroubleshooting_594335 = ref object of OpenApiRestCall_593438
-proc url_NetworkWatchersGetTroubleshooting_594337(protocol: Scheme; host: string;
+  Call_NetworkWatchersGetTroubleshooting_568564 = ref object of OpenApiRestCall_567667
+proc url_NetworkWatchersGetTroubleshooting_568566(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3781,7 +3781,7 @@ proc url_NetworkWatchersGetTroubleshooting_594337(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkWatchersGetTroubleshooting_594336(path: JsonNode;
+proc validate_NetworkWatchersGetTroubleshooting_568565(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Initiate troubleshooting on a specified resource
   ## 
@@ -3797,21 +3797,21 @@ proc validate_NetworkWatchersGetTroubleshooting_594336(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594338 = path.getOrDefault("resourceGroupName")
-  valid_594338 = validateParameter(valid_594338, JString, required = true,
+  var valid_568567 = path.getOrDefault("resourceGroupName")
+  valid_568567 = validateParameter(valid_568567, JString, required = true,
                                  default = nil)
-  if valid_594338 != nil:
-    section.add "resourceGroupName", valid_594338
-  var valid_594339 = path.getOrDefault("subscriptionId")
-  valid_594339 = validateParameter(valid_594339, JString, required = true,
+  if valid_568567 != nil:
+    section.add "resourceGroupName", valid_568567
+  var valid_568568 = path.getOrDefault("subscriptionId")
+  valid_568568 = validateParameter(valid_568568, JString, required = true,
                                  default = nil)
-  if valid_594339 != nil:
-    section.add "subscriptionId", valid_594339
-  var valid_594340 = path.getOrDefault("networkWatcherName")
-  valid_594340 = validateParameter(valid_594340, JString, required = true,
+  if valid_568568 != nil:
+    section.add "subscriptionId", valid_568568
+  var valid_568569 = path.getOrDefault("networkWatcherName")
+  valid_568569 = validateParameter(valid_568569, JString, required = true,
                                  default = nil)
-  if valid_594340 != nil:
-    section.add "networkWatcherName", valid_594340
+  if valid_568569 != nil:
+    section.add "networkWatcherName", valid_568569
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3819,11 +3819,11 @@ proc validate_NetworkWatchersGetTroubleshooting_594336(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594341 = query.getOrDefault("api-version")
-  valid_594341 = validateParameter(valid_594341, JString, required = true,
+  var valid_568570 = query.getOrDefault("api-version")
+  valid_568570 = validateParameter(valid_568570, JString, required = true,
                                  default = nil)
-  if valid_594341 != nil:
-    section.add "api-version", valid_594341
+  if valid_568570 != nil:
+    section.add "api-version", valid_568570
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3837,21 +3837,21 @@ proc validate_NetworkWatchersGetTroubleshooting_594336(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594343: Call_NetworkWatchersGetTroubleshooting_594335;
+proc call*(call_568572: Call_NetworkWatchersGetTroubleshooting_568564;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Initiate troubleshooting on a specified resource
   ## 
-  let valid = call_594343.validator(path, query, header, formData, body)
-  let scheme = call_594343.pickScheme
+  let valid = call_568572.validator(path, query, header, formData, body)
+  let scheme = call_568572.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594343.url(scheme.get, call_594343.host, call_594343.base,
-                         call_594343.route, valid.getOrDefault("path"),
+  let url = call_568572.url(scheme.get, call_568572.host, call_568572.base,
+                         call_568572.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594343, url, valid)
+  result = hook(call_568572, url, valid)
 
-proc call*(call_594344: Call_NetworkWatchersGetTroubleshooting_594335;
+proc call*(call_568573: Call_NetworkWatchersGetTroubleshooting_568564;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           networkWatcherName: string; parameters: JsonNode): Recallable =
   ## networkWatchersGetTroubleshooting
@@ -3866,22 +3866,22 @@ proc call*(call_594344: Call_NetworkWatchersGetTroubleshooting_594335;
   ##                     : The name of the network watcher resource.
   ##   parameters: JObject (required)
   ##             : Parameters that define the resource to troubleshoot.
-  var path_594345 = newJObject()
-  var query_594346 = newJObject()
-  var body_594347 = newJObject()
-  add(path_594345, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594346, "api-version", newJString(apiVersion))
-  add(path_594345, "subscriptionId", newJString(subscriptionId))
-  add(path_594345, "networkWatcherName", newJString(networkWatcherName))
+  var path_568574 = newJObject()
+  var query_568575 = newJObject()
+  var body_568576 = newJObject()
+  add(path_568574, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568575, "api-version", newJString(apiVersion))
+  add(path_568574, "subscriptionId", newJString(subscriptionId))
+  add(path_568574, "networkWatcherName", newJString(networkWatcherName))
   if parameters != nil:
-    body_594347 = parameters
-  result = call_594344.call(path_594345, query_594346, nil, nil, body_594347)
+    body_568576 = parameters
+  result = call_568573.call(path_568574, query_568575, nil, nil, body_568576)
 
-var networkWatchersGetTroubleshooting* = Call_NetworkWatchersGetTroubleshooting_594335(
+var networkWatchersGetTroubleshooting* = Call_NetworkWatchersGetTroubleshooting_568564(
     name: "networkWatchersGetTroubleshooting", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/troubleshoot",
-    validator: validate_NetworkWatchersGetTroubleshooting_594336, base: "",
-    url: url_NetworkWatchersGetTroubleshooting_594337, schemes: {Scheme.Https})
+    validator: validate_NetworkWatchersGetTroubleshooting_568565, base: "",
+    url: url_NetworkWatchersGetTroubleshooting_568566, schemes: {Scheme.Https})
 export
   rest
 

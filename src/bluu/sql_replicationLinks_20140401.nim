@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database replication links
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-replicationLinks"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ReplicationLinksListByDatabase_593647 = ref object of OpenApiRestCall_593425
-proc url_ReplicationLinksListByDatabase_593649(protocol: Scheme; host: string;
+  Call_ReplicationLinksListByDatabase_567880 = ref object of OpenApiRestCall_567658
+proc url_ReplicationLinksListByDatabase_567882(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,7 +130,7 @@ proc url_ReplicationLinksListByDatabase_593649(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationLinksListByDatabase_593648(path: JsonNode;
+proc validate_ReplicationLinksListByDatabase_567881(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a database's replication links.
   ## 
@@ -148,26 +148,26 @@ proc validate_ReplicationLinksListByDatabase_593648(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = path.getOrDefault("resourceGroupName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("serverName")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "resourceGroupName", valid_568055
+  var valid_568056 = path.getOrDefault("serverName")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "serverName", valid_593823
-  var valid_593824 = path.getOrDefault("subscriptionId")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_568056 != nil:
+    section.add "serverName", valid_568056
+  var valid_568057 = path.getOrDefault("subscriptionId")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "subscriptionId", valid_593824
-  var valid_593825 = path.getOrDefault("databaseName")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_568057 != nil:
+    section.add "subscriptionId", valid_568057
+  var valid_568058 = path.getOrDefault("databaseName")
+  valid_568058 = validateParameter(valid_568058, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "databaseName", valid_593825
+  if valid_568058 != nil:
+    section.add "databaseName", valid_568058
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -175,11 +175,11 @@ proc validate_ReplicationLinksListByDatabase_593648(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593826 = query.getOrDefault("api-version")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  var valid_568059 = query.getOrDefault("api-version")
+  valid_568059 = validateParameter(valid_568059, JString, required = true,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "api-version", valid_593826
+  if valid_568059 != nil:
+    section.add "api-version", valid_568059
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -188,20 +188,20 @@ proc validate_ReplicationLinksListByDatabase_593648(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593849: Call_ReplicationLinksListByDatabase_593647; path: JsonNode;
+proc call*(call_568082: Call_ReplicationLinksListByDatabase_567880; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a database's replication links.
   ## 
-  let valid = call_593849.validator(path, query, header, formData, body)
-  let scheme = call_593849.pickScheme
+  let valid = call_568082.validator(path, query, header, formData, body)
+  let scheme = call_568082.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593849.url(scheme.get, call_593849.host, call_593849.base,
-                         call_593849.route, valid.getOrDefault("path"),
+  let url = call_568082.url(scheme.get, call_568082.host, call_568082.base,
+                         call_568082.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593849, url, valid)
+  result = hook(call_568082, url, valid)
 
-proc call*(call_593920: Call_ReplicationLinksListByDatabase_593647;
+proc call*(call_568153: Call_ReplicationLinksListByDatabase_567880;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string): Recallable =
   ## replicationLinksListByDatabase
@@ -216,23 +216,23 @@ proc call*(call_593920: Call_ReplicationLinksListByDatabase_593647;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database to retrieve links for.
-  var path_593921 = newJObject()
-  var query_593923 = newJObject()
-  add(path_593921, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593923, "api-version", newJString(apiVersion))
-  add(path_593921, "serverName", newJString(serverName))
-  add(path_593921, "subscriptionId", newJString(subscriptionId))
-  add(path_593921, "databaseName", newJString(databaseName))
-  result = call_593920.call(path_593921, query_593923, nil, nil, nil)
+  var path_568154 = newJObject()
+  var query_568156 = newJObject()
+  add(path_568154, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568156, "api-version", newJString(apiVersion))
+  add(path_568154, "serverName", newJString(serverName))
+  add(path_568154, "subscriptionId", newJString(subscriptionId))
+  add(path_568154, "databaseName", newJString(databaseName))
+  result = call_568153.call(path_568154, query_568156, nil, nil, nil)
 
-var replicationLinksListByDatabase* = Call_ReplicationLinksListByDatabase_593647(
+var replicationLinksListByDatabase* = Call_ReplicationLinksListByDatabase_567880(
     name: "replicationLinksListByDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/replicationLinks",
-    validator: validate_ReplicationLinksListByDatabase_593648, base: "",
-    url: url_ReplicationLinksListByDatabase_593649, schemes: {Scheme.Https})
+    validator: validate_ReplicationLinksListByDatabase_567881, base: "",
+    url: url_ReplicationLinksListByDatabase_567882, schemes: {Scheme.Https})
 type
-  Call_ReplicationLinksGet_593962 = ref object of OpenApiRestCall_593425
-proc url_ReplicationLinksGet_593964(protocol: Scheme; host: string; base: string;
+  Call_ReplicationLinksGet_568195 = ref object of OpenApiRestCall_567658
+proc url_ReplicationLinksGet_568197(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -260,7 +260,7 @@ proc url_ReplicationLinksGet_593964(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationLinksGet_593963(path: JsonNode; query: JsonNode;
+proc validate_ReplicationLinksGet_568196(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets a database replication link.
@@ -281,31 +281,31 @@ proc validate_ReplicationLinksGet_593963(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593965 = path.getOrDefault("resourceGroupName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_568198 = path.getOrDefault("resourceGroupName")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "resourceGroupName", valid_593965
-  var valid_593966 = path.getOrDefault("serverName")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_568198 != nil:
+    section.add "resourceGroupName", valid_568198
+  var valid_568199 = path.getOrDefault("serverName")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "serverName", valid_593966
-  var valid_593967 = path.getOrDefault("subscriptionId")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_568199 != nil:
+    section.add "serverName", valid_568199
+  var valid_568200 = path.getOrDefault("subscriptionId")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "subscriptionId", valid_593967
-  var valid_593968 = path.getOrDefault("databaseName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  if valid_568200 != nil:
+    section.add "subscriptionId", valid_568200
+  var valid_568201 = path.getOrDefault("databaseName")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "databaseName", valid_593968
-  var valid_593969 = path.getOrDefault("linkId")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  if valid_568201 != nil:
+    section.add "databaseName", valid_568201
+  var valid_568202 = path.getOrDefault("linkId")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "linkId", valid_593969
+  if valid_568202 != nil:
+    section.add "linkId", valid_568202
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -313,11 +313,11 @@ proc validate_ReplicationLinksGet_593963(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593970 = query.getOrDefault("api-version")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  var valid_568203 = query.getOrDefault("api-version")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "api-version", valid_593970
+  if valid_568203 != nil:
+    section.add "api-version", valid_568203
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -326,20 +326,20 @@ proc validate_ReplicationLinksGet_593963(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593971: Call_ReplicationLinksGet_593962; path: JsonNode;
+proc call*(call_568204: Call_ReplicationLinksGet_568195; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a database replication link.
   ## 
-  let valid = call_593971.validator(path, query, header, formData, body)
-  let scheme = call_593971.pickScheme
+  let valid = call_568204.validator(path, query, header, formData, body)
+  let scheme = call_568204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593971.url(scheme.get, call_593971.host, call_593971.base,
-                         call_593971.route, valid.getOrDefault("path"),
+  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
+                         call_568204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593971, url, valid)
+  result = hook(call_568204, url, valid)
 
-proc call*(call_593972: Call_ReplicationLinksGet_593962; resourceGroupName: string;
+proc call*(call_568205: Call_ReplicationLinksGet_568195; resourceGroupName: string;
           apiVersion: string; serverName: string; subscriptionId: string;
           databaseName: string; linkId: string): Recallable =
   ## replicationLinksGet
@@ -356,24 +356,24 @@ proc call*(call_593972: Call_ReplicationLinksGet_593962; resourceGroupName: stri
   ##               : The name of the database to get the link for.
   ##   linkId: string (required)
   ##         : The replication link ID to be retrieved.
-  var path_593973 = newJObject()
-  var query_593974 = newJObject()
-  add(path_593973, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593974, "api-version", newJString(apiVersion))
-  add(path_593973, "serverName", newJString(serverName))
-  add(path_593973, "subscriptionId", newJString(subscriptionId))
-  add(path_593973, "databaseName", newJString(databaseName))
-  add(path_593973, "linkId", newJString(linkId))
-  result = call_593972.call(path_593973, query_593974, nil, nil, nil)
+  var path_568206 = newJObject()
+  var query_568207 = newJObject()
+  add(path_568206, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568207, "api-version", newJString(apiVersion))
+  add(path_568206, "serverName", newJString(serverName))
+  add(path_568206, "subscriptionId", newJString(subscriptionId))
+  add(path_568206, "databaseName", newJString(databaseName))
+  add(path_568206, "linkId", newJString(linkId))
+  result = call_568205.call(path_568206, query_568207, nil, nil, nil)
 
-var replicationLinksGet* = Call_ReplicationLinksGet_593962(
+var replicationLinksGet* = Call_ReplicationLinksGet_568195(
     name: "replicationLinksGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/replicationLinks/{linkId}",
-    validator: validate_ReplicationLinksGet_593963, base: "",
-    url: url_ReplicationLinksGet_593964, schemes: {Scheme.Https})
+    validator: validate_ReplicationLinksGet_568196, base: "",
+    url: url_ReplicationLinksGet_568197, schemes: {Scheme.Https})
 type
-  Call_ReplicationLinksDelete_593975 = ref object of OpenApiRestCall_593425
-proc url_ReplicationLinksDelete_593977(protocol: Scheme; host: string; base: string;
+  Call_ReplicationLinksDelete_568208 = ref object of OpenApiRestCall_567658
+proc url_ReplicationLinksDelete_568210(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -401,7 +401,7 @@ proc url_ReplicationLinksDelete_593977(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationLinksDelete_593976(path: JsonNode; query: JsonNode;
+proc validate_ReplicationLinksDelete_568209(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a database replication link. Cannot be done during failover.
   ## 
@@ -421,31 +421,31 @@ proc validate_ReplicationLinksDelete_593976(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593978 = path.getOrDefault("resourceGroupName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_568211 = path.getOrDefault("resourceGroupName")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "resourceGroupName", valid_593978
-  var valid_593979 = path.getOrDefault("serverName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_568211 != nil:
+    section.add "resourceGroupName", valid_568211
+  var valid_568212 = path.getOrDefault("serverName")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "serverName", valid_593979
-  var valid_593980 = path.getOrDefault("subscriptionId")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_568212 != nil:
+    section.add "serverName", valid_568212
+  var valid_568213 = path.getOrDefault("subscriptionId")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "subscriptionId", valid_593980
-  var valid_593981 = path.getOrDefault("databaseName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_568213 != nil:
+    section.add "subscriptionId", valid_568213
+  var valid_568214 = path.getOrDefault("databaseName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "databaseName", valid_593981
-  var valid_593982 = path.getOrDefault("linkId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568214 != nil:
+    section.add "databaseName", valid_568214
+  var valid_568215 = path.getOrDefault("linkId")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "linkId", valid_593982
+  if valid_568215 != nil:
+    section.add "linkId", valid_568215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -453,11 +453,11 @@ proc validate_ReplicationLinksDelete_593976(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = query.getOrDefault("api-version")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_568216 != nil:
+    section.add "api-version", valid_568216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -466,20 +466,20 @@ proc validate_ReplicationLinksDelete_593976(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_ReplicationLinksDelete_593975; path: JsonNode;
+proc call*(call_568217: Call_ReplicationLinksDelete_568208; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a database replication link. Cannot be done during failover.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_568217.validator(path, query, header, formData, body)
+  let scheme = call_568217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
+                         call_568217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_568217, url, valid)
 
-proc call*(call_593985: Call_ReplicationLinksDelete_593975;
+proc call*(call_568218: Call_ReplicationLinksDelete_568208;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string; linkId: string): Recallable =
   ## replicationLinksDelete
@@ -496,24 +496,24 @@ proc call*(call_593985: Call_ReplicationLinksDelete_593975;
   ##               : The name of the database that has the replication link to be dropped.
   ##   linkId: string (required)
   ##         : The ID of the replication link to be deleted.
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  add(path_593986, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "serverName", newJString(serverName))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
-  add(path_593986, "databaseName", newJString(databaseName))
-  add(path_593986, "linkId", newJString(linkId))
-  result = call_593985.call(path_593986, query_593987, nil, nil, nil)
+  var path_568219 = newJObject()
+  var query_568220 = newJObject()
+  add(path_568219, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568220, "api-version", newJString(apiVersion))
+  add(path_568219, "serverName", newJString(serverName))
+  add(path_568219, "subscriptionId", newJString(subscriptionId))
+  add(path_568219, "databaseName", newJString(databaseName))
+  add(path_568219, "linkId", newJString(linkId))
+  result = call_568218.call(path_568219, query_568220, nil, nil, nil)
 
-var replicationLinksDelete* = Call_ReplicationLinksDelete_593975(
+var replicationLinksDelete* = Call_ReplicationLinksDelete_568208(
     name: "replicationLinksDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/replicationLinks/{linkId}",
-    validator: validate_ReplicationLinksDelete_593976, base: "",
-    url: url_ReplicationLinksDelete_593977, schemes: {Scheme.Https})
+    validator: validate_ReplicationLinksDelete_568209, base: "",
+    url: url_ReplicationLinksDelete_568210, schemes: {Scheme.Https})
 type
-  Call_ReplicationLinksFailover_593988 = ref object of OpenApiRestCall_593425
-proc url_ReplicationLinksFailover_593990(protocol: Scheme; host: string;
+  Call_ReplicationLinksFailover_568221 = ref object of OpenApiRestCall_567658
+proc url_ReplicationLinksFailover_568223(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -543,7 +543,7 @@ proc url_ReplicationLinksFailover_593990(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationLinksFailover_593989(path: JsonNode; query: JsonNode;
+proc validate_ReplicationLinksFailover_568222(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sets which replica database is primary by failing over from the current primary replica database.
   ## 
@@ -563,31 +563,31 @@ proc validate_ReplicationLinksFailover_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593991 = path.getOrDefault("resourceGroupName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_568224 = path.getOrDefault("resourceGroupName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "resourceGroupName", valid_593991
-  var valid_593992 = path.getOrDefault("serverName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_568224 != nil:
+    section.add "resourceGroupName", valid_568224
+  var valid_568225 = path.getOrDefault("serverName")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "serverName", valid_593992
-  var valid_593993 = path.getOrDefault("subscriptionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "serverName", valid_568225
+  var valid_568226 = path.getOrDefault("subscriptionId")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "subscriptionId", valid_593993
-  var valid_593994 = path.getOrDefault("databaseName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "subscriptionId", valid_568226
+  var valid_568227 = path.getOrDefault("databaseName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "databaseName", valid_593994
-  var valid_593995 = path.getOrDefault("linkId")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_568227 != nil:
+    section.add "databaseName", valid_568227
+  var valid_568228 = path.getOrDefault("linkId")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "linkId", valid_593995
+  if valid_568228 != nil:
+    section.add "linkId", valid_568228
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -595,11 +595,11 @@ proc validate_ReplicationLinksFailover_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593996 = query.getOrDefault("api-version")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_568229 = query.getOrDefault("api-version")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "api-version", valid_593996
+  if valid_568229 != nil:
+    section.add "api-version", valid_568229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -608,20 +608,20 @@ proc validate_ReplicationLinksFailover_593989(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_ReplicationLinksFailover_593988; path: JsonNode;
+proc call*(call_568230: Call_ReplicationLinksFailover_568221; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Sets which replica database is primary by failing over from the current primary replica database.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_ReplicationLinksFailover_593988;
+proc call*(call_568231: Call_ReplicationLinksFailover_568221;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string; linkId: string): Recallable =
   ## replicationLinksFailover
@@ -638,24 +638,24 @@ proc call*(call_593998: Call_ReplicationLinksFailover_593988;
   ##               : The name of the database that has the replication link to be failed over.
   ##   linkId: string (required)
   ##         : The ID of the replication link to be failed over.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  add(path_593999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "serverName", newJString(serverName))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
-  add(path_593999, "databaseName", newJString(databaseName))
-  add(path_593999, "linkId", newJString(linkId))
-  result = call_593998.call(path_593999, query_594000, nil, nil, nil)
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "serverName", newJString(serverName))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
+  add(path_568232, "databaseName", newJString(databaseName))
+  add(path_568232, "linkId", newJString(linkId))
+  result = call_568231.call(path_568232, query_568233, nil, nil, nil)
 
-var replicationLinksFailover* = Call_ReplicationLinksFailover_593988(
+var replicationLinksFailover* = Call_ReplicationLinksFailover_568221(
     name: "replicationLinksFailover", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/replicationLinks/{linkId}/failover",
-    validator: validate_ReplicationLinksFailover_593989, base: "",
-    url: url_ReplicationLinksFailover_593990, schemes: {Scheme.Https})
+    validator: validate_ReplicationLinksFailover_568222, base: "",
+    url: url_ReplicationLinksFailover_568223, schemes: {Scheme.Https})
 type
-  Call_ReplicationLinksFailoverAllowDataLoss_594001 = ref object of OpenApiRestCall_593425
-proc url_ReplicationLinksFailoverAllowDataLoss_594003(protocol: Scheme;
+  Call_ReplicationLinksFailoverAllowDataLoss_568234 = ref object of OpenApiRestCall_567658
+proc url_ReplicationLinksFailoverAllowDataLoss_568236(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -684,7 +684,7 @@ proc url_ReplicationLinksFailoverAllowDataLoss_594003(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationLinksFailoverAllowDataLoss_594002(path: JsonNode;
+proc validate_ReplicationLinksFailoverAllowDataLoss_568235(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sets which replica database is primary by failing over from the current primary replica database. This operation might result in data loss.
   ## 
@@ -704,31 +704,31 @@ proc validate_ReplicationLinksFailoverAllowDataLoss_594002(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594004 = path.getOrDefault("resourceGroupName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = path.getOrDefault("resourceGroupName")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "resourceGroupName", valid_594004
-  var valid_594005 = path.getOrDefault("serverName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  if valid_568237 != nil:
+    section.add "resourceGroupName", valid_568237
+  var valid_568238 = path.getOrDefault("serverName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "serverName", valid_594005
-  var valid_594006 = path.getOrDefault("subscriptionId")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_568238 != nil:
+    section.add "serverName", valid_568238
+  var valid_568239 = path.getOrDefault("subscriptionId")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "subscriptionId", valid_594006
-  var valid_594007 = path.getOrDefault("databaseName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "subscriptionId", valid_568239
+  var valid_568240 = path.getOrDefault("databaseName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "databaseName", valid_594007
-  var valid_594008 = path.getOrDefault("linkId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568240 != nil:
+    section.add "databaseName", valid_568240
+  var valid_568241 = path.getOrDefault("linkId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "linkId", valid_594008
+  if valid_568241 != nil:
+    section.add "linkId", valid_568241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -736,11 +736,11 @@ proc validate_ReplicationLinksFailoverAllowDataLoss_594002(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594009 = query.getOrDefault("api-version")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_568242 = query.getOrDefault("api-version")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "api-version", valid_594009
+  if valid_568242 != nil:
+    section.add "api-version", valid_568242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -749,21 +749,21 @@ proc validate_ReplicationLinksFailoverAllowDataLoss_594002(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594010: Call_ReplicationLinksFailoverAllowDataLoss_594001;
+proc call*(call_568243: Call_ReplicationLinksFailoverAllowDataLoss_568234;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Sets which replica database is primary by failing over from the current primary replica database. This operation might result in data loss.
   ## 
-  let valid = call_594010.validator(path, query, header, formData, body)
-  let scheme = call_594010.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594010.url(scheme.get, call_594010.host, call_594010.base,
-                         call_594010.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594010, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594011: Call_ReplicationLinksFailoverAllowDataLoss_594001;
+proc call*(call_568244: Call_ReplicationLinksFailoverAllowDataLoss_568234;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string; linkId: string): Recallable =
   ## replicationLinksFailoverAllowDataLoss
@@ -780,21 +780,21 @@ proc call*(call_594011: Call_ReplicationLinksFailoverAllowDataLoss_594001;
   ##               : The name of the database that has the replication link to be failed over.
   ##   linkId: string (required)
   ##         : The ID of the replication link to be failed over.
-  var path_594012 = newJObject()
-  var query_594013 = newJObject()
-  add(path_594012, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594013, "api-version", newJString(apiVersion))
-  add(path_594012, "serverName", newJString(serverName))
-  add(path_594012, "subscriptionId", newJString(subscriptionId))
-  add(path_594012, "databaseName", newJString(databaseName))
-  add(path_594012, "linkId", newJString(linkId))
-  result = call_594011.call(path_594012, query_594013, nil, nil, nil)
+  var path_568245 = newJObject()
+  var query_568246 = newJObject()
+  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568246, "api-version", newJString(apiVersion))
+  add(path_568245, "serverName", newJString(serverName))
+  add(path_568245, "subscriptionId", newJString(subscriptionId))
+  add(path_568245, "databaseName", newJString(databaseName))
+  add(path_568245, "linkId", newJString(linkId))
+  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
 
-var replicationLinksFailoverAllowDataLoss* = Call_ReplicationLinksFailoverAllowDataLoss_594001(
+var replicationLinksFailoverAllowDataLoss* = Call_ReplicationLinksFailoverAllowDataLoss_568234(
     name: "replicationLinksFailoverAllowDataLoss", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/replicationLinks/{linkId}/forceFailoverAllowDataLoss",
-    validator: validate_ReplicationLinksFailoverAllowDataLoss_594002, base: "",
-    url: url_ReplicationLinksFailoverAllowDataLoss_594003, schemes: {Scheme.Https})
+    validator: validate_ReplicationLinksFailoverAllowDataLoss_568235, base: "",
+    url: url_ReplicationLinksFailoverAllowDataLoss_568236, schemes: {Scheme.Https})
 export
   rest
 

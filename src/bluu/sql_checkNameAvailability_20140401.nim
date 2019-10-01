@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_567642 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-checkNameAvailability"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServersCheckNameAvailability_593631 = ref object of OpenApiRestCall_593409
-proc url_ServersCheckNameAvailability_593633(protocol: Scheme; host: string;
+  Call_ServersCheckNameAvailability_567864 = ref object of OpenApiRestCall_567642
+proc url_ServersCheckNameAvailability_567866(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_ServersCheckNameAvailability_593633(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersCheckNameAvailability_593632(path: JsonNode; query: JsonNode;
+proc validate_ServersCheckNameAvailability_567865(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Determines whether a resource can be created with the specified name.
   ## 
@@ -133,11 +133,11 @@ proc validate_ServersCheckNameAvailability_593632(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_568056 = path.getOrDefault("subscriptionId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
+  if valid_568056 != nil:
+    section.add "subscriptionId", valid_568056
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_ServersCheckNameAvailability_593632(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593824 = query.getOrDefault("api-version")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  var valid_568057 = query.getOrDefault("api-version")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "api-version", valid_593824
+  if valid_568057 != nil:
+    section.add "api-version", valid_568057
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -163,20 +163,20 @@ proc validate_ServersCheckNameAvailability_593632(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593848: Call_ServersCheckNameAvailability_593631; path: JsonNode;
+proc call*(call_568081: Call_ServersCheckNameAvailability_567864; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Determines whether a resource can be created with the specified name.
   ## 
-  let valid = call_593848.validator(path, query, header, formData, body)
-  let scheme = call_593848.pickScheme
+  let valid = call_568081.validator(path, query, header, formData, body)
+  let scheme = call_568081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593848.url(scheme.get, call_593848.host, call_593848.base,
-                         call_593848.route, valid.getOrDefault("path"),
+  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
+                         call_568081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593848, url, valid)
+  result = hook(call_568081, url, valid)
 
-proc call*(call_593919: Call_ServersCheckNameAvailability_593631;
+proc call*(call_568152: Call_ServersCheckNameAvailability_567864;
           apiVersion: string; subscriptionId: string; parameters: JsonNode): Recallable =
   ## serversCheckNameAvailability
   ## Determines whether a resource can be created with the specified name.
@@ -186,20 +186,20 @@ proc call*(call_593919: Call_ServersCheckNameAvailability_593631;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   parameters: JObject (required)
   ##             : The parameters to request for name availability.
-  var path_593920 = newJObject()
-  var query_593922 = newJObject()
-  var body_593923 = newJObject()
-  add(query_593922, "api-version", newJString(apiVersion))
-  add(path_593920, "subscriptionId", newJString(subscriptionId))
+  var path_568153 = newJObject()
+  var query_568155 = newJObject()
+  var body_568156 = newJObject()
+  add(query_568155, "api-version", newJString(apiVersion))
+  add(path_568153, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593923 = parameters
-  result = call_593919.call(path_593920, query_593922, nil, nil, body_593923)
+    body_568156 = parameters
+  result = call_568152.call(path_568153, query_568155, nil, nil, body_568156)
 
-var serversCheckNameAvailability* = Call_ServersCheckNameAvailability_593631(
+var serversCheckNameAvailability* = Call_ServersCheckNameAvailability_567864(
     name: "serversCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/checkNameAvailability",
-    validator: validate_ServersCheckNameAvailability_593632, base: "",
-    url: url_ServersCheckNameAvailability_593633, schemes: {Scheme.Https})
+    validator: validate_ServersCheckNameAvailability_567865, base: "",
+    url: url_ServersCheckNameAvailability_567866, schemes: {Scheme.Https})
 export
   rest
 

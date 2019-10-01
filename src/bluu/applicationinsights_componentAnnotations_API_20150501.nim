@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_596458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "applicationinsights-componentAnnotations_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AnnotationsCreate_593963 = ref object of OpenApiRestCall_593425
-proc url_AnnotationsCreate_593965(protocol: Scheme; host: string; base: string;
+  Call_AnnotationsCreate_596996 = ref object of OpenApiRestCall_596458
+proc url_AnnotationsCreate_596998(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_AnnotationsCreate_593965(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AnnotationsCreate_593964(path: JsonNode; query: JsonNode;
+proc validate_AnnotationsCreate_596997(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Create an Annotation of an Application Insights component.
@@ -144,21 +144,21 @@ proc validate_AnnotationsCreate_593964(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593966 = path.getOrDefault("resourceGroupName")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_596999 = path.getOrDefault("resourceGroupName")
+  valid_596999 = validateParameter(valid_596999, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "resourceGroupName", valid_593966
-  var valid_593967 = path.getOrDefault("subscriptionId")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_596999 != nil:
+    section.add "resourceGroupName", valid_596999
+  var valid_597000 = path.getOrDefault("subscriptionId")
+  valid_597000 = validateParameter(valid_597000, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "subscriptionId", valid_593967
-  var valid_593968 = path.getOrDefault("resourceName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  if valid_597000 != nil:
+    section.add "subscriptionId", valid_597000
+  var valid_597001 = path.getOrDefault("resourceName")
+  valid_597001 = validateParameter(valid_597001, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "resourceName", valid_593968
+  if valid_597001 != nil:
+    section.add "resourceName", valid_597001
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -166,11 +166,11 @@ proc validate_AnnotationsCreate_593964(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593969 = query.getOrDefault("api-version")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_597002 = query.getOrDefault("api-version")
+  valid_597002 = validateParameter(valid_597002, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "api-version", valid_593969
+  if valid_597002 != nil:
+    section.add "api-version", valid_597002
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -184,20 +184,20 @@ proc validate_AnnotationsCreate_593964(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593971: Call_AnnotationsCreate_593963; path: JsonNode;
+proc call*(call_597004: Call_AnnotationsCreate_596996; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create an Annotation of an Application Insights component.
   ## 
-  let valid = call_593971.validator(path, query, header, formData, body)
-  let scheme = call_593971.pickScheme
+  let valid = call_597004.validator(path, query, header, formData, body)
+  let scheme = call_597004.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593971.url(scheme.get, call_593971.host, call_593971.base,
-                         call_593971.route, valid.getOrDefault("path"),
+  let url = call_597004.url(scheme.get, call_597004.host, call_597004.base,
+                         call_597004.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593971, url, valid)
+  result = hook(call_597004, url, valid)
 
-proc call*(call_593972: Call_AnnotationsCreate_593963; resourceGroupName: string;
+proc call*(call_597005: Call_AnnotationsCreate_596996; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string;
           AnnotationProperties: JsonNode): Recallable =
   ## annotationsCreate
@@ -212,24 +212,24 @@ proc call*(call_593972: Call_AnnotationsCreate_593963; resourceGroupName: string
   ##               : The name of the Application Insights component resource.
   ##   AnnotationProperties: JObject (required)
   ##                       : Properties that need to be specified to create an annotation of a Application Insights component.
-  var path_593973 = newJObject()
-  var query_593974 = newJObject()
-  var body_593975 = newJObject()
-  add(path_593973, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593974, "api-version", newJString(apiVersion))
-  add(path_593973, "subscriptionId", newJString(subscriptionId))
-  add(path_593973, "resourceName", newJString(resourceName))
+  var path_597006 = newJObject()
+  var query_597007 = newJObject()
+  var body_597008 = newJObject()
+  add(path_597006, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597007, "api-version", newJString(apiVersion))
+  add(path_597006, "subscriptionId", newJString(subscriptionId))
+  add(path_597006, "resourceName", newJString(resourceName))
   if AnnotationProperties != nil:
-    body_593975 = AnnotationProperties
-  result = call_593972.call(path_593973, query_593974, nil, nil, body_593975)
+    body_597008 = AnnotationProperties
+  result = call_597005.call(path_597006, query_597007, nil, nil, body_597008)
 
-var annotationsCreate* = Call_AnnotationsCreate_593963(name: "annotationsCreate",
+var annotationsCreate* = Call_AnnotationsCreate_596996(name: "annotationsCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/Annotations",
-    validator: validate_AnnotationsCreate_593964, base: "",
-    url: url_AnnotationsCreate_593965, schemes: {Scheme.Https})
+    validator: validate_AnnotationsCreate_596997, base: "",
+    url: url_AnnotationsCreate_596998, schemes: {Scheme.Https})
 type
-  Call_AnnotationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_AnnotationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_AnnotationsList_596680 = ref object of OpenApiRestCall_596458
+proc url_AnnotationsList_596682(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -252,7 +252,7 @@ proc url_AnnotationsList_593649(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AnnotationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_AnnotationsList_596681(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the list of annotations for a component for given time range
@@ -269,21 +269,21 @@ proc validate_AnnotationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_596855 = path.getOrDefault("resourceGroupName")
+  valid_596855 = validateParameter(valid_596855, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_596855 != nil:
+    section.add "resourceGroupName", valid_596855
+  var valid_596856 = path.getOrDefault("subscriptionId")
+  valid_596856 = validateParameter(valid_596856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
-  var valid_593824 = path.getOrDefault("resourceName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_596856 != nil:
+    section.add "subscriptionId", valid_596856
+  var valid_596857 = path.getOrDefault("resourceName")
+  valid_596857 = validateParameter(valid_596857, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "resourceName", valid_593824
+  if valid_596857 != nil:
+    section.add "resourceName", valid_596857
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -295,21 +295,21 @@ proc validate_AnnotationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_596858 = query.getOrDefault("api-version")
+  valid_596858 = validateParameter(valid_596858, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
-  var valid_593826 = query.getOrDefault("end")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  if valid_596858 != nil:
+    section.add "api-version", valid_596858
+  var valid_596859 = query.getOrDefault("end")
+  valid_596859 = validateParameter(valid_596859, JString, required = true,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "end", valid_593826
-  var valid_593827 = query.getOrDefault("start")
-  valid_593827 = validateParameter(valid_593827, JString, required = true,
+  if valid_596859 != nil:
+    section.add "end", valid_596859
+  var valid_596860 = query.getOrDefault("start")
+  valid_596860 = validateParameter(valid_596860, JString, required = true,
                                  default = nil)
-  if valid_593827 != nil:
-    section.add "start", valid_593827
+  if valid_596860 != nil:
+    section.add "start", valid_596860
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -318,20 +318,20 @@ proc validate_AnnotationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593850: Call_AnnotationsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_596883: Call_AnnotationsList_596680; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list of annotations for a component for given time range
   ## 
-  let valid = call_593850.validator(path, query, header, formData, body)
-  let scheme = call_593850.pickScheme
+  let valid = call_596883.validator(path, query, header, formData, body)
+  let scheme = call_596883.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593850.url(scheme.get, call_593850.host, call_593850.base,
-                         call_593850.route, valid.getOrDefault("path"),
+  let url = call_596883.url(scheme.get, call_596883.host, call_596883.base,
+                         call_596883.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593850, url, valid)
+  result = hook(call_596883, url, valid)
 
-proc call*(call_593921: Call_AnnotationsList_593647; resourceGroupName: string;
+proc call*(call_596954: Call_AnnotationsList_596680; resourceGroupName: string;
           apiVersion: string; `end`: string; subscriptionId: string;
           resourceName: string; start: string): Recallable =
   ## annotationsList
@@ -348,23 +348,23 @@ proc call*(call_593921: Call_AnnotationsList_593647; resourceGroupName: string;
   ##               : The name of the Application Insights component resource.
   ##   start: string (required)
   ##        : The start time to query from for annotations, cannot be older than 90 days from current date.
-  var path_593922 = newJObject()
-  var query_593924 = newJObject()
-  add(path_593922, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593924, "api-version", newJString(apiVersion))
-  add(query_593924, "end", newJString(`end`))
-  add(path_593922, "subscriptionId", newJString(subscriptionId))
-  add(path_593922, "resourceName", newJString(resourceName))
-  add(query_593924, "start", newJString(start))
-  result = call_593921.call(path_593922, query_593924, nil, nil, nil)
+  var path_596955 = newJObject()
+  var query_596957 = newJObject()
+  add(path_596955, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596957, "api-version", newJString(apiVersion))
+  add(query_596957, "end", newJString(`end`))
+  add(path_596955, "subscriptionId", newJString(subscriptionId))
+  add(path_596955, "resourceName", newJString(resourceName))
+  add(query_596957, "start", newJString(start))
+  result = call_596954.call(path_596955, query_596957, nil, nil, nil)
 
-var annotationsList* = Call_AnnotationsList_593647(name: "annotationsList",
+var annotationsList* = Call_AnnotationsList_596680(name: "annotationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/Annotations",
-    validator: validate_AnnotationsList_593648, base: "", url: url_AnnotationsList_593649,
+    validator: validate_AnnotationsList_596681, base: "", url: url_AnnotationsList_596682,
     schemes: {Scheme.Https})
 type
-  Call_AnnotationsGet_593976 = ref object of OpenApiRestCall_593425
-proc url_AnnotationsGet_593978(protocol: Scheme; host: string; base: string;
+  Call_AnnotationsGet_597009 = ref object of OpenApiRestCall_596458
+proc url_AnnotationsGet_597011(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -389,7 +389,7 @@ proc url_AnnotationsGet_593978(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AnnotationsGet_593977(path: JsonNode; query: JsonNode;
+proc validate_AnnotationsGet_597010(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Get the annotation for given id.
@@ -408,26 +408,26 @@ proc validate_AnnotationsGet_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593979 = path.getOrDefault("resourceGroupName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_597012 = path.getOrDefault("resourceGroupName")
+  valid_597012 = validateParameter(valid_597012, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "resourceGroupName", valid_593979
-  var valid_593980 = path.getOrDefault("subscriptionId")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_597012 != nil:
+    section.add "resourceGroupName", valid_597012
+  var valid_597013 = path.getOrDefault("subscriptionId")
+  valid_597013 = validateParameter(valid_597013, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "subscriptionId", valid_593980
-  var valid_593981 = path.getOrDefault("annotationId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_597013 != nil:
+    section.add "subscriptionId", valid_597013
+  var valid_597014 = path.getOrDefault("annotationId")
+  valid_597014 = validateParameter(valid_597014, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "annotationId", valid_593981
-  var valid_593982 = path.getOrDefault("resourceName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_597014 != nil:
+    section.add "annotationId", valid_597014
+  var valid_597015 = path.getOrDefault("resourceName")
+  valid_597015 = validateParameter(valid_597015, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "resourceName", valid_593982
+  if valid_597015 != nil:
+    section.add "resourceName", valid_597015
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -435,11 +435,11 @@ proc validate_AnnotationsGet_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_597016 = query.getOrDefault("api-version")
+  valid_597016 = validateParameter(valid_597016, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_597016 != nil:
+    section.add "api-version", valid_597016
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -448,20 +448,20 @@ proc validate_AnnotationsGet_593977(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_AnnotationsGet_593976; path: JsonNode; query: JsonNode;
+proc call*(call_597017: Call_AnnotationsGet_597009; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the annotation for given id.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_597017.validator(path, query, header, formData, body)
+  let scheme = call_597017.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_597017.url(scheme.get, call_597017.host, call_597017.base,
+                         call_597017.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_597017, url, valid)
 
-proc call*(call_593985: Call_AnnotationsGet_593976; resourceGroupName: string;
+proc call*(call_597018: Call_AnnotationsGet_597009; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; annotationId: string;
           resourceName: string): Recallable =
   ## annotationsGet
@@ -476,22 +476,22 @@ proc call*(call_593985: Call_AnnotationsGet_593976; resourceGroupName: string;
   ##               : The unique annotation ID. This is unique within a Application Insights component.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  add(path_593986, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
-  add(path_593986, "annotationId", newJString(annotationId))
-  add(path_593986, "resourceName", newJString(resourceName))
-  result = call_593985.call(path_593986, query_593987, nil, nil, nil)
+  var path_597019 = newJObject()
+  var query_597020 = newJObject()
+  add(path_597019, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597020, "api-version", newJString(apiVersion))
+  add(path_597019, "subscriptionId", newJString(subscriptionId))
+  add(path_597019, "annotationId", newJString(annotationId))
+  add(path_597019, "resourceName", newJString(resourceName))
+  result = call_597018.call(path_597019, query_597020, nil, nil, nil)
 
-var annotationsGet* = Call_AnnotationsGet_593976(name: "annotationsGet",
+var annotationsGet* = Call_AnnotationsGet_597009(name: "annotationsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/Annotations/{annotationId}",
-    validator: validate_AnnotationsGet_593977, base: "", url: url_AnnotationsGet_593978,
+    validator: validate_AnnotationsGet_597010, base: "", url: url_AnnotationsGet_597011,
     schemes: {Scheme.Https})
 type
-  Call_AnnotationsDelete_593988 = ref object of OpenApiRestCall_593425
-proc url_AnnotationsDelete_593990(protocol: Scheme; host: string; base: string;
+  Call_AnnotationsDelete_597021 = ref object of OpenApiRestCall_596458
+proc url_AnnotationsDelete_597023(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -516,7 +516,7 @@ proc url_AnnotationsDelete_593990(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AnnotationsDelete_593989(path: JsonNode; query: JsonNode;
+proc validate_AnnotationsDelete_597022(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Delete an Annotation of an Application Insights component.
@@ -535,26 +535,26 @@ proc validate_AnnotationsDelete_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593991 = path.getOrDefault("resourceGroupName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_597024 = path.getOrDefault("resourceGroupName")
+  valid_597024 = validateParameter(valid_597024, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "resourceGroupName", valid_593991
-  var valid_593992 = path.getOrDefault("subscriptionId")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_597024 != nil:
+    section.add "resourceGroupName", valid_597024
+  var valid_597025 = path.getOrDefault("subscriptionId")
+  valid_597025 = validateParameter(valid_597025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "subscriptionId", valid_593992
-  var valid_593993 = path.getOrDefault("annotationId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_597025 != nil:
+    section.add "subscriptionId", valid_597025
+  var valid_597026 = path.getOrDefault("annotationId")
+  valid_597026 = validateParameter(valid_597026, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "annotationId", valid_593993
-  var valid_593994 = path.getOrDefault("resourceName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_597026 != nil:
+    section.add "annotationId", valid_597026
+  var valid_597027 = path.getOrDefault("resourceName")
+  valid_597027 = validateParameter(valid_597027, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "resourceName", valid_593994
+  if valid_597027 != nil:
+    section.add "resourceName", valid_597027
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -562,11 +562,11 @@ proc validate_AnnotationsDelete_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593995 = query.getOrDefault("api-version")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_597028 = query.getOrDefault("api-version")
+  valid_597028 = validateParameter(valid_597028, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "api-version", valid_593995
+  if valid_597028 != nil:
+    section.add "api-version", valid_597028
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -575,20 +575,20 @@ proc validate_AnnotationsDelete_593989(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593996: Call_AnnotationsDelete_593988; path: JsonNode;
+proc call*(call_597029: Call_AnnotationsDelete_597021; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an Annotation of an Application Insights component.
   ## 
-  let valid = call_593996.validator(path, query, header, formData, body)
-  let scheme = call_593996.pickScheme
+  let valid = call_597029.validator(path, query, header, formData, body)
+  let scheme = call_597029.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593996.url(scheme.get, call_593996.host, call_593996.base,
-                         call_593996.route, valid.getOrDefault("path"),
+  let url = call_597029.url(scheme.get, call_597029.host, call_597029.base,
+                         call_597029.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593996, url, valid)
+  result = hook(call_597029, url, valid)
 
-proc call*(call_593997: Call_AnnotationsDelete_593988; resourceGroupName: string;
+proc call*(call_597030: Call_AnnotationsDelete_597021; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; annotationId: string;
           resourceName: string): Recallable =
   ## annotationsDelete
@@ -603,19 +603,19 @@ proc call*(call_593997: Call_AnnotationsDelete_593988; resourceGroupName: string
   ##               : The unique annotation ID. This is unique within a Application Insights component.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593998 = newJObject()
-  var query_593999 = newJObject()
-  add(path_593998, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593999, "api-version", newJString(apiVersion))
-  add(path_593998, "subscriptionId", newJString(subscriptionId))
-  add(path_593998, "annotationId", newJString(annotationId))
-  add(path_593998, "resourceName", newJString(resourceName))
-  result = call_593997.call(path_593998, query_593999, nil, nil, nil)
+  var path_597031 = newJObject()
+  var query_597032 = newJObject()
+  add(path_597031, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597032, "api-version", newJString(apiVersion))
+  add(path_597031, "subscriptionId", newJString(subscriptionId))
+  add(path_597031, "annotationId", newJString(annotationId))
+  add(path_597031, "resourceName", newJString(resourceName))
+  result = call_597030.call(path_597031, query_597032, nil, nil, nil)
 
-var annotationsDelete* = Call_AnnotationsDelete_593988(name: "annotationsDelete",
+var annotationsDelete* = Call_AnnotationsDelete_597021(name: "annotationsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/Annotations/{annotationId}",
-    validator: validate_AnnotationsDelete_593989, base: "",
-    url: url_AnnotationsDelete_593990, schemes: {Scheme.Https})
+    validator: validate_AnnotationsDelete_597022, base: "",
+    url: url_AnnotationsDelete_597023, schemes: {Scheme.Https})
 export
   rest
 

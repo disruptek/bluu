@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-DatabaseSecurityAlertPolicies"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DatabaseSecurityAlertPoliciesListByDatabase_593646 = ref object of OpenApiRestCall_593424
-proc url_DatabaseSecurityAlertPoliciesListByDatabase_593648(protocol: Scheme;
+  Call_DatabaseSecurityAlertPoliciesListByDatabase_567879 = ref object of OpenApiRestCall_567657
+proc url_DatabaseSecurityAlertPoliciesListByDatabase_567881(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,7 +130,7 @@ proc url_DatabaseSecurityAlertPoliciesListByDatabase_593648(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseSecurityAlertPoliciesListByDatabase_593647(path: JsonNode;
+proc validate_DatabaseSecurityAlertPoliciesListByDatabase_567880(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of database's security alert policies.
   ## 
@@ -148,26 +148,26 @@ proc validate_DatabaseSecurityAlertPoliciesListByDatabase_593647(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593821 = path.getOrDefault("resourceGroupName")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("resourceGroupName")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "resourceGroupName", valid_593821
-  var valid_593822 = path.getOrDefault("serverName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_568054 != nil:
+    section.add "resourceGroupName", valid_568054
+  var valid_568055 = path.getOrDefault("serverName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "serverName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "serverName", valid_568055
+  var valid_568056 = path.getOrDefault("subscriptionId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
-  var valid_593824 = path.getOrDefault("databaseName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_568056 != nil:
+    section.add "subscriptionId", valid_568056
+  var valid_568057 = path.getOrDefault("databaseName")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "databaseName", valid_593824
+  if valid_568057 != nil:
+    section.add "databaseName", valid_568057
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -175,11 +175,11 @@ proc validate_DatabaseSecurityAlertPoliciesListByDatabase_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_568058 = query.getOrDefault("api-version")
+  valid_568058 = validateParameter(valid_568058, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
+  if valid_568058 != nil:
+    section.add "api-version", valid_568058
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -188,21 +188,21 @@ proc validate_DatabaseSecurityAlertPoliciesListByDatabase_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593848: Call_DatabaseSecurityAlertPoliciesListByDatabase_593646;
+proc call*(call_568081: Call_DatabaseSecurityAlertPoliciesListByDatabase_567879;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of database's security alert policies.
   ## 
-  let valid = call_593848.validator(path, query, header, formData, body)
-  let scheme = call_593848.pickScheme
+  let valid = call_568081.validator(path, query, header, formData, body)
+  let scheme = call_568081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593848.url(scheme.get, call_593848.host, call_593848.base,
-                         call_593848.route, valid.getOrDefault("path"),
+  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
+                         call_568081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593848, url, valid)
+  result = hook(call_568081, url, valid)
 
-proc call*(call_593919: Call_DatabaseSecurityAlertPoliciesListByDatabase_593646;
+proc call*(call_568152: Call_DatabaseSecurityAlertPoliciesListByDatabase_567879;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string): Recallable =
   ## databaseSecurityAlertPoliciesListByDatabase
@@ -217,24 +217,24 @@ proc call*(call_593919: Call_DatabaseSecurityAlertPoliciesListByDatabase_593646;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the  database for which the security alert policy is defined.
-  var path_593920 = newJObject()
-  var query_593922 = newJObject()
-  add(path_593920, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593922, "api-version", newJString(apiVersion))
-  add(path_593920, "serverName", newJString(serverName))
-  add(path_593920, "subscriptionId", newJString(subscriptionId))
-  add(path_593920, "databaseName", newJString(databaseName))
-  result = call_593919.call(path_593920, query_593922, nil, nil, nil)
+  var path_568153 = newJObject()
+  var query_568155 = newJObject()
+  add(path_568153, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568155, "api-version", newJString(apiVersion))
+  add(path_568153, "serverName", newJString(serverName))
+  add(path_568153, "subscriptionId", newJString(subscriptionId))
+  add(path_568153, "databaseName", newJString(databaseName))
+  result = call_568152.call(path_568153, query_568155, nil, nil, nil)
 
-var databaseSecurityAlertPoliciesListByDatabase* = Call_DatabaseSecurityAlertPoliciesListByDatabase_593646(
+var databaseSecurityAlertPoliciesListByDatabase* = Call_DatabaseSecurityAlertPoliciesListByDatabase_567879(
     name: "databaseSecurityAlertPoliciesListByDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/securityAlertPolicies",
-    validator: validate_DatabaseSecurityAlertPoliciesListByDatabase_593647,
-    base: "", url: url_DatabaseSecurityAlertPoliciesListByDatabase_593648,
+    validator: validate_DatabaseSecurityAlertPoliciesListByDatabase_567880,
+    base: "", url: url_DatabaseSecurityAlertPoliciesListByDatabase_567881,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseSecurityAlertPoliciesCreateOrUpdate_593987 = ref object of OpenApiRestCall_593424
-proc url_DatabaseSecurityAlertPoliciesCreateOrUpdate_593989(protocol: Scheme;
+  Call_DatabaseSecurityAlertPoliciesCreateOrUpdate_568220 = ref object of OpenApiRestCall_567657
+proc url_DatabaseSecurityAlertPoliciesCreateOrUpdate_568222(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -263,7 +263,7 @@ proc url_DatabaseSecurityAlertPoliciesCreateOrUpdate_593989(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseSecurityAlertPoliciesCreateOrUpdate_593988(path: JsonNode;
+proc validate_DatabaseSecurityAlertPoliciesCreateOrUpdate_568221(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a database's security alert policy.
   ## 
@@ -283,31 +283,31 @@ proc validate_DatabaseSecurityAlertPoliciesCreateOrUpdate_593988(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593990 = path.getOrDefault("resourceGroupName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568223 = path.getOrDefault("resourceGroupName")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "resourceGroupName", valid_593990
-  var valid_593991 = path.getOrDefault("serverName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_568223 != nil:
+    section.add "resourceGroupName", valid_568223
+  var valid_568224 = path.getOrDefault("serverName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "serverName", valid_593991
-  var valid_593992 = path.getOrDefault("subscriptionId")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_568224 != nil:
+    section.add "serverName", valid_568224
+  var valid_568225 = path.getOrDefault("subscriptionId")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "subscriptionId", valid_593992
-  var valid_593993 = path.getOrDefault("securityAlertPolicyName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "subscriptionId", valid_568225
+  var valid_568226 = path.getOrDefault("securityAlertPolicyName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = newJString("default"))
-  if valid_593993 != nil:
-    section.add "securityAlertPolicyName", valid_593993
-  var valid_593994 = path.getOrDefault("databaseName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "securityAlertPolicyName", valid_568226
+  var valid_568227 = path.getOrDefault("databaseName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "databaseName", valid_593994
+  if valid_568227 != nil:
+    section.add "databaseName", valid_568227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -315,11 +315,11 @@ proc validate_DatabaseSecurityAlertPoliciesCreateOrUpdate_593988(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593995 = query.getOrDefault("api-version")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_568228 = query.getOrDefault("api-version")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "api-version", valid_593995
+  if valid_568228 != nil:
+    section.add "api-version", valid_568228
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -333,21 +333,21 @@ proc validate_DatabaseSecurityAlertPoliciesCreateOrUpdate_593988(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_DatabaseSecurityAlertPoliciesCreateOrUpdate_593987;
+proc call*(call_568230: Call_DatabaseSecurityAlertPoliciesCreateOrUpdate_568220;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a database's security alert policy.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_DatabaseSecurityAlertPoliciesCreateOrUpdate_593987;
+proc call*(call_568231: Call_DatabaseSecurityAlertPoliciesCreateOrUpdate_568220;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string; parameters: JsonNode;
           securityAlertPolicyName: string = "default"): Recallable =
@@ -367,28 +367,28 @@ proc call*(call_593998: Call_DatabaseSecurityAlertPoliciesCreateOrUpdate_593987;
   ##               : The name of the  database for which the security alert policy is defined.
   ##   parameters: JObject (required)
   ##             : The database security alert policy.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  var body_594001 = newJObject()
-  add(path_593999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "serverName", newJString(serverName))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
-  add(path_593999, "securityAlertPolicyName", newJString(securityAlertPolicyName))
-  add(path_593999, "databaseName", newJString(databaseName))
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  var body_568234 = newJObject()
+  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "serverName", newJString(serverName))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
+  add(path_568232, "securityAlertPolicyName", newJString(securityAlertPolicyName))
+  add(path_568232, "databaseName", newJString(databaseName))
   if parameters != nil:
-    body_594001 = parameters
-  result = call_593998.call(path_593999, query_594000, nil, nil, body_594001)
+    body_568234 = parameters
+  result = call_568231.call(path_568232, query_568233, nil, nil, body_568234)
 
-var databaseSecurityAlertPoliciesCreateOrUpdate* = Call_DatabaseSecurityAlertPoliciesCreateOrUpdate_593987(
+var databaseSecurityAlertPoliciesCreateOrUpdate* = Call_DatabaseSecurityAlertPoliciesCreateOrUpdate_568220(
     name: "databaseSecurityAlertPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/securityAlertPolicies/{securityAlertPolicyName}",
-    validator: validate_DatabaseSecurityAlertPoliciesCreateOrUpdate_593988,
-    base: "", url: url_DatabaseSecurityAlertPoliciesCreateOrUpdate_593989,
+    validator: validate_DatabaseSecurityAlertPoliciesCreateOrUpdate_568221,
+    base: "", url: url_DatabaseSecurityAlertPoliciesCreateOrUpdate_568222,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseSecurityAlertPoliciesGet_593961 = ref object of OpenApiRestCall_593424
-proc url_DatabaseSecurityAlertPoliciesGet_593963(protocol: Scheme; host: string;
+  Call_DatabaseSecurityAlertPoliciesGet_568194 = ref object of OpenApiRestCall_567657
+proc url_DatabaseSecurityAlertPoliciesGet_568196(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -417,7 +417,7 @@ proc url_DatabaseSecurityAlertPoliciesGet_593963(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseSecurityAlertPoliciesGet_593962(path: JsonNode;
+proc validate_DatabaseSecurityAlertPoliciesGet_568195(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a  database's security alert policy.
   ## 
@@ -437,31 +437,31 @@ proc validate_DatabaseSecurityAlertPoliciesGet_593962(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593964 = path.getOrDefault("resourceGroupName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_568197 = path.getOrDefault("resourceGroupName")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "resourceGroupName", valid_593964
-  var valid_593965 = path.getOrDefault("serverName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "resourceGroupName", valid_568197
+  var valid_568198 = path.getOrDefault("serverName")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "serverName", valid_593965
-  var valid_593966 = path.getOrDefault("subscriptionId")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_568198 != nil:
+    section.add "serverName", valid_568198
+  var valid_568199 = path.getOrDefault("subscriptionId")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "subscriptionId", valid_593966
-  var valid_593980 = path.getOrDefault("securityAlertPolicyName")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_568199 != nil:
+    section.add "subscriptionId", valid_568199
+  var valid_568213 = path.getOrDefault("securityAlertPolicyName")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = newJString("default"))
-  if valid_593980 != nil:
-    section.add "securityAlertPolicyName", valid_593980
-  var valid_593981 = path.getOrDefault("databaseName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_568213 != nil:
+    section.add "securityAlertPolicyName", valid_568213
+  var valid_568214 = path.getOrDefault("databaseName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "databaseName", valid_593981
+  if valid_568214 != nil:
+    section.add "databaseName", valid_568214
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -469,11 +469,11 @@ proc validate_DatabaseSecurityAlertPoliciesGet_593962(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593982 = query.getOrDefault("api-version")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568215 = query.getOrDefault("api-version")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "api-version", valid_593982
+  if valid_568215 != nil:
+    section.add "api-version", valid_568215
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -482,21 +482,21 @@ proc validate_DatabaseSecurityAlertPoliciesGet_593962(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593983: Call_DatabaseSecurityAlertPoliciesGet_593961;
+proc call*(call_568216: Call_DatabaseSecurityAlertPoliciesGet_568194;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a  database's security alert policy.
   ## 
-  let valid = call_593983.validator(path, query, header, formData, body)
-  let scheme = call_593983.pickScheme
+  let valid = call_568216.validator(path, query, header, formData, body)
+  let scheme = call_568216.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593983.url(scheme.get, call_593983.host, call_593983.base,
-                         call_593983.route, valid.getOrDefault("path"),
+  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
+                         call_568216.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593983, url, valid)
+  result = hook(call_568216, url, valid)
 
-proc call*(call_593984: Call_DatabaseSecurityAlertPoliciesGet_593961;
+proc call*(call_568217: Call_DatabaseSecurityAlertPoliciesGet_568194;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string;
           securityAlertPolicyName: string = "default"): Recallable =
@@ -514,21 +514,21 @@ proc call*(call_593984: Call_DatabaseSecurityAlertPoliciesGet_593961;
   ##                          : The name of the security alert policy.
   ##   databaseName: string (required)
   ##               : The name of the  database for which the security alert policy is defined.
-  var path_593985 = newJObject()
-  var query_593986 = newJObject()
-  add(path_593985, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593986, "api-version", newJString(apiVersion))
-  add(path_593985, "serverName", newJString(serverName))
-  add(path_593985, "subscriptionId", newJString(subscriptionId))
-  add(path_593985, "securityAlertPolicyName", newJString(securityAlertPolicyName))
-  add(path_593985, "databaseName", newJString(databaseName))
-  result = call_593984.call(path_593985, query_593986, nil, nil, nil)
+  var path_568218 = newJObject()
+  var query_568219 = newJObject()
+  add(path_568218, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568219, "api-version", newJString(apiVersion))
+  add(path_568218, "serverName", newJString(serverName))
+  add(path_568218, "subscriptionId", newJString(subscriptionId))
+  add(path_568218, "securityAlertPolicyName", newJString(securityAlertPolicyName))
+  add(path_568218, "databaseName", newJString(databaseName))
+  result = call_568217.call(path_568218, query_568219, nil, nil, nil)
 
-var databaseSecurityAlertPoliciesGet* = Call_DatabaseSecurityAlertPoliciesGet_593961(
+var databaseSecurityAlertPoliciesGet* = Call_DatabaseSecurityAlertPoliciesGet_568194(
     name: "databaseSecurityAlertPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/securityAlertPolicies/{securityAlertPolicyName}",
-    validator: validate_DatabaseSecurityAlertPoliciesGet_593962, base: "",
-    url: url_DatabaseSecurityAlertPoliciesGet_593963, schemes: {Scheme.Https})
+    validator: validate_DatabaseSecurityAlertPoliciesGet_568195, base: "",
+    url: url_DatabaseSecurityAlertPoliciesGet_568196, schemes: {Scheme.Https})
 export
   rest
 

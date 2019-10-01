@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Ink Recognizer Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "cognitiveservices-InkRecognizer"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_InkRecognizerRecognize_593647 = ref object of OpenApiRestCall_593425
-proc url_InkRecognizerRecognize_593649(protocol: Scheme; host: string; base: string;
+  Call_InkRecognizerRecognize_567880 = ref object of OpenApiRestCall_567658
+proc url_InkRecognizerRecognize_567882(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_InkRecognizerRecognize_593648(path: JsonNode; query: JsonNode;
+proc validate_InkRecognizerRecognize_567881(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Ink Recognition operation is used to perform ink layout and recognition of written words and shapes. It allows passing the ink strokes to the service to get the recognition results in the response.
   ## 
@@ -125,11 +125,11 @@ proc validate_InkRecognizerRecognize_593648(path: JsonNode; query: JsonNode;
   ##   x-ms-client-request-id: JString
   ##                         : The request id used to uniquely identify each request during troubleshooting. This is an optional parameter useful for correlating logs and other artifacts.
   section = newJObject()
-  var valid_593808 = header.getOrDefault("x-ms-client-request-id")
-  valid_593808 = validateParameter(valid_593808, JString, required = false,
+  var valid_568041 = header.getOrDefault("x-ms-client-request-id")
+  valid_568041 = validateParameter(valid_568041, JString, required = false,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "x-ms-client-request-id", valid_593808
+  if valid_568041 != nil:
+    section.add "x-ms-client-request-id", valid_568041
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -141,33 +141,33 @@ proc validate_InkRecognizerRecognize_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593832: Call_InkRecognizerRecognize_593647; path: JsonNode;
+proc call*(call_568065: Call_InkRecognizerRecognize_567880; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Ink Recognition operation is used to perform ink layout and recognition of written words and shapes. It allows passing the ink strokes to the service to get the recognition results in the response.
   ## 
-  let valid = call_593832.validator(path, query, header, formData, body)
-  let scheme = call_593832.pickScheme
+  let valid = call_568065.validator(path, query, header, formData, body)
+  let scheme = call_568065.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593832.url(scheme.get, call_593832.host, call_593832.base,
-                         call_593832.route, valid.getOrDefault("path"),
+  let url = call_568065.url(scheme.get, call_568065.host, call_568065.base,
+                         call_568065.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593832, url, valid)
+  result = hook(call_568065, url, valid)
 
-proc call*(call_593903: Call_InkRecognizerRecognize_593647; body: JsonNode): Recallable =
+proc call*(call_568136: Call_InkRecognizerRecognize_567880; body: JsonNode): Recallable =
   ## inkRecognizerRecognize
   ## Ink Recognition operation is used to perform ink layout and recognition of written words and shapes. It allows passing the ink strokes to the service to get the recognition results in the response.
   ##   body: JObject (required)
   ##       : The collection of stroke objects to send for analysis
-  var body_593904 = newJObject()
+  var body_568137 = newJObject()
   if body != nil:
-    body_593904 = body
-  result = call_593903.call(nil, nil, nil, nil, body_593904)
+    body_568137 = body
+  result = call_568136.call(nil, nil, nil, nil, body_568137)
 
-var inkRecognizerRecognize* = Call_InkRecognizerRecognize_593647(
+var inkRecognizerRecognize* = Call_InkRecognizerRecognize_567880(
     name: "inkRecognizerRecognize", meth: HttpMethod.HttpPut, host: "azure.local",
-    route: "/recognize", validator: validate_InkRecognizerRecognize_593648,
-    base: "", url: url_InkRecognizerRecognize_593649, schemes: {Scheme.Https})
+    route: "/recognize", validator: validate_InkRecognizerRecognize_567881,
+    base: "", url: url_InkRecognizerRecognize_567882, schemes: {Scheme.Https})
 export
   rest
 

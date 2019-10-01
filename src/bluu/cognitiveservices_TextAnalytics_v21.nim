@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Text Analytics Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "cognitiveservices-TextAnalytics"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_Entities_593647 = ref object of OpenApiRestCall_593425
-proc url_Entities_593649(protocol: Scheme; host: string; base: string; route: string;
+  Call_Entities_567880 = ref object of OpenApiRestCall_567658
+proc url_Entities_567882(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_Entities_593648(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_Entities_567881(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## To get even more information on each recognized entity we recommend using the Bing Entity Search API by querying for the recognized entities names. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/text-analytics-supported-languages">Supported languages in Text Analytics API</a> for the list of enabled languages.
   ## 
@@ -123,10 +123,10 @@ proc validate_Entities_593648(path: JsonNode; query: JsonNode; header: JsonNode;
   ##   showStats: JBool
   ##            : (optional) if set to true, response will contain input and document level statistics.
   section = newJObject()
-  var valid_593808 = query.getOrDefault("showStats")
-  valid_593808 = validateParameter(valid_593808, JBool, required = false, default = nil)
-  if valid_593808 != nil:
-    section.add "showStats", valid_593808
+  var valid_568041 = query.getOrDefault("showStats")
+  valid_568041 = validateParameter(valid_568041, JBool, required = false, default = nil)
+  if valid_568041 != nil:
+    section.add "showStats", valid_568041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,20 +139,20 @@ proc validate_Entities_593648(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593832: Call_Entities_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568065: Call_Entities_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## To get even more information on each recognized entity we recommend using the Bing Entity Search API by querying for the recognized entities names. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/text-analytics-supported-languages">Supported languages in Text Analytics API</a> for the list of enabled languages.
   ## 
-  let valid = call_593832.validator(path, query, header, formData, body)
-  let scheme = call_593832.pickScheme
+  let valid = call_568065.validator(path, query, header, formData, body)
+  let scheme = call_568065.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593832.url(scheme.get, call_593832.host, call_593832.base,
-                         call_593832.route, valid.getOrDefault("path"),
+  let url = call_568065.url(scheme.get, call_568065.host, call_568065.base,
+                         call_568065.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593832, url, valid)
+  result = hook(call_568065, url, valid)
 
-proc call*(call_593903: Call_Entities_593647; showStats: bool = false;
+proc call*(call_568136: Call_Entities_567880; showStats: bool = false;
           multiLanguageBatchInput: JsonNode = nil): Recallable =
   ## entities
   ## To get even more information on each recognized entity we recommend using the Bing Entity Search API by querying for the recognized entities names. See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/text-analytics-supported-languages">Supported languages in Text Analytics API</a> for the list of enabled languages.
@@ -160,28 +160,28 @@ proc call*(call_593903: Call_Entities_593647; showStats: bool = false;
   ##            : (optional) if set to true, response will contain input and document level statistics.
   ##   multiLanguageBatchInput: JObject
   ##                          : Collection of documents to analyze.
-  var query_593904 = newJObject()
-  var body_593906 = newJObject()
-  add(query_593904, "showStats", newJBool(showStats))
+  var query_568137 = newJObject()
+  var body_568139 = newJObject()
+  add(query_568137, "showStats", newJBool(showStats))
   if multiLanguageBatchInput != nil:
-    body_593906 = multiLanguageBatchInput
-  result = call_593903.call(nil, query_593904, nil, nil, body_593906)
+    body_568139 = multiLanguageBatchInput
+  result = call_568136.call(nil, query_568137, nil, nil, body_568139)
 
-var entities* = Call_Entities_593647(name: "entities", meth: HttpMethod.HttpPost,
+var entities* = Call_Entities_567880(name: "entities", meth: HttpMethod.HttpPost,
                                   host: "azure.local", route: "/entities",
-                                  validator: validate_Entities_593648, base: "",
-                                  url: url_Entities_593649,
+                                  validator: validate_Entities_567881, base: "",
+                                  url: url_Entities_567882,
                                   schemes: {Scheme.Https})
 type
-  Call_KeyPhrases_593945 = ref object of OpenApiRestCall_593425
-proc url_KeyPhrases_593947(protocol: Scheme; host: string; base: string; route: string;
+  Call_KeyPhrases_568178 = ref object of OpenApiRestCall_567658
+proc url_KeyPhrases_568180(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_KeyPhrases_593946(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_KeyPhrases_568179(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by key phrase extraction.
   ## 
@@ -193,10 +193,10 @@ proc validate_KeyPhrases_593946(path: JsonNode; query: JsonNode; header: JsonNod
   ##   showStats: JBool
   ##            : (optional) if set to true, response will contain input and document level statistics.
   section = newJObject()
-  var valid_593948 = query.getOrDefault("showStats")
-  valid_593948 = validateParameter(valid_593948, JBool, required = false, default = nil)
-  if valid_593948 != nil:
-    section.add "showStats", valid_593948
+  var valid_568181 = query.getOrDefault("showStats")
+  valid_568181 = validateParameter(valid_568181, JBool, required = false, default = nil)
+  if valid_568181 != nil:
+    section.add "showStats", valid_568181
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -209,20 +209,20 @@ proc validate_KeyPhrases_593946(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593950: Call_KeyPhrases_593945; path: JsonNode; query: JsonNode;
+proc call*(call_568183: Call_KeyPhrases_568178; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by key phrase extraction.
   ## 
-  let valid = call_593950.validator(path, query, header, formData, body)
-  let scheme = call_593950.pickScheme
+  let valid = call_568183.validator(path, query, header, formData, body)
+  let scheme = call_568183.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593950.url(scheme.get, call_593950.host, call_593950.base,
-                         call_593950.route, valid.getOrDefault("path"),
+  let url = call_568183.url(scheme.get, call_568183.host, call_568183.base,
+                         call_568183.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593950, url, valid)
+  result = hook(call_568183, url, valid)
 
-proc call*(call_593951: Call_KeyPhrases_593945; showStats: bool = false;
+proc call*(call_568184: Call_KeyPhrases_568178; showStats: bool = false;
           multiLanguageBatchInput: JsonNode = nil): Recallable =
   ## keyPhrases
   ## See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by key phrase extraction.
@@ -230,29 +230,29 @@ proc call*(call_593951: Call_KeyPhrases_593945; showStats: bool = false;
   ##            : (optional) if set to true, response will contain input and document level statistics.
   ##   multiLanguageBatchInput: JObject
   ##                          : Collection of documents to analyze. Documents can now contain a language field to indicate the text language
-  var query_593952 = newJObject()
-  var body_593953 = newJObject()
-  add(query_593952, "showStats", newJBool(showStats))
+  var query_568185 = newJObject()
+  var body_568186 = newJObject()
+  add(query_568185, "showStats", newJBool(showStats))
   if multiLanguageBatchInput != nil:
-    body_593953 = multiLanguageBatchInput
-  result = call_593951.call(nil, query_593952, nil, nil, body_593953)
+    body_568186 = multiLanguageBatchInput
+  result = call_568184.call(nil, query_568185, nil, nil, body_568186)
 
-var keyPhrases* = Call_KeyPhrases_593945(name: "keyPhrases",
+var keyPhrases* = Call_KeyPhrases_568178(name: "keyPhrases",
                                       meth: HttpMethod.HttpPost,
                                       host: "azure.local", route: "/keyPhrases",
-                                      validator: validate_KeyPhrases_593946,
-                                      base: "", url: url_KeyPhrases_593947,
+                                      validator: validate_KeyPhrases_568179,
+                                      base: "", url: url_KeyPhrases_568180,
                                       schemes: {Scheme.Https})
 type
-  Call_DetectLanguage_593954 = ref object of OpenApiRestCall_593425
-proc url_DetectLanguage_593956(protocol: Scheme; host: string; base: string;
+  Call_DetectLanguage_568187 = ref object of OpenApiRestCall_567658
+proc url_DetectLanguage_568189(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DetectLanguage_593955(path: JsonNode; query: JsonNode;
+proc validate_DetectLanguage_568188(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Scores close to 1 indicate 100% certainty that the identified language is true. A total of 120 languages are supported.
@@ -265,10 +265,10 @@ proc validate_DetectLanguage_593955(path: JsonNode; query: JsonNode;
   ##   showStats: JBool
   ##            : (optional) if set to true, response will contain input and document level statistics.
   section = newJObject()
-  var valid_593957 = query.getOrDefault("showStats")
-  valid_593957 = validateParameter(valid_593957, JBool, required = false, default = nil)
-  if valid_593957 != nil:
-    section.add "showStats", valid_593957
+  var valid_568190 = query.getOrDefault("showStats")
+  valid_568190 = validateParameter(valid_568190, JBool, required = false, default = nil)
+  if valid_568190 != nil:
+    section.add "showStats", valid_568190
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -281,20 +281,20 @@ proc validate_DetectLanguage_593955(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593959: Call_DetectLanguage_593954; path: JsonNode; query: JsonNode;
+proc call*(call_568192: Call_DetectLanguage_568187; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Scores close to 1 indicate 100% certainty that the identified language is true. A total of 120 languages are supported.
   ## 
-  let valid = call_593959.validator(path, query, header, formData, body)
-  let scheme = call_593959.pickScheme
+  let valid = call_568192.validator(path, query, header, formData, body)
+  let scheme = call_568192.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593959.url(scheme.get, call_593959.host, call_593959.base,
-                         call_593959.route, valid.getOrDefault("path"),
+  let url = call_568192.url(scheme.get, call_568192.host, call_568192.base,
+                         call_568192.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593959, url, valid)
+  result = hook(call_568192, url, valid)
 
-proc call*(call_593960: Call_DetectLanguage_593954;
+proc call*(call_568193: Call_DetectLanguage_568187;
           languageBatchInput: JsonNode = nil; showStats: bool = false): Recallable =
   ## detectLanguage
   ## Scores close to 1 indicate 100% certainty that the identified language is true. A total of 120 languages are supported.
@@ -302,27 +302,27 @@ proc call*(call_593960: Call_DetectLanguage_593954;
   ##                     : Collection of documents to analyze.
   ##   showStats: bool
   ##            : (optional) if set to true, response will contain input and document level statistics.
-  var query_593961 = newJObject()
-  var body_593962 = newJObject()
+  var query_568194 = newJObject()
+  var body_568195 = newJObject()
   if languageBatchInput != nil:
-    body_593962 = languageBatchInput
-  add(query_593961, "showStats", newJBool(showStats))
-  result = call_593960.call(nil, query_593961, nil, nil, body_593962)
+    body_568195 = languageBatchInput
+  add(query_568194, "showStats", newJBool(showStats))
+  result = call_568193.call(nil, query_568194, nil, nil, body_568195)
 
-var detectLanguage* = Call_DetectLanguage_593954(name: "detectLanguage",
+var detectLanguage* = Call_DetectLanguage_568187(name: "detectLanguage",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/languages",
-    validator: validate_DetectLanguage_593955, base: "", url: url_DetectLanguage_593956,
+    validator: validate_DetectLanguage_568188, base: "", url: url_DetectLanguage_568189,
     schemes: {Scheme.Https})
 type
-  Call_Sentiment_593963 = ref object of OpenApiRestCall_593425
-proc url_Sentiment_593965(protocol: Scheme; host: string; base: string; route: string;
+  Call_Sentiment_568196 = ref object of OpenApiRestCall_567658
+proc url_Sentiment_568198(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_Sentiment_593964(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_Sentiment_568197(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment. A score of 0.5 indicates the lack of sentiment (e.g. a factoid statement). See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by sentiment analysis.
   ## 
@@ -334,10 +334,10 @@ proc validate_Sentiment_593964(path: JsonNode; query: JsonNode; header: JsonNode
   ##   showStats: JBool
   ##            : (optional) if set to true, response will contain input and document level statistics.
   section = newJObject()
-  var valid_593966 = query.getOrDefault("showStats")
-  valid_593966 = validateParameter(valid_593966, JBool, required = false, default = nil)
-  if valid_593966 != nil:
-    section.add "showStats", valid_593966
+  var valid_568199 = query.getOrDefault("showStats")
+  valid_568199 = validateParameter(valid_568199, JBool, required = false, default = nil)
+  if valid_568199 != nil:
+    section.add "showStats", valid_568199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -350,20 +350,20 @@ proc validate_Sentiment_593964(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_Sentiment_593963; path: JsonNode; query: JsonNode;
+proc call*(call_568201: Call_Sentiment_568196; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment. A score of 0.5 indicates the lack of sentiment (e.g. a factoid statement). See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by sentiment analysis.
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_568201.validator(path, query, header, formData, body)
+  let scheme = call_568201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
+                         call_568201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_568201, url, valid)
 
-proc call*(call_593969: Call_Sentiment_593963; showStats: bool = false;
+proc call*(call_568202: Call_Sentiment_568196; showStats: bool = false;
           multiLanguageBatchInput: JsonNode = nil): Recallable =
   ## sentiment
   ## Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment. A score of 0.5 indicates the lack of sentiment (e.g. a factoid statement). See the <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/text-analytics/overview#supported-languages">Text Analytics Documentation</a> for details about the languages that are supported by sentiment analysis.
@@ -371,17 +371,17 @@ proc call*(call_593969: Call_Sentiment_593963; showStats: bool = false;
   ##            : (optional) if set to true, response will contain input and document level statistics.
   ##   multiLanguageBatchInput: JObject
   ##                          : Collection of documents to analyze.
-  var query_593970 = newJObject()
-  var body_593971 = newJObject()
-  add(query_593970, "showStats", newJBool(showStats))
+  var query_568203 = newJObject()
+  var body_568204 = newJObject()
+  add(query_568203, "showStats", newJBool(showStats))
   if multiLanguageBatchInput != nil:
-    body_593971 = multiLanguageBatchInput
-  result = call_593969.call(nil, query_593970, nil, nil, body_593971)
+    body_568204 = multiLanguageBatchInput
+  result = call_568202.call(nil, query_568203, nil, nil, body_568204)
 
-var sentiment* = Call_Sentiment_593963(name: "sentiment", meth: HttpMethod.HttpPost,
+var sentiment* = Call_Sentiment_568196(name: "sentiment", meth: HttpMethod.HttpPost,
                                     host: "azure.local", route: "/sentiment",
-                                    validator: validate_Sentiment_593964,
-                                    base: "", url: url_Sentiment_593965,
+                                    validator: validate_Sentiment_568197,
+                                    base: "", url: url_Sentiment_568198,
                                     schemes: {Scheme.Https})
 export
   rest

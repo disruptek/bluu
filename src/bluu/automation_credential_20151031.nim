@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: AutomationManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_596457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "automation-credential"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_CredentialListByAutomationAccount_593646 = ref object of OpenApiRestCall_593424
-proc url_CredentialListByAutomationAccount_593648(protocol: Scheme; host: string;
+  Call_CredentialListByAutomationAccount_596679 = ref object of OpenApiRestCall_596457
+proc url_CredentialListByAutomationAccount_596681(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +129,7 @@ proc url_CredentialListByAutomationAccount_593648(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CredentialListByAutomationAccount_593647(path: JsonNode;
+proc validate_CredentialListByAutomationAccount_596680(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of credentials.
   ## 
@@ -145,21 +145,21 @@ proc validate_CredentialListByAutomationAccount_593647(path: JsonNode;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593808 = path.getOrDefault("automationAccountName")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_596841 = path.getOrDefault("automationAccountName")
+  valid_596841 = validateParameter(valid_596841, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "automationAccountName", valid_593808
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  if valid_596841 != nil:
+    section.add "automationAccountName", valid_596841
+  var valid_596842 = path.getOrDefault("resourceGroupName")
+  valid_596842 = validateParameter(valid_596842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_596842 != nil:
+    section.add "resourceGroupName", valid_596842
+  var valid_596843 = path.getOrDefault("subscriptionId")
+  valid_596843 = validateParameter(valid_596843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
+  if valid_596843 != nil:
+    section.add "subscriptionId", valid_596843
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -167,11 +167,11 @@ proc validate_CredentialListByAutomationAccount_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593811 = query.getOrDefault("api-version")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  var valid_596844 = query.getOrDefault("api-version")
+  valid_596844 = validateParameter(valid_596844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "api-version", valid_593811
+  if valid_596844 != nil:
+    section.add "api-version", valid_596844
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -180,22 +180,22 @@ proc validate_CredentialListByAutomationAccount_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593838: Call_CredentialListByAutomationAccount_593646;
+proc call*(call_596871: Call_CredentialListByAutomationAccount_596679;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve a list of credentials.
   ## 
   ## http://aka.ms/azureautomationsdk/credentialoperations
-  let valid = call_593838.validator(path, query, header, formData, body)
-  let scheme = call_593838.pickScheme
+  let valid = call_596871.validator(path, query, header, formData, body)
+  let scheme = call_596871.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593838.url(scheme.get, call_593838.host, call_593838.base,
-                         call_593838.route, valid.getOrDefault("path"),
+  let url = call_596871.url(scheme.get, call_596871.host, call_596871.base,
+                         call_596871.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593838, url, valid)
+  result = hook(call_596871, url, valid)
 
-proc call*(call_593909: Call_CredentialListByAutomationAccount_593646;
+proc call*(call_596942: Call_CredentialListByAutomationAccount_596679;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## credentialListByAutomationAccount
@@ -209,22 +209,22 @@ proc call*(call_593909: Call_CredentialListByAutomationAccount_593646;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593910 = newJObject()
-  var query_593912 = newJObject()
-  add(path_593910, "automationAccountName", newJString(automationAccountName))
-  add(path_593910, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593912, "api-version", newJString(apiVersion))
-  add(path_593910, "subscriptionId", newJString(subscriptionId))
-  result = call_593909.call(path_593910, query_593912, nil, nil, nil)
+  var path_596943 = newJObject()
+  var query_596945 = newJObject()
+  add(path_596943, "automationAccountName", newJString(automationAccountName))
+  add(path_596943, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596945, "api-version", newJString(apiVersion))
+  add(path_596943, "subscriptionId", newJString(subscriptionId))
+  result = call_596942.call(path_596943, query_596945, nil, nil, nil)
 
-var credentialListByAutomationAccount* = Call_CredentialListByAutomationAccount_593646(
+var credentialListByAutomationAccount* = Call_CredentialListByAutomationAccount_596679(
     name: "credentialListByAutomationAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/credentials",
-    validator: validate_CredentialListByAutomationAccount_593647, base: "",
-    url: url_CredentialListByAutomationAccount_593648, schemes: {Scheme.Https})
+    validator: validate_CredentialListByAutomationAccount_596680, base: "",
+    url: url_CredentialListByAutomationAccount_596681, schemes: {Scheme.Https})
 type
-  Call_CredentialCreateOrUpdate_593963 = ref object of OpenApiRestCall_593424
-proc url_CredentialCreateOrUpdate_593965(protocol: Scheme; host: string;
+  Call_CredentialCreateOrUpdate_596996 = ref object of OpenApiRestCall_596457
+proc url_CredentialCreateOrUpdate_596998(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -252,7 +252,7 @@ proc url_CredentialCreateOrUpdate_593965(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CredentialCreateOrUpdate_593964(path: JsonNode; query: JsonNode;
+proc validate_CredentialCreateOrUpdate_596997(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a credential.
   ## 
@@ -270,26 +270,26 @@ proc validate_CredentialCreateOrUpdate_593964(path: JsonNode; query: JsonNode;
   ##                 : The parameters supplied to the create or update credential operation.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593992 = path.getOrDefault("automationAccountName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_597025 = path.getOrDefault("automationAccountName")
+  valid_597025 = validateParameter(valid_597025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "automationAccountName", valid_593992
-  var valid_593993 = path.getOrDefault("resourceGroupName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_597025 != nil:
+    section.add "automationAccountName", valid_597025
+  var valid_597026 = path.getOrDefault("resourceGroupName")
+  valid_597026 = validateParameter(valid_597026, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "resourceGroupName", valid_593993
-  var valid_593994 = path.getOrDefault("subscriptionId")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_597026 != nil:
+    section.add "resourceGroupName", valid_597026
+  var valid_597027 = path.getOrDefault("subscriptionId")
+  valid_597027 = validateParameter(valid_597027, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "subscriptionId", valid_593994
-  var valid_593995 = path.getOrDefault("credentialName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_597027 != nil:
+    section.add "subscriptionId", valid_597027
+  var valid_597028 = path.getOrDefault("credentialName")
+  valid_597028 = validateParameter(valid_597028, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "credentialName", valid_593995
+  if valid_597028 != nil:
+    section.add "credentialName", valid_597028
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -297,11 +297,11 @@ proc validate_CredentialCreateOrUpdate_593964(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593996 = query.getOrDefault("api-version")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_597029 = query.getOrDefault("api-version")
+  valid_597029 = validateParameter(valid_597029, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "api-version", valid_593996
+  if valid_597029 != nil:
+    section.add "api-version", valid_597029
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -315,21 +315,21 @@ proc validate_CredentialCreateOrUpdate_593964(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593998: Call_CredentialCreateOrUpdate_593963; path: JsonNode;
+proc call*(call_597031: Call_CredentialCreateOrUpdate_596996; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a credential.
   ## 
   ## http://aka.ms/azureautomationsdk/credentialoperations
-  let valid = call_593998.validator(path, query, header, formData, body)
-  let scheme = call_593998.pickScheme
+  let valid = call_597031.validator(path, query, header, formData, body)
+  let scheme = call_597031.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593998.url(scheme.get, call_593998.host, call_593998.base,
-                         call_593998.route, valid.getOrDefault("path"),
+  let url = call_597031.url(scheme.get, call_597031.host, call_597031.base,
+                         call_597031.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593998, url, valid)
+  result = hook(call_597031, url, valid)
 
-proc call*(call_593999: Call_CredentialCreateOrUpdate_593963;
+proc call*(call_597032: Call_CredentialCreateOrUpdate_596996;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; credentialName: string;
           parameters: JsonNode): Recallable =
@@ -348,26 +348,26 @@ proc call*(call_593999: Call_CredentialCreateOrUpdate_593963;
   ##                 : The parameters supplied to the create or update credential operation.
   ##   parameters: JObject (required)
   ##             : The parameters supplied to the create or update credential operation.
-  var path_594000 = newJObject()
-  var query_594001 = newJObject()
-  var body_594002 = newJObject()
-  add(path_594000, "automationAccountName", newJString(automationAccountName))
-  add(path_594000, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594001, "api-version", newJString(apiVersion))
-  add(path_594000, "subscriptionId", newJString(subscriptionId))
-  add(path_594000, "credentialName", newJString(credentialName))
+  var path_597033 = newJObject()
+  var query_597034 = newJObject()
+  var body_597035 = newJObject()
+  add(path_597033, "automationAccountName", newJString(automationAccountName))
+  add(path_597033, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597034, "api-version", newJString(apiVersion))
+  add(path_597033, "subscriptionId", newJString(subscriptionId))
+  add(path_597033, "credentialName", newJString(credentialName))
   if parameters != nil:
-    body_594002 = parameters
-  result = call_593999.call(path_594000, query_594001, nil, nil, body_594002)
+    body_597035 = parameters
+  result = call_597032.call(path_597033, query_597034, nil, nil, body_597035)
 
-var credentialCreateOrUpdate* = Call_CredentialCreateOrUpdate_593963(
+var credentialCreateOrUpdate* = Call_CredentialCreateOrUpdate_596996(
     name: "credentialCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/credentials/{credentialName}",
-    validator: validate_CredentialCreateOrUpdate_593964, base: "",
-    url: url_CredentialCreateOrUpdate_593965, schemes: {Scheme.Https})
+    validator: validate_CredentialCreateOrUpdate_596997, base: "",
+    url: url_CredentialCreateOrUpdate_596998, schemes: {Scheme.Https})
 type
-  Call_CredentialGet_593951 = ref object of OpenApiRestCall_593424
-proc url_CredentialGet_593953(protocol: Scheme; host: string; base: string;
+  Call_CredentialGet_596984 = ref object of OpenApiRestCall_596457
+proc url_CredentialGet_596986(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -394,7 +394,7 @@ proc url_CredentialGet_593953(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CredentialGet_593952(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_CredentialGet_596985(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the credential identified by credential name.
   ## 
@@ -412,26 +412,26 @@ proc validate_CredentialGet_593952(path: JsonNode; query: JsonNode; header: Json
   ##                 : The name of credential.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593954 = path.getOrDefault("automationAccountName")
-  valid_593954 = validateParameter(valid_593954, JString, required = true,
+  var valid_596987 = path.getOrDefault("automationAccountName")
+  valid_596987 = validateParameter(valid_596987, JString, required = true,
                                  default = nil)
-  if valid_593954 != nil:
-    section.add "automationAccountName", valid_593954
-  var valid_593955 = path.getOrDefault("resourceGroupName")
-  valid_593955 = validateParameter(valid_593955, JString, required = true,
+  if valid_596987 != nil:
+    section.add "automationAccountName", valid_596987
+  var valid_596988 = path.getOrDefault("resourceGroupName")
+  valid_596988 = validateParameter(valid_596988, JString, required = true,
                                  default = nil)
-  if valid_593955 != nil:
-    section.add "resourceGroupName", valid_593955
-  var valid_593956 = path.getOrDefault("subscriptionId")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  if valid_596988 != nil:
+    section.add "resourceGroupName", valid_596988
+  var valid_596989 = path.getOrDefault("subscriptionId")
+  valid_596989 = validateParameter(valid_596989, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "subscriptionId", valid_593956
-  var valid_593957 = path.getOrDefault("credentialName")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  if valid_596989 != nil:
+    section.add "subscriptionId", valid_596989
+  var valid_596990 = path.getOrDefault("credentialName")
+  valid_596990 = validateParameter(valid_596990, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "credentialName", valid_593957
+  if valid_596990 != nil:
+    section.add "credentialName", valid_596990
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -439,11 +439,11 @@ proc validate_CredentialGet_593952(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593958 = query.getOrDefault("api-version")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  var valid_596991 = query.getOrDefault("api-version")
+  valid_596991 = validateParameter(valid_596991, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "api-version", valid_593958
+  if valid_596991 != nil:
+    section.add "api-version", valid_596991
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -452,21 +452,21 @@ proc validate_CredentialGet_593952(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593959: Call_CredentialGet_593951; path: JsonNode; query: JsonNode;
+proc call*(call_596992: Call_CredentialGet_596984; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the credential identified by credential name.
   ## 
   ## http://aka.ms/azureautomationsdk/credentialoperations
-  let valid = call_593959.validator(path, query, header, formData, body)
-  let scheme = call_593959.pickScheme
+  let valid = call_596992.validator(path, query, header, formData, body)
+  let scheme = call_596992.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593959.url(scheme.get, call_593959.host, call_593959.base,
-                         call_593959.route, valid.getOrDefault("path"),
+  let url = call_596992.url(scheme.get, call_596992.host, call_596992.base,
+                         call_596992.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593959, url, valid)
+  result = hook(call_596992, url, valid)
 
-proc call*(call_593960: Call_CredentialGet_593951; automationAccountName: string;
+proc call*(call_596993: Call_CredentialGet_596984; automationAccountName: string;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           credentialName: string): Recallable =
   ## credentialGet
@@ -482,22 +482,22 @@ proc call*(call_593960: Call_CredentialGet_593951; automationAccountName: string
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   credentialName: string (required)
   ##                 : The name of credential.
-  var path_593961 = newJObject()
-  var query_593962 = newJObject()
-  add(path_593961, "automationAccountName", newJString(automationAccountName))
-  add(path_593961, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593962, "api-version", newJString(apiVersion))
-  add(path_593961, "subscriptionId", newJString(subscriptionId))
-  add(path_593961, "credentialName", newJString(credentialName))
-  result = call_593960.call(path_593961, query_593962, nil, nil, nil)
+  var path_596994 = newJObject()
+  var query_596995 = newJObject()
+  add(path_596994, "automationAccountName", newJString(automationAccountName))
+  add(path_596994, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596995, "api-version", newJString(apiVersion))
+  add(path_596994, "subscriptionId", newJString(subscriptionId))
+  add(path_596994, "credentialName", newJString(credentialName))
+  result = call_596993.call(path_596994, query_596995, nil, nil, nil)
 
-var credentialGet* = Call_CredentialGet_593951(name: "credentialGet",
+var credentialGet* = Call_CredentialGet_596984(name: "credentialGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/credentials/{credentialName}",
-    validator: validate_CredentialGet_593952, base: "", url: url_CredentialGet_593953,
+    validator: validate_CredentialGet_596985, base: "", url: url_CredentialGet_596986,
     schemes: {Scheme.Https})
 type
-  Call_CredentialUpdate_594015 = ref object of OpenApiRestCall_593424
-proc url_CredentialUpdate_594017(protocol: Scheme; host: string; base: string;
+  Call_CredentialUpdate_597048 = ref object of OpenApiRestCall_596457
+proc url_CredentialUpdate_597050(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -524,7 +524,7 @@ proc url_CredentialUpdate_594017(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CredentialUpdate_594016(path: JsonNode; query: JsonNode;
+proc validate_CredentialUpdate_597049(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Update a credential.
@@ -543,26 +543,26 @@ proc validate_CredentialUpdate_594016(path: JsonNode; query: JsonNode;
   ##                 : The parameters supplied to the Update credential operation.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594018 = path.getOrDefault("automationAccountName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  var valid_597051 = path.getOrDefault("automationAccountName")
+  valid_597051 = validateParameter(valid_597051, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "automationAccountName", valid_594018
-  var valid_594019 = path.getOrDefault("resourceGroupName")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  if valid_597051 != nil:
+    section.add "automationAccountName", valid_597051
+  var valid_597052 = path.getOrDefault("resourceGroupName")
+  valid_597052 = validateParameter(valid_597052, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "resourceGroupName", valid_594019
-  var valid_594020 = path.getOrDefault("subscriptionId")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  if valid_597052 != nil:
+    section.add "resourceGroupName", valid_597052
+  var valid_597053 = path.getOrDefault("subscriptionId")
+  valid_597053 = validateParameter(valid_597053, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "subscriptionId", valid_594020
-  var valid_594021 = path.getOrDefault("credentialName")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  if valid_597053 != nil:
+    section.add "subscriptionId", valid_597053
+  var valid_597054 = path.getOrDefault("credentialName")
+  valid_597054 = validateParameter(valid_597054, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "credentialName", valid_594021
+  if valid_597054 != nil:
+    section.add "credentialName", valid_597054
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -570,11 +570,11 @@ proc validate_CredentialUpdate_594016(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594022 = query.getOrDefault("api-version")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  var valid_597055 = query.getOrDefault("api-version")
+  valid_597055 = validateParameter(valid_597055, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "api-version", valid_594022
+  if valid_597055 != nil:
+    section.add "api-version", valid_597055
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -588,21 +588,21 @@ proc validate_CredentialUpdate_594016(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594024: Call_CredentialUpdate_594015; path: JsonNode;
+proc call*(call_597057: Call_CredentialUpdate_597048; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a credential.
   ## 
   ## http://aka.ms/azureautomationsdk/credentialoperations
-  let valid = call_594024.validator(path, query, header, formData, body)
-  let scheme = call_594024.pickScheme
+  let valid = call_597057.validator(path, query, header, formData, body)
+  let scheme = call_597057.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594024.url(scheme.get, call_594024.host, call_594024.base,
-                         call_594024.route, valid.getOrDefault("path"),
+  let url = call_597057.url(scheme.get, call_597057.host, call_597057.base,
+                         call_597057.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594024, url, valid)
+  result = hook(call_597057, url, valid)
 
-proc call*(call_594025: Call_CredentialUpdate_594015;
+proc call*(call_597058: Call_CredentialUpdate_597048;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; credentialName: string;
           parameters: JsonNode): Recallable =
@@ -621,25 +621,25 @@ proc call*(call_594025: Call_CredentialUpdate_594015;
   ##                 : The parameters supplied to the Update credential operation.
   ##   parameters: JObject (required)
   ##             : The parameters supplied to the Update credential operation.
-  var path_594026 = newJObject()
-  var query_594027 = newJObject()
-  var body_594028 = newJObject()
-  add(path_594026, "automationAccountName", newJString(automationAccountName))
-  add(path_594026, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594027, "api-version", newJString(apiVersion))
-  add(path_594026, "subscriptionId", newJString(subscriptionId))
-  add(path_594026, "credentialName", newJString(credentialName))
+  var path_597059 = newJObject()
+  var query_597060 = newJObject()
+  var body_597061 = newJObject()
+  add(path_597059, "automationAccountName", newJString(automationAccountName))
+  add(path_597059, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597060, "api-version", newJString(apiVersion))
+  add(path_597059, "subscriptionId", newJString(subscriptionId))
+  add(path_597059, "credentialName", newJString(credentialName))
   if parameters != nil:
-    body_594028 = parameters
-  result = call_594025.call(path_594026, query_594027, nil, nil, body_594028)
+    body_597061 = parameters
+  result = call_597058.call(path_597059, query_597060, nil, nil, body_597061)
 
-var credentialUpdate* = Call_CredentialUpdate_594015(name: "credentialUpdate",
+var credentialUpdate* = Call_CredentialUpdate_597048(name: "credentialUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/credentials/{credentialName}",
-    validator: validate_CredentialUpdate_594016, base: "",
-    url: url_CredentialUpdate_594017, schemes: {Scheme.Https})
+    validator: validate_CredentialUpdate_597049, base: "",
+    url: url_CredentialUpdate_597050, schemes: {Scheme.Https})
 type
-  Call_CredentialDelete_594003 = ref object of OpenApiRestCall_593424
-proc url_CredentialDelete_594005(protocol: Scheme; host: string; base: string;
+  Call_CredentialDelete_597036 = ref object of OpenApiRestCall_596457
+proc url_CredentialDelete_597038(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -666,7 +666,7 @@ proc url_CredentialDelete_594005(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CredentialDelete_594004(path: JsonNode; query: JsonNode;
+proc validate_CredentialDelete_597037(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Delete the credential.
@@ -685,26 +685,26 @@ proc validate_CredentialDelete_594004(path: JsonNode; query: JsonNode;
   ##                 : The name of credential.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594006 = path.getOrDefault("automationAccountName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_597039 = path.getOrDefault("automationAccountName")
+  valid_597039 = validateParameter(valid_597039, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "automationAccountName", valid_594006
-  var valid_594007 = path.getOrDefault("resourceGroupName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_597039 != nil:
+    section.add "automationAccountName", valid_597039
+  var valid_597040 = path.getOrDefault("resourceGroupName")
+  valid_597040 = validateParameter(valid_597040, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "resourceGroupName", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_597040 != nil:
+    section.add "resourceGroupName", valid_597040
+  var valid_597041 = path.getOrDefault("subscriptionId")
+  valid_597041 = validateParameter(valid_597041, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
-  var valid_594009 = path.getOrDefault("credentialName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_597041 != nil:
+    section.add "subscriptionId", valid_597041
+  var valid_597042 = path.getOrDefault("credentialName")
+  valid_597042 = validateParameter(valid_597042, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "credentialName", valid_594009
+  if valid_597042 != nil:
+    section.add "credentialName", valid_597042
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -712,11 +712,11 @@ proc validate_CredentialDelete_594004(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594010 = query.getOrDefault("api-version")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  var valid_597043 = query.getOrDefault("api-version")
+  valid_597043 = validateParameter(valid_597043, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "api-version", valid_594010
+  if valid_597043 != nil:
+    section.add "api-version", valid_597043
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -725,21 +725,21 @@ proc validate_CredentialDelete_594004(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594011: Call_CredentialDelete_594003; path: JsonNode;
+proc call*(call_597044: Call_CredentialDelete_597036; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the credential.
   ## 
   ## http://aka.ms/azureautomationsdk/credentialoperations
-  let valid = call_594011.validator(path, query, header, formData, body)
-  let scheme = call_594011.pickScheme
+  let valid = call_597044.validator(path, query, header, formData, body)
+  let scheme = call_597044.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594011.url(scheme.get, call_594011.host, call_594011.base,
-                         call_594011.route, valid.getOrDefault("path"),
+  let url = call_597044.url(scheme.get, call_597044.host, call_597044.base,
+                         call_597044.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594011, url, valid)
+  result = hook(call_597044, url, valid)
 
-proc call*(call_594012: Call_CredentialDelete_594003;
+proc call*(call_597045: Call_CredentialDelete_597036;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; credentialName: string): Recallable =
   ## credentialDelete
@@ -755,19 +755,19 @@ proc call*(call_594012: Call_CredentialDelete_594003;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   credentialName: string (required)
   ##                 : The name of credential.
-  var path_594013 = newJObject()
-  var query_594014 = newJObject()
-  add(path_594013, "automationAccountName", newJString(automationAccountName))
-  add(path_594013, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594014, "api-version", newJString(apiVersion))
-  add(path_594013, "subscriptionId", newJString(subscriptionId))
-  add(path_594013, "credentialName", newJString(credentialName))
-  result = call_594012.call(path_594013, query_594014, nil, nil, nil)
+  var path_597046 = newJObject()
+  var query_597047 = newJObject()
+  add(path_597046, "automationAccountName", newJString(automationAccountName))
+  add(path_597046, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597047, "api-version", newJString(apiVersion))
+  add(path_597046, "subscriptionId", newJString(subscriptionId))
+  add(path_597046, "credentialName", newJString(credentialName))
+  result = call_597045.call(path_597046, query_597047, nil, nil, nil)
 
-var credentialDelete* = Call_CredentialDelete_594003(name: "credentialDelete",
+var credentialDelete* = Call_CredentialDelete_597036(name: "credentialDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/credentials/{credentialName}",
-    validator: validate_CredentialDelete_594004, base: "",
-    url: url_CredentialDelete_594005, schemes: {Scheme.Https})
+    validator: validate_CredentialDelete_597037, base: "",
+    url: url_CredentialDelete_597038, schemes: {Scheme.Https})
 export
   rest
 

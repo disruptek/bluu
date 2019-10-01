@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ResourceHealthMetadata API Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "web-ResourceHealthMetadata"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ResourceHealthMetadataList_593646 = ref object of OpenApiRestCall_593424
-proc url_ResourceHealthMetadataList_593648(protocol: Scheme; host: string;
+  Call_ResourceHealthMetadataList_567879 = ref object of OpenApiRestCall_567657
+proc url_ResourceHealthMetadataList_567881(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_ResourceHealthMetadataList_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResourceHealthMetadataList_593647(path: JsonNode; query: JsonNode;
+proc validate_ResourceHealthMetadataList_567880(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all ResourceHealthMetadata for all sites in the subscription.
   ## 
@@ -133,11 +133,11 @@ proc validate_ResourceHealthMetadataList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593821 = path.getOrDefault("subscriptionId")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = path.getOrDefault("subscriptionId")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "subscriptionId", valid_593821
+  if valid_568054 != nil:
+    section.add "subscriptionId", valid_568054
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_ResourceHealthMetadataList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593822 = query.getOrDefault("api-version")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = query.getOrDefault("api-version")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "api-version", valid_593822
+  if valid_568055 != nil:
+    section.add "api-version", valid_568055
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_ResourceHealthMetadataList_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593845: Call_ResourceHealthMetadataList_593646; path: JsonNode;
+proc call*(call_568078: Call_ResourceHealthMetadataList_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all ResourceHealthMetadata for all sites in the subscription.
   ## 
-  let valid = call_593845.validator(path, query, header, formData, body)
-  let scheme = call_593845.pickScheme
+  let valid = call_568078.validator(path, query, header, formData, body)
+  let scheme = call_568078.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593845.url(scheme.get, call_593845.host, call_593845.base,
-                         call_593845.route, valid.getOrDefault("path"),
+  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
+                         call_568078.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593845, url, valid)
+  result = hook(call_568078, url, valid)
 
-proc call*(call_593916: Call_ResourceHealthMetadataList_593646; apiVersion: string;
+proc call*(call_568149: Call_ResourceHealthMetadataList_567879; apiVersion: string;
           subscriptionId: string): Recallable =
   ## resourceHealthMetadataList
   ## List all ResourceHealthMetadata for all sites in the subscription.
@@ -179,20 +179,20 @@ proc call*(call_593916: Call_ResourceHealthMetadataList_593646; apiVersion: stri
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_593917 = newJObject()
-  var query_593919 = newJObject()
-  add(query_593919, "api-version", newJString(apiVersion))
-  add(path_593917, "subscriptionId", newJString(subscriptionId))
-  result = call_593916.call(path_593917, query_593919, nil, nil, nil)
+  var path_568150 = newJObject()
+  var query_568152 = newJObject()
+  add(query_568152, "api-version", newJString(apiVersion))
+  add(path_568150, "subscriptionId", newJString(subscriptionId))
+  result = call_568149.call(path_568150, query_568152, nil, nil, nil)
 
-var resourceHealthMetadataList* = Call_ResourceHealthMetadataList_593646(
+var resourceHealthMetadataList* = Call_ResourceHealthMetadataList_567879(
     name: "resourceHealthMetadataList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Web/resourceHealthMetadata",
-    validator: validate_ResourceHealthMetadataList_593647, base: "",
-    url: url_ResourceHealthMetadataList_593648, schemes: {Scheme.Https})
+    validator: validate_ResourceHealthMetadataList_567880, base: "",
+    url: url_ResourceHealthMetadataList_567881, schemes: {Scheme.Https})
 type
-  Call_ResourceHealthMetadataListByResourceGroup_593958 = ref object of OpenApiRestCall_593424
-proc url_ResourceHealthMetadataListByResourceGroup_593960(protocol: Scheme;
+  Call_ResourceHealthMetadataListByResourceGroup_568191 = ref object of OpenApiRestCall_567657
+proc url_ResourceHealthMetadataListByResourceGroup_568193(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -213,7 +213,7 @@ proc url_ResourceHealthMetadataListByResourceGroup_593960(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResourceHealthMetadataListByResourceGroup_593959(path: JsonNode;
+proc validate_ResourceHealthMetadataListByResourceGroup_568192(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all ResourceHealthMetadata for all sites in the resource group in the subscription.
   ## 
@@ -227,16 +227,16 @@ proc validate_ResourceHealthMetadataListByResourceGroup_593959(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593961 = path.getOrDefault("resourceGroupName")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = path.getOrDefault("resourceGroupName")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "resourceGroupName", valid_593961
-  var valid_593962 = path.getOrDefault("subscriptionId")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_568194 != nil:
+    section.add "resourceGroupName", valid_568194
+  var valid_568195 = path.getOrDefault("subscriptionId")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "subscriptionId", valid_593962
+  if valid_568195 != nil:
+    section.add "subscriptionId", valid_568195
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -244,11 +244,11 @@ proc validate_ResourceHealthMetadataListByResourceGroup_593959(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593963 = query.getOrDefault("api-version")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_568196 = query.getOrDefault("api-version")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "api-version", valid_593963
+  if valid_568196 != nil:
+    section.add "api-version", valid_568196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -257,21 +257,21 @@ proc validate_ResourceHealthMetadataListByResourceGroup_593959(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593964: Call_ResourceHealthMetadataListByResourceGroup_593958;
+proc call*(call_568197: Call_ResourceHealthMetadataListByResourceGroup_568191;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all ResourceHealthMetadata for all sites in the resource group in the subscription.
   ## 
-  let valid = call_593964.validator(path, query, header, formData, body)
-  let scheme = call_593964.pickScheme
+  let valid = call_568197.validator(path, query, header, formData, body)
+  let scheme = call_568197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593964.url(scheme.get, call_593964.host, call_593964.base,
-                         call_593964.route, valid.getOrDefault("path"),
+  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
+                         call_568197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593964, url, valid)
+  result = hook(call_568197, url, valid)
 
-proc call*(call_593965: Call_ResourceHealthMetadataListByResourceGroup_593958;
+proc call*(call_568198: Call_ResourceHealthMetadataListByResourceGroup_568191;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## resourceHealthMetadataListByResourceGroup
   ## List all ResourceHealthMetadata for all sites in the resource group in the subscription.
@@ -281,22 +281,22 @@ proc call*(call_593965: Call_ResourceHealthMetadataListByResourceGroup_593958;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_593966 = newJObject()
-  var query_593967 = newJObject()
-  add(path_593966, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593967, "api-version", newJString(apiVersion))
-  add(path_593966, "subscriptionId", newJString(subscriptionId))
-  result = call_593965.call(path_593966, query_593967, nil, nil, nil)
+  var path_568199 = newJObject()
+  var query_568200 = newJObject()
+  add(path_568199, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568200, "api-version", newJString(apiVersion))
+  add(path_568199, "subscriptionId", newJString(subscriptionId))
+  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
 
-var resourceHealthMetadataListByResourceGroup* = Call_ResourceHealthMetadataListByResourceGroup_593958(
+var resourceHealthMetadataListByResourceGroup* = Call_ResourceHealthMetadataListByResourceGroup_568191(
     name: "resourceHealthMetadataListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/resourceHealthMetadata",
-    validator: validate_ResourceHealthMetadataListByResourceGroup_593959,
-    base: "", url: url_ResourceHealthMetadataListByResourceGroup_593960,
+    validator: validate_ResourceHealthMetadataListByResourceGroup_568192,
+    base: "", url: url_ResourceHealthMetadataListByResourceGroup_568193,
     schemes: {Scheme.Https})
 type
-  Call_ResourceHealthMetadataListBySite_593968 = ref object of OpenApiRestCall_593424
-proc url_ResourceHealthMetadataListBySite_593970(protocol: Scheme; host: string;
+  Call_ResourceHealthMetadataListBySite_568201 = ref object of OpenApiRestCall_567657
+proc url_ResourceHealthMetadataListBySite_568203(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -319,7 +319,7 @@ proc url_ResourceHealthMetadataListBySite_593970(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResourceHealthMetadataListBySite_593969(path: JsonNode;
+proc validate_ResourceHealthMetadataListBySite_568202(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the category of ResourceHealthMetadata to use for the given site as a collection
   ## 
@@ -335,21 +335,21 @@ proc validate_ResourceHealthMetadataListBySite_593969(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593971 = path.getOrDefault("resourceGroupName")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568204 = path.getOrDefault("resourceGroupName")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "resourceGroupName", valid_593971
-  var valid_593972 = path.getOrDefault("name")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  if valid_568204 != nil:
+    section.add "resourceGroupName", valid_568204
+  var valid_568205 = path.getOrDefault("name")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "name", valid_593972
-  var valid_593973 = path.getOrDefault("subscriptionId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  if valid_568205 != nil:
+    section.add "name", valid_568205
+  var valid_568206 = path.getOrDefault("subscriptionId")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "subscriptionId", valid_593973
+  if valid_568206 != nil:
+    section.add "subscriptionId", valid_568206
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +357,11 @@ proc validate_ResourceHealthMetadataListBySite_593969(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593974 = query.getOrDefault("api-version")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_568207 = query.getOrDefault("api-version")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "api-version", valid_593974
+  if valid_568207 != nil:
+    section.add "api-version", valid_568207
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -370,21 +370,21 @@ proc validate_ResourceHealthMetadataListBySite_593969(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593975: Call_ResourceHealthMetadataListBySite_593968;
+proc call*(call_568208: Call_ResourceHealthMetadataListBySite_568201;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the category of ResourceHealthMetadata to use for the given site as a collection
   ## 
-  let valid = call_593975.validator(path, query, header, formData, body)
-  let scheme = call_593975.pickScheme
+  let valid = call_568208.validator(path, query, header, formData, body)
+  let scheme = call_568208.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593975.url(scheme.get, call_593975.host, call_593975.base,
-                         call_593975.route, valid.getOrDefault("path"),
+  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
+                         call_568208.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593975, url, valid)
+  result = hook(call_568208, url, valid)
 
-proc call*(call_593976: Call_ResourceHealthMetadataListBySite_593968;
+proc call*(call_568209: Call_ResourceHealthMetadataListBySite_568201;
           resourceGroupName: string; apiVersion: string; name: string;
           subscriptionId: string): Recallable =
   ## resourceHealthMetadataListBySite
@@ -397,22 +397,22 @@ proc call*(call_593976: Call_ResourceHealthMetadataListBySite_593968;
   ##       : Name of web app.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_593977 = newJObject()
-  var query_593978 = newJObject()
-  add(path_593977, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593978, "api-version", newJString(apiVersion))
-  add(path_593977, "name", newJString(name))
-  add(path_593977, "subscriptionId", newJString(subscriptionId))
-  result = call_593976.call(path_593977, query_593978, nil, nil, nil)
+  var path_568210 = newJObject()
+  var query_568211 = newJObject()
+  add(path_568210, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568211, "api-version", newJString(apiVersion))
+  add(path_568210, "name", newJString(name))
+  add(path_568210, "subscriptionId", newJString(subscriptionId))
+  result = call_568209.call(path_568210, query_568211, nil, nil, nil)
 
-var resourceHealthMetadataListBySite* = Call_ResourceHealthMetadataListBySite_593968(
+var resourceHealthMetadataListBySite* = Call_ResourceHealthMetadataListBySite_568201(
     name: "resourceHealthMetadataListBySite", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/resourceHealthMetadata",
-    validator: validate_ResourceHealthMetadataListBySite_593969, base: "",
-    url: url_ResourceHealthMetadataListBySite_593970, schemes: {Scheme.Https})
+    validator: validate_ResourceHealthMetadataListBySite_568202, base: "",
+    url: url_ResourceHealthMetadataListBySite_568203, schemes: {Scheme.Https})
 type
-  Call_ResourceHealthMetadataGetBySite_593979 = ref object of OpenApiRestCall_593424
-proc url_ResourceHealthMetadataGetBySite_593981(protocol: Scheme; host: string;
+  Call_ResourceHealthMetadataGetBySite_568212 = ref object of OpenApiRestCall_567657
+proc url_ResourceHealthMetadataGetBySite_568214(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -435,7 +435,7 @@ proc url_ResourceHealthMetadataGetBySite_593981(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResourceHealthMetadataGetBySite_593980(path: JsonNode;
+proc validate_ResourceHealthMetadataGetBySite_568213(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the category of ResourceHealthMetadata to use for the given site
   ## 
@@ -451,21 +451,21 @@ proc validate_ResourceHealthMetadataGetBySite_593980(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593982 = path.getOrDefault("resourceGroupName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568215 = path.getOrDefault("resourceGroupName")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "resourceGroupName", valid_593982
-  var valid_593983 = path.getOrDefault("name")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_568215 != nil:
+    section.add "resourceGroupName", valid_568215
+  var valid_568216 = path.getOrDefault("name")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "name", valid_593983
-  var valid_593984 = path.getOrDefault("subscriptionId")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_568216 != nil:
+    section.add "name", valid_568216
+  var valid_568217 = path.getOrDefault("subscriptionId")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "subscriptionId", valid_593984
+  if valid_568217 != nil:
+    section.add "subscriptionId", valid_568217
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -473,11 +473,11 @@ proc validate_ResourceHealthMetadataGetBySite_593980(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568218 = query.getOrDefault("api-version")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_568218 != nil:
+    section.add "api-version", valid_568218
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -486,21 +486,21 @@ proc validate_ResourceHealthMetadataGetBySite_593980(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593986: Call_ResourceHealthMetadataGetBySite_593979;
+proc call*(call_568219: Call_ResourceHealthMetadataGetBySite_568212;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the category of ResourceHealthMetadata to use for the given site
   ## 
-  let valid = call_593986.validator(path, query, header, formData, body)
-  let scheme = call_593986.pickScheme
+  let valid = call_568219.validator(path, query, header, formData, body)
+  let scheme = call_568219.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593986.url(scheme.get, call_593986.host, call_593986.base,
-                         call_593986.route, valid.getOrDefault("path"),
+  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
+                         call_568219.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593986, url, valid)
+  result = hook(call_568219, url, valid)
 
-proc call*(call_593987: Call_ResourceHealthMetadataGetBySite_593979;
+proc call*(call_568220: Call_ResourceHealthMetadataGetBySite_568212;
           resourceGroupName: string; apiVersion: string; name: string;
           subscriptionId: string): Recallable =
   ## resourceHealthMetadataGetBySite
@@ -513,22 +513,22 @@ proc call*(call_593987: Call_ResourceHealthMetadataGetBySite_593979;
   ##       : Name of web app
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_593988 = newJObject()
-  var query_593989 = newJObject()
-  add(path_593988, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593989, "api-version", newJString(apiVersion))
-  add(path_593988, "name", newJString(name))
-  add(path_593988, "subscriptionId", newJString(subscriptionId))
-  result = call_593987.call(path_593988, query_593989, nil, nil, nil)
+  var path_568221 = newJObject()
+  var query_568222 = newJObject()
+  add(path_568221, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568222, "api-version", newJString(apiVersion))
+  add(path_568221, "name", newJString(name))
+  add(path_568221, "subscriptionId", newJString(subscriptionId))
+  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
 
-var resourceHealthMetadataGetBySite* = Call_ResourceHealthMetadataGetBySite_593979(
+var resourceHealthMetadataGetBySite* = Call_ResourceHealthMetadataGetBySite_568212(
     name: "resourceHealthMetadataGetBySite", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/resourceHealthMetadata/default",
-    validator: validate_ResourceHealthMetadataGetBySite_593980, base: "",
-    url: url_ResourceHealthMetadataGetBySite_593981, schemes: {Scheme.Https})
+    validator: validate_ResourceHealthMetadataGetBySite_568213, base: "",
+    url: url_ResourceHealthMetadataGetBySite_568214, schemes: {Scheme.Https})
 type
-  Call_ResourceHealthMetadataListBySiteSlot_593990 = ref object of OpenApiRestCall_593424
-proc url_ResourceHealthMetadataListBySiteSlot_593992(protocol: Scheme;
+  Call_ResourceHealthMetadataListBySiteSlot_568223 = ref object of OpenApiRestCall_567657
+proc url_ResourceHealthMetadataListBySiteSlot_568225(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -554,7 +554,7 @@ proc url_ResourceHealthMetadataListBySiteSlot_593992(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResourceHealthMetadataListBySiteSlot_593991(path: JsonNode;
+proc validate_ResourceHealthMetadataListBySiteSlot_568224(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the category of ResourceHealthMetadata to use for the given site as a collection
   ## 
@@ -572,26 +572,26 @@ proc validate_ResourceHealthMetadataListBySiteSlot_593991(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593993 = path.getOrDefault("resourceGroupName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568226 = path.getOrDefault("resourceGroupName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "resourceGroupName", valid_593993
-  var valid_593994 = path.getOrDefault("name")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "resourceGroupName", valid_568226
+  var valid_568227 = path.getOrDefault("name")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "name", valid_593994
-  var valid_593995 = path.getOrDefault("slot")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_568227 != nil:
+    section.add "name", valid_568227
+  var valid_568228 = path.getOrDefault("slot")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "slot", valid_593995
-  var valid_593996 = path.getOrDefault("subscriptionId")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_568228 != nil:
+    section.add "slot", valid_568228
+  var valid_568229 = path.getOrDefault("subscriptionId")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "subscriptionId", valid_593996
+  if valid_568229 != nil:
+    section.add "subscriptionId", valid_568229
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -599,11 +599,11 @@ proc validate_ResourceHealthMetadataListBySiteSlot_593991(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593997 = query.getOrDefault("api-version")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  var valid_568230 = query.getOrDefault("api-version")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "api-version", valid_593997
+  if valid_568230 != nil:
+    section.add "api-version", valid_568230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -612,21 +612,21 @@ proc validate_ResourceHealthMetadataListBySiteSlot_593991(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593998: Call_ResourceHealthMetadataListBySiteSlot_593990;
+proc call*(call_568231: Call_ResourceHealthMetadataListBySiteSlot_568223;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the category of ResourceHealthMetadata to use for the given site as a collection
   ## 
-  let valid = call_593998.validator(path, query, header, formData, body)
-  let scheme = call_593998.pickScheme
+  let valid = call_568231.validator(path, query, header, formData, body)
+  let scheme = call_568231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593998.url(scheme.get, call_593998.host, call_593998.base,
-                         call_593998.route, valid.getOrDefault("path"),
+  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
+                         call_568231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593998, url, valid)
+  result = hook(call_568231, url, valid)
 
-proc call*(call_593999: Call_ResourceHealthMetadataListBySiteSlot_593990;
+proc call*(call_568232: Call_ResourceHealthMetadataListBySiteSlot_568223;
           resourceGroupName: string; apiVersion: string; name: string; slot: string;
           subscriptionId: string): Recallable =
   ## resourceHealthMetadataListBySiteSlot
@@ -641,23 +641,23 @@ proc call*(call_593999: Call_ResourceHealthMetadataListBySiteSlot_593990;
   ##       : Name of web app slot. If not specified then will default to production slot.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594000 = newJObject()
-  var query_594001 = newJObject()
-  add(path_594000, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594001, "api-version", newJString(apiVersion))
-  add(path_594000, "name", newJString(name))
-  add(path_594000, "slot", newJString(slot))
-  add(path_594000, "subscriptionId", newJString(subscriptionId))
-  result = call_593999.call(path_594000, query_594001, nil, nil, nil)
+  var path_568233 = newJObject()
+  var query_568234 = newJObject()
+  add(path_568233, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568234, "api-version", newJString(apiVersion))
+  add(path_568233, "name", newJString(name))
+  add(path_568233, "slot", newJString(slot))
+  add(path_568233, "subscriptionId", newJString(subscriptionId))
+  result = call_568232.call(path_568233, query_568234, nil, nil, nil)
 
-var resourceHealthMetadataListBySiteSlot* = Call_ResourceHealthMetadataListBySiteSlot_593990(
+var resourceHealthMetadataListBySiteSlot* = Call_ResourceHealthMetadataListBySiteSlot_568223(
     name: "resourceHealthMetadataListBySiteSlot", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/resourceHealthMetadata",
-    validator: validate_ResourceHealthMetadataListBySiteSlot_593991, base: "",
-    url: url_ResourceHealthMetadataListBySiteSlot_593992, schemes: {Scheme.Https})
+    validator: validate_ResourceHealthMetadataListBySiteSlot_568224, base: "",
+    url: url_ResourceHealthMetadataListBySiteSlot_568225, schemes: {Scheme.Https})
 type
-  Call_ResourceHealthMetadataGetBySiteSlot_594002 = ref object of OpenApiRestCall_593424
-proc url_ResourceHealthMetadataGetBySiteSlot_594004(protocol: Scheme; host: string;
+  Call_ResourceHealthMetadataGetBySiteSlot_568235 = ref object of OpenApiRestCall_567657
+proc url_ResourceHealthMetadataGetBySiteSlot_568237(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -683,7 +683,7 @@ proc url_ResourceHealthMetadataGetBySiteSlot_594004(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResourceHealthMetadataGetBySiteSlot_594003(path: JsonNode;
+proc validate_ResourceHealthMetadataGetBySiteSlot_568236(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the category of ResourceHealthMetadata to use for the given site
   ## 
@@ -701,26 +701,26 @@ proc validate_ResourceHealthMetadataGetBySiteSlot_594003(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594005 = path.getOrDefault("resourceGroupName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_568238 = path.getOrDefault("resourceGroupName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "resourceGroupName", valid_594005
-  var valid_594006 = path.getOrDefault("name")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_568238 != nil:
+    section.add "resourceGroupName", valid_568238
+  var valid_568239 = path.getOrDefault("name")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "name", valid_594006
-  var valid_594007 = path.getOrDefault("slot")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "name", valid_568239
+  var valid_568240 = path.getOrDefault("slot")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "slot", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568240 != nil:
+    section.add "slot", valid_568240
+  var valid_568241 = path.getOrDefault("subscriptionId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
+  if valid_568241 != nil:
+    section.add "subscriptionId", valid_568241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -728,11 +728,11 @@ proc validate_ResourceHealthMetadataGetBySiteSlot_594003(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594009 = query.getOrDefault("api-version")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_568242 = query.getOrDefault("api-version")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "api-version", valid_594009
+  if valid_568242 != nil:
+    section.add "api-version", valid_568242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -741,21 +741,21 @@ proc validate_ResourceHealthMetadataGetBySiteSlot_594003(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594010: Call_ResourceHealthMetadataGetBySiteSlot_594002;
+proc call*(call_568243: Call_ResourceHealthMetadataGetBySiteSlot_568235;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the category of ResourceHealthMetadata to use for the given site
   ## 
-  let valid = call_594010.validator(path, query, header, formData, body)
-  let scheme = call_594010.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594010.url(scheme.get, call_594010.host, call_594010.base,
-                         call_594010.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594010, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594011: Call_ResourceHealthMetadataGetBySiteSlot_594002;
+proc call*(call_568244: Call_ResourceHealthMetadataGetBySiteSlot_568235;
           resourceGroupName: string; apiVersion: string; name: string; slot: string;
           subscriptionId: string): Recallable =
   ## resourceHealthMetadataGetBySiteSlot
@@ -770,20 +770,20 @@ proc call*(call_594011: Call_ResourceHealthMetadataGetBySiteSlot_594002;
   ##       : Name of web app slot. If not specified then will default to production slot.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_594012 = newJObject()
-  var query_594013 = newJObject()
-  add(path_594012, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594013, "api-version", newJString(apiVersion))
-  add(path_594012, "name", newJString(name))
-  add(path_594012, "slot", newJString(slot))
-  add(path_594012, "subscriptionId", newJString(subscriptionId))
-  result = call_594011.call(path_594012, query_594013, nil, nil, nil)
+  var path_568245 = newJObject()
+  var query_568246 = newJObject()
+  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568246, "api-version", newJString(apiVersion))
+  add(path_568245, "name", newJString(name))
+  add(path_568245, "slot", newJString(slot))
+  add(path_568245, "subscriptionId", newJString(subscriptionId))
+  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
 
-var resourceHealthMetadataGetBySiteSlot* = Call_ResourceHealthMetadataGetBySiteSlot_594002(
+var resourceHealthMetadataGetBySiteSlot* = Call_ResourceHealthMetadataGetBySiteSlot_568235(
     name: "resourceHealthMetadataGetBySiteSlot", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/slots/{slot}/resourceHealthMetadata/default",
-    validator: validate_ResourceHealthMetadataGetBySiteSlot_594003, base: "",
-    url: url_ResourceHealthMetadataGetBySiteSlot_594004, schemes: {Scheme.Https})
+    validator: validate_ResourceHealthMetadataGetBySiteSlot_568236, base: "",
+    url: url_ResourceHealthMetadataGetBySiteSlot_568237, schemes: {Scheme.Https})
 export
   rest
 

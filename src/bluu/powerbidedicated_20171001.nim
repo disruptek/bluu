@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: PowerBIDedicated
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "powerbidedicated"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_OperationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
+proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available PowerBIDedicated REST API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = query.getOrDefault("api-version")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
+  if valid_568041 != nil:
+    section.add "api-version", valid_568041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593831: Call_OperationsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568064: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available PowerBIDedicated REST API operations.
   ## 
-  let valid = call_593831.validator(path, query, header, formData, body)
-  let scheme = call_593831.pickScheme
+  let valid = call_568064.validator(path, query, header, formData, body)
+  let scheme = call_568064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593831.url(scheme.get, call_593831.host, call_593831.base,
-                         call_593831.route, valid.getOrDefault("path"),
+  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
+                         call_568064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593831, url, valid)
+  result = hook(call_568064, url, valid)
 
-proc call*(call_593902: Call_OperationsList_593647; apiVersion: string): Recallable =
+proc call*(call_568135: Call_OperationsList_567880; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available PowerBIDedicated REST API operations.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  var query_593903 = newJObject()
-  add(query_593903, "api-version", newJString(apiVersion))
-  result = call_593902.call(nil, query_593903, nil, nil, nil)
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  result = call_568135.call(nil, query_568136, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593647(name: "operationsList",
+var operationsList* = Call_OperationsList_567880(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.PowerBIDedicated/operations",
-    validator: validate_OperationsList_593648, base: "", url: url_OperationsList_593649,
+    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
     schemes: {Scheme.Https})
 type
-  Call_CapacitiesList_593943 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesList_593945(protocol: Scheme; host: string; base: string;
+  Call_CapacitiesList_568176 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesList_568178(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +185,7 @@ proc url_CapacitiesList_593945(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesList_593944(path: JsonNode; query: JsonNode;
+proc validate_CapacitiesList_568177(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all the Dedicated capacities for the given subscription.
@@ -198,11 +198,11 @@ proc validate_CapacitiesList_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_568193 = path.getOrDefault("subscriptionId")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
+  if valid_568193 != nil:
+    section.add "subscriptionId", valid_568193
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -210,11 +210,11 @@ proc validate_CapacitiesList_593944(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593961 = query.getOrDefault("api-version")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568194 = query.getOrDefault("api-version")
+  valid_568194 = validateParameter(valid_568194, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "api-version", valid_593961
+  if valid_568194 != nil:
+    section.add "api-version", valid_568194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -223,20 +223,20 @@ proc validate_CapacitiesList_593944(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593962: Call_CapacitiesList_593943; path: JsonNode; query: JsonNode;
+proc call*(call_568195: Call_CapacitiesList_568176; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the Dedicated capacities for the given subscription.
   ## 
-  let valid = call_593962.validator(path, query, header, formData, body)
-  let scheme = call_593962.pickScheme
+  let valid = call_568195.validator(path, query, header, formData, body)
+  let scheme = call_568195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593962.url(scheme.get, call_593962.host, call_593962.base,
-                         call_593962.route, valid.getOrDefault("path"),
+  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
+                         call_568195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593962, url, valid)
+  result = hook(call_568195, url, valid)
 
-proc call*(call_593963: Call_CapacitiesList_593943; apiVersion: string;
+proc call*(call_568196: Call_CapacitiesList_568176; apiVersion: string;
           subscriptionId: string): Recallable =
   ## capacitiesList
   ## Lists all the Dedicated capacities for the given subscription.
@@ -244,19 +244,19 @@ proc call*(call_593963: Call_CapacitiesList_593943; apiVersion: string;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593964 = newJObject()
-  var query_593965 = newJObject()
-  add(query_593965, "api-version", newJString(apiVersion))
-  add(path_593964, "subscriptionId", newJString(subscriptionId))
-  result = call_593963.call(path_593964, query_593965, nil, nil, nil)
+  var path_568197 = newJObject()
+  var query_568198 = newJObject()
+  add(query_568198, "api-version", newJString(apiVersion))
+  add(path_568197, "subscriptionId", newJString(subscriptionId))
+  result = call_568196.call(path_568197, query_568198, nil, nil, nil)
 
-var capacitiesList* = Call_CapacitiesList_593943(name: "capacitiesList",
+var capacitiesList* = Call_CapacitiesList_568176(name: "capacitiesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PowerBIDedicated/capacities",
-    validator: validate_CapacitiesList_593944, base: "", url: url_CapacitiesList_593945,
+    validator: validate_CapacitiesList_568177, base: "", url: url_CapacitiesList_568178,
     schemes: {Scheme.Https})
 type
-  Call_CapacitiesCheckNameAvailability_593966 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesCheckNameAvailability_593968(protocol: Scheme; host: string;
+  Call_CapacitiesCheckNameAvailability_568199 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesCheckNameAvailability_568201(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -276,7 +276,7 @@ proc url_CapacitiesCheckNameAvailability_593968(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesCheckNameAvailability_593967(path: JsonNode;
+proc validate_CapacitiesCheckNameAvailability_568200(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check the name availability in the target location.
   ## 
@@ -290,16 +290,16 @@ proc validate_CapacitiesCheckNameAvailability_593967(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593969 = path.getOrDefault("subscriptionId")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_568202 = path.getOrDefault("subscriptionId")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "subscriptionId", valid_593969
-  var valid_593970 = path.getOrDefault("location")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_568202 != nil:
+    section.add "subscriptionId", valid_568202
+  var valid_568203 = path.getOrDefault("location")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "location", valid_593970
+  if valid_568203 != nil:
+    section.add "location", valid_568203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -307,11 +307,11 @@ proc validate_CapacitiesCheckNameAvailability_593967(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568204 = query.getOrDefault("api-version")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
+  if valid_568204 != nil:
+    section.add "api-version", valid_568204
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -325,21 +325,21 @@ proc validate_CapacitiesCheckNameAvailability_593967(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593973: Call_CapacitiesCheckNameAvailability_593966;
+proc call*(call_568206: Call_CapacitiesCheckNameAvailability_568199;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Check the name availability in the target location.
   ## 
-  let valid = call_593973.validator(path, query, header, formData, body)
-  let scheme = call_593973.pickScheme
+  let valid = call_568206.validator(path, query, header, formData, body)
+  let scheme = call_568206.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593973.url(scheme.get, call_593973.host, call_593973.base,
-                         call_593973.route, valid.getOrDefault("path"),
+  let url = call_568206.url(scheme.get, call_568206.host, call_568206.base,
+                         call_568206.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593973, url, valid)
+  result = hook(call_568206, url, valid)
 
-proc call*(call_593974: Call_CapacitiesCheckNameAvailability_593966;
+proc call*(call_568207: Call_CapacitiesCheckNameAvailability_568199;
           apiVersion: string; subscriptionId: string; location: string;
           capacityParameters: JsonNode): Recallable =
   ## capacitiesCheckNameAvailability
@@ -352,24 +352,24 @@ proc call*(call_593974: Call_CapacitiesCheckNameAvailability_593966;
   ##           : The region name which the operation will lookup into.
   ##   capacityParameters: JObject (required)
   ##                     : The name of the capacity.
-  var path_593975 = newJObject()
-  var query_593976 = newJObject()
-  var body_593977 = newJObject()
-  add(query_593976, "api-version", newJString(apiVersion))
-  add(path_593975, "subscriptionId", newJString(subscriptionId))
-  add(path_593975, "location", newJString(location))
+  var path_568208 = newJObject()
+  var query_568209 = newJObject()
+  var body_568210 = newJObject()
+  add(query_568209, "api-version", newJString(apiVersion))
+  add(path_568208, "subscriptionId", newJString(subscriptionId))
+  add(path_568208, "location", newJString(location))
   if capacityParameters != nil:
-    body_593977 = capacityParameters
-  result = call_593974.call(path_593975, query_593976, nil, nil, body_593977)
+    body_568210 = capacityParameters
+  result = call_568207.call(path_568208, query_568209, nil, nil, body_568210)
 
-var capacitiesCheckNameAvailability* = Call_CapacitiesCheckNameAvailability_593966(
+var capacitiesCheckNameAvailability* = Call_CapacitiesCheckNameAvailability_568199(
     name: "capacitiesCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PowerBIDedicated/locations/{location}/checkNameAvailability",
-    validator: validate_CapacitiesCheckNameAvailability_593967, base: "",
-    url: url_CapacitiesCheckNameAvailability_593968, schemes: {Scheme.Https})
+    validator: validate_CapacitiesCheckNameAvailability_568200, base: "",
+    url: url_CapacitiesCheckNameAvailability_568201, schemes: {Scheme.Https})
 type
-  Call_CapacitiesListSkus_593978 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesListSkus_593980(protocol: Scheme; host: string; base: string;
+  Call_CapacitiesListSkus_568211 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesListSkus_568213(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -385,7 +385,7 @@ proc url_CapacitiesListSkus_593980(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesListSkus_593979(path: JsonNode; query: JsonNode;
+proc validate_CapacitiesListSkus_568212(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Lists eligible SKUs for PowerBI Dedicated resource provider.
@@ -398,11 +398,11 @@ proc validate_CapacitiesListSkus_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593981 = path.getOrDefault("subscriptionId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = path.getOrDefault("subscriptionId")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "subscriptionId", valid_593981
+  if valid_568214 != nil:
+    section.add "subscriptionId", valid_568214
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -410,11 +410,11 @@ proc validate_CapacitiesListSkus_593979(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593982 = query.getOrDefault("api-version")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568215 = query.getOrDefault("api-version")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "api-version", valid_593982
+  if valid_568215 != nil:
+    section.add "api-version", valid_568215
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -423,20 +423,20 @@ proc validate_CapacitiesListSkus_593979(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593983: Call_CapacitiesListSkus_593978; path: JsonNode;
+proc call*(call_568216: Call_CapacitiesListSkus_568211; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists eligible SKUs for PowerBI Dedicated resource provider.
   ## 
-  let valid = call_593983.validator(path, query, header, formData, body)
-  let scheme = call_593983.pickScheme
+  let valid = call_568216.validator(path, query, header, formData, body)
+  let scheme = call_568216.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593983.url(scheme.get, call_593983.host, call_593983.base,
-                         call_593983.route, valid.getOrDefault("path"),
+  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
+                         call_568216.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593983, url, valid)
+  result = hook(call_568216, url, valid)
 
-proc call*(call_593984: Call_CapacitiesListSkus_593978; apiVersion: string;
+proc call*(call_568217: Call_CapacitiesListSkus_568211; apiVersion: string;
           subscriptionId: string): Recallable =
   ## capacitiesListSkus
   ## Lists eligible SKUs for PowerBI Dedicated resource provider.
@@ -444,20 +444,20 @@ proc call*(call_593984: Call_CapacitiesListSkus_593978; apiVersion: string;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593985 = newJObject()
-  var query_593986 = newJObject()
-  add(query_593986, "api-version", newJString(apiVersion))
-  add(path_593985, "subscriptionId", newJString(subscriptionId))
-  result = call_593984.call(path_593985, query_593986, nil, nil, nil)
+  var path_568218 = newJObject()
+  var query_568219 = newJObject()
+  add(query_568219, "api-version", newJString(apiVersion))
+  add(path_568218, "subscriptionId", newJString(subscriptionId))
+  result = call_568217.call(path_568218, query_568219, nil, nil, nil)
 
-var capacitiesListSkus* = Call_CapacitiesListSkus_593978(
+var capacitiesListSkus* = Call_CapacitiesListSkus_568211(
     name: "capacitiesListSkus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PowerBIDedicated/skus",
-    validator: validate_CapacitiesListSkus_593979, base: "",
-    url: url_CapacitiesListSkus_593980, schemes: {Scheme.Https})
+    validator: validate_CapacitiesListSkus_568212, base: "",
+    url: url_CapacitiesListSkus_568213, schemes: {Scheme.Https})
 type
-  Call_CapacitiesListByResourceGroup_593987 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesListByResourceGroup_593989(protocol: Scheme; host: string;
+  Call_CapacitiesListByResourceGroup_568220 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesListByResourceGroup_568222(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -478,7 +478,7 @@ proc url_CapacitiesListByResourceGroup_593989(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesListByResourceGroup_593988(path: JsonNode; query: JsonNode;
+proc validate_CapacitiesListByResourceGroup_568221(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the Dedicated capacities for the given resource group.
   ## 
@@ -492,16 +492,16 @@ proc validate_CapacitiesListByResourceGroup_593988(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593990 = path.getOrDefault("resourceGroupName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568223 = path.getOrDefault("resourceGroupName")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "resourceGroupName", valid_593990
-  var valid_593991 = path.getOrDefault("subscriptionId")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_568223 != nil:
+    section.add "resourceGroupName", valid_568223
+  var valid_568224 = path.getOrDefault("subscriptionId")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "subscriptionId", valid_593991
+  if valid_568224 != nil:
+    section.add "subscriptionId", valid_568224
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -509,11 +509,11 @@ proc validate_CapacitiesListByResourceGroup_593988(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593992 = query.getOrDefault("api-version")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568225 = query.getOrDefault("api-version")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "api-version", valid_593992
+  if valid_568225 != nil:
+    section.add "api-version", valid_568225
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -522,20 +522,20 @@ proc validate_CapacitiesListByResourceGroup_593988(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593993: Call_CapacitiesListByResourceGroup_593987; path: JsonNode;
+proc call*(call_568226: Call_CapacitiesListByResourceGroup_568220; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the Dedicated capacities for the given resource group.
   ## 
-  let valid = call_593993.validator(path, query, header, formData, body)
-  let scheme = call_593993.pickScheme
+  let valid = call_568226.validator(path, query, header, formData, body)
+  let scheme = call_568226.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593993.url(scheme.get, call_593993.host, call_593993.base,
-                         call_593993.route, valid.getOrDefault("path"),
+  let url = call_568226.url(scheme.get, call_568226.host, call_568226.base,
+                         call_568226.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593993, url, valid)
+  result = hook(call_568226, url, valid)
 
-proc call*(call_593994: Call_CapacitiesListByResourceGroup_593987;
+proc call*(call_568227: Call_CapacitiesListByResourceGroup_568220;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## capacitiesListByResourceGroup
   ## Gets all the Dedicated capacities for the given resource group.
@@ -545,21 +545,21 @@ proc call*(call_593994: Call_CapacitiesListByResourceGroup_593987;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593995 = newJObject()
-  var query_593996 = newJObject()
-  add(path_593995, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593996, "api-version", newJString(apiVersion))
-  add(path_593995, "subscriptionId", newJString(subscriptionId))
-  result = call_593994.call(path_593995, query_593996, nil, nil, nil)
+  var path_568228 = newJObject()
+  var query_568229 = newJObject()
+  add(path_568228, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568229, "api-version", newJString(apiVersion))
+  add(path_568228, "subscriptionId", newJString(subscriptionId))
+  result = call_568227.call(path_568228, query_568229, nil, nil, nil)
 
-var capacitiesListByResourceGroup* = Call_CapacitiesListByResourceGroup_593987(
+var capacitiesListByResourceGroup* = Call_CapacitiesListByResourceGroup_568220(
     name: "capacitiesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBIDedicated/capacities",
-    validator: validate_CapacitiesListByResourceGroup_593988, base: "",
-    url: url_CapacitiesListByResourceGroup_593989, schemes: {Scheme.Https})
+    validator: validate_CapacitiesListByResourceGroup_568221, base: "",
+    url: url_CapacitiesListByResourceGroup_568222, schemes: {Scheme.Https})
 type
-  Call_CapacitiesCreate_594008 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesCreate_594010(protocol: Scheme; host: string; base: string;
+  Call_CapacitiesCreate_568241 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesCreate_568243(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -583,7 +583,7 @@ proc url_CapacitiesCreate_594010(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesCreate_594009(path: JsonNode; query: JsonNode;
+proc validate_CapacitiesCreate_568242(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Provisions the specified Dedicated capacity based on the configuration specified in the request.
@@ -600,21 +600,21 @@ proc validate_CapacitiesCreate_594009(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594011 = path.getOrDefault("resourceGroupName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_568244 = path.getOrDefault("resourceGroupName")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "resourceGroupName", valid_594011
-  var valid_594012 = path.getOrDefault("subscriptionId")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_568244 != nil:
+    section.add "resourceGroupName", valid_568244
+  var valid_568245 = path.getOrDefault("subscriptionId")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "subscriptionId", valid_594012
-  var valid_594013 = path.getOrDefault("dedicatedCapacityName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  if valid_568245 != nil:
+    section.add "subscriptionId", valid_568245
+  var valid_568246 = path.getOrDefault("dedicatedCapacityName")
+  valid_568246 = validateParameter(valid_568246, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "dedicatedCapacityName", valid_594013
+  if valid_568246 != nil:
+    section.add "dedicatedCapacityName", valid_568246
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -622,11 +622,11 @@ proc validate_CapacitiesCreate_594009(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594014 = query.getOrDefault("api-version")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_568247 = query.getOrDefault("api-version")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "api-version", valid_594014
+  if valid_568247 != nil:
+    section.add "api-version", valid_568247
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -640,20 +640,20 @@ proc validate_CapacitiesCreate_594009(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594016: Call_CapacitiesCreate_594008; path: JsonNode;
+proc call*(call_568249: Call_CapacitiesCreate_568241; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Provisions the specified Dedicated capacity based on the configuration specified in the request.
   ## 
-  let valid = call_594016.validator(path, query, header, formData, body)
-  let scheme = call_594016.pickScheme
+  let valid = call_568249.validator(path, query, header, formData, body)
+  let scheme = call_568249.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594016.url(scheme.get, call_594016.host, call_594016.base,
-                         call_594016.route, valid.getOrDefault("path"),
+  let url = call_568249.url(scheme.get, call_568249.host, call_568249.base,
+                         call_568249.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594016, url, valid)
+  result = hook(call_568249, url, valid)
 
-proc call*(call_594017: Call_CapacitiesCreate_594008; resourceGroupName: string;
+proc call*(call_568250: Call_CapacitiesCreate_568241; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; dedicatedCapacityName: string;
           capacityParameters: JsonNode): Recallable =
   ## capacitiesCreate
@@ -668,24 +668,24 @@ proc call*(call_594017: Call_CapacitiesCreate_594008; resourceGroupName: string;
   ##                        : The name of the Dedicated capacity. It must be a minimum of 3 characters, and a maximum of 63.
   ##   capacityParameters: JObject (required)
   ##                     : Contains the information used to provision the Dedicated capacity.
-  var path_594018 = newJObject()
-  var query_594019 = newJObject()
-  var body_594020 = newJObject()
-  add(path_594018, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594019, "api-version", newJString(apiVersion))
-  add(path_594018, "subscriptionId", newJString(subscriptionId))
-  add(path_594018, "dedicatedCapacityName", newJString(dedicatedCapacityName))
+  var path_568251 = newJObject()
+  var query_568252 = newJObject()
+  var body_568253 = newJObject()
+  add(path_568251, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568252, "api-version", newJString(apiVersion))
+  add(path_568251, "subscriptionId", newJString(subscriptionId))
+  add(path_568251, "dedicatedCapacityName", newJString(dedicatedCapacityName))
   if capacityParameters != nil:
-    body_594020 = capacityParameters
-  result = call_594017.call(path_594018, query_594019, nil, nil, body_594020)
+    body_568253 = capacityParameters
+  result = call_568250.call(path_568251, query_568252, nil, nil, body_568253)
 
-var capacitiesCreate* = Call_CapacitiesCreate_594008(name: "capacitiesCreate",
+var capacitiesCreate* = Call_CapacitiesCreate_568241(name: "capacitiesCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBIDedicated/capacities/{dedicatedCapacityName}",
-    validator: validate_CapacitiesCreate_594009, base: "",
-    url: url_CapacitiesCreate_594010, schemes: {Scheme.Https})
+    validator: validate_CapacitiesCreate_568242, base: "",
+    url: url_CapacitiesCreate_568243, schemes: {Scheme.Https})
 type
-  Call_CapacitiesGetDetails_593997 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesGetDetails_593999(protocol: Scheme; host: string; base: string;
+  Call_CapacitiesGetDetails_568230 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesGetDetails_568232(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -709,7 +709,7 @@ proc url_CapacitiesGetDetails_593999(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesGetDetails_593998(path: JsonNode; query: JsonNode;
+proc validate_CapacitiesGetDetails_568231(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets details about the specified dedicated capacity.
   ## 
@@ -725,21 +725,21 @@ proc validate_CapacitiesGetDetails_593998(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594000 = path.getOrDefault("resourceGroupName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_568233 = path.getOrDefault("resourceGroupName")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "resourceGroupName", valid_594000
-  var valid_594001 = path.getOrDefault("subscriptionId")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_568233 != nil:
+    section.add "resourceGroupName", valid_568233
+  var valid_568234 = path.getOrDefault("subscriptionId")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "subscriptionId", valid_594001
-  var valid_594002 = path.getOrDefault("dedicatedCapacityName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_568234 != nil:
+    section.add "subscriptionId", valid_568234
+  var valid_568235 = path.getOrDefault("dedicatedCapacityName")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "dedicatedCapacityName", valid_594002
+  if valid_568235 != nil:
+    section.add "dedicatedCapacityName", valid_568235
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -747,11 +747,11 @@ proc validate_CapacitiesGetDetails_593998(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594003 = query.getOrDefault("api-version")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  var valid_568236 = query.getOrDefault("api-version")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "api-version", valid_594003
+  if valid_568236 != nil:
+    section.add "api-version", valid_568236
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -760,20 +760,20 @@ proc validate_CapacitiesGetDetails_593998(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594004: Call_CapacitiesGetDetails_593997; path: JsonNode;
+proc call*(call_568237: Call_CapacitiesGetDetails_568230; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets details about the specified dedicated capacity.
   ## 
-  let valid = call_594004.validator(path, query, header, formData, body)
-  let scheme = call_594004.pickScheme
+  let valid = call_568237.validator(path, query, header, formData, body)
+  let scheme = call_568237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594004.url(scheme.get, call_594004.host, call_594004.base,
-                         call_594004.route, valid.getOrDefault("path"),
+  let url = call_568237.url(scheme.get, call_568237.host, call_568237.base,
+                         call_568237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594004, url, valid)
+  result = hook(call_568237, url, valid)
 
-proc call*(call_594005: Call_CapacitiesGetDetails_593997;
+proc call*(call_568238: Call_CapacitiesGetDetails_568230;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           dedicatedCapacityName: string): Recallable =
   ## capacitiesGetDetails
@@ -786,22 +786,22 @@ proc call*(call_594005: Call_CapacitiesGetDetails_593997;
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   dedicatedCapacityName: string (required)
   ##                        : The name of the dedicated capacity. It must be a minimum of 3 characters, and a maximum of 63.
-  var path_594006 = newJObject()
-  var query_594007 = newJObject()
-  add(path_594006, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594007, "api-version", newJString(apiVersion))
-  add(path_594006, "subscriptionId", newJString(subscriptionId))
-  add(path_594006, "dedicatedCapacityName", newJString(dedicatedCapacityName))
-  result = call_594005.call(path_594006, query_594007, nil, nil, nil)
+  var path_568239 = newJObject()
+  var query_568240 = newJObject()
+  add(path_568239, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568240, "api-version", newJString(apiVersion))
+  add(path_568239, "subscriptionId", newJString(subscriptionId))
+  add(path_568239, "dedicatedCapacityName", newJString(dedicatedCapacityName))
+  result = call_568238.call(path_568239, query_568240, nil, nil, nil)
 
-var capacitiesGetDetails* = Call_CapacitiesGetDetails_593997(
+var capacitiesGetDetails* = Call_CapacitiesGetDetails_568230(
     name: "capacitiesGetDetails", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBIDedicated/capacities/{dedicatedCapacityName}",
-    validator: validate_CapacitiesGetDetails_593998, base: "",
-    url: url_CapacitiesGetDetails_593999, schemes: {Scheme.Https})
+    validator: validate_CapacitiesGetDetails_568231, base: "",
+    url: url_CapacitiesGetDetails_568232, schemes: {Scheme.Https})
 type
-  Call_CapacitiesUpdate_594032 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesUpdate_594034(protocol: Scheme; host: string; base: string;
+  Call_CapacitiesUpdate_568265 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesUpdate_568267(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -825,7 +825,7 @@ proc url_CapacitiesUpdate_594034(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesUpdate_594033(path: JsonNode; query: JsonNode;
+proc validate_CapacitiesUpdate_568266(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Updates the current state of the specified Dedicated capacity.
@@ -842,21 +842,21 @@ proc validate_CapacitiesUpdate_594033(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594035 = path.getOrDefault("resourceGroupName")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  var valid_568268 = path.getOrDefault("resourceGroupName")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "resourceGroupName", valid_594035
-  var valid_594036 = path.getOrDefault("subscriptionId")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  if valid_568268 != nil:
+    section.add "resourceGroupName", valid_568268
+  var valid_568269 = path.getOrDefault("subscriptionId")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "subscriptionId", valid_594036
-  var valid_594037 = path.getOrDefault("dedicatedCapacityName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_568269 != nil:
+    section.add "subscriptionId", valid_568269
+  var valid_568270 = path.getOrDefault("dedicatedCapacityName")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "dedicatedCapacityName", valid_594037
+  if valid_568270 != nil:
+    section.add "dedicatedCapacityName", valid_568270
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -864,11 +864,11 @@ proc validate_CapacitiesUpdate_594033(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594038 = query.getOrDefault("api-version")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  var valid_568271 = query.getOrDefault("api-version")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "api-version", valid_594038
+  if valid_568271 != nil:
+    section.add "api-version", valid_568271
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -882,20 +882,20 @@ proc validate_CapacitiesUpdate_594033(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594040: Call_CapacitiesUpdate_594032; path: JsonNode;
+proc call*(call_568273: Call_CapacitiesUpdate_568265; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the current state of the specified Dedicated capacity.
   ## 
-  let valid = call_594040.validator(path, query, header, formData, body)
-  let scheme = call_594040.pickScheme
+  let valid = call_568273.validator(path, query, header, formData, body)
+  let scheme = call_568273.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594040.url(scheme.get, call_594040.host, call_594040.base,
-                         call_594040.route, valid.getOrDefault("path"),
+  let url = call_568273.url(scheme.get, call_568273.host, call_568273.base,
+                         call_568273.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594040, url, valid)
+  result = hook(call_568273, url, valid)
 
-proc call*(call_594041: Call_CapacitiesUpdate_594032; resourceGroupName: string;
+proc call*(call_568274: Call_CapacitiesUpdate_568265; resourceGroupName: string;
           apiVersion: string; capacityUpdateParameters: JsonNode;
           subscriptionId: string; dedicatedCapacityName: string): Recallable =
   ## capacitiesUpdate
@@ -910,24 +910,24 @@ proc call*(call_594041: Call_CapacitiesUpdate_594032; resourceGroupName: string;
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   dedicatedCapacityName: string (required)
   ##                        : The name of the Dedicated capacity. It must be at least 3 characters in length, and no more than 63.
-  var path_594042 = newJObject()
-  var query_594043 = newJObject()
-  var body_594044 = newJObject()
-  add(path_594042, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594043, "api-version", newJString(apiVersion))
+  var path_568275 = newJObject()
+  var query_568276 = newJObject()
+  var body_568277 = newJObject()
+  add(path_568275, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568276, "api-version", newJString(apiVersion))
   if capacityUpdateParameters != nil:
-    body_594044 = capacityUpdateParameters
-  add(path_594042, "subscriptionId", newJString(subscriptionId))
-  add(path_594042, "dedicatedCapacityName", newJString(dedicatedCapacityName))
-  result = call_594041.call(path_594042, query_594043, nil, nil, body_594044)
+    body_568277 = capacityUpdateParameters
+  add(path_568275, "subscriptionId", newJString(subscriptionId))
+  add(path_568275, "dedicatedCapacityName", newJString(dedicatedCapacityName))
+  result = call_568274.call(path_568275, query_568276, nil, nil, body_568277)
 
-var capacitiesUpdate* = Call_CapacitiesUpdate_594032(name: "capacitiesUpdate",
+var capacitiesUpdate* = Call_CapacitiesUpdate_568265(name: "capacitiesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBIDedicated/capacities/{dedicatedCapacityName}",
-    validator: validate_CapacitiesUpdate_594033, base: "",
-    url: url_CapacitiesUpdate_594034, schemes: {Scheme.Https})
+    validator: validate_CapacitiesUpdate_568266, base: "",
+    url: url_CapacitiesUpdate_568267, schemes: {Scheme.Https})
 type
-  Call_CapacitiesDelete_594021 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesDelete_594023(protocol: Scheme; host: string; base: string;
+  Call_CapacitiesDelete_568254 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesDelete_568256(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -951,7 +951,7 @@ proc url_CapacitiesDelete_594023(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesDelete_594022(path: JsonNode; query: JsonNode;
+proc validate_CapacitiesDelete_568255(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes the specified Dedicated capacity.
@@ -968,21 +968,21 @@ proc validate_CapacitiesDelete_594022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594024 = path.getOrDefault("resourceGroupName")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_568257 = path.getOrDefault("resourceGroupName")
+  valid_568257 = validateParameter(valid_568257, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "resourceGroupName", valid_594024
-  var valid_594025 = path.getOrDefault("subscriptionId")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  if valid_568257 != nil:
+    section.add "resourceGroupName", valid_568257
+  var valid_568258 = path.getOrDefault("subscriptionId")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "subscriptionId", valid_594025
-  var valid_594026 = path.getOrDefault("dedicatedCapacityName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_568258 != nil:
+    section.add "subscriptionId", valid_568258
+  var valid_568259 = path.getOrDefault("dedicatedCapacityName")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "dedicatedCapacityName", valid_594026
+  if valid_568259 != nil:
+    section.add "dedicatedCapacityName", valid_568259
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -990,11 +990,11 @@ proc validate_CapacitiesDelete_594022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594027 = query.getOrDefault("api-version")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  var valid_568260 = query.getOrDefault("api-version")
+  valid_568260 = validateParameter(valid_568260, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "api-version", valid_594027
+  if valid_568260 != nil:
+    section.add "api-version", valid_568260
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1003,20 +1003,20 @@ proc validate_CapacitiesDelete_594022(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594028: Call_CapacitiesDelete_594021; path: JsonNode;
+proc call*(call_568261: Call_CapacitiesDelete_568254; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Dedicated capacity.
   ## 
-  let valid = call_594028.validator(path, query, header, formData, body)
-  let scheme = call_594028.pickScheme
+  let valid = call_568261.validator(path, query, header, formData, body)
+  let scheme = call_568261.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594028.url(scheme.get, call_594028.host, call_594028.base,
-                         call_594028.route, valid.getOrDefault("path"),
+  let url = call_568261.url(scheme.get, call_568261.host, call_568261.base,
+                         call_568261.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594028, url, valid)
+  result = hook(call_568261, url, valid)
 
-proc call*(call_594029: Call_CapacitiesDelete_594021; resourceGroupName: string;
+proc call*(call_568262: Call_CapacitiesDelete_568254; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; dedicatedCapacityName: string): Recallable =
   ## capacitiesDelete
   ## Deletes the specified Dedicated capacity.
@@ -1028,21 +1028,21 @@ proc call*(call_594029: Call_CapacitiesDelete_594021; resourceGroupName: string;
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   dedicatedCapacityName: string (required)
   ##                        : The name of the Dedicated capacity. It must be at least 3 characters in length, and no more than 63.
-  var path_594030 = newJObject()
-  var query_594031 = newJObject()
-  add(path_594030, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594031, "api-version", newJString(apiVersion))
-  add(path_594030, "subscriptionId", newJString(subscriptionId))
-  add(path_594030, "dedicatedCapacityName", newJString(dedicatedCapacityName))
-  result = call_594029.call(path_594030, query_594031, nil, nil, nil)
+  var path_568263 = newJObject()
+  var query_568264 = newJObject()
+  add(path_568263, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568264, "api-version", newJString(apiVersion))
+  add(path_568263, "subscriptionId", newJString(subscriptionId))
+  add(path_568263, "dedicatedCapacityName", newJString(dedicatedCapacityName))
+  result = call_568262.call(path_568263, query_568264, nil, nil, nil)
 
-var capacitiesDelete* = Call_CapacitiesDelete_594021(name: "capacitiesDelete",
+var capacitiesDelete* = Call_CapacitiesDelete_568254(name: "capacitiesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBIDedicated/capacities/{dedicatedCapacityName}",
-    validator: validate_CapacitiesDelete_594022, base: "",
-    url: url_CapacitiesDelete_594023, schemes: {Scheme.Https})
+    validator: validate_CapacitiesDelete_568255, base: "",
+    url: url_CapacitiesDelete_568256, schemes: {Scheme.Https})
 type
-  Call_CapacitiesResume_594045 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesResume_594047(protocol: Scheme; host: string; base: string;
+  Call_CapacitiesResume_568278 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesResume_568280(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1067,7 +1067,7 @@ proc url_CapacitiesResume_594047(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesResume_594046(path: JsonNode; query: JsonNode;
+proc validate_CapacitiesResume_568279(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Resumes operation of the specified Dedicated capacity instance.
@@ -1084,21 +1084,21 @@ proc validate_CapacitiesResume_594046(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594048 = path.getOrDefault("resourceGroupName")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  var valid_568281 = path.getOrDefault("resourceGroupName")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "resourceGroupName", valid_594048
-  var valid_594049 = path.getOrDefault("subscriptionId")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  if valid_568281 != nil:
+    section.add "resourceGroupName", valid_568281
+  var valid_568282 = path.getOrDefault("subscriptionId")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "subscriptionId", valid_594049
-  var valid_594050 = path.getOrDefault("dedicatedCapacityName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  if valid_568282 != nil:
+    section.add "subscriptionId", valid_568282
+  var valid_568283 = path.getOrDefault("dedicatedCapacityName")
+  valid_568283 = validateParameter(valid_568283, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "dedicatedCapacityName", valid_594050
+  if valid_568283 != nil:
+    section.add "dedicatedCapacityName", valid_568283
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1106,11 +1106,11 @@ proc validate_CapacitiesResume_594046(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594051 = query.getOrDefault("api-version")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  var valid_568284 = query.getOrDefault("api-version")
+  valid_568284 = validateParameter(valid_568284, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "api-version", valid_594051
+  if valid_568284 != nil:
+    section.add "api-version", valid_568284
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1119,20 +1119,20 @@ proc validate_CapacitiesResume_594046(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594052: Call_CapacitiesResume_594045; path: JsonNode;
+proc call*(call_568285: Call_CapacitiesResume_568278; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resumes operation of the specified Dedicated capacity instance.
   ## 
-  let valid = call_594052.validator(path, query, header, formData, body)
-  let scheme = call_594052.pickScheme
+  let valid = call_568285.validator(path, query, header, formData, body)
+  let scheme = call_568285.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594052.url(scheme.get, call_594052.host, call_594052.base,
-                         call_594052.route, valid.getOrDefault("path"),
+  let url = call_568285.url(scheme.get, call_568285.host, call_568285.base,
+                         call_568285.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594052, url, valid)
+  result = hook(call_568285, url, valid)
 
-proc call*(call_594053: Call_CapacitiesResume_594045; resourceGroupName: string;
+proc call*(call_568286: Call_CapacitiesResume_568278; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; dedicatedCapacityName: string): Recallable =
   ## capacitiesResume
   ## Resumes operation of the specified Dedicated capacity instance.
@@ -1144,21 +1144,21 @@ proc call*(call_594053: Call_CapacitiesResume_594045; resourceGroupName: string;
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   dedicatedCapacityName: string (required)
   ##                        : The name of the Dedicated capacity. It must be at least 3 characters in length, and no more than 63.
-  var path_594054 = newJObject()
-  var query_594055 = newJObject()
-  add(path_594054, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594055, "api-version", newJString(apiVersion))
-  add(path_594054, "subscriptionId", newJString(subscriptionId))
-  add(path_594054, "dedicatedCapacityName", newJString(dedicatedCapacityName))
-  result = call_594053.call(path_594054, query_594055, nil, nil, nil)
+  var path_568287 = newJObject()
+  var query_568288 = newJObject()
+  add(path_568287, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568288, "api-version", newJString(apiVersion))
+  add(path_568287, "subscriptionId", newJString(subscriptionId))
+  add(path_568287, "dedicatedCapacityName", newJString(dedicatedCapacityName))
+  result = call_568286.call(path_568287, query_568288, nil, nil, nil)
 
-var capacitiesResume* = Call_CapacitiesResume_594045(name: "capacitiesResume",
+var capacitiesResume* = Call_CapacitiesResume_568278(name: "capacitiesResume",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBIDedicated/capacities/{dedicatedCapacityName}/resume",
-    validator: validate_CapacitiesResume_594046, base: "",
-    url: url_CapacitiesResume_594047, schemes: {Scheme.Https})
+    validator: validate_CapacitiesResume_568279, base: "",
+    url: url_CapacitiesResume_568280, schemes: {Scheme.Https})
 type
-  Call_CapacitiesListSkusForCapacity_594056 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesListSkusForCapacity_594058(protocol: Scheme; host: string;
+  Call_CapacitiesListSkusForCapacity_568289 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesListSkusForCapacity_568291(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1183,7 +1183,7 @@ proc url_CapacitiesListSkusForCapacity_594058(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesListSkusForCapacity_594057(path: JsonNode; query: JsonNode;
+proc validate_CapacitiesListSkusForCapacity_568290(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists eligible SKUs for a PowerBI Dedicated resource.
   ## 
@@ -1199,21 +1199,21 @@ proc validate_CapacitiesListSkusForCapacity_594057(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594059 = path.getOrDefault("resourceGroupName")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  var valid_568292 = path.getOrDefault("resourceGroupName")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "resourceGroupName", valid_594059
-  var valid_594060 = path.getOrDefault("subscriptionId")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  if valid_568292 != nil:
+    section.add "resourceGroupName", valid_568292
+  var valid_568293 = path.getOrDefault("subscriptionId")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "subscriptionId", valid_594060
-  var valid_594061 = path.getOrDefault("dedicatedCapacityName")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  if valid_568293 != nil:
+    section.add "subscriptionId", valid_568293
+  var valid_568294 = path.getOrDefault("dedicatedCapacityName")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "dedicatedCapacityName", valid_594061
+  if valid_568294 != nil:
+    section.add "dedicatedCapacityName", valid_568294
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1221,11 +1221,11 @@ proc validate_CapacitiesListSkusForCapacity_594057(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594062 = query.getOrDefault("api-version")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  var valid_568295 = query.getOrDefault("api-version")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "api-version", valid_594062
+  if valid_568295 != nil:
+    section.add "api-version", valid_568295
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1234,20 +1234,20 @@ proc validate_CapacitiesListSkusForCapacity_594057(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594063: Call_CapacitiesListSkusForCapacity_594056; path: JsonNode;
+proc call*(call_568296: Call_CapacitiesListSkusForCapacity_568289; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists eligible SKUs for a PowerBI Dedicated resource.
   ## 
-  let valid = call_594063.validator(path, query, header, formData, body)
-  let scheme = call_594063.pickScheme
+  let valid = call_568296.validator(path, query, header, formData, body)
+  let scheme = call_568296.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594063.url(scheme.get, call_594063.host, call_594063.base,
-                         call_594063.route, valid.getOrDefault("path"),
+  let url = call_568296.url(scheme.get, call_568296.host, call_568296.base,
+                         call_568296.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594063, url, valid)
+  result = hook(call_568296, url, valid)
 
-proc call*(call_594064: Call_CapacitiesListSkusForCapacity_594056;
+proc call*(call_568297: Call_CapacitiesListSkusForCapacity_568289;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           dedicatedCapacityName: string): Recallable =
   ## capacitiesListSkusForCapacity
@@ -1260,22 +1260,22 @@ proc call*(call_594064: Call_CapacitiesListSkusForCapacity_594056;
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   dedicatedCapacityName: string (required)
   ##                        : The name of the Dedicated capacity. It must be at least 3 characters in length, and no more than 63.
-  var path_594065 = newJObject()
-  var query_594066 = newJObject()
-  add(path_594065, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594066, "api-version", newJString(apiVersion))
-  add(path_594065, "subscriptionId", newJString(subscriptionId))
-  add(path_594065, "dedicatedCapacityName", newJString(dedicatedCapacityName))
-  result = call_594064.call(path_594065, query_594066, nil, nil, nil)
+  var path_568298 = newJObject()
+  var query_568299 = newJObject()
+  add(path_568298, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568299, "api-version", newJString(apiVersion))
+  add(path_568298, "subscriptionId", newJString(subscriptionId))
+  add(path_568298, "dedicatedCapacityName", newJString(dedicatedCapacityName))
+  result = call_568297.call(path_568298, query_568299, nil, nil, nil)
 
-var capacitiesListSkusForCapacity* = Call_CapacitiesListSkusForCapacity_594056(
+var capacitiesListSkusForCapacity* = Call_CapacitiesListSkusForCapacity_568289(
     name: "capacitiesListSkusForCapacity", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBIDedicated/capacities/{dedicatedCapacityName}/skus",
-    validator: validate_CapacitiesListSkusForCapacity_594057, base: "",
-    url: url_CapacitiesListSkusForCapacity_594058, schemes: {Scheme.Https})
+    validator: validate_CapacitiesListSkusForCapacity_568290, base: "",
+    url: url_CapacitiesListSkusForCapacity_568291, schemes: {Scheme.Https})
 type
-  Call_CapacitiesSuspend_594067 = ref object of OpenApiRestCall_593425
-proc url_CapacitiesSuspend_594069(protocol: Scheme; host: string; base: string;
+  Call_CapacitiesSuspend_568300 = ref object of OpenApiRestCall_567658
+proc url_CapacitiesSuspend_568302(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1300,7 +1300,7 @@ proc url_CapacitiesSuspend_594069(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapacitiesSuspend_594068(path: JsonNode; query: JsonNode;
+proc validate_CapacitiesSuspend_568301(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Suspends operation of the specified dedicated capacity instance.
@@ -1317,21 +1317,21 @@ proc validate_CapacitiesSuspend_594068(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594070 = path.getOrDefault("resourceGroupName")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  var valid_568303 = path.getOrDefault("resourceGroupName")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "resourceGroupName", valid_594070
-  var valid_594071 = path.getOrDefault("subscriptionId")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  if valid_568303 != nil:
+    section.add "resourceGroupName", valid_568303
+  var valid_568304 = path.getOrDefault("subscriptionId")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "subscriptionId", valid_594071
-  var valid_594072 = path.getOrDefault("dedicatedCapacityName")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  if valid_568304 != nil:
+    section.add "subscriptionId", valid_568304
+  var valid_568305 = path.getOrDefault("dedicatedCapacityName")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "dedicatedCapacityName", valid_594072
+  if valid_568305 != nil:
+    section.add "dedicatedCapacityName", valid_568305
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1339,11 +1339,11 @@ proc validate_CapacitiesSuspend_594068(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594073 = query.getOrDefault("api-version")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  var valid_568306 = query.getOrDefault("api-version")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "api-version", valid_594073
+  if valid_568306 != nil:
+    section.add "api-version", valid_568306
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1352,20 +1352,20 @@ proc validate_CapacitiesSuspend_594068(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594074: Call_CapacitiesSuspend_594067; path: JsonNode;
+proc call*(call_568307: Call_CapacitiesSuspend_568300; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Suspends operation of the specified dedicated capacity instance.
   ## 
-  let valid = call_594074.validator(path, query, header, formData, body)
-  let scheme = call_594074.pickScheme
+  let valid = call_568307.validator(path, query, header, formData, body)
+  let scheme = call_568307.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594074.url(scheme.get, call_594074.host, call_594074.base,
-                         call_594074.route, valid.getOrDefault("path"),
+  let url = call_568307.url(scheme.get, call_568307.host, call_568307.base,
+                         call_568307.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594074, url, valid)
+  result = hook(call_568307, url, valid)
 
-proc call*(call_594075: Call_CapacitiesSuspend_594067; resourceGroupName: string;
+proc call*(call_568308: Call_CapacitiesSuspend_568300; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; dedicatedCapacityName: string): Recallable =
   ## capacitiesSuspend
   ## Suspends operation of the specified dedicated capacity instance.
@@ -1377,18 +1377,18 @@ proc call*(call_594075: Call_CapacitiesSuspend_594067; resourceGroupName: string
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   dedicatedCapacityName: string (required)
   ##                        : The name of the Dedicated capacity. It must be at least 3 characters in length, and no more than 63.
-  var path_594076 = newJObject()
-  var query_594077 = newJObject()
-  add(path_594076, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594077, "api-version", newJString(apiVersion))
-  add(path_594076, "subscriptionId", newJString(subscriptionId))
-  add(path_594076, "dedicatedCapacityName", newJString(dedicatedCapacityName))
-  result = call_594075.call(path_594076, query_594077, nil, nil, nil)
+  var path_568309 = newJObject()
+  var query_568310 = newJObject()
+  add(path_568309, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568310, "api-version", newJString(apiVersion))
+  add(path_568309, "subscriptionId", newJString(subscriptionId))
+  add(path_568309, "dedicatedCapacityName", newJString(dedicatedCapacityName))
+  result = call_568308.call(path_568309, query_568310, nil, nil, nil)
 
-var capacitiesSuspend* = Call_CapacitiesSuspend_594067(name: "capacitiesSuspend",
+var capacitiesSuspend* = Call_CapacitiesSuspend_568300(name: "capacitiesSuspend",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBIDedicated/capacities/{dedicatedCapacityName}/suspend",
-    validator: validate_CapacitiesSuspend_594068, base: "",
-    url: url_CapacitiesSuspend_594069, schemes: {Scheme.Https})
+    validator: validate_CapacitiesSuspend_568301, base: "",
+    url: url_CapacitiesSuspend_568302, schemes: {Scheme.Https})
 export
   rest
 

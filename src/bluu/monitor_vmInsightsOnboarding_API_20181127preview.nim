@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: VM Insights Onboarding
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "monitor-vmInsightsOnboarding_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_VminsightsGetOnboardingStatus_593630 = ref object of OpenApiRestCall_593408
-proc url_VminsightsGetOnboardingStatus_593632(protocol: Scheme; host: string;
+  Call_VminsightsGetOnboardingStatus_567863 = ref object of OpenApiRestCall_567641
+proc url_VminsightsGetOnboardingStatus_567865(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +120,7 @@ proc url_VminsightsGetOnboardingStatus_593632(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VminsightsGetOnboardingStatus_593631(path: JsonNode; query: JsonNode;
+proc validate_VminsightsGetOnboardingStatus_567864(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the VM Insights onboarding status for the specified resource or resource scope.
   ## 
@@ -132,11 +132,11 @@ proc validate_VminsightsGetOnboardingStatus_593631(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceUri` field"
-  var valid_593805 = path.getOrDefault("resourceUri")
-  valid_593805 = validateParameter(valid_593805, JString, required = true,
+  var valid_568038 = path.getOrDefault("resourceUri")
+  valid_568038 = validateParameter(valid_568038, JString, required = true,
                                  default = nil)
-  if valid_593805 != nil:
-    section.add "resourceUri", valid_593805
+  if valid_568038 != nil:
+    section.add "resourceUri", valid_568038
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +144,11 @@ proc validate_VminsightsGetOnboardingStatus_593631(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593806 = query.getOrDefault("api-version")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_568039 = query.getOrDefault("api-version")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "api-version", valid_593806
+  if valid_568039 != nil:
+    section.add "api-version", valid_568039
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,20 +157,20 @@ proc validate_VminsightsGetOnboardingStatus_593631(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593829: Call_VminsightsGetOnboardingStatus_593630; path: JsonNode;
+proc call*(call_568062: Call_VminsightsGetOnboardingStatus_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the VM Insights onboarding status for the specified resource or resource scope.
   ## 
-  let valid = call_593829.validator(path, query, header, formData, body)
-  let scheme = call_593829.pickScheme
+  let valid = call_568062.validator(path, query, header, formData, body)
+  let scheme = call_568062.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593829.url(scheme.get, call_593829.host, call_593829.base,
-                         call_593829.route, valid.getOrDefault("path"),
+  let url = call_568062.url(scheme.get, call_568062.host, call_568062.base,
+                         call_568062.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593829, url, valid)
+  result = hook(call_568062, url, valid)
 
-proc call*(call_593900: Call_VminsightsGetOnboardingStatus_593630;
+proc call*(call_568133: Call_VminsightsGetOnboardingStatus_567863;
           apiVersion: string; resourceUri: string): Recallable =
   ## vminsightsGetOnboardingStatus
   ## Retrieves the VM Insights onboarding status for the specified resource or resource scope.
@@ -178,17 +178,17 @@ proc call*(call_593900: Call_VminsightsGetOnboardingStatus_593630;
   ##             : API version.
   ##   resourceUri: string (required)
   ##              : The fully qualified Azure Resource manager identifier of the resource, or scope, whose status to retrieve.
-  var path_593901 = newJObject()
-  var query_593903 = newJObject()
-  add(query_593903, "api-version", newJString(apiVersion))
-  add(path_593901, "resourceUri", newJString(resourceUri))
-  result = call_593900.call(path_593901, query_593903, nil, nil, nil)
+  var path_568134 = newJObject()
+  var query_568136 = newJObject()
+  add(query_568136, "api-version", newJString(apiVersion))
+  add(path_568134, "resourceUri", newJString(resourceUri))
+  result = call_568133.call(path_568134, query_568136, nil, nil, nil)
 
-var vminsightsGetOnboardingStatus* = Call_VminsightsGetOnboardingStatus_593630(
+var vminsightsGetOnboardingStatus* = Call_VminsightsGetOnboardingStatus_567863(
     name: "vminsightsGetOnboardingStatus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{resourceUri}/providers/Microsoft.Insights/vmInsightsOnboardingStatuses/default",
-    validator: validate_VminsightsGetOnboardingStatus_593631, base: "",
-    url: url_VminsightsGetOnboardingStatus_593632, schemes: {Scheme.Https})
+    validator: validate_VminsightsGetOnboardingStatus_567864, base: "",
+    url: url_VminsightsGetOnboardingStatus_567865, schemes: {Scheme.Https})
 export
   rest
 

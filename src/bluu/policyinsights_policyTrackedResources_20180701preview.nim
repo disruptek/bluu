@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: PolicyTrackedResourcesClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "policyinsights-policyTrackedResources"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_PolicyTrackedResourcesListQueryResultsForManagementGroup_593646 = ref object of OpenApiRestCall_593424
-proc url_PolicyTrackedResourcesListQueryResultsForManagementGroup_593648(
+  Call_PolicyTrackedResourcesListQueryResultsForManagementGroup_567879 = ref object of OpenApiRestCall_567657
+proc url_PolicyTrackedResourcesListQueryResultsForManagementGroup_567881(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -131,7 +131,7 @@ proc url_PolicyTrackedResourcesListQueryResultsForManagementGroup_593648(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyTrackedResourcesListQueryResultsForManagementGroup_593647(
+proc validate_PolicyTrackedResourcesListQueryResultsForManagementGroup_567880(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Queries policy tracked resources under the management group.
@@ -147,21 +147,21 @@ proc validate_PolicyTrackedResourcesListQueryResultsForManagementGroup_593647(
   ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `managementGroupName` field"
-  var valid_593822 = path.getOrDefault("managementGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = path.getOrDefault("managementGroupName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "managementGroupName", valid_593822
-  var valid_593836 = path.getOrDefault("policyTrackedResourcesResource")
-  valid_593836 = validateParameter(valid_593836, JString, required = true,
+  if valid_568055 != nil:
+    section.add "managementGroupName", valid_568055
+  var valid_568069 = path.getOrDefault("policyTrackedResourcesResource")
+  valid_568069 = validateParameter(valid_568069, JString, required = true,
                                  default = newJString("default"))
-  if valid_593836 != nil:
-    section.add "policyTrackedResourcesResource", valid_593836
-  var valid_593837 = path.getOrDefault("managementGroupsNamespace")
-  valid_593837 = validateParameter(valid_593837, JString, required = true,
+  if valid_568069 != nil:
+    section.add "policyTrackedResourcesResource", valid_568069
+  var valid_568070 = path.getOrDefault("managementGroupsNamespace")
+  valid_568070 = validateParameter(valid_568070, JString, required = true,
                                  default = newJString("Microsoft.Management"))
-  if valid_593837 != nil:
-    section.add "managementGroupsNamespace", valid_593837
+  if valid_568070 != nil:
+    section.add "managementGroupsNamespace", valid_568070
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -173,20 +173,20 @@ proc validate_PolicyTrackedResourcesListQueryResultsForManagementGroup_593647(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593838 = query.getOrDefault("api-version")
-  valid_593838 = validateParameter(valid_593838, JString, required = true,
+  var valid_568071 = query.getOrDefault("api-version")
+  valid_568071 = validateParameter(valid_568071, JString, required = true,
                                  default = nil)
-  if valid_593838 != nil:
-    section.add "api-version", valid_593838
-  var valid_593839 = query.getOrDefault("$top")
-  valid_593839 = validateParameter(valid_593839, JInt, required = false, default = nil)
-  if valid_593839 != nil:
-    section.add "$top", valid_593839
-  var valid_593840 = query.getOrDefault("$filter")
-  valid_593840 = validateParameter(valid_593840, JString, required = false,
+  if valid_568071 != nil:
+    section.add "api-version", valid_568071
+  var valid_568072 = query.getOrDefault("$top")
+  valid_568072 = validateParameter(valid_568072, JInt, required = false, default = nil)
+  if valid_568072 != nil:
+    section.add "$top", valid_568072
+  var valid_568073 = query.getOrDefault("$filter")
+  valid_568073 = validateParameter(valid_568073, JString, required = false,
                                  default = nil)
-  if valid_593840 != nil:
-    section.add "$filter", valid_593840
+  if valid_568073 != nil:
+    section.add "$filter", valid_568073
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -195,21 +195,21 @@ proc validate_PolicyTrackedResourcesListQueryResultsForManagementGroup_593647(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593863: Call_PolicyTrackedResourcesListQueryResultsForManagementGroup_593646;
+proc call*(call_568096: Call_PolicyTrackedResourcesListQueryResultsForManagementGroup_567879;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Queries policy tracked resources under the management group.
   ## 
-  let valid = call_593863.validator(path, query, header, formData, body)
-  let scheme = call_593863.pickScheme
+  let valid = call_568096.validator(path, query, header, formData, body)
+  let scheme = call_568096.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593863.url(scheme.get, call_593863.host, call_593863.base,
-                         call_593863.route, valid.getOrDefault("path"),
+  let url = call_568096.url(scheme.get, call_568096.host, call_568096.base,
+                         call_568096.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593863, url, valid)
+  result = hook(call_568096, url, valid)
 
-proc call*(call_593934: Call_PolicyTrackedResourcesListQueryResultsForManagementGroup_593646;
+proc call*(call_568167: Call_PolicyTrackedResourcesListQueryResultsForManagementGroup_567879;
           managementGroupName: string; apiVersion: string;
           policyTrackedResourcesResource: string = "default";
           managementGroupsNamespace: string = "Microsoft.Management"; Top: int = 0;
@@ -228,26 +228,26 @@ proc call*(call_593934: Call_PolicyTrackedResourcesListQueryResultsForManagement
   ##      : Maximum number of records to return.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_593935 = newJObject()
-  var query_593937 = newJObject()
-  add(path_593935, "managementGroupName", newJString(managementGroupName))
-  add(path_593935, "policyTrackedResourcesResource",
+  var path_568168 = newJObject()
+  var query_568170 = newJObject()
+  add(path_568168, "managementGroupName", newJString(managementGroupName))
+  add(path_568168, "policyTrackedResourcesResource",
       newJString(policyTrackedResourcesResource))
-  add(path_593935, "managementGroupsNamespace",
+  add(path_568168, "managementGroupsNamespace",
       newJString(managementGroupsNamespace))
-  add(query_593937, "api-version", newJString(apiVersion))
-  add(query_593937, "$top", newJInt(Top))
-  add(query_593937, "$filter", newJString(Filter))
-  result = call_593934.call(path_593935, query_593937, nil, nil, nil)
+  add(query_568170, "api-version", newJString(apiVersion))
+  add(query_568170, "$top", newJInt(Top))
+  add(query_568170, "$filter", newJString(Filter))
+  result = call_568167.call(path_568168, query_568170, nil, nil, nil)
 
-var policyTrackedResourcesListQueryResultsForManagementGroup* = Call_PolicyTrackedResourcesListQueryResultsForManagementGroup_593646(
+var policyTrackedResourcesListQueryResultsForManagementGroup* = Call_PolicyTrackedResourcesListQueryResultsForManagementGroup_567879(
     name: "policyTrackedResourcesListQueryResultsForManagementGroup",
-    meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/{managementGroupsNamespace}/managementGroups/{managementGroupName}/providers/Microsoft.PolicyInsights/policyTrackedResources/{policyTrackedResourcesResource}/queryResults", validator: validate_PolicyTrackedResourcesListQueryResultsForManagementGroup_593647,
-    base: "", url: url_PolicyTrackedResourcesListQueryResultsForManagementGroup_593648,
+    meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/{managementGroupsNamespace}/managementGroups/{managementGroupName}/providers/Microsoft.PolicyInsights/policyTrackedResources/{policyTrackedResourcesResource}/queryResults", validator: validate_PolicyTrackedResourcesListQueryResultsForManagementGroup_567880,
+    base: "", url: url_PolicyTrackedResourcesListQueryResultsForManagementGroup_567881,
     schemes: {Scheme.Https})
 type
-  Call_PolicyTrackedResourcesListQueryResultsForSubscription_593976 = ref object of OpenApiRestCall_593424
-proc url_PolicyTrackedResourcesListQueryResultsForSubscription_593978(
+  Call_PolicyTrackedResourcesListQueryResultsForSubscription_568209 = ref object of OpenApiRestCall_567657
+proc url_PolicyTrackedResourcesListQueryResultsForSubscription_568211(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -269,7 +269,7 @@ proc url_PolicyTrackedResourcesListQueryResultsForSubscription_593978(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyTrackedResourcesListQueryResultsForSubscription_593977(
+proc validate_PolicyTrackedResourcesListQueryResultsForSubscription_568210(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Queries policy tracked resources under the subscription.
@@ -283,16 +283,16 @@ proc validate_PolicyTrackedResourcesListQueryResultsForSubscription_593977(
   ##                 : Microsoft Azure subscription ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `policyTrackedResourcesResource` field"
-  var valid_593979 = path.getOrDefault("policyTrackedResourcesResource")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_568212 = path.getOrDefault("policyTrackedResourcesResource")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = newJString("default"))
-  if valid_593979 != nil:
-    section.add "policyTrackedResourcesResource", valid_593979
-  var valid_593980 = path.getOrDefault("subscriptionId")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_568212 != nil:
+    section.add "policyTrackedResourcesResource", valid_568212
+  var valid_568213 = path.getOrDefault("subscriptionId")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "subscriptionId", valid_593980
+  if valid_568213 != nil:
+    section.add "subscriptionId", valid_568213
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -304,20 +304,20 @@ proc validate_PolicyTrackedResourcesListQueryResultsForSubscription_593977(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593981 = query.getOrDefault("api-version")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568214 = query.getOrDefault("api-version")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "api-version", valid_593981
-  var valid_593982 = query.getOrDefault("$top")
-  valid_593982 = validateParameter(valid_593982, JInt, required = false, default = nil)
-  if valid_593982 != nil:
-    section.add "$top", valid_593982
-  var valid_593983 = query.getOrDefault("$filter")
-  valid_593983 = validateParameter(valid_593983, JString, required = false,
+  if valid_568214 != nil:
+    section.add "api-version", valid_568214
+  var valid_568215 = query.getOrDefault("$top")
+  valid_568215 = validateParameter(valid_568215, JInt, required = false, default = nil)
+  if valid_568215 != nil:
+    section.add "$top", valid_568215
+  var valid_568216 = query.getOrDefault("$filter")
+  valid_568216 = validateParameter(valid_568216, JString, required = false,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "$filter", valid_593983
+  if valid_568216 != nil:
+    section.add "$filter", valid_568216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -326,21 +326,21 @@ proc validate_PolicyTrackedResourcesListQueryResultsForSubscription_593977(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_PolicyTrackedResourcesListQueryResultsForSubscription_593976;
+proc call*(call_568217: Call_PolicyTrackedResourcesListQueryResultsForSubscription_568209;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Queries policy tracked resources under the subscription.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_568217.validator(path, query, header, formData, body)
+  let scheme = call_568217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
+                         call_568217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_568217, url, valid)
 
-proc call*(call_593985: Call_PolicyTrackedResourcesListQueryResultsForSubscription_593976;
+proc call*(call_568218: Call_PolicyTrackedResourcesListQueryResultsForSubscription_568209;
           apiVersion: string; subscriptionId: string;
           policyTrackedResourcesResource: string = "default"; Top: int = 0;
           Filter: string = ""): Recallable =
@@ -356,25 +356,25 @@ proc call*(call_593985: Call_PolicyTrackedResourcesListQueryResultsForSubscripti
   ##      : Maximum number of records to return.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  add(path_593986, "policyTrackedResourcesResource",
+  var path_568219 = newJObject()
+  var query_568220 = newJObject()
+  add(path_568219, "policyTrackedResourcesResource",
       newJString(policyTrackedResourcesResource))
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
-  add(query_593987, "$top", newJInt(Top))
-  add(query_593987, "$filter", newJString(Filter))
-  result = call_593985.call(path_593986, query_593987, nil, nil, nil)
+  add(query_568220, "api-version", newJString(apiVersion))
+  add(path_568219, "subscriptionId", newJString(subscriptionId))
+  add(query_568220, "$top", newJInt(Top))
+  add(query_568220, "$filter", newJString(Filter))
+  result = call_568218.call(path_568219, query_568220, nil, nil, nil)
 
-var policyTrackedResourcesListQueryResultsForSubscription* = Call_PolicyTrackedResourcesListQueryResultsForSubscription_593976(
+var policyTrackedResourcesListQueryResultsForSubscription* = Call_PolicyTrackedResourcesListQueryResultsForSubscription_568209(
     name: "policyTrackedResourcesListQueryResultsForSubscription",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PolicyInsights/policyTrackedResources/{policyTrackedResourcesResource}/queryResults",
-    validator: validate_PolicyTrackedResourcesListQueryResultsForSubscription_593977,
-    base: "", url: url_PolicyTrackedResourcesListQueryResultsForSubscription_593978,
+    validator: validate_PolicyTrackedResourcesListQueryResultsForSubscription_568210,
+    base: "", url: url_PolicyTrackedResourcesListQueryResultsForSubscription_568211,
     schemes: {Scheme.Https})
 type
-  Call_PolicyTrackedResourcesListQueryResultsForResourceGroup_593988 = ref object of OpenApiRestCall_593424
-proc url_PolicyTrackedResourcesListQueryResultsForResourceGroup_593990(
+  Call_PolicyTrackedResourcesListQueryResultsForResourceGroup_568221 = ref object of OpenApiRestCall_567657
+proc url_PolicyTrackedResourcesListQueryResultsForResourceGroup_568223(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -400,7 +400,7 @@ proc url_PolicyTrackedResourcesListQueryResultsForResourceGroup_593990(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyTrackedResourcesListQueryResultsForResourceGroup_593989(
+proc validate_PolicyTrackedResourcesListQueryResultsForResourceGroup_568222(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Queries policy tracked resources under the resource group.
@@ -416,21 +416,21 @@ proc validate_PolicyTrackedResourcesListQueryResultsForResourceGroup_593989(
   ##                 : Microsoft Azure subscription ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `policyTrackedResourcesResource` field"
-  var valid_593991 = path.getOrDefault("policyTrackedResourcesResource")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_568224 = path.getOrDefault("policyTrackedResourcesResource")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = newJString("default"))
-  if valid_593991 != nil:
-    section.add "policyTrackedResourcesResource", valid_593991
-  var valid_593992 = path.getOrDefault("resourceGroupName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_568224 != nil:
+    section.add "policyTrackedResourcesResource", valid_568224
+  var valid_568225 = path.getOrDefault("resourceGroupName")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "resourceGroupName", valid_593992
-  var valid_593993 = path.getOrDefault("subscriptionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "resourceGroupName", valid_568225
+  var valid_568226 = path.getOrDefault("subscriptionId")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "subscriptionId", valid_593993
+  if valid_568226 != nil:
+    section.add "subscriptionId", valid_568226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -442,20 +442,20 @@ proc validate_PolicyTrackedResourcesListQueryResultsForResourceGroup_593989(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568227 = query.getOrDefault("api-version")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
-  var valid_593995 = query.getOrDefault("$top")
-  valid_593995 = validateParameter(valid_593995, JInt, required = false, default = nil)
-  if valid_593995 != nil:
-    section.add "$top", valid_593995
-  var valid_593996 = query.getOrDefault("$filter")
-  valid_593996 = validateParameter(valid_593996, JString, required = false,
+  if valid_568227 != nil:
+    section.add "api-version", valid_568227
+  var valid_568228 = query.getOrDefault("$top")
+  valid_568228 = validateParameter(valid_568228, JInt, required = false, default = nil)
+  if valid_568228 != nil:
+    section.add "$top", valid_568228
+  var valid_568229 = query.getOrDefault("$filter")
+  valid_568229 = validateParameter(valid_568229, JString, required = false,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "$filter", valid_593996
+  if valid_568229 != nil:
+    section.add "$filter", valid_568229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -464,21 +464,21 @@ proc validate_PolicyTrackedResourcesListQueryResultsForResourceGroup_593989(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_PolicyTrackedResourcesListQueryResultsForResourceGroup_593988;
+proc call*(call_568230: Call_PolicyTrackedResourcesListQueryResultsForResourceGroup_568221;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Queries policy tracked resources under the resource group.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_PolicyTrackedResourcesListQueryResultsForResourceGroup_593988;
+proc call*(call_568231: Call_PolicyTrackedResourcesListQueryResultsForResourceGroup_568221;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           policyTrackedResourcesResource: string = "default"; Top: int = 0;
           Filter: string = ""): Recallable =
@@ -496,26 +496,26 @@ proc call*(call_593998: Call_PolicyTrackedResourcesListQueryResultsForResourceGr
   ##      : Maximum number of records to return.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  add(path_593999, "policyTrackedResourcesResource",
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  add(path_568232, "policyTrackedResourcesResource",
       newJString(policyTrackedResourcesResource))
-  add(path_593999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
-  add(query_594000, "$top", newJInt(Top))
-  add(query_594000, "$filter", newJString(Filter))
-  result = call_593998.call(path_593999, query_594000, nil, nil, nil)
+  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
+  add(query_568233, "$top", newJInt(Top))
+  add(query_568233, "$filter", newJString(Filter))
+  result = call_568231.call(path_568232, query_568233, nil, nil, nil)
 
-var policyTrackedResourcesListQueryResultsForResourceGroup* = Call_PolicyTrackedResourcesListQueryResultsForResourceGroup_593988(
+var policyTrackedResourcesListQueryResultsForResourceGroup* = Call_PolicyTrackedResourcesListQueryResultsForResourceGroup_568221(
     name: "policyTrackedResourcesListQueryResultsForResourceGroup",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PolicyInsights/policyTrackedResources/{policyTrackedResourcesResource}/queryResults",
-    validator: validate_PolicyTrackedResourcesListQueryResultsForResourceGroup_593989,
-    base: "", url: url_PolicyTrackedResourcesListQueryResultsForResourceGroup_593990,
+    validator: validate_PolicyTrackedResourcesListQueryResultsForResourceGroup_568222,
+    base: "", url: url_PolicyTrackedResourcesListQueryResultsForResourceGroup_568223,
     schemes: {Scheme.Https})
 type
-  Call_PolicyTrackedResourcesListQueryResultsForResource_594001 = ref object of OpenApiRestCall_593424
-proc url_PolicyTrackedResourcesListQueryResultsForResource_594003(
+  Call_PolicyTrackedResourcesListQueryResultsForResource_568234 = ref object of OpenApiRestCall_567657
+proc url_PolicyTrackedResourcesListQueryResultsForResource_568236(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -536,7 +536,7 @@ proc url_PolicyTrackedResourcesListQueryResultsForResource_594003(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyTrackedResourcesListQueryResultsForResource_594002(
+proc validate_PolicyTrackedResourcesListQueryResultsForResource_568235(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Queries policy tracked resources under the resource.
@@ -550,16 +550,16 @@ proc validate_PolicyTrackedResourcesListQueryResultsForResource_594002(
   ##             : Resource ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `policyTrackedResourcesResource` field"
-  var valid_594004 = path.getOrDefault("policyTrackedResourcesResource")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = path.getOrDefault("policyTrackedResourcesResource")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = newJString("default"))
-  if valid_594004 != nil:
-    section.add "policyTrackedResourcesResource", valid_594004
-  var valid_594005 = path.getOrDefault("resourceId")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  if valid_568237 != nil:
+    section.add "policyTrackedResourcesResource", valid_568237
+  var valid_568238 = path.getOrDefault("resourceId")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "resourceId", valid_594005
+  if valid_568238 != nil:
+    section.add "resourceId", valid_568238
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -571,20 +571,20 @@ proc validate_PolicyTrackedResourcesListQueryResultsForResource_594002(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594006 = query.getOrDefault("api-version")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_568239 = query.getOrDefault("api-version")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "api-version", valid_594006
-  var valid_594007 = query.getOrDefault("$top")
-  valid_594007 = validateParameter(valid_594007, JInt, required = false, default = nil)
-  if valid_594007 != nil:
-    section.add "$top", valid_594007
-  var valid_594008 = query.getOrDefault("$filter")
-  valid_594008 = validateParameter(valid_594008, JString, required = false,
+  if valid_568239 != nil:
+    section.add "api-version", valid_568239
+  var valid_568240 = query.getOrDefault("$top")
+  valid_568240 = validateParameter(valid_568240, JInt, required = false, default = nil)
+  if valid_568240 != nil:
+    section.add "$top", valid_568240
+  var valid_568241 = query.getOrDefault("$filter")
+  valid_568241 = validateParameter(valid_568241, JString, required = false,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "$filter", valid_594008
+  if valid_568241 != nil:
+    section.add "$filter", valid_568241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -593,21 +593,21 @@ proc validate_PolicyTrackedResourcesListQueryResultsForResource_594002(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594009: Call_PolicyTrackedResourcesListQueryResultsForResource_594001;
+proc call*(call_568242: Call_PolicyTrackedResourcesListQueryResultsForResource_568234;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Queries policy tracked resources under the resource.
   ## 
-  let valid = call_594009.validator(path, query, header, formData, body)
-  let scheme = call_594009.pickScheme
+  let valid = call_568242.validator(path, query, header, formData, body)
+  let scheme = call_568242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594009.url(scheme.get, call_594009.host, call_594009.base,
-                         call_594009.route, valid.getOrDefault("path"),
+  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
+                         call_568242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594009, url, valid)
+  result = hook(call_568242, url, valid)
 
-proc call*(call_594010: Call_PolicyTrackedResourcesListQueryResultsForResource_594001;
+proc call*(call_568243: Call_PolicyTrackedResourcesListQueryResultsForResource_568234;
           apiVersion: string; resourceId: string;
           policyTrackedResourcesResource: string = "default"; Top: int = 0;
           Filter: string = ""): Recallable =
@@ -623,21 +623,21 @@ proc call*(call_594010: Call_PolicyTrackedResourcesListQueryResultsForResource_5
   ##             : Resource ID.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_594011 = newJObject()
-  var query_594012 = newJObject()
-  add(path_594011, "policyTrackedResourcesResource",
+  var path_568244 = newJObject()
+  var query_568245 = newJObject()
+  add(path_568244, "policyTrackedResourcesResource",
       newJString(policyTrackedResourcesResource))
-  add(query_594012, "api-version", newJString(apiVersion))
-  add(query_594012, "$top", newJInt(Top))
-  add(path_594011, "resourceId", newJString(resourceId))
-  add(query_594012, "$filter", newJString(Filter))
-  result = call_594010.call(path_594011, query_594012, nil, nil, nil)
+  add(query_568245, "api-version", newJString(apiVersion))
+  add(query_568245, "$top", newJInt(Top))
+  add(path_568244, "resourceId", newJString(resourceId))
+  add(query_568245, "$filter", newJString(Filter))
+  result = call_568243.call(path_568244, query_568245, nil, nil, nil)
 
-var policyTrackedResourcesListQueryResultsForResource* = Call_PolicyTrackedResourcesListQueryResultsForResource_594001(
+var policyTrackedResourcesListQueryResultsForResource* = Call_PolicyTrackedResourcesListQueryResultsForResource_568234(
     name: "policyTrackedResourcesListQueryResultsForResource",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.PolicyInsights/policyTrackedResources/{policyTrackedResourcesResource}/queryResults",
-    validator: validate_PolicyTrackedResourcesListQueryResultsForResource_594002,
-    base: "", url: url_PolicyTrackedResourcesListQueryResultsForResource_594003,
+    validator: validate_PolicyTrackedResourcesListQueryResultsForResource_568235,
+    base: "", url: url_PolicyTrackedResourcesListQueryResultsForResource_568236,
     schemes: {Scheme.Https})
 export
   rest

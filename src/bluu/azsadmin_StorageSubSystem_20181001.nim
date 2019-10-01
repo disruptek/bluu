@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: FabricAdminClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_574457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-StorageSubSystem"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_StorageSubSystemsList_593646 = ref object of OpenApiRestCall_593424
-proc url_StorageSubSystemsList_593648(protocol: Scheme; host: string; base: string;
+  Call_StorageSubSystemsList_574679 = ref object of OpenApiRestCall_574457
+proc url_StorageSubSystemsList_574681(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -131,7 +131,7 @@ proc url_StorageSubSystemsList_593648(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageSubSystemsList_593647(path: JsonNode; query: JsonNode;
+proc validate_StorageSubSystemsList_574680(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of all storage subsystems for a location.
   ## 
@@ -149,26 +149,26 @@ proc validate_StorageSubSystemsList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_574855 = path.getOrDefault("resourceGroupName")
+  valid_574855 = validateParameter(valid_574855, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("scaleUnit")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_574855 != nil:
+    section.add "resourceGroupName", valid_574855
+  var valid_574856 = path.getOrDefault("scaleUnit")
+  valid_574856 = validateParameter(valid_574856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "scaleUnit", valid_593823
-  var valid_593824 = path.getOrDefault("subscriptionId")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_574856 != nil:
+    section.add "scaleUnit", valid_574856
+  var valid_574857 = path.getOrDefault("subscriptionId")
+  valid_574857 = validateParameter(valid_574857, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "subscriptionId", valid_593824
-  var valid_593825 = path.getOrDefault("location")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_574857 != nil:
+    section.add "subscriptionId", valid_574857
+  var valid_574858 = path.getOrDefault("location")
+  valid_574858 = validateParameter(valid_574858, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "location", valid_593825
+  if valid_574858 != nil:
+    section.add "location", valid_574858
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -178,16 +178,16 @@ proc validate_StorageSubSystemsList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593839 = query.getOrDefault("api-version")
-  valid_593839 = validateParameter(valid_593839, JString, required = true,
+  var valid_574872 = query.getOrDefault("api-version")
+  valid_574872 = validateParameter(valid_574872, JString, required = true,
                                  default = newJString("2018-10-01"))
-  if valid_593839 != nil:
-    section.add "api-version", valid_593839
-  var valid_593840 = query.getOrDefault("$filter")
-  valid_593840 = validateParameter(valid_593840, JString, required = false,
+  if valid_574872 != nil:
+    section.add "api-version", valid_574872
+  var valid_574873 = query.getOrDefault("$filter")
+  valid_574873 = validateParameter(valid_574873, JString, required = false,
                                  default = nil)
-  if valid_593840 != nil:
-    section.add "$filter", valid_593840
+  if valid_574873 != nil:
+    section.add "$filter", valid_574873
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -196,20 +196,20 @@ proc validate_StorageSubSystemsList_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593863: Call_StorageSubSystemsList_593646; path: JsonNode;
+proc call*(call_574896: Call_StorageSubSystemsList_574679; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all storage subsystems for a location.
   ## 
-  let valid = call_593863.validator(path, query, header, formData, body)
-  let scheme = call_593863.pickScheme
+  let valid = call_574896.validator(path, query, header, formData, body)
+  let scheme = call_574896.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593863.url(scheme.get, call_593863.host, call_593863.base,
-                         call_593863.route, valid.getOrDefault("path"),
+  let url = call_574896.url(scheme.get, call_574896.host, call_574896.base,
+                         call_574896.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593863, url, valid)
+  result = hook(call_574896, url, valid)
 
-proc call*(call_593934: Call_StorageSubSystemsList_593646;
+proc call*(call_574967: Call_StorageSubSystemsList_574679;
           resourceGroupName: string; scaleUnit: string; subscriptionId: string;
           location: string; apiVersion: string = "2018-10-01"; Filter: string = ""): Recallable =
   ## storageSubSystemsList
@@ -226,24 +226,24 @@ proc call*(call_593934: Call_StorageSubSystemsList_593646;
   ##           : Location of the resource.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_593935 = newJObject()
-  var query_593937 = newJObject()
-  add(path_593935, "resourceGroupName", newJString(resourceGroupName))
-  add(path_593935, "scaleUnit", newJString(scaleUnit))
-  add(query_593937, "api-version", newJString(apiVersion))
-  add(path_593935, "subscriptionId", newJString(subscriptionId))
-  add(path_593935, "location", newJString(location))
-  add(query_593937, "$filter", newJString(Filter))
-  result = call_593934.call(path_593935, query_593937, nil, nil, nil)
+  var path_574968 = newJObject()
+  var query_574970 = newJObject()
+  add(path_574968, "resourceGroupName", newJString(resourceGroupName))
+  add(path_574968, "scaleUnit", newJString(scaleUnit))
+  add(query_574970, "api-version", newJString(apiVersion))
+  add(path_574968, "subscriptionId", newJString(subscriptionId))
+  add(path_574968, "location", newJString(location))
+  add(query_574970, "$filter", newJString(Filter))
+  result = call_574967.call(path_574968, query_574970, nil, nil, nil)
 
-var storageSubSystemsList* = Call_StorageSubSystemsList_593646(
+var storageSubSystemsList* = Call_StorageSubSystemsList_574679(
     name: "storageSubSystemsList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnits/{scaleUnit}/storageSubSystems",
-    validator: validate_StorageSubSystemsList_593647, base: "",
-    url: url_StorageSubSystemsList_593648, schemes: {Scheme.Https})
+    validator: validate_StorageSubSystemsList_574680, base: "",
+    url: url_StorageSubSystemsList_574681, schemes: {Scheme.Https})
 type
-  Call_StorageSubSystemsGet_593976 = ref object of OpenApiRestCall_593424
-proc url_StorageSubSystemsGet_593978(protocol: Scheme; host: string; base: string;
+  Call_StorageSubSystemsGet_575009 = ref object of OpenApiRestCall_574457
+proc url_StorageSubSystemsGet_575011(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -273,7 +273,7 @@ proc url_StorageSubSystemsGet_593978(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageSubSystemsGet_593977(path: JsonNode; query: JsonNode;
+proc validate_StorageSubSystemsGet_575010(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Return the requested storage subsystem.
   ## 
@@ -293,31 +293,31 @@ proc validate_StorageSubSystemsGet_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593979 = path.getOrDefault("resourceGroupName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_575012 = path.getOrDefault("resourceGroupName")
+  valid_575012 = validateParameter(valid_575012, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "resourceGroupName", valid_593979
-  var valid_593980 = path.getOrDefault("scaleUnit")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_575012 != nil:
+    section.add "resourceGroupName", valid_575012
+  var valid_575013 = path.getOrDefault("scaleUnit")
+  valid_575013 = validateParameter(valid_575013, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "scaleUnit", valid_593980
-  var valid_593981 = path.getOrDefault("subscriptionId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_575013 != nil:
+    section.add "scaleUnit", valid_575013
+  var valid_575014 = path.getOrDefault("subscriptionId")
+  valid_575014 = validateParameter(valid_575014, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "subscriptionId", valid_593981
-  var valid_593982 = path.getOrDefault("storageSubSystem")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_575014 != nil:
+    section.add "subscriptionId", valid_575014
+  var valid_575015 = path.getOrDefault("storageSubSystem")
+  valid_575015 = validateParameter(valid_575015, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "storageSubSystem", valid_593982
-  var valid_593983 = path.getOrDefault("location")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_575015 != nil:
+    section.add "storageSubSystem", valid_575015
+  var valid_575016 = path.getOrDefault("location")
+  valid_575016 = validateParameter(valid_575016, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "location", valid_593983
+  if valid_575016 != nil:
+    section.add "location", valid_575016
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -325,11 +325,11 @@ proc validate_StorageSubSystemsGet_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593984 = query.getOrDefault("api-version")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_575017 = query.getOrDefault("api-version")
+  valid_575017 = validateParameter(valid_575017, JString, required = true,
                                  default = newJString("2018-10-01"))
-  if valid_593984 != nil:
-    section.add "api-version", valid_593984
+  if valid_575017 != nil:
+    section.add "api-version", valid_575017
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -338,20 +338,20 @@ proc validate_StorageSubSystemsGet_593977(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_StorageSubSystemsGet_593976; path: JsonNode;
+proc call*(call_575018: Call_StorageSubSystemsGet_575009; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Return the requested storage subsystem.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_575018.validator(path, query, header, formData, body)
+  let scheme = call_575018.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_575018.url(scheme.get, call_575018.host, call_575018.base,
+                         call_575018.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_575018, url, valid)
 
-proc call*(call_593986: Call_StorageSubSystemsGet_593976;
+proc call*(call_575019: Call_StorageSubSystemsGet_575009;
           resourceGroupName: string; scaleUnit: string; subscriptionId: string;
           storageSubSystem: string; location: string;
           apiVersion: string = "2018-10-01"): Recallable =
@@ -369,21 +369,21 @@ proc call*(call_593986: Call_StorageSubSystemsGet_593976;
   ##                   : Name of the storage system.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  add(path_593987, "resourceGroupName", newJString(resourceGroupName))
-  add(path_593987, "scaleUnit", newJString(scaleUnit))
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
-  add(path_593987, "storageSubSystem", newJString(storageSubSystem))
-  add(path_593987, "location", newJString(location))
-  result = call_593986.call(path_593987, query_593988, nil, nil, nil)
+  var path_575020 = newJObject()
+  var query_575021 = newJObject()
+  add(path_575020, "resourceGroupName", newJString(resourceGroupName))
+  add(path_575020, "scaleUnit", newJString(scaleUnit))
+  add(query_575021, "api-version", newJString(apiVersion))
+  add(path_575020, "subscriptionId", newJString(subscriptionId))
+  add(path_575020, "storageSubSystem", newJString(storageSubSystem))
+  add(path_575020, "location", newJString(location))
+  result = call_575019.call(path_575020, query_575021, nil, nil, nil)
 
-var storageSubSystemsGet* = Call_StorageSubSystemsGet_593976(
+var storageSubSystemsGet* = Call_StorageSubSystemsGet_575009(
     name: "storageSubSystemsGet", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnits/{scaleUnit}/storageSubSystems/{storageSubSystem}",
-    validator: validate_StorageSubSystemsGet_593977, base: "",
-    url: url_StorageSubSystemsGet_593978, schemes: {Scheme.Https})
+    validator: validate_StorageSubSystemsGet_575010, base: "",
+    url: url_StorageSubSystemsGet_575011, schemes: {Scheme.Https})
 export
   rest
 

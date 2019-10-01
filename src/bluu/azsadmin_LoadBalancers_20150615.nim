@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkAdminManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_574441 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574441](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574441): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-LoadBalancers"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_LoadBalancersList_593630 = ref object of OpenApiRestCall_593408
-proc url_LoadBalancersList_593632(protocol: Scheme; host: string; base: string;
+  Call_LoadBalancersList_574663 = ref object of OpenApiRestCall_574441
+proc url_LoadBalancersList_574665(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_LoadBalancersList_593632(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancersList_593631(path: JsonNode; query: JsonNode;
+proc validate_LoadBalancersList_574664(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get a list of all load balancers.
@@ -134,11 +134,11 @@ proc validate_LoadBalancersList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593793 = path.getOrDefault("subscriptionId")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  var valid_574826 = path.getOrDefault("subscriptionId")
+  valid_574826 = validateParameter(valid_574826, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "subscriptionId", valid_593793
+  if valid_574826 != nil:
+    section.add "subscriptionId", valid_574826
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -156,36 +156,36 @@ proc validate_LoadBalancersList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_574840 = query.getOrDefault("api-version")
+  valid_574840 = validateParameter(valid_574840, JString, required = true,
                                  default = newJString("2015-06-15"))
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
-  var valid_593808 = query.getOrDefault("$inlineCount")
-  valid_593808 = validateParameter(valid_593808, JString, required = false,
+  if valid_574840 != nil:
+    section.add "api-version", valid_574840
+  var valid_574841 = query.getOrDefault("$inlineCount")
+  valid_574841 = validateParameter(valid_574841, JString, required = false,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "$inlineCount", valid_593808
-  var valid_593809 = query.getOrDefault("$top")
-  valid_593809 = validateParameter(valid_593809, JString, required = false,
+  if valid_574841 != nil:
+    section.add "$inlineCount", valid_574841
+  var valid_574842 = query.getOrDefault("$top")
+  valid_574842 = validateParameter(valid_574842, JString, required = false,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "$top", valid_593809
-  var valid_593810 = query.getOrDefault("$orderBy")
-  valid_593810 = validateParameter(valid_593810, JString, required = false,
+  if valid_574842 != nil:
+    section.add "$top", valid_574842
+  var valid_574843 = query.getOrDefault("$orderBy")
+  valid_574843 = validateParameter(valid_574843, JString, required = false,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "$orderBy", valid_593810
-  var valid_593811 = query.getOrDefault("$skip")
-  valid_593811 = validateParameter(valid_593811, JString, required = false,
+  if valid_574843 != nil:
+    section.add "$orderBy", valid_574843
+  var valid_574844 = query.getOrDefault("$skip")
+  valid_574844 = validateParameter(valid_574844, JString, required = false,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "$skip", valid_593811
-  var valid_593812 = query.getOrDefault("$filter")
-  valid_593812 = validateParameter(valid_593812, JString, required = false,
+  if valid_574844 != nil:
+    section.add "$skip", valid_574844
+  var valid_574845 = query.getOrDefault("$filter")
+  valid_574845 = validateParameter(valid_574845, JString, required = false,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "$filter", valid_593812
+  if valid_574845 != nil:
+    section.add "$filter", valid_574845
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -194,20 +194,20 @@ proc validate_LoadBalancersList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593839: Call_LoadBalancersList_593630; path: JsonNode;
+proc call*(call_574872: Call_LoadBalancersList_574663; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a list of all load balancers.
   ## 
-  let valid = call_593839.validator(path, query, header, formData, body)
-  let scheme = call_593839.pickScheme
+  let valid = call_574872.validator(path, query, header, formData, body)
+  let scheme = call_574872.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593839.url(scheme.get, call_593839.host, call_593839.base,
-                         call_593839.route, valid.getOrDefault("path"),
+  let url = call_574872.url(scheme.get, call_574872.host, call_574872.base,
+                         call_574872.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593839, url, valid)
+  result = hook(call_574872, url, valid)
 
-proc call*(call_593910: Call_LoadBalancersList_593630; subscriptionId: string;
+proc call*(call_574943: Call_LoadBalancersList_574663; subscriptionId: string;
           apiVersion: string = "2015-06-15"; InlineCount: string = ""; Top: string = "";
           OrderBy: string = ""; Skip: string = ""; Filter: string = ""): Recallable =
   ## loadBalancersList
@@ -226,21 +226,21 @@ proc call*(call_593910: Call_LoadBalancersList_593630; subscriptionId: string;
   ##       : OData skip parameter.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_593911 = newJObject()
-  var query_593913 = newJObject()
-  add(query_593913, "api-version", newJString(apiVersion))
-  add(query_593913, "$inlineCount", newJString(InlineCount))
-  add(path_593911, "subscriptionId", newJString(subscriptionId))
-  add(query_593913, "$top", newJString(Top))
-  add(query_593913, "$orderBy", newJString(OrderBy))
-  add(query_593913, "$skip", newJString(Skip))
-  add(query_593913, "$filter", newJString(Filter))
-  result = call_593910.call(path_593911, query_593913, nil, nil, nil)
+  var path_574944 = newJObject()
+  var query_574946 = newJObject()
+  add(query_574946, "api-version", newJString(apiVersion))
+  add(query_574946, "$inlineCount", newJString(InlineCount))
+  add(path_574944, "subscriptionId", newJString(subscriptionId))
+  add(query_574946, "$top", newJString(Top))
+  add(query_574946, "$orderBy", newJString(OrderBy))
+  add(query_574946, "$skip", newJString(Skip))
+  add(query_574946, "$filter", newJString(Filter))
+  result = call_574943.call(path_574944, query_574946, nil, nil, nil)
 
-var loadBalancersList* = Call_LoadBalancersList_593630(name: "loadBalancersList",
+var loadBalancersList* = Call_LoadBalancersList_574663(name: "loadBalancersList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network.Admin/adminLoadBalancers",
-    validator: validate_LoadBalancersList_593631, base: "",
-    url: url_LoadBalancersList_593632, schemes: {Scheme.Https})
+    validator: validate_LoadBalancersList_574664, base: "",
+    url: url_LoadBalancersList_574665, schemes: {Scheme.Https})
 export
   rest
 

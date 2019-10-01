@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: AutomationManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_596457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "automation-dscNodeConfiguration"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DscNodeConfigurationListByAutomationAccount_593646 = ref object of OpenApiRestCall_593424
-proc url_DscNodeConfigurationListByAutomationAccount_593648(protocol: Scheme;
+  Call_DscNodeConfigurationListByAutomationAccount_596679 = ref object of OpenApiRestCall_596457
+proc url_DscNodeConfigurationListByAutomationAccount_596681(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +129,7 @@ proc url_DscNodeConfigurationListByAutomationAccount_593648(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DscNodeConfigurationListByAutomationAccount_593647(path: JsonNode;
+proc validate_DscNodeConfigurationListByAutomationAccount_596680(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of dsc node configurations.
   ## 
@@ -145,21 +145,21 @@ proc validate_DscNodeConfigurationListByAutomationAccount_593647(path: JsonNode;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593809 = path.getOrDefault("automationAccountName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_596842 = path.getOrDefault("automationAccountName")
+  valid_596842 = validateParameter(valid_596842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "automationAccountName", valid_593809
-  var valid_593810 = path.getOrDefault("resourceGroupName")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_596842 != nil:
+    section.add "automationAccountName", valid_596842
+  var valid_596843 = path.getOrDefault("resourceGroupName")
+  valid_596843 = validateParameter(valid_596843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "resourceGroupName", valid_593810
-  var valid_593811 = path.getOrDefault("subscriptionId")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_596843 != nil:
+    section.add "resourceGroupName", valid_596843
+  var valid_596844 = path.getOrDefault("subscriptionId")
+  valid_596844 = validateParameter(valid_596844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "subscriptionId", valid_593811
+  if valid_596844 != nil:
+    section.add "subscriptionId", valid_596844
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -169,16 +169,16 @@ proc validate_DscNodeConfigurationListByAutomationAccount_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_596845 = query.getOrDefault("api-version")
+  valid_596845 = validateParameter(valid_596845, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
-  var valid_593813 = query.getOrDefault("$filter")
-  valid_593813 = validateParameter(valid_593813, JString, required = false,
+  if valid_596845 != nil:
+    section.add "api-version", valid_596845
+  var valid_596846 = query.getOrDefault("$filter")
+  valid_596846 = validateParameter(valid_596846, JString, required = false,
                                  default = nil)
-  if valid_593813 != nil:
-    section.add "$filter", valid_593813
+  if valid_596846 != nil:
+    section.add "$filter", valid_596846
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -187,22 +187,22 @@ proc validate_DscNodeConfigurationListByAutomationAccount_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593840: Call_DscNodeConfigurationListByAutomationAccount_593646;
+proc call*(call_596873: Call_DscNodeConfigurationListByAutomationAccount_596679;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve a list of dsc node configurations.
   ## 
   ## http://aka.ms/azureautomationsdk/dscnodeconfigurations
-  let valid = call_593840.validator(path, query, header, formData, body)
-  let scheme = call_593840.pickScheme
+  let valid = call_596873.validator(path, query, header, formData, body)
+  let scheme = call_596873.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593840.url(scheme.get, call_593840.host, call_593840.base,
-                         call_593840.route, valid.getOrDefault("path"),
+  let url = call_596873.url(scheme.get, call_596873.host, call_596873.base,
+                         call_596873.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593840, url, valid)
+  result = hook(call_596873, url, valid)
 
-proc call*(call_593911: Call_DscNodeConfigurationListByAutomationAccount_593646;
+proc call*(call_596944: Call_DscNodeConfigurationListByAutomationAccount_596679;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; Filter: string = ""): Recallable =
   ## dscNodeConfigurationListByAutomationAccount
@@ -218,24 +218,24 @@ proc call*(call_593911: Call_DscNodeConfigurationListByAutomationAccount_593646;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_593912 = newJObject()
-  var query_593914 = newJObject()
-  add(path_593912, "automationAccountName", newJString(automationAccountName))
-  add(path_593912, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593914, "api-version", newJString(apiVersion))
-  add(path_593912, "subscriptionId", newJString(subscriptionId))
-  add(query_593914, "$filter", newJString(Filter))
-  result = call_593911.call(path_593912, query_593914, nil, nil, nil)
+  var path_596945 = newJObject()
+  var query_596947 = newJObject()
+  add(path_596945, "automationAccountName", newJString(automationAccountName))
+  add(path_596945, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596947, "api-version", newJString(apiVersion))
+  add(path_596945, "subscriptionId", newJString(subscriptionId))
+  add(query_596947, "$filter", newJString(Filter))
+  result = call_596944.call(path_596945, query_596947, nil, nil, nil)
 
-var dscNodeConfigurationListByAutomationAccount* = Call_DscNodeConfigurationListByAutomationAccount_593646(
+var dscNodeConfigurationListByAutomationAccount* = Call_DscNodeConfigurationListByAutomationAccount_596679(
     name: "dscNodeConfigurationListByAutomationAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/nodeConfigurations",
-    validator: validate_DscNodeConfigurationListByAutomationAccount_593647,
-    base: "", url: url_DscNodeConfigurationListByAutomationAccount_593648,
+    validator: validate_DscNodeConfigurationListByAutomationAccount_596680,
+    base: "", url: url_DscNodeConfigurationListByAutomationAccount_596681,
     schemes: {Scheme.Https})
 type
-  Call_DscNodeConfigurationCreateOrUpdate_593965 = ref object of OpenApiRestCall_593424
-proc url_DscNodeConfigurationCreateOrUpdate_593967(protocol: Scheme; host: string;
+  Call_DscNodeConfigurationCreateOrUpdate_596998 = ref object of OpenApiRestCall_596457
+proc url_DscNodeConfigurationCreateOrUpdate_597000(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -263,7 +263,7 @@ proc url_DscNodeConfigurationCreateOrUpdate_593967(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DscNodeConfigurationCreateOrUpdate_593966(path: JsonNode;
+proc validate_DscNodeConfigurationCreateOrUpdate_596999(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create the node configuration identified by node configuration name.
   ## 
@@ -281,26 +281,26 @@ proc validate_DscNodeConfigurationCreateOrUpdate_593966(path: JsonNode;
   ##                        : The create or update parameters for configuration.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593994 = path.getOrDefault("automationAccountName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_597027 = path.getOrDefault("automationAccountName")
+  valid_597027 = validateParameter(valid_597027, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "automationAccountName", valid_593994
-  var valid_593995 = path.getOrDefault("resourceGroupName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_597027 != nil:
+    section.add "automationAccountName", valid_597027
+  var valid_597028 = path.getOrDefault("resourceGroupName")
+  valid_597028 = validateParameter(valid_597028, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "resourceGroupName", valid_593995
-  var valid_593996 = path.getOrDefault("subscriptionId")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_597028 != nil:
+    section.add "resourceGroupName", valid_597028
+  var valid_597029 = path.getOrDefault("subscriptionId")
+  valid_597029 = validateParameter(valid_597029, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "subscriptionId", valid_593996
-  var valid_593997 = path.getOrDefault("nodeConfigurationName")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  if valid_597029 != nil:
+    section.add "subscriptionId", valid_597029
+  var valid_597030 = path.getOrDefault("nodeConfigurationName")
+  valid_597030 = validateParameter(valid_597030, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "nodeConfigurationName", valid_593997
+  if valid_597030 != nil:
+    section.add "nodeConfigurationName", valid_597030
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -308,11 +308,11 @@ proc validate_DscNodeConfigurationCreateOrUpdate_593966(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593998 = query.getOrDefault("api-version")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  var valid_597031 = query.getOrDefault("api-version")
+  valid_597031 = validateParameter(valid_597031, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "api-version", valid_593998
+  if valid_597031 != nil:
+    section.add "api-version", valid_597031
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -326,22 +326,22 @@ proc validate_DscNodeConfigurationCreateOrUpdate_593966(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594000: Call_DscNodeConfigurationCreateOrUpdate_593965;
+proc call*(call_597033: Call_DscNodeConfigurationCreateOrUpdate_596998;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create the node configuration identified by node configuration name.
   ## 
   ## http://aka.ms/azureautomationsdk/dscnodeconfigurations
-  let valid = call_594000.validator(path, query, header, formData, body)
-  let scheme = call_594000.pickScheme
+  let valid = call_597033.validator(path, query, header, formData, body)
+  let scheme = call_597033.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594000.url(scheme.get, call_594000.host, call_594000.base,
-                         call_594000.route, valid.getOrDefault("path"),
+  let url = call_597033.url(scheme.get, call_597033.host, call_597033.base,
+                         call_597033.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594000, url, valid)
+  result = hook(call_597033, url, valid)
 
-proc call*(call_594001: Call_DscNodeConfigurationCreateOrUpdate_593965;
+proc call*(call_597034: Call_DscNodeConfigurationCreateOrUpdate_596998;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; nodeConfigurationName: string;
           parameters: JsonNode): Recallable =
@@ -360,26 +360,26 @@ proc call*(call_594001: Call_DscNodeConfigurationCreateOrUpdate_593965;
   ##                        : The create or update parameters for configuration.
   ##   parameters: JObject (required)
   ##             : The create or update parameters for configuration.
-  var path_594002 = newJObject()
-  var query_594003 = newJObject()
-  var body_594004 = newJObject()
-  add(path_594002, "automationAccountName", newJString(automationAccountName))
-  add(path_594002, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594003, "api-version", newJString(apiVersion))
-  add(path_594002, "subscriptionId", newJString(subscriptionId))
-  add(path_594002, "nodeConfigurationName", newJString(nodeConfigurationName))
+  var path_597035 = newJObject()
+  var query_597036 = newJObject()
+  var body_597037 = newJObject()
+  add(path_597035, "automationAccountName", newJString(automationAccountName))
+  add(path_597035, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597036, "api-version", newJString(apiVersion))
+  add(path_597035, "subscriptionId", newJString(subscriptionId))
+  add(path_597035, "nodeConfigurationName", newJString(nodeConfigurationName))
   if parameters != nil:
-    body_594004 = parameters
-  result = call_594001.call(path_594002, query_594003, nil, nil, body_594004)
+    body_597037 = parameters
+  result = call_597034.call(path_597035, query_597036, nil, nil, body_597037)
 
-var dscNodeConfigurationCreateOrUpdate* = Call_DscNodeConfigurationCreateOrUpdate_593965(
+var dscNodeConfigurationCreateOrUpdate* = Call_DscNodeConfigurationCreateOrUpdate_596998(
     name: "dscNodeConfigurationCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/nodeConfigurations/{nodeConfigurationName}",
-    validator: validate_DscNodeConfigurationCreateOrUpdate_593966, base: "",
-    url: url_DscNodeConfigurationCreateOrUpdate_593967, schemes: {Scheme.Https})
+    validator: validate_DscNodeConfigurationCreateOrUpdate_596999, base: "",
+    url: url_DscNodeConfigurationCreateOrUpdate_597000, schemes: {Scheme.Https})
 type
-  Call_DscNodeConfigurationGet_593953 = ref object of OpenApiRestCall_593424
-proc url_DscNodeConfigurationGet_593955(protocol: Scheme; host: string; base: string;
+  Call_DscNodeConfigurationGet_596986 = ref object of OpenApiRestCall_596457
+proc url_DscNodeConfigurationGet_596988(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -408,7 +408,7 @@ proc url_DscNodeConfigurationGet_593955(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DscNodeConfigurationGet_593954(path: JsonNode; query: JsonNode;
+proc validate_DscNodeConfigurationGet_596987(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the Dsc node configurations by node configuration.
   ## 
@@ -426,26 +426,26 @@ proc validate_DscNodeConfigurationGet_593954(path: JsonNode; query: JsonNode;
   ##                        : The Dsc node configuration name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593956 = path.getOrDefault("automationAccountName")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  var valid_596989 = path.getOrDefault("automationAccountName")
+  valid_596989 = validateParameter(valid_596989, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "automationAccountName", valid_593956
-  var valid_593957 = path.getOrDefault("resourceGroupName")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  if valid_596989 != nil:
+    section.add "automationAccountName", valid_596989
+  var valid_596990 = path.getOrDefault("resourceGroupName")
+  valid_596990 = validateParameter(valid_596990, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "resourceGroupName", valid_593957
-  var valid_593958 = path.getOrDefault("subscriptionId")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  if valid_596990 != nil:
+    section.add "resourceGroupName", valid_596990
+  var valid_596991 = path.getOrDefault("subscriptionId")
+  valid_596991 = validateParameter(valid_596991, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "subscriptionId", valid_593958
-  var valid_593959 = path.getOrDefault("nodeConfigurationName")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_596991 != nil:
+    section.add "subscriptionId", valid_596991
+  var valid_596992 = path.getOrDefault("nodeConfigurationName")
+  valid_596992 = validateParameter(valid_596992, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "nodeConfigurationName", valid_593959
+  if valid_596992 != nil:
+    section.add "nodeConfigurationName", valid_596992
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -453,11 +453,11 @@ proc validate_DscNodeConfigurationGet_593954(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593960 = query.getOrDefault("api-version")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_596993 = query.getOrDefault("api-version")
+  valid_596993 = validateParameter(valid_596993, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "api-version", valid_593960
+  if valid_596993 != nil:
+    section.add "api-version", valid_596993
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -466,21 +466,21 @@ proc validate_DscNodeConfigurationGet_593954(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593961: Call_DscNodeConfigurationGet_593953; path: JsonNode;
+proc call*(call_596994: Call_DscNodeConfigurationGet_596986; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the Dsc node configurations by node configuration.
   ## 
   ## http://aka.ms/azureautomationsdk/dscnodeconfigurations
-  let valid = call_593961.validator(path, query, header, formData, body)
-  let scheme = call_593961.pickScheme
+  let valid = call_596994.validator(path, query, header, formData, body)
+  let scheme = call_596994.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593961.url(scheme.get, call_593961.host, call_593961.base,
-                         call_593961.route, valid.getOrDefault("path"),
+  let url = call_596994.url(scheme.get, call_596994.host, call_596994.base,
+                         call_596994.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593961, url, valid)
+  result = hook(call_596994, url, valid)
 
-proc call*(call_593962: Call_DscNodeConfigurationGet_593953;
+proc call*(call_596995: Call_DscNodeConfigurationGet_596986;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; nodeConfigurationName: string): Recallable =
   ## dscNodeConfigurationGet
@@ -496,23 +496,23 @@ proc call*(call_593962: Call_DscNodeConfigurationGet_593953;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   nodeConfigurationName: string (required)
   ##                        : The Dsc node configuration name.
-  var path_593963 = newJObject()
-  var query_593964 = newJObject()
-  add(path_593963, "automationAccountName", newJString(automationAccountName))
-  add(path_593963, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593964, "api-version", newJString(apiVersion))
-  add(path_593963, "subscriptionId", newJString(subscriptionId))
-  add(path_593963, "nodeConfigurationName", newJString(nodeConfigurationName))
-  result = call_593962.call(path_593963, query_593964, nil, nil, nil)
+  var path_596996 = newJObject()
+  var query_596997 = newJObject()
+  add(path_596996, "automationAccountName", newJString(automationAccountName))
+  add(path_596996, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596997, "api-version", newJString(apiVersion))
+  add(path_596996, "subscriptionId", newJString(subscriptionId))
+  add(path_596996, "nodeConfigurationName", newJString(nodeConfigurationName))
+  result = call_596995.call(path_596996, query_596997, nil, nil, nil)
 
-var dscNodeConfigurationGet* = Call_DscNodeConfigurationGet_593953(
+var dscNodeConfigurationGet* = Call_DscNodeConfigurationGet_596986(
     name: "dscNodeConfigurationGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/nodeConfigurations/{nodeConfigurationName}",
-    validator: validate_DscNodeConfigurationGet_593954, base: "",
-    url: url_DscNodeConfigurationGet_593955, schemes: {Scheme.Https})
+    validator: validate_DscNodeConfigurationGet_596987, base: "",
+    url: url_DscNodeConfigurationGet_596988, schemes: {Scheme.Https})
 type
-  Call_DscNodeConfigurationDelete_594005 = ref object of OpenApiRestCall_593424
-proc url_DscNodeConfigurationDelete_594007(protocol: Scheme; host: string;
+  Call_DscNodeConfigurationDelete_597038 = ref object of OpenApiRestCall_596457
+proc url_DscNodeConfigurationDelete_597040(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -540,7 +540,7 @@ proc url_DscNodeConfigurationDelete_594007(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DscNodeConfigurationDelete_594006(path: JsonNode; query: JsonNode;
+proc validate_DscNodeConfigurationDelete_597039(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the Dsc node configurations by node configuration.
   ## 
@@ -558,26 +558,26 @@ proc validate_DscNodeConfigurationDelete_594006(path: JsonNode; query: JsonNode;
   ##                        : The Dsc node configuration name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594008 = path.getOrDefault("automationAccountName")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  var valid_597041 = path.getOrDefault("automationAccountName")
+  valid_597041 = validateParameter(valid_597041, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "automationAccountName", valid_594008
-  var valid_594009 = path.getOrDefault("resourceGroupName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_597041 != nil:
+    section.add "automationAccountName", valid_597041
+  var valid_597042 = path.getOrDefault("resourceGroupName")
+  valid_597042 = validateParameter(valid_597042, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "resourceGroupName", valid_594009
-  var valid_594010 = path.getOrDefault("subscriptionId")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  if valid_597042 != nil:
+    section.add "resourceGroupName", valid_597042
+  var valid_597043 = path.getOrDefault("subscriptionId")
+  valid_597043 = validateParameter(valid_597043, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "subscriptionId", valid_594010
-  var valid_594011 = path.getOrDefault("nodeConfigurationName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  if valid_597043 != nil:
+    section.add "subscriptionId", valid_597043
+  var valid_597044 = path.getOrDefault("nodeConfigurationName")
+  valid_597044 = validateParameter(valid_597044, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "nodeConfigurationName", valid_594011
+  if valid_597044 != nil:
+    section.add "nodeConfigurationName", valid_597044
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -585,11 +585,11 @@ proc validate_DscNodeConfigurationDelete_594006(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594012 = query.getOrDefault("api-version")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  var valid_597045 = query.getOrDefault("api-version")
+  valid_597045 = validateParameter(valid_597045, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "api-version", valid_594012
+  if valid_597045 != nil:
+    section.add "api-version", valid_597045
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -598,21 +598,21 @@ proc validate_DscNodeConfigurationDelete_594006(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594013: Call_DscNodeConfigurationDelete_594005; path: JsonNode;
+proc call*(call_597046: Call_DscNodeConfigurationDelete_597038; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the Dsc node configurations by node configuration.
   ## 
   ## http://aka.ms/azureautomationsdk/dscnodeconfigurations
-  let valid = call_594013.validator(path, query, header, formData, body)
-  let scheme = call_594013.pickScheme
+  let valid = call_597046.validator(path, query, header, formData, body)
+  let scheme = call_597046.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594013.url(scheme.get, call_594013.host, call_594013.base,
-                         call_594013.route, valid.getOrDefault("path"),
+  let url = call_597046.url(scheme.get, call_597046.host, call_597046.base,
+                         call_597046.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594013, url, valid)
+  result = hook(call_597046, url, valid)
 
-proc call*(call_594014: Call_DscNodeConfigurationDelete_594005;
+proc call*(call_597047: Call_DscNodeConfigurationDelete_597038;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; nodeConfigurationName: string): Recallable =
   ## dscNodeConfigurationDelete
@@ -628,20 +628,20 @@ proc call*(call_594014: Call_DscNodeConfigurationDelete_594005;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   nodeConfigurationName: string (required)
   ##                        : The Dsc node configuration name.
-  var path_594015 = newJObject()
-  var query_594016 = newJObject()
-  add(path_594015, "automationAccountName", newJString(automationAccountName))
-  add(path_594015, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594016, "api-version", newJString(apiVersion))
-  add(path_594015, "subscriptionId", newJString(subscriptionId))
-  add(path_594015, "nodeConfigurationName", newJString(nodeConfigurationName))
-  result = call_594014.call(path_594015, query_594016, nil, nil, nil)
+  var path_597048 = newJObject()
+  var query_597049 = newJObject()
+  add(path_597048, "automationAccountName", newJString(automationAccountName))
+  add(path_597048, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597049, "api-version", newJString(apiVersion))
+  add(path_597048, "subscriptionId", newJString(subscriptionId))
+  add(path_597048, "nodeConfigurationName", newJString(nodeConfigurationName))
+  result = call_597047.call(path_597048, query_597049, nil, nil, nil)
 
-var dscNodeConfigurationDelete* = Call_DscNodeConfigurationDelete_594005(
+var dscNodeConfigurationDelete* = Call_DscNodeConfigurationDelete_597038(
     name: "dscNodeConfigurationDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/nodeConfigurations/{nodeConfigurationName}",
-    validator: validate_DscNodeConfigurationDelete_594006, base: "",
-    url: url_DscNodeConfigurationDelete_594007, schemes: {Scheme.Https})
+    validator: validate_DscNodeConfigurationDelete_597039, base: "",
+    url: url_DscNodeConfigurationDelete_597040, schemes: {Scheme.Https})
 export
   rest
 

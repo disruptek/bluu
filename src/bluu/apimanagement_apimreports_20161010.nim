@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_596457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "apimanagement-apimreports"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ReportsListByService_593646 = ref object of OpenApiRestCall_593424
-proc url_ReportsListByService_593648(protocol: Scheme; host: string; base: string;
+  Call_ReportsListByService_596679 = ref object of OpenApiRestCall_596457
+proc url_ReportsListByService_596681(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,7 +130,7 @@ proc url_ReportsListByService_593648(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportsListByService_593647(path: JsonNode; query: JsonNode;
+proc validate_ReportsListByService_596680(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists report records.
   ## 
@@ -148,26 +148,26 @@ proc validate_ReportsListByService_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_596842 = path.getOrDefault("resourceGroupName")
+  valid_596842 = validateParameter(valid_596842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_596842 != nil:
+    section.add "resourceGroupName", valid_596842
+  var valid_596843 = path.getOrDefault("subscriptionId")
+  valid_596843 = validateParameter(valid_596843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593824 = path.getOrDefault("aggregation")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_596843 != nil:
+    section.add "subscriptionId", valid_596843
+  var valid_596857 = path.getOrDefault("aggregation")
+  valid_596857 = validateParameter(valid_596857, JString, required = true,
                                  default = newJString("byApi"))
-  if valid_593824 != nil:
-    section.add "aggregation", valid_593824
-  var valid_593825 = path.getOrDefault("serviceName")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_596857 != nil:
+    section.add "aggregation", valid_596857
+  var valid_596858 = path.getOrDefault("serviceName")
+  valid_596858 = validateParameter(valid_596858, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "serviceName", valid_593825
+  if valid_596858 != nil:
+    section.add "serviceName", valid_596858
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -183,29 +183,29 @@ proc validate_ReportsListByService_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593826 = query.getOrDefault("api-version")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  var valid_596859 = query.getOrDefault("api-version")
+  valid_596859 = validateParameter(valid_596859, JString, required = true,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "api-version", valid_593826
-  var valid_593827 = query.getOrDefault("$top")
-  valid_593827 = validateParameter(valid_593827, JInt, required = false, default = nil)
-  if valid_593827 != nil:
-    section.add "$top", valid_593827
-  var valid_593828 = query.getOrDefault("$skip")
-  valid_593828 = validateParameter(valid_593828, JInt, required = false, default = nil)
-  if valid_593828 != nil:
-    section.add "$skip", valid_593828
-  var valid_593829 = query.getOrDefault("interval")
-  valid_593829 = validateParameter(valid_593829, JString, required = false,
+  if valid_596859 != nil:
+    section.add "api-version", valid_596859
+  var valid_596860 = query.getOrDefault("$top")
+  valid_596860 = validateParameter(valid_596860, JInt, required = false, default = nil)
+  if valid_596860 != nil:
+    section.add "$top", valid_596860
+  var valid_596861 = query.getOrDefault("$skip")
+  valid_596861 = validateParameter(valid_596861, JInt, required = false, default = nil)
+  if valid_596861 != nil:
+    section.add "$skip", valid_596861
+  var valid_596862 = query.getOrDefault("interval")
+  valid_596862 = validateParameter(valid_596862, JString, required = false,
                                  default = nil)
-  if valid_593829 != nil:
-    section.add "interval", valid_593829
-  var valid_593830 = query.getOrDefault("$filter")
-  valid_593830 = validateParameter(valid_593830, JString, required = false,
+  if valid_596862 != nil:
+    section.add "interval", valid_596862
+  var valid_596863 = query.getOrDefault("$filter")
+  valid_596863 = validateParameter(valid_596863, JString, required = false,
                                  default = nil)
-  if valid_593830 != nil:
-    section.add "$filter", valid_593830
+  if valid_596863 != nil:
+    section.add "$filter", valid_596863
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -214,20 +214,20 @@ proc validate_ReportsListByService_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593857: Call_ReportsListByService_593646; path: JsonNode;
+proc call*(call_596890: Call_ReportsListByService_596679; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists report records.
   ## 
-  let valid = call_593857.validator(path, query, header, formData, body)
-  let scheme = call_593857.pickScheme
+  let valid = call_596890.validator(path, query, header, formData, body)
+  let scheme = call_596890.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593857.url(scheme.get, call_593857.host, call_593857.base,
-                         call_593857.route, valid.getOrDefault("path"),
+  let url = call_596890.url(scheme.get, call_596890.host, call_596890.base,
+                         call_596890.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593857, url, valid)
+  result = hook(call_596890, url, valid)
 
-proc call*(call_593928: Call_ReportsListByService_593646;
+proc call*(call_596961: Call_ReportsListByService_596679;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           serviceName: string; Top: int = 0; Skip: int = 0; interval: string = "";
           aggregation: string = "byApi"; Filter: string = ""): Recallable =
@@ -251,24 +251,24 @@ proc call*(call_593928: Call_ReportsListByService_593646;
   ##              : The name of the API Management service.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_593929 = newJObject()
-  var query_593931 = newJObject()
-  add(path_593929, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593931, "api-version", newJString(apiVersion))
-  add(path_593929, "subscriptionId", newJString(subscriptionId))
-  add(query_593931, "$top", newJInt(Top))
-  add(query_593931, "$skip", newJInt(Skip))
-  add(query_593931, "interval", newJString(interval))
-  add(path_593929, "aggregation", newJString(aggregation))
-  add(path_593929, "serviceName", newJString(serviceName))
-  add(query_593931, "$filter", newJString(Filter))
-  result = call_593928.call(path_593929, query_593931, nil, nil, nil)
+  var path_596962 = newJObject()
+  var query_596964 = newJObject()
+  add(path_596962, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596964, "api-version", newJString(apiVersion))
+  add(path_596962, "subscriptionId", newJString(subscriptionId))
+  add(query_596964, "$top", newJInt(Top))
+  add(query_596964, "$skip", newJInt(Skip))
+  add(query_596964, "interval", newJString(interval))
+  add(path_596962, "aggregation", newJString(aggregation))
+  add(path_596962, "serviceName", newJString(serviceName))
+  add(query_596964, "$filter", newJString(Filter))
+  result = call_596961.call(path_596962, query_596964, nil, nil, nil)
 
-var reportsListByService* = Call_ReportsListByService_593646(
+var reportsListByService* = Call_ReportsListByService_596679(
     name: "reportsListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/reports/{aggregation}",
-    validator: validate_ReportsListByService_593647, base: "",
-    url: url_ReportsListByService_593648, schemes: {Scheme.Https})
+    validator: validate_ReportsListByService_596680, base: "",
+    url: url_ReportsListByService_596681, schemes: {Scheme.Https})
 export
   rest
 

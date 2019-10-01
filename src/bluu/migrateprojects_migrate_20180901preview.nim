@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Migrate Hub
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593438 = ref object of OpenApiRestCall
+  OpenApiRestCall_567667 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593438](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567667](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593438): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567667): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "migrateprojects-migrate"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593660 = ref object of OpenApiRestCall_593438
-proc url_OperationsList_593662(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567889 = ref object of OpenApiRestCall_567667
+proc url_OperationsList_567891(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567890(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Get a list of REST API supported by Microsoft.Migrate provider.
@@ -129,32 +129,32 @@ proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593767: Call_OperationsList_593660; path: JsonNode; query: JsonNode;
+proc call*(call_567996: Call_OperationsList_567889; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a list of REST API supported by Microsoft.Migrate provider.
   ## 
-  let valid = call_593767.validator(path, query, header, formData, body)
-  let scheme = call_593767.pickScheme
+  let valid = call_567996.validator(path, query, header, formData, body)
+  let scheme = call_567996.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593767.url(scheme.get, call_593767.host, call_593767.base,
-                         call_593767.route, valid.getOrDefault("path"),
+  let url = call_567996.url(scheme.get, call_567996.host, call_567996.base,
+                         call_567996.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593767, url, valid)
+  result = hook(call_567996, url, valid)
 
-proc call*(call_593851: Call_OperationsList_593660): Recallable =
+proc call*(call_568080: Call_OperationsList_567889): Recallable =
   ## operationsList
   ## Get a list of REST API supported by Microsoft.Migrate provider.
-  result = call_593851.call(nil, nil, nil, nil, nil)
+  result = call_568080.call(nil, nil, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593660(name: "operationsList",
+var operationsList* = Call_OperationsList_567889(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Migrate/operations",
-    validator: validate_OperationsList_593661, base: "", url: url_OperationsList_593662,
+    validator: validate_OperationsList_567890, base: "", url: url_OperationsList_567891,
     schemes: {Scheme.Https})
 type
-  Call_MigrateProjectsPutMigrateProject_593992 = ref object of OpenApiRestCall_593438
-proc url_MigrateProjectsPutMigrateProject_593994(protocol: Scheme; host: string;
+  Call_MigrateProjectsPutMigrateProject_568221 = ref object of OpenApiRestCall_567667
+proc url_MigrateProjectsPutMigrateProject_568223(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -178,7 +178,7 @@ proc url_MigrateProjectsPutMigrateProject_593994(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MigrateProjectsPutMigrateProject_593993(path: JsonNode;
+proc validate_MigrateProjectsPutMigrateProject_568222(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -192,21 +192,21 @@ proc validate_MigrateProjectsPutMigrateProject_593993(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593995 = path.getOrDefault("resourceGroupName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_568224 = path.getOrDefault("resourceGroupName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "resourceGroupName", valid_593995
-  var valid_593996 = path.getOrDefault("subscriptionId")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_568224 != nil:
+    section.add "resourceGroupName", valid_568224
+  var valid_568225 = path.getOrDefault("subscriptionId")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "subscriptionId", valid_593996
-  var valid_593997 = path.getOrDefault("migrateProjectName")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  if valid_568225 != nil:
+    section.add "subscriptionId", valid_568225
+  var valid_568226 = path.getOrDefault("migrateProjectName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "migrateProjectName", valid_593997
+  if valid_568226 != nil:
+    section.add "migrateProjectName", valid_568226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -214,21 +214,21 @@ proc validate_MigrateProjectsPutMigrateProject_593993(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593998 = query.getOrDefault("api-version")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  var valid_568227 = query.getOrDefault("api-version")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_593998 != nil:
-    section.add "api-version", valid_593998
+  if valid_568227 != nil:
+    section.add "api-version", valid_568227
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Standard request header. Used by service to respond to client in appropriate language.
   section = newJObject()
-  var valid_593999 = header.getOrDefault("Accept-Language")
-  valid_593999 = validateParameter(valid_593999, JString, required = false,
+  var valid_568228 = header.getOrDefault("Accept-Language")
+  valid_568228 = validateParameter(valid_568228, JString, required = false,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "Accept-Language", valid_593999
+  if valid_568228 != nil:
+    section.add "Accept-Language", valid_568228
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -240,19 +240,19 @@ proc validate_MigrateProjectsPutMigrateProject_593993(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594001: Call_MigrateProjectsPutMigrateProject_593992;
+proc call*(call_568230: Call_MigrateProjectsPutMigrateProject_568221;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
-  let valid = call_594001.validator(path, query, header, formData, body)
-  let scheme = call_594001.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594001.url(scheme.get, call_594001.host, call_594001.base,
-                         call_594001.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594001, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_594002: Call_MigrateProjectsPutMigrateProject_593992;
+proc call*(call_568231: Call_MigrateProjectsPutMigrateProject_568221;
           resourceGroupName: string; subscriptionId: string; body: JsonNode;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## migrateProjectsPutMigrateProject
@@ -266,25 +266,25 @@ proc call*(call_594002: Call_MigrateProjectsPutMigrateProject_593992;
   ##       : Body with migrate project details.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594003 = newJObject()
-  var query_594004 = newJObject()
-  var body_594005 = newJObject()
-  add(path_594003, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594004, "api-version", newJString(apiVersion))
-  add(path_594003, "subscriptionId", newJString(subscriptionId))
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  var body_568234 = newJObject()
+  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_594005 = body
-  add(path_594003, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594002.call(path_594003, query_594004, nil, nil, body_594005)
+    body_568234 = body
+  add(path_568232, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568231.call(path_568232, query_568233, nil, nil, body_568234)
 
-var migrateProjectsPutMigrateProject* = Call_MigrateProjectsPutMigrateProject_593992(
+var migrateProjectsPutMigrateProject* = Call_MigrateProjectsPutMigrateProject_568221(
     name: "migrateProjectsPutMigrateProject", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}",
-    validator: validate_MigrateProjectsPutMigrateProject_593993, base: "",
-    url: url_MigrateProjectsPutMigrateProject_593994, schemes: {Scheme.Https})
+    validator: validate_MigrateProjectsPutMigrateProject_568222, base: "",
+    url: url_MigrateProjectsPutMigrateProject_568223, schemes: {Scheme.Https})
 type
-  Call_MigrateProjectsGetMigrateProject_593889 = ref object of OpenApiRestCall_593438
-proc url_MigrateProjectsGetMigrateProject_593891(protocol: Scheme; host: string;
+  Call_MigrateProjectsGetMigrateProject_568118 = ref object of OpenApiRestCall_567667
+proc url_MigrateProjectsGetMigrateProject_568120(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -308,7 +308,7 @@ proc url_MigrateProjectsGetMigrateProject_593891(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MigrateProjectsGetMigrateProject_593890(path: JsonNode;
+proc validate_MigrateProjectsGetMigrateProject_568119(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -322,21 +322,21 @@ proc validate_MigrateProjectsGetMigrateProject_593890(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593969 = path.getOrDefault("resourceGroupName")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_568198 = path.getOrDefault("resourceGroupName")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "resourceGroupName", valid_593969
-  var valid_593970 = path.getOrDefault("subscriptionId")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_568198 != nil:
+    section.add "resourceGroupName", valid_568198
+  var valid_568199 = path.getOrDefault("subscriptionId")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "subscriptionId", valid_593970
-  var valid_593971 = path.getOrDefault("migrateProjectName")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  if valid_568199 != nil:
+    section.add "subscriptionId", valid_568199
+  var valid_568200 = path.getOrDefault("migrateProjectName")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "migrateProjectName", valid_593971
+  if valid_568200 != nil:
+    section.add "migrateProjectName", valid_568200
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -344,11 +344,11 @@ proc validate_MigrateProjectsGetMigrateProject_593890(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568214 = query.getOrDefault("api-version")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_568214 != nil:
+    section.add "api-version", valid_568214
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -357,19 +357,19 @@ proc validate_MigrateProjectsGetMigrateProject_593890(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593986: Call_MigrateProjectsGetMigrateProject_593889;
+proc call*(call_568215: Call_MigrateProjectsGetMigrateProject_568118;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
-  let valid = call_593986.validator(path, query, header, formData, body)
-  let scheme = call_593986.pickScheme
+  let valid = call_568215.validator(path, query, header, formData, body)
+  let scheme = call_568215.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593986.url(scheme.get, call_593986.host, call_593986.base,
-                         call_593986.route, valid.getOrDefault("path"),
+  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
+                         call_568215.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593986, url, valid)
+  result = hook(call_568215, url, valid)
 
-proc call*(call_593987: Call_MigrateProjectsGetMigrateProject_593889;
+proc call*(call_568216: Call_MigrateProjectsGetMigrateProject_568118;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## migrateProjectsGetMigrateProject
@@ -381,22 +381,22 @@ proc call*(call_593987: Call_MigrateProjectsGetMigrateProject_593889;
   ##                 : Azure Subscription Id in which migrate project was created.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_593988 = newJObject()
-  var query_593990 = newJObject()
-  add(path_593988, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593990, "api-version", newJString(apiVersion))
-  add(path_593988, "subscriptionId", newJString(subscriptionId))
-  add(path_593988, "migrateProjectName", newJString(migrateProjectName))
-  result = call_593987.call(path_593988, query_593990, nil, nil, nil)
+  var path_568217 = newJObject()
+  var query_568219 = newJObject()
+  add(path_568217, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568219, "api-version", newJString(apiVersion))
+  add(path_568217, "subscriptionId", newJString(subscriptionId))
+  add(path_568217, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568216.call(path_568217, query_568219, nil, nil, nil)
 
-var migrateProjectsGetMigrateProject* = Call_MigrateProjectsGetMigrateProject_593889(
+var migrateProjectsGetMigrateProject* = Call_MigrateProjectsGetMigrateProject_568118(
     name: "migrateProjectsGetMigrateProject", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}",
-    validator: validate_MigrateProjectsGetMigrateProject_593890, base: "",
-    url: url_MigrateProjectsGetMigrateProject_593891, schemes: {Scheme.Https})
+    validator: validate_MigrateProjectsGetMigrateProject_568119, base: "",
+    url: url_MigrateProjectsGetMigrateProject_568120, schemes: {Scheme.Https})
 type
-  Call_MigrateProjectsPatchMigrateProject_594018 = ref object of OpenApiRestCall_593438
-proc url_MigrateProjectsPatchMigrateProject_594020(protocol: Scheme; host: string;
+  Call_MigrateProjectsPatchMigrateProject_568247 = ref object of OpenApiRestCall_567667
+proc url_MigrateProjectsPatchMigrateProject_568249(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -420,7 +420,7 @@ proc url_MigrateProjectsPatchMigrateProject_594020(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MigrateProjectsPatchMigrateProject_594019(path: JsonNode;
+proc validate_MigrateProjectsPatchMigrateProject_568248(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update a migrate project with specified name. Supports partial updates, for example only tags can be provided.
   ## 
@@ -436,21 +436,21 @@ proc validate_MigrateProjectsPatchMigrateProject_594019(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594021 = path.getOrDefault("resourceGroupName")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  var valid_568250 = path.getOrDefault("resourceGroupName")
+  valid_568250 = validateParameter(valid_568250, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "resourceGroupName", valid_594021
-  var valid_594022 = path.getOrDefault("subscriptionId")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  if valid_568250 != nil:
+    section.add "resourceGroupName", valid_568250
+  var valid_568251 = path.getOrDefault("subscriptionId")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "subscriptionId", valid_594022
-  var valid_594023 = path.getOrDefault("migrateProjectName")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  if valid_568251 != nil:
+    section.add "subscriptionId", valid_568251
+  var valid_568252 = path.getOrDefault("migrateProjectName")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "migrateProjectName", valid_594023
+  if valid_568252 != nil:
+    section.add "migrateProjectName", valid_568252
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -458,21 +458,21 @@ proc validate_MigrateProjectsPatchMigrateProject_594019(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594024 = query.getOrDefault("api-version")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_568253 = query.getOrDefault("api-version")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594024 != nil:
-    section.add "api-version", valid_594024
+  if valid_568253 != nil:
+    section.add "api-version", valid_568253
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Standard request header. Used by service to respond to client in appropriate language.
   section = newJObject()
-  var valid_594025 = header.getOrDefault("Accept-Language")
-  valid_594025 = validateParameter(valid_594025, JString, required = false,
+  var valid_568254 = header.getOrDefault("Accept-Language")
+  valid_568254 = validateParameter(valid_568254, JString, required = false,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "Accept-Language", valid_594025
+  if valid_568254 != nil:
+    section.add "Accept-Language", valid_568254
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -484,21 +484,21 @@ proc validate_MigrateProjectsPatchMigrateProject_594019(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594027: Call_MigrateProjectsPatchMigrateProject_594018;
+proc call*(call_568256: Call_MigrateProjectsPatchMigrateProject_568247;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update a migrate project with specified name. Supports partial updates, for example only tags can be provided.
   ## 
-  let valid = call_594027.validator(path, query, header, formData, body)
-  let scheme = call_594027.pickScheme
+  let valid = call_568256.validator(path, query, header, formData, body)
+  let scheme = call_568256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594027.url(scheme.get, call_594027.host, call_594027.base,
-                         call_594027.route, valid.getOrDefault("path"),
+  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
+                         call_568256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594027, url, valid)
+  result = hook(call_568256, url, valid)
 
-proc call*(call_594028: Call_MigrateProjectsPatchMigrateProject_594018;
+proc call*(call_568257: Call_MigrateProjectsPatchMigrateProject_568247;
           resourceGroupName: string; subscriptionId: string; body: JsonNode;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## migrateProjectsPatchMigrateProject
@@ -513,25 +513,25 @@ proc call*(call_594028: Call_MigrateProjectsPatchMigrateProject_594018;
   ##       : Body with migrate project details.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594029 = newJObject()
-  var query_594030 = newJObject()
-  var body_594031 = newJObject()
-  add(path_594029, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594030, "api-version", newJString(apiVersion))
-  add(path_594029, "subscriptionId", newJString(subscriptionId))
+  var path_568258 = newJObject()
+  var query_568259 = newJObject()
+  var body_568260 = newJObject()
+  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568259, "api-version", newJString(apiVersion))
+  add(path_568258, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_594031 = body
-  add(path_594029, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594028.call(path_594029, query_594030, nil, nil, body_594031)
+    body_568260 = body
+  add(path_568258, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568257.call(path_568258, query_568259, nil, nil, body_568260)
 
-var migrateProjectsPatchMigrateProject* = Call_MigrateProjectsPatchMigrateProject_594018(
+var migrateProjectsPatchMigrateProject* = Call_MigrateProjectsPatchMigrateProject_568247(
     name: "migrateProjectsPatchMigrateProject", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}",
-    validator: validate_MigrateProjectsPatchMigrateProject_594019, base: "",
-    url: url_MigrateProjectsPatchMigrateProject_594020, schemes: {Scheme.Https})
+    validator: validate_MigrateProjectsPatchMigrateProject_568248, base: "",
+    url: url_MigrateProjectsPatchMigrateProject_568249, schemes: {Scheme.Https})
 type
-  Call_MigrateProjectsDeleteMigrateProject_594006 = ref object of OpenApiRestCall_593438
-proc url_MigrateProjectsDeleteMigrateProject_594008(protocol: Scheme; host: string;
+  Call_MigrateProjectsDeleteMigrateProject_568235 = ref object of OpenApiRestCall_567667
+proc url_MigrateProjectsDeleteMigrateProject_568237(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -555,7 +555,7 @@ proc url_MigrateProjectsDeleteMigrateProject_594008(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MigrateProjectsDeleteMigrateProject_594007(path: JsonNode;
+proc validate_MigrateProjectsDeleteMigrateProject_568236(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the migrate project. Deleting non-existent project is a no-operation.
   ## 
@@ -571,21 +571,21 @@ proc validate_MigrateProjectsDeleteMigrateProject_594007(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594009 = path.getOrDefault("resourceGroupName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_568238 = path.getOrDefault("resourceGroupName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "resourceGroupName", valid_594009
-  var valid_594010 = path.getOrDefault("subscriptionId")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  if valid_568238 != nil:
+    section.add "resourceGroupName", valid_568238
+  var valid_568239 = path.getOrDefault("subscriptionId")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "subscriptionId", valid_594010
-  var valid_594011 = path.getOrDefault("migrateProjectName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  if valid_568239 != nil:
+    section.add "subscriptionId", valid_568239
+  var valid_568240 = path.getOrDefault("migrateProjectName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "migrateProjectName", valid_594011
+  if valid_568240 != nil:
+    section.add "migrateProjectName", valid_568240
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -593,42 +593,42 @@ proc validate_MigrateProjectsDeleteMigrateProject_594007(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594012 = query.getOrDefault("api-version")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  var valid_568241 = query.getOrDefault("api-version")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594012 != nil:
-    section.add "api-version", valid_594012
+  if valid_568241 != nil:
+    section.add "api-version", valid_568241
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Standard request header. Used by service to respond to client in appropriate language.
   section = newJObject()
-  var valid_594013 = header.getOrDefault("Accept-Language")
-  valid_594013 = validateParameter(valid_594013, JString, required = false,
+  var valid_568242 = header.getOrDefault("Accept-Language")
+  valid_568242 = validateParameter(valid_568242, JString, required = false,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "Accept-Language", valid_594013
+  if valid_568242 != nil:
+    section.add "Accept-Language", valid_568242
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594014: Call_MigrateProjectsDeleteMigrateProject_594006;
+proc call*(call_568243: Call_MigrateProjectsDeleteMigrateProject_568235;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete the migrate project. Deleting non-existent project is a no-operation.
   ## 
-  let valid = call_594014.validator(path, query, header, formData, body)
-  let scheme = call_594014.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594014.url(scheme.get, call_594014.host, call_594014.base,
-                         call_594014.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594014, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594015: Call_MigrateProjectsDeleteMigrateProject_594006;
+proc call*(call_568244: Call_MigrateProjectsDeleteMigrateProject_568235;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## migrateProjectsDeleteMigrateProject
@@ -641,22 +641,22 @@ proc call*(call_594015: Call_MigrateProjectsDeleteMigrateProject_594006;
   ##                 : Azure Subscription Id in which migrate project was created.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594016 = newJObject()
-  var query_594017 = newJObject()
-  add(path_594016, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594017, "api-version", newJString(apiVersion))
-  add(path_594016, "subscriptionId", newJString(subscriptionId))
-  add(path_594016, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594015.call(path_594016, query_594017, nil, nil, nil)
+  var path_568245 = newJObject()
+  var query_568246 = newJObject()
+  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568246, "api-version", newJString(apiVersion))
+  add(path_568245, "subscriptionId", newJString(subscriptionId))
+  add(path_568245, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
 
-var migrateProjectsDeleteMigrateProject* = Call_MigrateProjectsDeleteMigrateProject_594006(
+var migrateProjectsDeleteMigrateProject* = Call_MigrateProjectsDeleteMigrateProject_568235(
     name: "migrateProjectsDeleteMigrateProject", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}",
-    validator: validate_MigrateProjectsDeleteMigrateProject_594007, base: "",
-    url: url_MigrateProjectsDeleteMigrateProject_594008, schemes: {Scheme.Https})
+    validator: validate_MigrateProjectsDeleteMigrateProject_568236, base: "",
+    url: url_MigrateProjectsDeleteMigrateProject_568237, schemes: {Scheme.Https})
 type
-  Call_DatabaseInstancesEnumerateDatabaseInstances_594032 = ref object of OpenApiRestCall_593438
-proc url_DatabaseInstancesEnumerateDatabaseInstances_594034(protocol: Scheme;
+  Call_DatabaseInstancesEnumerateDatabaseInstances_568261 = ref object of OpenApiRestCall_567667
+proc url_DatabaseInstancesEnumerateDatabaseInstances_568263(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -681,7 +681,7 @@ proc url_DatabaseInstancesEnumerateDatabaseInstances_594034(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseInstancesEnumerateDatabaseInstances_594033(path: JsonNode;
+proc validate_DatabaseInstancesEnumerateDatabaseInstances_568262(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -695,21 +695,21 @@ proc validate_DatabaseInstancesEnumerateDatabaseInstances_594033(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594035 = path.getOrDefault("resourceGroupName")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  var valid_568264 = path.getOrDefault("resourceGroupName")
+  valid_568264 = validateParameter(valid_568264, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "resourceGroupName", valid_594035
-  var valid_594036 = path.getOrDefault("subscriptionId")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  if valid_568264 != nil:
+    section.add "resourceGroupName", valid_568264
+  var valid_568265 = path.getOrDefault("subscriptionId")
+  valid_568265 = validateParameter(valid_568265, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "subscriptionId", valid_594036
-  var valid_594037 = path.getOrDefault("migrateProjectName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_568265 != nil:
+    section.add "subscriptionId", valid_568265
+  var valid_568266 = path.getOrDefault("migrateProjectName")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "migrateProjectName", valid_594037
+  if valid_568266 != nil:
+    section.add "migrateProjectName", valid_568266
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -721,49 +721,49 @@ proc validate_DatabaseInstancesEnumerateDatabaseInstances_594033(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594038 = query.getOrDefault("api-version")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  var valid_568267 = query.getOrDefault("api-version")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594038 != nil:
-    section.add "api-version", valid_594038
-  var valid_594039 = query.getOrDefault("continuationToken")
-  valid_594039 = validateParameter(valid_594039, JString, required = false,
+  if valid_568267 != nil:
+    section.add "api-version", valid_568267
+  var valid_568268 = query.getOrDefault("continuationToken")
+  valid_568268 = validateParameter(valid_568268, JString, required = false,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "continuationToken", valid_594039
-  var valid_594040 = query.getOrDefault("pageSize")
-  valid_594040 = validateParameter(valid_594040, JInt, required = false, default = nil)
-  if valid_594040 != nil:
-    section.add "pageSize", valid_594040
+  if valid_568268 != nil:
+    section.add "continuationToken", valid_568268
+  var valid_568269 = query.getOrDefault("pageSize")
+  valid_568269 = validateParameter(valid_568269, JInt, required = false, default = nil)
+  if valid_568269 != nil:
+    section.add "pageSize", valid_568269
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Standard request header. Used by service to respond to client in appropriate language.
   section = newJObject()
-  var valid_594041 = header.getOrDefault("Accept-Language")
-  valid_594041 = validateParameter(valid_594041, JString, required = false,
+  var valid_568270 = header.getOrDefault("Accept-Language")
+  valid_568270 = validateParameter(valid_568270, JString, required = false,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "Accept-Language", valid_594041
+  if valid_568270 != nil:
+    section.add "Accept-Language", valid_568270
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594042: Call_DatabaseInstancesEnumerateDatabaseInstances_594032;
+proc call*(call_568271: Call_DatabaseInstancesEnumerateDatabaseInstances_568261;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
-  let valid = call_594042.validator(path, query, header, formData, body)
-  let scheme = call_594042.pickScheme
+  let valid = call_568271.validator(path, query, header, formData, body)
+  let scheme = call_568271.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594042.url(scheme.get, call_594042.host, call_594042.base,
-                         call_594042.route, valid.getOrDefault("path"),
+  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
+                         call_568271.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594042, url, valid)
+  result = hook(call_568271, url, valid)
 
-proc call*(call_594043: Call_DatabaseInstancesEnumerateDatabaseInstances_594032;
+proc call*(call_568272: Call_DatabaseInstancesEnumerateDatabaseInstances_568261;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview";
           continuationToken: string = ""; pageSize: int = 0): Recallable =
@@ -780,25 +780,25 @@ proc call*(call_594043: Call_DatabaseInstancesEnumerateDatabaseInstances_594032;
   ##           : The number of items to be returned in a single page. This value is honored only if it is less than the 100.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594044 = newJObject()
-  var query_594045 = newJObject()
-  add(path_594044, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594045, "api-version", newJString(apiVersion))
-  add(path_594044, "subscriptionId", newJString(subscriptionId))
-  add(query_594045, "continuationToken", newJString(continuationToken))
-  add(query_594045, "pageSize", newJInt(pageSize))
-  add(path_594044, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594043.call(path_594044, query_594045, nil, nil, nil)
+  var path_568273 = newJObject()
+  var query_568274 = newJObject()
+  add(path_568273, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568274, "api-version", newJString(apiVersion))
+  add(path_568273, "subscriptionId", newJString(subscriptionId))
+  add(query_568274, "continuationToken", newJString(continuationToken))
+  add(query_568274, "pageSize", newJInt(pageSize))
+  add(path_568273, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568272.call(path_568273, query_568274, nil, nil, nil)
 
-var databaseInstancesEnumerateDatabaseInstances* = Call_DatabaseInstancesEnumerateDatabaseInstances_594032(
+var databaseInstancesEnumerateDatabaseInstances* = Call_DatabaseInstancesEnumerateDatabaseInstances_568261(
     name: "databaseInstancesEnumerateDatabaseInstances", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/databaseInstances",
-    validator: validate_DatabaseInstancesEnumerateDatabaseInstances_594033,
-    base: "", url: url_DatabaseInstancesEnumerateDatabaseInstances_594034,
+    validator: validate_DatabaseInstancesEnumerateDatabaseInstances_568262,
+    base: "", url: url_DatabaseInstancesEnumerateDatabaseInstances_568263,
     schemes: {Scheme.Https})
 type
-  Call_DatabaseInstancesGetDatabaseInstance_594046 = ref object of OpenApiRestCall_593438
-proc url_DatabaseInstancesGetDatabaseInstance_594048(protocol: Scheme;
+  Call_DatabaseInstancesGetDatabaseInstance_568275 = ref object of OpenApiRestCall_567667
+proc url_DatabaseInstancesGetDatabaseInstance_568277(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -826,7 +826,7 @@ proc url_DatabaseInstancesGetDatabaseInstance_594048(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabaseInstancesGetDatabaseInstance_594047(path: JsonNode;
+proc validate_DatabaseInstancesGetDatabaseInstance_568276(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -842,26 +842,26 @@ proc validate_DatabaseInstancesGetDatabaseInstance_594047(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594049 = path.getOrDefault("resourceGroupName")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  var valid_568278 = path.getOrDefault("resourceGroupName")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "resourceGroupName", valid_594049
-  var valid_594050 = path.getOrDefault("subscriptionId")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  if valid_568278 != nil:
+    section.add "resourceGroupName", valid_568278
+  var valid_568279 = path.getOrDefault("subscriptionId")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "subscriptionId", valid_594050
-  var valid_594051 = path.getOrDefault("migrateProjectName")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_568279 != nil:
+    section.add "subscriptionId", valid_568279
+  var valid_568280 = path.getOrDefault("migrateProjectName")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "migrateProjectName", valid_594051
-  var valid_594052 = path.getOrDefault("databaseInstanceName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_568280 != nil:
+    section.add "migrateProjectName", valid_568280
+  var valid_568281 = path.getOrDefault("databaseInstanceName")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "databaseInstanceName", valid_594052
+  if valid_568281 != nil:
+    section.add "databaseInstanceName", valid_568281
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -869,40 +869,40 @@ proc validate_DatabaseInstancesGetDatabaseInstance_594047(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594053 = query.getOrDefault("api-version")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_568282 = query.getOrDefault("api-version")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594053 != nil:
-    section.add "api-version", valid_594053
+  if valid_568282 != nil:
+    section.add "api-version", valid_568282
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Standard request header. Used by service to respond to client in appropriate language.
   section = newJObject()
-  var valid_594054 = header.getOrDefault("Accept-Language")
-  valid_594054 = validateParameter(valid_594054, JString, required = false,
+  var valid_568283 = header.getOrDefault("Accept-Language")
+  valid_568283 = validateParameter(valid_568283, JString, required = false,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "Accept-Language", valid_594054
+  if valid_568283 != nil:
+    section.add "Accept-Language", valid_568283
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594055: Call_DatabaseInstancesGetDatabaseInstance_594046;
+proc call*(call_568284: Call_DatabaseInstancesGetDatabaseInstance_568275;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
-  let valid = call_594055.validator(path, query, header, formData, body)
-  let scheme = call_594055.pickScheme
+  let valid = call_568284.validator(path, query, header, formData, body)
+  let scheme = call_568284.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594055.url(scheme.get, call_594055.host, call_594055.base,
-                         call_594055.route, valid.getOrDefault("path"),
+  let url = call_568284.url(scheme.get, call_568284.host, call_568284.base,
+                         call_568284.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594055, url, valid)
+  result = hook(call_568284, url, valid)
 
-proc call*(call_594056: Call_DatabaseInstancesGetDatabaseInstance_594046;
+proc call*(call_568285: Call_DatabaseInstancesGetDatabaseInstance_568275;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; databaseInstanceName: string;
           apiVersion: string = "2018-09-01-preview"): Recallable =
@@ -917,23 +917,23 @@ proc call*(call_594056: Call_DatabaseInstancesGetDatabaseInstance_594046;
   ##                     : Name of the Azure Migrate project.
   ##   databaseInstanceName: string (required)
   ##                       : Unique name of a database instance in Azure migration hub.
-  var path_594057 = newJObject()
-  var query_594058 = newJObject()
-  add(path_594057, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594058, "api-version", newJString(apiVersion))
-  add(path_594057, "subscriptionId", newJString(subscriptionId))
-  add(path_594057, "migrateProjectName", newJString(migrateProjectName))
-  add(path_594057, "databaseInstanceName", newJString(databaseInstanceName))
-  result = call_594056.call(path_594057, query_594058, nil, nil, nil)
+  var path_568286 = newJObject()
+  var query_568287 = newJObject()
+  add(path_568286, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568287, "api-version", newJString(apiVersion))
+  add(path_568286, "subscriptionId", newJString(subscriptionId))
+  add(path_568286, "migrateProjectName", newJString(migrateProjectName))
+  add(path_568286, "databaseInstanceName", newJString(databaseInstanceName))
+  result = call_568285.call(path_568286, query_568287, nil, nil, nil)
 
-var databaseInstancesGetDatabaseInstance* = Call_DatabaseInstancesGetDatabaseInstance_594046(
+var databaseInstancesGetDatabaseInstance* = Call_DatabaseInstancesGetDatabaseInstance_568275(
     name: "databaseInstancesGetDatabaseInstance", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/databaseInstances/{databaseInstanceName}",
-    validator: validate_DatabaseInstancesGetDatabaseInstance_594047, base: "",
-    url: url_DatabaseInstancesGetDatabaseInstance_594048, schemes: {Scheme.Https})
+    validator: validate_DatabaseInstancesGetDatabaseInstance_568276, base: "",
+    url: url_DatabaseInstancesGetDatabaseInstance_568277, schemes: {Scheme.Https})
 type
-  Call_DatabasesEnumerateDatabases_594059 = ref object of OpenApiRestCall_593438
-proc url_DatabasesEnumerateDatabases_594061(protocol: Scheme; host: string;
+  Call_DatabasesEnumerateDatabases_568288 = ref object of OpenApiRestCall_567667
+proc url_DatabasesEnumerateDatabases_568290(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -958,7 +958,7 @@ proc url_DatabasesEnumerateDatabases_594061(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesEnumerateDatabases_594060(path: JsonNode; query: JsonNode;
+proc validate_DatabasesEnumerateDatabases_568289(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -972,21 +972,21 @@ proc validate_DatabasesEnumerateDatabases_594060(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594062 = path.getOrDefault("resourceGroupName")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  var valid_568291 = path.getOrDefault("resourceGroupName")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "resourceGroupName", valid_594062
-  var valid_594063 = path.getOrDefault("subscriptionId")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  if valid_568291 != nil:
+    section.add "resourceGroupName", valid_568291
+  var valid_568292 = path.getOrDefault("subscriptionId")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "subscriptionId", valid_594063
-  var valid_594064 = path.getOrDefault("migrateProjectName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_568292 != nil:
+    section.add "subscriptionId", valid_568292
+  var valid_568293 = path.getOrDefault("migrateProjectName")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "migrateProjectName", valid_594064
+  if valid_568293 != nil:
+    section.add "migrateProjectName", valid_568293
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -998,48 +998,48 @@ proc validate_DatabasesEnumerateDatabases_594060(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594065 = query.getOrDefault("api-version")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  var valid_568294 = query.getOrDefault("api-version")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594065 != nil:
-    section.add "api-version", valid_594065
-  var valid_594066 = query.getOrDefault("continuationToken")
-  valid_594066 = validateParameter(valid_594066, JString, required = false,
+  if valid_568294 != nil:
+    section.add "api-version", valid_568294
+  var valid_568295 = query.getOrDefault("continuationToken")
+  valid_568295 = validateParameter(valid_568295, JString, required = false,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "continuationToken", valid_594066
-  var valid_594067 = query.getOrDefault("pageSize")
-  valid_594067 = validateParameter(valid_594067, JInt, required = false, default = nil)
-  if valid_594067 != nil:
-    section.add "pageSize", valid_594067
+  if valid_568295 != nil:
+    section.add "continuationToken", valid_568295
+  var valid_568296 = query.getOrDefault("pageSize")
+  valid_568296 = validateParameter(valid_568296, JInt, required = false, default = nil)
+  if valid_568296 != nil:
+    section.add "pageSize", valid_568296
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Standard request header. Used by service to respond to client in appropriate language.
   section = newJObject()
-  var valid_594068 = header.getOrDefault("Accept-Language")
-  valid_594068 = validateParameter(valid_594068, JString, required = false,
+  var valid_568297 = header.getOrDefault("Accept-Language")
+  valid_568297 = validateParameter(valid_568297, JString, required = false,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "Accept-Language", valid_594068
+  if valid_568297 != nil:
+    section.add "Accept-Language", valid_568297
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594069: Call_DatabasesEnumerateDatabases_594059; path: JsonNode;
+proc call*(call_568298: Call_DatabasesEnumerateDatabases_568288; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594069.validator(path, query, header, formData, body)
-  let scheme = call_594069.pickScheme
+  let valid = call_568298.validator(path, query, header, formData, body)
+  let scheme = call_568298.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594069.url(scheme.get, call_594069.host, call_594069.base,
-                         call_594069.route, valid.getOrDefault("path"),
+  let url = call_568298.url(scheme.get, call_568298.host, call_568298.base,
+                         call_568298.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594069, url, valid)
+  result = hook(call_568298, url, valid)
 
-proc call*(call_594070: Call_DatabasesEnumerateDatabases_594059;
+proc call*(call_568299: Call_DatabasesEnumerateDatabases_568288;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview";
           continuationToken: string = ""; pageSize: int = 0): Recallable =
@@ -1056,24 +1056,24 @@ proc call*(call_594070: Call_DatabasesEnumerateDatabases_594059;
   ##           : The number of items to be returned in a single page. This value is honored only if it is less than the 100.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594071 = newJObject()
-  var query_594072 = newJObject()
-  add(path_594071, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594072, "api-version", newJString(apiVersion))
-  add(path_594071, "subscriptionId", newJString(subscriptionId))
-  add(query_594072, "continuationToken", newJString(continuationToken))
-  add(query_594072, "pageSize", newJInt(pageSize))
-  add(path_594071, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594070.call(path_594071, query_594072, nil, nil, nil)
+  var path_568300 = newJObject()
+  var query_568301 = newJObject()
+  add(path_568300, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568301, "api-version", newJString(apiVersion))
+  add(path_568300, "subscriptionId", newJString(subscriptionId))
+  add(query_568301, "continuationToken", newJString(continuationToken))
+  add(query_568301, "pageSize", newJInt(pageSize))
+  add(path_568300, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568299.call(path_568300, query_568301, nil, nil, nil)
 
-var databasesEnumerateDatabases* = Call_DatabasesEnumerateDatabases_594059(
+var databasesEnumerateDatabases* = Call_DatabasesEnumerateDatabases_568288(
     name: "databasesEnumerateDatabases", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/databases",
-    validator: validate_DatabasesEnumerateDatabases_594060, base: "",
-    url: url_DatabasesEnumerateDatabases_594061, schemes: {Scheme.Https})
+    validator: validate_DatabasesEnumerateDatabases_568289, base: "",
+    url: url_DatabasesEnumerateDatabases_568290, schemes: {Scheme.Https})
 type
-  Call_DatabasesGetDatabase_594073 = ref object of OpenApiRestCall_593438
-proc url_DatabasesGetDatabase_594075(protocol: Scheme; host: string; base: string;
+  Call_DatabasesGetDatabase_568302 = ref object of OpenApiRestCall_567667
+proc url_DatabasesGetDatabase_568304(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1100,7 +1100,7 @@ proc url_DatabasesGetDatabase_594075(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesGetDatabase_594074(path: JsonNode; query: JsonNode;
+proc validate_DatabasesGetDatabase_568303(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -1116,26 +1116,26 @@ proc validate_DatabasesGetDatabase_594074(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594076 = path.getOrDefault("resourceGroupName")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  var valid_568305 = path.getOrDefault("resourceGroupName")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "resourceGroupName", valid_594076
-  var valid_594077 = path.getOrDefault("subscriptionId")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  if valid_568305 != nil:
+    section.add "resourceGroupName", valid_568305
+  var valid_568306 = path.getOrDefault("subscriptionId")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "subscriptionId", valid_594077
-  var valid_594078 = path.getOrDefault("databaseName")
-  valid_594078 = validateParameter(valid_594078, JString, required = true,
+  if valid_568306 != nil:
+    section.add "subscriptionId", valid_568306
+  var valid_568307 = path.getOrDefault("databaseName")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "databaseName", valid_594078
-  var valid_594079 = path.getOrDefault("migrateProjectName")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+  if valid_568307 != nil:
+    section.add "databaseName", valid_568307
+  var valid_568308 = path.getOrDefault("migrateProjectName")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "migrateProjectName", valid_594079
+  if valid_568308 != nil:
+    section.add "migrateProjectName", valid_568308
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1143,39 +1143,39 @@ proc validate_DatabasesGetDatabase_594074(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594080 = query.getOrDefault("api-version")
-  valid_594080 = validateParameter(valid_594080, JString, required = true,
+  var valid_568309 = query.getOrDefault("api-version")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594080 != nil:
-    section.add "api-version", valid_594080
+  if valid_568309 != nil:
+    section.add "api-version", valid_568309
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Standard request header. Used by service to respond to client in appropriate language.
   section = newJObject()
-  var valid_594081 = header.getOrDefault("Accept-Language")
-  valid_594081 = validateParameter(valid_594081, JString, required = false,
+  var valid_568310 = header.getOrDefault("Accept-Language")
+  valid_568310 = validateParameter(valid_568310, JString, required = false,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "Accept-Language", valid_594081
+  if valid_568310 != nil:
+    section.add "Accept-Language", valid_568310
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594082: Call_DatabasesGetDatabase_594073; path: JsonNode;
+proc call*(call_568311: Call_DatabasesGetDatabase_568302; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594082.validator(path, query, header, formData, body)
-  let scheme = call_594082.pickScheme
+  let valid = call_568311.validator(path, query, header, formData, body)
+  let scheme = call_568311.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594082.url(scheme.get, call_594082.host, call_594082.base,
-                         call_594082.route, valid.getOrDefault("path"),
+  let url = call_568311.url(scheme.get, call_568311.host, call_568311.base,
+                         call_568311.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594082, url, valid)
+  result = hook(call_568311, url, valid)
 
-proc call*(call_594083: Call_DatabasesGetDatabase_594073;
+proc call*(call_568312: Call_DatabasesGetDatabase_568302;
           resourceGroupName: string; subscriptionId: string; databaseName: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## databasesGetDatabase
@@ -1189,23 +1189,23 @@ proc call*(call_594083: Call_DatabasesGetDatabase_594073;
   ##               : Unique name of a database in Azure migration hub.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594084 = newJObject()
-  var query_594085 = newJObject()
-  add(path_594084, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594085, "api-version", newJString(apiVersion))
-  add(path_594084, "subscriptionId", newJString(subscriptionId))
-  add(path_594084, "databaseName", newJString(databaseName))
-  add(path_594084, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594083.call(path_594084, query_594085, nil, nil, nil)
+  var path_568313 = newJObject()
+  var query_568314 = newJObject()
+  add(path_568313, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568314, "api-version", newJString(apiVersion))
+  add(path_568313, "subscriptionId", newJString(subscriptionId))
+  add(path_568313, "databaseName", newJString(databaseName))
+  add(path_568313, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568312.call(path_568313, query_568314, nil, nil, nil)
 
-var databasesGetDatabase* = Call_DatabasesGetDatabase_594073(
+var databasesGetDatabase* = Call_DatabasesGetDatabase_568302(
     name: "databasesGetDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/databases/{databaseName}",
-    validator: validate_DatabasesGetDatabase_594074, base: "",
-    url: url_DatabasesGetDatabase_594075, schemes: {Scheme.Https})
+    validator: validate_DatabasesGetDatabase_568303, base: "",
+    url: url_DatabasesGetDatabase_568304, schemes: {Scheme.Https})
 type
-  Call_MachinesEnumerateMachines_594086 = ref object of OpenApiRestCall_593438
-proc url_MachinesEnumerateMachines_594088(protocol: Scheme; host: string;
+  Call_MachinesEnumerateMachines_568315 = ref object of OpenApiRestCall_567667
+proc url_MachinesEnumerateMachines_568317(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1230,7 +1230,7 @@ proc url_MachinesEnumerateMachines_594088(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachinesEnumerateMachines_594087(path: JsonNode; query: JsonNode;
+proc validate_MachinesEnumerateMachines_568316(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -1244,21 +1244,21 @@ proc validate_MachinesEnumerateMachines_594087(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594089 = path.getOrDefault("resourceGroupName")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_568318 = path.getOrDefault("resourceGroupName")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "resourceGroupName", valid_594089
-  var valid_594090 = path.getOrDefault("subscriptionId")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  if valid_568318 != nil:
+    section.add "resourceGroupName", valid_568318
+  var valid_568319 = path.getOrDefault("subscriptionId")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "subscriptionId", valid_594090
-  var valid_594091 = path.getOrDefault("migrateProjectName")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  if valid_568319 != nil:
+    section.add "subscriptionId", valid_568319
+  var valid_568320 = path.getOrDefault("migrateProjectName")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "migrateProjectName", valid_594091
+  if valid_568320 != nil:
+    section.add "migrateProjectName", valid_568320
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1270,20 +1270,20 @@ proc validate_MachinesEnumerateMachines_594087(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594092 = query.getOrDefault("api-version")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  var valid_568321 = query.getOrDefault("api-version")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594092 != nil:
-    section.add "api-version", valid_594092
-  var valid_594093 = query.getOrDefault("continuationToken")
-  valid_594093 = validateParameter(valid_594093, JString, required = false,
+  if valid_568321 != nil:
+    section.add "api-version", valid_568321
+  var valid_568322 = query.getOrDefault("continuationToken")
+  valid_568322 = validateParameter(valid_568322, JString, required = false,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "continuationToken", valid_594093
-  var valid_594094 = query.getOrDefault("pageSize")
-  valid_594094 = validateParameter(valid_594094, JInt, required = false, default = nil)
-  if valid_594094 != nil:
-    section.add "pageSize", valid_594094
+  if valid_568322 != nil:
+    section.add "continuationToken", valid_568322
+  var valid_568323 = query.getOrDefault("pageSize")
+  valid_568323 = validateParameter(valid_568323, JInt, required = false, default = nil)
+  if valid_568323 != nil:
+    section.add "pageSize", valid_568323
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1292,18 +1292,18 @@ proc validate_MachinesEnumerateMachines_594087(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594095: Call_MachinesEnumerateMachines_594086; path: JsonNode;
+proc call*(call_568324: Call_MachinesEnumerateMachines_568315; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594095.validator(path, query, header, formData, body)
-  let scheme = call_594095.pickScheme
+  let valid = call_568324.validator(path, query, header, formData, body)
+  let scheme = call_568324.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594095.url(scheme.get, call_594095.host, call_594095.base,
-                         call_594095.route, valid.getOrDefault("path"),
+  let url = call_568324.url(scheme.get, call_568324.host, call_568324.base,
+                         call_568324.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594095, url, valid)
+  result = hook(call_568324, url, valid)
 
-proc call*(call_594096: Call_MachinesEnumerateMachines_594086;
+proc call*(call_568325: Call_MachinesEnumerateMachines_568315;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview";
           continuationToken: string = ""; pageSize: int = 0): Recallable =
@@ -1320,24 +1320,24 @@ proc call*(call_594096: Call_MachinesEnumerateMachines_594086;
   ##           : The number of items to be returned in a single page. This value is honored only if it is less than the 100.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594097 = newJObject()
-  var query_594098 = newJObject()
-  add(path_594097, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594098, "api-version", newJString(apiVersion))
-  add(path_594097, "subscriptionId", newJString(subscriptionId))
-  add(query_594098, "continuationToken", newJString(continuationToken))
-  add(query_594098, "pageSize", newJInt(pageSize))
-  add(path_594097, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594096.call(path_594097, query_594098, nil, nil, nil)
+  var path_568326 = newJObject()
+  var query_568327 = newJObject()
+  add(path_568326, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568327, "api-version", newJString(apiVersion))
+  add(path_568326, "subscriptionId", newJString(subscriptionId))
+  add(query_568327, "continuationToken", newJString(continuationToken))
+  add(query_568327, "pageSize", newJInt(pageSize))
+  add(path_568326, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568325.call(path_568326, query_568327, nil, nil, nil)
 
-var machinesEnumerateMachines* = Call_MachinesEnumerateMachines_594086(
+var machinesEnumerateMachines* = Call_MachinesEnumerateMachines_568315(
     name: "machinesEnumerateMachines", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/machines",
-    validator: validate_MachinesEnumerateMachines_594087, base: "",
-    url: url_MachinesEnumerateMachines_594088, schemes: {Scheme.Https})
+    validator: validate_MachinesEnumerateMachines_568316, base: "",
+    url: url_MachinesEnumerateMachines_568317, schemes: {Scheme.Https})
 type
-  Call_MachinesGetMachine_594099 = ref object of OpenApiRestCall_593438
-proc url_MachinesGetMachine_594101(protocol: Scheme; host: string; base: string;
+  Call_MachinesGetMachine_568328 = ref object of OpenApiRestCall_567667
+proc url_MachinesGetMachine_568330(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1364,7 +1364,7 @@ proc url_MachinesGetMachine_594101(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MachinesGetMachine_594100(path: JsonNode; query: JsonNode;
+proc validate_MachinesGetMachine_568329(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   var section: JsonNode
@@ -1381,26 +1381,26 @@ proc validate_MachinesGetMachine_594100(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594102 = path.getOrDefault("resourceGroupName")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  var valid_568331 = path.getOrDefault("resourceGroupName")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "resourceGroupName", valid_594102
-  var valid_594103 = path.getOrDefault("machineName")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  if valid_568331 != nil:
+    section.add "resourceGroupName", valid_568331
+  var valid_568332 = path.getOrDefault("machineName")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "machineName", valid_594103
-  var valid_594104 = path.getOrDefault("subscriptionId")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  if valid_568332 != nil:
+    section.add "machineName", valid_568332
+  var valid_568333 = path.getOrDefault("subscriptionId")
+  valid_568333 = validateParameter(valid_568333, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "subscriptionId", valid_594104
-  var valid_594105 = path.getOrDefault("migrateProjectName")
-  valid_594105 = validateParameter(valid_594105, JString, required = true,
+  if valid_568333 != nil:
+    section.add "subscriptionId", valid_568333
+  var valid_568334 = path.getOrDefault("migrateProjectName")
+  valid_568334 = validateParameter(valid_568334, JString, required = true,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "migrateProjectName", valid_594105
+  if valid_568334 != nil:
+    section.add "migrateProjectName", valid_568334
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1408,11 +1408,11 @@ proc validate_MachinesGetMachine_594100(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594106 = query.getOrDefault("api-version")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  var valid_568335 = query.getOrDefault("api-version")
+  valid_568335 = validateParameter(valid_568335, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594106 != nil:
-    section.add "api-version", valid_594106
+  if valid_568335 != nil:
+    section.add "api-version", valid_568335
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1421,18 +1421,18 @@ proc validate_MachinesGetMachine_594100(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594107: Call_MachinesGetMachine_594099; path: JsonNode;
+proc call*(call_568336: Call_MachinesGetMachine_568328; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594107.validator(path, query, header, formData, body)
-  let scheme = call_594107.pickScheme
+  let valid = call_568336.validator(path, query, header, formData, body)
+  let scheme = call_568336.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594107.url(scheme.get, call_594107.host, call_594107.base,
-                         call_594107.route, valid.getOrDefault("path"),
+  let url = call_568336.url(scheme.get, call_568336.host, call_568336.base,
+                         call_568336.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594107, url, valid)
+  result = hook(call_568336, url, valid)
 
-proc call*(call_594108: Call_MachinesGetMachine_594099; resourceGroupName: string;
+proc call*(call_568337: Call_MachinesGetMachine_568328; resourceGroupName: string;
           machineName: string; subscriptionId: string; migrateProjectName: string;
           apiVersion: string = "2018-09-01-preview"): Recallable =
   ## machinesGetMachine
@@ -1446,23 +1446,23 @@ proc call*(call_594108: Call_MachinesGetMachine_594099; resourceGroupName: strin
   ##                 : Azure Subscription Id in which migrate project was created.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594109 = newJObject()
-  var query_594110 = newJObject()
-  add(path_594109, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594110, "api-version", newJString(apiVersion))
-  add(path_594109, "machineName", newJString(machineName))
-  add(path_594109, "subscriptionId", newJString(subscriptionId))
-  add(path_594109, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594108.call(path_594109, query_594110, nil, nil, nil)
+  var path_568338 = newJObject()
+  var query_568339 = newJObject()
+  add(path_568338, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568339, "api-version", newJString(apiVersion))
+  add(path_568338, "machineName", newJString(machineName))
+  add(path_568338, "subscriptionId", newJString(subscriptionId))
+  add(path_568338, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568337.call(path_568338, query_568339, nil, nil, nil)
 
-var machinesGetMachine* = Call_MachinesGetMachine_594099(
+var machinesGetMachine* = Call_MachinesGetMachine_568328(
     name: "machinesGetMachine", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/machines/{machineName}",
-    validator: validate_MachinesGetMachine_594100, base: "",
-    url: url_MachinesGetMachine_594101, schemes: {Scheme.Https})
+    validator: validate_MachinesGetMachine_568329, base: "",
+    url: url_MachinesGetMachine_568330, schemes: {Scheme.Https})
 type
-  Call_EventsEnumerateEvents_594111 = ref object of OpenApiRestCall_593438
-proc url_EventsEnumerateEvents_594113(protocol: Scheme; host: string; base: string;
+  Call_EventsEnumerateEvents_568340 = ref object of OpenApiRestCall_567667
+proc url_EventsEnumerateEvents_568342(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1487,7 +1487,7 @@ proc url_EventsEnumerateEvents_594113(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventsEnumerateEvents_594112(path: JsonNode; query: JsonNode;
+proc validate_EventsEnumerateEvents_568341(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -1501,21 +1501,21 @@ proc validate_EventsEnumerateEvents_594112(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594114 = path.getOrDefault("resourceGroupName")
-  valid_594114 = validateParameter(valid_594114, JString, required = true,
+  var valid_568343 = path.getOrDefault("resourceGroupName")
+  valid_568343 = validateParameter(valid_568343, JString, required = true,
                                  default = nil)
-  if valid_594114 != nil:
-    section.add "resourceGroupName", valid_594114
-  var valid_594115 = path.getOrDefault("subscriptionId")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  if valid_568343 != nil:
+    section.add "resourceGroupName", valid_568343
+  var valid_568344 = path.getOrDefault("subscriptionId")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "subscriptionId", valid_594115
-  var valid_594116 = path.getOrDefault("migrateProjectName")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_568344 != nil:
+    section.add "subscriptionId", valid_568344
+  var valid_568345 = path.getOrDefault("migrateProjectName")
+  valid_568345 = validateParameter(valid_568345, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "migrateProjectName", valid_594116
+  if valid_568345 != nil:
+    section.add "migrateProjectName", valid_568345
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1527,48 +1527,48 @@ proc validate_EventsEnumerateEvents_594112(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594117 = query.getOrDefault("api-version")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  var valid_568346 = query.getOrDefault("api-version")
+  valid_568346 = validateParameter(valid_568346, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594117 != nil:
-    section.add "api-version", valid_594117
-  var valid_594118 = query.getOrDefault("continuationToken")
-  valid_594118 = validateParameter(valid_594118, JString, required = false,
+  if valid_568346 != nil:
+    section.add "api-version", valid_568346
+  var valid_568347 = query.getOrDefault("continuationToken")
+  valid_568347 = validateParameter(valid_568347, JString, required = false,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "continuationToken", valid_594118
-  var valid_594119 = query.getOrDefault("pageSize")
-  valid_594119 = validateParameter(valid_594119, JInt, required = false, default = nil)
-  if valid_594119 != nil:
-    section.add "pageSize", valid_594119
+  if valid_568347 != nil:
+    section.add "continuationToken", valid_568347
+  var valid_568348 = query.getOrDefault("pageSize")
+  valid_568348 = validateParameter(valid_568348, JInt, required = false, default = nil)
+  if valid_568348 != nil:
+    section.add "pageSize", valid_568348
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Standard request header. Used by service to respond to client in appropriate language.
   section = newJObject()
-  var valid_594120 = header.getOrDefault("Accept-Language")
-  valid_594120 = validateParameter(valid_594120, JString, required = false,
+  var valid_568349 = header.getOrDefault("Accept-Language")
+  valid_568349 = validateParameter(valid_568349, JString, required = false,
                                  default = nil)
-  if valid_594120 != nil:
-    section.add "Accept-Language", valid_594120
+  if valid_568349 != nil:
+    section.add "Accept-Language", valid_568349
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594121: Call_EventsEnumerateEvents_594111; path: JsonNode;
+proc call*(call_568350: Call_EventsEnumerateEvents_568340; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594121.validator(path, query, header, formData, body)
-  let scheme = call_594121.pickScheme
+  let valid = call_568350.validator(path, query, header, formData, body)
+  let scheme = call_568350.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594121.url(scheme.get, call_594121.host, call_594121.base,
-                         call_594121.route, valid.getOrDefault("path"),
+  let url = call_568350.url(scheme.get, call_568350.host, call_568350.base,
+                         call_568350.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594121, url, valid)
+  result = hook(call_568350, url, valid)
 
-proc call*(call_594122: Call_EventsEnumerateEvents_594111;
+proc call*(call_568351: Call_EventsEnumerateEvents_568340;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview";
           continuationToken: string = ""; pageSize: int = 0): Recallable =
@@ -1585,24 +1585,24 @@ proc call*(call_594122: Call_EventsEnumerateEvents_594111;
   ##           : The number of items to be returned in a single page. This value is honored only if it is less than the 100.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594123 = newJObject()
-  var query_594124 = newJObject()
-  add(path_594123, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594124, "api-version", newJString(apiVersion))
-  add(path_594123, "subscriptionId", newJString(subscriptionId))
-  add(query_594124, "continuationToken", newJString(continuationToken))
-  add(query_594124, "pageSize", newJInt(pageSize))
-  add(path_594123, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594122.call(path_594123, query_594124, nil, nil, nil)
+  var path_568352 = newJObject()
+  var query_568353 = newJObject()
+  add(path_568352, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568353, "api-version", newJString(apiVersion))
+  add(path_568352, "subscriptionId", newJString(subscriptionId))
+  add(query_568353, "continuationToken", newJString(continuationToken))
+  add(query_568353, "pageSize", newJInt(pageSize))
+  add(path_568352, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568351.call(path_568352, query_568353, nil, nil, nil)
 
-var eventsEnumerateEvents* = Call_EventsEnumerateEvents_594111(
+var eventsEnumerateEvents* = Call_EventsEnumerateEvents_568340(
     name: "eventsEnumerateEvents", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/migrateEvents",
-    validator: validate_EventsEnumerateEvents_594112, base: "",
-    url: url_EventsEnumerateEvents_594113, schemes: {Scheme.Https})
+    validator: validate_EventsEnumerateEvents_568341, base: "",
+    url: url_EventsEnumerateEvents_568342, schemes: {Scheme.Https})
 type
-  Call_EventsGetEvent_594125 = ref object of OpenApiRestCall_593438
-proc url_EventsGetEvent_594127(protocol: Scheme; host: string; base: string;
+  Call_EventsGetEvent_568354 = ref object of OpenApiRestCall_567667
+proc url_EventsGetEvent_568356(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1629,7 +1629,7 @@ proc url_EventsGetEvent_594127(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventsGetEvent_594126(path: JsonNode; query: JsonNode;
+proc validate_EventsGetEvent_568355(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   var section: JsonNode
@@ -1646,26 +1646,26 @@ proc validate_EventsGetEvent_594126(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594128 = path.getOrDefault("resourceGroupName")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  var valid_568357 = path.getOrDefault("resourceGroupName")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "resourceGroupName", valid_594128
-  var valid_594129 = path.getOrDefault("subscriptionId")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  if valid_568357 != nil:
+    section.add "resourceGroupName", valid_568357
+  var valid_568358 = path.getOrDefault("subscriptionId")
+  valid_568358 = validateParameter(valid_568358, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "subscriptionId", valid_594129
-  var valid_594130 = path.getOrDefault("migrateProjectName")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  if valid_568358 != nil:
+    section.add "subscriptionId", valid_568358
+  var valid_568359 = path.getOrDefault("migrateProjectName")
+  valid_568359 = validateParameter(valid_568359, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "migrateProjectName", valid_594130
-  var valid_594131 = path.getOrDefault("eventName")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  if valid_568359 != nil:
+    section.add "migrateProjectName", valid_568359
+  var valid_568360 = path.getOrDefault("eventName")
+  valid_568360 = validateParameter(valid_568360, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "eventName", valid_594131
+  if valid_568360 != nil:
+    section.add "eventName", valid_568360
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1673,11 +1673,11 @@ proc validate_EventsGetEvent_594126(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594132 = query.getOrDefault("api-version")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  var valid_568361 = query.getOrDefault("api-version")
+  valid_568361 = validateParameter(valid_568361, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594132 != nil:
-    section.add "api-version", valid_594132
+  if valid_568361 != nil:
+    section.add "api-version", valid_568361
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1686,18 +1686,18 @@ proc validate_EventsGetEvent_594126(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594133: Call_EventsGetEvent_594125; path: JsonNode; query: JsonNode;
+proc call*(call_568362: Call_EventsGetEvent_568354; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594133.validator(path, query, header, formData, body)
-  let scheme = call_594133.pickScheme
+  let valid = call_568362.validator(path, query, header, formData, body)
+  let scheme = call_568362.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594133.url(scheme.get, call_594133.host, call_594133.base,
-                         call_594133.route, valid.getOrDefault("path"),
+  let url = call_568362.url(scheme.get, call_568362.host, call_568362.base,
+                         call_568362.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594133, url, valid)
+  result = hook(call_568362, url, valid)
 
-proc call*(call_594134: Call_EventsGetEvent_594125; resourceGroupName: string;
+proc call*(call_568363: Call_EventsGetEvent_568354; resourceGroupName: string;
           subscriptionId: string; migrateProjectName: string; eventName: string;
           apiVersion: string = "2018-09-01-preview"): Recallable =
   ## eventsGetEvent
@@ -1711,22 +1711,22 @@ proc call*(call_594134: Call_EventsGetEvent_594125; resourceGroupName: string;
   ##                     : Name of the Azure Migrate project.
   ##   eventName: string (required)
   ##            : Unique name of an event within a migrate project.
-  var path_594135 = newJObject()
-  var query_594136 = newJObject()
-  add(path_594135, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594136, "api-version", newJString(apiVersion))
-  add(path_594135, "subscriptionId", newJString(subscriptionId))
-  add(path_594135, "migrateProjectName", newJString(migrateProjectName))
-  add(path_594135, "eventName", newJString(eventName))
-  result = call_594134.call(path_594135, query_594136, nil, nil, nil)
+  var path_568364 = newJObject()
+  var query_568365 = newJObject()
+  add(path_568364, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568365, "api-version", newJString(apiVersion))
+  add(path_568364, "subscriptionId", newJString(subscriptionId))
+  add(path_568364, "migrateProjectName", newJString(migrateProjectName))
+  add(path_568364, "eventName", newJString(eventName))
+  result = call_568363.call(path_568364, query_568365, nil, nil, nil)
 
-var eventsGetEvent* = Call_EventsGetEvent_594125(name: "eventsGetEvent",
+var eventsGetEvent* = Call_EventsGetEvent_568354(name: "eventsGetEvent",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/migrateEvents/{eventName}",
-    validator: validate_EventsGetEvent_594126, base: "", url: url_EventsGetEvent_594127,
+    validator: validate_EventsGetEvent_568355, base: "", url: url_EventsGetEvent_568356,
     schemes: {Scheme.Https})
 type
-  Call_EventsDeleteEvent_594137 = ref object of OpenApiRestCall_593438
-proc url_EventsDeleteEvent_594139(protocol: Scheme; host: string; base: string;
+  Call_EventsDeleteEvent_568366 = ref object of OpenApiRestCall_567667
+proc url_EventsDeleteEvent_568368(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1753,7 +1753,7 @@ proc url_EventsDeleteEvent_594139(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventsDeleteEvent_594138(path: JsonNode; query: JsonNode;
+proc validate_EventsDeleteEvent_568367(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Delete the migrate event. Deleting non-existent migrate event is a no-operation.
@@ -1772,26 +1772,26 @@ proc validate_EventsDeleteEvent_594138(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594140 = path.getOrDefault("resourceGroupName")
-  valid_594140 = validateParameter(valid_594140, JString, required = true,
+  var valid_568369 = path.getOrDefault("resourceGroupName")
+  valid_568369 = validateParameter(valid_568369, JString, required = true,
                                  default = nil)
-  if valid_594140 != nil:
-    section.add "resourceGroupName", valid_594140
-  var valid_594141 = path.getOrDefault("subscriptionId")
-  valid_594141 = validateParameter(valid_594141, JString, required = true,
+  if valid_568369 != nil:
+    section.add "resourceGroupName", valid_568369
+  var valid_568370 = path.getOrDefault("subscriptionId")
+  valid_568370 = validateParameter(valid_568370, JString, required = true,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "subscriptionId", valid_594141
-  var valid_594142 = path.getOrDefault("migrateProjectName")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  if valid_568370 != nil:
+    section.add "subscriptionId", valid_568370
+  var valid_568371 = path.getOrDefault("migrateProjectName")
+  valid_568371 = validateParameter(valid_568371, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "migrateProjectName", valid_594142
-  var valid_594143 = path.getOrDefault("eventName")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+  if valid_568371 != nil:
+    section.add "migrateProjectName", valid_568371
+  var valid_568372 = path.getOrDefault("eventName")
+  valid_568372 = validateParameter(valid_568372, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "eventName", valid_594143
+  if valid_568372 != nil:
+    section.add "eventName", valid_568372
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1799,11 +1799,11 @@ proc validate_EventsDeleteEvent_594138(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594144 = query.getOrDefault("api-version")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  var valid_568373 = query.getOrDefault("api-version")
+  valid_568373 = validateParameter(valid_568373, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594144 != nil:
-    section.add "api-version", valid_594144
+  if valid_568373 != nil:
+    section.add "api-version", valid_568373
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1812,20 +1812,20 @@ proc validate_EventsDeleteEvent_594138(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594145: Call_EventsDeleteEvent_594137; path: JsonNode;
+proc call*(call_568374: Call_EventsDeleteEvent_568366; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the migrate event. Deleting non-existent migrate event is a no-operation.
   ## 
-  let valid = call_594145.validator(path, query, header, formData, body)
-  let scheme = call_594145.pickScheme
+  let valid = call_568374.validator(path, query, header, formData, body)
+  let scheme = call_568374.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594145.url(scheme.get, call_594145.host, call_594145.base,
-                         call_594145.route, valid.getOrDefault("path"),
+  let url = call_568374.url(scheme.get, call_568374.host, call_568374.base,
+                         call_568374.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594145, url, valid)
+  result = hook(call_568374, url, valid)
 
-proc call*(call_594146: Call_EventsDeleteEvent_594137; resourceGroupName: string;
+proc call*(call_568375: Call_EventsDeleteEvent_568366; resourceGroupName: string;
           subscriptionId: string; migrateProjectName: string; eventName: string;
           apiVersion: string = "2018-09-01-preview"): Recallable =
   ## eventsDeleteEvent
@@ -1840,22 +1840,22 @@ proc call*(call_594146: Call_EventsDeleteEvent_594137; resourceGroupName: string
   ##                     : Name of the Azure Migrate project.
   ##   eventName: string (required)
   ##            : Unique name of an event within a migrate project.
-  var path_594147 = newJObject()
-  var query_594148 = newJObject()
-  add(path_594147, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594148, "api-version", newJString(apiVersion))
-  add(path_594147, "subscriptionId", newJString(subscriptionId))
-  add(path_594147, "migrateProjectName", newJString(migrateProjectName))
-  add(path_594147, "eventName", newJString(eventName))
-  result = call_594146.call(path_594147, query_594148, nil, nil, nil)
+  var path_568376 = newJObject()
+  var query_568377 = newJObject()
+  add(path_568376, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568377, "api-version", newJString(apiVersion))
+  add(path_568376, "subscriptionId", newJString(subscriptionId))
+  add(path_568376, "migrateProjectName", newJString(migrateProjectName))
+  add(path_568376, "eventName", newJString(eventName))
+  result = call_568375.call(path_568376, query_568377, nil, nil, nil)
 
-var eventsDeleteEvent* = Call_EventsDeleteEvent_594137(name: "eventsDeleteEvent",
+var eventsDeleteEvent* = Call_EventsDeleteEvent_568366(name: "eventsDeleteEvent",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/migrateEvents/{eventName}",
-    validator: validate_EventsDeleteEvent_594138, base: "",
-    url: url_EventsDeleteEvent_594139, schemes: {Scheme.Https})
+    validator: validate_EventsDeleteEvent_568367, base: "",
+    url: url_EventsDeleteEvent_568368, schemes: {Scheme.Https})
 type
-  Call_MigrateProjectsRefreshMigrateProjectSummary_594149 = ref object of OpenApiRestCall_593438
-proc url_MigrateProjectsRefreshMigrateProjectSummary_594151(protocol: Scheme;
+  Call_MigrateProjectsRefreshMigrateProjectSummary_568378 = ref object of OpenApiRestCall_567667
+proc url_MigrateProjectsRefreshMigrateProjectSummary_568380(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1880,7 +1880,7 @@ proc url_MigrateProjectsRefreshMigrateProjectSummary_594151(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MigrateProjectsRefreshMigrateProjectSummary_594150(path: JsonNode;
+proc validate_MigrateProjectsRefreshMigrateProjectSummary_568379(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -1894,21 +1894,21 @@ proc validate_MigrateProjectsRefreshMigrateProjectSummary_594150(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594152 = path.getOrDefault("resourceGroupName")
-  valid_594152 = validateParameter(valid_594152, JString, required = true,
+  var valid_568381 = path.getOrDefault("resourceGroupName")
+  valid_568381 = validateParameter(valid_568381, JString, required = true,
                                  default = nil)
-  if valid_594152 != nil:
-    section.add "resourceGroupName", valid_594152
-  var valid_594153 = path.getOrDefault("subscriptionId")
-  valid_594153 = validateParameter(valid_594153, JString, required = true,
+  if valid_568381 != nil:
+    section.add "resourceGroupName", valid_568381
+  var valid_568382 = path.getOrDefault("subscriptionId")
+  valid_568382 = validateParameter(valid_568382, JString, required = true,
                                  default = nil)
-  if valid_594153 != nil:
-    section.add "subscriptionId", valid_594153
-  var valid_594154 = path.getOrDefault("migrateProjectName")
-  valid_594154 = validateParameter(valid_594154, JString, required = true,
+  if valid_568382 != nil:
+    section.add "subscriptionId", valid_568382
+  var valid_568383 = path.getOrDefault("migrateProjectName")
+  valid_568383 = validateParameter(valid_568383, JString, required = true,
                                  default = nil)
-  if valid_594154 != nil:
-    section.add "migrateProjectName", valid_594154
+  if valid_568383 != nil:
+    section.add "migrateProjectName", valid_568383
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1916,11 +1916,11 @@ proc validate_MigrateProjectsRefreshMigrateProjectSummary_594150(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594155 = query.getOrDefault("api-version")
-  valid_594155 = validateParameter(valid_594155, JString, required = true,
+  var valid_568384 = query.getOrDefault("api-version")
+  valid_568384 = validateParameter(valid_568384, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594155 != nil:
-    section.add "api-version", valid_594155
+  if valid_568384 != nil:
+    section.add "api-version", valid_568384
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1934,19 +1934,19 @@ proc validate_MigrateProjectsRefreshMigrateProjectSummary_594150(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594157: Call_MigrateProjectsRefreshMigrateProjectSummary_594149;
+proc call*(call_568386: Call_MigrateProjectsRefreshMigrateProjectSummary_568378;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
-  let valid = call_594157.validator(path, query, header, formData, body)
-  let scheme = call_594157.pickScheme
+  let valid = call_568386.validator(path, query, header, formData, body)
+  let scheme = call_568386.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594157.url(scheme.get, call_594157.host, call_594157.base,
-                         call_594157.route, valid.getOrDefault("path"),
+  let url = call_568386.url(scheme.get, call_568386.host, call_568386.base,
+                         call_568386.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594157, url, valid)
+  result = hook(call_568386, url, valid)
 
-proc call*(call_594158: Call_MigrateProjectsRefreshMigrateProjectSummary_594149;
+proc call*(call_568387: Call_MigrateProjectsRefreshMigrateProjectSummary_568378;
           resourceGroupName: string; subscriptionId: string; input: JsonNode;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## migrateProjectsRefreshMigrateProjectSummary
@@ -1960,26 +1960,26 @@ proc call*(call_594158: Call_MigrateProjectsRefreshMigrateProjectSummary_594149;
   ##        : The goal input which needs to be refreshed.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594159 = newJObject()
-  var query_594160 = newJObject()
-  var body_594161 = newJObject()
-  add(path_594159, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594160, "api-version", newJString(apiVersion))
-  add(path_594159, "subscriptionId", newJString(subscriptionId))
+  var path_568388 = newJObject()
+  var query_568389 = newJObject()
+  var body_568390 = newJObject()
+  add(path_568388, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568389, "api-version", newJString(apiVersion))
+  add(path_568388, "subscriptionId", newJString(subscriptionId))
   if input != nil:
-    body_594161 = input
-  add(path_594159, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594158.call(path_594159, query_594160, nil, nil, body_594161)
+    body_568390 = input
+  add(path_568388, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568387.call(path_568388, query_568389, nil, nil, body_568390)
 
-var migrateProjectsRefreshMigrateProjectSummary* = Call_MigrateProjectsRefreshMigrateProjectSummary_594149(
+var migrateProjectsRefreshMigrateProjectSummary* = Call_MigrateProjectsRefreshMigrateProjectSummary_568378(
     name: "migrateProjectsRefreshMigrateProjectSummary",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/refreshSummary",
-    validator: validate_MigrateProjectsRefreshMigrateProjectSummary_594150,
-    base: "", url: url_MigrateProjectsRefreshMigrateProjectSummary_594151,
+    validator: validate_MigrateProjectsRefreshMigrateProjectSummary_568379,
+    base: "", url: url_MigrateProjectsRefreshMigrateProjectSummary_568380,
     schemes: {Scheme.Https})
 type
-  Call_MigrateProjectsRegisterTool_594162 = ref object of OpenApiRestCall_593438
-proc url_MigrateProjectsRegisterTool_594164(protocol: Scheme; host: string;
+  Call_MigrateProjectsRegisterTool_568391 = ref object of OpenApiRestCall_567667
+proc url_MigrateProjectsRegisterTool_568393(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2004,7 +2004,7 @@ proc url_MigrateProjectsRegisterTool_594164(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MigrateProjectsRegisterTool_594163(path: JsonNode; query: JsonNode;
+proc validate_MigrateProjectsRegisterTool_568392(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -2018,21 +2018,21 @@ proc validate_MigrateProjectsRegisterTool_594163(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594165 = path.getOrDefault("resourceGroupName")
-  valid_594165 = validateParameter(valid_594165, JString, required = true,
+  var valid_568394 = path.getOrDefault("resourceGroupName")
+  valid_568394 = validateParameter(valid_568394, JString, required = true,
                                  default = nil)
-  if valid_594165 != nil:
-    section.add "resourceGroupName", valid_594165
-  var valid_594166 = path.getOrDefault("subscriptionId")
-  valid_594166 = validateParameter(valid_594166, JString, required = true,
+  if valid_568394 != nil:
+    section.add "resourceGroupName", valid_568394
+  var valid_568395 = path.getOrDefault("subscriptionId")
+  valid_568395 = validateParameter(valid_568395, JString, required = true,
                                  default = nil)
-  if valid_594166 != nil:
-    section.add "subscriptionId", valid_594166
-  var valid_594167 = path.getOrDefault("migrateProjectName")
-  valid_594167 = validateParameter(valid_594167, JString, required = true,
+  if valid_568395 != nil:
+    section.add "subscriptionId", valid_568395
+  var valid_568396 = path.getOrDefault("migrateProjectName")
+  valid_568396 = validateParameter(valid_568396, JString, required = true,
                                  default = nil)
-  if valid_594167 != nil:
-    section.add "migrateProjectName", valid_594167
+  if valid_568396 != nil:
+    section.add "migrateProjectName", valid_568396
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2040,21 +2040,21 @@ proc validate_MigrateProjectsRegisterTool_594163(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594168 = query.getOrDefault("api-version")
-  valid_594168 = validateParameter(valid_594168, JString, required = true,
+  var valid_568397 = query.getOrDefault("api-version")
+  valid_568397 = validateParameter(valid_568397, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594168 != nil:
-    section.add "api-version", valid_594168
+  if valid_568397 != nil:
+    section.add "api-version", valid_568397
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Standard request header. Used by service to respond to client in appropriate language.
   section = newJObject()
-  var valid_594169 = header.getOrDefault("Accept-Language")
-  valid_594169 = validateParameter(valid_594169, JString, required = false,
+  var valid_568398 = header.getOrDefault("Accept-Language")
+  valid_568398 = validateParameter(valid_568398, JString, required = false,
                                  default = nil)
-  if valid_594169 != nil:
-    section.add "Accept-Language", valid_594169
+  if valid_568398 != nil:
+    section.add "Accept-Language", valid_568398
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2066,18 +2066,18 @@ proc validate_MigrateProjectsRegisterTool_594163(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594171: Call_MigrateProjectsRegisterTool_594162; path: JsonNode;
+proc call*(call_568400: Call_MigrateProjectsRegisterTool_568391; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594171.validator(path, query, header, formData, body)
-  let scheme = call_594171.pickScheme
+  let valid = call_568400.validator(path, query, header, formData, body)
+  let scheme = call_568400.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594171.url(scheme.get, call_594171.host, call_594171.base,
-                         call_594171.route, valid.getOrDefault("path"),
+  let url = call_568400.url(scheme.get, call_568400.host, call_568400.base,
+                         call_568400.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594171, url, valid)
+  result = hook(call_568400, url, valid)
 
-proc call*(call_594172: Call_MigrateProjectsRegisterTool_594162;
+proc call*(call_568401: Call_MigrateProjectsRegisterTool_568391;
           resourceGroupName: string; subscriptionId: string; input: JsonNode;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## migrateProjectsRegisterTool
@@ -2091,25 +2091,25 @@ proc call*(call_594172: Call_MigrateProjectsRegisterTool_594162;
   ##        : Input containing the name of the tool to be registered.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594173 = newJObject()
-  var query_594174 = newJObject()
-  var body_594175 = newJObject()
-  add(path_594173, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594174, "api-version", newJString(apiVersion))
-  add(path_594173, "subscriptionId", newJString(subscriptionId))
+  var path_568402 = newJObject()
+  var query_568403 = newJObject()
+  var body_568404 = newJObject()
+  add(path_568402, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568403, "api-version", newJString(apiVersion))
+  add(path_568402, "subscriptionId", newJString(subscriptionId))
   if input != nil:
-    body_594175 = input
-  add(path_594173, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594172.call(path_594173, query_594174, nil, nil, body_594175)
+    body_568404 = input
+  add(path_568402, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568401.call(path_568402, query_568403, nil, nil, body_568404)
 
-var migrateProjectsRegisterTool* = Call_MigrateProjectsRegisterTool_594162(
+var migrateProjectsRegisterTool* = Call_MigrateProjectsRegisterTool_568391(
     name: "migrateProjectsRegisterTool", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/registerTool",
-    validator: validate_MigrateProjectsRegisterTool_594163, base: "",
-    url: url_MigrateProjectsRegisterTool_594164, schemes: {Scheme.Https})
+    validator: validate_MigrateProjectsRegisterTool_568392, base: "",
+    url: url_MigrateProjectsRegisterTool_568393, schemes: {Scheme.Https})
 type
-  Call_SolutionsEnumerateSolutions_594176 = ref object of OpenApiRestCall_593438
-proc url_SolutionsEnumerateSolutions_594178(protocol: Scheme; host: string;
+  Call_SolutionsEnumerateSolutions_568405 = ref object of OpenApiRestCall_567667
+proc url_SolutionsEnumerateSolutions_568407(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2134,7 +2134,7 @@ proc url_SolutionsEnumerateSolutions_594178(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SolutionsEnumerateSolutions_594177(path: JsonNode; query: JsonNode;
+proc validate_SolutionsEnumerateSolutions_568406(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -2148,21 +2148,21 @@ proc validate_SolutionsEnumerateSolutions_594177(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594179 = path.getOrDefault("resourceGroupName")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  var valid_568408 = path.getOrDefault("resourceGroupName")
+  valid_568408 = validateParameter(valid_568408, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "resourceGroupName", valid_594179
-  var valid_594180 = path.getOrDefault("subscriptionId")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  if valid_568408 != nil:
+    section.add "resourceGroupName", valid_568408
+  var valid_568409 = path.getOrDefault("subscriptionId")
+  valid_568409 = validateParameter(valid_568409, JString, required = true,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "subscriptionId", valid_594180
-  var valid_594181 = path.getOrDefault("migrateProjectName")
-  valid_594181 = validateParameter(valid_594181, JString, required = true,
+  if valid_568409 != nil:
+    section.add "subscriptionId", valid_568409
+  var valid_568410 = path.getOrDefault("migrateProjectName")
+  valid_568410 = validateParameter(valid_568410, JString, required = true,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "migrateProjectName", valid_594181
+  if valid_568410 != nil:
+    section.add "migrateProjectName", valid_568410
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2170,11 +2170,11 @@ proc validate_SolutionsEnumerateSolutions_594177(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594182 = query.getOrDefault("api-version")
-  valid_594182 = validateParameter(valid_594182, JString, required = true,
+  var valid_568411 = query.getOrDefault("api-version")
+  valid_568411 = validateParameter(valid_568411, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594182 != nil:
-    section.add "api-version", valid_594182
+  if valid_568411 != nil:
+    section.add "api-version", valid_568411
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2183,18 +2183,18 @@ proc validate_SolutionsEnumerateSolutions_594177(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594183: Call_SolutionsEnumerateSolutions_594176; path: JsonNode;
+proc call*(call_568412: Call_SolutionsEnumerateSolutions_568405; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594183.validator(path, query, header, formData, body)
-  let scheme = call_594183.pickScheme
+  let valid = call_568412.validator(path, query, header, formData, body)
+  let scheme = call_568412.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594183.url(scheme.get, call_594183.host, call_594183.base,
-                         call_594183.route, valid.getOrDefault("path"),
+  let url = call_568412.url(scheme.get, call_568412.host, call_568412.base,
+                         call_568412.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594183, url, valid)
+  result = hook(call_568412, url, valid)
 
-proc call*(call_594184: Call_SolutionsEnumerateSolutions_594176;
+proc call*(call_568413: Call_SolutionsEnumerateSolutions_568405;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## solutionsEnumerateSolutions
@@ -2206,22 +2206,22 @@ proc call*(call_594184: Call_SolutionsEnumerateSolutions_594176;
   ##                 : Azure Subscription Id in which migrate project was created.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594185 = newJObject()
-  var query_594186 = newJObject()
-  add(path_594185, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594186, "api-version", newJString(apiVersion))
-  add(path_594185, "subscriptionId", newJString(subscriptionId))
-  add(path_594185, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594184.call(path_594185, query_594186, nil, nil, nil)
+  var path_568414 = newJObject()
+  var query_568415 = newJObject()
+  add(path_568414, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568415, "api-version", newJString(apiVersion))
+  add(path_568414, "subscriptionId", newJString(subscriptionId))
+  add(path_568414, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568413.call(path_568414, query_568415, nil, nil, nil)
 
-var solutionsEnumerateSolutions* = Call_SolutionsEnumerateSolutions_594176(
+var solutionsEnumerateSolutions* = Call_SolutionsEnumerateSolutions_568405(
     name: "solutionsEnumerateSolutions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/solutions",
-    validator: validate_SolutionsEnumerateSolutions_594177, base: "",
-    url: url_SolutionsEnumerateSolutions_594178, schemes: {Scheme.Https})
+    validator: validate_SolutionsEnumerateSolutions_568406, base: "",
+    url: url_SolutionsEnumerateSolutions_568407, schemes: {Scheme.Https})
 type
-  Call_SolutionsPutSolution_594199 = ref object of OpenApiRestCall_593438
-proc url_SolutionsPutSolution_594201(protocol: Scheme; host: string; base: string;
+  Call_SolutionsPutSolution_568428 = ref object of OpenApiRestCall_567667
+proc url_SolutionsPutSolution_568430(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2248,7 +2248,7 @@ proc url_SolutionsPutSolution_594201(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SolutionsPutSolution_594200(path: JsonNode; query: JsonNode;
+proc validate_SolutionsPutSolution_568429(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -2264,26 +2264,26 @@ proc validate_SolutionsPutSolution_594200(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_594202 = path.getOrDefault("solutionName")
-  valid_594202 = validateParameter(valid_594202, JString, required = true,
+  var valid_568431 = path.getOrDefault("solutionName")
+  valid_568431 = validateParameter(valid_568431, JString, required = true,
                                  default = nil)
-  if valid_594202 != nil:
-    section.add "solutionName", valid_594202
-  var valid_594203 = path.getOrDefault("resourceGroupName")
-  valid_594203 = validateParameter(valid_594203, JString, required = true,
+  if valid_568431 != nil:
+    section.add "solutionName", valid_568431
+  var valid_568432 = path.getOrDefault("resourceGroupName")
+  valid_568432 = validateParameter(valid_568432, JString, required = true,
                                  default = nil)
-  if valid_594203 != nil:
-    section.add "resourceGroupName", valid_594203
-  var valid_594204 = path.getOrDefault("subscriptionId")
-  valid_594204 = validateParameter(valid_594204, JString, required = true,
+  if valid_568432 != nil:
+    section.add "resourceGroupName", valid_568432
+  var valid_568433 = path.getOrDefault("subscriptionId")
+  valid_568433 = validateParameter(valid_568433, JString, required = true,
                                  default = nil)
-  if valid_594204 != nil:
-    section.add "subscriptionId", valid_594204
-  var valid_594205 = path.getOrDefault("migrateProjectName")
-  valid_594205 = validateParameter(valid_594205, JString, required = true,
+  if valid_568433 != nil:
+    section.add "subscriptionId", valid_568433
+  var valid_568434 = path.getOrDefault("migrateProjectName")
+  valid_568434 = validateParameter(valid_568434, JString, required = true,
                                  default = nil)
-  if valid_594205 != nil:
-    section.add "migrateProjectName", valid_594205
+  if valid_568434 != nil:
+    section.add "migrateProjectName", valid_568434
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2291,11 +2291,11 @@ proc validate_SolutionsPutSolution_594200(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594206 = query.getOrDefault("api-version")
-  valid_594206 = validateParameter(valid_594206, JString, required = true,
+  var valid_568435 = query.getOrDefault("api-version")
+  valid_568435 = validateParameter(valid_568435, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594206 != nil:
-    section.add "api-version", valid_594206
+  if valid_568435 != nil:
+    section.add "api-version", valid_568435
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2309,18 +2309,18 @@ proc validate_SolutionsPutSolution_594200(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594208: Call_SolutionsPutSolution_594199; path: JsonNode;
+proc call*(call_568437: Call_SolutionsPutSolution_568428; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594208.validator(path, query, header, formData, body)
-  let scheme = call_594208.pickScheme
+  let valid = call_568437.validator(path, query, header, formData, body)
+  let scheme = call_568437.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594208.url(scheme.get, call_594208.host, call_594208.base,
-                         call_594208.route, valid.getOrDefault("path"),
+  let url = call_568437.url(scheme.get, call_568437.host, call_568437.base,
+                         call_568437.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594208, url, valid)
+  result = hook(call_568437, url, valid)
 
-proc call*(call_594209: Call_SolutionsPutSolution_594199; solutionName: string;
+proc call*(call_568438: Call_SolutionsPutSolution_568428; solutionName: string;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; solutionInput: JsonNode;
           apiVersion: string = "2018-09-01-preview"): Recallable =
@@ -2337,26 +2337,26 @@ proc call*(call_594209: Call_SolutionsPutSolution_594199; solutionName: string;
   ##                     : Name of the Azure Migrate project.
   ##   solutionInput: JObject (required)
   ##                : The input for the solution.
-  var path_594210 = newJObject()
-  var query_594211 = newJObject()
-  var body_594212 = newJObject()
-  add(path_594210, "solutionName", newJString(solutionName))
-  add(path_594210, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594211, "api-version", newJString(apiVersion))
-  add(path_594210, "subscriptionId", newJString(subscriptionId))
-  add(path_594210, "migrateProjectName", newJString(migrateProjectName))
+  var path_568439 = newJObject()
+  var query_568440 = newJObject()
+  var body_568441 = newJObject()
+  add(path_568439, "solutionName", newJString(solutionName))
+  add(path_568439, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568440, "api-version", newJString(apiVersion))
+  add(path_568439, "subscriptionId", newJString(subscriptionId))
+  add(path_568439, "migrateProjectName", newJString(migrateProjectName))
   if solutionInput != nil:
-    body_594212 = solutionInput
-  result = call_594209.call(path_594210, query_594211, nil, nil, body_594212)
+    body_568441 = solutionInput
+  result = call_568438.call(path_568439, query_568440, nil, nil, body_568441)
 
-var solutionsPutSolution* = Call_SolutionsPutSolution_594199(
+var solutionsPutSolution* = Call_SolutionsPutSolution_568428(
     name: "solutionsPutSolution", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/solutions/{solutionName}",
-    validator: validate_SolutionsPutSolution_594200, base: "",
-    url: url_SolutionsPutSolution_594201, schemes: {Scheme.Https})
+    validator: validate_SolutionsPutSolution_568429, base: "",
+    url: url_SolutionsPutSolution_568430, schemes: {Scheme.Https})
 type
-  Call_SolutionsGetSolution_594187 = ref object of OpenApiRestCall_593438
-proc url_SolutionsGetSolution_594189(protocol: Scheme; host: string; base: string;
+  Call_SolutionsGetSolution_568416 = ref object of OpenApiRestCall_567667
+proc url_SolutionsGetSolution_568418(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2383,7 +2383,7 @@ proc url_SolutionsGetSolution_594189(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SolutionsGetSolution_594188(path: JsonNode; query: JsonNode;
+proc validate_SolutionsGetSolution_568417(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -2399,26 +2399,26 @@ proc validate_SolutionsGetSolution_594188(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_594190 = path.getOrDefault("solutionName")
-  valid_594190 = validateParameter(valid_594190, JString, required = true,
+  var valid_568419 = path.getOrDefault("solutionName")
+  valid_568419 = validateParameter(valid_568419, JString, required = true,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "solutionName", valid_594190
-  var valid_594191 = path.getOrDefault("resourceGroupName")
-  valid_594191 = validateParameter(valid_594191, JString, required = true,
+  if valid_568419 != nil:
+    section.add "solutionName", valid_568419
+  var valid_568420 = path.getOrDefault("resourceGroupName")
+  valid_568420 = validateParameter(valid_568420, JString, required = true,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "resourceGroupName", valid_594191
-  var valid_594192 = path.getOrDefault("subscriptionId")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  if valid_568420 != nil:
+    section.add "resourceGroupName", valid_568420
+  var valid_568421 = path.getOrDefault("subscriptionId")
+  valid_568421 = validateParameter(valid_568421, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "subscriptionId", valid_594192
-  var valid_594193 = path.getOrDefault("migrateProjectName")
-  valid_594193 = validateParameter(valid_594193, JString, required = true,
+  if valid_568421 != nil:
+    section.add "subscriptionId", valid_568421
+  var valid_568422 = path.getOrDefault("migrateProjectName")
+  valid_568422 = validateParameter(valid_568422, JString, required = true,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "migrateProjectName", valid_594193
+  if valid_568422 != nil:
+    section.add "migrateProjectName", valid_568422
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2426,11 +2426,11 @@ proc validate_SolutionsGetSolution_594188(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594194 = query.getOrDefault("api-version")
-  valid_594194 = validateParameter(valid_594194, JString, required = true,
+  var valid_568423 = query.getOrDefault("api-version")
+  valid_568423 = validateParameter(valid_568423, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594194 != nil:
-    section.add "api-version", valid_594194
+  if valid_568423 != nil:
+    section.add "api-version", valid_568423
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2439,18 +2439,18 @@ proc validate_SolutionsGetSolution_594188(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594195: Call_SolutionsGetSolution_594187; path: JsonNode;
+proc call*(call_568424: Call_SolutionsGetSolution_568416; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594195.validator(path, query, header, formData, body)
-  let scheme = call_594195.pickScheme
+  let valid = call_568424.validator(path, query, header, formData, body)
+  let scheme = call_568424.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594195.url(scheme.get, call_594195.host, call_594195.base,
-                         call_594195.route, valid.getOrDefault("path"),
+  let url = call_568424.url(scheme.get, call_568424.host, call_568424.base,
+                         call_568424.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594195, url, valid)
+  result = hook(call_568424, url, valid)
 
-proc call*(call_594196: Call_SolutionsGetSolution_594187; solutionName: string;
+proc call*(call_568425: Call_SolutionsGetSolution_568416; solutionName: string;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## solutionsGetSolution
@@ -2464,23 +2464,23 @@ proc call*(call_594196: Call_SolutionsGetSolution_594187; solutionName: string;
   ##                 : Azure Subscription Id in which migrate project was created.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594197 = newJObject()
-  var query_594198 = newJObject()
-  add(path_594197, "solutionName", newJString(solutionName))
-  add(path_594197, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594198, "api-version", newJString(apiVersion))
-  add(path_594197, "subscriptionId", newJString(subscriptionId))
-  add(path_594197, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594196.call(path_594197, query_594198, nil, nil, nil)
+  var path_568426 = newJObject()
+  var query_568427 = newJObject()
+  add(path_568426, "solutionName", newJString(solutionName))
+  add(path_568426, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568427, "api-version", newJString(apiVersion))
+  add(path_568426, "subscriptionId", newJString(subscriptionId))
+  add(path_568426, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568425.call(path_568426, query_568427, nil, nil, nil)
 
-var solutionsGetSolution* = Call_SolutionsGetSolution_594187(
+var solutionsGetSolution* = Call_SolutionsGetSolution_568416(
     name: "solutionsGetSolution", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/solutions/{solutionName}",
-    validator: validate_SolutionsGetSolution_594188, base: "",
-    url: url_SolutionsGetSolution_594189, schemes: {Scheme.Https})
+    validator: validate_SolutionsGetSolution_568417, base: "",
+    url: url_SolutionsGetSolution_568418, schemes: {Scheme.Https})
 type
-  Call_SolutionsPatchSolution_594226 = ref object of OpenApiRestCall_593438
-proc url_SolutionsPatchSolution_594228(protocol: Scheme; host: string; base: string;
+  Call_SolutionsPatchSolution_568455 = ref object of OpenApiRestCall_567667
+proc url_SolutionsPatchSolution_568457(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2507,7 +2507,7 @@ proc url_SolutionsPatchSolution_594228(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SolutionsPatchSolution_594227(path: JsonNode; query: JsonNode;
+proc validate_SolutionsPatchSolution_568456(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update a solution with specified name. Supports partial updates, for example only tags can be provided.
   ## 
@@ -2525,26 +2525,26 @@ proc validate_SolutionsPatchSolution_594227(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_594229 = path.getOrDefault("solutionName")
-  valid_594229 = validateParameter(valid_594229, JString, required = true,
+  var valid_568458 = path.getOrDefault("solutionName")
+  valid_568458 = validateParameter(valid_568458, JString, required = true,
                                  default = nil)
-  if valid_594229 != nil:
-    section.add "solutionName", valid_594229
-  var valid_594230 = path.getOrDefault("resourceGroupName")
-  valid_594230 = validateParameter(valid_594230, JString, required = true,
+  if valid_568458 != nil:
+    section.add "solutionName", valid_568458
+  var valid_568459 = path.getOrDefault("resourceGroupName")
+  valid_568459 = validateParameter(valid_568459, JString, required = true,
                                  default = nil)
-  if valid_594230 != nil:
-    section.add "resourceGroupName", valid_594230
-  var valid_594231 = path.getOrDefault("subscriptionId")
-  valid_594231 = validateParameter(valid_594231, JString, required = true,
+  if valid_568459 != nil:
+    section.add "resourceGroupName", valid_568459
+  var valid_568460 = path.getOrDefault("subscriptionId")
+  valid_568460 = validateParameter(valid_568460, JString, required = true,
                                  default = nil)
-  if valid_594231 != nil:
-    section.add "subscriptionId", valid_594231
-  var valid_594232 = path.getOrDefault("migrateProjectName")
-  valid_594232 = validateParameter(valid_594232, JString, required = true,
+  if valid_568460 != nil:
+    section.add "subscriptionId", valid_568460
+  var valid_568461 = path.getOrDefault("migrateProjectName")
+  valid_568461 = validateParameter(valid_568461, JString, required = true,
                                  default = nil)
-  if valid_594232 != nil:
-    section.add "migrateProjectName", valid_594232
+  if valid_568461 != nil:
+    section.add "migrateProjectName", valid_568461
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2552,11 +2552,11 @@ proc validate_SolutionsPatchSolution_594227(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594233 = query.getOrDefault("api-version")
-  valid_594233 = validateParameter(valid_594233, JString, required = true,
+  var valid_568462 = query.getOrDefault("api-version")
+  valid_568462 = validateParameter(valid_568462, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594233 != nil:
-    section.add "api-version", valid_594233
+  if valid_568462 != nil:
+    section.add "api-version", valid_568462
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2570,20 +2570,20 @@ proc validate_SolutionsPatchSolution_594227(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594235: Call_SolutionsPatchSolution_594226; path: JsonNode;
+proc call*(call_568464: Call_SolutionsPatchSolution_568455; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a solution with specified name. Supports partial updates, for example only tags can be provided.
   ## 
-  let valid = call_594235.validator(path, query, header, formData, body)
-  let scheme = call_594235.pickScheme
+  let valid = call_568464.validator(path, query, header, formData, body)
+  let scheme = call_568464.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594235.url(scheme.get, call_594235.host, call_594235.base,
-                         call_594235.route, valid.getOrDefault("path"),
+  let url = call_568464.url(scheme.get, call_568464.host, call_568464.base,
+                         call_568464.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594235, url, valid)
+  result = hook(call_568464, url, valid)
 
-proc call*(call_594236: Call_SolutionsPatchSolution_594226; solutionName: string;
+proc call*(call_568465: Call_SolutionsPatchSolution_568455; solutionName: string;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; solutionInput: JsonNode;
           apiVersion: string = "2018-09-01-preview"): Recallable =
@@ -2601,26 +2601,26 @@ proc call*(call_594236: Call_SolutionsPatchSolution_594226; solutionName: string
   ##                     : Name of the Azure Migrate project.
   ##   solutionInput: JObject (required)
   ##                : The input for the solution.
-  var path_594237 = newJObject()
-  var query_594238 = newJObject()
-  var body_594239 = newJObject()
-  add(path_594237, "solutionName", newJString(solutionName))
-  add(path_594237, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594238, "api-version", newJString(apiVersion))
-  add(path_594237, "subscriptionId", newJString(subscriptionId))
-  add(path_594237, "migrateProjectName", newJString(migrateProjectName))
+  var path_568466 = newJObject()
+  var query_568467 = newJObject()
+  var body_568468 = newJObject()
+  add(path_568466, "solutionName", newJString(solutionName))
+  add(path_568466, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568467, "api-version", newJString(apiVersion))
+  add(path_568466, "subscriptionId", newJString(subscriptionId))
+  add(path_568466, "migrateProjectName", newJString(migrateProjectName))
   if solutionInput != nil:
-    body_594239 = solutionInput
-  result = call_594236.call(path_594237, query_594238, nil, nil, body_594239)
+    body_568468 = solutionInput
+  result = call_568465.call(path_568466, query_568467, nil, nil, body_568468)
 
-var solutionsPatchSolution* = Call_SolutionsPatchSolution_594226(
+var solutionsPatchSolution* = Call_SolutionsPatchSolution_568455(
     name: "solutionsPatchSolution", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/solutions/{solutionName}",
-    validator: validate_SolutionsPatchSolution_594227, base: "",
-    url: url_SolutionsPatchSolution_594228, schemes: {Scheme.Https})
+    validator: validate_SolutionsPatchSolution_568456, base: "",
+    url: url_SolutionsPatchSolution_568457, schemes: {Scheme.Https})
 type
-  Call_SolutionsDeleteSolution_594213 = ref object of OpenApiRestCall_593438
-proc url_SolutionsDeleteSolution_594215(protocol: Scheme; host: string; base: string;
+  Call_SolutionsDeleteSolution_568442 = ref object of OpenApiRestCall_567667
+proc url_SolutionsDeleteSolution_568444(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2648,7 +2648,7 @@ proc url_SolutionsDeleteSolution_594215(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SolutionsDeleteSolution_594214(path: JsonNode; query: JsonNode;
+proc validate_SolutionsDeleteSolution_568443(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the solution. Deleting non-existent project is a no-operation.
   ## 
@@ -2666,26 +2666,26 @@ proc validate_SolutionsDeleteSolution_594214(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_594216 = path.getOrDefault("solutionName")
-  valid_594216 = validateParameter(valid_594216, JString, required = true,
+  var valid_568445 = path.getOrDefault("solutionName")
+  valid_568445 = validateParameter(valid_568445, JString, required = true,
                                  default = nil)
-  if valid_594216 != nil:
-    section.add "solutionName", valid_594216
-  var valid_594217 = path.getOrDefault("resourceGroupName")
-  valid_594217 = validateParameter(valid_594217, JString, required = true,
+  if valid_568445 != nil:
+    section.add "solutionName", valid_568445
+  var valid_568446 = path.getOrDefault("resourceGroupName")
+  valid_568446 = validateParameter(valid_568446, JString, required = true,
                                  default = nil)
-  if valid_594217 != nil:
-    section.add "resourceGroupName", valid_594217
-  var valid_594218 = path.getOrDefault("subscriptionId")
-  valid_594218 = validateParameter(valid_594218, JString, required = true,
+  if valid_568446 != nil:
+    section.add "resourceGroupName", valid_568446
+  var valid_568447 = path.getOrDefault("subscriptionId")
+  valid_568447 = validateParameter(valid_568447, JString, required = true,
                                  default = nil)
-  if valid_594218 != nil:
-    section.add "subscriptionId", valid_594218
-  var valid_594219 = path.getOrDefault("migrateProjectName")
-  valid_594219 = validateParameter(valid_594219, JString, required = true,
+  if valid_568447 != nil:
+    section.add "subscriptionId", valid_568447
+  var valid_568448 = path.getOrDefault("migrateProjectName")
+  valid_568448 = validateParameter(valid_568448, JString, required = true,
                                  default = nil)
-  if valid_594219 != nil:
-    section.add "migrateProjectName", valid_594219
+  if valid_568448 != nil:
+    section.add "migrateProjectName", valid_568448
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2693,41 +2693,41 @@ proc validate_SolutionsDeleteSolution_594214(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594220 = query.getOrDefault("api-version")
-  valid_594220 = validateParameter(valid_594220, JString, required = true,
+  var valid_568449 = query.getOrDefault("api-version")
+  valid_568449 = validateParameter(valid_568449, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594220 != nil:
-    section.add "api-version", valid_594220
+  if valid_568449 != nil:
+    section.add "api-version", valid_568449
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Standard request header. Used by service to respond to client in appropriate language.
   section = newJObject()
-  var valid_594221 = header.getOrDefault("Accept-Language")
-  valid_594221 = validateParameter(valid_594221, JString, required = false,
+  var valid_568450 = header.getOrDefault("Accept-Language")
+  valid_568450 = validateParameter(valid_568450, JString, required = false,
                                  default = nil)
-  if valid_594221 != nil:
-    section.add "Accept-Language", valid_594221
+  if valid_568450 != nil:
+    section.add "Accept-Language", valid_568450
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594222: Call_SolutionsDeleteSolution_594213; path: JsonNode;
+proc call*(call_568451: Call_SolutionsDeleteSolution_568442; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the solution. Deleting non-existent project is a no-operation.
   ## 
-  let valid = call_594222.validator(path, query, header, formData, body)
-  let scheme = call_594222.pickScheme
+  let valid = call_568451.validator(path, query, header, formData, body)
+  let scheme = call_568451.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594222.url(scheme.get, call_594222.host, call_594222.base,
-                         call_594222.route, valid.getOrDefault("path"),
+  let url = call_568451.url(scheme.get, call_568451.host, call_568451.base,
+                         call_568451.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594222, url, valid)
+  result = hook(call_568451, url, valid)
 
-proc call*(call_594223: Call_SolutionsDeleteSolution_594213; solutionName: string;
+proc call*(call_568452: Call_SolutionsDeleteSolution_568442; solutionName: string;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## solutionsDeleteSolution
@@ -2742,23 +2742,23 @@ proc call*(call_594223: Call_SolutionsDeleteSolution_594213; solutionName: strin
   ##                 : Azure Subscription Id in which migrate project was created.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594224 = newJObject()
-  var query_594225 = newJObject()
-  add(path_594224, "solutionName", newJString(solutionName))
-  add(path_594224, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594225, "api-version", newJString(apiVersion))
-  add(path_594224, "subscriptionId", newJString(subscriptionId))
-  add(path_594224, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594223.call(path_594224, query_594225, nil, nil, nil)
+  var path_568453 = newJObject()
+  var query_568454 = newJObject()
+  add(path_568453, "solutionName", newJString(solutionName))
+  add(path_568453, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568454, "api-version", newJString(apiVersion))
+  add(path_568453, "subscriptionId", newJString(subscriptionId))
+  add(path_568453, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568452.call(path_568453, query_568454, nil, nil, nil)
 
-var solutionsDeleteSolution* = Call_SolutionsDeleteSolution_594213(
+var solutionsDeleteSolution* = Call_SolutionsDeleteSolution_568442(
     name: "solutionsDeleteSolution", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/solutions/{solutionName}",
-    validator: validate_SolutionsDeleteSolution_594214, base: "",
-    url: url_SolutionsDeleteSolution_594215, schemes: {Scheme.Https})
+    validator: validate_SolutionsDeleteSolution_568443, base: "",
+    url: url_SolutionsDeleteSolution_568444, schemes: {Scheme.Https})
 type
-  Call_SolutionsCleanupSolutionData_594240 = ref object of OpenApiRestCall_593438
-proc url_SolutionsCleanupSolutionData_594242(protocol: Scheme; host: string;
+  Call_SolutionsCleanupSolutionData_568469 = ref object of OpenApiRestCall_567667
+proc url_SolutionsCleanupSolutionData_568471(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2786,7 +2786,7 @@ proc url_SolutionsCleanupSolutionData_594242(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SolutionsCleanupSolutionData_594241(path: JsonNode; query: JsonNode;
+proc validate_SolutionsCleanupSolutionData_568470(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -2802,26 +2802,26 @@ proc validate_SolutionsCleanupSolutionData_594241(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_594243 = path.getOrDefault("solutionName")
-  valid_594243 = validateParameter(valid_594243, JString, required = true,
+  var valid_568472 = path.getOrDefault("solutionName")
+  valid_568472 = validateParameter(valid_568472, JString, required = true,
                                  default = nil)
-  if valid_594243 != nil:
-    section.add "solutionName", valid_594243
-  var valid_594244 = path.getOrDefault("resourceGroupName")
-  valid_594244 = validateParameter(valid_594244, JString, required = true,
+  if valid_568472 != nil:
+    section.add "solutionName", valid_568472
+  var valid_568473 = path.getOrDefault("resourceGroupName")
+  valid_568473 = validateParameter(valid_568473, JString, required = true,
                                  default = nil)
-  if valid_594244 != nil:
-    section.add "resourceGroupName", valid_594244
-  var valid_594245 = path.getOrDefault("subscriptionId")
-  valid_594245 = validateParameter(valid_594245, JString, required = true,
+  if valid_568473 != nil:
+    section.add "resourceGroupName", valid_568473
+  var valid_568474 = path.getOrDefault("subscriptionId")
+  valid_568474 = validateParameter(valid_568474, JString, required = true,
                                  default = nil)
-  if valid_594245 != nil:
-    section.add "subscriptionId", valid_594245
-  var valid_594246 = path.getOrDefault("migrateProjectName")
-  valid_594246 = validateParameter(valid_594246, JString, required = true,
+  if valid_568474 != nil:
+    section.add "subscriptionId", valid_568474
+  var valid_568475 = path.getOrDefault("migrateProjectName")
+  valid_568475 = validateParameter(valid_568475, JString, required = true,
                                  default = nil)
-  if valid_594246 != nil:
-    section.add "migrateProjectName", valid_594246
+  if valid_568475 != nil:
+    section.add "migrateProjectName", valid_568475
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2829,11 +2829,11 @@ proc validate_SolutionsCleanupSolutionData_594241(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594247 = query.getOrDefault("api-version")
-  valid_594247 = validateParameter(valid_594247, JString, required = true,
+  var valid_568476 = query.getOrDefault("api-version")
+  valid_568476 = validateParameter(valid_568476, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594247 != nil:
-    section.add "api-version", valid_594247
+  if valid_568476 != nil:
+    section.add "api-version", valid_568476
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2842,18 +2842,18 @@ proc validate_SolutionsCleanupSolutionData_594241(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594248: Call_SolutionsCleanupSolutionData_594240; path: JsonNode;
+proc call*(call_568477: Call_SolutionsCleanupSolutionData_568469; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594248.validator(path, query, header, formData, body)
-  let scheme = call_594248.pickScheme
+  let valid = call_568477.validator(path, query, header, formData, body)
+  let scheme = call_568477.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594248.url(scheme.get, call_594248.host, call_594248.base,
-                         call_594248.route, valid.getOrDefault("path"),
+  let url = call_568477.url(scheme.get, call_568477.host, call_568477.base,
+                         call_568477.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594248, url, valid)
+  result = hook(call_568477, url, valid)
 
-proc call*(call_594249: Call_SolutionsCleanupSolutionData_594240;
+proc call*(call_568478: Call_SolutionsCleanupSolutionData_568469;
           solutionName: string; resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## solutionsCleanupSolutionData
@@ -2867,23 +2867,23 @@ proc call*(call_594249: Call_SolutionsCleanupSolutionData_594240;
   ##                 : Azure Subscription Id in which migrate project was created.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594250 = newJObject()
-  var query_594251 = newJObject()
-  add(path_594250, "solutionName", newJString(solutionName))
-  add(path_594250, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594251, "api-version", newJString(apiVersion))
-  add(path_594250, "subscriptionId", newJString(subscriptionId))
-  add(path_594250, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594249.call(path_594250, query_594251, nil, nil, nil)
+  var path_568479 = newJObject()
+  var query_568480 = newJObject()
+  add(path_568479, "solutionName", newJString(solutionName))
+  add(path_568479, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568480, "api-version", newJString(apiVersion))
+  add(path_568479, "subscriptionId", newJString(subscriptionId))
+  add(path_568479, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568478.call(path_568479, query_568480, nil, nil, nil)
 
-var solutionsCleanupSolutionData* = Call_SolutionsCleanupSolutionData_594240(
+var solutionsCleanupSolutionData* = Call_SolutionsCleanupSolutionData_568469(
     name: "solutionsCleanupSolutionData", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/solutions/{solutionName}/cleanupData",
-    validator: validate_SolutionsCleanupSolutionData_594241, base: "",
-    url: url_SolutionsCleanupSolutionData_594242, schemes: {Scheme.Https})
+    validator: validate_SolutionsCleanupSolutionData_568470, base: "",
+    url: url_SolutionsCleanupSolutionData_568471, schemes: {Scheme.Https})
 type
-  Call_SolutionsGetConfig_594252 = ref object of OpenApiRestCall_593438
-proc url_SolutionsGetConfig_594254(protocol: Scheme; host: string; base: string;
+  Call_SolutionsGetConfig_568481 = ref object of OpenApiRestCall_567667
+proc url_SolutionsGetConfig_568483(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2911,7 +2911,7 @@ proc url_SolutionsGetConfig_594254(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SolutionsGetConfig_594253(path: JsonNode; query: JsonNode;
+proc validate_SolutionsGetConfig_568482(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   var section: JsonNode
@@ -2928,26 +2928,26 @@ proc validate_SolutionsGetConfig_594253(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `solutionName` field"
-  var valid_594255 = path.getOrDefault("solutionName")
-  valid_594255 = validateParameter(valid_594255, JString, required = true,
+  var valid_568484 = path.getOrDefault("solutionName")
+  valid_568484 = validateParameter(valid_568484, JString, required = true,
                                  default = nil)
-  if valid_594255 != nil:
-    section.add "solutionName", valid_594255
-  var valid_594256 = path.getOrDefault("resourceGroupName")
-  valid_594256 = validateParameter(valid_594256, JString, required = true,
+  if valid_568484 != nil:
+    section.add "solutionName", valid_568484
+  var valid_568485 = path.getOrDefault("resourceGroupName")
+  valid_568485 = validateParameter(valid_568485, JString, required = true,
                                  default = nil)
-  if valid_594256 != nil:
-    section.add "resourceGroupName", valid_594256
-  var valid_594257 = path.getOrDefault("subscriptionId")
-  valid_594257 = validateParameter(valid_594257, JString, required = true,
+  if valid_568485 != nil:
+    section.add "resourceGroupName", valid_568485
+  var valid_568486 = path.getOrDefault("subscriptionId")
+  valid_568486 = validateParameter(valid_568486, JString, required = true,
                                  default = nil)
-  if valid_594257 != nil:
-    section.add "subscriptionId", valid_594257
-  var valid_594258 = path.getOrDefault("migrateProjectName")
-  valid_594258 = validateParameter(valid_594258, JString, required = true,
+  if valid_568486 != nil:
+    section.add "subscriptionId", valid_568486
+  var valid_568487 = path.getOrDefault("migrateProjectName")
+  valid_568487 = validateParameter(valid_568487, JString, required = true,
                                  default = nil)
-  if valid_594258 != nil:
-    section.add "migrateProjectName", valid_594258
+  if valid_568487 != nil:
+    section.add "migrateProjectName", valid_568487
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2955,11 +2955,11 @@ proc validate_SolutionsGetConfig_594253(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594259 = query.getOrDefault("api-version")
-  valid_594259 = validateParameter(valid_594259, JString, required = true,
+  var valid_568488 = query.getOrDefault("api-version")
+  valid_568488 = validateParameter(valid_568488, JString, required = true,
                                  default = newJString("2018-09-01-preview"))
-  if valid_594259 != nil:
-    section.add "api-version", valid_594259
+  if valid_568488 != nil:
+    section.add "api-version", valid_568488
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2968,18 +2968,18 @@ proc validate_SolutionsGetConfig_594253(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594260: Call_SolutionsGetConfig_594252; path: JsonNode;
+proc call*(call_568489: Call_SolutionsGetConfig_568481; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_594260.validator(path, query, header, formData, body)
-  let scheme = call_594260.pickScheme
+  let valid = call_568489.validator(path, query, header, formData, body)
+  let scheme = call_568489.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594260.url(scheme.get, call_594260.host, call_594260.base,
-                         call_594260.route, valid.getOrDefault("path"),
+  let url = call_568489.url(scheme.get, call_568489.host, call_568489.base,
+                         call_568489.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594260, url, valid)
+  result = hook(call_568489, url, valid)
 
-proc call*(call_594261: Call_SolutionsGetConfig_594252; solutionName: string;
+proc call*(call_568490: Call_SolutionsGetConfig_568481; solutionName: string;
           resourceGroupName: string; subscriptionId: string;
           migrateProjectName: string; apiVersion: string = "2018-09-01-preview"): Recallable =
   ## solutionsGetConfig
@@ -2993,20 +2993,20 @@ proc call*(call_594261: Call_SolutionsGetConfig_594252; solutionName: string;
   ##                 : Azure Subscription Id in which migrate project was created.
   ##   migrateProjectName: string (required)
   ##                     : Name of the Azure Migrate project.
-  var path_594262 = newJObject()
-  var query_594263 = newJObject()
-  add(path_594262, "solutionName", newJString(solutionName))
-  add(path_594262, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594263, "api-version", newJString(apiVersion))
-  add(path_594262, "subscriptionId", newJString(subscriptionId))
-  add(path_594262, "migrateProjectName", newJString(migrateProjectName))
-  result = call_594261.call(path_594262, query_594263, nil, nil, nil)
+  var path_568491 = newJObject()
+  var query_568492 = newJObject()
+  add(path_568491, "solutionName", newJString(solutionName))
+  add(path_568491, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568492, "api-version", newJString(apiVersion))
+  add(path_568491, "subscriptionId", newJString(subscriptionId))
+  add(path_568491, "migrateProjectName", newJString(migrateProjectName))
+  result = call_568490.call(path_568491, query_568492, nil, nil, nil)
 
-var solutionsGetConfig* = Call_SolutionsGetConfig_594252(
+var solutionsGetConfig* = Call_SolutionsGetConfig_568481(
     name: "solutionsGetConfig", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Migrate/migrateProjects/{migrateProjectName}/solutions/{solutionName}/getConfig",
-    validator: validate_SolutionsGetConfig_594253, base: "",
-    url: url_SolutionsGetConfig_594254, schemes: {Scheme.Https})
+    validator: validate_SolutionsGetConfig_568482, base: "",
+    url: url_SolutionsGetConfig_568483, schemes: {Scheme.Https})
 export
   rest
 

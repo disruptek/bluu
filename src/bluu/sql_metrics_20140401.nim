@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-metrics"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DatabasesListMetricDefinitions_593647 = ref object of OpenApiRestCall_593425
-proc url_DatabasesListMetricDefinitions_593649(protocol: Scheme; host: string;
+  Call_DatabasesListMetricDefinitions_567880 = ref object of OpenApiRestCall_567658
+proc url_DatabasesListMetricDefinitions_567882(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,7 +130,7 @@ proc url_DatabasesListMetricDefinitions_593649(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesListMetricDefinitions_593648(path: JsonNode;
+proc validate_DatabasesListMetricDefinitions_567881(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns database metric definitions.
   ## 
@@ -148,26 +148,26 @@ proc validate_DatabasesListMetricDefinitions_593648(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = path.getOrDefault("resourceGroupName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("serverName")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "resourceGroupName", valid_568055
+  var valid_568056 = path.getOrDefault("serverName")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "serverName", valid_593823
-  var valid_593824 = path.getOrDefault("subscriptionId")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_568056 != nil:
+    section.add "serverName", valid_568056
+  var valid_568057 = path.getOrDefault("subscriptionId")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "subscriptionId", valid_593824
-  var valid_593825 = path.getOrDefault("databaseName")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_568057 != nil:
+    section.add "subscriptionId", valid_568057
+  var valid_568058 = path.getOrDefault("databaseName")
+  valid_568058 = validateParameter(valid_568058, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "databaseName", valid_593825
+  if valid_568058 != nil:
+    section.add "databaseName", valid_568058
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -175,11 +175,11 @@ proc validate_DatabasesListMetricDefinitions_593648(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593826 = query.getOrDefault("api-version")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  var valid_568059 = query.getOrDefault("api-version")
+  valid_568059 = validateParameter(valid_568059, JString, required = true,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "api-version", valid_593826
+  if valid_568059 != nil:
+    section.add "api-version", valid_568059
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -188,20 +188,20 @@ proc validate_DatabasesListMetricDefinitions_593648(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593849: Call_DatabasesListMetricDefinitions_593647; path: JsonNode;
+proc call*(call_568082: Call_DatabasesListMetricDefinitions_567880; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns database metric definitions.
   ## 
-  let valid = call_593849.validator(path, query, header, formData, body)
-  let scheme = call_593849.pickScheme
+  let valid = call_568082.validator(path, query, header, formData, body)
+  let scheme = call_568082.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593849.url(scheme.get, call_593849.host, call_593849.base,
-                         call_593849.route, valid.getOrDefault("path"),
+  let url = call_568082.url(scheme.get, call_568082.host, call_568082.base,
+                         call_568082.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593849, url, valid)
+  result = hook(call_568082, url, valid)
 
-proc call*(call_593920: Call_DatabasesListMetricDefinitions_593647;
+proc call*(call_568153: Call_DatabasesListMetricDefinitions_567880;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string): Recallable =
   ## databasesListMetricDefinitions
@@ -216,23 +216,23 @@ proc call*(call_593920: Call_DatabasesListMetricDefinitions_593647;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  var path_593921 = newJObject()
-  var query_593923 = newJObject()
-  add(path_593921, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593923, "api-version", newJString(apiVersion))
-  add(path_593921, "serverName", newJString(serverName))
-  add(path_593921, "subscriptionId", newJString(subscriptionId))
-  add(path_593921, "databaseName", newJString(databaseName))
-  result = call_593920.call(path_593921, query_593923, nil, nil, nil)
+  var path_568154 = newJObject()
+  var query_568156 = newJObject()
+  add(path_568154, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568156, "api-version", newJString(apiVersion))
+  add(path_568154, "serverName", newJString(serverName))
+  add(path_568154, "subscriptionId", newJString(subscriptionId))
+  add(path_568154, "databaseName", newJString(databaseName))
+  result = call_568153.call(path_568154, query_568156, nil, nil, nil)
 
-var databasesListMetricDefinitions* = Call_DatabasesListMetricDefinitions_593647(
+var databasesListMetricDefinitions* = Call_DatabasesListMetricDefinitions_567880(
     name: "databasesListMetricDefinitions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/metricDefinitions",
-    validator: validate_DatabasesListMetricDefinitions_593648, base: "",
-    url: url_DatabasesListMetricDefinitions_593649, schemes: {Scheme.Https})
+    validator: validate_DatabasesListMetricDefinitions_567881, base: "",
+    url: url_DatabasesListMetricDefinitions_567882, schemes: {Scheme.Https})
 type
-  Call_DatabasesListMetrics_593962 = ref object of OpenApiRestCall_593425
-proc url_DatabasesListMetrics_593964(protocol: Scheme; host: string; base: string;
+  Call_DatabasesListMetrics_568195 = ref object of OpenApiRestCall_567658
+proc url_DatabasesListMetrics_568197(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -258,7 +258,7 @@ proc url_DatabasesListMetrics_593964(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesListMetrics_593963(path: JsonNode; query: JsonNode;
+proc validate_DatabasesListMetrics_568196(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns database metrics.
   ## 
@@ -276,26 +276,26 @@ proc validate_DatabasesListMetrics_593963(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593966 = path.getOrDefault("resourceGroupName")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  var valid_568199 = path.getOrDefault("resourceGroupName")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "resourceGroupName", valid_593966
-  var valid_593967 = path.getOrDefault("serverName")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_568199 != nil:
+    section.add "resourceGroupName", valid_568199
+  var valid_568200 = path.getOrDefault("serverName")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "serverName", valid_593967
-  var valid_593968 = path.getOrDefault("subscriptionId")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  if valid_568200 != nil:
+    section.add "serverName", valid_568200
+  var valid_568201 = path.getOrDefault("subscriptionId")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "subscriptionId", valid_593968
-  var valid_593969 = path.getOrDefault("databaseName")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  if valid_568201 != nil:
+    section.add "subscriptionId", valid_568201
+  var valid_568202 = path.getOrDefault("databaseName")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "databaseName", valid_593969
+  if valid_568202 != nil:
+    section.add "databaseName", valid_568202
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -305,16 +305,16 @@ proc validate_DatabasesListMetrics_593963(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593970 = query.getOrDefault("api-version")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  var valid_568203 = query.getOrDefault("api-version")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "api-version", valid_593970
-  var valid_593971 = query.getOrDefault("$filter")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  if valid_568203 != nil:
+    section.add "api-version", valid_568203
+  var valid_568204 = query.getOrDefault("$filter")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "$filter", valid_593971
+  if valid_568204 != nil:
+    section.add "$filter", valid_568204
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -323,20 +323,20 @@ proc validate_DatabasesListMetrics_593963(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593972: Call_DatabasesListMetrics_593962; path: JsonNode;
+proc call*(call_568205: Call_DatabasesListMetrics_568195; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns database metrics.
   ## 
-  let valid = call_593972.validator(path, query, header, formData, body)
-  let scheme = call_593972.pickScheme
+  let valid = call_568205.validator(path, query, header, formData, body)
+  let scheme = call_568205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593972.url(scheme.get, call_593972.host, call_593972.base,
-                         call_593972.route, valid.getOrDefault("path"),
+  let url = call_568205.url(scheme.get, call_568205.host, call_568205.base,
+                         call_568205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593972, url, valid)
+  result = hook(call_568205, url, valid)
 
-proc call*(call_593973: Call_DatabasesListMetrics_593962;
+proc call*(call_568206: Call_DatabasesListMetrics_568195;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string; Filter: string): Recallable =
   ## databasesListMetrics
@@ -353,24 +353,24 @@ proc call*(call_593973: Call_DatabasesListMetrics_593962;
   ##               : The name of the database.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return.
-  var path_593974 = newJObject()
-  var query_593975 = newJObject()
-  add(path_593974, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593975, "api-version", newJString(apiVersion))
-  add(path_593974, "serverName", newJString(serverName))
-  add(path_593974, "subscriptionId", newJString(subscriptionId))
-  add(path_593974, "databaseName", newJString(databaseName))
-  add(query_593975, "$filter", newJString(Filter))
-  result = call_593973.call(path_593974, query_593975, nil, nil, nil)
+  var path_568207 = newJObject()
+  var query_568208 = newJObject()
+  add(path_568207, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568208, "api-version", newJString(apiVersion))
+  add(path_568207, "serverName", newJString(serverName))
+  add(path_568207, "subscriptionId", newJString(subscriptionId))
+  add(path_568207, "databaseName", newJString(databaseName))
+  add(query_568208, "$filter", newJString(Filter))
+  result = call_568206.call(path_568207, query_568208, nil, nil, nil)
 
-var databasesListMetrics* = Call_DatabasesListMetrics_593962(
+var databasesListMetrics* = Call_DatabasesListMetrics_568195(
     name: "databasesListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/metrics",
-    validator: validate_DatabasesListMetrics_593963, base: "",
-    url: url_DatabasesListMetrics_593964, schemes: {Scheme.Https})
+    validator: validate_DatabasesListMetrics_568196, base: "",
+    url: url_DatabasesListMetrics_568197, schemes: {Scheme.Https})
 type
-  Call_ElasticPoolsListMetricDefinitions_593976 = ref object of OpenApiRestCall_593425
-proc url_ElasticPoolsListMetricDefinitions_593978(protocol: Scheme; host: string;
+  Call_ElasticPoolsListMetricDefinitions_568209 = ref object of OpenApiRestCall_567658
+proc url_ElasticPoolsListMetricDefinitions_568211(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -396,7 +396,7 @@ proc url_ElasticPoolsListMetricDefinitions_593978(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ElasticPoolsListMetricDefinitions_593977(path: JsonNode;
+proc validate_ElasticPoolsListMetricDefinitions_568210(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns elastic pool metric definitions.
   ## 
@@ -414,26 +414,26 @@ proc validate_ElasticPoolsListMetricDefinitions_593977(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593979 = path.getOrDefault("resourceGroupName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_568212 = path.getOrDefault("resourceGroupName")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "resourceGroupName", valid_593979
-  var valid_593980 = path.getOrDefault("serverName")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_568212 != nil:
+    section.add "resourceGroupName", valid_568212
+  var valid_568213 = path.getOrDefault("serverName")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "serverName", valid_593980
-  var valid_593981 = path.getOrDefault("elasticPoolName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_568213 != nil:
+    section.add "serverName", valid_568213
+  var valid_568214 = path.getOrDefault("elasticPoolName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "elasticPoolName", valid_593981
-  var valid_593982 = path.getOrDefault("subscriptionId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568214 != nil:
+    section.add "elasticPoolName", valid_568214
+  var valid_568215 = path.getOrDefault("subscriptionId")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "subscriptionId", valid_593982
+  if valid_568215 != nil:
+    section.add "subscriptionId", valid_568215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -441,11 +441,11 @@ proc validate_ElasticPoolsListMetricDefinitions_593977(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = query.getOrDefault("api-version")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_568216 != nil:
+    section.add "api-version", valid_568216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -454,21 +454,21 @@ proc validate_ElasticPoolsListMetricDefinitions_593977(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_ElasticPoolsListMetricDefinitions_593976;
+proc call*(call_568217: Call_ElasticPoolsListMetricDefinitions_568209;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns elastic pool metric definitions.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_568217.validator(path, query, header, formData, body)
+  let scheme = call_568217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
+                         call_568217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_568217, url, valid)
 
-proc call*(call_593985: Call_ElasticPoolsListMetricDefinitions_593976;
+proc call*(call_568218: Call_ElasticPoolsListMetricDefinitions_568209;
           resourceGroupName: string; apiVersion: string; serverName: string;
           elasticPoolName: string; subscriptionId: string): Recallable =
   ## elasticPoolsListMetricDefinitions
@@ -483,23 +483,23 @@ proc call*(call_593985: Call_ElasticPoolsListMetricDefinitions_593976;
   ##                  : The name of the elastic pool.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  add(path_593986, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "serverName", newJString(serverName))
-  add(path_593986, "elasticPoolName", newJString(elasticPoolName))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
-  result = call_593985.call(path_593986, query_593987, nil, nil, nil)
+  var path_568219 = newJObject()
+  var query_568220 = newJObject()
+  add(path_568219, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568220, "api-version", newJString(apiVersion))
+  add(path_568219, "serverName", newJString(serverName))
+  add(path_568219, "elasticPoolName", newJString(elasticPoolName))
+  add(path_568219, "subscriptionId", newJString(subscriptionId))
+  result = call_568218.call(path_568219, query_568220, nil, nil, nil)
 
-var elasticPoolsListMetricDefinitions* = Call_ElasticPoolsListMetricDefinitions_593976(
+var elasticPoolsListMetricDefinitions* = Call_ElasticPoolsListMetricDefinitions_568209(
     name: "elasticPoolsListMetricDefinitions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/elasticPools/{elasticPoolName}/metricDefinitions",
-    validator: validate_ElasticPoolsListMetricDefinitions_593977, base: "",
-    url: url_ElasticPoolsListMetricDefinitions_593978, schemes: {Scheme.Https})
+    validator: validate_ElasticPoolsListMetricDefinitions_568210, base: "",
+    url: url_ElasticPoolsListMetricDefinitions_568211, schemes: {Scheme.Https})
 type
-  Call_ElasticPoolsListMetrics_593988 = ref object of OpenApiRestCall_593425
-proc url_ElasticPoolsListMetrics_593990(protocol: Scheme; host: string; base: string;
+  Call_ElasticPoolsListMetrics_568221 = ref object of OpenApiRestCall_567658
+proc url_ElasticPoolsListMetrics_568223(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -526,7 +526,7 @@ proc url_ElasticPoolsListMetrics_593990(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ElasticPoolsListMetrics_593989(path: JsonNode; query: JsonNode;
+proc validate_ElasticPoolsListMetrics_568222(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns elastic pool  metrics.
   ## 
@@ -544,26 +544,26 @@ proc validate_ElasticPoolsListMetrics_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593991 = path.getOrDefault("resourceGroupName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_568224 = path.getOrDefault("resourceGroupName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "resourceGroupName", valid_593991
-  var valid_593992 = path.getOrDefault("serverName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_568224 != nil:
+    section.add "resourceGroupName", valid_568224
+  var valid_568225 = path.getOrDefault("serverName")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "serverName", valid_593992
-  var valid_593993 = path.getOrDefault("elasticPoolName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "serverName", valid_568225
+  var valid_568226 = path.getOrDefault("elasticPoolName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "elasticPoolName", valid_593993
-  var valid_593994 = path.getOrDefault("subscriptionId")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "elasticPoolName", valid_568226
+  var valid_568227 = path.getOrDefault("subscriptionId")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "subscriptionId", valid_593994
+  if valid_568227 != nil:
+    section.add "subscriptionId", valid_568227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -573,16 +573,16 @@ proc validate_ElasticPoolsListMetrics_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593995 = query.getOrDefault("api-version")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_568228 = query.getOrDefault("api-version")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "api-version", valid_593995
-  var valid_593996 = query.getOrDefault("$filter")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_568228 != nil:
+    section.add "api-version", valid_568228
+  var valid_568229 = query.getOrDefault("$filter")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "$filter", valid_593996
+  if valid_568229 != nil:
+    section.add "$filter", valid_568229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -591,20 +591,20 @@ proc validate_ElasticPoolsListMetrics_593989(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_ElasticPoolsListMetrics_593988; path: JsonNode;
+proc call*(call_568230: Call_ElasticPoolsListMetrics_568221; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns elastic pool  metrics.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_ElasticPoolsListMetrics_593988;
+proc call*(call_568231: Call_ElasticPoolsListMetrics_568221;
           resourceGroupName: string; apiVersion: string; serverName: string;
           elasticPoolName: string; subscriptionId: string; Filter: string): Recallable =
   ## elasticPoolsListMetrics
@@ -621,21 +621,21 @@ proc call*(call_593998: Call_ElasticPoolsListMetrics_593988;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   Filter: string (required)
   ##         : An OData filter expression that describes a subset of metrics to return.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  add(path_593999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "serverName", newJString(serverName))
-  add(path_593999, "elasticPoolName", newJString(elasticPoolName))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
-  add(query_594000, "$filter", newJString(Filter))
-  result = call_593998.call(path_593999, query_594000, nil, nil, nil)
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "serverName", newJString(serverName))
+  add(path_568232, "elasticPoolName", newJString(elasticPoolName))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
+  add(query_568233, "$filter", newJString(Filter))
+  result = call_568231.call(path_568232, query_568233, nil, nil, nil)
 
-var elasticPoolsListMetrics* = Call_ElasticPoolsListMetrics_593988(
+var elasticPoolsListMetrics* = Call_ElasticPoolsListMetrics_568221(
     name: "elasticPoolsListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/elasticPools/{elasticPoolName}/metrics",
-    validator: validate_ElasticPoolsListMetrics_593989, base: "",
-    url: url_ElasticPoolsListMetrics_593990, schemes: {Scheme.Https})
+    validator: validate_ElasticPoolsListMetrics_568222, base: "",
+    url: url_ElasticPoolsListMetrics_568223, schemes: {Scheme.Https})
 export
   rest
 

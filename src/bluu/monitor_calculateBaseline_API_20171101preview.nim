@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: MonitorManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "monitor-calculateBaseline_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_MetricBaselineCalculateBaseline_593647 = ref object of OpenApiRestCall_593425
-proc url_MetricBaselineCalculateBaseline_593649(protocol: Scheme; host: string;
+  Call_MetricBaselineCalculateBaseline_567880 = ref object of OpenApiRestCall_567658
+proc url_MetricBaselineCalculateBaseline_567882(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_MetricBaselineCalculateBaseline_593649(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricBaselineCalculateBaseline_593648(path: JsonNode;
+proc validate_MetricBaselineCalculateBaseline_567881(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## **Lists the baseline values for a resource**.
   ## 
@@ -135,11 +135,11 @@ proc validate_MetricBaselineCalculateBaseline_593648(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceUri` field"
-  var valid_593839 = path.getOrDefault("resourceUri")
-  valid_593839 = validateParameter(valid_593839, JString, required = true,
+  var valid_568072 = path.getOrDefault("resourceUri")
+  valid_568072 = validateParameter(valid_568072, JString, required = true,
                                  default = nil)
-  if valid_593839 != nil:
-    section.add "resourceUri", valid_593839
+  if valid_568072 != nil:
+    section.add "resourceUri", valid_568072
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -147,11 +147,11 @@ proc validate_MetricBaselineCalculateBaseline_593648(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593840 = query.getOrDefault("api-version")
-  valid_593840 = validateParameter(valid_593840, JString, required = true,
+  var valid_568073 = query.getOrDefault("api-version")
+  valid_568073 = validateParameter(valid_568073, JString, required = true,
                                  default = nil)
-  if valid_593840 != nil:
-    section.add "api-version", valid_593840
+  if valid_568073 != nil:
+    section.add "api-version", valid_568073
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -165,21 +165,21 @@ proc validate_MetricBaselineCalculateBaseline_593648(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593864: Call_MetricBaselineCalculateBaseline_593647;
+proc call*(call_568097: Call_MetricBaselineCalculateBaseline_567880;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## **Lists the baseline values for a resource**.
   ## 
-  let valid = call_593864.validator(path, query, header, formData, body)
-  let scheme = call_593864.pickScheme
+  let valid = call_568097.validator(path, query, header, formData, body)
+  let scheme = call_568097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593864.url(scheme.get, call_593864.host, call_593864.base,
-                         call_593864.route, valid.getOrDefault("path"),
+  let url = call_568097.url(scheme.get, call_568097.host, call_568097.base,
+                         call_568097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593864, url, valid)
+  result = hook(call_568097, url, valid)
 
-proc call*(call_593935: Call_MetricBaselineCalculateBaseline_593647;
+proc call*(call_568168: Call_MetricBaselineCalculateBaseline_567880;
           apiVersion: string; resourceUri: string; TimeSeriesInformation: JsonNode): Recallable =
   ## metricBaselineCalculateBaseline
   ## **Lists the baseline values for a resource**.
@@ -191,21 +191,21 @@ proc call*(call_593935: Call_MetricBaselineCalculateBaseline_593647;
   ## subscriptions/b368ca2f-e298-46b7-b0ab-012281956afa/resourceGroups/vms/providers/Microsoft.Compute/virtualMachines/vm1
   ##   TimeSeriesInformation: JObject (required)
   ##                        : Information that need to be specified to calculate a baseline on a time series.
-  var path_593936 = newJObject()
-  var query_593938 = newJObject()
-  var body_593939 = newJObject()
-  add(query_593938, "api-version", newJString(apiVersion))
-  add(path_593936, "resourceUri", newJString(resourceUri))
+  var path_568169 = newJObject()
+  var query_568171 = newJObject()
+  var body_568172 = newJObject()
+  add(query_568171, "api-version", newJString(apiVersion))
+  add(path_568169, "resourceUri", newJString(resourceUri))
   if TimeSeriesInformation != nil:
-    body_593939 = TimeSeriesInformation
-  result = call_593935.call(path_593936, query_593938, nil, nil, body_593939)
+    body_568172 = TimeSeriesInformation
+  result = call_568168.call(path_568169, query_568171, nil, nil, body_568172)
 
-var metricBaselineCalculateBaseline* = Call_MetricBaselineCalculateBaseline_593647(
+var metricBaselineCalculateBaseline* = Call_MetricBaselineCalculateBaseline_567880(
     name: "metricBaselineCalculateBaseline", meth: HttpMethod.HttpPost,
     host: "management.azure.com",
     route: "/{resourceUri}/providers/microsoft.insights/calculatebaseline",
-    validator: validate_MetricBaselineCalculateBaseline_593648, base: "",
-    url: url_MetricBaselineCalculateBaseline_593649, schemes: {Scheme.Https})
+    validator: validate_MetricBaselineCalculateBaseline_567881, base: "",
+    url: url_MetricBaselineCalculateBaseline_567882, schemes: {Scheme.Https})
 export
   rest
 

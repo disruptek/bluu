@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: BlockchainManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "blockchain"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_OperationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
+proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists the available operations of Microsoft.Blockchain resource provider.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593821 = query.getOrDefault("api-version")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568054 = query.getOrDefault("api-version")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_593821 != nil:
-    section.add "api-version", valid_593821
+  if valid_568054 != nil:
+    section.add "api-version", valid_568054
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,37 +139,37 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593844: Call_OperationsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568077: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the available operations of Microsoft.Blockchain resource provider.
   ## 
-  let valid = call_593844.validator(path, query, header, formData, body)
-  let scheme = call_593844.pickScheme
+  let valid = call_568077.validator(path, query, header, formData, body)
+  let scheme = call_568077.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593844.url(scheme.get, call_593844.host, call_593844.base,
-                         call_593844.route, valid.getOrDefault("path"),
+  let url = call_568077.url(scheme.get, call_568077.host, call_568077.base,
+                         call_568077.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593844, url, valid)
+  result = hook(call_568077, url, valid)
 
-proc call*(call_593915: Call_OperationsList_593647;
+proc call*(call_568148: Call_OperationsList_567880;
           apiVersion: string = "2018-06-01-preview"): Recallable =
   ## operationsList
   ## Lists the available operations of Microsoft.Blockchain resource provider.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var query_593916 = newJObject()
-  add(query_593916, "api-version", newJString(apiVersion))
-  result = call_593915.call(nil, query_593916, nil, nil, nil)
+  var query_568149 = newJObject()
+  add(query_568149, "api-version", newJString(apiVersion))
+  result = call_568148.call(nil, query_568149, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593647(name: "operationsList",
+var operationsList* = Call_OperationsList_567880(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Blockchain/operations",
-    validator: validate_OperationsList_593648, base: "", url: url_OperationsList_593649,
+    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
     schemes: {Scheme.Https})
 type
-  Call_BlockchainMembersListAll_593956 = ref object of OpenApiRestCall_593425
-proc url_BlockchainMembersListAll_593958(protocol: Scheme; host: string;
+  Call_BlockchainMembersListAll_568189 = ref object of OpenApiRestCall_567658
+proc url_BlockchainMembersListAll_568191(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -187,7 +187,7 @@ proc url_BlockchainMembersListAll_593958(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlockchainMembersListAll_593957(path: JsonNode; query: JsonNode;
+proc validate_BlockchainMembersListAll_568190(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the blockchain members for a subscription.
   ## 
@@ -199,11 +199,11 @@ proc validate_BlockchainMembersListAll_593957(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593973 = path.getOrDefault("subscriptionId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568206 = path.getOrDefault("subscriptionId")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "subscriptionId", valid_593973
+  if valid_568206 != nil:
+    section.add "subscriptionId", valid_568206
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -211,11 +211,11 @@ proc validate_BlockchainMembersListAll_593957(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593974 = query.getOrDefault("api-version")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_568207 = query.getOrDefault("api-version")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_593974 != nil:
-    section.add "api-version", valid_593974
+  if valid_568207 != nil:
+    section.add "api-version", valid_568207
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -224,20 +224,20 @@ proc validate_BlockchainMembersListAll_593957(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593975: Call_BlockchainMembersListAll_593956; path: JsonNode;
+proc call*(call_568208: Call_BlockchainMembersListAll_568189; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the blockchain members for a subscription.
   ## 
-  let valid = call_593975.validator(path, query, header, formData, body)
-  let scheme = call_593975.pickScheme
+  let valid = call_568208.validator(path, query, header, formData, body)
+  let scheme = call_568208.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593975.url(scheme.get, call_593975.host, call_593975.base,
-                         call_593975.route, valid.getOrDefault("path"),
+  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
+                         call_568208.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593975, url, valid)
+  result = hook(call_568208, url, valid)
 
-proc call*(call_593976: Call_BlockchainMembersListAll_593956;
+proc call*(call_568209: Call_BlockchainMembersListAll_568189;
           subscriptionId: string; apiVersion: string = "2018-06-01-preview"): Recallable =
   ## blockchainMembersListAll
   ## Lists the blockchain members for a subscription.
@@ -245,20 +245,20 @@ proc call*(call_593976: Call_BlockchainMembersListAll_593956;
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
-  var path_593977 = newJObject()
-  var query_593978 = newJObject()
-  add(query_593978, "api-version", newJString(apiVersion))
-  add(path_593977, "subscriptionId", newJString(subscriptionId))
-  result = call_593976.call(path_593977, query_593978, nil, nil, nil)
+  var path_568210 = newJObject()
+  var query_568211 = newJObject()
+  add(query_568211, "api-version", newJString(apiVersion))
+  add(path_568210, "subscriptionId", newJString(subscriptionId))
+  result = call_568209.call(path_568210, query_568211, nil, nil, nil)
 
-var blockchainMembersListAll* = Call_BlockchainMembersListAll_593956(
+var blockchainMembersListAll* = Call_BlockchainMembersListAll_568189(
     name: "blockchainMembersListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Blockchain/blockchainMembers",
-    validator: validate_BlockchainMembersListAll_593957, base: "",
-    url: url_BlockchainMembersListAll_593958, schemes: {Scheme.Https})
+    validator: validate_BlockchainMembersListAll_568190, base: "",
+    url: url_BlockchainMembersListAll_568191, schemes: {Scheme.Https})
 type
-  Call_BlockchainMemberOperationResultsGet_593979 = ref object of OpenApiRestCall_593425
-proc url_BlockchainMemberOperationResultsGet_593981(protocol: Scheme; host: string;
+  Call_BlockchainMemberOperationResultsGet_568212 = ref object of OpenApiRestCall_567658
+proc url_BlockchainMemberOperationResultsGet_568214(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -279,7 +279,7 @@ proc url_BlockchainMemberOperationResultsGet_593981(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlockchainMemberOperationResultsGet_593980(path: JsonNode;
+proc validate_BlockchainMemberOperationResultsGet_568213(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get Async operation result.
   ## 
@@ -295,21 +295,21 @@ proc validate_BlockchainMemberOperationResultsGet_593980(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593982 = path.getOrDefault("subscriptionId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568215 = path.getOrDefault("subscriptionId")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "subscriptionId", valid_593982
-  var valid_593983 = path.getOrDefault("locationName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_568215 != nil:
+    section.add "subscriptionId", valid_568215
+  var valid_568216 = path.getOrDefault("locationName")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "locationName", valid_593983
-  var valid_593984 = path.getOrDefault("operationId")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  if valid_568216 != nil:
+    section.add "locationName", valid_568216
+  var valid_568217 = path.getOrDefault("operationId")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "operationId", valid_593984
+  if valid_568217 != nil:
+    section.add "operationId", valid_568217
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -317,11 +317,11 @@ proc validate_BlockchainMemberOperationResultsGet_593980(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568218 = query.getOrDefault("api-version")
+  valid_568218 = validateParameter(valid_568218, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_568218 != nil:
+    section.add "api-version", valid_568218
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -330,21 +330,21 @@ proc validate_BlockchainMemberOperationResultsGet_593980(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593986: Call_BlockchainMemberOperationResultsGet_593979;
+proc call*(call_568219: Call_BlockchainMemberOperationResultsGet_568212;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get Async operation result.
   ## 
-  let valid = call_593986.validator(path, query, header, formData, body)
-  let scheme = call_593986.pickScheme
+  let valid = call_568219.validator(path, query, header, formData, body)
+  let scheme = call_568219.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593986.url(scheme.get, call_593986.host, call_593986.base,
-                         call_593986.route, valid.getOrDefault("path"),
+  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
+                         call_568219.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593986, url, valid)
+  result = hook(call_568219, url, valid)
 
-proc call*(call_593987: Call_BlockchainMemberOperationResultsGet_593979;
+proc call*(call_568220: Call_BlockchainMemberOperationResultsGet_568212;
           subscriptionId: string; locationName: string; operationId: string;
           apiVersion: string = "2018-06-01-preview"): Recallable =
   ## blockchainMemberOperationResultsGet
@@ -357,22 +357,22 @@ proc call*(call_593987: Call_BlockchainMemberOperationResultsGet_593979;
   ##               : Location name.
   ##   operationId: string (required)
   ##              : Operation Id.
-  var path_593988 = newJObject()
-  var query_593989 = newJObject()
-  add(query_593989, "api-version", newJString(apiVersion))
-  add(path_593988, "subscriptionId", newJString(subscriptionId))
-  add(path_593988, "locationName", newJString(locationName))
-  add(path_593988, "operationId", newJString(operationId))
-  result = call_593987.call(path_593988, query_593989, nil, nil, nil)
+  var path_568221 = newJObject()
+  var query_568222 = newJObject()
+  add(query_568222, "api-version", newJString(apiVersion))
+  add(path_568221, "subscriptionId", newJString(subscriptionId))
+  add(path_568221, "locationName", newJString(locationName))
+  add(path_568221, "operationId", newJString(operationId))
+  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
 
-var blockchainMemberOperationResultsGet* = Call_BlockchainMemberOperationResultsGet_593979(
+var blockchainMemberOperationResultsGet* = Call_BlockchainMemberOperationResultsGet_568212(
     name: "blockchainMemberOperationResultsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Blockchain/locations/{locationName}/blockchainMemberOperationResults/{operationId}",
-    validator: validate_BlockchainMemberOperationResultsGet_593980, base: "",
-    url: url_BlockchainMemberOperationResultsGet_593981, schemes: {Scheme.Https})
+    validator: validate_BlockchainMemberOperationResultsGet_568213, base: "",
+    url: url_BlockchainMemberOperationResultsGet_568214, schemes: {Scheme.Https})
 type
-  Call_LocationsCheckNameAvailability_593990 = ref object of OpenApiRestCall_593425
-proc url_LocationsCheckNameAvailability_593992(protocol: Scheme; host: string;
+  Call_LocationsCheckNameAvailability_568223 = ref object of OpenApiRestCall_567658
+proc url_LocationsCheckNameAvailability_568225(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -391,7 +391,7 @@ proc url_LocationsCheckNameAvailability_593992(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LocationsCheckNameAvailability_593991(path: JsonNode;
+proc validate_LocationsCheckNameAvailability_568224(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## To check whether a resource name is available.
   ## 
@@ -405,16 +405,16 @@ proc validate_LocationsCheckNameAvailability_593991(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593993 = path.getOrDefault("subscriptionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568226 = path.getOrDefault("subscriptionId")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "subscriptionId", valid_593993
-  var valid_593994 = path.getOrDefault("locationName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "subscriptionId", valid_568226
+  var valid_568227 = path.getOrDefault("locationName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "locationName", valid_593994
+  if valid_568227 != nil:
+    section.add "locationName", valid_568227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -422,11 +422,11 @@ proc validate_LocationsCheckNameAvailability_593991(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593995 = query.getOrDefault("api-version")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_568228 = query.getOrDefault("api-version")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_593995 != nil:
-    section.add "api-version", valid_593995
+  if valid_568228 != nil:
+    section.add "api-version", valid_568228
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -439,20 +439,20 @@ proc validate_LocationsCheckNameAvailability_593991(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_LocationsCheckNameAvailability_593990; path: JsonNode;
+proc call*(call_568230: Call_LocationsCheckNameAvailability_568223; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## To check whether a resource name is available.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_LocationsCheckNameAvailability_593990;
+proc call*(call_568231: Call_LocationsCheckNameAvailability_568223;
           subscriptionId: string; locationName: string;
           apiVersion: string = "2018-06-01-preview";
           nameAvailabilityRequest: JsonNode = nil): Recallable =
@@ -466,24 +466,24 @@ proc call*(call_593998: Call_LocationsCheckNameAvailability_593990;
   ##               : Location Name.
   ##   nameAvailabilityRequest: JObject
   ##                          : Name availability request payload.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  var body_594001 = newJObject()
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
-  add(path_593999, "locationName", newJString(locationName))
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  var body_568234 = newJObject()
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
+  add(path_568232, "locationName", newJString(locationName))
   if nameAvailabilityRequest != nil:
-    body_594001 = nameAvailabilityRequest
-  result = call_593998.call(path_593999, query_594000, nil, nil, body_594001)
+    body_568234 = nameAvailabilityRequest
+  result = call_568231.call(path_568232, query_568233, nil, nil, body_568234)
 
-var locationsCheckNameAvailability* = Call_LocationsCheckNameAvailability_593990(
+var locationsCheckNameAvailability* = Call_LocationsCheckNameAvailability_568223(
     name: "locationsCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Blockchain/locations/{locationName}/checkNameAvailability",
-    validator: validate_LocationsCheckNameAvailability_593991, base: "",
-    url: url_LocationsCheckNameAvailability_593992, schemes: {Scheme.Https})
+    validator: validate_LocationsCheckNameAvailability_568224, base: "",
+    url: url_LocationsCheckNameAvailability_568225, schemes: {Scheme.Https})
 type
-  Call_LocationsListConsortiums_594002 = ref object of OpenApiRestCall_593425
-proc url_LocationsListConsortiums_594004(protocol: Scheme; host: string;
+  Call_LocationsListConsortiums_568235 = ref object of OpenApiRestCall_567658
+proc url_LocationsListConsortiums_568237(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -503,7 +503,7 @@ proc url_LocationsListConsortiums_594004(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LocationsListConsortiums_594003(path: JsonNode; query: JsonNode;
+proc validate_LocationsListConsortiums_568236(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the available consortiums for a subscription.
   ## 
@@ -517,16 +517,16 @@ proc validate_LocationsListConsortiums_594003(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594005 = path.getOrDefault("subscriptionId")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_568238 = path.getOrDefault("subscriptionId")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "subscriptionId", valid_594005
-  var valid_594006 = path.getOrDefault("locationName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_568238 != nil:
+    section.add "subscriptionId", valid_568238
+  var valid_568239 = path.getOrDefault("locationName")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "locationName", valid_594006
+  if valid_568239 != nil:
+    section.add "locationName", valid_568239
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -534,11 +534,11 @@ proc validate_LocationsListConsortiums_594003(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594007 = query.getOrDefault("api-version")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  var valid_568240 = query.getOrDefault("api-version")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594007 != nil:
-    section.add "api-version", valid_594007
+  if valid_568240 != nil:
+    section.add "api-version", valid_568240
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -547,20 +547,20 @@ proc validate_LocationsListConsortiums_594003(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594008: Call_LocationsListConsortiums_594002; path: JsonNode;
+proc call*(call_568241: Call_LocationsListConsortiums_568235; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the available consortiums for a subscription.
   ## 
-  let valid = call_594008.validator(path, query, header, formData, body)
-  let scheme = call_594008.pickScheme
+  let valid = call_568241.validator(path, query, header, formData, body)
+  let scheme = call_568241.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594008.url(scheme.get, call_594008.host, call_594008.base,
-                         call_594008.route, valid.getOrDefault("path"),
+  let url = call_568241.url(scheme.get, call_568241.host, call_568241.base,
+                         call_568241.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594008, url, valid)
+  result = hook(call_568241, url, valid)
 
-proc call*(call_594009: Call_LocationsListConsortiums_594002;
+proc call*(call_568242: Call_LocationsListConsortiums_568235;
           subscriptionId: string; locationName: string;
           apiVersion: string = "2018-06-01-preview"): Recallable =
   ## locationsListConsortiums
@@ -571,21 +571,21 @@ proc call*(call_594009: Call_LocationsListConsortiums_594002;
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
   ##   locationName: string (required)
   ##               : Location Name.
-  var path_594010 = newJObject()
-  var query_594011 = newJObject()
-  add(query_594011, "api-version", newJString(apiVersion))
-  add(path_594010, "subscriptionId", newJString(subscriptionId))
-  add(path_594010, "locationName", newJString(locationName))
-  result = call_594009.call(path_594010, query_594011, nil, nil, nil)
+  var path_568243 = newJObject()
+  var query_568244 = newJObject()
+  add(query_568244, "api-version", newJString(apiVersion))
+  add(path_568243, "subscriptionId", newJString(subscriptionId))
+  add(path_568243, "locationName", newJString(locationName))
+  result = call_568242.call(path_568243, query_568244, nil, nil, nil)
 
-var locationsListConsortiums* = Call_LocationsListConsortiums_594002(
+var locationsListConsortiums* = Call_LocationsListConsortiums_568235(
     name: "locationsListConsortiums", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Blockchain/locations/{locationName}/listConsortiums",
-    validator: validate_LocationsListConsortiums_594003, base: "",
-    url: url_LocationsListConsortiums_594004, schemes: {Scheme.Https})
+    validator: validate_LocationsListConsortiums_568236, base: "",
+    url: url_LocationsListConsortiums_568237, schemes: {Scheme.Https})
 type
-  Call_SkusList_594012 = ref object of OpenApiRestCall_593425
-proc url_SkusList_594014(protocol: Scheme; host: string; base: string; route: string;
+  Call_SkusList_568245 = ref object of OpenApiRestCall_567658
+proc url_SkusList_568247(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -601,7 +601,7 @@ proc url_SkusList_594014(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SkusList_594013(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SkusList_568246(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Skus of the resource type.
   ## 
@@ -613,11 +613,11 @@ proc validate_SkusList_594013(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594015 = path.getOrDefault("subscriptionId")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_568248 = path.getOrDefault("subscriptionId")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "subscriptionId", valid_594015
+  if valid_568248 != nil:
+    section.add "subscriptionId", valid_568248
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -625,11 +625,11 @@ proc validate_SkusList_594013(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594016 = query.getOrDefault("api-version")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_568249 = query.getOrDefault("api-version")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594016 != nil:
-    section.add "api-version", valid_594016
+  if valid_568249 != nil:
+    section.add "api-version", valid_568249
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -638,20 +638,20 @@ proc validate_SkusList_594013(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594017: Call_SkusList_594012; path: JsonNode; query: JsonNode;
+proc call*(call_568250: Call_SkusList_568245; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the Skus of the resource type.
   ## 
-  let valid = call_594017.validator(path, query, header, formData, body)
-  let scheme = call_594017.pickScheme
+  let valid = call_568250.validator(path, query, header, formData, body)
+  let scheme = call_568250.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594017.url(scheme.get, call_594017.host, call_594017.base,
-                         call_594017.route, valid.getOrDefault("path"),
+  let url = call_568250.url(scheme.get, call_568250.host, call_568250.base,
+                         call_568250.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594017, url, valid)
+  result = hook(call_568250, url, valid)
 
-proc call*(call_594018: Call_SkusList_594012; subscriptionId: string;
+proc call*(call_568251: Call_SkusList_568245; subscriptionId: string;
           apiVersion: string = "2018-06-01-preview"): Recallable =
   ## skusList
   ## Lists the Skus of the resource type.
@@ -659,20 +659,20 @@ proc call*(call_594018: Call_SkusList_594012; subscriptionId: string;
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
-  var path_594019 = newJObject()
-  var query_594020 = newJObject()
-  add(query_594020, "api-version", newJString(apiVersion))
-  add(path_594019, "subscriptionId", newJString(subscriptionId))
-  result = call_594018.call(path_594019, query_594020, nil, nil, nil)
+  var path_568252 = newJObject()
+  var query_568253 = newJObject()
+  add(query_568253, "api-version", newJString(apiVersion))
+  add(path_568252, "subscriptionId", newJString(subscriptionId))
+  result = call_568251.call(path_568252, query_568253, nil, nil, nil)
 
-var skusList* = Call_SkusList_594012(name: "skusList", meth: HttpMethod.HttpGet,
+var skusList* = Call_SkusList_568245(name: "skusList", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Blockchain/skus",
-                                  validator: validate_SkusList_594013, base: "",
-                                  url: url_SkusList_594014,
+                                  validator: validate_SkusList_568246, base: "",
+                                  url: url_SkusList_568247,
                                   schemes: {Scheme.Https})
 type
-  Call_BlockchainMembersList_594021 = ref object of OpenApiRestCall_593425
-proc url_BlockchainMembersList_594023(protocol: Scheme; host: string; base: string;
+  Call_BlockchainMembersList_568254 = ref object of OpenApiRestCall_567658
+proc url_BlockchainMembersList_568256(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -693,7 +693,7 @@ proc url_BlockchainMembersList_594023(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlockchainMembersList_594022(path: JsonNode; query: JsonNode;
+proc validate_BlockchainMembersList_568255(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the blockchain members for a resource group.
   ## 
@@ -707,16 +707,16 @@ proc validate_BlockchainMembersList_594022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594024 = path.getOrDefault("resourceGroupName")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_568257 = path.getOrDefault("resourceGroupName")
+  valid_568257 = validateParameter(valid_568257, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "resourceGroupName", valid_594024
-  var valid_594025 = path.getOrDefault("subscriptionId")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  if valid_568257 != nil:
+    section.add "resourceGroupName", valid_568257
+  var valid_568258 = path.getOrDefault("subscriptionId")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "subscriptionId", valid_594025
+  if valid_568258 != nil:
+    section.add "subscriptionId", valid_568258
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -724,11 +724,11 @@ proc validate_BlockchainMembersList_594022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594026 = query.getOrDefault("api-version")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_568259 = query.getOrDefault("api-version")
+  valid_568259 = validateParameter(valid_568259, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594026 != nil:
-    section.add "api-version", valid_594026
+  if valid_568259 != nil:
+    section.add "api-version", valid_568259
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -737,20 +737,20 @@ proc validate_BlockchainMembersList_594022(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594027: Call_BlockchainMembersList_594021; path: JsonNode;
+proc call*(call_568260: Call_BlockchainMembersList_568254; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the blockchain members for a resource group.
   ## 
-  let valid = call_594027.validator(path, query, header, formData, body)
-  let scheme = call_594027.pickScheme
+  let valid = call_568260.validator(path, query, header, formData, body)
+  let scheme = call_568260.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594027.url(scheme.get, call_594027.host, call_594027.base,
-                         call_594027.route, valid.getOrDefault("path"),
+  let url = call_568260.url(scheme.get, call_568260.host, call_568260.base,
+                         call_568260.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594027, url, valid)
+  result = hook(call_568260, url, valid)
 
-proc call*(call_594028: Call_BlockchainMembersList_594021;
+proc call*(call_568261: Call_BlockchainMembersList_568254;
           resourceGroupName: string; subscriptionId: string;
           apiVersion: string = "2018-06-01-preview"): Recallable =
   ## blockchainMembersList
@@ -761,21 +761,21 @@ proc call*(call_594028: Call_BlockchainMembersList_594021;
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
-  var path_594029 = newJObject()
-  var query_594030 = newJObject()
-  add(path_594029, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594030, "api-version", newJString(apiVersion))
-  add(path_594029, "subscriptionId", newJString(subscriptionId))
-  result = call_594028.call(path_594029, query_594030, nil, nil, nil)
+  var path_568262 = newJObject()
+  var query_568263 = newJObject()
+  add(path_568262, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568263, "api-version", newJString(apiVersion))
+  add(path_568262, "subscriptionId", newJString(subscriptionId))
+  result = call_568261.call(path_568262, query_568263, nil, nil, nil)
 
-var blockchainMembersList* = Call_BlockchainMembersList_594021(
+var blockchainMembersList* = Call_BlockchainMembersList_568254(
     name: "blockchainMembersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers",
-    validator: validate_BlockchainMembersList_594022, base: "",
-    url: url_BlockchainMembersList_594023, schemes: {Scheme.Https})
+    validator: validate_BlockchainMembersList_568255, base: "",
+    url: url_BlockchainMembersList_568256, schemes: {Scheme.Https})
 type
-  Call_BlockchainMembersCreate_594042 = ref object of OpenApiRestCall_593425
-proc url_BlockchainMembersCreate_594044(protocol: Scheme; host: string; base: string;
+  Call_BlockchainMembersCreate_568275 = ref object of OpenApiRestCall_567658
+proc url_BlockchainMembersCreate_568277(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -800,7 +800,7 @@ proc url_BlockchainMembersCreate_594044(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlockchainMembersCreate_594043(path: JsonNode; query: JsonNode;
+proc validate_BlockchainMembersCreate_568276(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a blockchain member.
   ## 
@@ -816,21 +816,21 @@ proc validate_BlockchainMembersCreate_594043(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594045 = path.getOrDefault("resourceGroupName")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  var valid_568278 = path.getOrDefault("resourceGroupName")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "resourceGroupName", valid_594045
-  var valid_594046 = path.getOrDefault("blockchainMemberName")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  if valid_568278 != nil:
+    section.add "resourceGroupName", valid_568278
+  var valid_568279 = path.getOrDefault("blockchainMemberName")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "blockchainMemberName", valid_594046
-  var valid_594047 = path.getOrDefault("subscriptionId")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  if valid_568279 != nil:
+    section.add "blockchainMemberName", valid_568279
+  var valid_568280 = path.getOrDefault("subscriptionId")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "subscriptionId", valid_594047
+  if valid_568280 != nil:
+    section.add "subscriptionId", valid_568280
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -838,11 +838,11 @@ proc validate_BlockchainMembersCreate_594043(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594048 = query.getOrDefault("api-version")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  var valid_568281 = query.getOrDefault("api-version")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594048 != nil:
-    section.add "api-version", valid_594048
+  if valid_568281 != nil:
+    section.add "api-version", valid_568281
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -855,20 +855,20 @@ proc validate_BlockchainMembersCreate_594043(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594050: Call_BlockchainMembersCreate_594042; path: JsonNode;
+proc call*(call_568283: Call_BlockchainMembersCreate_568275; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a blockchain member.
   ## 
-  let valid = call_594050.validator(path, query, header, formData, body)
-  let scheme = call_594050.pickScheme
+  let valid = call_568283.validator(path, query, header, formData, body)
+  let scheme = call_568283.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594050.url(scheme.get, call_594050.host, call_594050.base,
-                         call_594050.route, valid.getOrDefault("path"),
+  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
+                         call_568283.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594050, url, valid)
+  result = hook(call_568283, url, valid)
 
-proc call*(call_594051: Call_BlockchainMembersCreate_594042;
+proc call*(call_568284: Call_BlockchainMembersCreate_568275;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; apiVersion: string = "2018-06-01-preview";
           blockchainMember: JsonNode = nil): Recallable =
@@ -884,25 +884,25 @@ proc call*(call_594051: Call_BlockchainMembersCreate_594042;
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
   ##   blockchainMember: JObject
   ##                   : Payload to create a blockchain member.
-  var path_594052 = newJObject()
-  var query_594053 = newJObject()
-  var body_594054 = newJObject()
-  add(path_594052, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594053, "api-version", newJString(apiVersion))
-  add(path_594052, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594052, "subscriptionId", newJString(subscriptionId))
+  var path_568285 = newJObject()
+  var query_568286 = newJObject()
+  var body_568287 = newJObject()
+  add(path_568285, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568286, "api-version", newJString(apiVersion))
+  add(path_568285, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568285, "subscriptionId", newJString(subscriptionId))
   if blockchainMember != nil:
-    body_594054 = blockchainMember
-  result = call_594051.call(path_594052, query_594053, nil, nil, body_594054)
+    body_568287 = blockchainMember
+  result = call_568284.call(path_568285, query_568286, nil, nil, body_568287)
 
-var blockchainMembersCreate* = Call_BlockchainMembersCreate_594042(
+var blockchainMembersCreate* = Call_BlockchainMembersCreate_568275(
     name: "blockchainMembersCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}",
-    validator: validate_BlockchainMembersCreate_594043, base: "",
-    url: url_BlockchainMembersCreate_594044, schemes: {Scheme.Https})
+    validator: validate_BlockchainMembersCreate_568276, base: "",
+    url: url_BlockchainMembersCreate_568277, schemes: {Scheme.Https})
 type
-  Call_BlockchainMembersGet_594031 = ref object of OpenApiRestCall_593425
-proc url_BlockchainMembersGet_594033(protocol: Scheme; host: string; base: string;
+  Call_BlockchainMembersGet_568264 = ref object of OpenApiRestCall_567658
+proc url_BlockchainMembersGet_568266(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -926,7 +926,7 @@ proc url_BlockchainMembersGet_594033(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlockchainMembersGet_594032(path: JsonNode; query: JsonNode;
+proc validate_BlockchainMembersGet_568265(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get details about a blockchain member.
   ## 
@@ -942,21 +942,21 @@ proc validate_BlockchainMembersGet_594032(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594034 = path.getOrDefault("resourceGroupName")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  var valid_568267 = path.getOrDefault("resourceGroupName")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "resourceGroupName", valid_594034
-  var valid_594035 = path.getOrDefault("blockchainMemberName")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  if valid_568267 != nil:
+    section.add "resourceGroupName", valid_568267
+  var valid_568268 = path.getOrDefault("blockchainMemberName")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "blockchainMemberName", valid_594035
-  var valid_594036 = path.getOrDefault("subscriptionId")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  if valid_568268 != nil:
+    section.add "blockchainMemberName", valid_568268
+  var valid_568269 = path.getOrDefault("subscriptionId")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "subscriptionId", valid_594036
+  if valid_568269 != nil:
+    section.add "subscriptionId", valid_568269
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -964,11 +964,11 @@ proc validate_BlockchainMembersGet_594032(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594037 = query.getOrDefault("api-version")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  var valid_568270 = query.getOrDefault("api-version")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594037 != nil:
-    section.add "api-version", valid_594037
+  if valid_568270 != nil:
+    section.add "api-version", valid_568270
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -977,20 +977,20 @@ proc validate_BlockchainMembersGet_594032(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594038: Call_BlockchainMembersGet_594031; path: JsonNode;
+proc call*(call_568271: Call_BlockchainMembersGet_568264; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get details about a blockchain member.
   ## 
-  let valid = call_594038.validator(path, query, header, formData, body)
-  let scheme = call_594038.pickScheme
+  let valid = call_568271.validator(path, query, header, formData, body)
+  let scheme = call_568271.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594038.url(scheme.get, call_594038.host, call_594038.base,
-                         call_594038.route, valid.getOrDefault("path"),
+  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
+                         call_568271.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594038, url, valid)
+  result = hook(call_568271, url, valid)
 
-proc call*(call_594039: Call_BlockchainMembersGet_594031;
+proc call*(call_568272: Call_BlockchainMembersGet_568264;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; apiVersion: string = "2018-06-01-preview"): Recallable =
   ## blockchainMembersGet
@@ -1003,22 +1003,22 @@ proc call*(call_594039: Call_BlockchainMembersGet_594031;
   ##                       : Blockchain member name.
   ##   subscriptionId: string (required)
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
-  var path_594040 = newJObject()
-  var query_594041 = newJObject()
-  add(path_594040, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594041, "api-version", newJString(apiVersion))
-  add(path_594040, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594040, "subscriptionId", newJString(subscriptionId))
-  result = call_594039.call(path_594040, query_594041, nil, nil, nil)
+  var path_568273 = newJObject()
+  var query_568274 = newJObject()
+  add(path_568273, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568274, "api-version", newJString(apiVersion))
+  add(path_568273, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568273, "subscriptionId", newJString(subscriptionId))
+  result = call_568272.call(path_568273, query_568274, nil, nil, nil)
 
-var blockchainMembersGet* = Call_BlockchainMembersGet_594031(
+var blockchainMembersGet* = Call_BlockchainMembersGet_568264(
     name: "blockchainMembersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}",
-    validator: validate_BlockchainMembersGet_594032, base: "",
-    url: url_BlockchainMembersGet_594033, schemes: {Scheme.Https})
+    validator: validate_BlockchainMembersGet_568265, base: "",
+    url: url_BlockchainMembersGet_568266, schemes: {Scheme.Https})
 type
-  Call_BlockchainMembersUpdate_594066 = ref object of OpenApiRestCall_593425
-proc url_BlockchainMembersUpdate_594068(protocol: Scheme; host: string; base: string;
+  Call_BlockchainMembersUpdate_568299 = ref object of OpenApiRestCall_567658
+proc url_BlockchainMembersUpdate_568301(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1043,7 +1043,7 @@ proc url_BlockchainMembersUpdate_594068(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlockchainMembersUpdate_594067(path: JsonNode; query: JsonNode;
+proc validate_BlockchainMembersUpdate_568300(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update a blockchain member.
   ## 
@@ -1059,21 +1059,21 @@ proc validate_BlockchainMembersUpdate_594067(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594069 = path.getOrDefault("resourceGroupName")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  var valid_568302 = path.getOrDefault("resourceGroupName")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "resourceGroupName", valid_594069
-  var valid_594070 = path.getOrDefault("blockchainMemberName")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  if valid_568302 != nil:
+    section.add "resourceGroupName", valid_568302
+  var valid_568303 = path.getOrDefault("blockchainMemberName")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "blockchainMemberName", valid_594070
-  var valid_594071 = path.getOrDefault("subscriptionId")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  if valid_568303 != nil:
+    section.add "blockchainMemberName", valid_568303
+  var valid_568304 = path.getOrDefault("subscriptionId")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "subscriptionId", valid_594071
+  if valid_568304 != nil:
+    section.add "subscriptionId", valid_568304
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1081,11 +1081,11 @@ proc validate_BlockchainMembersUpdate_594067(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594072 = query.getOrDefault("api-version")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  var valid_568305 = query.getOrDefault("api-version")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594072 != nil:
-    section.add "api-version", valid_594072
+  if valid_568305 != nil:
+    section.add "api-version", valid_568305
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1098,20 +1098,20 @@ proc validate_BlockchainMembersUpdate_594067(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594074: Call_BlockchainMembersUpdate_594066; path: JsonNode;
+proc call*(call_568307: Call_BlockchainMembersUpdate_568299; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a blockchain member.
   ## 
-  let valid = call_594074.validator(path, query, header, formData, body)
-  let scheme = call_594074.pickScheme
+  let valid = call_568307.validator(path, query, header, formData, body)
+  let scheme = call_568307.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594074.url(scheme.get, call_594074.host, call_594074.base,
-                         call_594074.route, valid.getOrDefault("path"),
+  let url = call_568307.url(scheme.get, call_568307.host, call_568307.base,
+                         call_568307.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594074, url, valid)
+  result = hook(call_568307, url, valid)
 
-proc call*(call_594075: Call_BlockchainMembersUpdate_594066;
+proc call*(call_568308: Call_BlockchainMembersUpdate_568299;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; apiVersion: string = "2018-06-01-preview";
           blockchainMember: JsonNode = nil): Recallable =
@@ -1127,25 +1127,25 @@ proc call*(call_594075: Call_BlockchainMembersUpdate_594066;
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
   ##   blockchainMember: JObject
   ##                   : Payload to update the blockchain member.
-  var path_594076 = newJObject()
-  var query_594077 = newJObject()
-  var body_594078 = newJObject()
-  add(path_594076, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594077, "api-version", newJString(apiVersion))
-  add(path_594076, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594076, "subscriptionId", newJString(subscriptionId))
+  var path_568309 = newJObject()
+  var query_568310 = newJObject()
+  var body_568311 = newJObject()
+  add(path_568309, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568310, "api-version", newJString(apiVersion))
+  add(path_568309, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568309, "subscriptionId", newJString(subscriptionId))
   if blockchainMember != nil:
-    body_594078 = blockchainMember
-  result = call_594075.call(path_594076, query_594077, nil, nil, body_594078)
+    body_568311 = blockchainMember
+  result = call_568308.call(path_568309, query_568310, nil, nil, body_568311)
 
-var blockchainMembersUpdate* = Call_BlockchainMembersUpdate_594066(
+var blockchainMembersUpdate* = Call_BlockchainMembersUpdate_568299(
     name: "blockchainMembersUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}",
-    validator: validate_BlockchainMembersUpdate_594067, base: "",
-    url: url_BlockchainMembersUpdate_594068, schemes: {Scheme.Https})
+    validator: validate_BlockchainMembersUpdate_568300, base: "",
+    url: url_BlockchainMembersUpdate_568301, schemes: {Scheme.Https})
 type
-  Call_BlockchainMembersDelete_594055 = ref object of OpenApiRestCall_593425
-proc url_BlockchainMembersDelete_594057(protocol: Scheme; host: string; base: string;
+  Call_BlockchainMembersDelete_568288 = ref object of OpenApiRestCall_567658
+proc url_BlockchainMembersDelete_568290(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1170,7 +1170,7 @@ proc url_BlockchainMembersDelete_594057(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlockchainMembersDelete_594056(path: JsonNode; query: JsonNode;
+proc validate_BlockchainMembersDelete_568289(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a blockchain member.
   ## 
@@ -1186,21 +1186,21 @@ proc validate_BlockchainMembersDelete_594056(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594058 = path.getOrDefault("resourceGroupName")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  var valid_568291 = path.getOrDefault("resourceGroupName")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "resourceGroupName", valid_594058
-  var valid_594059 = path.getOrDefault("blockchainMemberName")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  if valid_568291 != nil:
+    section.add "resourceGroupName", valid_568291
+  var valid_568292 = path.getOrDefault("blockchainMemberName")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "blockchainMemberName", valid_594059
-  var valid_594060 = path.getOrDefault("subscriptionId")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  if valid_568292 != nil:
+    section.add "blockchainMemberName", valid_568292
+  var valid_568293 = path.getOrDefault("subscriptionId")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "subscriptionId", valid_594060
+  if valid_568293 != nil:
+    section.add "subscriptionId", valid_568293
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1208,11 +1208,11 @@ proc validate_BlockchainMembersDelete_594056(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594061 = query.getOrDefault("api-version")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  var valid_568294 = query.getOrDefault("api-version")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594061 != nil:
-    section.add "api-version", valid_594061
+  if valid_568294 != nil:
+    section.add "api-version", valid_568294
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1221,20 +1221,20 @@ proc validate_BlockchainMembersDelete_594056(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594062: Call_BlockchainMembersDelete_594055; path: JsonNode;
+proc call*(call_568295: Call_BlockchainMembersDelete_568288; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a blockchain member.
   ## 
-  let valid = call_594062.validator(path, query, header, formData, body)
-  let scheme = call_594062.pickScheme
+  let valid = call_568295.validator(path, query, header, formData, body)
+  let scheme = call_568295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594062.url(scheme.get, call_594062.host, call_594062.base,
-                         call_594062.route, valid.getOrDefault("path"),
+  let url = call_568295.url(scheme.get, call_568295.host, call_568295.base,
+                         call_568295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594062, url, valid)
+  result = hook(call_568295, url, valid)
 
-proc call*(call_594063: Call_BlockchainMembersDelete_594055;
+proc call*(call_568296: Call_BlockchainMembersDelete_568288;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; apiVersion: string = "2018-06-01-preview"): Recallable =
   ## blockchainMembersDelete
@@ -1247,22 +1247,22 @@ proc call*(call_594063: Call_BlockchainMembersDelete_594055;
   ##                       : Blockchain member name
   ##   subscriptionId: string (required)
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
-  var path_594064 = newJObject()
-  var query_594065 = newJObject()
-  add(path_594064, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594065, "api-version", newJString(apiVersion))
-  add(path_594064, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594064, "subscriptionId", newJString(subscriptionId))
-  result = call_594063.call(path_594064, query_594065, nil, nil, nil)
+  var path_568297 = newJObject()
+  var query_568298 = newJObject()
+  add(path_568297, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568298, "api-version", newJString(apiVersion))
+  add(path_568297, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568297, "subscriptionId", newJString(subscriptionId))
+  result = call_568296.call(path_568297, query_568298, nil, nil, nil)
 
-var blockchainMembersDelete* = Call_BlockchainMembersDelete_594055(
+var blockchainMembersDelete* = Call_BlockchainMembersDelete_568288(
     name: "blockchainMembersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}",
-    validator: validate_BlockchainMembersDelete_594056, base: "",
-    url: url_BlockchainMembersDelete_594057, schemes: {Scheme.Https})
+    validator: validate_BlockchainMembersDelete_568289, base: "",
+    url: url_BlockchainMembersDelete_568290, schemes: {Scheme.Https})
 type
-  Call_BlockchainMembersListConsortiumMembers_594079 = ref object of OpenApiRestCall_593425
-proc url_BlockchainMembersListConsortiumMembers_594081(protocol: Scheme;
+  Call_BlockchainMembersListConsortiumMembers_568312 = ref object of OpenApiRestCall_567658
+proc url_BlockchainMembersListConsortiumMembers_568314(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1287,7 +1287,7 @@ proc url_BlockchainMembersListConsortiumMembers_594081(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlockchainMembersListConsortiumMembers_594080(path: JsonNode;
+proc validate_BlockchainMembersListConsortiumMembers_568313(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the consortium members for a blockchain member.
   ## 
@@ -1303,21 +1303,21 @@ proc validate_BlockchainMembersListConsortiumMembers_594080(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594082 = path.getOrDefault("resourceGroupName")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  var valid_568315 = path.getOrDefault("resourceGroupName")
+  valid_568315 = validateParameter(valid_568315, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "resourceGroupName", valid_594082
-  var valid_594083 = path.getOrDefault("blockchainMemberName")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
+  if valid_568315 != nil:
+    section.add "resourceGroupName", valid_568315
+  var valid_568316 = path.getOrDefault("blockchainMemberName")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = nil)
-  if valid_594083 != nil:
-    section.add "blockchainMemberName", valid_594083
-  var valid_594084 = path.getOrDefault("subscriptionId")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  if valid_568316 != nil:
+    section.add "blockchainMemberName", valid_568316
+  var valid_568317 = path.getOrDefault("subscriptionId")
+  valid_568317 = validateParameter(valid_568317, JString, required = true,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "subscriptionId", valid_594084
+  if valid_568317 != nil:
+    section.add "subscriptionId", valid_568317
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1325,11 +1325,11 @@ proc validate_BlockchainMembersListConsortiumMembers_594080(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594085 = query.getOrDefault("api-version")
-  valid_594085 = validateParameter(valid_594085, JString, required = true,
+  var valid_568318 = query.getOrDefault("api-version")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594085 != nil:
-    section.add "api-version", valid_594085
+  if valid_568318 != nil:
+    section.add "api-version", valid_568318
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1338,21 +1338,21 @@ proc validate_BlockchainMembersListConsortiumMembers_594080(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594086: Call_BlockchainMembersListConsortiumMembers_594079;
+proc call*(call_568319: Call_BlockchainMembersListConsortiumMembers_568312;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the consortium members for a blockchain member.
   ## 
-  let valid = call_594086.validator(path, query, header, formData, body)
-  let scheme = call_594086.pickScheme
+  let valid = call_568319.validator(path, query, header, formData, body)
+  let scheme = call_568319.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594086.url(scheme.get, call_594086.host, call_594086.base,
-                         call_594086.route, valid.getOrDefault("path"),
+  let url = call_568319.url(scheme.get, call_568319.host, call_568319.base,
+                         call_568319.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594086, url, valid)
+  result = hook(call_568319, url, valid)
 
-proc call*(call_594087: Call_BlockchainMembersListConsortiumMembers_594079;
+proc call*(call_568320: Call_BlockchainMembersListConsortiumMembers_568312;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; apiVersion: string = "2018-06-01-preview"): Recallable =
   ## blockchainMembersListConsortiumMembers
@@ -1365,23 +1365,23 @@ proc call*(call_594087: Call_BlockchainMembersListConsortiumMembers_594079;
   ##                       : Blockchain member name.
   ##   subscriptionId: string (required)
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
-  var path_594088 = newJObject()
-  var query_594089 = newJObject()
-  add(path_594088, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594089, "api-version", newJString(apiVersion))
-  add(path_594088, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594088, "subscriptionId", newJString(subscriptionId))
-  result = call_594087.call(path_594088, query_594089, nil, nil, nil)
+  var path_568321 = newJObject()
+  var query_568322 = newJObject()
+  add(path_568321, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568322, "api-version", newJString(apiVersion))
+  add(path_568321, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568321, "subscriptionId", newJString(subscriptionId))
+  result = call_568320.call(path_568321, query_568322, nil, nil, nil)
 
-var blockchainMembersListConsortiumMembers* = Call_BlockchainMembersListConsortiumMembers_594079(
+var blockchainMembersListConsortiumMembers* = Call_BlockchainMembersListConsortiumMembers_568312(
     name: "blockchainMembersListConsortiumMembers", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/consortiumMembers",
-    validator: validate_BlockchainMembersListConsortiumMembers_594080, base: "",
-    url: url_BlockchainMembersListConsortiumMembers_594081,
+    validator: validate_BlockchainMembersListConsortiumMembers_568313, base: "",
+    url: url_BlockchainMembersListConsortiumMembers_568314,
     schemes: {Scheme.Https})
 type
-  Call_BlockchainMembersListApiKeys_594090 = ref object of OpenApiRestCall_593425
-proc url_BlockchainMembersListApiKeys_594092(protocol: Scheme; host: string;
+  Call_BlockchainMembersListApiKeys_568323 = ref object of OpenApiRestCall_567658
+proc url_BlockchainMembersListApiKeys_568325(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1406,7 +1406,7 @@ proc url_BlockchainMembersListApiKeys_594092(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlockchainMembersListApiKeys_594091(path: JsonNode; query: JsonNode;
+proc validate_BlockchainMembersListApiKeys_568324(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the API keys for a blockchain member.
   ## 
@@ -1422,21 +1422,21 @@ proc validate_BlockchainMembersListApiKeys_594091(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594093 = path.getOrDefault("resourceGroupName")
-  valid_594093 = validateParameter(valid_594093, JString, required = true,
+  var valid_568326 = path.getOrDefault("resourceGroupName")
+  valid_568326 = validateParameter(valid_568326, JString, required = true,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "resourceGroupName", valid_594093
-  var valid_594094 = path.getOrDefault("blockchainMemberName")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  if valid_568326 != nil:
+    section.add "resourceGroupName", valid_568326
+  var valid_568327 = path.getOrDefault("blockchainMemberName")
+  valid_568327 = validateParameter(valid_568327, JString, required = true,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "blockchainMemberName", valid_594094
-  var valid_594095 = path.getOrDefault("subscriptionId")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  if valid_568327 != nil:
+    section.add "blockchainMemberName", valid_568327
+  var valid_568328 = path.getOrDefault("subscriptionId")
+  valid_568328 = validateParameter(valid_568328, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "subscriptionId", valid_594095
+  if valid_568328 != nil:
+    section.add "subscriptionId", valid_568328
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1444,11 +1444,11 @@ proc validate_BlockchainMembersListApiKeys_594091(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594096 = query.getOrDefault("api-version")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
+  var valid_568329 = query.getOrDefault("api-version")
+  valid_568329 = validateParameter(valid_568329, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594096 != nil:
-    section.add "api-version", valid_594096
+  if valid_568329 != nil:
+    section.add "api-version", valid_568329
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1457,20 +1457,20 @@ proc validate_BlockchainMembersListApiKeys_594091(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594097: Call_BlockchainMembersListApiKeys_594090; path: JsonNode;
+proc call*(call_568330: Call_BlockchainMembersListApiKeys_568323; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the API keys for a blockchain member.
   ## 
-  let valid = call_594097.validator(path, query, header, formData, body)
-  let scheme = call_594097.pickScheme
+  let valid = call_568330.validator(path, query, header, formData, body)
+  let scheme = call_568330.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594097.url(scheme.get, call_594097.host, call_594097.base,
-                         call_594097.route, valid.getOrDefault("path"),
+  let url = call_568330.url(scheme.get, call_568330.host, call_568330.base,
+                         call_568330.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594097, url, valid)
+  result = hook(call_568330, url, valid)
 
-proc call*(call_594098: Call_BlockchainMembersListApiKeys_594090;
+proc call*(call_568331: Call_BlockchainMembersListApiKeys_568323;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; apiVersion: string = "2018-06-01-preview"): Recallable =
   ## blockchainMembersListApiKeys
@@ -1483,22 +1483,22 @@ proc call*(call_594098: Call_BlockchainMembersListApiKeys_594090;
   ##                       : Blockchain member name.
   ##   subscriptionId: string (required)
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
-  var path_594099 = newJObject()
-  var query_594100 = newJObject()
-  add(path_594099, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594100, "api-version", newJString(apiVersion))
-  add(path_594099, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594099, "subscriptionId", newJString(subscriptionId))
-  result = call_594098.call(path_594099, query_594100, nil, nil, nil)
+  var path_568332 = newJObject()
+  var query_568333 = newJObject()
+  add(path_568332, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568333, "api-version", newJString(apiVersion))
+  add(path_568332, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568332, "subscriptionId", newJString(subscriptionId))
+  result = call_568331.call(path_568332, query_568333, nil, nil, nil)
 
-var blockchainMembersListApiKeys* = Call_BlockchainMembersListApiKeys_594090(
+var blockchainMembersListApiKeys* = Call_BlockchainMembersListApiKeys_568323(
     name: "blockchainMembersListApiKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/listApiKeys",
-    validator: validate_BlockchainMembersListApiKeys_594091, base: "",
-    url: url_BlockchainMembersListApiKeys_594092, schemes: {Scheme.Https})
+    validator: validate_BlockchainMembersListApiKeys_568324, base: "",
+    url: url_BlockchainMembersListApiKeys_568325, schemes: {Scheme.Https})
 type
-  Call_BlockchainMembersListRegenerateApiKeys_594101 = ref object of OpenApiRestCall_593425
-proc url_BlockchainMembersListRegenerateApiKeys_594103(protocol: Scheme;
+  Call_BlockchainMembersListRegenerateApiKeys_568334 = ref object of OpenApiRestCall_567658
+proc url_BlockchainMembersListRegenerateApiKeys_568336(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1523,7 +1523,7 @@ proc url_BlockchainMembersListRegenerateApiKeys_594103(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlockchainMembersListRegenerateApiKeys_594102(path: JsonNode;
+proc validate_BlockchainMembersListRegenerateApiKeys_568335(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerate the API keys for a blockchain member.
   ## 
@@ -1539,21 +1539,21 @@ proc validate_BlockchainMembersListRegenerateApiKeys_594102(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594104 = path.getOrDefault("resourceGroupName")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  var valid_568337 = path.getOrDefault("resourceGroupName")
+  valid_568337 = validateParameter(valid_568337, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "resourceGroupName", valid_594104
-  var valid_594105 = path.getOrDefault("blockchainMemberName")
-  valid_594105 = validateParameter(valid_594105, JString, required = true,
+  if valid_568337 != nil:
+    section.add "resourceGroupName", valid_568337
+  var valid_568338 = path.getOrDefault("blockchainMemberName")
+  valid_568338 = validateParameter(valid_568338, JString, required = true,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "blockchainMemberName", valid_594105
-  var valid_594106 = path.getOrDefault("subscriptionId")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  if valid_568338 != nil:
+    section.add "blockchainMemberName", valid_568338
+  var valid_568339 = path.getOrDefault("subscriptionId")
+  valid_568339 = validateParameter(valid_568339, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "subscriptionId", valid_594106
+  if valid_568339 != nil:
+    section.add "subscriptionId", valid_568339
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1561,11 +1561,11 @@ proc validate_BlockchainMembersListRegenerateApiKeys_594102(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594107 = query.getOrDefault("api-version")
-  valid_594107 = validateParameter(valid_594107, JString, required = true,
+  var valid_568340 = query.getOrDefault("api-version")
+  valid_568340 = validateParameter(valid_568340, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594107 != nil:
-    section.add "api-version", valid_594107
+  if valid_568340 != nil:
+    section.add "api-version", valid_568340
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1578,21 +1578,21 @@ proc validate_BlockchainMembersListRegenerateApiKeys_594102(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594109: Call_BlockchainMembersListRegenerateApiKeys_594101;
+proc call*(call_568342: Call_BlockchainMembersListRegenerateApiKeys_568334;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerate the API keys for a blockchain member.
   ## 
-  let valid = call_594109.validator(path, query, header, formData, body)
-  let scheme = call_594109.pickScheme
+  let valid = call_568342.validator(path, query, header, formData, body)
+  let scheme = call_568342.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594109.url(scheme.get, call_594109.host, call_594109.base,
-                         call_594109.route, valid.getOrDefault("path"),
+  let url = call_568342.url(scheme.get, call_568342.host, call_568342.base,
+                         call_568342.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594109, url, valid)
+  result = hook(call_568342, url, valid)
 
-proc call*(call_594110: Call_BlockchainMembersListRegenerateApiKeys_594101;
+proc call*(call_568343: Call_BlockchainMembersListRegenerateApiKeys_568334;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; apiVersion: string = "2018-06-01-preview";
           apiKey: JsonNode = nil): Recallable =
@@ -1608,26 +1608,26 @@ proc call*(call_594110: Call_BlockchainMembersListRegenerateApiKeys_594101;
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
   ##   apiKey: JObject
   ##         : api key to be regenerate
-  var path_594111 = newJObject()
-  var query_594112 = newJObject()
-  var body_594113 = newJObject()
-  add(path_594111, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594112, "api-version", newJString(apiVersion))
-  add(path_594111, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594111, "subscriptionId", newJString(subscriptionId))
+  var path_568344 = newJObject()
+  var query_568345 = newJObject()
+  var body_568346 = newJObject()
+  add(path_568344, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568345, "api-version", newJString(apiVersion))
+  add(path_568344, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568344, "subscriptionId", newJString(subscriptionId))
   if apiKey != nil:
-    body_594113 = apiKey
-  result = call_594110.call(path_594111, query_594112, nil, nil, body_594113)
+    body_568346 = apiKey
+  result = call_568343.call(path_568344, query_568345, nil, nil, body_568346)
 
-var blockchainMembersListRegenerateApiKeys* = Call_BlockchainMembersListRegenerateApiKeys_594101(
+var blockchainMembersListRegenerateApiKeys* = Call_BlockchainMembersListRegenerateApiKeys_568334(
     name: "blockchainMembersListRegenerateApiKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/regenerateApiKeys",
-    validator: validate_BlockchainMembersListRegenerateApiKeys_594102, base: "",
-    url: url_BlockchainMembersListRegenerateApiKeys_594103,
+    validator: validate_BlockchainMembersListRegenerateApiKeys_568335, base: "",
+    url: url_BlockchainMembersListRegenerateApiKeys_568336,
     schemes: {Scheme.Https})
 type
-  Call_TransactionNodesList_594114 = ref object of OpenApiRestCall_593425
-proc url_TransactionNodesList_594116(protocol: Scheme; host: string; base: string;
+  Call_TransactionNodesList_568347 = ref object of OpenApiRestCall_567658
+proc url_TransactionNodesList_568349(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1652,7 +1652,7 @@ proc url_TransactionNodesList_594116(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionNodesList_594115(path: JsonNode; query: JsonNode;
+proc validate_TransactionNodesList_568348(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the transaction nodes for a blockchain member.
   ## 
@@ -1668,21 +1668,21 @@ proc validate_TransactionNodesList_594115(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594117 = path.getOrDefault("resourceGroupName")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  var valid_568350 = path.getOrDefault("resourceGroupName")
+  valid_568350 = validateParameter(valid_568350, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "resourceGroupName", valid_594117
-  var valid_594118 = path.getOrDefault("blockchainMemberName")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  if valid_568350 != nil:
+    section.add "resourceGroupName", valid_568350
+  var valid_568351 = path.getOrDefault("blockchainMemberName")
+  valid_568351 = validateParameter(valid_568351, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "blockchainMemberName", valid_594118
-  var valid_594119 = path.getOrDefault("subscriptionId")
-  valid_594119 = validateParameter(valid_594119, JString, required = true,
+  if valid_568351 != nil:
+    section.add "blockchainMemberName", valid_568351
+  var valid_568352 = path.getOrDefault("subscriptionId")
+  valid_568352 = validateParameter(valid_568352, JString, required = true,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "subscriptionId", valid_594119
+  if valid_568352 != nil:
+    section.add "subscriptionId", valid_568352
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1690,11 +1690,11 @@ proc validate_TransactionNodesList_594115(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594120 = query.getOrDefault("api-version")
-  valid_594120 = validateParameter(valid_594120, JString, required = true,
+  var valid_568353 = query.getOrDefault("api-version")
+  valid_568353 = validateParameter(valid_568353, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594120 != nil:
-    section.add "api-version", valid_594120
+  if valid_568353 != nil:
+    section.add "api-version", valid_568353
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1703,20 +1703,20 @@ proc validate_TransactionNodesList_594115(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594121: Call_TransactionNodesList_594114; path: JsonNode;
+proc call*(call_568354: Call_TransactionNodesList_568347; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the transaction nodes for a blockchain member.
   ## 
-  let valid = call_594121.validator(path, query, header, formData, body)
-  let scheme = call_594121.pickScheme
+  let valid = call_568354.validator(path, query, header, formData, body)
+  let scheme = call_568354.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594121.url(scheme.get, call_594121.host, call_594121.base,
-                         call_594121.route, valid.getOrDefault("path"),
+  let url = call_568354.url(scheme.get, call_568354.host, call_568354.base,
+                         call_568354.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594121, url, valid)
+  result = hook(call_568354, url, valid)
 
-proc call*(call_594122: Call_TransactionNodesList_594114;
+proc call*(call_568355: Call_TransactionNodesList_568347;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; apiVersion: string = "2018-06-01-preview"): Recallable =
   ## transactionNodesList
@@ -1729,22 +1729,22 @@ proc call*(call_594122: Call_TransactionNodesList_594114;
   ##                       : Blockchain member name.
   ##   subscriptionId: string (required)
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
-  var path_594123 = newJObject()
-  var query_594124 = newJObject()
-  add(path_594123, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594124, "api-version", newJString(apiVersion))
-  add(path_594123, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594123, "subscriptionId", newJString(subscriptionId))
-  result = call_594122.call(path_594123, query_594124, nil, nil, nil)
+  var path_568356 = newJObject()
+  var query_568357 = newJObject()
+  add(path_568356, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568357, "api-version", newJString(apiVersion))
+  add(path_568356, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568356, "subscriptionId", newJString(subscriptionId))
+  result = call_568355.call(path_568356, query_568357, nil, nil, nil)
 
-var transactionNodesList* = Call_TransactionNodesList_594114(
+var transactionNodesList* = Call_TransactionNodesList_568347(
     name: "transactionNodesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/transactionNodes",
-    validator: validate_TransactionNodesList_594115, base: "",
-    url: url_TransactionNodesList_594116, schemes: {Scheme.Https})
+    validator: validate_TransactionNodesList_568348, base: "",
+    url: url_TransactionNodesList_568349, schemes: {Scheme.Https})
 type
-  Call_TransactionNodesCreate_594137 = ref object of OpenApiRestCall_593425
-proc url_TransactionNodesCreate_594139(protocol: Scheme; host: string; base: string;
+  Call_TransactionNodesCreate_568370 = ref object of OpenApiRestCall_567658
+proc url_TransactionNodesCreate_568372(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1772,7 +1772,7 @@ proc url_TransactionNodesCreate_594139(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionNodesCreate_594138(path: JsonNode; query: JsonNode;
+proc validate_TransactionNodesCreate_568371(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update the transaction node.
   ## 
@@ -1790,26 +1790,26 @@ proc validate_TransactionNodesCreate_594138(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594140 = path.getOrDefault("resourceGroupName")
-  valid_594140 = validateParameter(valid_594140, JString, required = true,
+  var valid_568373 = path.getOrDefault("resourceGroupName")
+  valid_568373 = validateParameter(valid_568373, JString, required = true,
                                  default = nil)
-  if valid_594140 != nil:
-    section.add "resourceGroupName", valid_594140
-  var valid_594141 = path.getOrDefault("blockchainMemberName")
-  valid_594141 = validateParameter(valid_594141, JString, required = true,
+  if valid_568373 != nil:
+    section.add "resourceGroupName", valid_568373
+  var valid_568374 = path.getOrDefault("blockchainMemberName")
+  valid_568374 = validateParameter(valid_568374, JString, required = true,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "blockchainMemberName", valid_594141
-  var valid_594142 = path.getOrDefault("subscriptionId")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  if valid_568374 != nil:
+    section.add "blockchainMemberName", valid_568374
+  var valid_568375 = path.getOrDefault("subscriptionId")
+  valid_568375 = validateParameter(valid_568375, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "subscriptionId", valid_594142
-  var valid_594143 = path.getOrDefault("transactionNodeName")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+  if valid_568375 != nil:
+    section.add "subscriptionId", valid_568375
+  var valid_568376 = path.getOrDefault("transactionNodeName")
+  valid_568376 = validateParameter(valid_568376, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "transactionNodeName", valid_594143
+  if valid_568376 != nil:
+    section.add "transactionNodeName", valid_568376
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1817,11 +1817,11 @@ proc validate_TransactionNodesCreate_594138(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594144 = query.getOrDefault("api-version")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  var valid_568377 = query.getOrDefault("api-version")
+  valid_568377 = validateParameter(valid_568377, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594144 != nil:
-    section.add "api-version", valid_594144
+  if valid_568377 != nil:
+    section.add "api-version", valid_568377
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1834,20 +1834,20 @@ proc validate_TransactionNodesCreate_594138(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594146: Call_TransactionNodesCreate_594137; path: JsonNode;
+proc call*(call_568379: Call_TransactionNodesCreate_568370; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update the transaction node.
   ## 
-  let valid = call_594146.validator(path, query, header, formData, body)
-  let scheme = call_594146.pickScheme
+  let valid = call_568379.validator(path, query, header, formData, body)
+  let scheme = call_568379.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594146.url(scheme.get, call_594146.host, call_594146.base,
-                         call_594146.route, valid.getOrDefault("path"),
+  let url = call_568379.url(scheme.get, call_568379.host, call_568379.base,
+                         call_568379.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594146, url, valid)
+  result = hook(call_568379, url, valid)
 
-proc call*(call_594147: Call_TransactionNodesCreate_594137;
+proc call*(call_568380: Call_TransactionNodesCreate_568370;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; transactionNodeName: string;
           apiVersion: string = "2018-06-01-preview"; transactionNode: JsonNode = nil): Recallable =
@@ -1865,26 +1865,26 @@ proc call*(call_594147: Call_TransactionNodesCreate_594137;
   ##                      : Transaction node name.
   ##   transactionNode: JObject
   ##                  : Payload to create the transaction node.
-  var path_594148 = newJObject()
-  var query_594149 = newJObject()
-  var body_594150 = newJObject()
-  add(path_594148, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594149, "api-version", newJString(apiVersion))
-  add(path_594148, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594148, "subscriptionId", newJString(subscriptionId))
-  add(path_594148, "transactionNodeName", newJString(transactionNodeName))
+  var path_568381 = newJObject()
+  var query_568382 = newJObject()
+  var body_568383 = newJObject()
+  add(path_568381, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568382, "api-version", newJString(apiVersion))
+  add(path_568381, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568381, "subscriptionId", newJString(subscriptionId))
+  add(path_568381, "transactionNodeName", newJString(transactionNodeName))
   if transactionNode != nil:
-    body_594150 = transactionNode
-  result = call_594147.call(path_594148, query_594149, nil, nil, body_594150)
+    body_568383 = transactionNode
+  result = call_568380.call(path_568381, query_568382, nil, nil, body_568383)
 
-var transactionNodesCreate* = Call_TransactionNodesCreate_594137(
+var transactionNodesCreate* = Call_TransactionNodesCreate_568370(
     name: "transactionNodesCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/transactionNodes/{transactionNodeName}",
-    validator: validate_TransactionNodesCreate_594138, base: "",
-    url: url_TransactionNodesCreate_594139, schemes: {Scheme.Https})
+    validator: validate_TransactionNodesCreate_568371, base: "",
+    url: url_TransactionNodesCreate_568372, schemes: {Scheme.Https})
 type
-  Call_TransactionNodesGet_594125 = ref object of OpenApiRestCall_593425
-proc url_TransactionNodesGet_594127(protocol: Scheme; host: string; base: string;
+  Call_TransactionNodesGet_568358 = ref object of OpenApiRestCall_567658
+proc url_TransactionNodesGet_568360(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1912,7 +1912,7 @@ proc url_TransactionNodesGet_594127(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionNodesGet_594126(path: JsonNode; query: JsonNode;
+proc validate_TransactionNodesGet_568359(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get the details of the transaction node.
@@ -1931,26 +1931,26 @@ proc validate_TransactionNodesGet_594126(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594128 = path.getOrDefault("resourceGroupName")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  var valid_568361 = path.getOrDefault("resourceGroupName")
+  valid_568361 = validateParameter(valid_568361, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "resourceGroupName", valid_594128
-  var valid_594129 = path.getOrDefault("blockchainMemberName")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  if valid_568361 != nil:
+    section.add "resourceGroupName", valid_568361
+  var valid_568362 = path.getOrDefault("blockchainMemberName")
+  valid_568362 = validateParameter(valid_568362, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "blockchainMemberName", valid_594129
-  var valid_594130 = path.getOrDefault("subscriptionId")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  if valid_568362 != nil:
+    section.add "blockchainMemberName", valid_568362
+  var valid_568363 = path.getOrDefault("subscriptionId")
+  valid_568363 = validateParameter(valid_568363, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "subscriptionId", valid_594130
-  var valid_594131 = path.getOrDefault("transactionNodeName")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  if valid_568363 != nil:
+    section.add "subscriptionId", valid_568363
+  var valid_568364 = path.getOrDefault("transactionNodeName")
+  valid_568364 = validateParameter(valid_568364, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "transactionNodeName", valid_594131
+  if valid_568364 != nil:
+    section.add "transactionNodeName", valid_568364
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1958,11 +1958,11 @@ proc validate_TransactionNodesGet_594126(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594132 = query.getOrDefault("api-version")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  var valid_568365 = query.getOrDefault("api-version")
+  valid_568365 = validateParameter(valid_568365, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594132 != nil:
-    section.add "api-version", valid_594132
+  if valid_568365 != nil:
+    section.add "api-version", valid_568365
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1971,20 +1971,20 @@ proc validate_TransactionNodesGet_594126(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594133: Call_TransactionNodesGet_594125; path: JsonNode;
+proc call*(call_568366: Call_TransactionNodesGet_568358; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of the transaction node.
   ## 
-  let valid = call_594133.validator(path, query, header, formData, body)
-  let scheme = call_594133.pickScheme
+  let valid = call_568366.validator(path, query, header, formData, body)
+  let scheme = call_568366.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594133.url(scheme.get, call_594133.host, call_594133.base,
-                         call_594133.route, valid.getOrDefault("path"),
+  let url = call_568366.url(scheme.get, call_568366.host, call_568366.base,
+                         call_568366.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594133, url, valid)
+  result = hook(call_568366, url, valid)
 
-proc call*(call_594134: Call_TransactionNodesGet_594125; resourceGroupName: string;
+proc call*(call_568367: Call_TransactionNodesGet_568358; resourceGroupName: string;
           blockchainMemberName: string; subscriptionId: string;
           transactionNodeName: string; apiVersion: string = "2018-06-01-preview"): Recallable =
   ## transactionNodesGet
@@ -1999,23 +1999,23 @@ proc call*(call_594134: Call_TransactionNodesGet_594125; resourceGroupName: stri
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
   ##   transactionNodeName: string (required)
   ##                      : Transaction node name.
-  var path_594135 = newJObject()
-  var query_594136 = newJObject()
-  add(path_594135, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594136, "api-version", newJString(apiVersion))
-  add(path_594135, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594135, "subscriptionId", newJString(subscriptionId))
-  add(path_594135, "transactionNodeName", newJString(transactionNodeName))
-  result = call_594134.call(path_594135, query_594136, nil, nil, nil)
+  var path_568368 = newJObject()
+  var query_568369 = newJObject()
+  add(path_568368, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568369, "api-version", newJString(apiVersion))
+  add(path_568368, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568368, "subscriptionId", newJString(subscriptionId))
+  add(path_568368, "transactionNodeName", newJString(transactionNodeName))
+  result = call_568367.call(path_568368, query_568369, nil, nil, nil)
 
-var transactionNodesGet* = Call_TransactionNodesGet_594125(
+var transactionNodesGet* = Call_TransactionNodesGet_568358(
     name: "transactionNodesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/transactionNodes/{transactionNodeName}",
-    validator: validate_TransactionNodesGet_594126, base: "",
-    url: url_TransactionNodesGet_594127, schemes: {Scheme.Https})
+    validator: validate_TransactionNodesGet_568359, base: "",
+    url: url_TransactionNodesGet_568360, schemes: {Scheme.Https})
 type
-  Call_TransactionNodesUpdate_594163 = ref object of OpenApiRestCall_593425
-proc url_TransactionNodesUpdate_594165(protocol: Scheme; host: string; base: string;
+  Call_TransactionNodesUpdate_568396 = ref object of OpenApiRestCall_567658
+proc url_TransactionNodesUpdate_568398(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2043,7 +2043,7 @@ proc url_TransactionNodesUpdate_594165(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionNodesUpdate_594164(path: JsonNode; query: JsonNode;
+proc validate_TransactionNodesUpdate_568397(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the transaction node.
   ## 
@@ -2061,26 +2061,26 @@ proc validate_TransactionNodesUpdate_594164(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594166 = path.getOrDefault("resourceGroupName")
-  valid_594166 = validateParameter(valid_594166, JString, required = true,
+  var valid_568399 = path.getOrDefault("resourceGroupName")
+  valid_568399 = validateParameter(valid_568399, JString, required = true,
                                  default = nil)
-  if valid_594166 != nil:
-    section.add "resourceGroupName", valid_594166
-  var valid_594167 = path.getOrDefault("blockchainMemberName")
-  valid_594167 = validateParameter(valid_594167, JString, required = true,
+  if valid_568399 != nil:
+    section.add "resourceGroupName", valid_568399
+  var valid_568400 = path.getOrDefault("blockchainMemberName")
+  valid_568400 = validateParameter(valid_568400, JString, required = true,
                                  default = nil)
-  if valid_594167 != nil:
-    section.add "blockchainMemberName", valid_594167
-  var valid_594168 = path.getOrDefault("subscriptionId")
-  valid_594168 = validateParameter(valid_594168, JString, required = true,
+  if valid_568400 != nil:
+    section.add "blockchainMemberName", valid_568400
+  var valid_568401 = path.getOrDefault("subscriptionId")
+  valid_568401 = validateParameter(valid_568401, JString, required = true,
                                  default = nil)
-  if valid_594168 != nil:
-    section.add "subscriptionId", valid_594168
-  var valid_594169 = path.getOrDefault("transactionNodeName")
-  valid_594169 = validateParameter(valid_594169, JString, required = true,
+  if valid_568401 != nil:
+    section.add "subscriptionId", valid_568401
+  var valid_568402 = path.getOrDefault("transactionNodeName")
+  valid_568402 = validateParameter(valid_568402, JString, required = true,
                                  default = nil)
-  if valid_594169 != nil:
-    section.add "transactionNodeName", valid_594169
+  if valid_568402 != nil:
+    section.add "transactionNodeName", valid_568402
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2088,11 +2088,11 @@ proc validate_TransactionNodesUpdate_594164(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594170 = query.getOrDefault("api-version")
-  valid_594170 = validateParameter(valid_594170, JString, required = true,
+  var valid_568403 = query.getOrDefault("api-version")
+  valid_568403 = validateParameter(valid_568403, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594170 != nil:
-    section.add "api-version", valid_594170
+  if valid_568403 != nil:
+    section.add "api-version", valid_568403
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2105,20 +2105,20 @@ proc validate_TransactionNodesUpdate_594164(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594172: Call_TransactionNodesUpdate_594163; path: JsonNode;
+proc call*(call_568405: Call_TransactionNodesUpdate_568396; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the transaction node.
   ## 
-  let valid = call_594172.validator(path, query, header, formData, body)
-  let scheme = call_594172.pickScheme
+  let valid = call_568405.validator(path, query, header, formData, body)
+  let scheme = call_568405.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594172.url(scheme.get, call_594172.host, call_594172.base,
-                         call_594172.route, valid.getOrDefault("path"),
+  let url = call_568405.url(scheme.get, call_568405.host, call_568405.base,
+                         call_568405.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594172, url, valid)
+  result = hook(call_568405, url, valid)
 
-proc call*(call_594173: Call_TransactionNodesUpdate_594163;
+proc call*(call_568406: Call_TransactionNodesUpdate_568396;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; transactionNodeName: string;
           apiVersion: string = "2018-06-01-preview"; transactionNode: JsonNode = nil): Recallable =
@@ -2136,26 +2136,26 @@ proc call*(call_594173: Call_TransactionNodesUpdate_594163;
   ##                      : Transaction node name.
   ##   transactionNode: JObject
   ##                  : Payload to create the transaction node.
-  var path_594174 = newJObject()
-  var query_594175 = newJObject()
-  var body_594176 = newJObject()
-  add(path_594174, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594175, "api-version", newJString(apiVersion))
-  add(path_594174, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594174, "subscriptionId", newJString(subscriptionId))
-  add(path_594174, "transactionNodeName", newJString(transactionNodeName))
+  var path_568407 = newJObject()
+  var query_568408 = newJObject()
+  var body_568409 = newJObject()
+  add(path_568407, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568408, "api-version", newJString(apiVersion))
+  add(path_568407, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568407, "subscriptionId", newJString(subscriptionId))
+  add(path_568407, "transactionNodeName", newJString(transactionNodeName))
   if transactionNode != nil:
-    body_594176 = transactionNode
-  result = call_594173.call(path_594174, query_594175, nil, nil, body_594176)
+    body_568409 = transactionNode
+  result = call_568406.call(path_568407, query_568408, nil, nil, body_568409)
 
-var transactionNodesUpdate* = Call_TransactionNodesUpdate_594163(
+var transactionNodesUpdate* = Call_TransactionNodesUpdate_568396(
     name: "transactionNodesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/transactionNodes/{transactionNodeName}",
-    validator: validate_TransactionNodesUpdate_594164, base: "",
-    url: url_TransactionNodesUpdate_594165, schemes: {Scheme.Https})
+    validator: validate_TransactionNodesUpdate_568397, base: "",
+    url: url_TransactionNodesUpdate_568398, schemes: {Scheme.Https})
 type
-  Call_TransactionNodesDelete_594151 = ref object of OpenApiRestCall_593425
-proc url_TransactionNodesDelete_594153(protocol: Scheme; host: string; base: string;
+  Call_TransactionNodesDelete_568384 = ref object of OpenApiRestCall_567658
+proc url_TransactionNodesDelete_568386(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2183,7 +2183,7 @@ proc url_TransactionNodesDelete_594153(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionNodesDelete_594152(path: JsonNode; query: JsonNode;
+proc validate_TransactionNodesDelete_568385(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the transaction node.
   ## 
@@ -2201,26 +2201,26 @@ proc validate_TransactionNodesDelete_594152(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594154 = path.getOrDefault("resourceGroupName")
-  valid_594154 = validateParameter(valid_594154, JString, required = true,
+  var valid_568387 = path.getOrDefault("resourceGroupName")
+  valid_568387 = validateParameter(valid_568387, JString, required = true,
                                  default = nil)
-  if valid_594154 != nil:
-    section.add "resourceGroupName", valid_594154
-  var valid_594155 = path.getOrDefault("blockchainMemberName")
-  valid_594155 = validateParameter(valid_594155, JString, required = true,
+  if valid_568387 != nil:
+    section.add "resourceGroupName", valid_568387
+  var valid_568388 = path.getOrDefault("blockchainMemberName")
+  valid_568388 = validateParameter(valid_568388, JString, required = true,
                                  default = nil)
-  if valid_594155 != nil:
-    section.add "blockchainMemberName", valid_594155
-  var valid_594156 = path.getOrDefault("subscriptionId")
-  valid_594156 = validateParameter(valid_594156, JString, required = true,
+  if valid_568388 != nil:
+    section.add "blockchainMemberName", valid_568388
+  var valid_568389 = path.getOrDefault("subscriptionId")
+  valid_568389 = validateParameter(valid_568389, JString, required = true,
                                  default = nil)
-  if valid_594156 != nil:
-    section.add "subscriptionId", valid_594156
-  var valid_594157 = path.getOrDefault("transactionNodeName")
-  valid_594157 = validateParameter(valid_594157, JString, required = true,
+  if valid_568389 != nil:
+    section.add "subscriptionId", valid_568389
+  var valid_568390 = path.getOrDefault("transactionNodeName")
+  valid_568390 = validateParameter(valid_568390, JString, required = true,
                                  default = nil)
-  if valid_594157 != nil:
-    section.add "transactionNodeName", valid_594157
+  if valid_568390 != nil:
+    section.add "transactionNodeName", valid_568390
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2228,11 +2228,11 @@ proc validate_TransactionNodesDelete_594152(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594158 = query.getOrDefault("api-version")
-  valid_594158 = validateParameter(valid_594158, JString, required = true,
+  var valid_568391 = query.getOrDefault("api-version")
+  valid_568391 = validateParameter(valid_568391, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594158 != nil:
-    section.add "api-version", valid_594158
+  if valid_568391 != nil:
+    section.add "api-version", valid_568391
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2241,20 +2241,20 @@ proc validate_TransactionNodesDelete_594152(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594159: Call_TransactionNodesDelete_594151; path: JsonNode;
+proc call*(call_568392: Call_TransactionNodesDelete_568384; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the transaction node.
   ## 
-  let valid = call_594159.validator(path, query, header, formData, body)
-  let scheme = call_594159.pickScheme
+  let valid = call_568392.validator(path, query, header, formData, body)
+  let scheme = call_568392.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594159.url(scheme.get, call_594159.host, call_594159.base,
-                         call_594159.route, valid.getOrDefault("path"),
+  let url = call_568392.url(scheme.get, call_568392.host, call_568392.base,
+                         call_568392.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594159, url, valid)
+  result = hook(call_568392, url, valid)
 
-proc call*(call_594160: Call_TransactionNodesDelete_594151;
+proc call*(call_568393: Call_TransactionNodesDelete_568384;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; transactionNodeName: string;
           apiVersion: string = "2018-06-01-preview"): Recallable =
@@ -2270,23 +2270,23 @@ proc call*(call_594160: Call_TransactionNodesDelete_594151;
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
   ##   transactionNodeName: string (required)
   ##                      : Transaction node name.
-  var path_594161 = newJObject()
-  var query_594162 = newJObject()
-  add(path_594161, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594162, "api-version", newJString(apiVersion))
-  add(path_594161, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594161, "subscriptionId", newJString(subscriptionId))
-  add(path_594161, "transactionNodeName", newJString(transactionNodeName))
-  result = call_594160.call(path_594161, query_594162, nil, nil, nil)
+  var path_568394 = newJObject()
+  var query_568395 = newJObject()
+  add(path_568394, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568395, "api-version", newJString(apiVersion))
+  add(path_568394, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568394, "subscriptionId", newJString(subscriptionId))
+  add(path_568394, "transactionNodeName", newJString(transactionNodeName))
+  result = call_568393.call(path_568394, query_568395, nil, nil, nil)
 
-var transactionNodesDelete* = Call_TransactionNodesDelete_594151(
+var transactionNodesDelete* = Call_TransactionNodesDelete_568384(
     name: "transactionNodesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/transactionNodes/{transactionNodeName}",
-    validator: validate_TransactionNodesDelete_594152, base: "",
-    url: url_TransactionNodesDelete_594153, schemes: {Scheme.Https})
+    validator: validate_TransactionNodesDelete_568385, base: "",
+    url: url_TransactionNodesDelete_568386, schemes: {Scheme.Https})
 type
-  Call_TransactionNodesListApiKeys_594177 = ref object of OpenApiRestCall_593425
-proc url_TransactionNodesListApiKeys_594179(protocol: Scheme; host: string;
+  Call_TransactionNodesListApiKeys_568410 = ref object of OpenApiRestCall_567658
+proc url_TransactionNodesListApiKeys_568412(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2315,7 +2315,7 @@ proc url_TransactionNodesListApiKeys_594179(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionNodesListApiKeys_594178(path: JsonNode; query: JsonNode;
+proc validate_TransactionNodesListApiKeys_568411(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List the API keys for the transaction node.
   ## 
@@ -2333,26 +2333,26 @@ proc validate_TransactionNodesListApiKeys_594178(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594180 = path.getOrDefault("resourceGroupName")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  var valid_568413 = path.getOrDefault("resourceGroupName")
+  valid_568413 = validateParameter(valid_568413, JString, required = true,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "resourceGroupName", valid_594180
-  var valid_594181 = path.getOrDefault("blockchainMemberName")
-  valid_594181 = validateParameter(valid_594181, JString, required = true,
+  if valid_568413 != nil:
+    section.add "resourceGroupName", valid_568413
+  var valid_568414 = path.getOrDefault("blockchainMemberName")
+  valid_568414 = validateParameter(valid_568414, JString, required = true,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "blockchainMemberName", valid_594181
-  var valid_594182 = path.getOrDefault("subscriptionId")
-  valid_594182 = validateParameter(valid_594182, JString, required = true,
+  if valid_568414 != nil:
+    section.add "blockchainMemberName", valid_568414
+  var valid_568415 = path.getOrDefault("subscriptionId")
+  valid_568415 = validateParameter(valid_568415, JString, required = true,
                                  default = nil)
-  if valid_594182 != nil:
-    section.add "subscriptionId", valid_594182
-  var valid_594183 = path.getOrDefault("transactionNodeName")
-  valid_594183 = validateParameter(valid_594183, JString, required = true,
+  if valid_568415 != nil:
+    section.add "subscriptionId", valid_568415
+  var valid_568416 = path.getOrDefault("transactionNodeName")
+  valid_568416 = validateParameter(valid_568416, JString, required = true,
                                  default = nil)
-  if valid_594183 != nil:
-    section.add "transactionNodeName", valid_594183
+  if valid_568416 != nil:
+    section.add "transactionNodeName", valid_568416
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2360,11 +2360,11 @@ proc validate_TransactionNodesListApiKeys_594178(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594184 = query.getOrDefault("api-version")
-  valid_594184 = validateParameter(valid_594184, JString, required = true,
+  var valid_568417 = query.getOrDefault("api-version")
+  valid_568417 = validateParameter(valid_568417, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594184 != nil:
-    section.add "api-version", valid_594184
+  if valid_568417 != nil:
+    section.add "api-version", valid_568417
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2373,20 +2373,20 @@ proc validate_TransactionNodesListApiKeys_594178(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594185: Call_TransactionNodesListApiKeys_594177; path: JsonNode;
+proc call*(call_568418: Call_TransactionNodesListApiKeys_568410; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List the API keys for the transaction node.
   ## 
-  let valid = call_594185.validator(path, query, header, formData, body)
-  let scheme = call_594185.pickScheme
+  let valid = call_568418.validator(path, query, header, formData, body)
+  let scheme = call_568418.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594185.url(scheme.get, call_594185.host, call_594185.base,
-                         call_594185.route, valid.getOrDefault("path"),
+  let url = call_568418.url(scheme.get, call_568418.host, call_568418.base,
+                         call_568418.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594185, url, valid)
+  result = hook(call_568418, url, valid)
 
-proc call*(call_594186: Call_TransactionNodesListApiKeys_594177;
+proc call*(call_568419: Call_TransactionNodesListApiKeys_568410;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; transactionNodeName: string;
           apiVersion: string = "2018-06-01-preview"): Recallable =
@@ -2402,23 +2402,23 @@ proc call*(call_594186: Call_TransactionNodesListApiKeys_594177;
   ##                 : Gets the subscription Id which uniquely identifies the Microsoft Azure subscription. The subscription ID is part of the URI for every service call.
   ##   transactionNodeName: string (required)
   ##                      : Transaction node name.
-  var path_594187 = newJObject()
-  var query_594188 = newJObject()
-  add(path_594187, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594188, "api-version", newJString(apiVersion))
-  add(path_594187, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594187, "subscriptionId", newJString(subscriptionId))
-  add(path_594187, "transactionNodeName", newJString(transactionNodeName))
-  result = call_594186.call(path_594187, query_594188, nil, nil, nil)
+  var path_568420 = newJObject()
+  var query_568421 = newJObject()
+  add(path_568420, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568421, "api-version", newJString(apiVersion))
+  add(path_568420, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568420, "subscriptionId", newJString(subscriptionId))
+  add(path_568420, "transactionNodeName", newJString(transactionNodeName))
+  result = call_568419.call(path_568420, query_568421, nil, nil, nil)
 
-var transactionNodesListApiKeys* = Call_TransactionNodesListApiKeys_594177(
+var transactionNodesListApiKeys* = Call_TransactionNodesListApiKeys_568410(
     name: "transactionNodesListApiKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/transactionNodes/{transactionNodeName}/listApiKeys",
-    validator: validate_TransactionNodesListApiKeys_594178, base: "",
-    url: url_TransactionNodesListApiKeys_594179, schemes: {Scheme.Https})
+    validator: validate_TransactionNodesListApiKeys_568411, base: "",
+    url: url_TransactionNodesListApiKeys_568412, schemes: {Scheme.Https})
 type
-  Call_TransactionNodesListRegenerateApiKeys_594189 = ref object of OpenApiRestCall_593425
-proc url_TransactionNodesListRegenerateApiKeys_594191(protocol: Scheme;
+  Call_TransactionNodesListRegenerateApiKeys_568422 = ref object of OpenApiRestCall_567658
+proc url_TransactionNodesListRegenerateApiKeys_568424(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2447,7 +2447,7 @@ proc url_TransactionNodesListRegenerateApiKeys_594191(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionNodesListRegenerateApiKeys_594190(path: JsonNode;
+proc validate_TransactionNodesListRegenerateApiKeys_568423(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerate the API keys for the blockchain member.
   ## 
@@ -2465,26 +2465,26 @@ proc validate_TransactionNodesListRegenerateApiKeys_594190(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594192 = path.getOrDefault("resourceGroupName")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  var valid_568425 = path.getOrDefault("resourceGroupName")
+  valid_568425 = validateParameter(valid_568425, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "resourceGroupName", valid_594192
-  var valid_594193 = path.getOrDefault("blockchainMemberName")
-  valid_594193 = validateParameter(valid_594193, JString, required = true,
+  if valid_568425 != nil:
+    section.add "resourceGroupName", valid_568425
+  var valid_568426 = path.getOrDefault("blockchainMemberName")
+  valid_568426 = validateParameter(valid_568426, JString, required = true,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "blockchainMemberName", valid_594193
-  var valid_594194 = path.getOrDefault("subscriptionId")
-  valid_594194 = validateParameter(valid_594194, JString, required = true,
+  if valid_568426 != nil:
+    section.add "blockchainMemberName", valid_568426
+  var valid_568427 = path.getOrDefault("subscriptionId")
+  valid_568427 = validateParameter(valid_568427, JString, required = true,
                                  default = nil)
-  if valid_594194 != nil:
-    section.add "subscriptionId", valid_594194
-  var valid_594195 = path.getOrDefault("transactionNodeName")
-  valid_594195 = validateParameter(valid_594195, JString, required = true,
+  if valid_568427 != nil:
+    section.add "subscriptionId", valid_568427
+  var valid_568428 = path.getOrDefault("transactionNodeName")
+  valid_568428 = validateParameter(valid_568428, JString, required = true,
                                  default = nil)
-  if valid_594195 != nil:
-    section.add "transactionNodeName", valid_594195
+  if valid_568428 != nil:
+    section.add "transactionNodeName", valid_568428
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2492,11 +2492,11 @@ proc validate_TransactionNodesListRegenerateApiKeys_594190(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594196 = query.getOrDefault("api-version")
-  valid_594196 = validateParameter(valid_594196, JString, required = true,
+  var valid_568429 = query.getOrDefault("api-version")
+  valid_568429 = validateParameter(valid_568429, JString, required = true,
                                  default = newJString("2018-06-01-preview"))
-  if valid_594196 != nil:
-    section.add "api-version", valid_594196
+  if valid_568429 != nil:
+    section.add "api-version", valid_568429
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2509,21 +2509,21 @@ proc validate_TransactionNodesListRegenerateApiKeys_594190(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594198: Call_TransactionNodesListRegenerateApiKeys_594189;
+proc call*(call_568431: Call_TransactionNodesListRegenerateApiKeys_568422;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerate the API keys for the blockchain member.
   ## 
-  let valid = call_594198.validator(path, query, header, formData, body)
-  let scheme = call_594198.pickScheme
+  let valid = call_568431.validator(path, query, header, formData, body)
+  let scheme = call_568431.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594198.url(scheme.get, call_594198.host, call_594198.base,
-                         call_594198.route, valid.getOrDefault("path"),
+  let url = call_568431.url(scheme.get, call_568431.host, call_568431.base,
+                         call_568431.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594198, url, valid)
+  result = hook(call_568431, url, valid)
 
-proc call*(call_594199: Call_TransactionNodesListRegenerateApiKeys_594189;
+proc call*(call_568432: Call_TransactionNodesListRegenerateApiKeys_568422;
           resourceGroupName: string; blockchainMemberName: string;
           subscriptionId: string; transactionNodeName: string;
           apiVersion: string = "2018-06-01-preview"; apiKey: JsonNode = nil): Recallable =
@@ -2541,23 +2541,23 @@ proc call*(call_594199: Call_TransactionNodesListRegenerateApiKeys_594189;
   ##                      : Transaction node name.
   ##   apiKey: JObject
   ##         : api key to be regenerated
-  var path_594200 = newJObject()
-  var query_594201 = newJObject()
-  var body_594202 = newJObject()
-  add(path_594200, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594201, "api-version", newJString(apiVersion))
-  add(path_594200, "blockchainMemberName", newJString(blockchainMemberName))
-  add(path_594200, "subscriptionId", newJString(subscriptionId))
-  add(path_594200, "transactionNodeName", newJString(transactionNodeName))
+  var path_568433 = newJObject()
+  var query_568434 = newJObject()
+  var body_568435 = newJObject()
+  add(path_568433, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568434, "api-version", newJString(apiVersion))
+  add(path_568433, "blockchainMemberName", newJString(blockchainMemberName))
+  add(path_568433, "subscriptionId", newJString(subscriptionId))
+  add(path_568433, "transactionNodeName", newJString(transactionNodeName))
   if apiKey != nil:
-    body_594202 = apiKey
-  result = call_594199.call(path_594200, query_594201, nil, nil, body_594202)
+    body_568435 = apiKey
+  result = call_568432.call(path_568433, query_568434, nil, nil, body_568435)
 
-var transactionNodesListRegenerateApiKeys* = Call_TransactionNodesListRegenerateApiKeys_594189(
+var transactionNodesListRegenerateApiKeys* = Call_TransactionNodesListRegenerateApiKeys_568422(
     name: "transactionNodesListRegenerateApiKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Blockchain/blockchainMembers/{blockchainMemberName}/transactionNodes/{transactionNodeName}/regenerateApiKeys",
-    validator: validate_TransactionNodesListRegenerateApiKeys_594190, base: "",
-    url: url_TransactionNodesListRegenerateApiKeys_594191, schemes: {Scheme.Https})
+    validator: validate_TransactionNodesListRegenerateApiKeys_568423, base: "",
+    url: url_TransactionNodesListRegenerateApiKeys_568424, schemes: {Scheme.Https})
 export
   rest
 

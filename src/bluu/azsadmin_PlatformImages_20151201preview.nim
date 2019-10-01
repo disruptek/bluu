@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Compute Admin Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_574441 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574441](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574441): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-PlatformImages"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_PlatformImagesList_593630 = ref object of OpenApiRestCall_593408
-proc url_PlatformImagesList_593632(protocol: Scheme; host: string; base: string;
+  Call_PlatformImagesList_574663 = ref object of OpenApiRestCall_574441
+proc url_PlatformImagesList_574665(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +124,7 @@ proc url_PlatformImagesList_593632(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PlatformImagesList_593631(path: JsonNode; query: JsonNode;
+proc validate_PlatformImagesList_574664(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Returns a list of all platform images.
@@ -139,16 +139,16 @@ proc validate_PlatformImagesList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593792 = path.getOrDefault("subscriptionId")
-  valid_593792 = validateParameter(valid_593792, JString, required = true,
+  var valid_574825 = path.getOrDefault("subscriptionId")
+  valid_574825 = validateParameter(valid_574825, JString, required = true,
                                  default = nil)
-  if valid_593792 != nil:
-    section.add "subscriptionId", valid_593792
-  var valid_593793 = path.getOrDefault("location")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  if valid_574825 != nil:
+    section.add "subscriptionId", valid_574825
+  var valid_574826 = path.getOrDefault("location")
+  valid_574826 = validateParameter(valid_574826, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "location", valid_593793
+  if valid_574826 != nil:
+    section.add "location", valid_574826
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -156,11 +156,11 @@ proc validate_PlatformImagesList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_574840 = query.getOrDefault("api-version")
+  valid_574840 = validateParameter(valid_574840, JString, required = true,
                                  default = newJString("2015-12-01-preview"))
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_574840 != nil:
+    section.add "api-version", valid_574840
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -169,20 +169,20 @@ proc validate_PlatformImagesList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593834: Call_PlatformImagesList_593630; path: JsonNode;
+proc call*(call_574867: Call_PlatformImagesList_574663; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all platform images.
   ## 
-  let valid = call_593834.validator(path, query, header, formData, body)
-  let scheme = call_593834.pickScheme
+  let valid = call_574867.validator(path, query, header, formData, body)
+  let scheme = call_574867.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593834.url(scheme.get, call_593834.host, call_593834.base,
-                         call_593834.route, valid.getOrDefault("path"),
+  let url = call_574867.url(scheme.get, call_574867.host, call_574867.base,
+                         call_574867.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593834, url, valid)
+  result = hook(call_574867, url, valid)
 
-proc call*(call_593905: Call_PlatformImagesList_593630; subscriptionId: string;
+proc call*(call_574938: Call_PlatformImagesList_574663; subscriptionId: string;
           location: string; apiVersion: string = "2015-12-01-preview"): Recallable =
   ## platformImagesList
   ## Returns a list of all platform images.
@@ -192,21 +192,21 @@ proc call*(call_593905: Call_PlatformImagesList_593630; subscriptionId: string;
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593906 = newJObject()
-  var query_593908 = newJObject()
-  add(query_593908, "api-version", newJString(apiVersion))
-  add(path_593906, "subscriptionId", newJString(subscriptionId))
-  add(path_593906, "location", newJString(location))
-  result = call_593905.call(path_593906, query_593908, nil, nil, nil)
+  var path_574939 = newJObject()
+  var query_574941 = newJObject()
+  add(query_574941, "api-version", newJString(apiVersion))
+  add(path_574939, "subscriptionId", newJString(subscriptionId))
+  add(path_574939, "location", newJString(location))
+  result = call_574938.call(path_574939, query_574941, nil, nil, nil)
 
-var platformImagesList* = Call_PlatformImagesList_593630(
+var platformImagesList* = Call_PlatformImagesList_574663(
     name: "platformImagesList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/artifactTypes/platformImage",
-    validator: validate_PlatformImagesList_593631, base: "",
-    url: url_PlatformImagesList_593632, schemes: {Scheme.Https})
+    validator: validate_PlatformImagesList_574664, base: "",
+    url: url_PlatformImagesList_574665, schemes: {Scheme.Https})
 type
-  Call_PlatformImagesCreate_593970 = ref object of OpenApiRestCall_593408
-proc url_PlatformImagesCreate_593972(protocol: Scheme; host: string; base: string;
+  Call_PlatformImagesCreate_575003 = ref object of OpenApiRestCall_574441
+proc url_PlatformImagesCreate_575005(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -237,7 +237,7 @@ proc url_PlatformImagesCreate_593972(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PlatformImagesCreate_593971(path: JsonNode; query: JsonNode;
+proc validate_PlatformImagesCreate_575004(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new platform image with given publisher, offer, skus and version.
   ## 
@@ -258,36 +258,36 @@ proc validate_PlatformImagesCreate_593971(path: JsonNode; query: JsonNode;
   ##           : Location of the resource.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `publisher` field"
-  var valid_593973 = path.getOrDefault("publisher")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_575006 = path.getOrDefault("publisher")
+  valid_575006 = validateParameter(valid_575006, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "publisher", valid_593973
-  var valid_593974 = path.getOrDefault("version")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  if valid_575006 != nil:
+    section.add "publisher", valid_575006
+  var valid_575007 = path.getOrDefault("version")
+  valid_575007 = validateParameter(valid_575007, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "version", valid_593974
-  var valid_593975 = path.getOrDefault("subscriptionId")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  if valid_575007 != nil:
+    section.add "version", valid_575007
+  var valid_575008 = path.getOrDefault("subscriptionId")
+  valid_575008 = validateParameter(valid_575008, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "subscriptionId", valid_593975
-  var valid_593976 = path.getOrDefault("sku")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  if valid_575008 != nil:
+    section.add "subscriptionId", valid_575008
+  var valid_575009 = path.getOrDefault("sku")
+  valid_575009 = validateParameter(valid_575009, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "sku", valid_593976
-  var valid_593977 = path.getOrDefault("offer")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_575009 != nil:
+    section.add "sku", valid_575009
+  var valid_575010 = path.getOrDefault("offer")
+  valid_575010 = validateParameter(valid_575010, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "offer", valid_593977
-  var valid_593978 = path.getOrDefault("location")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  if valid_575010 != nil:
+    section.add "offer", valid_575010
+  var valid_575011 = path.getOrDefault("location")
+  valid_575011 = validateParameter(valid_575011, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "location", valid_593978
+  if valid_575011 != nil:
+    section.add "location", valid_575011
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -295,11 +295,11 @@ proc validate_PlatformImagesCreate_593971(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593979 = query.getOrDefault("api-version")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_575012 = query.getOrDefault("api-version")
+  valid_575012 = validateParameter(valid_575012, JString, required = true,
                                  default = newJString("2015-12-01-preview"))
-  if valid_593979 != nil:
-    section.add "api-version", valid_593979
+  if valid_575012 != nil:
+    section.add "api-version", valid_575012
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -313,20 +313,20 @@ proc validate_PlatformImagesCreate_593971(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593981: Call_PlatformImagesCreate_593970; path: JsonNode;
+proc call*(call_575014: Call_PlatformImagesCreate_575003; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new platform image with given publisher, offer, skus and version.
   ## 
-  let valid = call_593981.validator(path, query, header, formData, body)
-  let scheme = call_593981.pickScheme
+  let valid = call_575014.validator(path, query, header, formData, body)
+  let scheme = call_575014.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593981.url(scheme.get, call_593981.host, call_593981.base,
-                         call_593981.route, valid.getOrDefault("path"),
+  let url = call_575014.url(scheme.get, call_575014.host, call_575014.base,
+                         call_575014.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593981, url, valid)
+  result = hook(call_575014, url, valid)
 
-proc call*(call_593982: Call_PlatformImagesCreate_593970; newImage: JsonNode;
+proc call*(call_575015: Call_PlatformImagesCreate_575003; newImage: JsonNode;
           publisher: string; version: string; subscriptionId: string; sku: string;
           offer: string; location: string; apiVersion: string = "2015-12-01-preview"): Recallable =
   ## platformImagesCreate
@@ -347,28 +347,28 @@ proc call*(call_593982: Call_PlatformImagesCreate_593970; newImage: JsonNode;
   ##        : Name of the offer.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593983 = newJObject()
-  var query_593984 = newJObject()
-  var body_593985 = newJObject()
-  add(query_593984, "api-version", newJString(apiVersion))
+  var path_575016 = newJObject()
+  var query_575017 = newJObject()
+  var body_575018 = newJObject()
+  add(query_575017, "api-version", newJString(apiVersion))
   if newImage != nil:
-    body_593985 = newImage
-  add(path_593983, "publisher", newJString(publisher))
-  add(path_593983, "version", newJString(version))
-  add(path_593983, "subscriptionId", newJString(subscriptionId))
-  add(path_593983, "sku", newJString(sku))
-  add(path_593983, "offer", newJString(offer))
-  add(path_593983, "location", newJString(location))
-  result = call_593982.call(path_593983, query_593984, nil, nil, body_593985)
+    body_575018 = newImage
+  add(path_575016, "publisher", newJString(publisher))
+  add(path_575016, "version", newJString(version))
+  add(path_575016, "subscriptionId", newJString(subscriptionId))
+  add(path_575016, "sku", newJString(sku))
+  add(path_575016, "offer", newJString(offer))
+  add(path_575016, "location", newJString(location))
+  result = call_575015.call(path_575016, query_575017, nil, nil, body_575018)
 
-var platformImagesCreate* = Call_PlatformImagesCreate_593970(
+var platformImagesCreate* = Call_PlatformImagesCreate_575003(
     name: "platformImagesCreate", meth: HttpMethod.HttpPut,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/artifactTypes/platformImage/publishers/{publisher}/offers/{offer}/skus/{sku}/versions/{version}",
-    validator: validate_PlatformImagesCreate_593971, base: "",
-    url: url_PlatformImagesCreate_593972, schemes: {Scheme.Https})
+    validator: validate_PlatformImagesCreate_575004, base: "",
+    url: url_PlatformImagesCreate_575005, schemes: {Scheme.Https})
 type
-  Call_PlatformImagesGet_593947 = ref object of OpenApiRestCall_593408
-proc url_PlatformImagesGet_593949(protocol: Scheme; host: string; base: string;
+  Call_PlatformImagesGet_574980 = ref object of OpenApiRestCall_574441
+proc url_PlatformImagesGet_574982(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -399,7 +399,7 @@ proc url_PlatformImagesGet_593949(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PlatformImagesGet_593948(path: JsonNode; query: JsonNode;
+proc validate_PlatformImagesGet_574981(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Returns the specific platform image matching publisher, offer, skus and version.
@@ -421,36 +421,36 @@ proc validate_PlatformImagesGet_593948(path: JsonNode; query: JsonNode;
   ##           : Location of the resource.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `publisher` field"
-  var valid_593959 = path.getOrDefault("publisher")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  var valid_574992 = path.getOrDefault("publisher")
+  valid_574992 = validateParameter(valid_574992, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "publisher", valid_593959
-  var valid_593960 = path.getOrDefault("version")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  if valid_574992 != nil:
+    section.add "publisher", valid_574992
+  var valid_574993 = path.getOrDefault("version")
+  valid_574993 = validateParameter(valid_574993, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "version", valid_593960
-  var valid_593961 = path.getOrDefault("subscriptionId")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  if valid_574993 != nil:
+    section.add "version", valid_574993
+  var valid_574994 = path.getOrDefault("subscriptionId")
+  valid_574994 = validateParameter(valid_574994, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "subscriptionId", valid_593961
-  var valid_593962 = path.getOrDefault("sku")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_574994 != nil:
+    section.add "subscriptionId", valid_574994
+  var valid_574995 = path.getOrDefault("sku")
+  valid_574995 = validateParameter(valid_574995, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "sku", valid_593962
-  var valid_593963 = path.getOrDefault("offer")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_574995 != nil:
+    section.add "sku", valid_574995
+  var valid_574996 = path.getOrDefault("offer")
+  valid_574996 = validateParameter(valid_574996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "offer", valid_593963
-  var valid_593964 = path.getOrDefault("location")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_574996 != nil:
+    section.add "offer", valid_574996
+  var valid_574997 = path.getOrDefault("location")
+  valid_574997 = validateParameter(valid_574997, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "location", valid_593964
+  if valid_574997 != nil:
+    section.add "location", valid_574997
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -458,11 +458,11 @@ proc validate_PlatformImagesGet_593948(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593965 = query.getOrDefault("api-version")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_574998 = query.getOrDefault("api-version")
+  valid_574998 = validateParameter(valid_574998, JString, required = true,
                                  default = newJString("2015-12-01-preview"))
-  if valid_593965 != nil:
-    section.add "api-version", valid_593965
+  if valid_574998 != nil:
+    section.add "api-version", valid_574998
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -471,20 +471,20 @@ proc validate_PlatformImagesGet_593948(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593966: Call_PlatformImagesGet_593947; path: JsonNode;
+proc call*(call_574999: Call_PlatformImagesGet_574980; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the specific platform image matching publisher, offer, skus and version.
   ## 
-  let valid = call_593966.validator(path, query, header, formData, body)
-  let scheme = call_593966.pickScheme
+  let valid = call_574999.validator(path, query, header, formData, body)
+  let scheme = call_574999.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593966.url(scheme.get, call_593966.host, call_593966.base,
-                         call_593966.route, valid.getOrDefault("path"),
+  let url = call_574999.url(scheme.get, call_574999.host, call_574999.base,
+                         call_574999.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593966, url, valid)
+  result = hook(call_574999, url, valid)
 
-proc call*(call_593967: Call_PlatformImagesGet_593947; publisher: string;
+proc call*(call_575000: Call_PlatformImagesGet_574980; publisher: string;
           version: string; subscriptionId: string; sku: string; offer: string;
           location: string; apiVersion: string = "2015-12-01-preview"): Recallable =
   ## platformImagesGet
@@ -503,24 +503,24 @@ proc call*(call_593967: Call_PlatformImagesGet_593947; publisher: string;
   ##        : Name of the offer.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593968 = newJObject()
-  var query_593969 = newJObject()
-  add(query_593969, "api-version", newJString(apiVersion))
-  add(path_593968, "publisher", newJString(publisher))
-  add(path_593968, "version", newJString(version))
-  add(path_593968, "subscriptionId", newJString(subscriptionId))
-  add(path_593968, "sku", newJString(sku))
-  add(path_593968, "offer", newJString(offer))
-  add(path_593968, "location", newJString(location))
-  result = call_593967.call(path_593968, query_593969, nil, nil, nil)
+  var path_575001 = newJObject()
+  var query_575002 = newJObject()
+  add(query_575002, "api-version", newJString(apiVersion))
+  add(path_575001, "publisher", newJString(publisher))
+  add(path_575001, "version", newJString(version))
+  add(path_575001, "subscriptionId", newJString(subscriptionId))
+  add(path_575001, "sku", newJString(sku))
+  add(path_575001, "offer", newJString(offer))
+  add(path_575001, "location", newJString(location))
+  result = call_575000.call(path_575001, query_575002, nil, nil, nil)
 
-var platformImagesGet* = Call_PlatformImagesGet_593947(name: "platformImagesGet",
+var platformImagesGet* = Call_PlatformImagesGet_574980(name: "platformImagesGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/artifactTypes/platformImage/publishers/{publisher}/offers/{offer}/skus/{sku}/versions/{version}",
-    validator: validate_PlatformImagesGet_593948, base: "",
-    url: url_PlatformImagesGet_593949, schemes: {Scheme.Https})
+    validator: validate_PlatformImagesGet_574981, base: "",
+    url: url_PlatformImagesGet_574982, schemes: {Scheme.Https})
 type
-  Call_PlatformImagesDelete_593986 = ref object of OpenApiRestCall_593408
-proc url_PlatformImagesDelete_593988(protocol: Scheme; host: string; base: string;
+  Call_PlatformImagesDelete_575019 = ref object of OpenApiRestCall_574441
+proc url_PlatformImagesDelete_575021(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -551,7 +551,7 @@ proc url_PlatformImagesDelete_593988(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PlatformImagesDelete_593987(path: JsonNode; query: JsonNode;
+proc validate_PlatformImagesDelete_575020(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a platform image
   ## 
@@ -572,36 +572,36 @@ proc validate_PlatformImagesDelete_593987(path: JsonNode; query: JsonNode;
   ##           : Location of the resource.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `publisher` field"
-  var valid_593989 = path.getOrDefault("publisher")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  var valid_575022 = path.getOrDefault("publisher")
+  valid_575022 = validateParameter(valid_575022, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "publisher", valid_593989
-  var valid_593990 = path.getOrDefault("version")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  if valid_575022 != nil:
+    section.add "publisher", valid_575022
+  var valid_575023 = path.getOrDefault("version")
+  valid_575023 = validateParameter(valid_575023, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "version", valid_593990
-  var valid_593991 = path.getOrDefault("subscriptionId")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_575023 != nil:
+    section.add "version", valid_575023
+  var valid_575024 = path.getOrDefault("subscriptionId")
+  valid_575024 = validateParameter(valid_575024, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "subscriptionId", valid_593991
-  var valid_593992 = path.getOrDefault("sku")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_575024 != nil:
+    section.add "subscriptionId", valid_575024
+  var valid_575025 = path.getOrDefault("sku")
+  valid_575025 = validateParameter(valid_575025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "sku", valid_593992
-  var valid_593993 = path.getOrDefault("offer")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_575025 != nil:
+    section.add "sku", valid_575025
+  var valid_575026 = path.getOrDefault("offer")
+  valid_575026 = validateParameter(valid_575026, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "offer", valid_593993
-  var valid_593994 = path.getOrDefault("location")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_575026 != nil:
+    section.add "offer", valid_575026
+  var valid_575027 = path.getOrDefault("location")
+  valid_575027 = validateParameter(valid_575027, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "location", valid_593994
+  if valid_575027 != nil:
+    section.add "location", valid_575027
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -609,11 +609,11 @@ proc validate_PlatformImagesDelete_593987(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593995 = query.getOrDefault("api-version")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_575028 = query.getOrDefault("api-version")
+  valid_575028 = validateParameter(valid_575028, JString, required = true,
                                  default = newJString("2015-12-01-preview"))
-  if valid_593995 != nil:
-    section.add "api-version", valid_593995
+  if valid_575028 != nil:
+    section.add "api-version", valid_575028
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -622,20 +622,20 @@ proc validate_PlatformImagesDelete_593987(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593996: Call_PlatformImagesDelete_593986; path: JsonNode;
+proc call*(call_575029: Call_PlatformImagesDelete_575019; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a platform image
   ## 
-  let valid = call_593996.validator(path, query, header, formData, body)
-  let scheme = call_593996.pickScheme
+  let valid = call_575029.validator(path, query, header, formData, body)
+  let scheme = call_575029.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593996.url(scheme.get, call_593996.host, call_593996.base,
-                         call_593996.route, valid.getOrDefault("path"),
+  let url = call_575029.url(scheme.get, call_575029.host, call_575029.base,
+                         call_575029.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593996, url, valid)
+  result = hook(call_575029, url, valid)
 
-proc call*(call_593997: Call_PlatformImagesDelete_593986; publisher: string;
+proc call*(call_575030: Call_PlatformImagesDelete_575019; publisher: string;
           version: string; subscriptionId: string; sku: string; offer: string;
           location: string; apiVersion: string = "2015-12-01-preview"): Recallable =
   ## platformImagesDelete
@@ -654,22 +654,22 @@ proc call*(call_593997: Call_PlatformImagesDelete_593986; publisher: string;
   ##        : Name of the offer.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593998 = newJObject()
-  var query_593999 = newJObject()
-  add(query_593999, "api-version", newJString(apiVersion))
-  add(path_593998, "publisher", newJString(publisher))
-  add(path_593998, "version", newJString(version))
-  add(path_593998, "subscriptionId", newJString(subscriptionId))
-  add(path_593998, "sku", newJString(sku))
-  add(path_593998, "offer", newJString(offer))
-  add(path_593998, "location", newJString(location))
-  result = call_593997.call(path_593998, query_593999, nil, nil, nil)
+  var path_575031 = newJObject()
+  var query_575032 = newJObject()
+  add(query_575032, "api-version", newJString(apiVersion))
+  add(path_575031, "publisher", newJString(publisher))
+  add(path_575031, "version", newJString(version))
+  add(path_575031, "subscriptionId", newJString(subscriptionId))
+  add(path_575031, "sku", newJString(sku))
+  add(path_575031, "offer", newJString(offer))
+  add(path_575031, "location", newJString(location))
+  result = call_575030.call(path_575031, query_575032, nil, nil, nil)
 
-var platformImagesDelete* = Call_PlatformImagesDelete_593986(
+var platformImagesDelete* = Call_PlatformImagesDelete_575019(
     name: "platformImagesDelete", meth: HttpMethod.HttpDelete,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/artifactTypes/platformImage/publishers/{publisher}/offers/{offer}/skus/{sku}/versions/{version}",
-    validator: validate_PlatformImagesDelete_593987, base: "",
-    url: url_PlatformImagesDelete_593988, schemes: {Scheme.Https})
+    validator: validate_PlatformImagesDelete_575020, base: "",
+    url: url_PlatformImagesDelete_575021, schemes: {Scheme.Https})
 export
   rest
 

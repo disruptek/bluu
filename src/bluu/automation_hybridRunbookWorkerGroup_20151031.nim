@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: AutomationManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_596457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "automation-hybridRunbookWorkerGroup"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_HybridRunbookWorkerGroupListByAutomationAccount_593646 = ref object of OpenApiRestCall_593424
-proc url_HybridRunbookWorkerGroupListByAutomationAccount_593648(protocol: Scheme;
+  Call_HybridRunbookWorkerGroupListByAutomationAccount_596679 = ref object of OpenApiRestCall_596457
+proc url_HybridRunbookWorkerGroupListByAutomationAccount_596681(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +129,7 @@ proc url_HybridRunbookWorkerGroupListByAutomationAccount_593648(protocol: Scheme
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridRunbookWorkerGroupListByAutomationAccount_593647(
+proc validate_HybridRunbookWorkerGroupListByAutomationAccount_596680(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Retrieve a list of hybrid runbook worker groups.
@@ -146,21 +146,21 @@ proc validate_HybridRunbookWorkerGroupListByAutomationAccount_593647(
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593809 = path.getOrDefault("automationAccountName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_596842 = path.getOrDefault("automationAccountName")
+  valid_596842 = validateParameter(valid_596842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "automationAccountName", valid_593809
-  var valid_593810 = path.getOrDefault("resourceGroupName")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_596842 != nil:
+    section.add "automationAccountName", valid_596842
+  var valid_596843 = path.getOrDefault("resourceGroupName")
+  valid_596843 = validateParameter(valid_596843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "resourceGroupName", valid_593810
-  var valid_593811 = path.getOrDefault("subscriptionId")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_596843 != nil:
+    section.add "resourceGroupName", valid_596843
+  var valid_596844 = path.getOrDefault("subscriptionId")
+  valid_596844 = validateParameter(valid_596844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "subscriptionId", valid_593811
+  if valid_596844 != nil:
+    section.add "subscriptionId", valid_596844
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -170,16 +170,16 @@ proc validate_HybridRunbookWorkerGroupListByAutomationAccount_593647(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_596845 = query.getOrDefault("api-version")
+  valid_596845 = validateParameter(valid_596845, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
-  var valid_593813 = query.getOrDefault("$filter")
-  valid_593813 = validateParameter(valid_593813, JString, required = false,
+  if valid_596845 != nil:
+    section.add "api-version", valid_596845
+  var valid_596846 = query.getOrDefault("$filter")
+  valid_596846 = validateParameter(valid_596846, JString, required = false,
                                  default = nil)
-  if valid_593813 != nil:
-    section.add "$filter", valid_593813
+  if valid_596846 != nil:
+    section.add "$filter", valid_596846
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -188,22 +188,22 @@ proc validate_HybridRunbookWorkerGroupListByAutomationAccount_593647(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593840: Call_HybridRunbookWorkerGroupListByAutomationAccount_593646;
+proc call*(call_596873: Call_HybridRunbookWorkerGroupListByAutomationAccount_596679;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve a list of hybrid runbook worker groups.
   ## 
   ## http://aka.ms/azureautomationsdk/hybridrunbookworkergroupoperations
-  let valid = call_593840.validator(path, query, header, formData, body)
-  let scheme = call_593840.pickScheme
+  let valid = call_596873.validator(path, query, header, formData, body)
+  let scheme = call_596873.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593840.url(scheme.get, call_593840.host, call_593840.base,
-                         call_593840.route, valid.getOrDefault("path"),
+  let url = call_596873.url(scheme.get, call_596873.host, call_596873.base,
+                         call_596873.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593840, url, valid)
+  result = hook(call_596873, url, valid)
 
-proc call*(call_593911: Call_HybridRunbookWorkerGroupListByAutomationAccount_593646;
+proc call*(call_596944: Call_HybridRunbookWorkerGroupListByAutomationAccount_596679;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; Filter: string = ""): Recallable =
   ## hybridRunbookWorkerGroupListByAutomationAccount
@@ -219,24 +219,24 @@ proc call*(call_593911: Call_HybridRunbookWorkerGroupListByAutomationAccount_593
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_593912 = newJObject()
-  var query_593914 = newJObject()
-  add(path_593912, "automationAccountName", newJString(automationAccountName))
-  add(path_593912, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593914, "api-version", newJString(apiVersion))
-  add(path_593912, "subscriptionId", newJString(subscriptionId))
-  add(query_593914, "$filter", newJString(Filter))
-  result = call_593911.call(path_593912, query_593914, nil, nil, nil)
+  var path_596945 = newJObject()
+  var query_596947 = newJObject()
+  add(path_596945, "automationAccountName", newJString(automationAccountName))
+  add(path_596945, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596947, "api-version", newJString(apiVersion))
+  add(path_596945, "subscriptionId", newJString(subscriptionId))
+  add(query_596947, "$filter", newJString(Filter))
+  result = call_596944.call(path_596945, query_596947, nil, nil, nil)
 
-var hybridRunbookWorkerGroupListByAutomationAccount* = Call_HybridRunbookWorkerGroupListByAutomationAccount_593646(
+var hybridRunbookWorkerGroupListByAutomationAccount* = Call_HybridRunbookWorkerGroupListByAutomationAccount_596679(
     name: "hybridRunbookWorkerGroupListByAutomationAccount",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/hybridRunbookWorkerGroups",
-    validator: validate_HybridRunbookWorkerGroupListByAutomationAccount_593647,
-    base: "", url: url_HybridRunbookWorkerGroupListByAutomationAccount_593648,
+    validator: validate_HybridRunbookWorkerGroupListByAutomationAccount_596680,
+    base: "", url: url_HybridRunbookWorkerGroupListByAutomationAccount_596681,
     schemes: {Scheme.Https})
 type
-  Call_HybridRunbookWorkerGroupGet_593953 = ref object of OpenApiRestCall_593424
-proc url_HybridRunbookWorkerGroupGet_593955(protocol: Scheme; host: string;
+  Call_HybridRunbookWorkerGroupGet_596986 = ref object of OpenApiRestCall_596457
+proc url_HybridRunbookWorkerGroupGet_596988(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -264,7 +264,7 @@ proc url_HybridRunbookWorkerGroupGet_593955(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridRunbookWorkerGroupGet_593954(path: JsonNode; query: JsonNode;
+proc validate_HybridRunbookWorkerGroupGet_596987(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a hybrid runbook worker group.
   ## 
@@ -282,26 +282,26 @@ proc validate_HybridRunbookWorkerGroupGet_593954(path: JsonNode; query: JsonNode
   ##                               : The hybrid runbook worker group name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593956 = path.getOrDefault("automationAccountName")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  var valid_596989 = path.getOrDefault("automationAccountName")
+  valid_596989 = validateParameter(valid_596989, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "automationAccountName", valid_593956
-  var valid_593957 = path.getOrDefault("resourceGroupName")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  if valid_596989 != nil:
+    section.add "automationAccountName", valid_596989
+  var valid_596990 = path.getOrDefault("resourceGroupName")
+  valid_596990 = validateParameter(valid_596990, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "resourceGroupName", valid_593957
-  var valid_593958 = path.getOrDefault("subscriptionId")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  if valid_596990 != nil:
+    section.add "resourceGroupName", valid_596990
+  var valid_596991 = path.getOrDefault("subscriptionId")
+  valid_596991 = validateParameter(valid_596991, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "subscriptionId", valid_593958
-  var valid_593959 = path.getOrDefault("hybridRunbookWorkerGroupName")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_596991 != nil:
+    section.add "subscriptionId", valid_596991
+  var valid_596992 = path.getOrDefault("hybridRunbookWorkerGroupName")
+  valid_596992 = validateParameter(valid_596992, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "hybridRunbookWorkerGroupName", valid_593959
+  if valid_596992 != nil:
+    section.add "hybridRunbookWorkerGroupName", valid_596992
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -309,11 +309,11 @@ proc validate_HybridRunbookWorkerGroupGet_593954(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593960 = query.getOrDefault("api-version")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_596993 = query.getOrDefault("api-version")
+  valid_596993 = validateParameter(valid_596993, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "api-version", valid_593960
+  if valid_596993 != nil:
+    section.add "api-version", valid_596993
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -322,21 +322,21 @@ proc validate_HybridRunbookWorkerGroupGet_593954(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593961: Call_HybridRunbookWorkerGroupGet_593953; path: JsonNode;
+proc call*(call_596994: Call_HybridRunbookWorkerGroupGet_596986; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a hybrid runbook worker group.
   ## 
   ## http://aka.ms/azureautomationsdk/hybridrunbookworkergroupoperations
-  let valid = call_593961.validator(path, query, header, formData, body)
-  let scheme = call_593961.pickScheme
+  let valid = call_596994.validator(path, query, header, formData, body)
+  let scheme = call_596994.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593961.url(scheme.get, call_593961.host, call_593961.base,
-                         call_593961.route, valid.getOrDefault("path"),
+  let url = call_596994.url(scheme.get, call_596994.host, call_596994.base,
+                         call_596994.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593961, url, valid)
+  result = hook(call_596994, url, valid)
 
-proc call*(call_593962: Call_HybridRunbookWorkerGroupGet_593953;
+proc call*(call_596995: Call_HybridRunbookWorkerGroupGet_596986;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string;
           hybridRunbookWorkerGroupName: string): Recallable =
@@ -353,24 +353,24 @@ proc call*(call_593962: Call_HybridRunbookWorkerGroupGet_593953;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   hybridRunbookWorkerGroupName: string (required)
   ##                               : The hybrid runbook worker group name
-  var path_593963 = newJObject()
-  var query_593964 = newJObject()
-  add(path_593963, "automationAccountName", newJString(automationAccountName))
-  add(path_593963, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593964, "api-version", newJString(apiVersion))
-  add(path_593963, "subscriptionId", newJString(subscriptionId))
-  add(path_593963, "hybridRunbookWorkerGroupName",
+  var path_596996 = newJObject()
+  var query_596997 = newJObject()
+  add(path_596996, "automationAccountName", newJString(automationAccountName))
+  add(path_596996, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596997, "api-version", newJString(apiVersion))
+  add(path_596996, "subscriptionId", newJString(subscriptionId))
+  add(path_596996, "hybridRunbookWorkerGroupName",
       newJString(hybridRunbookWorkerGroupName))
-  result = call_593962.call(path_593963, query_593964, nil, nil, nil)
+  result = call_596995.call(path_596996, query_596997, nil, nil, nil)
 
-var hybridRunbookWorkerGroupGet* = Call_HybridRunbookWorkerGroupGet_593953(
+var hybridRunbookWorkerGroupGet* = Call_HybridRunbookWorkerGroupGet_596986(
     name: "hybridRunbookWorkerGroupGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/hybridRunbookWorkerGroups/{hybridRunbookWorkerGroupName}",
-    validator: validate_HybridRunbookWorkerGroupGet_593954, base: "",
-    url: url_HybridRunbookWorkerGroupGet_593955, schemes: {Scheme.Https})
+    validator: validate_HybridRunbookWorkerGroupGet_596987, base: "",
+    url: url_HybridRunbookWorkerGroupGet_596988, schemes: {Scheme.Https})
 type
-  Call_HybridRunbookWorkerGroupUpdate_593977 = ref object of OpenApiRestCall_593424
-proc url_HybridRunbookWorkerGroupUpdate_593979(protocol: Scheme; host: string;
+  Call_HybridRunbookWorkerGroupUpdate_597010 = ref object of OpenApiRestCall_596457
+proc url_HybridRunbookWorkerGroupUpdate_597012(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -398,7 +398,7 @@ proc url_HybridRunbookWorkerGroupUpdate_593979(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridRunbookWorkerGroupUpdate_593978(path: JsonNode;
+proc validate_HybridRunbookWorkerGroupUpdate_597011(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update a hybrid runbook worker group.
   ## 
@@ -416,26 +416,26 @@ proc validate_HybridRunbookWorkerGroupUpdate_593978(path: JsonNode;
   ##                               : The hybrid runbook worker group name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594006 = path.getOrDefault("automationAccountName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_597039 = path.getOrDefault("automationAccountName")
+  valid_597039 = validateParameter(valid_597039, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "automationAccountName", valid_594006
-  var valid_594007 = path.getOrDefault("resourceGroupName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_597039 != nil:
+    section.add "automationAccountName", valid_597039
+  var valid_597040 = path.getOrDefault("resourceGroupName")
+  valid_597040 = validateParameter(valid_597040, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "resourceGroupName", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_597040 != nil:
+    section.add "resourceGroupName", valid_597040
+  var valid_597041 = path.getOrDefault("subscriptionId")
+  valid_597041 = validateParameter(valid_597041, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
-  var valid_594009 = path.getOrDefault("hybridRunbookWorkerGroupName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_597041 != nil:
+    section.add "subscriptionId", valid_597041
+  var valid_597042 = path.getOrDefault("hybridRunbookWorkerGroupName")
+  valid_597042 = validateParameter(valid_597042, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "hybridRunbookWorkerGroupName", valid_594009
+  if valid_597042 != nil:
+    section.add "hybridRunbookWorkerGroupName", valid_597042
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -443,11 +443,11 @@ proc validate_HybridRunbookWorkerGroupUpdate_593978(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594010 = query.getOrDefault("api-version")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  var valid_597043 = query.getOrDefault("api-version")
+  valid_597043 = validateParameter(valid_597043, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "api-version", valid_594010
+  if valid_597043 != nil:
+    section.add "api-version", valid_597043
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -461,21 +461,21 @@ proc validate_HybridRunbookWorkerGroupUpdate_593978(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594012: Call_HybridRunbookWorkerGroupUpdate_593977; path: JsonNode;
+proc call*(call_597045: Call_HybridRunbookWorkerGroupUpdate_597010; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a hybrid runbook worker group.
   ## 
   ## http://aka.ms/azureautomationsdk/hybridrunbookworkergroupoperations
-  let valid = call_594012.validator(path, query, header, formData, body)
-  let scheme = call_594012.pickScheme
+  let valid = call_597045.validator(path, query, header, formData, body)
+  let scheme = call_597045.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594012.url(scheme.get, call_594012.host, call_594012.base,
-                         call_594012.route, valid.getOrDefault("path"),
+  let url = call_597045.url(scheme.get, call_597045.host, call_597045.base,
+                         call_597045.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594012, url, valid)
+  result = hook(call_597045, url, valid)
 
-proc call*(call_594013: Call_HybridRunbookWorkerGroupUpdate_593977;
+proc call*(call_597046: Call_HybridRunbookWorkerGroupUpdate_597010;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string;
           hybridRunbookWorkerGroupName: string; parameters: JsonNode): Recallable =
@@ -494,27 +494,27 @@ proc call*(call_594013: Call_HybridRunbookWorkerGroupUpdate_593977;
   ##                               : The hybrid runbook worker group name
   ##   parameters: JObject (required)
   ##             : The hybrid runbook worker group
-  var path_594014 = newJObject()
-  var query_594015 = newJObject()
-  var body_594016 = newJObject()
-  add(path_594014, "automationAccountName", newJString(automationAccountName))
-  add(path_594014, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594015, "api-version", newJString(apiVersion))
-  add(path_594014, "subscriptionId", newJString(subscriptionId))
-  add(path_594014, "hybridRunbookWorkerGroupName",
+  var path_597047 = newJObject()
+  var query_597048 = newJObject()
+  var body_597049 = newJObject()
+  add(path_597047, "automationAccountName", newJString(automationAccountName))
+  add(path_597047, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597048, "api-version", newJString(apiVersion))
+  add(path_597047, "subscriptionId", newJString(subscriptionId))
+  add(path_597047, "hybridRunbookWorkerGroupName",
       newJString(hybridRunbookWorkerGroupName))
   if parameters != nil:
-    body_594016 = parameters
-  result = call_594013.call(path_594014, query_594015, nil, nil, body_594016)
+    body_597049 = parameters
+  result = call_597046.call(path_597047, query_597048, nil, nil, body_597049)
 
-var hybridRunbookWorkerGroupUpdate* = Call_HybridRunbookWorkerGroupUpdate_593977(
+var hybridRunbookWorkerGroupUpdate* = Call_HybridRunbookWorkerGroupUpdate_597010(
     name: "hybridRunbookWorkerGroupUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/hybridRunbookWorkerGroups/{hybridRunbookWorkerGroupName}",
-    validator: validate_HybridRunbookWorkerGroupUpdate_593978, base: "",
-    url: url_HybridRunbookWorkerGroupUpdate_593979, schemes: {Scheme.Https})
+    validator: validate_HybridRunbookWorkerGroupUpdate_597011, base: "",
+    url: url_HybridRunbookWorkerGroupUpdate_597012, schemes: {Scheme.Https})
 type
-  Call_HybridRunbookWorkerGroupDelete_593965 = ref object of OpenApiRestCall_593424
-proc url_HybridRunbookWorkerGroupDelete_593967(protocol: Scheme; host: string;
+  Call_HybridRunbookWorkerGroupDelete_596998 = ref object of OpenApiRestCall_596457
+proc url_HybridRunbookWorkerGroupDelete_597000(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -542,7 +542,7 @@ proc url_HybridRunbookWorkerGroupDelete_593967(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridRunbookWorkerGroupDelete_593966(path: JsonNode;
+proc validate_HybridRunbookWorkerGroupDelete_596999(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a hybrid runbook worker group.
   ## 
@@ -560,26 +560,26 @@ proc validate_HybridRunbookWorkerGroupDelete_593966(path: JsonNode;
   ##                               : The hybrid runbook worker group name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593968 = path.getOrDefault("automationAccountName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  var valid_597001 = path.getOrDefault("automationAccountName")
+  valid_597001 = validateParameter(valid_597001, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "automationAccountName", valid_593968
-  var valid_593969 = path.getOrDefault("resourceGroupName")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  if valid_597001 != nil:
+    section.add "automationAccountName", valid_597001
+  var valid_597002 = path.getOrDefault("resourceGroupName")
+  valid_597002 = validateParameter(valid_597002, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "resourceGroupName", valid_593969
-  var valid_593970 = path.getOrDefault("subscriptionId")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_597002 != nil:
+    section.add "resourceGroupName", valid_597002
+  var valid_597003 = path.getOrDefault("subscriptionId")
+  valid_597003 = validateParameter(valid_597003, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "subscriptionId", valid_593970
-  var valid_593971 = path.getOrDefault("hybridRunbookWorkerGroupName")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  if valid_597003 != nil:
+    section.add "subscriptionId", valid_597003
+  var valid_597004 = path.getOrDefault("hybridRunbookWorkerGroupName")
+  valid_597004 = validateParameter(valid_597004, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "hybridRunbookWorkerGroupName", valid_593971
+  if valid_597004 != nil:
+    section.add "hybridRunbookWorkerGroupName", valid_597004
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -587,11 +587,11 @@ proc validate_HybridRunbookWorkerGroupDelete_593966(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593972 = query.getOrDefault("api-version")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_597005 = query.getOrDefault("api-version")
+  valid_597005 = validateParameter(valid_597005, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "api-version", valid_593972
+  if valid_597005 != nil:
+    section.add "api-version", valid_597005
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -600,21 +600,21 @@ proc validate_HybridRunbookWorkerGroupDelete_593966(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593973: Call_HybridRunbookWorkerGroupDelete_593965; path: JsonNode;
+proc call*(call_597006: Call_HybridRunbookWorkerGroupDelete_596998; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a hybrid runbook worker group.
   ## 
   ## http://aka.ms/azureautomationsdk/hybridrunbookworkergroupoperations
-  let valid = call_593973.validator(path, query, header, formData, body)
-  let scheme = call_593973.pickScheme
+  let valid = call_597006.validator(path, query, header, formData, body)
+  let scheme = call_597006.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593973.url(scheme.get, call_593973.host, call_593973.base,
-                         call_593973.route, valid.getOrDefault("path"),
+  let url = call_597006.url(scheme.get, call_597006.host, call_597006.base,
+                         call_597006.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593973, url, valid)
+  result = hook(call_597006, url, valid)
 
-proc call*(call_593974: Call_HybridRunbookWorkerGroupDelete_593965;
+proc call*(call_597007: Call_HybridRunbookWorkerGroupDelete_596998;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string;
           hybridRunbookWorkerGroupName: string): Recallable =
@@ -631,21 +631,21 @@ proc call*(call_593974: Call_HybridRunbookWorkerGroupDelete_593965;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   hybridRunbookWorkerGroupName: string (required)
   ##                               : The hybrid runbook worker group name
-  var path_593975 = newJObject()
-  var query_593976 = newJObject()
-  add(path_593975, "automationAccountName", newJString(automationAccountName))
-  add(path_593975, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593976, "api-version", newJString(apiVersion))
-  add(path_593975, "subscriptionId", newJString(subscriptionId))
-  add(path_593975, "hybridRunbookWorkerGroupName",
+  var path_597008 = newJObject()
+  var query_597009 = newJObject()
+  add(path_597008, "automationAccountName", newJString(automationAccountName))
+  add(path_597008, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597009, "api-version", newJString(apiVersion))
+  add(path_597008, "subscriptionId", newJString(subscriptionId))
+  add(path_597008, "hybridRunbookWorkerGroupName",
       newJString(hybridRunbookWorkerGroupName))
-  result = call_593974.call(path_593975, query_593976, nil, nil, nil)
+  result = call_597007.call(path_597008, query_597009, nil, nil, nil)
 
-var hybridRunbookWorkerGroupDelete* = Call_HybridRunbookWorkerGroupDelete_593965(
+var hybridRunbookWorkerGroupDelete* = Call_HybridRunbookWorkerGroupDelete_596998(
     name: "hybridRunbookWorkerGroupDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/hybridRunbookWorkerGroups/{hybridRunbookWorkerGroupName}",
-    validator: validate_HybridRunbookWorkerGroupDelete_593966, base: "",
-    url: url_HybridRunbookWorkerGroupDelete_593967, schemes: {Scheme.Https})
+    validator: validate_HybridRunbookWorkerGroupDelete_596999, base: "",
+    url: url_HybridRunbookWorkerGroupDelete_597000, schemes: {Scheme.Https})
 export
   rest
 

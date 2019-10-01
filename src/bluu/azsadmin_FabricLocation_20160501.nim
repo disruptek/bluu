@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: FabricAdminClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_574441 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574441](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574441): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-FabricLocation"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_FabricLocationsList_593630 = ref object of OpenApiRestCall_593408
-proc url_FabricLocationsList_593632(protocol: Scheme; host: string; base: string;
+  Call_FabricLocationsList_574663 = ref object of OpenApiRestCall_574441
+proc url_FabricLocationsList_574665(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -125,7 +125,7 @@ proc url_FabricLocationsList_593632(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FabricLocationsList_593631(path: JsonNode; query: JsonNode;
+proc validate_FabricLocationsList_574664(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Returns a list of all fabric locations.
@@ -140,16 +140,16 @@ proc validate_FabricLocationsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593793 = path.getOrDefault("resourceGroupName")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  var valid_574826 = path.getOrDefault("resourceGroupName")
+  valid_574826 = validateParameter(valid_574826, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "resourceGroupName", valid_593793
-  var valid_593794 = path.getOrDefault("subscriptionId")
-  valid_593794 = validateParameter(valid_593794, JString, required = true,
+  if valid_574826 != nil:
+    section.add "resourceGroupName", valid_574826
+  var valid_574827 = path.getOrDefault("subscriptionId")
+  valid_574827 = validateParameter(valid_574827, JString, required = true,
                                  default = nil)
-  if valid_593794 != nil:
-    section.add "subscriptionId", valid_593794
+  if valid_574827 != nil:
+    section.add "subscriptionId", valid_574827
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -159,16 +159,16 @@ proc validate_FabricLocationsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593808 = query.getOrDefault("api-version")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_574841 = query.getOrDefault("api-version")
+  valid_574841 = validateParameter(valid_574841, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593808 != nil:
-    section.add "api-version", valid_593808
-  var valid_593809 = query.getOrDefault("$filter")
-  valid_593809 = validateParameter(valid_593809, JString, required = false,
+  if valid_574841 != nil:
+    section.add "api-version", valid_574841
+  var valid_574842 = query.getOrDefault("$filter")
+  valid_574842 = validateParameter(valid_574842, JString, required = false,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "$filter", valid_593809
+  if valid_574842 != nil:
+    section.add "$filter", valid_574842
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -177,20 +177,20 @@ proc validate_FabricLocationsList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593836: Call_FabricLocationsList_593630; path: JsonNode;
+proc call*(call_574869: Call_FabricLocationsList_574663; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all fabric locations.
   ## 
-  let valid = call_593836.validator(path, query, header, formData, body)
-  let scheme = call_593836.pickScheme
+  let valid = call_574869.validator(path, query, header, formData, body)
+  let scheme = call_574869.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593836.url(scheme.get, call_593836.host, call_593836.base,
-                         call_593836.route, valid.getOrDefault("path"),
+  let url = call_574869.url(scheme.get, call_574869.host, call_574869.base,
+                         call_574869.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593836, url, valid)
+  result = hook(call_574869, url, valid)
 
-proc call*(call_593907: Call_FabricLocationsList_593630; resourceGroupName: string;
+proc call*(call_574940: Call_FabricLocationsList_574663; resourceGroupName: string;
           subscriptionId: string; apiVersion: string = "2016-05-01";
           Filter: string = ""): Recallable =
   ## fabricLocationsList
@@ -203,22 +203,22 @@ proc call*(call_593907: Call_FabricLocationsList_593630; resourceGroupName: stri
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_593908 = newJObject()
-  var query_593910 = newJObject()
-  add(path_593908, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593910, "api-version", newJString(apiVersion))
-  add(path_593908, "subscriptionId", newJString(subscriptionId))
-  add(query_593910, "$filter", newJString(Filter))
-  result = call_593907.call(path_593908, query_593910, nil, nil, nil)
+  var path_574941 = newJObject()
+  var query_574943 = newJObject()
+  add(path_574941, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574943, "api-version", newJString(apiVersion))
+  add(path_574941, "subscriptionId", newJString(subscriptionId))
+  add(query_574943, "$filter", newJString(Filter))
+  result = call_574940.call(path_574941, query_574943, nil, nil, nil)
 
-var fabricLocationsList* = Call_FabricLocationsList_593630(
+var fabricLocationsList* = Call_FabricLocationsList_574663(
     name: "fabricLocationsList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations",
-    validator: validate_FabricLocationsList_593631, base: "",
-    url: url_FabricLocationsList_593632, schemes: {Scheme.Https})
+    validator: validate_FabricLocationsList_574664, base: "",
+    url: url_FabricLocationsList_574665, schemes: {Scheme.Https})
 type
-  Call_FabricLocationsGet_593949 = ref object of OpenApiRestCall_593408
-proc url_FabricLocationsGet_593951(protocol: Scheme; host: string; base: string;
+  Call_FabricLocationsGet_574982 = ref object of OpenApiRestCall_574441
+proc url_FabricLocationsGet_574984(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -241,7 +241,7 @@ proc url_FabricLocationsGet_593951(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FabricLocationsGet_593950(path: JsonNode; query: JsonNode;
+proc validate_FabricLocationsGet_574983(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Returns the requested fabric location.
@@ -258,21 +258,21 @@ proc validate_FabricLocationsGet_593950(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593961 = path.getOrDefault("resourceGroupName")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_574994 = path.getOrDefault("resourceGroupName")
+  valid_574994 = validateParameter(valid_574994, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "resourceGroupName", valid_593961
-  var valid_593962 = path.getOrDefault("fabricLocation")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_574994 != nil:
+    section.add "resourceGroupName", valid_574994
+  var valid_574995 = path.getOrDefault("fabricLocation")
+  valid_574995 = validateParameter(valid_574995, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "fabricLocation", valid_593962
-  var valid_593963 = path.getOrDefault("subscriptionId")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_574995 != nil:
+    section.add "fabricLocation", valid_574995
+  var valid_574996 = path.getOrDefault("subscriptionId")
+  valid_574996 = validateParameter(valid_574996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "subscriptionId", valid_593963
+  if valid_574996 != nil:
+    section.add "subscriptionId", valid_574996
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -280,11 +280,11 @@ proc validate_FabricLocationsGet_593950(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593964 = query.getOrDefault("api-version")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_574997 = query.getOrDefault("api-version")
+  valid_574997 = validateParameter(valid_574997, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593964 != nil:
-    section.add "api-version", valid_593964
+  if valid_574997 != nil:
+    section.add "api-version", valid_574997
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -293,20 +293,20 @@ proc validate_FabricLocationsGet_593950(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593965: Call_FabricLocationsGet_593949; path: JsonNode;
+proc call*(call_574998: Call_FabricLocationsGet_574982; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the requested fabric location.
   ## 
-  let valid = call_593965.validator(path, query, header, formData, body)
-  let scheme = call_593965.pickScheme
+  let valid = call_574998.validator(path, query, header, formData, body)
+  let scheme = call_574998.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593965.url(scheme.get, call_593965.host, call_593965.base,
-                         call_593965.route, valid.getOrDefault("path"),
+  let url = call_574998.url(scheme.get, call_574998.host, call_574998.base,
+                         call_574998.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593965, url, valid)
+  result = hook(call_574998, url, valid)
 
-proc call*(call_593966: Call_FabricLocationsGet_593949; resourceGroupName: string;
+proc call*(call_574999: Call_FabricLocationsGet_574982; resourceGroupName: string;
           fabricLocation: string; subscriptionId: string;
           apiVersion: string = "2016-05-01"): Recallable =
   ## fabricLocationsGet
@@ -319,19 +319,19 @@ proc call*(call_593966: Call_FabricLocationsGet_593949; resourceGroupName: strin
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593967 = newJObject()
-  var query_593968 = newJObject()
-  add(path_593967, "resourceGroupName", newJString(resourceGroupName))
-  add(path_593967, "fabricLocation", newJString(fabricLocation))
-  add(query_593968, "api-version", newJString(apiVersion))
-  add(path_593967, "subscriptionId", newJString(subscriptionId))
-  result = call_593966.call(path_593967, query_593968, nil, nil, nil)
+  var path_575000 = newJObject()
+  var query_575001 = newJObject()
+  add(path_575000, "resourceGroupName", newJString(resourceGroupName))
+  add(path_575000, "fabricLocation", newJString(fabricLocation))
+  add(query_575001, "api-version", newJString(apiVersion))
+  add(path_575000, "subscriptionId", newJString(subscriptionId))
+  result = call_574999.call(path_575000, query_575001, nil, nil, nil)
 
-var fabricLocationsGet* = Call_FabricLocationsGet_593949(
+var fabricLocationsGet* = Call_FabricLocationsGet_574982(
     name: "fabricLocationsGet", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{fabricLocation}",
-    validator: validate_FabricLocationsGet_593950, base: "",
-    url: url_FabricLocationsGet_593951, schemes: {Scheme.Https})
+    validator: validate_FabricLocationsGet_574983, base: "",
+    url: url_FabricLocationsGet_574984, schemes: {Scheme.Https})
 export
   rest
 

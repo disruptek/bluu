@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: AutomationManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_596458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "automation-python2package"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_Python2PackageListByAutomationAccount_593647 = ref object of OpenApiRestCall_593425
-proc url_Python2PackageListByAutomationAccount_593649(protocol: Scheme;
+  Call_Python2PackageListByAutomationAccount_596680 = ref object of OpenApiRestCall_596458
+proc url_Python2PackageListByAutomationAccount_596682(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +129,7 @@ proc url_Python2PackageListByAutomationAccount_593649(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_Python2PackageListByAutomationAccount_593648(path: JsonNode;
+proc validate_Python2PackageListByAutomationAccount_596681(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of python 2 packages.
   ## 
@@ -145,21 +145,21 @@ proc validate_Python2PackageListByAutomationAccount_593648(path: JsonNode;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593809 = path.getOrDefault("automationAccountName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_596842 = path.getOrDefault("automationAccountName")
+  valid_596842 = validateParameter(valid_596842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "automationAccountName", valid_593809
-  var valid_593810 = path.getOrDefault("resourceGroupName")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_596842 != nil:
+    section.add "automationAccountName", valid_596842
+  var valid_596843 = path.getOrDefault("resourceGroupName")
+  valid_596843 = validateParameter(valid_596843, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "resourceGroupName", valid_593810
-  var valid_593811 = path.getOrDefault("subscriptionId")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_596843 != nil:
+    section.add "resourceGroupName", valid_596843
+  var valid_596844 = path.getOrDefault("subscriptionId")
+  valid_596844 = validateParameter(valid_596844, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "subscriptionId", valid_593811
+  if valid_596844 != nil:
+    section.add "subscriptionId", valid_596844
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -167,11 +167,11 @@ proc validate_Python2PackageListByAutomationAccount_593648(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_596845 = query.getOrDefault("api-version")
+  valid_596845 = validateParameter(valid_596845, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
+  if valid_596845 != nil:
+    section.add "api-version", valid_596845
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -180,22 +180,22 @@ proc validate_Python2PackageListByAutomationAccount_593648(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593839: Call_Python2PackageListByAutomationAccount_593647;
+proc call*(call_596872: Call_Python2PackageListByAutomationAccount_596680;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve a list of python 2 packages.
   ## 
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  let valid = call_593839.validator(path, query, header, formData, body)
-  let scheme = call_593839.pickScheme
+  let valid = call_596872.validator(path, query, header, formData, body)
+  let scheme = call_596872.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593839.url(scheme.get, call_593839.host, call_593839.base,
-                         call_593839.route, valid.getOrDefault("path"),
+  let url = call_596872.url(scheme.get, call_596872.host, call_596872.base,
+                         call_596872.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593839, url, valid)
+  result = hook(call_596872, url, valid)
 
-proc call*(call_593910: Call_Python2PackageListByAutomationAccount_593647;
+proc call*(call_596943: Call_Python2PackageListByAutomationAccount_596680;
           automationAccountName: string; resourceGroupName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## python2PackageListByAutomationAccount
@@ -209,22 +209,22 @@ proc call*(call_593910: Call_Python2PackageListByAutomationAccount_593647;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593911 = newJObject()
-  var query_593913 = newJObject()
-  add(path_593911, "automationAccountName", newJString(automationAccountName))
-  add(path_593911, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593913, "api-version", newJString(apiVersion))
-  add(path_593911, "subscriptionId", newJString(subscriptionId))
-  result = call_593910.call(path_593911, query_593913, nil, nil, nil)
+  var path_596944 = newJObject()
+  var query_596946 = newJObject()
+  add(path_596944, "automationAccountName", newJString(automationAccountName))
+  add(path_596944, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596946, "api-version", newJString(apiVersion))
+  add(path_596944, "subscriptionId", newJString(subscriptionId))
+  result = call_596943.call(path_596944, query_596946, nil, nil, nil)
 
-var python2PackageListByAutomationAccount* = Call_Python2PackageListByAutomationAccount_593647(
+var python2PackageListByAutomationAccount* = Call_Python2PackageListByAutomationAccount_596680(
     name: "python2PackageListByAutomationAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/python2Packages",
-    validator: validate_Python2PackageListByAutomationAccount_593648, base: "",
-    url: url_Python2PackageListByAutomationAccount_593649, schemes: {Scheme.Https})
+    validator: validate_Python2PackageListByAutomationAccount_596681, base: "",
+    url: url_Python2PackageListByAutomationAccount_596682, schemes: {Scheme.Https})
 type
-  Call_Python2PackageCreateOrUpdate_593964 = ref object of OpenApiRestCall_593425
-proc url_Python2PackageCreateOrUpdate_593966(protocol: Scheme; host: string;
+  Call_Python2PackageCreateOrUpdate_596997 = ref object of OpenApiRestCall_596458
+proc url_Python2PackageCreateOrUpdate_596999(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -251,7 +251,7 @@ proc url_Python2PackageCreateOrUpdate_593966(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_Python2PackageCreateOrUpdate_593965(path: JsonNode; query: JsonNode;
+proc validate_Python2PackageCreateOrUpdate_596998(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or Update the python 2 package identified by package name.
   ## 
@@ -269,26 +269,26 @@ proc validate_Python2PackageCreateOrUpdate_593965(path: JsonNode; query: JsonNod
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593993 = path.getOrDefault("automationAccountName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_597026 = path.getOrDefault("automationAccountName")
+  valid_597026 = validateParameter(valid_597026, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "automationAccountName", valid_593993
-  var valid_593994 = path.getOrDefault("resourceGroupName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_597026 != nil:
+    section.add "automationAccountName", valid_597026
+  var valid_597027 = path.getOrDefault("resourceGroupName")
+  valid_597027 = validateParameter(valid_597027, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "resourceGroupName", valid_593994
-  var valid_593995 = path.getOrDefault("packageName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_597027 != nil:
+    section.add "resourceGroupName", valid_597027
+  var valid_597028 = path.getOrDefault("packageName")
+  valid_597028 = validateParameter(valid_597028, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "packageName", valid_593995
-  var valid_593996 = path.getOrDefault("subscriptionId")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_597028 != nil:
+    section.add "packageName", valid_597028
+  var valid_597029 = path.getOrDefault("subscriptionId")
+  valid_597029 = validateParameter(valid_597029, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "subscriptionId", valid_593996
+  if valid_597029 != nil:
+    section.add "subscriptionId", valid_597029
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -296,11 +296,11 @@ proc validate_Python2PackageCreateOrUpdate_593965(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593997 = query.getOrDefault("api-version")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  var valid_597030 = query.getOrDefault("api-version")
+  valid_597030 = validateParameter(valid_597030, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "api-version", valid_593997
+  if valid_597030 != nil:
+    section.add "api-version", valid_597030
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -314,21 +314,21 @@ proc validate_Python2PackageCreateOrUpdate_593965(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593999: Call_Python2PackageCreateOrUpdate_593964; path: JsonNode;
+proc call*(call_597032: Call_Python2PackageCreateOrUpdate_596997; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or Update the python 2 package identified by package name.
   ## 
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  let valid = call_593999.validator(path, query, header, formData, body)
-  let scheme = call_593999.pickScheme
+  let valid = call_597032.validator(path, query, header, formData, body)
+  let scheme = call_597032.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593999.url(scheme.get, call_593999.host, call_593999.base,
-                         call_593999.route, valid.getOrDefault("path"),
+  let url = call_597032.url(scheme.get, call_597032.host, call_597032.base,
+                         call_597032.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593999, url, valid)
+  result = hook(call_597032, url, valid)
 
-proc call*(call_594000: Call_Python2PackageCreateOrUpdate_593964;
+proc call*(call_597033: Call_Python2PackageCreateOrUpdate_596997;
           automationAccountName: string; resourceGroupName: string;
           packageName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode): Recallable =
@@ -347,26 +347,26 @@ proc call*(call_594000: Call_Python2PackageCreateOrUpdate_593964;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : The create or update parameters for python package.
-  var path_594001 = newJObject()
-  var query_594002 = newJObject()
-  var body_594003 = newJObject()
-  add(path_594001, "automationAccountName", newJString(automationAccountName))
-  add(path_594001, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594001, "packageName", newJString(packageName))
-  add(query_594002, "api-version", newJString(apiVersion))
-  add(path_594001, "subscriptionId", newJString(subscriptionId))
+  var path_597034 = newJObject()
+  var query_597035 = newJObject()
+  var body_597036 = newJObject()
+  add(path_597034, "automationAccountName", newJString(automationAccountName))
+  add(path_597034, "resourceGroupName", newJString(resourceGroupName))
+  add(path_597034, "packageName", newJString(packageName))
+  add(query_597035, "api-version", newJString(apiVersion))
+  add(path_597034, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594003 = parameters
-  result = call_594000.call(path_594001, query_594002, nil, nil, body_594003)
+    body_597036 = parameters
+  result = call_597033.call(path_597034, query_597035, nil, nil, body_597036)
 
-var python2PackageCreateOrUpdate* = Call_Python2PackageCreateOrUpdate_593964(
+var python2PackageCreateOrUpdate* = Call_Python2PackageCreateOrUpdate_596997(
     name: "python2PackageCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/python2Packages/{packageName}",
-    validator: validate_Python2PackageCreateOrUpdate_593965, base: "",
-    url: url_Python2PackageCreateOrUpdate_593966, schemes: {Scheme.Https})
+    validator: validate_Python2PackageCreateOrUpdate_596998, base: "",
+    url: url_Python2PackageCreateOrUpdate_596999, schemes: {Scheme.Https})
 type
-  Call_Python2PackageGet_593952 = ref object of OpenApiRestCall_593425
-proc url_Python2PackageGet_593954(protocol: Scheme; host: string; base: string;
+  Call_Python2PackageGet_596985 = ref object of OpenApiRestCall_596458
+proc url_Python2PackageGet_596987(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -393,7 +393,7 @@ proc url_Python2PackageGet_593954(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_Python2PackageGet_593953(path: JsonNode; query: JsonNode;
+proc validate_Python2PackageGet_596986(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Retrieve the python 2 package identified by package name.
@@ -412,26 +412,26 @@ proc validate_Python2PackageGet_593953(path: JsonNode; query: JsonNode;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_593955 = path.getOrDefault("automationAccountName")
-  valid_593955 = validateParameter(valid_593955, JString, required = true,
+  var valid_596988 = path.getOrDefault("automationAccountName")
+  valid_596988 = validateParameter(valid_596988, JString, required = true,
                                  default = nil)
-  if valid_593955 != nil:
-    section.add "automationAccountName", valid_593955
-  var valid_593956 = path.getOrDefault("resourceGroupName")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  if valid_596988 != nil:
+    section.add "automationAccountName", valid_596988
+  var valid_596989 = path.getOrDefault("resourceGroupName")
+  valid_596989 = validateParameter(valid_596989, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "resourceGroupName", valid_593956
-  var valid_593957 = path.getOrDefault("packageName")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  if valid_596989 != nil:
+    section.add "resourceGroupName", valid_596989
+  var valid_596990 = path.getOrDefault("packageName")
+  valid_596990 = validateParameter(valid_596990, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "packageName", valid_593957
-  var valid_593958 = path.getOrDefault("subscriptionId")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  if valid_596990 != nil:
+    section.add "packageName", valid_596990
+  var valid_596991 = path.getOrDefault("subscriptionId")
+  valid_596991 = validateParameter(valid_596991, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "subscriptionId", valid_593958
+  if valid_596991 != nil:
+    section.add "subscriptionId", valid_596991
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -439,11 +439,11 @@ proc validate_Python2PackageGet_593953(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593959 = query.getOrDefault("api-version")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  var valid_596992 = query.getOrDefault("api-version")
+  valid_596992 = validateParameter(valid_596992, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "api-version", valid_593959
+  if valid_596992 != nil:
+    section.add "api-version", valid_596992
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -452,21 +452,21 @@ proc validate_Python2PackageGet_593953(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593960: Call_Python2PackageGet_593952; path: JsonNode;
+proc call*(call_596993: Call_Python2PackageGet_596985; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the python 2 package identified by package name.
   ## 
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  let valid = call_593960.validator(path, query, header, formData, body)
-  let scheme = call_593960.pickScheme
+  let valid = call_596993.validator(path, query, header, formData, body)
+  let scheme = call_596993.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593960.url(scheme.get, call_593960.host, call_593960.base,
-                         call_593960.route, valid.getOrDefault("path"),
+  let url = call_596993.url(scheme.get, call_596993.host, call_596993.base,
+                         call_596993.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593960, url, valid)
+  result = hook(call_596993, url, valid)
 
-proc call*(call_593961: Call_Python2PackageGet_593952;
+proc call*(call_596994: Call_Python2PackageGet_596985;
           automationAccountName: string; resourceGroupName: string;
           packageName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## python2PackageGet
@@ -482,22 +482,22 @@ proc call*(call_593961: Call_Python2PackageGet_593952;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593962 = newJObject()
-  var query_593963 = newJObject()
-  add(path_593962, "automationAccountName", newJString(automationAccountName))
-  add(path_593962, "resourceGroupName", newJString(resourceGroupName))
-  add(path_593962, "packageName", newJString(packageName))
-  add(query_593963, "api-version", newJString(apiVersion))
-  add(path_593962, "subscriptionId", newJString(subscriptionId))
-  result = call_593961.call(path_593962, query_593963, nil, nil, nil)
+  var path_596995 = newJObject()
+  var query_596996 = newJObject()
+  add(path_596995, "automationAccountName", newJString(automationAccountName))
+  add(path_596995, "resourceGroupName", newJString(resourceGroupName))
+  add(path_596995, "packageName", newJString(packageName))
+  add(query_596996, "api-version", newJString(apiVersion))
+  add(path_596995, "subscriptionId", newJString(subscriptionId))
+  result = call_596994.call(path_596995, query_596996, nil, nil, nil)
 
-var python2PackageGet* = Call_Python2PackageGet_593952(name: "python2PackageGet",
+var python2PackageGet* = Call_Python2PackageGet_596985(name: "python2PackageGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/python2Packages/{packageName}",
-    validator: validate_Python2PackageGet_593953, base: "",
-    url: url_Python2PackageGet_593954, schemes: {Scheme.Https})
+    validator: validate_Python2PackageGet_596986, base: "",
+    url: url_Python2PackageGet_596987, schemes: {Scheme.Https})
 type
-  Call_Python2PackageUpdate_594016 = ref object of OpenApiRestCall_593425
-proc url_Python2PackageUpdate_594018(protocol: Scheme; host: string; base: string;
+  Call_Python2PackageUpdate_597049 = ref object of OpenApiRestCall_596458
+proc url_Python2PackageUpdate_597051(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -524,7 +524,7 @@ proc url_Python2PackageUpdate_594018(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_Python2PackageUpdate_594017(path: JsonNode; query: JsonNode;
+proc validate_Python2PackageUpdate_597050(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the python 2 package identified by package name.
   ## 
@@ -542,26 +542,26 @@ proc validate_Python2PackageUpdate_594017(path: JsonNode; query: JsonNode;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594019 = path.getOrDefault("automationAccountName")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_597052 = path.getOrDefault("automationAccountName")
+  valid_597052 = validateParameter(valid_597052, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "automationAccountName", valid_594019
-  var valid_594020 = path.getOrDefault("resourceGroupName")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  if valid_597052 != nil:
+    section.add "automationAccountName", valid_597052
+  var valid_597053 = path.getOrDefault("resourceGroupName")
+  valid_597053 = validateParameter(valid_597053, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "resourceGroupName", valid_594020
-  var valid_594021 = path.getOrDefault("packageName")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  if valid_597053 != nil:
+    section.add "resourceGroupName", valid_597053
+  var valid_597054 = path.getOrDefault("packageName")
+  valid_597054 = validateParameter(valid_597054, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "packageName", valid_594021
-  var valid_594022 = path.getOrDefault("subscriptionId")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  if valid_597054 != nil:
+    section.add "packageName", valid_597054
+  var valid_597055 = path.getOrDefault("subscriptionId")
+  valid_597055 = validateParameter(valid_597055, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "subscriptionId", valid_594022
+  if valid_597055 != nil:
+    section.add "subscriptionId", valid_597055
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -569,11 +569,11 @@ proc validate_Python2PackageUpdate_594017(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594023 = query.getOrDefault("api-version")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  var valid_597056 = query.getOrDefault("api-version")
+  valid_597056 = validateParameter(valid_597056, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "api-version", valid_594023
+  if valid_597056 != nil:
+    section.add "api-version", valid_597056
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -587,21 +587,21 @@ proc validate_Python2PackageUpdate_594017(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594025: Call_Python2PackageUpdate_594016; path: JsonNode;
+proc call*(call_597058: Call_Python2PackageUpdate_597049; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the python 2 package identified by package name.
   ## 
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  let valid = call_594025.validator(path, query, header, formData, body)
-  let scheme = call_594025.pickScheme
+  let valid = call_597058.validator(path, query, header, formData, body)
+  let scheme = call_597058.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594025.url(scheme.get, call_594025.host, call_594025.base,
-                         call_594025.route, valid.getOrDefault("path"),
+  let url = call_597058.url(scheme.get, call_597058.host, call_597058.base,
+                         call_597058.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594025, url, valid)
+  result = hook(call_597058, url, valid)
 
-proc call*(call_594026: Call_Python2PackageUpdate_594016;
+proc call*(call_597059: Call_Python2PackageUpdate_597049;
           automationAccountName: string; resourceGroupName: string;
           packageName: string; apiVersion: string; subscriptionId: string;
           parameters: JsonNode): Recallable =
@@ -620,26 +620,26 @@ proc call*(call_594026: Call_Python2PackageUpdate_594016;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : The update parameters for python package.
-  var path_594027 = newJObject()
-  var query_594028 = newJObject()
-  var body_594029 = newJObject()
-  add(path_594027, "automationAccountName", newJString(automationAccountName))
-  add(path_594027, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594027, "packageName", newJString(packageName))
-  add(query_594028, "api-version", newJString(apiVersion))
-  add(path_594027, "subscriptionId", newJString(subscriptionId))
+  var path_597060 = newJObject()
+  var query_597061 = newJObject()
+  var body_597062 = newJObject()
+  add(path_597060, "automationAccountName", newJString(automationAccountName))
+  add(path_597060, "resourceGroupName", newJString(resourceGroupName))
+  add(path_597060, "packageName", newJString(packageName))
+  add(query_597061, "api-version", newJString(apiVersion))
+  add(path_597060, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594029 = parameters
-  result = call_594026.call(path_594027, query_594028, nil, nil, body_594029)
+    body_597062 = parameters
+  result = call_597059.call(path_597060, query_597061, nil, nil, body_597062)
 
-var python2PackageUpdate* = Call_Python2PackageUpdate_594016(
+var python2PackageUpdate* = Call_Python2PackageUpdate_597049(
     name: "python2PackageUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/python2Packages/{packageName}",
-    validator: validate_Python2PackageUpdate_594017, base: "",
-    url: url_Python2PackageUpdate_594018, schemes: {Scheme.Https})
+    validator: validate_Python2PackageUpdate_597050, base: "",
+    url: url_Python2PackageUpdate_597051, schemes: {Scheme.Https})
 type
-  Call_Python2PackageDelete_594004 = ref object of OpenApiRestCall_593425
-proc url_Python2PackageDelete_594006(protocol: Scheme; host: string; base: string;
+  Call_Python2PackageDelete_597037 = ref object of OpenApiRestCall_596458
+proc url_Python2PackageDelete_597039(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -666,7 +666,7 @@ proc url_Python2PackageDelete_594006(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_Python2PackageDelete_594005(path: JsonNode; query: JsonNode;
+proc validate_Python2PackageDelete_597038(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the python 2 package by name.
   ## 
@@ -684,26 +684,26 @@ proc validate_Python2PackageDelete_594005(path: JsonNode; query: JsonNode;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_594007 = path.getOrDefault("automationAccountName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  var valid_597040 = path.getOrDefault("automationAccountName")
+  valid_597040 = validateParameter(valid_597040, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "automationAccountName", valid_594007
-  var valid_594008 = path.getOrDefault("resourceGroupName")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_597040 != nil:
+    section.add "automationAccountName", valid_597040
+  var valid_597041 = path.getOrDefault("resourceGroupName")
+  valid_597041 = validateParameter(valid_597041, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "resourceGroupName", valid_594008
-  var valid_594009 = path.getOrDefault("packageName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_597041 != nil:
+    section.add "resourceGroupName", valid_597041
+  var valid_597042 = path.getOrDefault("packageName")
+  valid_597042 = validateParameter(valid_597042, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "packageName", valid_594009
-  var valid_594010 = path.getOrDefault("subscriptionId")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  if valid_597042 != nil:
+    section.add "packageName", valid_597042
+  var valid_597043 = path.getOrDefault("subscriptionId")
+  valid_597043 = validateParameter(valid_597043, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "subscriptionId", valid_594010
+  if valid_597043 != nil:
+    section.add "subscriptionId", valid_597043
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -711,11 +711,11 @@ proc validate_Python2PackageDelete_594005(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594011 = query.getOrDefault("api-version")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_597044 = query.getOrDefault("api-version")
+  valid_597044 = validateParameter(valid_597044, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "api-version", valid_594011
+  if valid_597044 != nil:
+    section.add "api-version", valid_597044
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -724,21 +724,21 @@ proc validate_Python2PackageDelete_594005(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594012: Call_Python2PackageDelete_594004; path: JsonNode;
+proc call*(call_597045: Call_Python2PackageDelete_597037; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the python 2 package by name.
   ## 
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  let valid = call_594012.validator(path, query, header, formData, body)
-  let scheme = call_594012.pickScheme
+  let valid = call_597045.validator(path, query, header, formData, body)
+  let scheme = call_597045.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594012.url(scheme.get, call_594012.host, call_594012.base,
-                         call_594012.route, valid.getOrDefault("path"),
+  let url = call_597045.url(scheme.get, call_597045.host, call_597045.base,
+                         call_597045.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594012, url, valid)
+  result = hook(call_597045, url, valid)
 
-proc call*(call_594013: Call_Python2PackageDelete_594004;
+proc call*(call_597046: Call_Python2PackageDelete_597037;
           automationAccountName: string; resourceGroupName: string;
           packageName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## python2PackageDelete
@@ -754,20 +754,20 @@ proc call*(call_594013: Call_Python2PackageDelete_594004;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594014 = newJObject()
-  var query_594015 = newJObject()
-  add(path_594014, "automationAccountName", newJString(automationAccountName))
-  add(path_594014, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594014, "packageName", newJString(packageName))
-  add(query_594015, "api-version", newJString(apiVersion))
-  add(path_594014, "subscriptionId", newJString(subscriptionId))
-  result = call_594013.call(path_594014, query_594015, nil, nil, nil)
+  var path_597047 = newJObject()
+  var query_597048 = newJObject()
+  add(path_597047, "automationAccountName", newJString(automationAccountName))
+  add(path_597047, "resourceGroupName", newJString(resourceGroupName))
+  add(path_597047, "packageName", newJString(packageName))
+  add(query_597048, "api-version", newJString(apiVersion))
+  add(path_597047, "subscriptionId", newJString(subscriptionId))
+  result = call_597046.call(path_597047, query_597048, nil, nil, nil)
 
-var python2PackageDelete* = Call_Python2PackageDelete_594004(
+var python2PackageDelete* = Call_Python2PackageDelete_597037(
     name: "python2PackageDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/python2Packages/{packageName}",
-    validator: validate_Python2PackageDelete_594005, base: "",
-    url: url_Python2PackageDelete_594006, schemes: {Scheme.Https})
+    validator: validate_Python2PackageDelete_597038, base: "",
+    url: url_Python2PackageDelete_597039, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: FabricAdminClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_574441 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574441](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574441): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-LogicalSubnet"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_LogicalSubnetsList_593630 = ref object of OpenApiRestCall_593408
-proc url_LogicalSubnetsList_593632(protocol: Scheme; host: string; base: string;
+  Call_LogicalSubnetsList_574663 = ref object of OpenApiRestCall_574441
+proc url_LogicalSubnetsList_574665(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -131,7 +131,7 @@ proc url_LogicalSubnetsList_593632(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LogicalSubnetsList_593631(path: JsonNode; query: JsonNode;
+proc validate_LogicalSubnetsList_574664(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Returns a list of all logical subnets.
@@ -150,26 +150,26 @@ proc validate_LogicalSubnetsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593806 = path.getOrDefault("resourceGroupName")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_574839 = path.getOrDefault("resourceGroupName")
+  valid_574839 = validateParameter(valid_574839, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "resourceGroupName", valid_593806
-  var valid_593807 = path.getOrDefault("logicalNetwork")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  if valid_574839 != nil:
+    section.add "resourceGroupName", valid_574839
+  var valid_574840 = path.getOrDefault("logicalNetwork")
+  valid_574840 = validateParameter(valid_574840, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "logicalNetwork", valid_593807
-  var valid_593808 = path.getOrDefault("subscriptionId")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  if valid_574840 != nil:
+    section.add "logicalNetwork", valid_574840
+  var valid_574841 = path.getOrDefault("subscriptionId")
+  valid_574841 = validateParameter(valid_574841, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "subscriptionId", valid_593808
-  var valid_593809 = path.getOrDefault("location")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  if valid_574841 != nil:
+    section.add "subscriptionId", valid_574841
+  var valid_574842 = path.getOrDefault("location")
+  valid_574842 = validateParameter(valid_574842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "location", valid_593809
+  if valid_574842 != nil:
+    section.add "location", valid_574842
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -179,16 +179,16 @@ proc validate_LogicalSubnetsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593823 = query.getOrDefault("api-version")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_574856 = query.getOrDefault("api-version")
+  valid_574856 = validateParameter(valid_574856, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593823 != nil:
-    section.add "api-version", valid_593823
-  var valid_593824 = query.getOrDefault("$filter")
-  valid_593824 = validateParameter(valid_593824, JString, required = false,
+  if valid_574856 != nil:
+    section.add "api-version", valid_574856
+  var valid_574857 = query.getOrDefault("$filter")
+  valid_574857 = validateParameter(valid_574857, JString, required = false,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "$filter", valid_593824
+  if valid_574857 != nil:
+    section.add "$filter", valid_574857
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -197,20 +197,20 @@ proc validate_LogicalSubnetsList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593847: Call_LogicalSubnetsList_593630; path: JsonNode;
+proc call*(call_574880: Call_LogicalSubnetsList_574663; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all logical subnets.
   ## 
-  let valid = call_593847.validator(path, query, header, formData, body)
-  let scheme = call_593847.pickScheme
+  let valid = call_574880.validator(path, query, header, formData, body)
+  let scheme = call_574880.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593847.url(scheme.get, call_593847.host, call_593847.base,
-                         call_593847.route, valid.getOrDefault("path"),
+  let url = call_574880.url(scheme.get, call_574880.host, call_574880.base,
+                         call_574880.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593847, url, valid)
+  result = hook(call_574880, url, valid)
 
-proc call*(call_593918: Call_LogicalSubnetsList_593630; resourceGroupName: string;
+proc call*(call_574951: Call_LogicalSubnetsList_574663; resourceGroupName: string;
           logicalNetwork: string; subscriptionId: string; location: string;
           apiVersion: string = "2016-05-01"; Filter: string = ""): Recallable =
   ## logicalSubnetsList
@@ -227,24 +227,24 @@ proc call*(call_593918: Call_LogicalSubnetsList_593630; resourceGroupName: strin
   ##           : Location of the resource.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_593919 = newJObject()
-  var query_593921 = newJObject()
-  add(path_593919, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593921, "api-version", newJString(apiVersion))
-  add(path_593919, "logicalNetwork", newJString(logicalNetwork))
-  add(path_593919, "subscriptionId", newJString(subscriptionId))
-  add(path_593919, "location", newJString(location))
-  add(query_593921, "$filter", newJString(Filter))
-  result = call_593918.call(path_593919, query_593921, nil, nil, nil)
+  var path_574952 = newJObject()
+  var query_574954 = newJObject()
+  add(path_574952, "resourceGroupName", newJString(resourceGroupName))
+  add(query_574954, "api-version", newJString(apiVersion))
+  add(path_574952, "logicalNetwork", newJString(logicalNetwork))
+  add(path_574952, "subscriptionId", newJString(subscriptionId))
+  add(path_574952, "location", newJString(location))
+  add(query_574954, "$filter", newJString(Filter))
+  result = call_574951.call(path_574952, query_574954, nil, nil, nil)
 
-var logicalSubnetsList* = Call_LogicalSubnetsList_593630(
+var logicalSubnetsList* = Call_LogicalSubnetsList_574663(
     name: "logicalSubnetsList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/logicalNetworks/{logicalNetwork}/logicalSubnets",
-    validator: validate_LogicalSubnetsList_593631, base: "",
-    url: url_LogicalSubnetsList_593632, schemes: {Scheme.Https})
+    validator: validate_LogicalSubnetsList_574664, base: "",
+    url: url_LogicalSubnetsList_574665, schemes: {Scheme.Https})
 type
-  Call_LogicalSubnetsGet_593960 = ref object of OpenApiRestCall_593408
-proc url_LogicalSubnetsGet_593962(protocol: Scheme; host: string; base: string;
+  Call_LogicalSubnetsGet_574993 = ref object of OpenApiRestCall_574441
+proc url_LogicalSubnetsGet_574995(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -273,7 +273,7 @@ proc url_LogicalSubnetsGet_593962(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LogicalSubnetsGet_593961(path: JsonNode; query: JsonNode;
+proc validate_LogicalSubnetsGet_574994(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Returns the requested logical subnet.
@@ -294,31 +294,31 @@ proc validate_LogicalSubnetsGet_593961(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593963 = path.getOrDefault("resourceGroupName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_574996 = path.getOrDefault("resourceGroupName")
+  valid_574996 = validateParameter(valid_574996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "resourceGroupName", valid_593963
-  var valid_593964 = path.getOrDefault("logicalSubnet")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_574996 != nil:
+    section.add "resourceGroupName", valid_574996
+  var valid_574997 = path.getOrDefault("logicalSubnet")
+  valid_574997 = validateParameter(valid_574997, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "logicalSubnet", valid_593964
-  var valid_593965 = path.getOrDefault("logicalNetwork")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_574997 != nil:
+    section.add "logicalSubnet", valid_574997
+  var valid_574998 = path.getOrDefault("logicalNetwork")
+  valid_574998 = validateParameter(valid_574998, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "logicalNetwork", valid_593965
-  var valid_593966 = path.getOrDefault("subscriptionId")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_574998 != nil:
+    section.add "logicalNetwork", valid_574998
+  var valid_574999 = path.getOrDefault("subscriptionId")
+  valid_574999 = validateParameter(valid_574999, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "subscriptionId", valid_593966
-  var valid_593967 = path.getOrDefault("location")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_574999 != nil:
+    section.add "subscriptionId", valid_574999
+  var valid_575000 = path.getOrDefault("location")
+  valid_575000 = validateParameter(valid_575000, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "location", valid_593967
+  if valid_575000 != nil:
+    section.add "location", valid_575000
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -326,11 +326,11 @@ proc validate_LogicalSubnetsGet_593961(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593968 = query.getOrDefault("api-version")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  var valid_575001 = query.getOrDefault("api-version")
+  valid_575001 = validateParameter(valid_575001, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_593968 != nil:
-    section.add "api-version", valid_593968
+  if valid_575001 != nil:
+    section.add "api-version", valid_575001
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -339,20 +339,20 @@ proc validate_LogicalSubnetsGet_593961(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593969: Call_LogicalSubnetsGet_593960; path: JsonNode;
+proc call*(call_575002: Call_LogicalSubnetsGet_574993; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the requested logical subnet.
   ## 
-  let valid = call_593969.validator(path, query, header, formData, body)
-  let scheme = call_593969.pickScheme
+  let valid = call_575002.validator(path, query, header, formData, body)
+  let scheme = call_575002.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593969.url(scheme.get, call_593969.host, call_593969.base,
-                         call_593969.route, valid.getOrDefault("path"),
+  let url = call_575002.url(scheme.get, call_575002.host, call_575002.base,
+                         call_575002.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593969, url, valid)
+  result = hook(call_575002, url, valid)
 
-proc call*(call_593970: Call_LogicalSubnetsGet_593960; resourceGroupName: string;
+proc call*(call_575003: Call_LogicalSubnetsGet_574993; resourceGroupName: string;
           logicalSubnet: string; logicalNetwork: string; subscriptionId: string;
           location: string; apiVersion: string = "2016-05-01"): Recallable =
   ## logicalSubnetsGet
@@ -369,20 +369,20 @@ proc call*(call_593970: Call_LogicalSubnetsGet_593960; resourceGroupName: string
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_593971 = newJObject()
-  var query_593972 = newJObject()
-  add(path_593971, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593972, "api-version", newJString(apiVersion))
-  add(path_593971, "logicalSubnet", newJString(logicalSubnet))
-  add(path_593971, "logicalNetwork", newJString(logicalNetwork))
-  add(path_593971, "subscriptionId", newJString(subscriptionId))
-  add(path_593971, "location", newJString(location))
-  result = call_593970.call(path_593971, query_593972, nil, nil, nil)
+  var path_575004 = newJObject()
+  var query_575005 = newJObject()
+  add(path_575004, "resourceGroupName", newJString(resourceGroupName))
+  add(query_575005, "api-version", newJString(apiVersion))
+  add(path_575004, "logicalSubnet", newJString(logicalSubnet))
+  add(path_575004, "logicalNetwork", newJString(logicalNetwork))
+  add(path_575004, "subscriptionId", newJString(subscriptionId))
+  add(path_575004, "location", newJString(location))
+  result = call_575003.call(path_575004, query_575005, nil, nil, nil)
 
-var logicalSubnetsGet* = Call_LogicalSubnetsGet_593960(name: "logicalSubnetsGet",
+var logicalSubnetsGet* = Call_LogicalSubnetsGet_574993(name: "logicalSubnetsGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/logicalNetworks/{logicalNetwork}/logicalSubnets/{logicalSubnet}",
-    validator: validate_LogicalSubnetsGet_593961, base: "",
-    url: url_LogicalSubnetsGet_593962, schemes: {Scheme.Https})
+    validator: validate_LogicalSubnetsGet_574994, base: "",
+    url: url_LogicalSubnetsGet_574995, schemes: {Scheme.Https})
 export
   rest
 

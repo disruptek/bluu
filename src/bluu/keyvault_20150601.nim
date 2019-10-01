@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: KeyVaultManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "keyvault"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_VaultsListByResourceGroup_593646 = ref object of OpenApiRestCall_593424
-proc url_VaultsListByResourceGroup_593648(protocol: Scheme; host: string;
+  Call_VaultsListByResourceGroup_567879 = ref object of OpenApiRestCall_567657
+proc url_VaultsListByResourceGroup_567881(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +124,7 @@ proc url_VaultsListByResourceGroup_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VaultsListByResourceGroup_593647(path: JsonNode; query: JsonNode;
+proc validate_VaultsListByResourceGroup_567880(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The List operation gets information about the vaults associated with the subscription and within the specified resource group.
   ## 
@@ -138,16 +138,16 @@ proc validate_VaultsListByResourceGroup_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_568055 = path.getOrDefault("resourceGroupName")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_568055 != nil:
+    section.add "resourceGroupName", valid_568055
+  var valid_568056 = path.getOrDefault("subscriptionId")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
+  if valid_568056 != nil:
+    section.add "subscriptionId", valid_568056
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -157,15 +157,15 @@ proc validate_VaultsListByResourceGroup_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593824 = query.getOrDefault("api-version")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  var valid_568057 = query.getOrDefault("api-version")
+  valid_568057 = validateParameter(valid_568057, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "api-version", valid_593824
-  var valid_593825 = query.getOrDefault("$top")
-  valid_593825 = validateParameter(valid_593825, JInt, required = false, default = nil)
-  if valid_593825 != nil:
-    section.add "$top", valid_593825
+  if valid_568057 != nil:
+    section.add "api-version", valid_568057
+  var valid_568058 = query.getOrDefault("$top")
+  valid_568058 = validateParameter(valid_568058, JInt, required = false, default = nil)
+  if valid_568058 != nil:
+    section.add "$top", valid_568058
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -174,20 +174,20 @@ proc validate_VaultsListByResourceGroup_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593848: Call_VaultsListByResourceGroup_593646; path: JsonNode;
+proc call*(call_568081: Call_VaultsListByResourceGroup_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The List operation gets information about the vaults associated with the subscription and within the specified resource group.
   ## 
-  let valid = call_593848.validator(path, query, header, formData, body)
-  let scheme = call_593848.pickScheme
+  let valid = call_568081.validator(path, query, header, formData, body)
+  let scheme = call_568081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593848.url(scheme.get, call_593848.host, call_593848.base,
-                         call_593848.route, valid.getOrDefault("path"),
+  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
+                         call_568081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593848, url, valid)
+  result = hook(call_568081, url, valid)
 
-proc call*(call_593919: Call_VaultsListByResourceGroup_593646;
+proc call*(call_568152: Call_VaultsListByResourceGroup_567879;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           Top: int = 0): Recallable =
   ## vaultsListByResourceGroup
@@ -200,22 +200,22 @@ proc call*(call_593919: Call_VaultsListByResourceGroup_593646;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : Maximum number of results to return.
-  var path_593920 = newJObject()
-  var query_593922 = newJObject()
-  add(path_593920, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593922, "api-version", newJString(apiVersion))
-  add(path_593920, "subscriptionId", newJString(subscriptionId))
-  add(query_593922, "$top", newJInt(Top))
-  result = call_593919.call(path_593920, query_593922, nil, nil, nil)
+  var path_568153 = newJObject()
+  var query_568155 = newJObject()
+  add(path_568153, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568155, "api-version", newJString(apiVersion))
+  add(path_568153, "subscriptionId", newJString(subscriptionId))
+  add(query_568155, "$top", newJInt(Top))
+  result = call_568152.call(path_568153, query_568155, nil, nil, nil)
 
-var vaultsListByResourceGroup* = Call_VaultsListByResourceGroup_593646(
+var vaultsListByResourceGroup* = Call_VaultsListByResourceGroup_567879(
     name: "vaultsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults",
-    validator: validate_VaultsListByResourceGroup_593647, base: "",
-    url: url_VaultsListByResourceGroup_593648, schemes: {Scheme.Https})
+    validator: validate_VaultsListByResourceGroup_567880, base: "",
+    url: url_VaultsListByResourceGroup_567881, schemes: {Scheme.Https})
 type
-  Call_VaultsCreateOrUpdate_593972 = ref object of OpenApiRestCall_593424
-proc url_VaultsCreateOrUpdate_593974(protocol: Scheme; host: string; base: string;
+  Call_VaultsCreateOrUpdate_568205 = ref object of OpenApiRestCall_567657
+proc url_VaultsCreateOrUpdate_568207(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -237,7 +237,7 @@ proc url_VaultsCreateOrUpdate_593974(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VaultsCreateOrUpdate_593973(path: JsonNode; query: JsonNode;
+proc validate_VaultsCreateOrUpdate_568206(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a key vault in the specified subscription.
   ## 
@@ -253,21 +253,21 @@ proc validate_VaultsCreateOrUpdate_593973(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593992 = path.getOrDefault("resourceGroupName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568225 = path.getOrDefault("resourceGroupName")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "resourceGroupName", valid_593992
-  var valid_593993 = path.getOrDefault("subscriptionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "resourceGroupName", valid_568225
+  var valid_568226 = path.getOrDefault("subscriptionId")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "subscriptionId", valid_593993
-  var valid_593994 = path.getOrDefault("vaultName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "subscriptionId", valid_568226
+  var valid_568227 = path.getOrDefault("vaultName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "vaultName", valid_593994
+  if valid_568227 != nil:
+    section.add "vaultName", valid_568227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -275,11 +275,11 @@ proc validate_VaultsCreateOrUpdate_593973(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593995 = query.getOrDefault("api-version")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_568228 = query.getOrDefault("api-version")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "api-version", valid_593995
+  if valid_568228 != nil:
+    section.add "api-version", valid_568228
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -293,20 +293,20 @@ proc validate_VaultsCreateOrUpdate_593973(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_VaultsCreateOrUpdate_593972; path: JsonNode;
+proc call*(call_568230: Call_VaultsCreateOrUpdate_568205; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a key vault in the specified subscription.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_VaultsCreateOrUpdate_593972;
+proc call*(call_568231: Call_VaultsCreateOrUpdate_568205;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           vaultName: string; parameters: JsonNode): Recallable =
   ## vaultsCreateOrUpdate
@@ -321,25 +321,25 @@ proc call*(call_593998: Call_VaultsCreateOrUpdate_593972;
   ##            : Name of the vault
   ##   parameters: JObject (required)
   ##             : Parameters to create or update the vault
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  var body_594001 = newJObject()
-  add(path_593999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
-  add(path_593999, "vaultName", newJString(vaultName))
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  var body_568234 = newJObject()
+  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
+  add(path_568232, "vaultName", newJString(vaultName))
   if parameters != nil:
-    body_594001 = parameters
-  result = call_593998.call(path_593999, query_594000, nil, nil, body_594001)
+    body_568234 = parameters
+  result = call_568231.call(path_568232, query_568233, nil, nil, body_568234)
 
-var vaultsCreateOrUpdate* = Call_VaultsCreateOrUpdate_593972(
+var vaultsCreateOrUpdate* = Call_VaultsCreateOrUpdate_568205(
     name: "vaultsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}",
-    validator: validate_VaultsCreateOrUpdate_593973, base: "",
-    url: url_VaultsCreateOrUpdate_593974, schemes: {Scheme.Https})
+    validator: validate_VaultsCreateOrUpdate_568206, base: "",
+    url: url_VaultsCreateOrUpdate_568207, schemes: {Scheme.Https})
 type
-  Call_VaultsGet_593961 = ref object of OpenApiRestCall_593424
-proc url_VaultsGet_593963(protocol: Scheme; host: string; base: string; route: string;
+  Call_VaultsGet_568194 = ref object of OpenApiRestCall_567657
+proc url_VaultsGet_568196(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -361,7 +361,7 @@ proc url_VaultsGet_593963(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VaultsGet_593962(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_VaultsGet_568195(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the specified Azure key vault.
   ## 
@@ -377,21 +377,21 @@ proc validate_VaultsGet_593962(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593964 = path.getOrDefault("resourceGroupName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_568197 = path.getOrDefault("resourceGroupName")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "resourceGroupName", valid_593964
-  var valid_593965 = path.getOrDefault("subscriptionId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "resourceGroupName", valid_568197
+  var valid_568198 = path.getOrDefault("subscriptionId")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "subscriptionId", valid_593965
-  var valid_593966 = path.getOrDefault("vaultName")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_568198 != nil:
+    section.add "subscriptionId", valid_568198
+  var valid_568199 = path.getOrDefault("vaultName")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "vaultName", valid_593966
+  if valid_568199 != nil:
+    section.add "vaultName", valid_568199
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -399,11 +399,11 @@ proc validate_VaultsGet_593962(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593967 = query.getOrDefault("api-version")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  var valid_568200 = query.getOrDefault("api-version")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "api-version", valid_593967
+  if valid_568200 != nil:
+    section.add "api-version", valid_568200
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -412,20 +412,20 @@ proc validate_VaultsGet_593962(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_VaultsGet_593961; path: JsonNode; query: JsonNode;
+proc call*(call_568201: Call_VaultsGet_568194; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified Azure key vault.
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_568201.validator(path, query, header, formData, body)
+  let scheme = call_568201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
+                         call_568201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_568201, url, valid)
 
-proc call*(call_593969: Call_VaultsGet_593961; resourceGroupName: string;
+proc call*(call_568202: Call_VaultsGet_568194; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; vaultName: string): Recallable =
   ## vaultsGet
   ## Gets the specified Azure key vault.
@@ -437,22 +437,22 @@ proc call*(call_593969: Call_VaultsGet_593961; resourceGroupName: string;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   vaultName: string (required)
   ##            : The name of the vault.
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  add(path_593970, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(path_593970, "subscriptionId", newJString(subscriptionId))
-  add(path_593970, "vaultName", newJString(vaultName))
-  result = call_593969.call(path_593970, query_593971, nil, nil, nil)
+  var path_568203 = newJObject()
+  var query_568204 = newJObject()
+  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568204, "api-version", newJString(apiVersion))
+  add(path_568203, "subscriptionId", newJString(subscriptionId))
+  add(path_568203, "vaultName", newJString(vaultName))
+  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
 
-var vaultsGet* = Call_VaultsGet_593961(name: "vaultsGet", meth: HttpMethod.HttpGet,
+var vaultsGet* = Call_VaultsGet_568194(name: "vaultsGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}",
-                                    validator: validate_VaultsGet_593962,
-                                    base: "", url: url_VaultsGet_593963,
+                                    validator: validate_VaultsGet_568195,
+                                    base: "", url: url_VaultsGet_568196,
                                     schemes: {Scheme.Https})
 type
-  Call_VaultsDelete_594002 = ref object of OpenApiRestCall_593424
-proc url_VaultsDelete_594004(protocol: Scheme; host: string; base: string;
+  Call_VaultsDelete_568235 = ref object of OpenApiRestCall_567657
+proc url_VaultsDelete_568237(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -474,7 +474,7 @@ proc url_VaultsDelete_594004(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VaultsDelete_594003(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_VaultsDelete_568236(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified Azure key vault.
   ## 
@@ -490,21 +490,21 @@ proc validate_VaultsDelete_594003(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594005 = path.getOrDefault("resourceGroupName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  var valid_568238 = path.getOrDefault("resourceGroupName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "resourceGroupName", valid_594005
-  var valid_594006 = path.getOrDefault("subscriptionId")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_568238 != nil:
+    section.add "resourceGroupName", valid_568238
+  var valid_568239 = path.getOrDefault("subscriptionId")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "subscriptionId", valid_594006
-  var valid_594007 = path.getOrDefault("vaultName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "subscriptionId", valid_568239
+  var valid_568240 = path.getOrDefault("vaultName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "vaultName", valid_594007
+  if valid_568240 != nil:
+    section.add "vaultName", valid_568240
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -512,11 +512,11 @@ proc validate_VaultsDelete_594003(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594008 = query.getOrDefault("api-version")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  var valid_568241 = query.getOrDefault("api-version")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "api-version", valid_594008
+  if valid_568241 != nil:
+    section.add "api-version", valid_568241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -525,20 +525,20 @@ proc validate_VaultsDelete_594003(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594009: Call_VaultsDelete_594002; path: JsonNode; query: JsonNode;
+proc call*(call_568242: Call_VaultsDelete_568235; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Azure key vault.
   ## 
-  let valid = call_594009.validator(path, query, header, formData, body)
-  let scheme = call_594009.pickScheme
+  let valid = call_568242.validator(path, query, header, formData, body)
+  let scheme = call_568242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594009.url(scheme.get, call_594009.host, call_594009.base,
-                         call_594009.route, valid.getOrDefault("path"),
+  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
+                         call_568242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594009, url, valid)
+  result = hook(call_568242, url, valid)
 
-proc call*(call_594010: Call_VaultsDelete_594002; resourceGroupName: string;
+proc call*(call_568243: Call_VaultsDelete_568235; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; vaultName: string): Recallable =
   ## vaultsDelete
   ## Deletes the specified Azure key vault.
@@ -550,21 +550,21 @@ proc call*(call_594010: Call_VaultsDelete_594002; resourceGroupName: string;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   vaultName: string (required)
   ##            : The name of the vault to delete
-  var path_594011 = newJObject()
-  var query_594012 = newJObject()
-  add(path_594011, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594012, "api-version", newJString(apiVersion))
-  add(path_594011, "subscriptionId", newJString(subscriptionId))
-  add(path_594011, "vaultName", newJString(vaultName))
-  result = call_594010.call(path_594011, query_594012, nil, nil, nil)
+  var path_568244 = newJObject()
+  var query_568245 = newJObject()
+  add(path_568244, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568245, "api-version", newJString(apiVersion))
+  add(path_568244, "subscriptionId", newJString(subscriptionId))
+  add(path_568244, "vaultName", newJString(vaultName))
+  result = call_568243.call(path_568244, query_568245, nil, nil, nil)
 
-var vaultsDelete* = Call_VaultsDelete_594002(name: "vaultsDelete",
+var vaultsDelete* = Call_VaultsDelete_568235(name: "vaultsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}",
-    validator: validate_VaultsDelete_594003, base: "", url: url_VaultsDelete_594004,
+    validator: validate_VaultsDelete_568236, base: "", url: url_VaultsDelete_568237,
     schemes: {Scheme.Https})
 type
-  Call_VaultsList_594013 = ref object of OpenApiRestCall_593424
-proc url_VaultsList_594015(protocol: Scheme; host: string; base: string; route: string;
+  Call_VaultsList_568246 = ref object of OpenApiRestCall_567657
+proc url_VaultsList_568248(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -580,7 +580,7 @@ proc url_VaultsList_594015(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VaultsList_594014(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_VaultsList_568247(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## The List operation gets information about the vaults associated with the subscription.
   ## 
@@ -592,11 +592,11 @@ proc validate_VaultsList_594014(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594016 = path.getOrDefault("subscriptionId")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_568249 = path.getOrDefault("subscriptionId")
+  valid_568249 = validateParameter(valid_568249, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "subscriptionId", valid_594016
+  if valid_568249 != nil:
+    section.add "subscriptionId", valid_568249
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -608,20 +608,20 @@ proc validate_VaultsList_594014(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594030 = query.getOrDefault("api-version")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  var valid_568263 = query.getOrDefault("api-version")
+  valid_568263 = validateParameter(valid_568263, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_594030 != nil:
-    section.add "api-version", valid_594030
-  var valid_594031 = query.getOrDefault("$top")
-  valid_594031 = validateParameter(valid_594031, JInt, required = false, default = nil)
-  if valid_594031 != nil:
-    section.add "$top", valid_594031
-  var valid_594032 = query.getOrDefault("$filter")
-  valid_594032 = validateParameter(valid_594032, JString, required = true, default = newJString(
+  if valid_568263 != nil:
+    section.add "api-version", valid_568263
+  var valid_568264 = query.getOrDefault("$top")
+  valid_568264 = validateParameter(valid_568264, JInt, required = false, default = nil)
+  if valid_568264 != nil:
+    section.add "$top", valid_568264
+  var valid_568265 = query.getOrDefault("$filter")
+  valid_568265 = validateParameter(valid_568265, JString, required = true, default = newJString(
       "resourceType eq \'Microsoft.KeyVault/vaults\'"))
-  if valid_594032 != nil:
-    section.add "$filter", valid_594032
+  if valid_568265 != nil:
+    section.add "$filter", valid_568265
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -630,20 +630,20 @@ proc validate_VaultsList_594014(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594033: Call_VaultsList_594013; path: JsonNode; query: JsonNode;
+proc call*(call_568266: Call_VaultsList_568246; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The List operation gets information about the vaults associated with the subscription.
   ## 
-  let valid = call_594033.validator(path, query, header, formData, body)
-  let scheme = call_594033.pickScheme
+  let valid = call_568266.validator(path, query, header, formData, body)
+  let scheme = call_568266.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594033.url(scheme.get, call_594033.host, call_594033.base,
-                         call_594033.route, valid.getOrDefault("path"),
+  let url = call_568266.url(scheme.get, call_568266.host, call_568266.base,
+                         call_568266.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594033, url, valid)
+  result = hook(call_568266, url, valid)
 
-proc call*(call_594034: Call_VaultsList_594013; subscriptionId: string;
+proc call*(call_568267: Call_VaultsList_568246; subscriptionId: string;
           apiVersion: string = "2015-11-01"; Top: int = 0;
           Filter: string = "resourceType eq \'Microsoft.KeyVault/vaults\'"): Recallable =
   ## vaultsList
@@ -656,19 +656,19 @@ proc call*(call_594034: Call_VaultsList_594013; subscriptionId: string;
   ##      : Maximum number of results to return.
   ##   Filter: string (required)
   ##         : The filter to apply on the operation.
-  var path_594035 = newJObject()
-  var query_594036 = newJObject()
-  add(query_594036, "api-version", newJString(apiVersion))
-  add(path_594035, "subscriptionId", newJString(subscriptionId))
-  add(query_594036, "$top", newJInt(Top))
-  add(query_594036, "$filter", newJString(Filter))
-  result = call_594034.call(path_594035, query_594036, nil, nil, nil)
+  var path_568268 = newJObject()
+  var query_568269 = newJObject()
+  add(query_568269, "api-version", newJString(apiVersion))
+  add(path_568268, "subscriptionId", newJString(subscriptionId))
+  add(query_568269, "$top", newJInt(Top))
+  add(query_568269, "$filter", newJString(Filter))
+  result = call_568267.call(path_568268, query_568269, nil, nil, nil)
 
-var vaultsList* = Call_VaultsList_594013(name: "vaultsList",
+var vaultsList* = Call_VaultsList_568246(name: "vaultsList",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resources",
-                                      validator: validate_VaultsList_594014,
-                                      base: "", url: url_VaultsList_594015,
+                                      validator: validate_VaultsList_568247,
+                                      base: "", url: url_VaultsList_568248,
                                       schemes: {Scheme.Https})
 export
   rest

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ServiceFabricManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593437 = ref object of OpenApiRestCall
+  OpenApiRestCall_567666 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593437](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567666](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593437): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567666): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "servicefabric-application"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593659 = ref object of OpenApiRestCall_593437
-proc url_OperationsList_593661(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567888 = ref object of OpenApiRestCall_567666
+proc url_OperationsList_567890(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593660(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567889(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Get the list of available Service Fabric resource provider API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593660(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_568036 = query.getOrDefault("api-version")
+  valid_568036 = validateParameter(valid_568036, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_568036 != nil:
+    section.add "api-version", valid_568036
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593660(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593834: Call_OperationsList_593659; path: JsonNode; query: JsonNode;
+proc call*(call_568063: Call_OperationsList_567888; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the list of available Service Fabric resource provider API operations.
   ## 
-  let valid = call_593834.validator(path, query, header, formData, body)
-  let scheme = call_593834.pickScheme
+  let valid = call_568063.validator(path, query, header, formData, body)
+  let scheme = call_568063.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593834.url(scheme.get, call_593834.host, call_593834.base,
-                         call_593834.route, valid.getOrDefault("path"),
+  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
+                         call_568063.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593834, url, valid)
+  result = hook(call_568063, url, valid)
 
-proc call*(call_593905: Call_OperationsList_593659; apiVersion: string): Recallable =
+proc call*(call_568134: Call_OperationsList_567888; apiVersion: string): Recallable =
   ## operationsList
   ## Get the list of available Service Fabric resource provider API operations.
   ##   apiVersion: string (required)
   ##             : The version of the Service Fabric resource provider API
-  var query_593906 = newJObject()
-  add(query_593906, "api-version", newJString(apiVersion))
-  result = call_593905.call(nil, query_593906, nil, nil, nil)
+  var query_568135 = newJObject()
+  add(query_568135, "api-version", newJString(apiVersion))
+  result = call_568134.call(nil, query_568135, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593659(name: "operationsList",
+var operationsList* = Call_OperationsList_567888(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.ServiceFabric/operations",
-    validator: validate_OperationsList_593660, base: "", url: url_OperationsList_593661,
+    validator: validate_OperationsList_567889, base: "", url: url_OperationsList_567890,
     schemes: {Scheme.Https})
 type
-  Call_ApplicationTypesList_593946 = ref object of OpenApiRestCall_593437
-proc url_ApplicationTypesList_593948(protocol: Scheme; host: string; base: string;
+  Call_ApplicationTypesList_568175 = ref object of OpenApiRestCall_567666
+proc url_ApplicationTypesList_568177(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -192,7 +192,7 @@ proc url_ApplicationTypesList_593948(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationTypesList_593947(path: JsonNode; query: JsonNode;
+proc validate_ApplicationTypesList_568176(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all application type name resources created or in the process of being created in the Service Fabric cluster resource.
   ## 
@@ -208,21 +208,21 @@ proc validate_ApplicationTypesList_593947(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_593972 = path.getOrDefault("clusterName")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_568201 = path.getOrDefault("clusterName")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "clusterName", valid_593972
-  var valid_593973 = path.getOrDefault("resourceGroupName")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  if valid_568201 != nil:
+    section.add "clusterName", valid_568201
+  var valid_568202 = path.getOrDefault("resourceGroupName")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "resourceGroupName", valid_593973
-  var valid_593974 = path.getOrDefault("subscriptionId")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  if valid_568202 != nil:
+    section.add "resourceGroupName", valid_568202
+  var valid_568203 = path.getOrDefault("subscriptionId")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "subscriptionId", valid_593974
+  if valid_568203 != nil:
+    section.add "subscriptionId", valid_568203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -230,11 +230,11 @@ proc validate_ApplicationTypesList_593947(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593988 = query.getOrDefault("api-version")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_568217 = query.getOrDefault("api-version")
+  valid_568217 = validateParameter(valid_568217, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_593988 != nil:
-    section.add "api-version", valid_593988
+  if valid_568217 != nil:
+    section.add "api-version", valid_568217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -243,20 +243,20 @@ proc validate_ApplicationTypesList_593947(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593989: Call_ApplicationTypesList_593946; path: JsonNode;
+proc call*(call_568218: Call_ApplicationTypesList_568175; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all application type name resources created or in the process of being created in the Service Fabric cluster resource.
   ## 
-  let valid = call_593989.validator(path, query, header, formData, body)
-  let scheme = call_593989.pickScheme
+  let valid = call_568218.validator(path, query, header, formData, body)
+  let scheme = call_568218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593989.url(scheme.get, call_593989.host, call_593989.base,
-                         call_593989.route, valid.getOrDefault("path"),
+  let url = call_568218.url(scheme.get, call_568218.host, call_568218.base,
+                         call_568218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593989, url, valid)
+  result = hook(call_568218, url, valid)
 
-proc call*(call_593990: Call_ApplicationTypesList_593946; clusterName: string;
+proc call*(call_568219: Call_ApplicationTypesList_568175; clusterName: string;
           resourceGroupName: string; subscriptionId: string;
           apiVersion: string = "2017-07-01-preview"): Recallable =
   ## applicationTypesList
@@ -269,22 +269,22 @@ proc call*(call_593990: Call_ApplicationTypesList_593946; clusterName: string;
   ##             : The version of the Service Fabric resource provider API. This is a required parameter and it's value must be "2017-07-01-preview" for this specification.
   ##   subscriptionId: string (required)
   ##                 : The customer subscription identifier.
-  var path_593991 = newJObject()
-  var query_593992 = newJObject()
-  add(path_593991, "clusterName", newJString(clusterName))
-  add(path_593991, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593992, "api-version", newJString(apiVersion))
-  add(path_593991, "subscriptionId", newJString(subscriptionId))
-  result = call_593990.call(path_593991, query_593992, nil, nil, nil)
+  var path_568220 = newJObject()
+  var query_568221 = newJObject()
+  add(path_568220, "clusterName", newJString(clusterName))
+  add(path_568220, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568221, "api-version", newJString(apiVersion))
+  add(path_568220, "subscriptionId", newJString(subscriptionId))
+  result = call_568219.call(path_568220, query_568221, nil, nil, nil)
 
-var applicationTypesList* = Call_ApplicationTypesList_593946(
+var applicationTypesList* = Call_ApplicationTypesList_568175(
     name: "applicationTypesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applicationTypes",
-    validator: validate_ApplicationTypesList_593947, base: "",
-    url: url_ApplicationTypesList_593948, schemes: {Scheme.Https})
+    validator: validate_ApplicationTypesList_568176, base: "",
+    url: url_ApplicationTypesList_568177, schemes: {Scheme.Https})
 type
-  Call_ApplicationTypesCreate_594005 = ref object of OpenApiRestCall_593437
-proc url_ApplicationTypesCreate_594007(protocol: Scheme; host: string; base: string;
+  Call_ApplicationTypesCreate_568234 = ref object of OpenApiRestCall_567666
+proc url_ApplicationTypesCreate_568236(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -311,7 +311,7 @@ proc url_ApplicationTypesCreate_594007(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationTypesCreate_594006(path: JsonNode; query: JsonNode;
+proc validate_ApplicationTypesCreate_568235(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Service Fabric application type name resource with the specified name.
   ## 
@@ -329,26 +329,26 @@ proc validate_ApplicationTypesCreate_594006(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594025 = path.getOrDefault("clusterName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_568254 = path.getOrDefault("clusterName")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "clusterName", valid_594025
-  var valid_594026 = path.getOrDefault("resourceGroupName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_568254 != nil:
+    section.add "clusterName", valid_568254
+  var valid_568255 = path.getOrDefault("resourceGroupName")
+  valid_568255 = validateParameter(valid_568255, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "resourceGroupName", valid_594026
-  var valid_594027 = path.getOrDefault("applicationTypeName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_568255 != nil:
+    section.add "resourceGroupName", valid_568255
+  var valid_568256 = path.getOrDefault("applicationTypeName")
+  valid_568256 = validateParameter(valid_568256, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "applicationTypeName", valid_594027
-  var valid_594028 = path.getOrDefault("subscriptionId")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  if valid_568256 != nil:
+    section.add "applicationTypeName", valid_568256
+  var valid_568257 = path.getOrDefault("subscriptionId")
+  valid_568257 = validateParameter(valid_568257, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "subscriptionId", valid_594028
+  if valid_568257 != nil:
+    section.add "subscriptionId", valid_568257
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -356,11 +356,11 @@ proc validate_ApplicationTypesCreate_594006(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594029 = query.getOrDefault("api-version")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_568258 = query.getOrDefault("api-version")
+  valid_568258 = validateParameter(valid_568258, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594029 != nil:
-    section.add "api-version", valid_594029
+  if valid_568258 != nil:
+    section.add "api-version", valid_568258
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -374,20 +374,20 @@ proc validate_ApplicationTypesCreate_594006(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594031: Call_ApplicationTypesCreate_594005; path: JsonNode;
+proc call*(call_568260: Call_ApplicationTypesCreate_568234; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Service Fabric application type name resource with the specified name.
   ## 
-  let valid = call_594031.validator(path, query, header, formData, body)
-  let scheme = call_594031.pickScheme
+  let valid = call_568260.validator(path, query, header, formData, body)
+  let scheme = call_568260.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594031.url(scheme.get, call_594031.host, call_594031.base,
-                         call_594031.route, valid.getOrDefault("path"),
+  let url = call_568260.url(scheme.get, call_568260.host, call_568260.base,
+                         call_568260.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594031, url, valid)
+  result = hook(call_568260, url, valid)
 
-proc call*(call_594032: Call_ApplicationTypesCreate_594005; clusterName: string;
+proc call*(call_568261: Call_ApplicationTypesCreate_568234; clusterName: string;
           resourceGroupName: string; applicationTypeName: string;
           subscriptionId: string; parameters: JsonNode;
           apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -405,26 +405,26 @@ proc call*(call_594032: Call_ApplicationTypesCreate_594005; clusterName: string;
   ##                 : The customer subscription identifier.
   ##   parameters: JObject (required)
   ##             : The application type name resource.
-  var path_594033 = newJObject()
-  var query_594034 = newJObject()
-  var body_594035 = newJObject()
-  add(path_594033, "clusterName", newJString(clusterName))
-  add(path_594033, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594034, "api-version", newJString(apiVersion))
-  add(path_594033, "applicationTypeName", newJString(applicationTypeName))
-  add(path_594033, "subscriptionId", newJString(subscriptionId))
+  var path_568262 = newJObject()
+  var query_568263 = newJObject()
+  var body_568264 = newJObject()
+  add(path_568262, "clusterName", newJString(clusterName))
+  add(path_568262, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568263, "api-version", newJString(apiVersion))
+  add(path_568262, "applicationTypeName", newJString(applicationTypeName))
+  add(path_568262, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594035 = parameters
-  result = call_594032.call(path_594033, query_594034, nil, nil, body_594035)
+    body_568264 = parameters
+  result = call_568261.call(path_568262, query_568263, nil, nil, body_568264)
 
-var applicationTypesCreate* = Call_ApplicationTypesCreate_594005(
+var applicationTypesCreate* = Call_ApplicationTypesCreate_568234(
     name: "applicationTypesCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applicationTypes/{applicationTypeName}",
-    validator: validate_ApplicationTypesCreate_594006, base: "",
-    url: url_ApplicationTypesCreate_594007, schemes: {Scheme.Https})
+    validator: validate_ApplicationTypesCreate_568235, base: "",
+    url: url_ApplicationTypesCreate_568236, schemes: {Scheme.Https})
 type
-  Call_ApplicationTypesGet_593993 = ref object of OpenApiRestCall_593437
-proc url_ApplicationTypesGet_593995(protocol: Scheme; host: string; base: string;
+  Call_ApplicationTypesGet_568222 = ref object of OpenApiRestCall_567666
+proc url_ApplicationTypesGet_568224(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -451,7 +451,7 @@ proc url_ApplicationTypesGet_593995(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationTypesGet_593994(path: JsonNode; query: JsonNode;
+proc validate_ApplicationTypesGet_568223(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get a Service Fabric application type name resource created or in the process of being created in the Service Fabric cluster resource.
@@ -470,26 +470,26 @@ proc validate_ApplicationTypesGet_593994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_593996 = path.getOrDefault("clusterName")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_568225 = path.getOrDefault("clusterName")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "clusterName", valid_593996
-  var valid_593997 = path.getOrDefault("resourceGroupName")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  if valid_568225 != nil:
+    section.add "clusterName", valid_568225
+  var valid_568226 = path.getOrDefault("resourceGroupName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "resourceGroupName", valid_593997
-  var valid_593998 = path.getOrDefault("applicationTypeName")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  if valid_568226 != nil:
+    section.add "resourceGroupName", valid_568226
+  var valid_568227 = path.getOrDefault("applicationTypeName")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "applicationTypeName", valid_593998
-  var valid_593999 = path.getOrDefault("subscriptionId")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  if valid_568227 != nil:
+    section.add "applicationTypeName", valid_568227
+  var valid_568228 = path.getOrDefault("subscriptionId")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "subscriptionId", valid_593999
+  if valid_568228 != nil:
+    section.add "subscriptionId", valid_568228
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -497,11 +497,11 @@ proc validate_ApplicationTypesGet_593994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594000 = query.getOrDefault("api-version")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_568229 = query.getOrDefault("api-version")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594000 != nil:
-    section.add "api-version", valid_594000
+  if valid_568229 != nil:
+    section.add "api-version", valid_568229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -510,20 +510,20 @@ proc validate_ApplicationTypesGet_593994(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594001: Call_ApplicationTypesGet_593993; path: JsonNode;
+proc call*(call_568230: Call_ApplicationTypesGet_568222; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a Service Fabric application type name resource created or in the process of being created in the Service Fabric cluster resource.
   ## 
-  let valid = call_594001.validator(path, query, header, formData, body)
-  let scheme = call_594001.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594001.url(scheme.get, call_594001.host, call_594001.base,
-                         call_594001.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594001, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_594002: Call_ApplicationTypesGet_593993; clusterName: string;
+proc call*(call_568231: Call_ApplicationTypesGet_568222; clusterName: string;
           resourceGroupName: string; applicationTypeName: string;
           subscriptionId: string; apiVersion: string = "2017-07-01-preview"): Recallable =
   ## applicationTypesGet
@@ -538,23 +538,23 @@ proc call*(call_594002: Call_ApplicationTypesGet_593993; clusterName: string;
   ##                      : The name of the application type name resource.
   ##   subscriptionId: string (required)
   ##                 : The customer subscription identifier.
-  var path_594003 = newJObject()
-  var query_594004 = newJObject()
-  add(path_594003, "clusterName", newJString(clusterName))
-  add(path_594003, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594004, "api-version", newJString(apiVersion))
-  add(path_594003, "applicationTypeName", newJString(applicationTypeName))
-  add(path_594003, "subscriptionId", newJString(subscriptionId))
-  result = call_594002.call(path_594003, query_594004, nil, nil, nil)
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  add(path_568232, "clusterName", newJString(clusterName))
+  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "applicationTypeName", newJString(applicationTypeName))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
+  result = call_568231.call(path_568232, query_568233, nil, nil, nil)
 
-var applicationTypesGet* = Call_ApplicationTypesGet_593993(
+var applicationTypesGet* = Call_ApplicationTypesGet_568222(
     name: "applicationTypesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applicationTypes/{applicationTypeName}",
-    validator: validate_ApplicationTypesGet_593994, base: "",
-    url: url_ApplicationTypesGet_593995, schemes: {Scheme.Https})
+    validator: validate_ApplicationTypesGet_568223, base: "",
+    url: url_ApplicationTypesGet_568224, schemes: {Scheme.Https})
 type
-  Call_ApplicationTypesDelete_594036 = ref object of OpenApiRestCall_593437
-proc url_ApplicationTypesDelete_594038(protocol: Scheme; host: string; base: string;
+  Call_ApplicationTypesDelete_568265 = ref object of OpenApiRestCall_567666
+proc url_ApplicationTypesDelete_568267(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -581,7 +581,7 @@ proc url_ApplicationTypesDelete_594038(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationTypesDelete_594037(path: JsonNode; query: JsonNode;
+proc validate_ApplicationTypesDelete_568266(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a Service Fabric application type name resource with the specified name.
   ## 
@@ -599,26 +599,26 @@ proc validate_ApplicationTypesDelete_594037(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594039 = path.getOrDefault("clusterName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  var valid_568268 = path.getOrDefault("clusterName")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "clusterName", valid_594039
-  var valid_594040 = path.getOrDefault("resourceGroupName")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_568268 != nil:
+    section.add "clusterName", valid_568268
+  var valid_568269 = path.getOrDefault("resourceGroupName")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "resourceGroupName", valid_594040
-  var valid_594041 = path.getOrDefault("applicationTypeName")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  if valid_568269 != nil:
+    section.add "resourceGroupName", valid_568269
+  var valid_568270 = path.getOrDefault("applicationTypeName")
+  valid_568270 = validateParameter(valid_568270, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "applicationTypeName", valid_594041
-  var valid_594042 = path.getOrDefault("subscriptionId")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  if valid_568270 != nil:
+    section.add "applicationTypeName", valid_568270
+  var valid_568271 = path.getOrDefault("subscriptionId")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "subscriptionId", valid_594042
+  if valid_568271 != nil:
+    section.add "subscriptionId", valid_568271
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -626,11 +626,11 @@ proc validate_ApplicationTypesDelete_594037(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594043 = query.getOrDefault("api-version")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  var valid_568272 = query.getOrDefault("api-version")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594043 != nil:
-    section.add "api-version", valid_594043
+  if valid_568272 != nil:
+    section.add "api-version", valid_568272
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -639,20 +639,20 @@ proc validate_ApplicationTypesDelete_594037(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594044: Call_ApplicationTypesDelete_594036; path: JsonNode;
+proc call*(call_568273: Call_ApplicationTypesDelete_568265; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Service Fabric application type name resource with the specified name.
   ## 
-  let valid = call_594044.validator(path, query, header, formData, body)
-  let scheme = call_594044.pickScheme
+  let valid = call_568273.validator(path, query, header, formData, body)
+  let scheme = call_568273.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594044.url(scheme.get, call_594044.host, call_594044.base,
-                         call_594044.route, valid.getOrDefault("path"),
+  let url = call_568273.url(scheme.get, call_568273.host, call_568273.base,
+                         call_568273.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594044, url, valid)
+  result = hook(call_568273, url, valid)
 
-proc call*(call_594045: Call_ApplicationTypesDelete_594036; clusterName: string;
+proc call*(call_568274: Call_ApplicationTypesDelete_568265; clusterName: string;
           resourceGroupName: string; applicationTypeName: string;
           subscriptionId: string; apiVersion: string = "2017-07-01-preview"): Recallable =
   ## applicationTypesDelete
@@ -667,23 +667,23 @@ proc call*(call_594045: Call_ApplicationTypesDelete_594036; clusterName: string;
   ##                      : The name of the application type name resource.
   ##   subscriptionId: string (required)
   ##                 : The customer subscription identifier.
-  var path_594046 = newJObject()
-  var query_594047 = newJObject()
-  add(path_594046, "clusterName", newJString(clusterName))
-  add(path_594046, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594047, "api-version", newJString(apiVersion))
-  add(path_594046, "applicationTypeName", newJString(applicationTypeName))
-  add(path_594046, "subscriptionId", newJString(subscriptionId))
-  result = call_594045.call(path_594046, query_594047, nil, nil, nil)
+  var path_568275 = newJObject()
+  var query_568276 = newJObject()
+  add(path_568275, "clusterName", newJString(clusterName))
+  add(path_568275, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568276, "api-version", newJString(apiVersion))
+  add(path_568275, "applicationTypeName", newJString(applicationTypeName))
+  add(path_568275, "subscriptionId", newJString(subscriptionId))
+  result = call_568274.call(path_568275, query_568276, nil, nil, nil)
 
-var applicationTypesDelete* = Call_ApplicationTypesDelete_594036(
+var applicationTypesDelete* = Call_ApplicationTypesDelete_568265(
     name: "applicationTypesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applicationTypes/{applicationTypeName}",
-    validator: validate_ApplicationTypesDelete_594037, base: "",
-    url: url_ApplicationTypesDelete_594038, schemes: {Scheme.Https})
+    validator: validate_ApplicationTypesDelete_568266, base: "",
+    url: url_ApplicationTypesDelete_568267, schemes: {Scheme.Https})
 type
-  Call_ApplicationTypeVersionsList_594048 = ref object of OpenApiRestCall_593437
-proc url_ApplicationTypeVersionsList_594050(protocol: Scheme; host: string;
+  Call_ApplicationTypeVersionsList_568277 = ref object of OpenApiRestCall_567666
+proc url_ApplicationTypeVersionsList_568279(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -711,7 +711,7 @@ proc url_ApplicationTypeVersionsList_594050(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationTypeVersionsList_594049(path: JsonNode; query: JsonNode;
+proc validate_ApplicationTypeVersionsList_568278(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all application type version resources created or in the process of being created in the Service Fabric application type name resource.
   ## 
@@ -729,26 +729,26 @@ proc validate_ApplicationTypeVersionsList_594049(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594051 = path.getOrDefault("clusterName")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  var valid_568280 = path.getOrDefault("clusterName")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "clusterName", valid_594051
-  var valid_594052 = path.getOrDefault("resourceGroupName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_568280 != nil:
+    section.add "clusterName", valid_568280
+  var valid_568281 = path.getOrDefault("resourceGroupName")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "resourceGroupName", valid_594052
-  var valid_594053 = path.getOrDefault("applicationTypeName")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  if valid_568281 != nil:
+    section.add "resourceGroupName", valid_568281
+  var valid_568282 = path.getOrDefault("applicationTypeName")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "applicationTypeName", valid_594053
-  var valid_594054 = path.getOrDefault("subscriptionId")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  if valid_568282 != nil:
+    section.add "applicationTypeName", valid_568282
+  var valid_568283 = path.getOrDefault("subscriptionId")
+  valid_568283 = validateParameter(valid_568283, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "subscriptionId", valid_594054
+  if valid_568283 != nil:
+    section.add "subscriptionId", valid_568283
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -756,11 +756,11 @@ proc validate_ApplicationTypeVersionsList_594049(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594055 = query.getOrDefault("api-version")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  var valid_568284 = query.getOrDefault("api-version")
+  valid_568284 = validateParameter(valid_568284, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594055 != nil:
-    section.add "api-version", valid_594055
+  if valid_568284 != nil:
+    section.add "api-version", valid_568284
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -769,20 +769,20 @@ proc validate_ApplicationTypeVersionsList_594049(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594056: Call_ApplicationTypeVersionsList_594048; path: JsonNode;
+proc call*(call_568285: Call_ApplicationTypeVersionsList_568277; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all application type version resources created or in the process of being created in the Service Fabric application type name resource.
   ## 
-  let valid = call_594056.validator(path, query, header, formData, body)
-  let scheme = call_594056.pickScheme
+  let valid = call_568285.validator(path, query, header, formData, body)
+  let scheme = call_568285.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594056.url(scheme.get, call_594056.host, call_594056.base,
-                         call_594056.route, valid.getOrDefault("path"),
+  let url = call_568285.url(scheme.get, call_568285.host, call_568285.base,
+                         call_568285.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594056, url, valid)
+  result = hook(call_568285, url, valid)
 
-proc call*(call_594057: Call_ApplicationTypeVersionsList_594048;
+proc call*(call_568286: Call_ApplicationTypeVersionsList_568277;
           clusterName: string; resourceGroupName: string;
           applicationTypeName: string; subscriptionId: string;
           apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -798,23 +798,23 @@ proc call*(call_594057: Call_ApplicationTypeVersionsList_594048;
   ##                      : The name of the application type name resource.
   ##   subscriptionId: string (required)
   ##                 : The customer subscription identifier.
-  var path_594058 = newJObject()
-  var query_594059 = newJObject()
-  add(path_594058, "clusterName", newJString(clusterName))
-  add(path_594058, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594059, "api-version", newJString(apiVersion))
-  add(path_594058, "applicationTypeName", newJString(applicationTypeName))
-  add(path_594058, "subscriptionId", newJString(subscriptionId))
-  result = call_594057.call(path_594058, query_594059, nil, nil, nil)
+  var path_568287 = newJObject()
+  var query_568288 = newJObject()
+  add(path_568287, "clusterName", newJString(clusterName))
+  add(path_568287, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568288, "api-version", newJString(apiVersion))
+  add(path_568287, "applicationTypeName", newJString(applicationTypeName))
+  add(path_568287, "subscriptionId", newJString(subscriptionId))
+  result = call_568286.call(path_568287, query_568288, nil, nil, nil)
 
-var applicationTypeVersionsList* = Call_ApplicationTypeVersionsList_594048(
+var applicationTypeVersionsList* = Call_ApplicationTypeVersionsList_568277(
     name: "applicationTypeVersionsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applicationTypes/{applicationTypeName}/versions",
-    validator: validate_ApplicationTypeVersionsList_594049, base: "",
-    url: url_ApplicationTypeVersionsList_594050, schemes: {Scheme.Https})
+    validator: validate_ApplicationTypeVersionsList_568278, base: "",
+    url: url_ApplicationTypeVersionsList_568279, schemes: {Scheme.Https})
 type
-  Call_ApplicationTypeVersionsCreate_594073 = ref object of OpenApiRestCall_593437
-proc url_ApplicationTypeVersionsCreate_594075(protocol: Scheme; host: string;
+  Call_ApplicationTypeVersionsCreate_568302 = ref object of OpenApiRestCall_567666
+proc url_ApplicationTypeVersionsCreate_568304(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -844,7 +844,7 @@ proc url_ApplicationTypeVersionsCreate_594075(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationTypeVersionsCreate_594074(path: JsonNode; query: JsonNode;
+proc validate_ApplicationTypeVersionsCreate_568303(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Service Fabric application type version resource with the specified name.
   ## 
@@ -864,31 +864,31 @@ proc validate_ApplicationTypeVersionsCreate_594074(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594076 = path.getOrDefault("clusterName")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  var valid_568305 = path.getOrDefault("clusterName")
+  valid_568305 = validateParameter(valid_568305, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "clusterName", valid_594076
-  var valid_594077 = path.getOrDefault("resourceGroupName")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  if valid_568305 != nil:
+    section.add "clusterName", valid_568305
+  var valid_568306 = path.getOrDefault("resourceGroupName")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "resourceGroupName", valid_594077
-  var valid_594078 = path.getOrDefault("applicationTypeName")
-  valid_594078 = validateParameter(valid_594078, JString, required = true,
+  if valid_568306 != nil:
+    section.add "resourceGroupName", valid_568306
+  var valid_568307 = path.getOrDefault("applicationTypeName")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "applicationTypeName", valid_594078
-  var valid_594079 = path.getOrDefault("version")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+  if valid_568307 != nil:
+    section.add "applicationTypeName", valid_568307
+  var valid_568308 = path.getOrDefault("version")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "version", valid_594079
-  var valid_594080 = path.getOrDefault("subscriptionId")
-  valid_594080 = validateParameter(valid_594080, JString, required = true,
+  if valid_568308 != nil:
+    section.add "version", valid_568308
+  var valid_568309 = path.getOrDefault("subscriptionId")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "subscriptionId", valid_594080
+  if valid_568309 != nil:
+    section.add "subscriptionId", valid_568309
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -896,11 +896,11 @@ proc validate_ApplicationTypeVersionsCreate_594074(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594081 = query.getOrDefault("api-version")
-  valid_594081 = validateParameter(valid_594081, JString, required = true,
+  var valid_568310 = query.getOrDefault("api-version")
+  valid_568310 = validateParameter(valid_568310, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594081 != nil:
-    section.add "api-version", valid_594081
+  if valid_568310 != nil:
+    section.add "api-version", valid_568310
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -914,20 +914,20 @@ proc validate_ApplicationTypeVersionsCreate_594074(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594083: Call_ApplicationTypeVersionsCreate_594073; path: JsonNode;
+proc call*(call_568312: Call_ApplicationTypeVersionsCreate_568302; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Service Fabric application type version resource with the specified name.
   ## 
-  let valid = call_594083.validator(path, query, header, formData, body)
-  let scheme = call_594083.pickScheme
+  let valid = call_568312.validator(path, query, header, formData, body)
+  let scheme = call_568312.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594083.url(scheme.get, call_594083.host, call_594083.base,
-                         call_594083.route, valid.getOrDefault("path"),
+  let url = call_568312.url(scheme.get, call_568312.host, call_568312.base,
+                         call_568312.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594083, url, valid)
+  result = hook(call_568312, url, valid)
 
-proc call*(call_594084: Call_ApplicationTypeVersionsCreate_594073;
+proc call*(call_568313: Call_ApplicationTypeVersionsCreate_568302;
           clusterName: string; resourceGroupName: string;
           applicationTypeName: string; version: string; subscriptionId: string;
           parameters: JsonNode; apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -947,27 +947,27 @@ proc call*(call_594084: Call_ApplicationTypeVersionsCreate_594073;
   ##                 : The customer subscription identifier.
   ##   parameters: JObject (required)
   ##             : The application type version resource.
-  var path_594085 = newJObject()
-  var query_594086 = newJObject()
-  var body_594087 = newJObject()
-  add(path_594085, "clusterName", newJString(clusterName))
-  add(path_594085, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594086, "api-version", newJString(apiVersion))
-  add(path_594085, "applicationTypeName", newJString(applicationTypeName))
-  add(path_594085, "version", newJString(version))
-  add(path_594085, "subscriptionId", newJString(subscriptionId))
+  var path_568314 = newJObject()
+  var query_568315 = newJObject()
+  var body_568316 = newJObject()
+  add(path_568314, "clusterName", newJString(clusterName))
+  add(path_568314, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568315, "api-version", newJString(apiVersion))
+  add(path_568314, "applicationTypeName", newJString(applicationTypeName))
+  add(path_568314, "version", newJString(version))
+  add(path_568314, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594087 = parameters
-  result = call_594084.call(path_594085, query_594086, nil, nil, body_594087)
+    body_568316 = parameters
+  result = call_568313.call(path_568314, query_568315, nil, nil, body_568316)
 
-var applicationTypeVersionsCreate* = Call_ApplicationTypeVersionsCreate_594073(
+var applicationTypeVersionsCreate* = Call_ApplicationTypeVersionsCreate_568302(
     name: "applicationTypeVersionsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applicationTypes/{applicationTypeName}/versions/{version}",
-    validator: validate_ApplicationTypeVersionsCreate_594074, base: "",
-    url: url_ApplicationTypeVersionsCreate_594075, schemes: {Scheme.Https})
+    validator: validate_ApplicationTypeVersionsCreate_568303, base: "",
+    url: url_ApplicationTypeVersionsCreate_568304, schemes: {Scheme.Https})
 type
-  Call_ApplicationTypeVersionsGet_594060 = ref object of OpenApiRestCall_593437
-proc url_ApplicationTypeVersionsGet_594062(protocol: Scheme; host: string;
+  Call_ApplicationTypeVersionsGet_568289 = ref object of OpenApiRestCall_567666
+proc url_ApplicationTypeVersionsGet_568291(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -997,7 +997,7 @@ proc url_ApplicationTypeVersionsGet_594062(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationTypeVersionsGet_594061(path: JsonNode; query: JsonNode;
+proc validate_ApplicationTypeVersionsGet_568290(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a Service Fabric application type version resource created or in the process of being created in the Service Fabric application type name resource.
   ## 
@@ -1017,31 +1017,31 @@ proc validate_ApplicationTypeVersionsGet_594061(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594063 = path.getOrDefault("clusterName")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  var valid_568292 = path.getOrDefault("clusterName")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "clusterName", valid_594063
-  var valid_594064 = path.getOrDefault("resourceGroupName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_568292 != nil:
+    section.add "clusterName", valid_568292
+  var valid_568293 = path.getOrDefault("resourceGroupName")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "resourceGroupName", valid_594064
-  var valid_594065 = path.getOrDefault("applicationTypeName")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  if valid_568293 != nil:
+    section.add "resourceGroupName", valid_568293
+  var valid_568294 = path.getOrDefault("applicationTypeName")
+  valid_568294 = validateParameter(valid_568294, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "applicationTypeName", valid_594065
-  var valid_594066 = path.getOrDefault("version")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  if valid_568294 != nil:
+    section.add "applicationTypeName", valid_568294
+  var valid_568295 = path.getOrDefault("version")
+  valid_568295 = validateParameter(valid_568295, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "version", valid_594066
-  var valid_594067 = path.getOrDefault("subscriptionId")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  if valid_568295 != nil:
+    section.add "version", valid_568295
+  var valid_568296 = path.getOrDefault("subscriptionId")
+  valid_568296 = validateParameter(valid_568296, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "subscriptionId", valid_594067
+  if valid_568296 != nil:
+    section.add "subscriptionId", valid_568296
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1049,11 +1049,11 @@ proc validate_ApplicationTypeVersionsGet_594061(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594068 = query.getOrDefault("api-version")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  var valid_568297 = query.getOrDefault("api-version")
+  valid_568297 = validateParameter(valid_568297, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594068 != nil:
-    section.add "api-version", valid_594068
+  if valid_568297 != nil:
+    section.add "api-version", valid_568297
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1062,20 +1062,20 @@ proc validate_ApplicationTypeVersionsGet_594061(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594069: Call_ApplicationTypeVersionsGet_594060; path: JsonNode;
+proc call*(call_568298: Call_ApplicationTypeVersionsGet_568289; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a Service Fabric application type version resource created or in the process of being created in the Service Fabric application type name resource.
   ## 
-  let valid = call_594069.validator(path, query, header, formData, body)
-  let scheme = call_594069.pickScheme
+  let valid = call_568298.validator(path, query, header, formData, body)
+  let scheme = call_568298.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594069.url(scheme.get, call_594069.host, call_594069.base,
-                         call_594069.route, valid.getOrDefault("path"),
+  let url = call_568298.url(scheme.get, call_568298.host, call_568298.base,
+                         call_568298.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594069, url, valid)
+  result = hook(call_568298, url, valid)
 
-proc call*(call_594070: Call_ApplicationTypeVersionsGet_594060;
+proc call*(call_568299: Call_ApplicationTypeVersionsGet_568289;
           clusterName: string; resourceGroupName: string;
           applicationTypeName: string; version: string; subscriptionId: string;
           apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -1093,24 +1093,24 @@ proc call*(call_594070: Call_ApplicationTypeVersionsGet_594060;
   ##          : The application type version.
   ##   subscriptionId: string (required)
   ##                 : The customer subscription identifier.
-  var path_594071 = newJObject()
-  var query_594072 = newJObject()
-  add(path_594071, "clusterName", newJString(clusterName))
-  add(path_594071, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594072, "api-version", newJString(apiVersion))
-  add(path_594071, "applicationTypeName", newJString(applicationTypeName))
-  add(path_594071, "version", newJString(version))
-  add(path_594071, "subscriptionId", newJString(subscriptionId))
-  result = call_594070.call(path_594071, query_594072, nil, nil, nil)
+  var path_568300 = newJObject()
+  var query_568301 = newJObject()
+  add(path_568300, "clusterName", newJString(clusterName))
+  add(path_568300, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568301, "api-version", newJString(apiVersion))
+  add(path_568300, "applicationTypeName", newJString(applicationTypeName))
+  add(path_568300, "version", newJString(version))
+  add(path_568300, "subscriptionId", newJString(subscriptionId))
+  result = call_568299.call(path_568300, query_568301, nil, nil, nil)
 
-var applicationTypeVersionsGet* = Call_ApplicationTypeVersionsGet_594060(
+var applicationTypeVersionsGet* = Call_ApplicationTypeVersionsGet_568289(
     name: "applicationTypeVersionsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applicationTypes/{applicationTypeName}/versions/{version}",
-    validator: validate_ApplicationTypeVersionsGet_594061, base: "",
-    url: url_ApplicationTypeVersionsGet_594062, schemes: {Scheme.Https})
+    validator: validate_ApplicationTypeVersionsGet_568290, base: "",
+    url: url_ApplicationTypeVersionsGet_568291, schemes: {Scheme.Https})
 type
-  Call_ApplicationTypeVersionsDelete_594088 = ref object of OpenApiRestCall_593437
-proc url_ApplicationTypeVersionsDelete_594090(protocol: Scheme; host: string;
+  Call_ApplicationTypeVersionsDelete_568317 = ref object of OpenApiRestCall_567666
+proc url_ApplicationTypeVersionsDelete_568319(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1140,7 +1140,7 @@ proc url_ApplicationTypeVersionsDelete_594090(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationTypeVersionsDelete_594089(path: JsonNode; query: JsonNode;
+proc validate_ApplicationTypeVersionsDelete_568318(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a Service Fabric application type version resource with the specified name.
   ## 
@@ -1160,31 +1160,31 @@ proc validate_ApplicationTypeVersionsDelete_594089(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594091 = path.getOrDefault("clusterName")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  var valid_568320 = path.getOrDefault("clusterName")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "clusterName", valid_594091
-  var valid_594092 = path.getOrDefault("resourceGroupName")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  if valid_568320 != nil:
+    section.add "clusterName", valid_568320
+  var valid_568321 = path.getOrDefault("resourceGroupName")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "resourceGroupName", valid_594092
-  var valid_594093 = path.getOrDefault("applicationTypeName")
-  valid_594093 = validateParameter(valid_594093, JString, required = true,
+  if valid_568321 != nil:
+    section.add "resourceGroupName", valid_568321
+  var valid_568322 = path.getOrDefault("applicationTypeName")
+  valid_568322 = validateParameter(valid_568322, JString, required = true,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "applicationTypeName", valid_594093
-  var valid_594094 = path.getOrDefault("version")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  if valid_568322 != nil:
+    section.add "applicationTypeName", valid_568322
+  var valid_568323 = path.getOrDefault("version")
+  valid_568323 = validateParameter(valid_568323, JString, required = true,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "version", valid_594094
-  var valid_594095 = path.getOrDefault("subscriptionId")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  if valid_568323 != nil:
+    section.add "version", valid_568323
+  var valid_568324 = path.getOrDefault("subscriptionId")
+  valid_568324 = validateParameter(valid_568324, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "subscriptionId", valid_594095
+  if valid_568324 != nil:
+    section.add "subscriptionId", valid_568324
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1192,11 +1192,11 @@ proc validate_ApplicationTypeVersionsDelete_594089(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594096 = query.getOrDefault("api-version")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
+  var valid_568325 = query.getOrDefault("api-version")
+  valid_568325 = validateParameter(valid_568325, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594096 != nil:
-    section.add "api-version", valid_594096
+  if valid_568325 != nil:
+    section.add "api-version", valid_568325
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1205,20 +1205,20 @@ proc validate_ApplicationTypeVersionsDelete_594089(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594097: Call_ApplicationTypeVersionsDelete_594088; path: JsonNode;
+proc call*(call_568326: Call_ApplicationTypeVersionsDelete_568317; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Service Fabric application type version resource with the specified name.
   ## 
-  let valid = call_594097.validator(path, query, header, formData, body)
-  let scheme = call_594097.pickScheme
+  let valid = call_568326.validator(path, query, header, formData, body)
+  let scheme = call_568326.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594097.url(scheme.get, call_594097.host, call_594097.base,
-                         call_594097.route, valid.getOrDefault("path"),
+  let url = call_568326.url(scheme.get, call_568326.host, call_568326.base,
+                         call_568326.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594097, url, valid)
+  result = hook(call_568326, url, valid)
 
-proc call*(call_594098: Call_ApplicationTypeVersionsDelete_594088;
+proc call*(call_568327: Call_ApplicationTypeVersionsDelete_568317;
           clusterName: string; resourceGroupName: string;
           applicationTypeName: string; version: string; subscriptionId: string;
           apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -1236,24 +1236,24 @@ proc call*(call_594098: Call_ApplicationTypeVersionsDelete_594088;
   ##          : The application type version.
   ##   subscriptionId: string (required)
   ##                 : The customer subscription identifier.
-  var path_594099 = newJObject()
-  var query_594100 = newJObject()
-  add(path_594099, "clusterName", newJString(clusterName))
-  add(path_594099, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594100, "api-version", newJString(apiVersion))
-  add(path_594099, "applicationTypeName", newJString(applicationTypeName))
-  add(path_594099, "version", newJString(version))
-  add(path_594099, "subscriptionId", newJString(subscriptionId))
-  result = call_594098.call(path_594099, query_594100, nil, nil, nil)
+  var path_568328 = newJObject()
+  var query_568329 = newJObject()
+  add(path_568328, "clusterName", newJString(clusterName))
+  add(path_568328, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568329, "api-version", newJString(apiVersion))
+  add(path_568328, "applicationTypeName", newJString(applicationTypeName))
+  add(path_568328, "version", newJString(version))
+  add(path_568328, "subscriptionId", newJString(subscriptionId))
+  result = call_568327.call(path_568328, query_568329, nil, nil, nil)
 
-var applicationTypeVersionsDelete* = Call_ApplicationTypeVersionsDelete_594088(
+var applicationTypeVersionsDelete* = Call_ApplicationTypeVersionsDelete_568317(
     name: "applicationTypeVersionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applicationTypes/{applicationTypeName}/versions/{version}",
-    validator: validate_ApplicationTypeVersionsDelete_594089, base: "",
-    url: url_ApplicationTypeVersionsDelete_594090, schemes: {Scheme.Https})
+    validator: validate_ApplicationTypeVersionsDelete_568318, base: "",
+    url: url_ApplicationTypeVersionsDelete_568319, schemes: {Scheme.Https})
 type
-  Call_ApplicationsList_594101 = ref object of OpenApiRestCall_593437
-proc url_ApplicationsList_594103(protocol: Scheme; host: string; base: string;
+  Call_ApplicationsList_568330 = ref object of OpenApiRestCall_567666
+proc url_ApplicationsList_568332(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1277,7 +1277,7 @@ proc url_ApplicationsList_594103(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationsList_594102(path: JsonNode; query: JsonNode;
+proc validate_ApplicationsList_568331(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets all application resources created or in the process of being created in the Service Fabric cluster resource.
@@ -1294,21 +1294,21 @@ proc validate_ApplicationsList_594102(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594104 = path.getOrDefault("clusterName")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  var valid_568333 = path.getOrDefault("clusterName")
+  valid_568333 = validateParameter(valid_568333, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "clusterName", valid_594104
-  var valid_594105 = path.getOrDefault("resourceGroupName")
-  valid_594105 = validateParameter(valid_594105, JString, required = true,
+  if valid_568333 != nil:
+    section.add "clusterName", valid_568333
+  var valid_568334 = path.getOrDefault("resourceGroupName")
+  valid_568334 = validateParameter(valid_568334, JString, required = true,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "resourceGroupName", valid_594105
-  var valid_594106 = path.getOrDefault("subscriptionId")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  if valid_568334 != nil:
+    section.add "resourceGroupName", valid_568334
+  var valid_568335 = path.getOrDefault("subscriptionId")
+  valid_568335 = validateParameter(valid_568335, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "subscriptionId", valid_594106
+  if valid_568335 != nil:
+    section.add "subscriptionId", valid_568335
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1316,11 +1316,11 @@ proc validate_ApplicationsList_594102(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594107 = query.getOrDefault("api-version")
-  valid_594107 = validateParameter(valid_594107, JString, required = true,
+  var valid_568336 = query.getOrDefault("api-version")
+  valid_568336 = validateParameter(valid_568336, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594107 != nil:
-    section.add "api-version", valid_594107
+  if valid_568336 != nil:
+    section.add "api-version", valid_568336
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1329,20 +1329,20 @@ proc validate_ApplicationsList_594102(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594108: Call_ApplicationsList_594101; path: JsonNode;
+proc call*(call_568337: Call_ApplicationsList_568330; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all application resources created or in the process of being created in the Service Fabric cluster resource.
   ## 
-  let valid = call_594108.validator(path, query, header, formData, body)
-  let scheme = call_594108.pickScheme
+  let valid = call_568337.validator(path, query, header, formData, body)
+  let scheme = call_568337.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594108.url(scheme.get, call_594108.host, call_594108.base,
-                         call_594108.route, valid.getOrDefault("path"),
+  let url = call_568337.url(scheme.get, call_568337.host, call_568337.base,
+                         call_568337.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594108, url, valid)
+  result = hook(call_568337, url, valid)
 
-proc call*(call_594109: Call_ApplicationsList_594101; clusterName: string;
+proc call*(call_568338: Call_ApplicationsList_568330; clusterName: string;
           resourceGroupName: string; subscriptionId: string;
           apiVersion: string = "2017-07-01-preview"): Recallable =
   ## applicationsList
@@ -1355,21 +1355,21 @@ proc call*(call_594109: Call_ApplicationsList_594101; clusterName: string;
   ##             : The version of the Service Fabric resource provider API. This is a required parameter and it's value must be "2017-07-01-preview" for this specification.
   ##   subscriptionId: string (required)
   ##                 : The customer subscription identifier.
-  var path_594110 = newJObject()
-  var query_594111 = newJObject()
-  add(path_594110, "clusterName", newJString(clusterName))
-  add(path_594110, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594111, "api-version", newJString(apiVersion))
-  add(path_594110, "subscriptionId", newJString(subscriptionId))
-  result = call_594109.call(path_594110, query_594111, nil, nil, nil)
+  var path_568339 = newJObject()
+  var query_568340 = newJObject()
+  add(path_568339, "clusterName", newJString(clusterName))
+  add(path_568339, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568340, "api-version", newJString(apiVersion))
+  add(path_568339, "subscriptionId", newJString(subscriptionId))
+  result = call_568338.call(path_568339, query_568340, nil, nil, nil)
 
-var applicationsList* = Call_ApplicationsList_594101(name: "applicationsList",
+var applicationsList* = Call_ApplicationsList_568330(name: "applicationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applications",
-    validator: validate_ApplicationsList_594102, base: "",
-    url: url_ApplicationsList_594103, schemes: {Scheme.Https})
+    validator: validate_ApplicationsList_568331, base: "",
+    url: url_ApplicationsList_568332, schemes: {Scheme.Https})
 type
-  Call_ApplicationsCreate_594124 = ref object of OpenApiRestCall_593437
-proc url_ApplicationsCreate_594126(protocol: Scheme; host: string; base: string;
+  Call_ApplicationsCreate_568353 = ref object of OpenApiRestCall_567666
+proc url_ApplicationsCreate_568355(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1395,7 +1395,7 @@ proc url_ApplicationsCreate_594126(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationsCreate_594125(path: JsonNode; query: JsonNode;
+proc validate_ApplicationsCreate_568354(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Create or update a Service Fabric application resource with the specified name.
@@ -1414,26 +1414,26 @@ proc validate_ApplicationsCreate_594125(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594127 = path.getOrDefault("clusterName")
-  valid_594127 = validateParameter(valid_594127, JString, required = true,
+  var valid_568356 = path.getOrDefault("clusterName")
+  valid_568356 = validateParameter(valid_568356, JString, required = true,
                                  default = nil)
-  if valid_594127 != nil:
-    section.add "clusterName", valid_594127
-  var valid_594128 = path.getOrDefault("resourceGroupName")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  if valid_568356 != nil:
+    section.add "clusterName", valid_568356
+  var valid_568357 = path.getOrDefault("resourceGroupName")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "resourceGroupName", valid_594128
-  var valid_594129 = path.getOrDefault("applicationName")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  if valid_568357 != nil:
+    section.add "resourceGroupName", valid_568357
+  var valid_568358 = path.getOrDefault("applicationName")
+  valid_568358 = validateParameter(valid_568358, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "applicationName", valid_594129
-  var valid_594130 = path.getOrDefault("subscriptionId")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  if valid_568358 != nil:
+    section.add "applicationName", valid_568358
+  var valid_568359 = path.getOrDefault("subscriptionId")
+  valid_568359 = validateParameter(valid_568359, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "subscriptionId", valid_594130
+  if valid_568359 != nil:
+    section.add "subscriptionId", valid_568359
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1441,11 +1441,11 @@ proc validate_ApplicationsCreate_594125(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594131 = query.getOrDefault("api-version")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  var valid_568360 = query.getOrDefault("api-version")
+  valid_568360 = validateParameter(valid_568360, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594131 != nil:
-    section.add "api-version", valid_594131
+  if valid_568360 != nil:
+    section.add "api-version", valid_568360
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1459,20 +1459,20 @@ proc validate_ApplicationsCreate_594125(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594133: Call_ApplicationsCreate_594124; path: JsonNode;
+proc call*(call_568362: Call_ApplicationsCreate_568353; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Service Fabric application resource with the specified name.
   ## 
-  let valid = call_594133.validator(path, query, header, formData, body)
-  let scheme = call_594133.pickScheme
+  let valid = call_568362.validator(path, query, header, formData, body)
+  let scheme = call_568362.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594133.url(scheme.get, call_594133.host, call_594133.base,
-                         call_594133.route, valid.getOrDefault("path"),
+  let url = call_568362.url(scheme.get, call_568362.host, call_568362.base,
+                         call_568362.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594133, url, valid)
+  result = hook(call_568362, url, valid)
 
-proc call*(call_594134: Call_ApplicationsCreate_594124; clusterName: string;
+proc call*(call_568363: Call_ApplicationsCreate_568353; clusterName: string;
           resourceGroupName: string; applicationName: string;
           subscriptionId: string; parameters: JsonNode;
           apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -1490,26 +1490,26 @@ proc call*(call_594134: Call_ApplicationsCreate_594124; clusterName: string;
   ##                 : The customer subscription identifier.
   ##   parameters: JObject (required)
   ##             : The application resource.
-  var path_594135 = newJObject()
-  var query_594136 = newJObject()
-  var body_594137 = newJObject()
-  add(path_594135, "clusterName", newJString(clusterName))
-  add(path_594135, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594135, "applicationName", newJString(applicationName))
-  add(query_594136, "api-version", newJString(apiVersion))
-  add(path_594135, "subscriptionId", newJString(subscriptionId))
+  var path_568364 = newJObject()
+  var query_568365 = newJObject()
+  var body_568366 = newJObject()
+  add(path_568364, "clusterName", newJString(clusterName))
+  add(path_568364, "resourceGroupName", newJString(resourceGroupName))
+  add(path_568364, "applicationName", newJString(applicationName))
+  add(query_568365, "api-version", newJString(apiVersion))
+  add(path_568364, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594137 = parameters
-  result = call_594134.call(path_594135, query_594136, nil, nil, body_594137)
+    body_568366 = parameters
+  result = call_568363.call(path_568364, query_568365, nil, nil, body_568366)
 
-var applicationsCreate* = Call_ApplicationsCreate_594124(
+var applicationsCreate* = Call_ApplicationsCreate_568353(
     name: "applicationsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applications/{applicationName}",
-    validator: validate_ApplicationsCreate_594125, base: "",
-    url: url_ApplicationsCreate_594126, schemes: {Scheme.Https})
+    validator: validate_ApplicationsCreate_568354, base: "",
+    url: url_ApplicationsCreate_568355, schemes: {Scheme.Https})
 type
-  Call_ApplicationsGet_594112 = ref object of OpenApiRestCall_593437
-proc url_ApplicationsGet_594114(protocol: Scheme; host: string; base: string;
+  Call_ApplicationsGet_568341 = ref object of OpenApiRestCall_567666
+proc url_ApplicationsGet_568343(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1535,7 +1535,7 @@ proc url_ApplicationsGet_594114(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationsGet_594113(path: JsonNode; query: JsonNode;
+proc validate_ApplicationsGet_568342(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Get a Service Fabric application resource created or in the process of being created in the Service Fabric cluster resource.
@@ -1554,26 +1554,26 @@ proc validate_ApplicationsGet_594113(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594115 = path.getOrDefault("clusterName")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  var valid_568344 = path.getOrDefault("clusterName")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "clusterName", valid_594115
-  var valid_594116 = path.getOrDefault("resourceGroupName")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_568344 != nil:
+    section.add "clusterName", valid_568344
+  var valid_568345 = path.getOrDefault("resourceGroupName")
+  valid_568345 = validateParameter(valid_568345, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "resourceGroupName", valid_594116
-  var valid_594117 = path.getOrDefault("applicationName")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  if valid_568345 != nil:
+    section.add "resourceGroupName", valid_568345
+  var valid_568346 = path.getOrDefault("applicationName")
+  valid_568346 = validateParameter(valid_568346, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "applicationName", valid_594117
-  var valid_594118 = path.getOrDefault("subscriptionId")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  if valid_568346 != nil:
+    section.add "applicationName", valid_568346
+  var valid_568347 = path.getOrDefault("subscriptionId")
+  valid_568347 = validateParameter(valid_568347, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "subscriptionId", valid_594118
+  if valid_568347 != nil:
+    section.add "subscriptionId", valid_568347
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1581,11 +1581,11 @@ proc validate_ApplicationsGet_594113(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594119 = query.getOrDefault("api-version")
-  valid_594119 = validateParameter(valid_594119, JString, required = true,
+  var valid_568348 = query.getOrDefault("api-version")
+  valid_568348 = validateParameter(valid_568348, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594119 != nil:
-    section.add "api-version", valid_594119
+  if valid_568348 != nil:
+    section.add "api-version", valid_568348
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1594,20 +1594,20 @@ proc validate_ApplicationsGet_594113(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594120: Call_ApplicationsGet_594112; path: JsonNode; query: JsonNode;
+proc call*(call_568349: Call_ApplicationsGet_568341; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a Service Fabric application resource created or in the process of being created in the Service Fabric cluster resource.
   ## 
-  let valid = call_594120.validator(path, query, header, formData, body)
-  let scheme = call_594120.pickScheme
+  let valid = call_568349.validator(path, query, header, formData, body)
+  let scheme = call_568349.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594120.url(scheme.get, call_594120.host, call_594120.base,
-                         call_594120.route, valid.getOrDefault("path"),
+  let url = call_568349.url(scheme.get, call_568349.host, call_568349.base,
+                         call_568349.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594120, url, valid)
+  result = hook(call_568349, url, valid)
 
-proc call*(call_594121: Call_ApplicationsGet_594112; clusterName: string;
+proc call*(call_568350: Call_ApplicationsGet_568341; clusterName: string;
           resourceGroupName: string; applicationName: string;
           subscriptionId: string; apiVersion: string = "2017-07-01-preview"): Recallable =
   ## applicationsGet
@@ -1622,22 +1622,22 @@ proc call*(call_594121: Call_ApplicationsGet_594112; clusterName: string;
   ##             : The version of the Service Fabric resource provider API. This is a required parameter and it's value must be "2017-07-01-preview" for this specification.
   ##   subscriptionId: string (required)
   ##                 : The customer subscription identifier.
-  var path_594122 = newJObject()
-  var query_594123 = newJObject()
-  add(path_594122, "clusterName", newJString(clusterName))
-  add(path_594122, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594122, "applicationName", newJString(applicationName))
-  add(query_594123, "api-version", newJString(apiVersion))
-  add(path_594122, "subscriptionId", newJString(subscriptionId))
-  result = call_594121.call(path_594122, query_594123, nil, nil, nil)
+  var path_568351 = newJObject()
+  var query_568352 = newJObject()
+  add(path_568351, "clusterName", newJString(clusterName))
+  add(path_568351, "resourceGroupName", newJString(resourceGroupName))
+  add(path_568351, "applicationName", newJString(applicationName))
+  add(query_568352, "api-version", newJString(apiVersion))
+  add(path_568351, "subscriptionId", newJString(subscriptionId))
+  result = call_568350.call(path_568351, query_568352, nil, nil, nil)
 
-var applicationsGet* = Call_ApplicationsGet_594112(name: "applicationsGet",
+var applicationsGet* = Call_ApplicationsGet_568341(name: "applicationsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applications/{applicationName}",
-    validator: validate_ApplicationsGet_594113, base: "", url: url_ApplicationsGet_594114,
+    validator: validate_ApplicationsGet_568342, base: "", url: url_ApplicationsGet_568343,
     schemes: {Scheme.Https})
 type
-  Call_ApplicationsUpdate_594150 = ref object of OpenApiRestCall_593437
-proc url_ApplicationsUpdate_594152(protocol: Scheme; host: string; base: string;
+  Call_ApplicationsUpdate_568379 = ref object of OpenApiRestCall_567666
+proc url_ApplicationsUpdate_568381(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1663,7 +1663,7 @@ proc url_ApplicationsUpdate_594152(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationsUpdate_594151(path: JsonNode; query: JsonNode;
+proc validate_ApplicationsUpdate_568380(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Update a Service Fabric application resource with the specified name.
@@ -1682,26 +1682,26 @@ proc validate_ApplicationsUpdate_594151(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594153 = path.getOrDefault("clusterName")
-  valid_594153 = validateParameter(valid_594153, JString, required = true,
+  var valid_568382 = path.getOrDefault("clusterName")
+  valid_568382 = validateParameter(valid_568382, JString, required = true,
                                  default = nil)
-  if valid_594153 != nil:
-    section.add "clusterName", valid_594153
-  var valid_594154 = path.getOrDefault("resourceGroupName")
-  valid_594154 = validateParameter(valid_594154, JString, required = true,
+  if valid_568382 != nil:
+    section.add "clusterName", valid_568382
+  var valid_568383 = path.getOrDefault("resourceGroupName")
+  valid_568383 = validateParameter(valid_568383, JString, required = true,
                                  default = nil)
-  if valid_594154 != nil:
-    section.add "resourceGroupName", valid_594154
-  var valid_594155 = path.getOrDefault("applicationName")
-  valid_594155 = validateParameter(valid_594155, JString, required = true,
+  if valid_568383 != nil:
+    section.add "resourceGroupName", valid_568383
+  var valid_568384 = path.getOrDefault("applicationName")
+  valid_568384 = validateParameter(valid_568384, JString, required = true,
                                  default = nil)
-  if valid_594155 != nil:
-    section.add "applicationName", valid_594155
-  var valid_594156 = path.getOrDefault("subscriptionId")
-  valid_594156 = validateParameter(valid_594156, JString, required = true,
+  if valid_568384 != nil:
+    section.add "applicationName", valid_568384
+  var valid_568385 = path.getOrDefault("subscriptionId")
+  valid_568385 = validateParameter(valid_568385, JString, required = true,
                                  default = nil)
-  if valid_594156 != nil:
-    section.add "subscriptionId", valid_594156
+  if valid_568385 != nil:
+    section.add "subscriptionId", valid_568385
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1709,11 +1709,11 @@ proc validate_ApplicationsUpdate_594151(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594157 = query.getOrDefault("api-version")
-  valid_594157 = validateParameter(valid_594157, JString, required = true,
+  var valid_568386 = query.getOrDefault("api-version")
+  valid_568386 = validateParameter(valid_568386, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594157 != nil:
-    section.add "api-version", valid_594157
+  if valid_568386 != nil:
+    section.add "api-version", valid_568386
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1727,20 +1727,20 @@ proc validate_ApplicationsUpdate_594151(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594159: Call_ApplicationsUpdate_594150; path: JsonNode;
+proc call*(call_568388: Call_ApplicationsUpdate_568379; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a Service Fabric application resource with the specified name.
   ## 
-  let valid = call_594159.validator(path, query, header, formData, body)
-  let scheme = call_594159.pickScheme
+  let valid = call_568388.validator(path, query, header, formData, body)
+  let scheme = call_568388.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594159.url(scheme.get, call_594159.host, call_594159.base,
-                         call_594159.route, valid.getOrDefault("path"),
+  let url = call_568388.url(scheme.get, call_568388.host, call_568388.base,
+                         call_568388.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594159, url, valid)
+  result = hook(call_568388, url, valid)
 
-proc call*(call_594160: Call_ApplicationsUpdate_594150; clusterName: string;
+proc call*(call_568389: Call_ApplicationsUpdate_568379; clusterName: string;
           resourceGroupName: string; applicationName: string;
           subscriptionId: string; parameters: JsonNode;
           apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -1758,26 +1758,26 @@ proc call*(call_594160: Call_ApplicationsUpdate_594150; clusterName: string;
   ##                 : The customer subscription identifier.
   ##   parameters: JObject (required)
   ##             : The application resource for patch operations.
-  var path_594161 = newJObject()
-  var query_594162 = newJObject()
-  var body_594163 = newJObject()
-  add(path_594161, "clusterName", newJString(clusterName))
-  add(path_594161, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594161, "applicationName", newJString(applicationName))
-  add(query_594162, "api-version", newJString(apiVersion))
-  add(path_594161, "subscriptionId", newJString(subscriptionId))
+  var path_568390 = newJObject()
+  var query_568391 = newJObject()
+  var body_568392 = newJObject()
+  add(path_568390, "clusterName", newJString(clusterName))
+  add(path_568390, "resourceGroupName", newJString(resourceGroupName))
+  add(path_568390, "applicationName", newJString(applicationName))
+  add(query_568391, "api-version", newJString(apiVersion))
+  add(path_568390, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594163 = parameters
-  result = call_594160.call(path_594161, query_594162, nil, nil, body_594163)
+    body_568392 = parameters
+  result = call_568389.call(path_568390, query_568391, nil, nil, body_568392)
 
-var applicationsUpdate* = Call_ApplicationsUpdate_594150(
+var applicationsUpdate* = Call_ApplicationsUpdate_568379(
     name: "applicationsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applications/{applicationName}",
-    validator: validate_ApplicationsUpdate_594151, base: "",
-    url: url_ApplicationsUpdate_594152, schemes: {Scheme.Https})
+    validator: validate_ApplicationsUpdate_568380, base: "",
+    url: url_ApplicationsUpdate_568381, schemes: {Scheme.Https})
 type
-  Call_ApplicationsDelete_594138 = ref object of OpenApiRestCall_593437
-proc url_ApplicationsDelete_594140(protocol: Scheme; host: string; base: string;
+  Call_ApplicationsDelete_568367 = ref object of OpenApiRestCall_567666
+proc url_ApplicationsDelete_568369(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1803,7 +1803,7 @@ proc url_ApplicationsDelete_594140(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationsDelete_594139(path: JsonNode; query: JsonNode;
+proc validate_ApplicationsDelete_568368(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Delete a Service Fabric application resource with the specified name.
@@ -1822,26 +1822,26 @@ proc validate_ApplicationsDelete_594139(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594141 = path.getOrDefault("clusterName")
-  valid_594141 = validateParameter(valid_594141, JString, required = true,
+  var valid_568370 = path.getOrDefault("clusterName")
+  valid_568370 = validateParameter(valid_568370, JString, required = true,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "clusterName", valid_594141
-  var valid_594142 = path.getOrDefault("resourceGroupName")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  if valid_568370 != nil:
+    section.add "clusterName", valid_568370
+  var valid_568371 = path.getOrDefault("resourceGroupName")
+  valid_568371 = validateParameter(valid_568371, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "resourceGroupName", valid_594142
-  var valid_594143 = path.getOrDefault("applicationName")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+  if valid_568371 != nil:
+    section.add "resourceGroupName", valid_568371
+  var valid_568372 = path.getOrDefault("applicationName")
+  valid_568372 = validateParameter(valid_568372, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "applicationName", valid_594143
-  var valid_594144 = path.getOrDefault("subscriptionId")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  if valid_568372 != nil:
+    section.add "applicationName", valid_568372
+  var valid_568373 = path.getOrDefault("subscriptionId")
+  valid_568373 = validateParameter(valid_568373, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "subscriptionId", valid_594144
+  if valid_568373 != nil:
+    section.add "subscriptionId", valid_568373
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1849,11 +1849,11 @@ proc validate_ApplicationsDelete_594139(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594145 = query.getOrDefault("api-version")
-  valid_594145 = validateParameter(valid_594145, JString, required = true,
+  var valid_568374 = query.getOrDefault("api-version")
+  valid_568374 = validateParameter(valid_568374, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594145 != nil:
-    section.add "api-version", valid_594145
+  if valid_568374 != nil:
+    section.add "api-version", valid_568374
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1862,20 +1862,20 @@ proc validate_ApplicationsDelete_594139(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594146: Call_ApplicationsDelete_594138; path: JsonNode;
+proc call*(call_568375: Call_ApplicationsDelete_568367; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Service Fabric application resource with the specified name.
   ## 
-  let valid = call_594146.validator(path, query, header, formData, body)
-  let scheme = call_594146.pickScheme
+  let valid = call_568375.validator(path, query, header, formData, body)
+  let scheme = call_568375.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594146.url(scheme.get, call_594146.host, call_594146.base,
-                         call_594146.route, valid.getOrDefault("path"),
+  let url = call_568375.url(scheme.get, call_568375.host, call_568375.base,
+                         call_568375.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594146, url, valid)
+  result = hook(call_568375, url, valid)
 
-proc call*(call_594147: Call_ApplicationsDelete_594138; clusterName: string;
+proc call*(call_568376: Call_ApplicationsDelete_568367; clusterName: string;
           resourceGroupName: string; applicationName: string;
           subscriptionId: string; apiVersion: string = "2017-07-01-preview"): Recallable =
   ## applicationsDelete
@@ -1890,23 +1890,23 @@ proc call*(call_594147: Call_ApplicationsDelete_594138; clusterName: string;
   ##             : The version of the Service Fabric resource provider API. This is a required parameter and it's value must be "2017-07-01-preview" for this specification.
   ##   subscriptionId: string (required)
   ##                 : The customer subscription identifier.
-  var path_594148 = newJObject()
-  var query_594149 = newJObject()
-  add(path_594148, "clusterName", newJString(clusterName))
-  add(path_594148, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594148, "applicationName", newJString(applicationName))
-  add(query_594149, "api-version", newJString(apiVersion))
-  add(path_594148, "subscriptionId", newJString(subscriptionId))
-  result = call_594147.call(path_594148, query_594149, nil, nil, nil)
+  var path_568377 = newJObject()
+  var query_568378 = newJObject()
+  add(path_568377, "clusterName", newJString(clusterName))
+  add(path_568377, "resourceGroupName", newJString(resourceGroupName))
+  add(path_568377, "applicationName", newJString(applicationName))
+  add(query_568378, "api-version", newJString(apiVersion))
+  add(path_568377, "subscriptionId", newJString(subscriptionId))
+  result = call_568376.call(path_568377, query_568378, nil, nil, nil)
 
-var applicationsDelete* = Call_ApplicationsDelete_594138(
+var applicationsDelete* = Call_ApplicationsDelete_568367(
     name: "applicationsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applications/{applicationName}",
-    validator: validate_ApplicationsDelete_594139, base: "",
-    url: url_ApplicationsDelete_594140, schemes: {Scheme.Https})
+    validator: validate_ApplicationsDelete_568368, base: "",
+    url: url_ApplicationsDelete_568369, schemes: {Scheme.Https})
 type
-  Call_ServicesList_594164 = ref object of OpenApiRestCall_593437
-proc url_ServicesList_594166(protocol: Scheme; host: string; base: string;
+  Call_ServicesList_568393 = ref object of OpenApiRestCall_567666
+proc url_ServicesList_568395(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1933,7 +1933,7 @@ proc url_ServicesList_594166(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesList_594165(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServicesList_568394(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all service resources created or in the process of being created in the Service Fabric application resource.
   ## 
@@ -1951,26 +1951,26 @@ proc validate_ServicesList_594165(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594167 = path.getOrDefault("clusterName")
-  valid_594167 = validateParameter(valid_594167, JString, required = true,
+  var valid_568396 = path.getOrDefault("clusterName")
+  valid_568396 = validateParameter(valid_568396, JString, required = true,
                                  default = nil)
-  if valid_594167 != nil:
-    section.add "clusterName", valid_594167
-  var valid_594168 = path.getOrDefault("resourceGroupName")
-  valid_594168 = validateParameter(valid_594168, JString, required = true,
+  if valid_568396 != nil:
+    section.add "clusterName", valid_568396
+  var valid_568397 = path.getOrDefault("resourceGroupName")
+  valid_568397 = validateParameter(valid_568397, JString, required = true,
                                  default = nil)
-  if valid_594168 != nil:
-    section.add "resourceGroupName", valid_594168
-  var valid_594169 = path.getOrDefault("applicationName")
-  valid_594169 = validateParameter(valid_594169, JString, required = true,
+  if valid_568397 != nil:
+    section.add "resourceGroupName", valid_568397
+  var valid_568398 = path.getOrDefault("applicationName")
+  valid_568398 = validateParameter(valid_568398, JString, required = true,
                                  default = nil)
-  if valid_594169 != nil:
-    section.add "applicationName", valid_594169
-  var valid_594170 = path.getOrDefault("subscriptionId")
-  valid_594170 = validateParameter(valid_594170, JString, required = true,
+  if valid_568398 != nil:
+    section.add "applicationName", valid_568398
+  var valid_568399 = path.getOrDefault("subscriptionId")
+  valid_568399 = validateParameter(valid_568399, JString, required = true,
                                  default = nil)
-  if valid_594170 != nil:
-    section.add "subscriptionId", valid_594170
+  if valid_568399 != nil:
+    section.add "subscriptionId", valid_568399
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1978,11 +1978,11 @@ proc validate_ServicesList_594165(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594171 = query.getOrDefault("api-version")
-  valid_594171 = validateParameter(valid_594171, JString, required = true,
+  var valid_568400 = query.getOrDefault("api-version")
+  valid_568400 = validateParameter(valid_568400, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594171 != nil:
-    section.add "api-version", valid_594171
+  if valid_568400 != nil:
+    section.add "api-version", valid_568400
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1991,20 +1991,20 @@ proc validate_ServicesList_594165(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594172: Call_ServicesList_594164; path: JsonNode; query: JsonNode;
+proc call*(call_568401: Call_ServicesList_568393; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all service resources created or in the process of being created in the Service Fabric application resource.
   ## 
-  let valid = call_594172.validator(path, query, header, formData, body)
-  let scheme = call_594172.pickScheme
+  let valid = call_568401.validator(path, query, header, formData, body)
+  let scheme = call_568401.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594172.url(scheme.get, call_594172.host, call_594172.base,
-                         call_594172.route, valid.getOrDefault("path"),
+  let url = call_568401.url(scheme.get, call_568401.host, call_568401.base,
+                         call_568401.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594172, url, valid)
+  result = hook(call_568401, url, valid)
 
-proc call*(call_594173: Call_ServicesList_594164; clusterName: string;
+proc call*(call_568402: Call_ServicesList_568393; clusterName: string;
           resourceGroupName: string; applicationName: string;
           subscriptionId: string; apiVersion: string = "2017-07-01-preview"): Recallable =
   ## servicesList
@@ -2019,22 +2019,22 @@ proc call*(call_594173: Call_ServicesList_594164; clusterName: string;
   ##             : The version of the Service Fabric resource provider API. This is a required parameter and it's value must be "2017-07-01-preview" for this specification.
   ##   subscriptionId: string (required)
   ##                 : The customer subscription identifier.
-  var path_594174 = newJObject()
-  var query_594175 = newJObject()
-  add(path_594174, "clusterName", newJString(clusterName))
-  add(path_594174, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594174, "applicationName", newJString(applicationName))
-  add(query_594175, "api-version", newJString(apiVersion))
-  add(path_594174, "subscriptionId", newJString(subscriptionId))
-  result = call_594173.call(path_594174, query_594175, nil, nil, nil)
+  var path_568403 = newJObject()
+  var query_568404 = newJObject()
+  add(path_568403, "clusterName", newJString(clusterName))
+  add(path_568403, "resourceGroupName", newJString(resourceGroupName))
+  add(path_568403, "applicationName", newJString(applicationName))
+  add(query_568404, "api-version", newJString(apiVersion))
+  add(path_568403, "subscriptionId", newJString(subscriptionId))
+  result = call_568402.call(path_568403, query_568404, nil, nil, nil)
 
-var servicesList* = Call_ServicesList_594164(name: "servicesList",
+var servicesList* = Call_ServicesList_568393(name: "servicesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applications/{applicationName}/services",
-    validator: validate_ServicesList_594165, base: "", url: url_ServicesList_594166,
+    validator: validate_ServicesList_568394, base: "", url: url_ServicesList_568395,
     schemes: {Scheme.Https})
 type
-  Call_ServicesCreate_594189 = ref object of OpenApiRestCall_593437
-proc url_ServicesCreate_594191(protocol: Scheme; host: string; base: string;
+  Call_ServicesCreate_568418 = ref object of OpenApiRestCall_567666
+proc url_ServicesCreate_568420(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2063,7 +2063,7 @@ proc url_ServicesCreate_594191(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesCreate_594190(path: JsonNode; query: JsonNode;
+proc validate_ServicesCreate_568419(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Create or update a Service Fabric service resource with the specified name.
@@ -2084,31 +2084,31 @@ proc validate_ServicesCreate_594190(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594192 = path.getOrDefault("clusterName")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  var valid_568421 = path.getOrDefault("clusterName")
+  valid_568421 = validateParameter(valid_568421, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "clusterName", valid_594192
-  var valid_594193 = path.getOrDefault("resourceGroupName")
-  valid_594193 = validateParameter(valid_594193, JString, required = true,
+  if valid_568421 != nil:
+    section.add "clusterName", valid_568421
+  var valid_568422 = path.getOrDefault("resourceGroupName")
+  valid_568422 = validateParameter(valid_568422, JString, required = true,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "resourceGroupName", valid_594193
-  var valid_594194 = path.getOrDefault("applicationName")
-  valid_594194 = validateParameter(valid_594194, JString, required = true,
+  if valid_568422 != nil:
+    section.add "resourceGroupName", valid_568422
+  var valid_568423 = path.getOrDefault("applicationName")
+  valid_568423 = validateParameter(valid_568423, JString, required = true,
                                  default = nil)
-  if valid_594194 != nil:
-    section.add "applicationName", valid_594194
-  var valid_594195 = path.getOrDefault("subscriptionId")
-  valid_594195 = validateParameter(valid_594195, JString, required = true,
+  if valid_568423 != nil:
+    section.add "applicationName", valid_568423
+  var valid_568424 = path.getOrDefault("subscriptionId")
+  valid_568424 = validateParameter(valid_568424, JString, required = true,
                                  default = nil)
-  if valid_594195 != nil:
-    section.add "subscriptionId", valid_594195
-  var valid_594196 = path.getOrDefault("serviceName")
-  valid_594196 = validateParameter(valid_594196, JString, required = true,
+  if valid_568424 != nil:
+    section.add "subscriptionId", valid_568424
+  var valid_568425 = path.getOrDefault("serviceName")
+  valid_568425 = validateParameter(valid_568425, JString, required = true,
                                  default = nil)
-  if valid_594196 != nil:
-    section.add "serviceName", valid_594196
+  if valid_568425 != nil:
+    section.add "serviceName", valid_568425
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2116,11 +2116,11 @@ proc validate_ServicesCreate_594190(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594197 = query.getOrDefault("api-version")
-  valid_594197 = validateParameter(valid_594197, JString, required = true,
+  var valid_568426 = query.getOrDefault("api-version")
+  valid_568426 = validateParameter(valid_568426, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594197 != nil:
-    section.add "api-version", valid_594197
+  if valid_568426 != nil:
+    section.add "api-version", valid_568426
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2134,20 +2134,20 @@ proc validate_ServicesCreate_594190(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594199: Call_ServicesCreate_594189; path: JsonNode; query: JsonNode;
+proc call*(call_568428: Call_ServicesCreate_568418; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Service Fabric service resource with the specified name.
   ## 
-  let valid = call_594199.validator(path, query, header, formData, body)
-  let scheme = call_594199.pickScheme
+  let valid = call_568428.validator(path, query, header, formData, body)
+  let scheme = call_568428.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594199.url(scheme.get, call_594199.host, call_594199.base,
-                         call_594199.route, valid.getOrDefault("path"),
+  let url = call_568428.url(scheme.get, call_568428.host, call_568428.base,
+                         call_568428.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594199, url, valid)
+  result = hook(call_568428, url, valid)
 
-proc call*(call_594200: Call_ServicesCreate_594189; clusterName: string;
+proc call*(call_568429: Call_ServicesCreate_568418; clusterName: string;
           resourceGroupName: string; applicationName: string;
           subscriptionId: string; parameters: JsonNode; serviceName: string;
           apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -2167,26 +2167,26 @@ proc call*(call_594200: Call_ServicesCreate_594189; clusterName: string;
   ##             : The service resource.
   ##   serviceName: string (required)
   ##              : The name of the service resource in the format of {applicationName}~{serviceName}.
-  var path_594201 = newJObject()
-  var query_594202 = newJObject()
-  var body_594203 = newJObject()
-  add(path_594201, "clusterName", newJString(clusterName))
-  add(path_594201, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594201, "applicationName", newJString(applicationName))
-  add(query_594202, "api-version", newJString(apiVersion))
-  add(path_594201, "subscriptionId", newJString(subscriptionId))
+  var path_568430 = newJObject()
+  var query_568431 = newJObject()
+  var body_568432 = newJObject()
+  add(path_568430, "clusterName", newJString(clusterName))
+  add(path_568430, "resourceGroupName", newJString(resourceGroupName))
+  add(path_568430, "applicationName", newJString(applicationName))
+  add(query_568431, "api-version", newJString(apiVersion))
+  add(path_568430, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594203 = parameters
-  add(path_594201, "serviceName", newJString(serviceName))
-  result = call_594200.call(path_594201, query_594202, nil, nil, body_594203)
+    body_568432 = parameters
+  add(path_568430, "serviceName", newJString(serviceName))
+  result = call_568429.call(path_568430, query_568431, nil, nil, body_568432)
 
-var servicesCreate* = Call_ServicesCreate_594189(name: "servicesCreate",
+var servicesCreate* = Call_ServicesCreate_568418(name: "servicesCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applications/{applicationName}/services/{serviceName}",
-    validator: validate_ServicesCreate_594190, base: "", url: url_ServicesCreate_594191,
+    validator: validate_ServicesCreate_568419, base: "", url: url_ServicesCreate_568420,
     schemes: {Scheme.Https})
 type
-  Call_ServicesGet_594176 = ref object of OpenApiRestCall_593437
-proc url_ServicesGet_594178(protocol: Scheme; host: string; base: string;
+  Call_ServicesGet_568405 = ref object of OpenApiRestCall_567666
+proc url_ServicesGet_568407(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2215,7 +2215,7 @@ proc url_ServicesGet_594178(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesGet_594177(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServicesGet_568406(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a Service Fabric service resource created or in the process of being created in the Service Fabric application resource.
   ## 
@@ -2235,31 +2235,31 @@ proc validate_ServicesGet_594177(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594179 = path.getOrDefault("clusterName")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  var valid_568408 = path.getOrDefault("clusterName")
+  valid_568408 = validateParameter(valid_568408, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "clusterName", valid_594179
-  var valid_594180 = path.getOrDefault("resourceGroupName")
-  valid_594180 = validateParameter(valid_594180, JString, required = true,
+  if valid_568408 != nil:
+    section.add "clusterName", valid_568408
+  var valid_568409 = path.getOrDefault("resourceGroupName")
+  valid_568409 = validateParameter(valid_568409, JString, required = true,
                                  default = nil)
-  if valid_594180 != nil:
-    section.add "resourceGroupName", valid_594180
-  var valid_594181 = path.getOrDefault("applicationName")
-  valid_594181 = validateParameter(valid_594181, JString, required = true,
+  if valid_568409 != nil:
+    section.add "resourceGroupName", valid_568409
+  var valid_568410 = path.getOrDefault("applicationName")
+  valid_568410 = validateParameter(valid_568410, JString, required = true,
                                  default = nil)
-  if valid_594181 != nil:
-    section.add "applicationName", valid_594181
-  var valid_594182 = path.getOrDefault("subscriptionId")
-  valid_594182 = validateParameter(valid_594182, JString, required = true,
+  if valid_568410 != nil:
+    section.add "applicationName", valid_568410
+  var valid_568411 = path.getOrDefault("subscriptionId")
+  valid_568411 = validateParameter(valid_568411, JString, required = true,
                                  default = nil)
-  if valid_594182 != nil:
-    section.add "subscriptionId", valid_594182
-  var valid_594183 = path.getOrDefault("serviceName")
-  valid_594183 = validateParameter(valid_594183, JString, required = true,
+  if valid_568411 != nil:
+    section.add "subscriptionId", valid_568411
+  var valid_568412 = path.getOrDefault("serviceName")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594183 != nil:
-    section.add "serviceName", valid_594183
+  if valid_568412 != nil:
+    section.add "serviceName", valid_568412
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2267,11 +2267,11 @@ proc validate_ServicesGet_594177(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594184 = query.getOrDefault("api-version")
-  valid_594184 = validateParameter(valid_594184, JString, required = true,
+  var valid_568413 = query.getOrDefault("api-version")
+  valid_568413 = validateParameter(valid_568413, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594184 != nil:
-    section.add "api-version", valid_594184
+  if valid_568413 != nil:
+    section.add "api-version", valid_568413
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2280,20 +2280,20 @@ proc validate_ServicesGet_594177(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594185: Call_ServicesGet_594176; path: JsonNode; query: JsonNode;
+proc call*(call_568414: Call_ServicesGet_568405; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a Service Fabric service resource created or in the process of being created in the Service Fabric application resource.
   ## 
-  let valid = call_594185.validator(path, query, header, formData, body)
-  let scheme = call_594185.pickScheme
+  let valid = call_568414.validator(path, query, header, formData, body)
+  let scheme = call_568414.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594185.url(scheme.get, call_594185.host, call_594185.base,
-                         call_594185.route, valid.getOrDefault("path"),
+  let url = call_568414.url(scheme.get, call_568414.host, call_568414.base,
+                         call_568414.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594185, url, valid)
+  result = hook(call_568414, url, valid)
 
-proc call*(call_594186: Call_ServicesGet_594176; clusterName: string;
+proc call*(call_568415: Call_ServicesGet_568405; clusterName: string;
           resourceGroupName: string; applicationName: string;
           subscriptionId: string; serviceName: string;
           apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -2311,25 +2311,25 @@ proc call*(call_594186: Call_ServicesGet_594176; clusterName: string;
   ##                 : The customer subscription identifier.
   ##   serviceName: string (required)
   ##              : The name of the service resource in the format of {applicationName}~{serviceName}.
-  var path_594187 = newJObject()
-  var query_594188 = newJObject()
-  add(path_594187, "clusterName", newJString(clusterName))
-  add(path_594187, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594187, "applicationName", newJString(applicationName))
-  add(query_594188, "api-version", newJString(apiVersion))
-  add(path_594187, "subscriptionId", newJString(subscriptionId))
-  add(path_594187, "serviceName", newJString(serviceName))
-  result = call_594186.call(path_594187, query_594188, nil, nil, nil)
+  var path_568416 = newJObject()
+  var query_568417 = newJObject()
+  add(path_568416, "clusterName", newJString(clusterName))
+  add(path_568416, "resourceGroupName", newJString(resourceGroupName))
+  add(path_568416, "applicationName", newJString(applicationName))
+  add(query_568417, "api-version", newJString(apiVersion))
+  add(path_568416, "subscriptionId", newJString(subscriptionId))
+  add(path_568416, "serviceName", newJString(serviceName))
+  result = call_568415.call(path_568416, query_568417, nil, nil, nil)
 
-var servicesGet* = Call_ServicesGet_594176(name: "servicesGet",
+var servicesGet* = Call_ServicesGet_568405(name: "servicesGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applications/{applicationName}/services/{serviceName}",
-                                        validator: validate_ServicesGet_594177,
-                                        base: "", url: url_ServicesGet_594178,
+                                        validator: validate_ServicesGet_568406,
+                                        base: "", url: url_ServicesGet_568407,
                                         schemes: {Scheme.Https})
 type
-  Call_ServicesUpdate_594217 = ref object of OpenApiRestCall_593437
-proc url_ServicesUpdate_594219(protocol: Scheme; host: string; base: string;
+  Call_ServicesUpdate_568446 = ref object of OpenApiRestCall_567666
+proc url_ServicesUpdate_568448(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2358,7 +2358,7 @@ proc url_ServicesUpdate_594219(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesUpdate_594218(path: JsonNode; query: JsonNode;
+proc validate_ServicesUpdate_568447(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Update a Service Fabric service resource with the specified name.
@@ -2379,31 +2379,31 @@ proc validate_ServicesUpdate_594218(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594220 = path.getOrDefault("clusterName")
-  valid_594220 = validateParameter(valid_594220, JString, required = true,
+  var valid_568449 = path.getOrDefault("clusterName")
+  valid_568449 = validateParameter(valid_568449, JString, required = true,
                                  default = nil)
-  if valid_594220 != nil:
-    section.add "clusterName", valid_594220
-  var valid_594221 = path.getOrDefault("resourceGroupName")
-  valid_594221 = validateParameter(valid_594221, JString, required = true,
+  if valid_568449 != nil:
+    section.add "clusterName", valid_568449
+  var valid_568450 = path.getOrDefault("resourceGroupName")
+  valid_568450 = validateParameter(valid_568450, JString, required = true,
                                  default = nil)
-  if valid_594221 != nil:
-    section.add "resourceGroupName", valid_594221
-  var valid_594222 = path.getOrDefault("applicationName")
-  valid_594222 = validateParameter(valid_594222, JString, required = true,
+  if valid_568450 != nil:
+    section.add "resourceGroupName", valid_568450
+  var valid_568451 = path.getOrDefault("applicationName")
+  valid_568451 = validateParameter(valid_568451, JString, required = true,
                                  default = nil)
-  if valid_594222 != nil:
-    section.add "applicationName", valid_594222
-  var valid_594223 = path.getOrDefault("subscriptionId")
-  valid_594223 = validateParameter(valid_594223, JString, required = true,
+  if valid_568451 != nil:
+    section.add "applicationName", valid_568451
+  var valid_568452 = path.getOrDefault("subscriptionId")
+  valid_568452 = validateParameter(valid_568452, JString, required = true,
                                  default = nil)
-  if valid_594223 != nil:
-    section.add "subscriptionId", valid_594223
-  var valid_594224 = path.getOrDefault("serviceName")
-  valid_594224 = validateParameter(valid_594224, JString, required = true,
+  if valid_568452 != nil:
+    section.add "subscriptionId", valid_568452
+  var valid_568453 = path.getOrDefault("serviceName")
+  valid_568453 = validateParameter(valid_568453, JString, required = true,
                                  default = nil)
-  if valid_594224 != nil:
-    section.add "serviceName", valid_594224
+  if valid_568453 != nil:
+    section.add "serviceName", valid_568453
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2411,11 +2411,11 @@ proc validate_ServicesUpdate_594218(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594225 = query.getOrDefault("api-version")
-  valid_594225 = validateParameter(valid_594225, JString, required = true,
+  var valid_568454 = query.getOrDefault("api-version")
+  valid_568454 = validateParameter(valid_568454, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594225 != nil:
-    section.add "api-version", valid_594225
+  if valid_568454 != nil:
+    section.add "api-version", valid_568454
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2429,20 +2429,20 @@ proc validate_ServicesUpdate_594218(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594227: Call_ServicesUpdate_594217; path: JsonNode; query: JsonNode;
+proc call*(call_568456: Call_ServicesUpdate_568446; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a Service Fabric service resource with the specified name.
   ## 
-  let valid = call_594227.validator(path, query, header, formData, body)
-  let scheme = call_594227.pickScheme
+  let valid = call_568456.validator(path, query, header, formData, body)
+  let scheme = call_568456.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594227.url(scheme.get, call_594227.host, call_594227.base,
-                         call_594227.route, valid.getOrDefault("path"),
+  let url = call_568456.url(scheme.get, call_568456.host, call_568456.base,
+                         call_568456.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594227, url, valid)
+  result = hook(call_568456, url, valid)
 
-proc call*(call_594228: Call_ServicesUpdate_594217; clusterName: string;
+proc call*(call_568457: Call_ServicesUpdate_568446; clusterName: string;
           resourceGroupName: string; applicationName: string;
           subscriptionId: string; parameters: JsonNode; serviceName: string;
           apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -2462,26 +2462,26 @@ proc call*(call_594228: Call_ServicesUpdate_594217; clusterName: string;
   ##             : The service resource for patch operations.
   ##   serviceName: string (required)
   ##              : The name of the service resource in the format of {applicationName}~{serviceName}.
-  var path_594229 = newJObject()
-  var query_594230 = newJObject()
-  var body_594231 = newJObject()
-  add(path_594229, "clusterName", newJString(clusterName))
-  add(path_594229, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594229, "applicationName", newJString(applicationName))
-  add(query_594230, "api-version", newJString(apiVersion))
-  add(path_594229, "subscriptionId", newJString(subscriptionId))
+  var path_568458 = newJObject()
+  var query_568459 = newJObject()
+  var body_568460 = newJObject()
+  add(path_568458, "clusterName", newJString(clusterName))
+  add(path_568458, "resourceGroupName", newJString(resourceGroupName))
+  add(path_568458, "applicationName", newJString(applicationName))
+  add(query_568459, "api-version", newJString(apiVersion))
+  add(path_568458, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_594231 = parameters
-  add(path_594229, "serviceName", newJString(serviceName))
-  result = call_594228.call(path_594229, query_594230, nil, nil, body_594231)
+    body_568460 = parameters
+  add(path_568458, "serviceName", newJString(serviceName))
+  result = call_568457.call(path_568458, query_568459, nil, nil, body_568460)
 
-var servicesUpdate* = Call_ServicesUpdate_594217(name: "servicesUpdate",
+var servicesUpdate* = Call_ServicesUpdate_568446(name: "servicesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applications/{applicationName}/services/{serviceName}",
-    validator: validate_ServicesUpdate_594218, base: "", url: url_ServicesUpdate_594219,
+    validator: validate_ServicesUpdate_568447, base: "", url: url_ServicesUpdate_568448,
     schemes: {Scheme.Https})
 type
-  Call_ServicesDelete_594204 = ref object of OpenApiRestCall_593437
-proc url_ServicesDelete_594206(protocol: Scheme; host: string; base: string;
+  Call_ServicesDelete_568433 = ref object of OpenApiRestCall_567666
+proc url_ServicesDelete_568435(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2510,7 +2510,7 @@ proc url_ServicesDelete_594206(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServicesDelete_594205(path: JsonNode; query: JsonNode;
+proc validate_ServicesDelete_568434(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Delete a Service Fabric service resource with the specified name.
@@ -2531,31 +2531,31 @@ proc validate_ServicesDelete_594205(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_594207 = path.getOrDefault("clusterName")
-  valid_594207 = validateParameter(valid_594207, JString, required = true,
+  var valid_568436 = path.getOrDefault("clusterName")
+  valid_568436 = validateParameter(valid_568436, JString, required = true,
                                  default = nil)
-  if valid_594207 != nil:
-    section.add "clusterName", valid_594207
-  var valid_594208 = path.getOrDefault("resourceGroupName")
-  valid_594208 = validateParameter(valid_594208, JString, required = true,
+  if valid_568436 != nil:
+    section.add "clusterName", valid_568436
+  var valid_568437 = path.getOrDefault("resourceGroupName")
+  valid_568437 = validateParameter(valid_568437, JString, required = true,
                                  default = nil)
-  if valid_594208 != nil:
-    section.add "resourceGroupName", valid_594208
-  var valid_594209 = path.getOrDefault("applicationName")
-  valid_594209 = validateParameter(valid_594209, JString, required = true,
+  if valid_568437 != nil:
+    section.add "resourceGroupName", valid_568437
+  var valid_568438 = path.getOrDefault("applicationName")
+  valid_568438 = validateParameter(valid_568438, JString, required = true,
                                  default = nil)
-  if valid_594209 != nil:
-    section.add "applicationName", valid_594209
-  var valid_594210 = path.getOrDefault("subscriptionId")
-  valid_594210 = validateParameter(valid_594210, JString, required = true,
+  if valid_568438 != nil:
+    section.add "applicationName", valid_568438
+  var valid_568439 = path.getOrDefault("subscriptionId")
+  valid_568439 = validateParameter(valid_568439, JString, required = true,
                                  default = nil)
-  if valid_594210 != nil:
-    section.add "subscriptionId", valid_594210
-  var valid_594211 = path.getOrDefault("serviceName")
-  valid_594211 = validateParameter(valid_594211, JString, required = true,
+  if valid_568439 != nil:
+    section.add "subscriptionId", valid_568439
+  var valid_568440 = path.getOrDefault("serviceName")
+  valid_568440 = validateParameter(valid_568440, JString, required = true,
                                  default = nil)
-  if valid_594211 != nil:
-    section.add "serviceName", valid_594211
+  if valid_568440 != nil:
+    section.add "serviceName", valid_568440
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2563,11 +2563,11 @@ proc validate_ServicesDelete_594205(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594212 = query.getOrDefault("api-version")
-  valid_594212 = validateParameter(valid_594212, JString, required = true,
+  var valid_568441 = query.getOrDefault("api-version")
+  valid_568441 = validateParameter(valid_568441, JString, required = true,
                                  default = newJString("2017-07-01-preview"))
-  if valid_594212 != nil:
-    section.add "api-version", valid_594212
+  if valid_568441 != nil:
+    section.add "api-version", valid_568441
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2576,20 +2576,20 @@ proc validate_ServicesDelete_594205(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594213: Call_ServicesDelete_594204; path: JsonNode; query: JsonNode;
+proc call*(call_568442: Call_ServicesDelete_568433; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Service Fabric service resource with the specified name.
   ## 
-  let valid = call_594213.validator(path, query, header, formData, body)
-  let scheme = call_594213.pickScheme
+  let valid = call_568442.validator(path, query, header, formData, body)
+  let scheme = call_568442.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594213.url(scheme.get, call_594213.host, call_594213.base,
-                         call_594213.route, valid.getOrDefault("path"),
+  let url = call_568442.url(scheme.get, call_568442.host, call_568442.base,
+                         call_568442.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594213, url, valid)
+  result = hook(call_568442, url, valid)
 
-proc call*(call_594214: Call_ServicesDelete_594204; clusterName: string;
+proc call*(call_568443: Call_ServicesDelete_568433; clusterName: string;
           resourceGroupName: string; applicationName: string;
           subscriptionId: string; serviceName: string;
           apiVersion: string = "2017-07-01-preview"): Recallable =
@@ -2607,19 +2607,19 @@ proc call*(call_594214: Call_ServicesDelete_594204; clusterName: string;
   ##                 : The customer subscription identifier.
   ##   serviceName: string (required)
   ##              : The name of the service resource in the format of {applicationName}~{serviceName}.
-  var path_594215 = newJObject()
-  var query_594216 = newJObject()
-  add(path_594215, "clusterName", newJString(clusterName))
-  add(path_594215, "resourceGroupName", newJString(resourceGroupName))
-  add(path_594215, "applicationName", newJString(applicationName))
-  add(query_594216, "api-version", newJString(apiVersion))
-  add(path_594215, "subscriptionId", newJString(subscriptionId))
-  add(path_594215, "serviceName", newJString(serviceName))
-  result = call_594214.call(path_594215, query_594216, nil, nil, nil)
+  var path_568444 = newJObject()
+  var query_568445 = newJObject()
+  add(path_568444, "clusterName", newJString(clusterName))
+  add(path_568444, "resourceGroupName", newJString(resourceGroupName))
+  add(path_568444, "applicationName", newJString(applicationName))
+  add(query_568445, "api-version", newJString(apiVersion))
+  add(path_568444, "subscriptionId", newJString(subscriptionId))
+  add(path_568444, "serviceName", newJString(serviceName))
+  result = call_568443.call(path_568444, query_568445, nil, nil, nil)
 
-var servicesDelete* = Call_ServicesDelete_594204(name: "servicesDelete",
+var servicesDelete* = Call_ServicesDelete_568433(name: "servicesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceFabric/clusters/{clusterName}/applications/{applicationName}/services/{serviceName}",
-    validator: validate_ServicesDelete_594205, base: "", url: url_ServicesDelete_594206,
+    validator: validate_ServicesDelete_568434, base: "", url: url_ServicesDelete_568435,
     schemes: {Scheme.Https})
 export
   rest

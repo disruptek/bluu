@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Server API spec
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_567642 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-connectionPolicies"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServerConnectionPoliciesCreateOrUpdate_593959 = ref object of OpenApiRestCall_593409
-proc url_ServerConnectionPoliciesCreateOrUpdate_593961(protocol: Scheme;
+  Call_ServerConnectionPoliciesCreateOrUpdate_568192 = ref object of OpenApiRestCall_567642
+proc url_ServerConnectionPoliciesCreateOrUpdate_568194(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,7 +130,7 @@ proc url_ServerConnectionPoliciesCreateOrUpdate_593961(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerConnectionPoliciesCreateOrUpdate_593960(path: JsonNode;
+proc validate_ServerConnectionPoliciesCreateOrUpdate_568193(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the server's connection policy.
   ## 
@@ -148,26 +148,26 @@ proc validate_ServerConnectionPoliciesCreateOrUpdate_593960(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593979 = path.getOrDefault("resourceGroupName")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_568212 = path.getOrDefault("resourceGroupName")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "resourceGroupName", valid_593979
-  var valid_593980 = path.getOrDefault("connectionPolicyName")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_568212 != nil:
+    section.add "resourceGroupName", valid_568212
+  var valid_568213 = path.getOrDefault("connectionPolicyName")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = newJString("default"))
-  if valid_593980 != nil:
-    section.add "connectionPolicyName", valid_593980
-  var valid_593981 = path.getOrDefault("serverName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  if valid_568213 != nil:
+    section.add "connectionPolicyName", valid_568213
+  var valid_568214 = path.getOrDefault("serverName")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "serverName", valid_593981
-  var valid_593982 = path.getOrDefault("subscriptionId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  if valid_568214 != nil:
+    section.add "serverName", valid_568214
+  var valid_568215 = path.getOrDefault("subscriptionId")
+  valid_568215 = validateParameter(valid_568215, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "subscriptionId", valid_593982
+  if valid_568215 != nil:
+    section.add "subscriptionId", valid_568215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -175,11 +175,11 @@ proc validate_ServerConnectionPoliciesCreateOrUpdate_593960(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_568216 = query.getOrDefault("api-version")
+  valid_568216 = validateParameter(valid_568216, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_568216 != nil:
+    section.add "api-version", valid_568216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -193,21 +193,21 @@ proc validate_ServerConnectionPoliciesCreateOrUpdate_593960(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_ServerConnectionPoliciesCreateOrUpdate_593959;
+proc call*(call_568218: Call_ServerConnectionPoliciesCreateOrUpdate_568192;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates the server's connection policy.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_568218.validator(path, query, header, formData, body)
+  let scheme = call_568218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_568218.url(scheme.get, call_568218.host, call_568218.base,
+                         call_568218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_568218, url, valid)
 
-proc call*(call_593986: Call_ServerConnectionPoliciesCreateOrUpdate_593959;
+proc call*(call_568219: Call_ServerConnectionPoliciesCreateOrUpdate_568192;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; parameters: JsonNode;
           connectionPolicyName: string = "default"): Recallable =
@@ -225,27 +225,27 @@ proc call*(call_593986: Call_ServerConnectionPoliciesCreateOrUpdate_593959;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   parameters: JObject (required)
   ##             : The required parameters for updating a secure connection policy.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  var body_593989 = newJObject()
-  add(path_593987, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "connectionPolicyName", newJString(connectionPolicyName))
-  add(path_593987, "serverName", newJString(serverName))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
+  var path_568220 = newJObject()
+  var query_568221 = newJObject()
+  var body_568222 = newJObject()
+  add(path_568220, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568221, "api-version", newJString(apiVersion))
+  add(path_568220, "connectionPolicyName", newJString(connectionPolicyName))
+  add(path_568220, "serverName", newJString(serverName))
+  add(path_568220, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_593989 = parameters
-  result = call_593986.call(path_593987, query_593988, nil, nil, body_593989)
+    body_568222 = parameters
+  result = call_568219.call(path_568220, query_568221, nil, nil, body_568222)
 
-var serverConnectionPoliciesCreateOrUpdate* = Call_ServerConnectionPoliciesCreateOrUpdate_593959(
+var serverConnectionPoliciesCreateOrUpdate* = Call_ServerConnectionPoliciesCreateOrUpdate_568192(
     name: "serverConnectionPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/connectionPolicies/{connectionPolicyName}",
-    validator: validate_ServerConnectionPoliciesCreateOrUpdate_593960, base: "",
-    url: url_ServerConnectionPoliciesCreateOrUpdate_593961,
+    validator: validate_ServerConnectionPoliciesCreateOrUpdate_568193, base: "",
+    url: url_ServerConnectionPoliciesCreateOrUpdate_568194,
     schemes: {Scheme.Https})
 type
-  Call_ServerConnectionPoliciesGet_593631 = ref object of OpenApiRestCall_593409
-proc url_ServerConnectionPoliciesGet_593633(protocol: Scheme; host: string;
+  Call_ServerConnectionPoliciesGet_567864 = ref object of OpenApiRestCall_567642
+proc url_ServerConnectionPoliciesGet_567866(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -271,7 +271,7 @@ proc url_ServerConnectionPoliciesGet_593633(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerConnectionPoliciesGet_593632(path: JsonNode; query: JsonNode;
+proc validate_ServerConnectionPoliciesGet_567865(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the server's secure connection policy.
   ## 
@@ -289,26 +289,26 @@ proc validate_ServerConnectionPoliciesGet_593632(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593806 = path.getOrDefault("resourceGroupName")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_568039 = path.getOrDefault("resourceGroupName")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "resourceGroupName", valid_593806
-  var valid_593820 = path.getOrDefault("connectionPolicyName")
-  valid_593820 = validateParameter(valid_593820, JString, required = true,
+  if valid_568039 != nil:
+    section.add "resourceGroupName", valid_568039
+  var valid_568053 = path.getOrDefault("connectionPolicyName")
+  valid_568053 = validateParameter(valid_568053, JString, required = true,
                                  default = newJString("default"))
-  if valid_593820 != nil:
-    section.add "connectionPolicyName", valid_593820
-  var valid_593821 = path.getOrDefault("serverName")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  if valid_568053 != nil:
+    section.add "connectionPolicyName", valid_568053
+  var valid_568054 = path.getOrDefault("serverName")
+  valid_568054 = validateParameter(valid_568054, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "serverName", valid_593821
-  var valid_593822 = path.getOrDefault("subscriptionId")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  if valid_568054 != nil:
+    section.add "serverName", valid_568054
+  var valid_568055 = path.getOrDefault("subscriptionId")
+  valid_568055 = validateParameter(valid_568055, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "subscriptionId", valid_593822
+  if valid_568055 != nil:
+    section.add "subscriptionId", valid_568055
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -316,11 +316,11 @@ proc validate_ServerConnectionPoliciesGet_593632(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593823 = query.getOrDefault("api-version")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_568056 = query.getOrDefault("api-version")
+  valid_568056 = validateParameter(valid_568056, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "api-version", valid_593823
+  if valid_568056 != nil:
+    section.add "api-version", valid_568056
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -329,20 +329,20 @@ proc validate_ServerConnectionPoliciesGet_593632(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593846: Call_ServerConnectionPoliciesGet_593631; path: JsonNode;
+proc call*(call_568079: Call_ServerConnectionPoliciesGet_567864; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the server's secure connection policy.
   ## 
-  let valid = call_593846.validator(path, query, header, formData, body)
-  let scheme = call_593846.pickScheme
+  let valid = call_568079.validator(path, query, header, formData, body)
+  let scheme = call_568079.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593846.url(scheme.get, call_593846.host, call_593846.base,
-                         call_593846.route, valid.getOrDefault("path"),
+  let url = call_568079.url(scheme.get, call_568079.host, call_568079.base,
+                         call_568079.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593846, url, valid)
+  result = hook(call_568079, url, valid)
 
-proc call*(call_593917: Call_ServerConnectionPoliciesGet_593631;
+proc call*(call_568150: Call_ServerConnectionPoliciesGet_567864;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; connectionPolicyName: string = "default"): Recallable =
   ## serverConnectionPoliciesGet
@@ -357,20 +357,20 @@ proc call*(call_593917: Call_ServerConnectionPoliciesGet_593631;
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_593918 = newJObject()
-  var query_593920 = newJObject()
-  add(path_593918, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593920, "api-version", newJString(apiVersion))
-  add(path_593918, "connectionPolicyName", newJString(connectionPolicyName))
-  add(path_593918, "serverName", newJString(serverName))
-  add(path_593918, "subscriptionId", newJString(subscriptionId))
-  result = call_593917.call(path_593918, query_593920, nil, nil, nil)
+  var path_568151 = newJObject()
+  var query_568153 = newJObject()
+  add(path_568151, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568153, "api-version", newJString(apiVersion))
+  add(path_568151, "connectionPolicyName", newJString(connectionPolicyName))
+  add(path_568151, "serverName", newJString(serverName))
+  add(path_568151, "subscriptionId", newJString(subscriptionId))
+  result = call_568150.call(path_568151, query_568153, nil, nil, nil)
 
-var serverConnectionPoliciesGet* = Call_ServerConnectionPoliciesGet_593631(
+var serverConnectionPoliciesGet* = Call_ServerConnectionPoliciesGet_567864(
     name: "serverConnectionPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/connectionPolicies/{connectionPolicyName}",
-    validator: validate_ServerConnectionPoliciesGet_593632, base: "",
-    url: url_ServerConnectionPoliciesGet_593633, schemes: {Scheme.Https})
+    validator: validate_ServerConnectionPoliciesGet_567865, base: "",
+    url: url_ServerConnectionPoliciesGet_567866, schemes: {Scheme.Https})
 export
   rest
 

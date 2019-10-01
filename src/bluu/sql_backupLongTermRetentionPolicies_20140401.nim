@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database Backup Long Term Retention Policy
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_567642 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-backupLongTermRetentionPolicies"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BackupLongTermRetentionPoliciesListByDatabase_593631 = ref object of OpenApiRestCall_593409
-proc url_BackupLongTermRetentionPoliciesListByDatabase_593633(protocol: Scheme;
+  Call_BackupLongTermRetentionPoliciesListByDatabase_567864 = ref object of OpenApiRestCall_567642
+proc url_BackupLongTermRetentionPoliciesListByDatabase_567866(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,7 +130,7 @@ proc url_BackupLongTermRetentionPoliciesListByDatabase_593633(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupLongTermRetentionPoliciesListByDatabase_593632(
+proc validate_BackupLongTermRetentionPoliciesListByDatabase_567865(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Returns a database backup long term retention policy
@@ -149,26 +149,26 @@ proc validate_BackupLongTermRetentionPoliciesListByDatabase_593632(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593806 = path.getOrDefault("resourceGroupName")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_568039 = path.getOrDefault("resourceGroupName")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "resourceGroupName", valid_593806
-  var valid_593807 = path.getOrDefault("serverName")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  if valid_568039 != nil:
+    section.add "resourceGroupName", valid_568039
+  var valid_568040 = path.getOrDefault("serverName")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "serverName", valid_593807
-  var valid_593808 = path.getOrDefault("subscriptionId")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  if valid_568040 != nil:
+    section.add "serverName", valid_568040
+  var valid_568041 = path.getOrDefault("subscriptionId")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "subscriptionId", valid_593808
-  var valid_593809 = path.getOrDefault("databaseName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  if valid_568041 != nil:
+    section.add "subscriptionId", valid_568041
+  var valid_568042 = path.getOrDefault("databaseName")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "databaseName", valid_593809
+  if valid_568042 != nil:
+    section.add "databaseName", valid_568042
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,11 +176,11 @@ proc validate_BackupLongTermRetentionPoliciesListByDatabase_593632(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593810 = query.getOrDefault("api-version")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  var valid_568043 = query.getOrDefault("api-version")
+  valid_568043 = validateParameter(valid_568043, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "api-version", valid_593810
+  if valid_568043 != nil:
+    section.add "api-version", valid_568043
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -189,21 +189,21 @@ proc validate_BackupLongTermRetentionPoliciesListByDatabase_593632(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593833: Call_BackupLongTermRetentionPoliciesListByDatabase_593631;
+proc call*(call_568066: Call_BackupLongTermRetentionPoliciesListByDatabase_567864;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns a database backup long term retention policy
   ## 
-  let valid = call_593833.validator(path, query, header, formData, body)
-  let scheme = call_593833.pickScheme
+  let valid = call_568066.validator(path, query, header, formData, body)
+  let scheme = call_568066.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593833.url(scheme.get, call_593833.host, call_593833.base,
-                         call_593833.route, valid.getOrDefault("path"),
+  let url = call_568066.url(scheme.get, call_568066.host, call_568066.base,
+                         call_568066.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593833, url, valid)
+  result = hook(call_568066, url, valid)
 
-proc call*(call_593904: Call_BackupLongTermRetentionPoliciesListByDatabase_593631;
+proc call*(call_568137: Call_BackupLongTermRetentionPoliciesListByDatabase_567864;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string): Recallable =
   ## backupLongTermRetentionPoliciesListByDatabase
@@ -218,24 +218,24 @@ proc call*(call_593904: Call_BackupLongTermRetentionPoliciesListByDatabase_59363
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  var path_593905 = newJObject()
-  var query_593907 = newJObject()
-  add(path_593905, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593907, "api-version", newJString(apiVersion))
-  add(path_593905, "serverName", newJString(serverName))
-  add(path_593905, "subscriptionId", newJString(subscriptionId))
-  add(path_593905, "databaseName", newJString(databaseName))
-  result = call_593904.call(path_593905, query_593907, nil, nil, nil)
+  var path_568138 = newJObject()
+  var query_568140 = newJObject()
+  add(path_568138, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568140, "api-version", newJString(apiVersion))
+  add(path_568138, "serverName", newJString(serverName))
+  add(path_568138, "subscriptionId", newJString(subscriptionId))
+  add(path_568138, "databaseName", newJString(databaseName))
+  result = call_568137.call(path_568138, query_568140, nil, nil, nil)
 
-var backupLongTermRetentionPoliciesListByDatabase* = Call_BackupLongTermRetentionPoliciesListByDatabase_593631(
+var backupLongTermRetentionPoliciesListByDatabase* = Call_BackupLongTermRetentionPoliciesListByDatabase_567864(
     name: "backupLongTermRetentionPoliciesListByDatabase",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupLongTermRetentionPolicies",
-    validator: validate_BackupLongTermRetentionPoliciesListByDatabase_593632,
-    base: "", url: url_BackupLongTermRetentionPoliciesListByDatabase_593633,
+    validator: validate_BackupLongTermRetentionPoliciesListByDatabase_567865,
+    base: "", url: url_BackupLongTermRetentionPoliciesListByDatabase_567866,
     schemes: {Scheme.Https})
 type
-  Call_BackupLongTermRetentionPoliciesCreateOrUpdate_593972 = ref object of OpenApiRestCall_593409
-proc url_BackupLongTermRetentionPoliciesCreateOrUpdate_593974(protocol: Scheme;
+  Call_BackupLongTermRetentionPoliciesCreateOrUpdate_568205 = ref object of OpenApiRestCall_567642
+proc url_BackupLongTermRetentionPoliciesCreateOrUpdate_568207(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -264,7 +264,7 @@ proc url_BackupLongTermRetentionPoliciesCreateOrUpdate_593974(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupLongTermRetentionPoliciesCreateOrUpdate_593973(
+proc validate_BackupLongTermRetentionPoliciesCreateOrUpdate_568206(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Creates or updates a database backup long term retention policy
@@ -285,31 +285,31 @@ proc validate_BackupLongTermRetentionPoliciesCreateOrUpdate_593973(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593992 = path.getOrDefault("resourceGroupName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568225 = path.getOrDefault("resourceGroupName")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "resourceGroupName", valid_593992
-  var valid_593993 = path.getOrDefault("serverName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "resourceGroupName", valid_568225
+  var valid_568226 = path.getOrDefault("serverName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "serverName", valid_593993
-  var valid_593994 = path.getOrDefault("subscriptionId")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "serverName", valid_568226
+  var valid_568227 = path.getOrDefault("subscriptionId")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "subscriptionId", valid_593994
-  var valid_593995 = path.getOrDefault("backupLongTermRetentionPolicyName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_568227 != nil:
+    section.add "subscriptionId", valid_568227
+  var valid_568228 = path.getOrDefault("backupLongTermRetentionPolicyName")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = newJString("Default"))
-  if valid_593995 != nil:
-    section.add "backupLongTermRetentionPolicyName", valid_593995
-  var valid_593996 = path.getOrDefault("databaseName")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  if valid_568228 != nil:
+    section.add "backupLongTermRetentionPolicyName", valid_568228
+  var valid_568229 = path.getOrDefault("databaseName")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "databaseName", valid_593996
+  if valid_568229 != nil:
+    section.add "databaseName", valid_568229
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -317,11 +317,11 @@ proc validate_BackupLongTermRetentionPoliciesCreateOrUpdate_593973(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593997 = query.getOrDefault("api-version")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  var valid_568230 = query.getOrDefault("api-version")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "api-version", valid_593997
+  if valid_568230 != nil:
+    section.add "api-version", valid_568230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -335,21 +335,21 @@ proc validate_BackupLongTermRetentionPoliciesCreateOrUpdate_593973(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593999: Call_BackupLongTermRetentionPoliciesCreateOrUpdate_593972;
+proc call*(call_568232: Call_BackupLongTermRetentionPoliciesCreateOrUpdate_568205;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a database backup long term retention policy
   ## 
-  let valid = call_593999.validator(path, query, header, formData, body)
-  let scheme = call_593999.pickScheme
+  let valid = call_568232.validator(path, query, header, formData, body)
+  let scheme = call_568232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593999.url(scheme.get, call_593999.host, call_593999.base,
-                         call_593999.route, valid.getOrDefault("path"),
+  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
+                         call_568232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593999, url, valid)
+  result = hook(call_568232, url, valid)
 
-proc call*(call_594000: Call_BackupLongTermRetentionPoliciesCreateOrUpdate_593972;
+proc call*(call_568233: Call_BackupLongTermRetentionPoliciesCreateOrUpdate_568205;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string; parameters: JsonNode;
           backupLongTermRetentionPolicyName: string = "Default"): Recallable =
@@ -369,29 +369,29 @@ proc call*(call_594000: Call_BackupLongTermRetentionPoliciesCreateOrUpdate_59397
   ##               : The name of the database
   ##   parameters: JObject (required)
   ##             : The required parameters to update a backup long term retention policy
-  var path_594001 = newJObject()
-  var query_594002 = newJObject()
-  var body_594003 = newJObject()
-  add(path_594001, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594002, "api-version", newJString(apiVersion))
-  add(path_594001, "serverName", newJString(serverName))
-  add(path_594001, "subscriptionId", newJString(subscriptionId))
-  add(path_594001, "backupLongTermRetentionPolicyName",
+  var path_568234 = newJObject()
+  var query_568235 = newJObject()
+  var body_568236 = newJObject()
+  add(path_568234, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568235, "api-version", newJString(apiVersion))
+  add(path_568234, "serverName", newJString(serverName))
+  add(path_568234, "subscriptionId", newJString(subscriptionId))
+  add(path_568234, "backupLongTermRetentionPolicyName",
       newJString(backupLongTermRetentionPolicyName))
-  add(path_594001, "databaseName", newJString(databaseName))
+  add(path_568234, "databaseName", newJString(databaseName))
   if parameters != nil:
-    body_594003 = parameters
-  result = call_594000.call(path_594001, query_594002, nil, nil, body_594003)
+    body_568236 = parameters
+  result = call_568233.call(path_568234, query_568235, nil, nil, body_568236)
 
-var backupLongTermRetentionPoliciesCreateOrUpdate* = Call_BackupLongTermRetentionPoliciesCreateOrUpdate_593972(
+var backupLongTermRetentionPoliciesCreateOrUpdate* = Call_BackupLongTermRetentionPoliciesCreateOrUpdate_568205(
     name: "backupLongTermRetentionPoliciesCreateOrUpdate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupLongTermRetentionPolicies/{backupLongTermRetentionPolicyName}",
-    validator: validate_BackupLongTermRetentionPoliciesCreateOrUpdate_593973,
-    base: "", url: url_BackupLongTermRetentionPoliciesCreateOrUpdate_593974,
+    validator: validate_BackupLongTermRetentionPoliciesCreateOrUpdate_568206,
+    base: "", url: url_BackupLongTermRetentionPoliciesCreateOrUpdate_568207,
     schemes: {Scheme.Https})
 type
-  Call_BackupLongTermRetentionPoliciesGet_593946 = ref object of OpenApiRestCall_593409
-proc url_BackupLongTermRetentionPoliciesGet_593948(protocol: Scheme; host: string;
+  Call_BackupLongTermRetentionPoliciesGet_568179 = ref object of OpenApiRestCall_567642
+proc url_BackupLongTermRetentionPoliciesGet_568181(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -420,7 +420,7 @@ proc url_BackupLongTermRetentionPoliciesGet_593948(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupLongTermRetentionPoliciesGet_593947(path: JsonNode;
+proc validate_BackupLongTermRetentionPoliciesGet_568180(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a database backup long term retention policy
   ## 
@@ -440,31 +440,31 @@ proc validate_BackupLongTermRetentionPoliciesGet_593947(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593949 = path.getOrDefault("resourceGroupName")
-  valid_593949 = validateParameter(valid_593949, JString, required = true,
+  var valid_568182 = path.getOrDefault("resourceGroupName")
+  valid_568182 = validateParameter(valid_568182, JString, required = true,
                                  default = nil)
-  if valid_593949 != nil:
-    section.add "resourceGroupName", valid_593949
-  var valid_593950 = path.getOrDefault("serverName")
-  valid_593950 = validateParameter(valid_593950, JString, required = true,
+  if valid_568182 != nil:
+    section.add "resourceGroupName", valid_568182
+  var valid_568183 = path.getOrDefault("serverName")
+  valid_568183 = validateParameter(valid_568183, JString, required = true,
                                  default = nil)
-  if valid_593950 != nil:
-    section.add "serverName", valid_593950
-  var valid_593951 = path.getOrDefault("subscriptionId")
-  valid_593951 = validateParameter(valid_593951, JString, required = true,
+  if valid_568183 != nil:
+    section.add "serverName", valid_568183
+  var valid_568184 = path.getOrDefault("subscriptionId")
+  valid_568184 = validateParameter(valid_568184, JString, required = true,
                                  default = nil)
-  if valid_593951 != nil:
-    section.add "subscriptionId", valid_593951
-  var valid_593965 = path.getOrDefault("backupLongTermRetentionPolicyName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568184 != nil:
+    section.add "subscriptionId", valid_568184
+  var valid_568198 = path.getOrDefault("backupLongTermRetentionPolicyName")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = newJString("Default"))
-  if valid_593965 != nil:
-    section.add "backupLongTermRetentionPolicyName", valid_593965
-  var valid_593966 = path.getOrDefault("databaseName")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_568198 != nil:
+    section.add "backupLongTermRetentionPolicyName", valid_568198
+  var valid_568199 = path.getOrDefault("databaseName")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "databaseName", valid_593966
+  if valid_568199 != nil:
+    section.add "databaseName", valid_568199
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -472,11 +472,11 @@ proc validate_BackupLongTermRetentionPoliciesGet_593947(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593967 = query.getOrDefault("api-version")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  var valid_568200 = query.getOrDefault("api-version")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "api-version", valid_593967
+  if valid_568200 != nil:
+    section.add "api-version", valid_568200
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -485,21 +485,21 @@ proc validate_BackupLongTermRetentionPoliciesGet_593947(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_BackupLongTermRetentionPoliciesGet_593946;
+proc call*(call_568201: Call_BackupLongTermRetentionPoliciesGet_568179;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns a database backup long term retention policy
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_568201.validator(path, query, header, formData, body)
+  let scheme = call_568201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
+                         call_568201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_568201, url, valid)
 
-proc call*(call_593969: Call_BackupLongTermRetentionPoliciesGet_593946;
+proc call*(call_568202: Call_BackupLongTermRetentionPoliciesGet_568179;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string;
           backupLongTermRetentionPolicyName: string = "Default"): Recallable =
@@ -517,22 +517,22 @@ proc call*(call_593969: Call_BackupLongTermRetentionPoliciesGet_593946;
   ##                                    : The name of the backup long term retention policy
   ##   databaseName: string (required)
   ##               : The name of the database.
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  add(path_593970, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(path_593970, "serverName", newJString(serverName))
-  add(path_593970, "subscriptionId", newJString(subscriptionId))
-  add(path_593970, "backupLongTermRetentionPolicyName",
+  var path_568203 = newJObject()
+  var query_568204 = newJObject()
+  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568204, "api-version", newJString(apiVersion))
+  add(path_568203, "serverName", newJString(serverName))
+  add(path_568203, "subscriptionId", newJString(subscriptionId))
+  add(path_568203, "backupLongTermRetentionPolicyName",
       newJString(backupLongTermRetentionPolicyName))
-  add(path_593970, "databaseName", newJString(databaseName))
-  result = call_593969.call(path_593970, query_593971, nil, nil, nil)
+  add(path_568203, "databaseName", newJString(databaseName))
+  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
 
-var backupLongTermRetentionPoliciesGet* = Call_BackupLongTermRetentionPoliciesGet_593946(
+var backupLongTermRetentionPoliciesGet* = Call_BackupLongTermRetentionPoliciesGet_568179(
     name: "backupLongTermRetentionPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupLongTermRetentionPolicies/{backupLongTermRetentionPolicyName}",
-    validator: validate_BackupLongTermRetentionPoliciesGet_593947, base: "",
-    url: url_BackupLongTermRetentionPoliciesGet_593948, schemes: {Scheme.Https})
+    validator: validate_BackupLongTermRetentionPoliciesGet_568180, base: "",
+    url: url_BackupLongTermRetentionPoliciesGet_568181, schemes: {Scheme.Https})
 export
   rest
 

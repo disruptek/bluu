@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_567642 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-deprecated"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ExtensionsListByDatabase_593631 = ref object of OpenApiRestCall_593409
-proc url_ExtensionsListByDatabase_593633(protocol: Scheme; host: string;
+  Call_ExtensionsListByDatabase_567864 = ref object of OpenApiRestCall_567642
+proc url_ExtensionsListByDatabase_567866(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -131,7 +131,7 @@ proc url_ExtensionsListByDatabase_593633(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsListByDatabase_593632(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsListByDatabase_567865(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets database extensions. This API is deprecated and should not be used.
   ## 
@@ -149,26 +149,26 @@ proc validate_ExtensionsListByDatabase_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593806 = path.getOrDefault("resourceGroupName")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_568039 = path.getOrDefault("resourceGroupName")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "resourceGroupName", valid_593806
-  var valid_593807 = path.getOrDefault("serverName")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  if valid_568039 != nil:
+    section.add "resourceGroupName", valid_568039
+  var valid_568040 = path.getOrDefault("serverName")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "serverName", valid_593807
-  var valid_593808 = path.getOrDefault("subscriptionId")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  if valid_568040 != nil:
+    section.add "serverName", valid_568040
+  var valid_568041 = path.getOrDefault("subscriptionId")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "subscriptionId", valid_593808
-  var valid_593809 = path.getOrDefault("databaseName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  if valid_568041 != nil:
+    section.add "subscriptionId", valid_568041
+  var valid_568042 = path.getOrDefault("databaseName")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "databaseName", valid_593809
+  if valid_568042 != nil:
+    section.add "databaseName", valid_568042
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,11 +176,11 @@ proc validate_ExtensionsListByDatabase_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593810 = query.getOrDefault("api-version")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  var valid_568043 = query.getOrDefault("api-version")
+  valid_568043 = validateParameter(valid_568043, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "api-version", valid_593810
+  if valid_568043 != nil:
+    section.add "api-version", valid_568043
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -189,20 +189,20 @@ proc validate_ExtensionsListByDatabase_593632(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593833: Call_ExtensionsListByDatabase_593631; path: JsonNode;
+proc call*(call_568066: Call_ExtensionsListByDatabase_567864; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets database extensions. This API is deprecated and should not be used.
   ## 
-  let valid = call_593833.validator(path, query, header, formData, body)
-  let scheme = call_593833.pickScheme
+  let valid = call_568066.validator(path, query, header, formData, body)
+  let scheme = call_568066.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593833.url(scheme.get, call_593833.host, call_593833.base,
-                         call_593833.route, valid.getOrDefault("path"),
+  let url = call_568066.url(scheme.get, call_568066.host, call_568066.base,
+                         call_568066.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593833, url, valid)
+  result = hook(call_568066, url, valid)
 
-proc call*(call_593904: Call_ExtensionsListByDatabase_593631;
+proc call*(call_568137: Call_ExtensionsListByDatabase_567864;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string): Recallable =
   ## extensionsListByDatabase
@@ -217,23 +217,23 @@ proc call*(call_593904: Call_ExtensionsListByDatabase_593631;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database to import into
-  var path_593905 = newJObject()
-  var query_593907 = newJObject()
-  add(path_593905, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593907, "api-version", newJString(apiVersion))
-  add(path_593905, "serverName", newJString(serverName))
-  add(path_593905, "subscriptionId", newJString(subscriptionId))
-  add(path_593905, "databaseName", newJString(databaseName))
-  result = call_593904.call(path_593905, query_593907, nil, nil, nil)
+  var path_568138 = newJObject()
+  var query_568140 = newJObject()
+  add(path_568138, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568140, "api-version", newJString(apiVersion))
+  add(path_568138, "serverName", newJString(serverName))
+  add(path_568138, "subscriptionId", newJString(subscriptionId))
+  add(path_568138, "databaseName", newJString(databaseName))
+  result = call_568137.call(path_568138, query_568140, nil, nil, nil)
 
-var extensionsListByDatabase* = Call_ExtensionsListByDatabase_593631(
+var extensionsListByDatabase* = Call_ExtensionsListByDatabase_567864(
     name: "extensionsListByDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/extensions",
-    validator: validate_ExtensionsListByDatabase_593632, base: "",
-    url: url_ExtensionsListByDatabase_593633, schemes: {Scheme.Https})
+    validator: validate_ExtensionsListByDatabase_567865, base: "",
+    url: url_ExtensionsListByDatabase_567866, schemes: {Scheme.Https})
 type
-  Call_ExtensionsGet_593946 = ref object of OpenApiRestCall_593409
-proc url_ExtensionsGet_593948(protocol: Scheme; host: string; base: string;
+  Call_ExtensionsGet_568179 = ref object of OpenApiRestCall_567642
+proc url_ExtensionsGet_568181(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -261,7 +261,7 @@ proc url_ExtensionsGet_593948(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsGet_593947(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ExtensionsGet_568180(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a database extension. This API is deprecated and should not be used.
   ## 
@@ -281,31 +281,31 @@ proc validate_ExtensionsGet_593947(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593949 = path.getOrDefault("resourceGroupName")
-  valid_593949 = validateParameter(valid_593949, JString, required = true,
+  var valid_568182 = path.getOrDefault("resourceGroupName")
+  valid_568182 = validateParameter(valid_568182, JString, required = true,
                                  default = nil)
-  if valid_593949 != nil:
-    section.add "resourceGroupName", valid_593949
-  var valid_593963 = path.getOrDefault("extensionName")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_568182 != nil:
+    section.add "resourceGroupName", valid_568182
+  var valid_568196 = path.getOrDefault("extensionName")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = newJString("import"))
-  if valid_593963 != nil:
-    section.add "extensionName", valid_593963
-  var valid_593964 = path.getOrDefault("serverName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_568196 != nil:
+    section.add "extensionName", valid_568196
+  var valid_568197 = path.getOrDefault("serverName")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "serverName", valid_593964
-  var valid_593965 = path.getOrDefault("subscriptionId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_568197 != nil:
+    section.add "serverName", valid_568197
+  var valid_568198 = path.getOrDefault("subscriptionId")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "subscriptionId", valid_593965
-  var valid_593966 = path.getOrDefault("databaseName")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_568198 != nil:
+    section.add "subscriptionId", valid_568198
+  var valid_568199 = path.getOrDefault("databaseName")
+  valid_568199 = validateParameter(valid_568199, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "databaseName", valid_593966
+  if valid_568199 != nil:
+    section.add "databaseName", valid_568199
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -313,11 +313,11 @@ proc validate_ExtensionsGet_593947(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593967 = query.getOrDefault("api-version")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  var valid_568200 = query.getOrDefault("api-version")
+  valid_568200 = validateParameter(valid_568200, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "api-version", valid_593967
+  if valid_568200 != nil:
+    section.add "api-version", valid_568200
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -326,20 +326,20 @@ proc validate_ExtensionsGet_593947(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_ExtensionsGet_593946; path: JsonNode; query: JsonNode;
+proc call*(call_568201: Call_ExtensionsGet_568179; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a database extension. This API is deprecated and should not be used.
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_568201.validator(path, query, header, formData, body)
+  let scheme = call_568201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
+                         call_568201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_568201, url, valid)
 
-proc call*(call_593969: Call_ExtensionsGet_593946; resourceGroupName: string;
+proc call*(call_568202: Call_ExtensionsGet_568179; resourceGroupName: string;
           apiVersion: string; serverName: string; subscriptionId: string;
           databaseName: string; extensionName: string = "import"): Recallable =
   ## extensionsGet
@@ -356,23 +356,23 @@ proc call*(call_593969: Call_ExtensionsGet_593946; resourceGroupName: string;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database to import into
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  add(path_593970, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(path_593970, "extensionName", newJString(extensionName))
-  add(path_593970, "serverName", newJString(serverName))
-  add(path_593970, "subscriptionId", newJString(subscriptionId))
-  add(path_593970, "databaseName", newJString(databaseName))
-  result = call_593969.call(path_593970, query_593971, nil, nil, nil)
+  var path_568203 = newJObject()
+  var query_568204 = newJObject()
+  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568204, "api-version", newJString(apiVersion))
+  add(path_568203, "extensionName", newJString(extensionName))
+  add(path_568203, "serverName", newJString(serverName))
+  add(path_568203, "subscriptionId", newJString(subscriptionId))
+  add(path_568203, "databaseName", newJString(databaseName))
+  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
 
-var extensionsGet* = Call_ExtensionsGet_593946(name: "extensionsGet",
+var extensionsGet* = Call_ExtensionsGet_568179(name: "extensionsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/extensions/{extensionName}",
-    validator: validate_ExtensionsGet_593947, base: "", url: url_ExtensionsGet_593948,
+    validator: validate_ExtensionsGet_568180, base: "", url: url_ExtensionsGet_568181,
     schemes: {Scheme.Https})
 type
-  Call_TransparentDataEncryptionConfigurationsListByDatabase_593972 = ref object of OpenApiRestCall_593409
-proc url_TransparentDataEncryptionConfigurationsListByDatabase_593974(
+  Call_TransparentDataEncryptionConfigurationsListByDatabase_568205 = ref object of OpenApiRestCall_567642
+proc url_TransparentDataEncryptionConfigurationsListByDatabase_568207(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -399,7 +399,7 @@ proc url_TransparentDataEncryptionConfigurationsListByDatabase_593974(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransparentDataEncryptionConfigurationsListByDatabase_593973(
+proc validate_TransparentDataEncryptionConfigurationsListByDatabase_568206(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets a list of a database's transparent data encryption configurations. There is only ever one element, named 'current', so GetTransparentDataEncryptionConfiguration should be used instead.
@@ -418,26 +418,26 @@ proc validate_TransparentDataEncryptionConfigurationsListByDatabase_593973(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593975 = path.getOrDefault("resourceGroupName")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_568208 = path.getOrDefault("resourceGroupName")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "resourceGroupName", valid_593975
-  var valid_593976 = path.getOrDefault("serverName")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  if valid_568208 != nil:
+    section.add "resourceGroupName", valid_568208
+  var valid_568209 = path.getOrDefault("serverName")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "serverName", valid_593976
-  var valid_593977 = path.getOrDefault("subscriptionId")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_568209 != nil:
+    section.add "serverName", valid_568209
+  var valid_568210 = path.getOrDefault("subscriptionId")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "subscriptionId", valid_593977
-  var valid_593978 = path.getOrDefault("databaseName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  if valid_568210 != nil:
+    section.add "subscriptionId", valid_568210
+  var valid_568211 = path.getOrDefault("databaseName")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "databaseName", valid_593978
+  if valid_568211 != nil:
+    section.add "databaseName", valid_568211
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -445,11 +445,11 @@ proc validate_TransparentDataEncryptionConfigurationsListByDatabase_593973(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593979 = query.getOrDefault("api-version")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_568212 = query.getOrDefault("api-version")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "api-version", valid_593979
+  if valid_568212 != nil:
+    section.add "api-version", valid_568212
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -458,21 +458,21 @@ proc validate_TransparentDataEncryptionConfigurationsListByDatabase_593973(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593980: Call_TransparentDataEncryptionConfigurationsListByDatabase_593972;
+proc call*(call_568213: Call_TransparentDataEncryptionConfigurationsListByDatabase_568205;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of a database's transparent data encryption configurations. There is only ever one element, named 'current', so GetTransparentDataEncryptionConfiguration should be used instead.
   ## 
-  let valid = call_593980.validator(path, query, header, formData, body)
-  let scheme = call_593980.pickScheme
+  let valid = call_568213.validator(path, query, header, formData, body)
+  let scheme = call_568213.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593980.url(scheme.get, call_593980.host, call_593980.base,
-                         call_593980.route, valid.getOrDefault("path"),
+  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
+                         call_568213.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593980, url, valid)
+  result = hook(call_568213, url, valid)
 
-proc call*(call_593981: Call_TransparentDataEncryptionConfigurationsListByDatabase_593972;
+proc call*(call_568214: Call_TransparentDataEncryptionConfigurationsListByDatabase_568205;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; databaseName: string): Recallable =
   ## transparentDataEncryptionConfigurationsListByDatabase
@@ -487,20 +487,20 @@ proc call*(call_593981: Call_TransparentDataEncryptionConfigurationsListByDataba
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database for which the transparent data encryption applies.
-  var path_593982 = newJObject()
-  var query_593983 = newJObject()
-  add(path_593982, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593983, "api-version", newJString(apiVersion))
-  add(path_593982, "serverName", newJString(serverName))
-  add(path_593982, "subscriptionId", newJString(subscriptionId))
-  add(path_593982, "databaseName", newJString(databaseName))
-  result = call_593981.call(path_593982, query_593983, nil, nil, nil)
+  var path_568215 = newJObject()
+  var query_568216 = newJObject()
+  add(path_568215, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568216, "api-version", newJString(apiVersion))
+  add(path_568215, "serverName", newJString(serverName))
+  add(path_568215, "subscriptionId", newJString(subscriptionId))
+  add(path_568215, "databaseName", newJString(databaseName))
+  result = call_568214.call(path_568215, query_568216, nil, nil, nil)
 
-var transparentDataEncryptionConfigurationsListByDatabase* = Call_TransparentDataEncryptionConfigurationsListByDatabase_593972(
+var transparentDataEncryptionConfigurationsListByDatabase* = Call_TransparentDataEncryptionConfigurationsListByDatabase_568205(
     name: "transparentDataEncryptionConfigurationsListByDatabase",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/transparentDataEncryption",
-    validator: validate_TransparentDataEncryptionConfigurationsListByDatabase_593973,
-    base: "", url: url_TransparentDataEncryptionConfigurationsListByDatabase_593974,
+    validator: validate_TransparentDataEncryptionConfigurationsListByDatabase_568206,
+    base: "", url: url_TransparentDataEncryptionConfigurationsListByDatabase_568207,
     schemes: {Scheme.Https})
 export
   rest

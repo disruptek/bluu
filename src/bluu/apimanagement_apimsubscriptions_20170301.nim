@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_596457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "apimanagement-apimsubscriptions"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SubscriptionList_593646 = ref object of OpenApiRestCall_593424
-proc url_SubscriptionList_593648(protocol: Scheme; host: string; base: string;
+  Call_SubscriptionList_596679 = ref object of OpenApiRestCall_596457
+proc url_SubscriptionList_596681(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_SubscriptionList_593647(path: JsonNode; query: JsonNode;
+proc validate_SubscriptionList_596680(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Lists all subscriptions of the API Management service instance.
@@ -140,24 +140,24 @@ proc validate_SubscriptionList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593795 = query.getOrDefault("api-version")
-  valid_593795 = validateParameter(valid_593795, JString, required = true,
+  var valid_596828 = query.getOrDefault("api-version")
+  valid_596828 = validateParameter(valid_596828, JString, required = true,
                                  default = nil)
-  if valid_593795 != nil:
-    section.add "api-version", valid_593795
-  var valid_593796 = query.getOrDefault("$top")
-  valid_593796 = validateParameter(valid_593796, JInt, required = false, default = nil)
-  if valid_593796 != nil:
-    section.add "$top", valid_593796
-  var valid_593797 = query.getOrDefault("$skip")
-  valid_593797 = validateParameter(valid_593797, JInt, required = false, default = nil)
-  if valid_593797 != nil:
-    section.add "$skip", valid_593797
-  var valid_593798 = query.getOrDefault("$filter")
-  valid_593798 = validateParameter(valid_593798, JString, required = false,
+  if valid_596828 != nil:
+    section.add "api-version", valid_596828
+  var valid_596829 = query.getOrDefault("$top")
+  valid_596829 = validateParameter(valid_596829, JInt, required = false, default = nil)
+  if valid_596829 != nil:
+    section.add "$top", valid_596829
+  var valid_596830 = query.getOrDefault("$skip")
+  valid_596830 = validateParameter(valid_596830, JInt, required = false, default = nil)
+  if valid_596830 != nil:
+    section.add "$skip", valid_596830
+  var valid_596831 = query.getOrDefault("$filter")
+  valid_596831 = validateParameter(valid_596831, JString, required = false,
                                  default = nil)
-  if valid_593798 != nil:
-    section.add "$filter", valid_593798
+  if valid_596831 != nil:
+    section.add "$filter", valid_596831
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -166,20 +166,20 @@ proc validate_SubscriptionList_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593825: Call_SubscriptionList_593646; path: JsonNode;
+proc call*(call_596858: Call_SubscriptionList_596679; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all subscriptions of the API Management service instance.
   ## 
-  let valid = call_593825.validator(path, query, header, formData, body)
-  let scheme = call_593825.pickScheme
+  let valid = call_596858.validator(path, query, header, formData, body)
+  let scheme = call_596858.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593825.url(scheme.get, call_593825.host, call_593825.base,
-                         call_593825.route, valid.getOrDefault("path"),
+  let url = call_596858.url(scheme.get, call_596858.host, call_596858.base,
+                         call_596858.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593825, url, valid)
+  result = hook(call_596858, url, valid)
 
-proc call*(call_593896: Call_SubscriptionList_593646; apiVersion: string;
+proc call*(call_596929: Call_SubscriptionList_596679; apiVersion: string;
           Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## subscriptionList
   ## Lists all subscriptions of the API Management service instance.
@@ -199,20 +199,20 @@ proc call*(call_593896: Call_SubscriptionList_593646; apiVersion: string;
   ## | userId       | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | productId    | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | state        | eq                     |                                             |
-  var query_593897 = newJObject()
-  add(query_593897, "api-version", newJString(apiVersion))
-  add(query_593897, "$top", newJInt(Top))
-  add(query_593897, "$skip", newJInt(Skip))
-  add(query_593897, "$filter", newJString(Filter))
-  result = call_593896.call(nil, query_593897, nil, nil, nil)
+  var query_596930 = newJObject()
+  add(query_596930, "api-version", newJString(apiVersion))
+  add(query_596930, "$top", newJInt(Top))
+  add(query_596930, "$skip", newJInt(Skip))
+  add(query_596930, "$filter", newJString(Filter))
+  result = call_596929.call(nil, query_596930, nil, nil, nil)
 
-var subscriptionList* = Call_SubscriptionList_593646(name: "subscriptionList",
+var subscriptionList* = Call_SubscriptionList_596679(name: "subscriptionList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/subscriptions",
-    validator: validate_SubscriptionList_593647, base: "",
-    url: url_SubscriptionList_593648, schemes: {Scheme.Https})
+    validator: validate_SubscriptionList_596680, base: "",
+    url: url_SubscriptionList_596681, schemes: {Scheme.Https})
 type
-  Call_SubscriptionCreateOrUpdate_593969 = ref object of OpenApiRestCall_593424
-proc url_SubscriptionCreateOrUpdate_593971(protocol: Scheme; host: string;
+  Call_SubscriptionCreateOrUpdate_597002 = ref object of OpenApiRestCall_596457
+proc url_SubscriptionCreateOrUpdate_597004(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -227,7 +227,7 @@ proc url_SubscriptionCreateOrUpdate_593971(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriptionCreateOrUpdate_593970(path: JsonNode; query: JsonNode;
+proc validate_SubscriptionCreateOrUpdate_597003(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the subscription of specified user to the specified product.
   ## 
@@ -238,11 +238,11 @@ proc validate_SubscriptionCreateOrUpdate_593970(path: JsonNode; query: JsonNode;
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `sid` field"
-  var valid_593999 = path.getOrDefault("sid")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  var valid_597032 = path.getOrDefault("sid")
+  valid_597032 = validateParameter(valid_597032, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "sid", valid_593999
+  if valid_597032 != nil:
+    section.add "sid", valid_597032
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -252,16 +252,16 @@ proc validate_SubscriptionCreateOrUpdate_593970(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594000 = query.getOrDefault("api-version")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_597033 = query.getOrDefault("api-version")
+  valid_597033 = validateParameter(valid_597033, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "api-version", valid_594000
-  var valid_594014 = query.getOrDefault("notify")
-  valid_594014 = validateParameter(valid_594014, JString, required = false,
+  if valid_597033 != nil:
+    section.add "api-version", valid_597033
+  var valid_597047 = query.getOrDefault("notify")
+  valid_597047 = validateParameter(valid_597047, JString, required = false,
                                  default = newJString("False"))
-  if valid_594014 != nil:
-    section.add "notify", valid_594014
+  if valid_597047 != nil:
+    section.add "notify", valid_597047
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -275,20 +275,20 @@ proc validate_SubscriptionCreateOrUpdate_593970(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594016: Call_SubscriptionCreateOrUpdate_593969; path: JsonNode;
+proc call*(call_597049: Call_SubscriptionCreateOrUpdate_597002; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the subscription of specified user to the specified product.
   ## 
-  let valid = call_594016.validator(path, query, header, formData, body)
-  let scheme = call_594016.pickScheme
+  let valid = call_597049.validator(path, query, header, formData, body)
+  let scheme = call_597049.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594016.url(scheme.get, call_594016.host, call_594016.base,
-                         call_594016.route, valid.getOrDefault("path"),
+  let url = call_597049.url(scheme.get, call_597049.host, call_597049.base,
+                         call_597049.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594016, url, valid)
+  result = hook(call_597049, url, valid)
 
-proc call*(call_594017: Call_SubscriptionCreateOrUpdate_593969; apiVersion: string;
+proc call*(call_597050: Call_SubscriptionCreateOrUpdate_597002; apiVersion: string;
           parameters: JsonNode; sid: string; notify: string = "False"): Recallable =
   ## subscriptionCreateOrUpdate
   ## Creates or updates the subscription of specified user to the specified product.
@@ -300,24 +300,24 @@ proc call*(call_594017: Call_SubscriptionCreateOrUpdate_593969; apiVersion: stri
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
   ##   notify: string
   ##         : Notify the subscriber of the subscription state change to Submitted or Active state.
-  var path_594018 = newJObject()
-  var query_594019 = newJObject()
-  var body_594020 = newJObject()
-  add(query_594019, "api-version", newJString(apiVersion))
+  var path_597051 = newJObject()
+  var query_597052 = newJObject()
+  var body_597053 = newJObject()
+  add(query_597052, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_594020 = parameters
-  add(path_594018, "sid", newJString(sid))
-  add(query_594019, "notify", newJString(notify))
-  result = call_594017.call(path_594018, query_594019, nil, nil, body_594020)
+    body_597053 = parameters
+  add(path_597051, "sid", newJString(sid))
+  add(query_597052, "notify", newJString(notify))
+  result = call_597050.call(path_597051, query_597052, nil, nil, body_597053)
 
-var subscriptionCreateOrUpdate* = Call_SubscriptionCreateOrUpdate_593969(
+var subscriptionCreateOrUpdate* = Call_SubscriptionCreateOrUpdate_597002(
     name: "subscriptionCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/subscriptions/{sid}",
-    validator: validate_SubscriptionCreateOrUpdate_593970, base: "",
-    url: url_SubscriptionCreateOrUpdate_593971, schemes: {Scheme.Https})
+    validator: validate_SubscriptionCreateOrUpdate_597003, base: "",
+    url: url_SubscriptionCreateOrUpdate_597004, schemes: {Scheme.Https})
 type
-  Call_SubscriptionGet_593937 = ref object of OpenApiRestCall_593424
-proc url_SubscriptionGet_593939(protocol: Scheme; host: string; base: string;
+  Call_SubscriptionGet_596970 = ref object of OpenApiRestCall_596457
+proc url_SubscriptionGet_596972(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -332,7 +332,7 @@ proc url_SubscriptionGet_593939(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriptionGet_593938(path: JsonNode; query: JsonNode;
+proc validate_SubscriptionGet_596971(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the specified Subscription entity.
@@ -344,11 +344,11 @@ proc validate_SubscriptionGet_593938(path: JsonNode; query: JsonNode;
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `sid` field"
-  var valid_593963 = path.getOrDefault("sid")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_596996 = path.getOrDefault("sid")
+  valid_596996 = validateParameter(valid_596996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "sid", valid_593963
+  if valid_596996 != nil:
+    section.add "sid", valid_596996
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -356,11 +356,11 @@ proc validate_SubscriptionGet_593938(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593964 = query.getOrDefault("api-version")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_596997 = query.getOrDefault("api-version")
+  valid_596997 = validateParameter(valid_596997, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "api-version", valid_593964
+  if valid_596997 != nil:
+    section.add "api-version", valid_596997
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -369,39 +369,39 @@ proc validate_SubscriptionGet_593938(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593965: Call_SubscriptionGet_593937; path: JsonNode; query: JsonNode;
+proc call*(call_596998: Call_SubscriptionGet_596970; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified Subscription entity.
   ## 
-  let valid = call_593965.validator(path, query, header, formData, body)
-  let scheme = call_593965.pickScheme
+  let valid = call_596998.validator(path, query, header, formData, body)
+  let scheme = call_596998.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593965.url(scheme.get, call_593965.host, call_593965.base,
-                         call_593965.route, valid.getOrDefault("path"),
+  let url = call_596998.url(scheme.get, call_596998.host, call_596998.base,
+                         call_596998.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593965, url, valid)
+  result = hook(call_596998, url, valid)
 
-proc call*(call_593966: Call_SubscriptionGet_593937; apiVersion: string; sid: string): Recallable =
+proc call*(call_596999: Call_SubscriptionGet_596970; apiVersion: string; sid: string): Recallable =
   ## subscriptionGet
   ## Gets the specified Subscription entity.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   sid: string (required)
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
-  var path_593967 = newJObject()
-  var query_593968 = newJObject()
-  add(query_593968, "api-version", newJString(apiVersion))
-  add(path_593967, "sid", newJString(sid))
-  result = call_593966.call(path_593967, query_593968, nil, nil, nil)
+  var path_597000 = newJObject()
+  var query_597001 = newJObject()
+  add(query_597001, "api-version", newJString(apiVersion))
+  add(path_597000, "sid", newJString(sid))
+  result = call_596999.call(path_597000, query_597001, nil, nil, nil)
 
-var subscriptionGet* = Call_SubscriptionGet_593937(name: "subscriptionGet",
+var subscriptionGet* = Call_SubscriptionGet_596970(name: "subscriptionGet",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/subscriptions/{sid}",
-    validator: validate_SubscriptionGet_593938, base: "", url: url_SubscriptionGet_593939,
+    validator: validate_SubscriptionGet_596971, base: "", url: url_SubscriptionGet_596972,
     schemes: {Scheme.Https})
 type
-  Call_SubscriptionUpdate_594031 = ref object of OpenApiRestCall_593424
-proc url_SubscriptionUpdate_594033(protocol: Scheme; host: string; base: string;
+  Call_SubscriptionUpdate_597064 = ref object of OpenApiRestCall_596457
+proc url_SubscriptionUpdate_597066(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -416,7 +416,7 @@ proc url_SubscriptionUpdate_594033(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriptionUpdate_594032(path: JsonNode; query: JsonNode;
+proc validate_SubscriptionUpdate_597065(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Updates the details of a subscription specified by its identifier.
@@ -428,11 +428,11 @@ proc validate_SubscriptionUpdate_594032(path: JsonNode; query: JsonNode;
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `sid` field"
-  var valid_594034 = path.getOrDefault("sid")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  var valid_597067 = path.getOrDefault("sid")
+  valid_597067 = validateParameter(valid_597067, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "sid", valid_594034
+  if valid_597067 != nil:
+    section.add "sid", valid_597067
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -442,16 +442,16 @@ proc validate_SubscriptionUpdate_594032(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594035 = query.getOrDefault("api-version")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  var valid_597068 = query.getOrDefault("api-version")
+  valid_597068 = validateParameter(valid_597068, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "api-version", valid_594035
-  var valid_594036 = query.getOrDefault("notify")
-  valid_594036 = validateParameter(valid_594036, JString, required = false,
+  if valid_597068 != nil:
+    section.add "api-version", valid_597068
+  var valid_597069 = query.getOrDefault("notify")
+  valid_597069 = validateParameter(valid_597069, JString, required = false,
                                  default = newJString("False"))
-  if valid_594036 != nil:
-    section.add "notify", valid_594036
+  if valid_597069 != nil:
+    section.add "notify", valid_597069
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -459,11 +459,11 @@ proc validate_SubscriptionUpdate_594032(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594037 = header.getOrDefault("If-Match")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  var valid_597070 = header.getOrDefault("If-Match")
+  valid_597070 = validateParameter(valid_597070, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "If-Match", valid_594037
+  if valid_597070 != nil:
+    section.add "If-Match", valid_597070
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -475,20 +475,20 @@ proc validate_SubscriptionUpdate_594032(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594039: Call_SubscriptionUpdate_594031; path: JsonNode;
+proc call*(call_597072: Call_SubscriptionUpdate_597064; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the details of a subscription specified by its identifier.
   ## 
-  let valid = call_594039.validator(path, query, header, formData, body)
-  let scheme = call_594039.pickScheme
+  let valid = call_597072.validator(path, query, header, formData, body)
+  let scheme = call_597072.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594039.url(scheme.get, call_594039.host, call_594039.base,
-                         call_594039.route, valid.getOrDefault("path"),
+  let url = call_597072.url(scheme.get, call_597072.host, call_597072.base,
+                         call_597072.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594039, url, valid)
+  result = hook(call_597072, url, valid)
 
-proc call*(call_594040: Call_SubscriptionUpdate_594031; apiVersion: string;
+proc call*(call_597073: Call_SubscriptionUpdate_597064; apiVersion: string;
           parameters: JsonNode; sid: string; notify: string = "False"): Recallable =
   ## subscriptionUpdate
   ## Updates the details of a subscription specified by its identifier.
@@ -500,23 +500,23 @@ proc call*(call_594040: Call_SubscriptionUpdate_594031; apiVersion: string;
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
   ##   notify: string
   ##         : Notify the subscriber of the subscription state change to Submitted or Active state.
-  var path_594041 = newJObject()
-  var query_594042 = newJObject()
-  var body_594043 = newJObject()
-  add(query_594042, "api-version", newJString(apiVersion))
+  var path_597074 = newJObject()
+  var query_597075 = newJObject()
+  var body_597076 = newJObject()
+  add(query_597075, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_594043 = parameters
-  add(path_594041, "sid", newJString(sid))
-  add(query_594042, "notify", newJString(notify))
-  result = call_594040.call(path_594041, query_594042, nil, nil, body_594043)
+    body_597076 = parameters
+  add(path_597074, "sid", newJString(sid))
+  add(query_597075, "notify", newJString(notify))
+  result = call_597073.call(path_597074, query_597075, nil, nil, body_597076)
 
-var subscriptionUpdate* = Call_SubscriptionUpdate_594031(
+var subscriptionUpdate* = Call_SubscriptionUpdate_597064(
     name: "subscriptionUpdate", meth: HttpMethod.HttpPatch, host: "azure.local",
-    route: "/subscriptions/{sid}", validator: validate_SubscriptionUpdate_594032,
-    base: "", url: url_SubscriptionUpdate_594033, schemes: {Scheme.Https})
+    route: "/subscriptions/{sid}", validator: validate_SubscriptionUpdate_597065,
+    base: "", url: url_SubscriptionUpdate_597066, schemes: {Scheme.Https})
 type
-  Call_SubscriptionDelete_594021 = ref object of OpenApiRestCall_593424
-proc url_SubscriptionDelete_594023(protocol: Scheme; host: string; base: string;
+  Call_SubscriptionDelete_597054 = ref object of OpenApiRestCall_596457
+proc url_SubscriptionDelete_597056(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -531,7 +531,7 @@ proc url_SubscriptionDelete_594023(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriptionDelete_594022(path: JsonNode; query: JsonNode;
+proc validate_SubscriptionDelete_597055(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes the specified subscription.
@@ -543,11 +543,11 @@ proc validate_SubscriptionDelete_594022(path: JsonNode; query: JsonNode;
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `sid` field"
-  var valid_594024 = path.getOrDefault("sid")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_597057 = path.getOrDefault("sid")
+  valid_597057 = validateParameter(valid_597057, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "sid", valid_594024
+  if valid_597057 != nil:
+    section.add "sid", valid_597057
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -555,11 +555,11 @@ proc validate_SubscriptionDelete_594022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594025 = query.getOrDefault("api-version")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_597058 = query.getOrDefault("api-version")
+  valid_597058 = validateParameter(valid_597058, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "api-version", valid_594025
+  if valid_597058 != nil:
+    section.add "api-version", valid_597058
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -567,31 +567,31 @@ proc validate_SubscriptionDelete_594022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594026 = header.getOrDefault("If-Match")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  var valid_597059 = header.getOrDefault("If-Match")
+  valid_597059 = validateParameter(valid_597059, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "If-Match", valid_594026
+  if valid_597059 != nil:
+    section.add "If-Match", valid_597059
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594027: Call_SubscriptionDelete_594021; path: JsonNode;
+proc call*(call_597060: Call_SubscriptionDelete_597054; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified subscription.
   ## 
-  let valid = call_594027.validator(path, query, header, formData, body)
-  let scheme = call_594027.pickScheme
+  let valid = call_597060.validator(path, query, header, formData, body)
+  let scheme = call_597060.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594027.url(scheme.get, call_594027.host, call_594027.base,
-                         call_594027.route, valid.getOrDefault("path"),
+  let url = call_597060.url(scheme.get, call_597060.host, call_597060.base,
+                         call_597060.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594027, url, valid)
+  result = hook(call_597060, url, valid)
 
-proc call*(call_594028: Call_SubscriptionDelete_594021; apiVersion: string;
+proc call*(call_597061: Call_SubscriptionDelete_597054; apiVersion: string;
           sid: string): Recallable =
   ## subscriptionDelete
   ## Deletes the specified subscription.
@@ -599,19 +599,19 @@ proc call*(call_594028: Call_SubscriptionDelete_594021; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   sid: string (required)
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
-  var path_594029 = newJObject()
-  var query_594030 = newJObject()
-  add(query_594030, "api-version", newJString(apiVersion))
-  add(path_594029, "sid", newJString(sid))
-  result = call_594028.call(path_594029, query_594030, nil, nil, nil)
+  var path_597062 = newJObject()
+  var query_597063 = newJObject()
+  add(query_597063, "api-version", newJString(apiVersion))
+  add(path_597062, "sid", newJString(sid))
+  result = call_597061.call(path_597062, query_597063, nil, nil, nil)
 
-var subscriptionDelete* = Call_SubscriptionDelete_594021(
+var subscriptionDelete* = Call_SubscriptionDelete_597054(
     name: "subscriptionDelete", meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/subscriptions/{sid}", validator: validate_SubscriptionDelete_594022,
-    base: "", url: url_SubscriptionDelete_594023, schemes: {Scheme.Https})
+    route: "/subscriptions/{sid}", validator: validate_SubscriptionDelete_597055,
+    base: "", url: url_SubscriptionDelete_597056, schemes: {Scheme.Https})
 type
-  Call_SubscriptionRegeneratePrimaryKey_594044 = ref object of OpenApiRestCall_593424
-proc url_SubscriptionRegeneratePrimaryKey_594046(protocol: Scheme; host: string;
+  Call_SubscriptionRegeneratePrimaryKey_597077 = ref object of OpenApiRestCall_596457
+proc url_SubscriptionRegeneratePrimaryKey_597079(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -627,7 +627,7 @@ proc url_SubscriptionRegeneratePrimaryKey_594046(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriptionRegeneratePrimaryKey_594045(path: JsonNode;
+proc validate_SubscriptionRegeneratePrimaryKey_597078(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates primary key of existing subscription of the API Management service instance.
   ## 
@@ -638,11 +638,11 @@ proc validate_SubscriptionRegeneratePrimaryKey_594045(path: JsonNode;
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `sid` field"
-  var valid_594047 = path.getOrDefault("sid")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  var valid_597080 = path.getOrDefault("sid")
+  valid_597080 = validateParameter(valid_597080, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "sid", valid_594047
+  if valid_597080 != nil:
+    section.add "sid", valid_597080
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -650,11 +650,11 @@ proc validate_SubscriptionRegeneratePrimaryKey_594045(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594048 = query.getOrDefault("api-version")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  var valid_597081 = query.getOrDefault("api-version")
+  valid_597081 = validateParameter(valid_597081, JString, required = true,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "api-version", valid_594048
+  if valid_597081 != nil:
+    section.add "api-version", valid_597081
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -663,21 +663,21 @@ proc validate_SubscriptionRegeneratePrimaryKey_594045(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594049: Call_SubscriptionRegeneratePrimaryKey_594044;
+proc call*(call_597082: Call_SubscriptionRegeneratePrimaryKey_597077;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerates primary key of existing subscription of the API Management service instance.
   ## 
-  let valid = call_594049.validator(path, query, header, formData, body)
-  let scheme = call_594049.pickScheme
+  let valid = call_597082.validator(path, query, header, formData, body)
+  let scheme = call_597082.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594049.url(scheme.get, call_594049.host, call_594049.base,
-                         call_594049.route, valid.getOrDefault("path"),
+  let url = call_597082.url(scheme.get, call_597082.host, call_597082.base,
+                         call_597082.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594049, url, valid)
+  result = hook(call_597082, url, valid)
 
-proc call*(call_594050: Call_SubscriptionRegeneratePrimaryKey_594044;
+proc call*(call_597083: Call_SubscriptionRegeneratePrimaryKey_597077;
           apiVersion: string; sid: string): Recallable =
   ## subscriptionRegeneratePrimaryKey
   ## Regenerates primary key of existing subscription of the API Management service instance.
@@ -685,20 +685,20 @@ proc call*(call_594050: Call_SubscriptionRegeneratePrimaryKey_594044;
   ##             : Version of the API to be used with the client request.
   ##   sid: string (required)
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
-  var path_594051 = newJObject()
-  var query_594052 = newJObject()
-  add(query_594052, "api-version", newJString(apiVersion))
-  add(path_594051, "sid", newJString(sid))
-  result = call_594050.call(path_594051, query_594052, nil, nil, nil)
+  var path_597084 = newJObject()
+  var query_597085 = newJObject()
+  add(query_597085, "api-version", newJString(apiVersion))
+  add(path_597084, "sid", newJString(sid))
+  result = call_597083.call(path_597084, query_597085, nil, nil, nil)
 
-var subscriptionRegeneratePrimaryKey* = Call_SubscriptionRegeneratePrimaryKey_594044(
+var subscriptionRegeneratePrimaryKey* = Call_SubscriptionRegeneratePrimaryKey_597077(
     name: "subscriptionRegeneratePrimaryKey", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/subscriptions/{sid}/regeneratePrimaryKey",
-    validator: validate_SubscriptionRegeneratePrimaryKey_594045, base: "",
-    url: url_SubscriptionRegeneratePrimaryKey_594046, schemes: {Scheme.Https})
+    validator: validate_SubscriptionRegeneratePrimaryKey_597078, base: "",
+    url: url_SubscriptionRegeneratePrimaryKey_597079, schemes: {Scheme.Https})
 type
-  Call_SubscriptionRegenerateSecondaryKey_594053 = ref object of OpenApiRestCall_593424
-proc url_SubscriptionRegenerateSecondaryKey_594055(protocol: Scheme; host: string;
+  Call_SubscriptionRegenerateSecondaryKey_597086 = ref object of OpenApiRestCall_596457
+proc url_SubscriptionRegenerateSecondaryKey_597088(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -714,7 +714,7 @@ proc url_SubscriptionRegenerateSecondaryKey_594055(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriptionRegenerateSecondaryKey_594054(path: JsonNode;
+proc validate_SubscriptionRegenerateSecondaryKey_597087(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates secondary key of existing subscription of the API Management service instance.
   ## 
@@ -725,11 +725,11 @@ proc validate_SubscriptionRegenerateSecondaryKey_594054(path: JsonNode;
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `sid` field"
-  var valid_594056 = path.getOrDefault("sid")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  var valid_597089 = path.getOrDefault("sid")
+  valid_597089 = validateParameter(valid_597089, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "sid", valid_594056
+  if valid_597089 != nil:
+    section.add "sid", valid_597089
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -737,11 +737,11 @@ proc validate_SubscriptionRegenerateSecondaryKey_594054(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594057 = query.getOrDefault("api-version")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  var valid_597090 = query.getOrDefault("api-version")
+  valid_597090 = validateParameter(valid_597090, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "api-version", valid_594057
+  if valid_597090 != nil:
+    section.add "api-version", valid_597090
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -750,21 +750,21 @@ proc validate_SubscriptionRegenerateSecondaryKey_594054(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594058: Call_SubscriptionRegenerateSecondaryKey_594053;
+proc call*(call_597091: Call_SubscriptionRegenerateSecondaryKey_597086;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerates secondary key of existing subscription of the API Management service instance.
   ## 
-  let valid = call_594058.validator(path, query, header, formData, body)
-  let scheme = call_594058.pickScheme
+  let valid = call_597091.validator(path, query, header, formData, body)
+  let scheme = call_597091.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594058.url(scheme.get, call_594058.host, call_594058.base,
-                         call_594058.route, valid.getOrDefault("path"),
+  let url = call_597091.url(scheme.get, call_597091.host, call_597091.base,
+                         call_597091.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594058, url, valid)
+  result = hook(call_597091, url, valid)
 
-proc call*(call_594059: Call_SubscriptionRegenerateSecondaryKey_594053;
+proc call*(call_597092: Call_SubscriptionRegenerateSecondaryKey_597086;
           apiVersion: string; sid: string): Recallable =
   ## subscriptionRegenerateSecondaryKey
   ## Regenerates secondary key of existing subscription of the API Management service instance.
@@ -772,17 +772,17 @@ proc call*(call_594059: Call_SubscriptionRegenerateSecondaryKey_594053;
   ##             : Version of the API to be used with the client request.
   ##   sid: string (required)
   ##      : Subscription entity Identifier. The entity represents the association between a user and a product in API Management.
-  var path_594060 = newJObject()
-  var query_594061 = newJObject()
-  add(query_594061, "api-version", newJString(apiVersion))
-  add(path_594060, "sid", newJString(sid))
-  result = call_594059.call(path_594060, query_594061, nil, nil, nil)
+  var path_597093 = newJObject()
+  var query_597094 = newJObject()
+  add(query_597094, "api-version", newJString(apiVersion))
+  add(path_597093, "sid", newJString(sid))
+  result = call_597092.call(path_597093, query_597094, nil, nil, nil)
 
-var subscriptionRegenerateSecondaryKey* = Call_SubscriptionRegenerateSecondaryKey_594053(
+var subscriptionRegenerateSecondaryKey* = Call_SubscriptionRegenerateSecondaryKey_597086(
     name: "subscriptionRegenerateSecondaryKey", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/subscriptions/{sid}/regenerateSecondaryKey",
-    validator: validate_SubscriptionRegenerateSecondaryKey_594054, base: "",
-    url: url_SubscriptionRegenerateSecondaryKey_594055, schemes: {Scheme.Https})
+    validator: validate_SubscriptionRegenerateSecondaryKey_597087, base: "",
+    url: url_SubscriptionRegenerateSecondaryKey_597088, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: BackupManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_582442 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_582442](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_582442): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-Backups"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BackupsList_593631 = ref object of OpenApiRestCall_593409
-proc url_BackupsList_593633(protocol: Scheme; host: string; base: string;
+  Call_BackupsList_582664 = ref object of OpenApiRestCall_582442
+proc url_BackupsList_582666(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +128,7 @@ proc url_BackupsList_593633(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupsList_593632(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BackupsList_582665(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of backups from a location.
   ## 
@@ -144,21 +144,21 @@ proc validate_BackupsList_593632(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593793 = path.getOrDefault("resourceGroupName")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  var valid_582826 = path.getOrDefault("resourceGroupName")
+  valid_582826 = validateParameter(valid_582826, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "resourceGroupName", valid_593793
-  var valid_593794 = path.getOrDefault("subscriptionId")
-  valid_593794 = validateParameter(valid_593794, JString, required = true,
+  if valid_582826 != nil:
+    section.add "resourceGroupName", valid_582826
+  var valid_582827 = path.getOrDefault("subscriptionId")
+  valid_582827 = validateParameter(valid_582827, JString, required = true,
                                  default = nil)
-  if valid_593794 != nil:
-    section.add "subscriptionId", valid_593794
-  var valid_593795 = path.getOrDefault("location")
-  valid_593795 = validateParameter(valid_593795, JString, required = true,
+  if valid_582827 != nil:
+    section.add "subscriptionId", valid_582827
+  var valid_582828 = path.getOrDefault("location")
+  valid_582828 = validateParameter(valid_582828, JString, required = true,
                                  default = nil)
-  if valid_593795 != nil:
-    section.add "location", valid_593795
+  if valid_582828 != nil:
+    section.add "location", valid_582828
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -166,11 +166,11 @@ proc validate_BackupsList_593632(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593809 = query.getOrDefault("api-version")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_582842 = query.getOrDefault("api-version")
+  valid_582842 = validateParameter(valid_582842, JString, required = true,
                                  default = newJString("2018-09-01"))
-  if valid_593809 != nil:
-    section.add "api-version", valid_593809
+  if valid_582842 != nil:
+    section.add "api-version", valid_582842
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -179,20 +179,20 @@ proc validate_BackupsList_593632(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593836: Call_BackupsList_593631; path: JsonNode; query: JsonNode;
+proc call*(call_582869: Call_BackupsList_582664; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of backups from a location.
   ## 
-  let valid = call_593836.validator(path, query, header, formData, body)
-  let scheme = call_593836.pickScheme
+  let valid = call_582869.validator(path, query, header, formData, body)
+  let scheme = call_582869.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593836.url(scheme.get, call_593836.host, call_593836.base,
-                         call_593836.route, valid.getOrDefault("path"),
+  let url = call_582869.url(scheme.get, call_582869.host, call_582869.base,
+                         call_582869.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593836, url, valid)
+  result = hook(call_582869, url, valid)
 
-proc call*(call_593907: Call_BackupsList_593631; resourceGroupName: string;
+proc call*(call_582940: Call_BackupsList_582664; resourceGroupName: string;
           subscriptionId: string; location: string;
           apiVersion: string = "2018-09-01"): Recallable =
   ## backupsList
@@ -205,22 +205,22 @@ proc call*(call_593907: Call_BackupsList_593631; resourceGroupName: string;
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Name of the backup location.
-  var path_593908 = newJObject()
-  var query_593910 = newJObject()
-  add(path_593908, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593910, "api-version", newJString(apiVersion))
-  add(path_593908, "subscriptionId", newJString(subscriptionId))
-  add(path_593908, "location", newJString(location))
-  result = call_593907.call(path_593908, query_593910, nil, nil, nil)
+  var path_582941 = newJObject()
+  var query_582943 = newJObject()
+  add(path_582941, "resourceGroupName", newJString(resourceGroupName))
+  add(query_582943, "api-version", newJString(apiVersion))
+  add(path_582941, "subscriptionId", newJString(subscriptionId))
+  add(path_582941, "location", newJString(location))
+  result = call_582940.call(path_582941, query_582943, nil, nil, nil)
 
-var backupsList* = Call_BackupsList_593631(name: "backupsList",
+var backupsList* = Call_BackupsList_582664(name: "backupsList",
                                         meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Backup.Admin/backupLocations/{location}/backups",
-                                        validator: validate_BackupsList_593632,
-                                        base: "", url: url_BackupsList_593633,
+                                        validator: validate_BackupsList_582665,
+                                        base: "", url: url_BackupsList_582666,
                                         schemes: {Scheme.Https})
 type
-  Call_BackupsGet_593949 = ref object of OpenApiRestCall_593409
-proc url_BackupsGet_593951(protocol: Scheme; host: string; base: string; route: string;
+  Call_BackupsGet_582982 = ref object of OpenApiRestCall_582442
+proc url_BackupsGet_582984(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -246,7 +246,7 @@ proc url_BackupsGet_593951(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupsGet_593950(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BackupsGet_582983(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a backup from a location based on name.
   ## 
@@ -264,26 +264,26 @@ proc validate_BackupsGet_593950(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593961 = path.getOrDefault("resourceGroupName")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_582994 = path.getOrDefault("resourceGroupName")
+  valid_582994 = validateParameter(valid_582994, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "resourceGroupName", valid_593961
-  var valid_593962 = path.getOrDefault("subscriptionId")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_582994 != nil:
+    section.add "resourceGroupName", valid_582994
+  var valid_582995 = path.getOrDefault("subscriptionId")
+  valid_582995 = validateParameter(valid_582995, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "subscriptionId", valid_593962
-  var valid_593963 = path.getOrDefault("backup")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_582995 != nil:
+    section.add "subscriptionId", valid_582995
+  var valid_582996 = path.getOrDefault("backup")
+  valid_582996 = validateParameter(valid_582996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "backup", valid_593963
-  var valid_593964 = path.getOrDefault("location")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_582996 != nil:
+    section.add "backup", valid_582996
+  var valid_582997 = path.getOrDefault("location")
+  valid_582997 = validateParameter(valid_582997, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "location", valid_593964
+  if valid_582997 != nil:
+    section.add "location", valid_582997
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -291,11 +291,11 @@ proc validate_BackupsGet_593950(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593965 = query.getOrDefault("api-version")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_582998 = query.getOrDefault("api-version")
+  valid_582998 = validateParameter(valid_582998, JString, required = true,
                                  default = newJString("2018-09-01"))
-  if valid_593965 != nil:
-    section.add "api-version", valid_593965
+  if valid_582998 != nil:
+    section.add "api-version", valid_582998
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -304,20 +304,20 @@ proc validate_BackupsGet_593950(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593966: Call_BackupsGet_593949; path: JsonNode; query: JsonNode;
+proc call*(call_582999: Call_BackupsGet_582982; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a backup from a location based on name.
   ## 
-  let valid = call_593966.validator(path, query, header, formData, body)
-  let scheme = call_593966.pickScheme
+  let valid = call_582999.validator(path, query, header, formData, body)
+  let scheme = call_582999.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593966.url(scheme.get, call_593966.host, call_593966.base,
-                         call_593966.route, valid.getOrDefault("path"),
+  let url = call_582999.url(scheme.get, call_582999.host, call_582999.base,
+                         call_582999.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593966, url, valid)
+  result = hook(call_582999, url, valid)
 
-proc call*(call_593967: Call_BackupsGet_593949; resourceGroupName: string;
+proc call*(call_583000: Call_BackupsGet_582982; resourceGroupName: string;
           subscriptionId: string; backup: string; location: string;
           apiVersion: string = "2018-09-01"): Recallable =
   ## backupsGet
@@ -332,23 +332,23 @@ proc call*(call_593967: Call_BackupsGet_593949; resourceGroupName: string;
   ##         : Name of the backup.
   ##   location: string (required)
   ##           : Name of the backup location.
-  var path_593968 = newJObject()
-  var query_593969 = newJObject()
-  add(path_593968, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593969, "api-version", newJString(apiVersion))
-  add(path_593968, "subscriptionId", newJString(subscriptionId))
-  add(path_593968, "backup", newJString(backup))
-  add(path_593968, "location", newJString(location))
-  result = call_593967.call(path_593968, query_593969, nil, nil, nil)
+  var path_583001 = newJObject()
+  var query_583002 = newJObject()
+  add(path_583001, "resourceGroupName", newJString(resourceGroupName))
+  add(query_583002, "api-version", newJString(apiVersion))
+  add(path_583001, "subscriptionId", newJString(subscriptionId))
+  add(path_583001, "backup", newJString(backup))
+  add(path_583001, "location", newJString(location))
+  result = call_583000.call(path_583001, query_583002, nil, nil, nil)
 
-var backupsGet* = Call_BackupsGet_593949(name: "backupsGet",
+var backupsGet* = Call_BackupsGet_582982(name: "backupsGet",
                                       meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Backup.Admin/backupLocations/{location}/backups/{backup}",
-                                      validator: validate_BackupsGet_593950,
-                                      base: "", url: url_BackupsGet_593951,
+                                      validator: validate_BackupsGet_582983,
+                                      base: "", url: url_BackupsGet_582984,
                                       schemes: {Scheme.Https})
 type
-  Call_BackupsRestore_593970 = ref object of OpenApiRestCall_593409
-proc url_BackupsRestore_593972(protocol: Scheme; host: string; base: string;
+  Call_BackupsRestore_583003 = ref object of OpenApiRestCall_582442
+proc url_BackupsRestore_583005(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -375,7 +375,7 @@ proc url_BackupsRestore_593972(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupsRestore_593971(path: JsonNode; query: JsonNode;
+proc validate_BackupsRestore_583004(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Restore a backup.
@@ -394,26 +394,26 @@ proc validate_BackupsRestore_593971(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593990 = path.getOrDefault("resourceGroupName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_583023 = path.getOrDefault("resourceGroupName")
+  valid_583023 = validateParameter(valid_583023, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "resourceGroupName", valid_593990
-  var valid_593991 = path.getOrDefault("subscriptionId")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_583023 != nil:
+    section.add "resourceGroupName", valid_583023
+  var valid_583024 = path.getOrDefault("subscriptionId")
+  valid_583024 = validateParameter(valid_583024, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "subscriptionId", valid_593991
-  var valid_593992 = path.getOrDefault("backup")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_583024 != nil:
+    section.add "subscriptionId", valid_583024
+  var valid_583025 = path.getOrDefault("backup")
+  valid_583025 = validateParameter(valid_583025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "backup", valid_593992
-  var valid_593993 = path.getOrDefault("location")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_583025 != nil:
+    section.add "backup", valid_583025
+  var valid_583026 = path.getOrDefault("location")
+  valid_583026 = validateParameter(valid_583026, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "location", valid_593993
+  if valid_583026 != nil:
+    section.add "location", valid_583026
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -421,11 +421,11 @@ proc validate_BackupsRestore_593971(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_583027 = query.getOrDefault("api-version")
+  valid_583027 = validateParameter(valid_583027, JString, required = true,
                                  default = newJString("2018-09-01"))
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
+  if valid_583027 != nil:
+    section.add "api-version", valid_583027
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -439,20 +439,20 @@ proc validate_BackupsRestore_593971(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593996: Call_BackupsRestore_593970; path: JsonNode; query: JsonNode;
+proc call*(call_583029: Call_BackupsRestore_583003; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restore a backup.
   ## 
-  let valid = call_593996.validator(path, query, header, formData, body)
-  let scheme = call_593996.pickScheme
+  let valid = call_583029.validator(path, query, header, formData, body)
+  let scheme = call_583029.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593996.url(scheme.get, call_593996.host, call_593996.base,
-                         call_593996.route, valid.getOrDefault("path"),
+  let url = call_583029.url(scheme.get, call_583029.host, call_583029.base,
+                         call_583029.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593996, url, valid)
+  result = hook(call_583029, url, valid)
 
-proc call*(call_593997: Call_BackupsRestore_593970; resourceGroupName: string;
+proc call*(call_583030: Call_BackupsRestore_583003; resourceGroupName: string;
           restoreOptions: JsonNode; subscriptionId: string; backup: string;
           location: string; apiVersion: string = "2018-09-01"): Recallable =
   ## backupsRestore
@@ -469,21 +469,21 @@ proc call*(call_593997: Call_BackupsRestore_593970; resourceGroupName: string;
   ##         : Name of the backup.
   ##   location: string (required)
   ##           : Name of the backup location.
-  var path_593998 = newJObject()
-  var query_593999 = newJObject()
-  var body_594000 = newJObject()
-  add(path_593998, "resourceGroupName", newJString(resourceGroupName))
+  var path_583031 = newJObject()
+  var query_583032 = newJObject()
+  var body_583033 = newJObject()
+  add(path_583031, "resourceGroupName", newJString(resourceGroupName))
   if restoreOptions != nil:
-    body_594000 = restoreOptions
-  add(query_593999, "api-version", newJString(apiVersion))
-  add(path_593998, "subscriptionId", newJString(subscriptionId))
-  add(path_593998, "backup", newJString(backup))
-  add(path_593998, "location", newJString(location))
-  result = call_593997.call(path_593998, query_593999, nil, nil, body_594000)
+    body_583033 = restoreOptions
+  add(query_583032, "api-version", newJString(apiVersion))
+  add(path_583031, "subscriptionId", newJString(subscriptionId))
+  add(path_583031, "backup", newJString(backup))
+  add(path_583031, "location", newJString(location))
+  result = call_583030.call(path_583031, query_583032, nil, nil, body_583033)
 
-var backupsRestore* = Call_BackupsRestore_593970(name: "backupsRestore",
+var backupsRestore* = Call_BackupsRestore_583003(name: "backupsRestore",
     meth: HttpMethod.HttpPost, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Backup.Admin/backupLocations/{location}/backups/{backup}/restore",
-    validator: validate_BackupsRestore_593971, base: "", url: url_BackupsRestore_593972,
+    validator: validate_BackupsRestore_583004, base: "", url: url_BackupsRestore_583005,
     schemes: {Scheme.Https})
 export
   rest

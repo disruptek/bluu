@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "network-privateEndpoint"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AvailablePrivateEndpointTypesList_593630 = ref object of OpenApiRestCall_593408
-proc url_AvailablePrivateEndpointTypesList_593632(protocol: Scheme; host: string;
+  Call_AvailablePrivateEndpointTypesList_567863 = ref object of OpenApiRestCall_567641
+proc url_AvailablePrivateEndpointTypesList_567865(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -123,7 +123,7 @@ proc url_AvailablePrivateEndpointTypesList_593632(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailablePrivateEndpointTypesList_593631(path: JsonNode;
+proc validate_AvailablePrivateEndpointTypesList_567864(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all of the resource types that can be linked to a Private Endpoint in this subscription in this region.
   ## 
@@ -137,16 +137,16 @@ proc validate_AvailablePrivateEndpointTypesList_593631(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593792 = path.getOrDefault("subscriptionId")
-  valid_593792 = validateParameter(valid_593792, JString, required = true,
+  var valid_568025 = path.getOrDefault("subscriptionId")
+  valid_568025 = validateParameter(valid_568025, JString, required = true,
                                  default = nil)
-  if valid_593792 != nil:
-    section.add "subscriptionId", valid_593792
-  var valid_593793 = path.getOrDefault("location")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  if valid_568025 != nil:
+    section.add "subscriptionId", valid_568025
+  var valid_568026 = path.getOrDefault("location")
+  valid_568026 = validateParameter(valid_568026, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "location", valid_593793
+  if valid_568026 != nil:
+    section.add "location", valid_568026
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -154,11 +154,11 @@ proc validate_AvailablePrivateEndpointTypesList_593631(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593794 = query.getOrDefault("api-version")
-  valid_593794 = validateParameter(valid_593794, JString, required = true,
+  var valid_568027 = query.getOrDefault("api-version")
+  valid_568027 = validateParameter(valid_568027, JString, required = true,
                                  default = nil)
-  if valid_593794 != nil:
-    section.add "api-version", valid_593794
+  if valid_568027 != nil:
+    section.add "api-version", valid_568027
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -167,21 +167,21 @@ proc validate_AvailablePrivateEndpointTypesList_593631(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593821: Call_AvailablePrivateEndpointTypesList_593630;
+proc call*(call_568054: Call_AvailablePrivateEndpointTypesList_567863;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns all of the resource types that can be linked to a Private Endpoint in this subscription in this region.
   ## 
-  let valid = call_593821.validator(path, query, header, formData, body)
-  let scheme = call_593821.pickScheme
+  let valid = call_568054.validator(path, query, header, formData, body)
+  let scheme = call_568054.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593821.url(scheme.get, call_593821.host, call_593821.base,
-                         call_593821.route, valid.getOrDefault("path"),
+  let url = call_568054.url(scheme.get, call_568054.host, call_568054.base,
+                         call_568054.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593821, url, valid)
+  result = hook(call_568054, url, valid)
 
-proc call*(call_593892: Call_AvailablePrivateEndpointTypesList_593630;
+proc call*(call_568125: Call_AvailablePrivateEndpointTypesList_567863;
           apiVersion: string; subscriptionId: string; location: string): Recallable =
   ## availablePrivateEndpointTypesList
   ## Returns all of the resource types that can be linked to a Private Endpoint in this subscription in this region.
@@ -191,21 +191,21 @@ proc call*(call_593892: Call_AvailablePrivateEndpointTypesList_593630;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The location of the domain name.
-  var path_593893 = newJObject()
-  var query_593895 = newJObject()
-  add(query_593895, "api-version", newJString(apiVersion))
-  add(path_593893, "subscriptionId", newJString(subscriptionId))
-  add(path_593893, "location", newJString(location))
-  result = call_593892.call(path_593893, query_593895, nil, nil, nil)
+  var path_568126 = newJObject()
+  var query_568128 = newJObject()
+  add(query_568128, "api-version", newJString(apiVersion))
+  add(path_568126, "subscriptionId", newJString(subscriptionId))
+  add(path_568126, "location", newJString(location))
+  result = call_568125.call(path_568126, query_568128, nil, nil, nil)
 
-var availablePrivateEndpointTypesList* = Call_AvailablePrivateEndpointTypesList_593630(
+var availablePrivateEndpointTypesList* = Call_AvailablePrivateEndpointTypesList_567863(
     name: "availablePrivateEndpointTypesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/locations/{location}/availablePrivateEndpointTypes",
-    validator: validate_AvailablePrivateEndpointTypesList_593631, base: "",
-    url: url_AvailablePrivateEndpointTypesList_593632, schemes: {Scheme.Https})
+    validator: validate_AvailablePrivateEndpointTypesList_567864, base: "",
+    url: url_AvailablePrivateEndpointTypesList_567865, schemes: {Scheme.Https})
 type
-  Call_PrivateEndpointsListBySubscription_593934 = ref object of OpenApiRestCall_593408
-proc url_PrivateEndpointsListBySubscription_593936(protocol: Scheme; host: string;
+  Call_PrivateEndpointsListBySubscription_568167 = ref object of OpenApiRestCall_567641
+proc url_PrivateEndpointsListBySubscription_568169(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -222,7 +222,7 @@ proc url_PrivateEndpointsListBySubscription_593936(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PrivateEndpointsListBySubscription_593935(path: JsonNode;
+proc validate_PrivateEndpointsListBySubscription_568168(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all private endpoints in a subscription.
   ## 
@@ -234,11 +234,11 @@ proc validate_PrivateEndpointsListBySubscription_593935(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593937 = path.getOrDefault("subscriptionId")
-  valid_593937 = validateParameter(valid_593937, JString, required = true,
+  var valid_568170 = path.getOrDefault("subscriptionId")
+  valid_568170 = validateParameter(valid_568170, JString, required = true,
                                  default = nil)
-  if valid_593937 != nil:
-    section.add "subscriptionId", valid_593937
+  if valid_568170 != nil:
+    section.add "subscriptionId", valid_568170
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -246,11 +246,11 @@ proc validate_PrivateEndpointsListBySubscription_593935(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593938 = query.getOrDefault("api-version")
-  valid_593938 = validateParameter(valid_593938, JString, required = true,
+  var valid_568171 = query.getOrDefault("api-version")
+  valid_568171 = validateParameter(valid_568171, JString, required = true,
                                  default = nil)
-  if valid_593938 != nil:
-    section.add "api-version", valid_593938
+  if valid_568171 != nil:
+    section.add "api-version", valid_568171
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -259,21 +259,21 @@ proc validate_PrivateEndpointsListBySubscription_593935(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593939: Call_PrivateEndpointsListBySubscription_593934;
+proc call*(call_568172: Call_PrivateEndpointsListBySubscription_568167;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all private endpoints in a subscription.
   ## 
-  let valid = call_593939.validator(path, query, header, formData, body)
-  let scheme = call_593939.pickScheme
+  let valid = call_568172.validator(path, query, header, formData, body)
+  let scheme = call_568172.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593939.url(scheme.get, call_593939.host, call_593939.base,
-                         call_593939.route, valid.getOrDefault("path"),
+  let url = call_568172.url(scheme.get, call_568172.host, call_568172.base,
+                         call_568172.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593939, url, valid)
+  result = hook(call_568172, url, valid)
 
-proc call*(call_593940: Call_PrivateEndpointsListBySubscription_593934;
+proc call*(call_568173: Call_PrivateEndpointsListBySubscription_568167;
           apiVersion: string; subscriptionId: string): Recallable =
   ## privateEndpointsListBySubscription
   ## Gets all private endpoints in a subscription.
@@ -281,20 +281,20 @@ proc call*(call_593940: Call_PrivateEndpointsListBySubscription_593934;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593941 = newJObject()
-  var query_593942 = newJObject()
-  add(query_593942, "api-version", newJString(apiVersion))
-  add(path_593941, "subscriptionId", newJString(subscriptionId))
-  result = call_593940.call(path_593941, query_593942, nil, nil, nil)
+  var path_568174 = newJObject()
+  var query_568175 = newJObject()
+  add(query_568175, "api-version", newJString(apiVersion))
+  add(path_568174, "subscriptionId", newJString(subscriptionId))
+  result = call_568173.call(path_568174, query_568175, nil, nil, nil)
 
-var privateEndpointsListBySubscription* = Call_PrivateEndpointsListBySubscription_593934(
+var privateEndpointsListBySubscription* = Call_PrivateEndpointsListBySubscription_568167(
     name: "privateEndpointsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/privateEndpoints",
-    validator: validate_PrivateEndpointsListBySubscription_593935, base: "",
-    url: url_PrivateEndpointsListBySubscription_593936, schemes: {Scheme.Https})
+    validator: validate_PrivateEndpointsListBySubscription_568168, base: "",
+    url: url_PrivateEndpointsListBySubscription_568169, schemes: {Scheme.Https})
 type
-  Call_AvailablePrivateEndpointTypesListByResourceGroup_593943 = ref object of OpenApiRestCall_593408
-proc url_AvailablePrivateEndpointTypesListByResourceGroup_593945(
+  Call_AvailablePrivateEndpointTypesListByResourceGroup_568176 = ref object of OpenApiRestCall_567641
+proc url_AvailablePrivateEndpointTypesListByResourceGroup_568178(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -318,7 +318,7 @@ proc url_AvailablePrivateEndpointTypesListByResourceGroup_593945(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailablePrivateEndpointTypesListByResourceGroup_593944(
+proc validate_AvailablePrivateEndpointTypesListByResourceGroup_568177(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Returns all of the resource types that can be linked to a Private Endpoint in this subscription in this region.
@@ -335,21 +335,21 @@ proc validate_AvailablePrivateEndpointTypesListByResourceGroup_593944(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593946 = path.getOrDefault("resourceGroupName")
-  valid_593946 = validateParameter(valid_593946, JString, required = true,
+  var valid_568179 = path.getOrDefault("resourceGroupName")
+  valid_568179 = validateParameter(valid_568179, JString, required = true,
                                  default = nil)
-  if valid_593946 != nil:
-    section.add "resourceGroupName", valid_593946
-  var valid_593947 = path.getOrDefault("subscriptionId")
-  valid_593947 = validateParameter(valid_593947, JString, required = true,
+  if valid_568179 != nil:
+    section.add "resourceGroupName", valid_568179
+  var valid_568180 = path.getOrDefault("subscriptionId")
+  valid_568180 = validateParameter(valid_568180, JString, required = true,
                                  default = nil)
-  if valid_593947 != nil:
-    section.add "subscriptionId", valid_593947
-  var valid_593948 = path.getOrDefault("location")
-  valid_593948 = validateParameter(valid_593948, JString, required = true,
+  if valid_568180 != nil:
+    section.add "subscriptionId", valid_568180
+  var valid_568181 = path.getOrDefault("location")
+  valid_568181 = validateParameter(valid_568181, JString, required = true,
                                  default = nil)
-  if valid_593948 != nil:
-    section.add "location", valid_593948
+  if valid_568181 != nil:
+    section.add "location", valid_568181
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +357,11 @@ proc validate_AvailablePrivateEndpointTypesListByResourceGroup_593944(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593949 = query.getOrDefault("api-version")
-  valid_593949 = validateParameter(valid_593949, JString, required = true,
+  var valid_568182 = query.getOrDefault("api-version")
+  valid_568182 = validateParameter(valid_568182, JString, required = true,
                                  default = nil)
-  if valid_593949 != nil:
-    section.add "api-version", valid_593949
+  if valid_568182 != nil:
+    section.add "api-version", valid_568182
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -370,21 +370,21 @@ proc validate_AvailablePrivateEndpointTypesListByResourceGroup_593944(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593950: Call_AvailablePrivateEndpointTypesListByResourceGroup_593943;
+proc call*(call_568183: Call_AvailablePrivateEndpointTypesListByResourceGroup_568176;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns all of the resource types that can be linked to a Private Endpoint in this subscription in this region.
   ## 
-  let valid = call_593950.validator(path, query, header, formData, body)
-  let scheme = call_593950.pickScheme
+  let valid = call_568183.validator(path, query, header, formData, body)
+  let scheme = call_568183.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593950.url(scheme.get, call_593950.host, call_593950.base,
-                         call_593950.route, valid.getOrDefault("path"),
+  let url = call_568183.url(scheme.get, call_568183.host, call_568183.base,
+                         call_568183.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593950, url, valid)
+  result = hook(call_568183, url, valid)
 
-proc call*(call_593951: Call_AvailablePrivateEndpointTypesListByResourceGroup_593943;
+proc call*(call_568184: Call_AvailablePrivateEndpointTypesListByResourceGroup_568176;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           location: string): Recallable =
   ## availablePrivateEndpointTypesListByResourceGroup
@@ -397,23 +397,23 @@ proc call*(call_593951: Call_AvailablePrivateEndpointTypesListByResourceGroup_59
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The location of the domain name.
-  var path_593952 = newJObject()
-  var query_593953 = newJObject()
-  add(path_593952, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593953, "api-version", newJString(apiVersion))
-  add(path_593952, "subscriptionId", newJString(subscriptionId))
-  add(path_593952, "location", newJString(location))
-  result = call_593951.call(path_593952, query_593953, nil, nil, nil)
+  var path_568185 = newJObject()
+  var query_568186 = newJObject()
+  add(path_568185, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568186, "api-version", newJString(apiVersion))
+  add(path_568185, "subscriptionId", newJString(subscriptionId))
+  add(path_568185, "location", newJString(location))
+  result = call_568184.call(path_568185, query_568186, nil, nil, nil)
 
-var availablePrivateEndpointTypesListByResourceGroup* = Call_AvailablePrivateEndpointTypesListByResourceGroup_593943(
+var availablePrivateEndpointTypesListByResourceGroup* = Call_AvailablePrivateEndpointTypesListByResourceGroup_568176(
     name: "availablePrivateEndpointTypesListByResourceGroup",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/locations/{location}/availablePrivateEndpointTypes",
-    validator: validate_AvailablePrivateEndpointTypesListByResourceGroup_593944,
-    base: "", url: url_AvailablePrivateEndpointTypesListByResourceGroup_593945,
+    validator: validate_AvailablePrivateEndpointTypesListByResourceGroup_568177,
+    base: "", url: url_AvailablePrivateEndpointTypesListByResourceGroup_568178,
     schemes: {Scheme.Https})
 type
-  Call_PrivateEndpointsList_593954 = ref object of OpenApiRestCall_593408
-proc url_PrivateEndpointsList_593956(protocol: Scheme; host: string; base: string;
+  Call_PrivateEndpointsList_568187 = ref object of OpenApiRestCall_567641
+proc url_PrivateEndpointsList_568189(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -434,7 +434,7 @@ proc url_PrivateEndpointsList_593956(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PrivateEndpointsList_593955(path: JsonNode; query: JsonNode;
+proc validate_PrivateEndpointsList_568188(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all private endpoints in a resource group.
   ## 
@@ -448,16 +448,16 @@ proc validate_PrivateEndpointsList_593955(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593957 = path.getOrDefault("resourceGroupName")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  var valid_568190 = path.getOrDefault("resourceGroupName")
+  valid_568190 = validateParameter(valid_568190, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "resourceGroupName", valid_593957
-  var valid_593958 = path.getOrDefault("subscriptionId")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  if valid_568190 != nil:
+    section.add "resourceGroupName", valid_568190
+  var valid_568191 = path.getOrDefault("subscriptionId")
+  valid_568191 = validateParameter(valid_568191, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "subscriptionId", valid_593958
+  if valid_568191 != nil:
+    section.add "subscriptionId", valid_568191
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -465,11 +465,11 @@ proc validate_PrivateEndpointsList_593955(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593959 = query.getOrDefault("api-version")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  var valid_568192 = query.getOrDefault("api-version")
+  valid_568192 = validateParameter(valid_568192, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "api-version", valid_593959
+  if valid_568192 != nil:
+    section.add "api-version", valid_568192
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -478,20 +478,20 @@ proc validate_PrivateEndpointsList_593955(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593960: Call_PrivateEndpointsList_593954; path: JsonNode;
+proc call*(call_568193: Call_PrivateEndpointsList_568187; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all private endpoints in a resource group.
   ## 
-  let valid = call_593960.validator(path, query, header, formData, body)
-  let scheme = call_593960.pickScheme
+  let valid = call_568193.validator(path, query, header, formData, body)
+  let scheme = call_568193.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593960.url(scheme.get, call_593960.host, call_593960.base,
-                         call_593960.route, valid.getOrDefault("path"),
+  let url = call_568193.url(scheme.get, call_568193.host, call_568193.base,
+                         call_568193.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593960, url, valid)
+  result = hook(call_568193, url, valid)
 
-proc call*(call_593961: Call_PrivateEndpointsList_593954;
+proc call*(call_568194: Call_PrivateEndpointsList_568187;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## privateEndpointsList
   ## Gets all private endpoints in a resource group.
@@ -501,21 +501,21 @@ proc call*(call_593961: Call_PrivateEndpointsList_593954;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593962 = newJObject()
-  var query_593963 = newJObject()
-  add(path_593962, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593963, "api-version", newJString(apiVersion))
-  add(path_593962, "subscriptionId", newJString(subscriptionId))
-  result = call_593961.call(path_593962, query_593963, nil, nil, nil)
+  var path_568195 = newJObject()
+  var query_568196 = newJObject()
+  add(path_568195, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568196, "api-version", newJString(apiVersion))
+  add(path_568195, "subscriptionId", newJString(subscriptionId))
+  result = call_568194.call(path_568195, query_568196, nil, nil, nil)
 
-var privateEndpointsList* = Call_PrivateEndpointsList_593954(
+var privateEndpointsList* = Call_PrivateEndpointsList_568187(
     name: "privateEndpointsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateEndpoints",
-    validator: validate_PrivateEndpointsList_593955, base: "",
-    url: url_PrivateEndpointsList_593956, schemes: {Scheme.Https})
+    validator: validate_PrivateEndpointsList_568188, base: "",
+    url: url_PrivateEndpointsList_568189, schemes: {Scheme.Https})
 type
-  Call_PrivateEndpointsCreateOrUpdate_593977 = ref object of OpenApiRestCall_593408
-proc url_PrivateEndpointsCreateOrUpdate_593979(protocol: Scheme; host: string;
+  Call_PrivateEndpointsCreateOrUpdate_568210 = ref object of OpenApiRestCall_567641
+proc url_PrivateEndpointsCreateOrUpdate_568212(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -539,7 +539,7 @@ proc url_PrivateEndpointsCreateOrUpdate_593979(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PrivateEndpointsCreateOrUpdate_593978(path: JsonNode;
+proc validate_PrivateEndpointsCreateOrUpdate_568211(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an private endpoint in the specified resource group.
   ## 
@@ -555,21 +555,21 @@ proc validate_PrivateEndpointsCreateOrUpdate_593978(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594006 = path.getOrDefault("resourceGroupName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_568239 = path.getOrDefault("resourceGroupName")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "resourceGroupName", valid_594006
-  var valid_594007 = path.getOrDefault("subscriptionId")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "resourceGroupName", valid_568239
+  var valid_568240 = path.getOrDefault("subscriptionId")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "subscriptionId", valid_594007
-  var valid_594008 = path.getOrDefault("privateEndpointName")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_568240 != nil:
+    section.add "subscriptionId", valid_568240
+  var valid_568241 = path.getOrDefault("privateEndpointName")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "privateEndpointName", valid_594008
+  if valid_568241 != nil:
+    section.add "privateEndpointName", valid_568241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -577,11 +577,11 @@ proc validate_PrivateEndpointsCreateOrUpdate_593978(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594009 = query.getOrDefault("api-version")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  var valid_568242 = query.getOrDefault("api-version")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "api-version", valid_594009
+  if valid_568242 != nil:
+    section.add "api-version", valid_568242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -595,20 +595,20 @@ proc validate_PrivateEndpointsCreateOrUpdate_593978(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594011: Call_PrivateEndpointsCreateOrUpdate_593977; path: JsonNode;
+proc call*(call_568244: Call_PrivateEndpointsCreateOrUpdate_568210; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates an private endpoint in the specified resource group.
   ## 
-  let valid = call_594011.validator(path, query, header, formData, body)
-  let scheme = call_594011.pickScheme
+  let valid = call_568244.validator(path, query, header, formData, body)
+  let scheme = call_568244.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594011.url(scheme.get, call_594011.host, call_594011.base,
-                         call_594011.route, valid.getOrDefault("path"),
+  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
+                         call_568244.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594011, url, valid)
+  result = hook(call_568244, url, valid)
 
-proc call*(call_594012: Call_PrivateEndpointsCreateOrUpdate_593977;
+proc call*(call_568245: Call_PrivateEndpointsCreateOrUpdate_568210;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           privateEndpointName: string; parameters: JsonNode): Recallable =
   ## privateEndpointsCreateOrUpdate
@@ -623,25 +623,25 @@ proc call*(call_594012: Call_PrivateEndpointsCreateOrUpdate_593977;
   ##                      : The name of the private endpoint.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update private endpoint operation.
-  var path_594013 = newJObject()
-  var query_594014 = newJObject()
-  var body_594015 = newJObject()
-  add(path_594013, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594014, "api-version", newJString(apiVersion))
-  add(path_594013, "subscriptionId", newJString(subscriptionId))
-  add(path_594013, "privateEndpointName", newJString(privateEndpointName))
+  var path_568246 = newJObject()
+  var query_568247 = newJObject()
+  var body_568248 = newJObject()
+  add(path_568246, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568247, "api-version", newJString(apiVersion))
+  add(path_568246, "subscriptionId", newJString(subscriptionId))
+  add(path_568246, "privateEndpointName", newJString(privateEndpointName))
   if parameters != nil:
-    body_594015 = parameters
-  result = call_594012.call(path_594013, query_594014, nil, nil, body_594015)
+    body_568248 = parameters
+  result = call_568245.call(path_568246, query_568247, nil, nil, body_568248)
 
-var privateEndpointsCreateOrUpdate* = Call_PrivateEndpointsCreateOrUpdate_593977(
+var privateEndpointsCreateOrUpdate* = Call_PrivateEndpointsCreateOrUpdate_568210(
     name: "privateEndpointsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateEndpoints/{privateEndpointName}",
-    validator: validate_PrivateEndpointsCreateOrUpdate_593978, base: "",
-    url: url_PrivateEndpointsCreateOrUpdate_593979, schemes: {Scheme.Https})
+    validator: validate_PrivateEndpointsCreateOrUpdate_568211, base: "",
+    url: url_PrivateEndpointsCreateOrUpdate_568212, schemes: {Scheme.Https})
 type
-  Call_PrivateEndpointsGet_593964 = ref object of OpenApiRestCall_593408
-proc url_PrivateEndpointsGet_593966(protocol: Scheme; host: string; base: string;
+  Call_PrivateEndpointsGet_568197 = ref object of OpenApiRestCall_567641
+proc url_PrivateEndpointsGet_568199(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -665,7 +665,7 @@ proc url_PrivateEndpointsGet_593966(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PrivateEndpointsGet_593965(path: JsonNode; query: JsonNode;
+proc validate_PrivateEndpointsGet_568198(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets the specified private endpoint by resource group.
@@ -682,21 +682,21 @@ proc validate_PrivateEndpointsGet_593965(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593968 = path.getOrDefault("resourceGroupName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  var valid_568201 = path.getOrDefault("resourceGroupName")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "resourceGroupName", valid_593968
-  var valid_593969 = path.getOrDefault("subscriptionId")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  if valid_568201 != nil:
+    section.add "resourceGroupName", valid_568201
+  var valid_568202 = path.getOrDefault("subscriptionId")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "subscriptionId", valid_593969
-  var valid_593970 = path.getOrDefault("privateEndpointName")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_568202 != nil:
+    section.add "subscriptionId", valid_568202
+  var valid_568203 = path.getOrDefault("privateEndpointName")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "privateEndpointName", valid_593970
+  if valid_568203 != nil:
+    section.add "privateEndpointName", valid_568203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -706,16 +706,16 @@ proc validate_PrivateEndpointsGet_593965(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_568204 = query.getOrDefault("api-version")
+  valid_568204 = validateParameter(valid_568204, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
-  var valid_593972 = query.getOrDefault("$expand")
-  valid_593972 = validateParameter(valid_593972, JString, required = false,
+  if valid_568204 != nil:
+    section.add "api-version", valid_568204
+  var valid_568205 = query.getOrDefault("$expand")
+  valid_568205 = validateParameter(valid_568205, JString, required = false,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "$expand", valid_593972
+  if valid_568205 != nil:
+    section.add "$expand", valid_568205
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -724,20 +724,20 @@ proc validate_PrivateEndpointsGet_593965(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593973: Call_PrivateEndpointsGet_593964; path: JsonNode;
+proc call*(call_568206: Call_PrivateEndpointsGet_568197; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified private endpoint by resource group.
   ## 
-  let valid = call_593973.validator(path, query, header, formData, body)
-  let scheme = call_593973.pickScheme
+  let valid = call_568206.validator(path, query, header, formData, body)
+  let scheme = call_568206.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593973.url(scheme.get, call_593973.host, call_593973.base,
-                         call_593973.route, valid.getOrDefault("path"),
+  let url = call_568206.url(scheme.get, call_568206.host, call_568206.base,
+                         call_568206.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593973, url, valid)
+  result = hook(call_568206, url, valid)
 
-proc call*(call_593974: Call_PrivateEndpointsGet_593964; resourceGroupName: string;
+proc call*(call_568207: Call_PrivateEndpointsGet_568197; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; privateEndpointName: string;
           Expand: string = ""): Recallable =
   ## privateEndpointsGet
@@ -752,23 +752,23 @@ proc call*(call_593974: Call_PrivateEndpointsGet_593964; resourceGroupName: stri
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   privateEndpointName: string (required)
   ##                      : The name of the private endpoint.
-  var path_593975 = newJObject()
-  var query_593976 = newJObject()
-  add(path_593975, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593976, "api-version", newJString(apiVersion))
-  add(query_593976, "$expand", newJString(Expand))
-  add(path_593975, "subscriptionId", newJString(subscriptionId))
-  add(path_593975, "privateEndpointName", newJString(privateEndpointName))
-  result = call_593974.call(path_593975, query_593976, nil, nil, nil)
+  var path_568208 = newJObject()
+  var query_568209 = newJObject()
+  add(path_568208, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568209, "api-version", newJString(apiVersion))
+  add(query_568209, "$expand", newJString(Expand))
+  add(path_568208, "subscriptionId", newJString(subscriptionId))
+  add(path_568208, "privateEndpointName", newJString(privateEndpointName))
+  result = call_568207.call(path_568208, query_568209, nil, nil, nil)
 
-var privateEndpointsGet* = Call_PrivateEndpointsGet_593964(
+var privateEndpointsGet* = Call_PrivateEndpointsGet_568197(
     name: "privateEndpointsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateEndpoints/{privateEndpointName}",
-    validator: validate_PrivateEndpointsGet_593965, base: "",
-    url: url_PrivateEndpointsGet_593966, schemes: {Scheme.Https})
+    validator: validate_PrivateEndpointsGet_568198, base: "",
+    url: url_PrivateEndpointsGet_568199, schemes: {Scheme.Https})
 type
-  Call_PrivateEndpointsDelete_594016 = ref object of OpenApiRestCall_593408
-proc url_PrivateEndpointsDelete_594018(protocol: Scheme; host: string; base: string;
+  Call_PrivateEndpointsDelete_568249 = ref object of OpenApiRestCall_567641
+proc url_PrivateEndpointsDelete_568251(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -792,7 +792,7 @@ proc url_PrivateEndpointsDelete_594018(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PrivateEndpointsDelete_594017(path: JsonNode; query: JsonNode;
+proc validate_PrivateEndpointsDelete_568250(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified private endpoint.
   ## 
@@ -808,21 +808,21 @@ proc validate_PrivateEndpointsDelete_594017(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594019 = path.getOrDefault("resourceGroupName")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_568252 = path.getOrDefault("resourceGroupName")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "resourceGroupName", valid_594019
-  var valid_594020 = path.getOrDefault("subscriptionId")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  if valid_568252 != nil:
+    section.add "resourceGroupName", valid_568252
+  var valid_568253 = path.getOrDefault("subscriptionId")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "subscriptionId", valid_594020
-  var valid_594021 = path.getOrDefault("privateEndpointName")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  if valid_568253 != nil:
+    section.add "subscriptionId", valid_568253
+  var valid_568254 = path.getOrDefault("privateEndpointName")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "privateEndpointName", valid_594021
+  if valid_568254 != nil:
+    section.add "privateEndpointName", valid_568254
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -830,11 +830,11 @@ proc validate_PrivateEndpointsDelete_594017(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594022 = query.getOrDefault("api-version")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  var valid_568255 = query.getOrDefault("api-version")
+  valid_568255 = validateParameter(valid_568255, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "api-version", valid_594022
+  if valid_568255 != nil:
+    section.add "api-version", valid_568255
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -843,20 +843,20 @@ proc validate_PrivateEndpointsDelete_594017(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594023: Call_PrivateEndpointsDelete_594016; path: JsonNode;
+proc call*(call_568256: Call_PrivateEndpointsDelete_568249; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified private endpoint.
   ## 
-  let valid = call_594023.validator(path, query, header, formData, body)
-  let scheme = call_594023.pickScheme
+  let valid = call_568256.validator(path, query, header, formData, body)
+  let scheme = call_568256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594023.url(scheme.get, call_594023.host, call_594023.base,
-                         call_594023.route, valid.getOrDefault("path"),
+  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
+                         call_568256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594023, url, valid)
+  result = hook(call_568256, url, valid)
 
-proc call*(call_594024: Call_PrivateEndpointsDelete_594016;
+proc call*(call_568257: Call_PrivateEndpointsDelete_568249;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           privateEndpointName: string): Recallable =
   ## privateEndpointsDelete
@@ -869,19 +869,19 @@ proc call*(call_594024: Call_PrivateEndpointsDelete_594016;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   privateEndpointName: string (required)
   ##                      : The name of the private endpoint.
-  var path_594025 = newJObject()
-  var query_594026 = newJObject()
-  add(path_594025, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594026, "api-version", newJString(apiVersion))
-  add(path_594025, "subscriptionId", newJString(subscriptionId))
-  add(path_594025, "privateEndpointName", newJString(privateEndpointName))
-  result = call_594024.call(path_594025, query_594026, nil, nil, nil)
+  var path_568258 = newJObject()
+  var query_568259 = newJObject()
+  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568259, "api-version", newJString(apiVersion))
+  add(path_568258, "subscriptionId", newJString(subscriptionId))
+  add(path_568258, "privateEndpointName", newJString(privateEndpointName))
+  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
 
-var privateEndpointsDelete* = Call_PrivateEndpointsDelete_594016(
+var privateEndpointsDelete* = Call_PrivateEndpointsDelete_568249(
     name: "privateEndpointsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/privateEndpoints/{privateEndpointName}",
-    validator: validate_PrivateEndpointsDelete_594017, base: "",
-    url: url_PrivateEndpointsDelete_594018, schemes: {Scheme.Https})
+    validator: validate_PrivateEndpointsDelete_568250, base: "",
+    url: url_PrivateEndpointsDelete_568251, schemes: {Scheme.Https})
 export
   rest
 

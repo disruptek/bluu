@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: CostManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593426 = ref object of OpenApiRestCall
+  OpenApiRestCall_567659 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593426](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567659](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593426): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567659): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "cost-management-costmanagement"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593648 = ref object of OpenApiRestCall_593426
-proc url_OperationsList_593650(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567881 = ref object of OpenApiRestCall_567659
+proc url_OperationsList_567883(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593649(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567882(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available consumption REST API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593649(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593809 = query.getOrDefault("api-version")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_568042 = query.getOrDefault("api-version")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "api-version", valid_593809
+  if valid_568042 != nil:
+    section.add "api-version", valid_568042
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,43 +139,43 @@ proc validate_OperationsList_593649(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593832: Call_OperationsList_593648; path: JsonNode; query: JsonNode;
+proc call*(call_568065: Call_OperationsList_567881; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available consumption REST API operations.
   ## 
-  let valid = call_593832.validator(path, query, header, formData, body)
-  let scheme = call_593832.pickScheme
+  let valid = call_568065.validator(path, query, header, formData, body)
+  let scheme = call_568065.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593832.url(scheme.get, call_593832.host, call_593832.base,
-                         call_593832.route, valid.getOrDefault("path"),
+  let url = call_568065.url(scheme.get, call_568065.host, call_568065.base,
+                         call_568065.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593832, url, valid)
+  result = hook(call_568065, url, valid)
 
-proc call*(call_593903: Call_OperationsList_593648; apiVersion: string): Recallable =
+proc call*(call_568136: Call_OperationsList_567881; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available consumption REST API operations.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2019-04-01-preview
-  var query_593904 = newJObject()
-  add(query_593904, "api-version", newJString(apiVersion))
-  result = call_593903.call(nil, query_593904, nil, nil, nil)
+  var query_568137 = newJObject()
+  add(query_568137, "api-version", newJString(apiVersion))
+  result = call_568136.call(nil, query_568137, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593648(name: "operationsList",
+var operationsList* = Call_OperationsList_567881(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.CostManagement/operations",
-    validator: validate_OperationsList_593649, base: "", url: url_OperationsList_593650,
+    validator: validate_OperationsList_567882, base: "", url: url_OperationsList_567883,
     schemes: {Scheme.Https})
 type
-  Call_ViewsList_593944 = ref object of OpenApiRestCall_593426
-proc url_ViewsList_593946(protocol: Scheme; host: string; base: string; route: string;
+  Call_ViewsList_568177 = ref object of OpenApiRestCall_567659
+proc url_ViewsList_568179(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ViewsList_593945(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ViewsList_568178(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all views by tenant and object.
   ## 
@@ -190,11 +190,11 @@ proc validate_ViewsList_593945(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593947 = query.getOrDefault("api-version")
-  valid_593947 = validateParameter(valid_593947, JString, required = true,
+  var valid_568180 = query.getOrDefault("api-version")
+  valid_568180 = validateParameter(valid_568180, JString, required = true,
                                  default = nil)
-  if valid_593947 != nil:
-    section.add "api-version", valid_593947
+  if valid_568180 != nil:
+    section.add "api-version", valid_568180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -203,38 +203,38 @@ proc validate_ViewsList_593945(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593948: Call_ViewsList_593944; path: JsonNode; query: JsonNode;
+proc call*(call_568181: Call_ViewsList_568177; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all views by tenant and object.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_593948.validator(path, query, header, formData, body)
-  let scheme = call_593948.pickScheme
+  let valid = call_568181.validator(path, query, header, formData, body)
+  let scheme = call_568181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593948.url(scheme.get, call_593948.host, call_593948.base,
-                         call_593948.route, valid.getOrDefault("path"),
+  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
+                         call_568181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593948, url, valid)
+  result = hook(call_568181, url, valid)
 
-proc call*(call_593949: Call_ViewsList_593944; apiVersion: string): Recallable =
+proc call*(call_568182: Call_ViewsList_568177; apiVersion: string): Recallable =
   ## viewsList
   ## Lists all views by tenant and object.
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2019-04-01-preview
-  var query_593950 = newJObject()
-  add(query_593950, "api-version", newJString(apiVersion))
-  result = call_593949.call(nil, query_593950, nil, nil, nil)
+  var query_568183 = newJObject()
+  add(query_568183, "api-version", newJString(apiVersion))
+  result = call_568182.call(nil, query_568183, nil, nil, nil)
 
-var viewsList* = Call_ViewsList_593944(name: "viewsList", meth: HttpMethod.HttpGet,
+var viewsList* = Call_ViewsList_568177(name: "viewsList", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/providers/Microsoft.CostManagement/views",
-                                    validator: validate_ViewsList_593945,
-                                    base: "", url: url_ViewsList_593946,
+                                    validator: validate_ViewsList_568178,
+                                    base: "", url: url_ViewsList_568179,
                                     schemes: {Scheme.Https})
 type
-  Call_ViewsCreateOrUpdate_593974 = ref object of OpenApiRestCall_593426
-proc url_ViewsCreateOrUpdate_593976(protocol: Scheme; host: string; base: string;
+  Call_ViewsCreateOrUpdate_568207 = ref object of OpenApiRestCall_567659
+proc url_ViewsCreateOrUpdate_568209(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -250,7 +250,7 @@ proc url_ViewsCreateOrUpdate_593976(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ViewsCreateOrUpdate_593975(path: JsonNode; query: JsonNode;
+proc validate_ViewsCreateOrUpdate_568208(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## The operation to create or update a view. Update operation requires latest eTag to be set in the request. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
@@ -263,11 +263,11 @@ proc validate_ViewsCreateOrUpdate_593975(path: JsonNode; query: JsonNode;
   ##           : View name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `viewName` field"
-  var valid_593977 = path.getOrDefault("viewName")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  var valid_568210 = path.getOrDefault("viewName")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "viewName", valid_593977
+  if valid_568210 != nil:
+    section.add "viewName", valid_568210
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -275,11 +275,11 @@ proc validate_ViewsCreateOrUpdate_593975(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593978 = query.getOrDefault("api-version")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_568211 = query.getOrDefault("api-version")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "api-version", valid_593978
+  if valid_568211 != nil:
+    section.add "api-version", valid_568211
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -293,21 +293,21 @@ proc validate_ViewsCreateOrUpdate_593975(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593980: Call_ViewsCreateOrUpdate_593974; path: JsonNode;
+proc call*(call_568213: Call_ViewsCreateOrUpdate_568207; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to create or update a view. Update operation requires latest eTag to be set in the request. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_593980.validator(path, query, header, formData, body)
-  let scheme = call_593980.pickScheme
+  let valid = call_568213.validator(path, query, header, formData, body)
+  let scheme = call_568213.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593980.url(scheme.get, call_593980.host, call_593980.base,
-                         call_593980.route, valid.getOrDefault("path"),
+  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
+                         call_568213.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593980, url, valid)
+  result = hook(call_568213, url, valid)
 
-proc call*(call_593981: Call_ViewsCreateOrUpdate_593974; apiVersion: string;
+proc call*(call_568214: Call_ViewsCreateOrUpdate_568207; apiVersion: string;
           viewName: string; parameters: JsonNode): Recallable =
   ## viewsCreateOrUpdate
   ## The operation to create or update a view. Update operation requires latest eTag to be set in the request. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
@@ -318,24 +318,24 @@ proc call*(call_593981: Call_ViewsCreateOrUpdate_593974; apiVersion: string;
   ##           : View name
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the CreateOrUpdate View operation.
-  var path_593982 = newJObject()
-  var query_593983 = newJObject()
-  var body_593984 = newJObject()
-  add(query_593983, "api-version", newJString(apiVersion))
-  add(path_593982, "viewName", newJString(viewName))
+  var path_568215 = newJObject()
+  var query_568216 = newJObject()
+  var body_568217 = newJObject()
+  add(query_568216, "api-version", newJString(apiVersion))
+  add(path_568215, "viewName", newJString(viewName))
   if parameters != nil:
-    body_593984 = parameters
-  result = call_593981.call(path_593982, query_593983, nil, nil, body_593984)
+    body_568217 = parameters
+  result = call_568214.call(path_568215, query_568216, nil, nil, body_568217)
 
-var viewsCreateOrUpdate* = Call_ViewsCreateOrUpdate_593974(
+var viewsCreateOrUpdate* = Call_ViewsCreateOrUpdate_568207(
     name: "viewsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com",
     route: "/providers/Microsoft.CostManagement/views/{viewName}",
-    validator: validate_ViewsCreateOrUpdate_593975, base: "",
-    url: url_ViewsCreateOrUpdate_593976, schemes: {Scheme.Https})
+    validator: validate_ViewsCreateOrUpdate_568208, base: "",
+    url: url_ViewsCreateOrUpdate_568209, schemes: {Scheme.Https})
 type
-  Call_ViewsGet_593951 = ref object of OpenApiRestCall_593426
-proc url_ViewsGet_593953(protocol: Scheme; host: string; base: string; route: string;
+  Call_ViewsGet_568184 = ref object of OpenApiRestCall_567659
+proc url_ViewsGet_568186(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -351,7 +351,7 @@ proc url_ViewsGet_593953(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ViewsGet_593952(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ViewsGet_568185(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the view by view name.
   ## 
@@ -363,11 +363,11 @@ proc validate_ViewsGet_593952(path: JsonNode; query: JsonNode; header: JsonNode;
   ##           : View name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `viewName` field"
-  var valid_593968 = path.getOrDefault("viewName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  var valid_568201 = path.getOrDefault("viewName")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "viewName", valid_593968
+  if valid_568201 != nil:
+    section.add "viewName", valid_568201
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -375,11 +375,11 @@ proc validate_ViewsGet_593952(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593969 = query.getOrDefault("api-version")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  var valid_568202 = query.getOrDefault("api-version")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "api-version", valid_593969
+  if valid_568202 != nil:
+    section.add "api-version", valid_568202
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -388,21 +388,21 @@ proc validate_ViewsGet_593952(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593970: Call_ViewsGet_593951; path: JsonNode; query: JsonNode;
+proc call*(call_568203: Call_ViewsGet_568184; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the view by view name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_593970.validator(path, query, header, formData, body)
-  let scheme = call_593970.pickScheme
+  let valid = call_568203.validator(path, query, header, formData, body)
+  let scheme = call_568203.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593970.url(scheme.get, call_593970.host, call_593970.base,
-                         call_593970.route, valid.getOrDefault("path"),
+  let url = call_568203.url(scheme.get, call_568203.host, call_568203.base,
+                         call_568203.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593970, url, valid)
+  result = hook(call_568203, url, valid)
 
-proc call*(call_593971: Call_ViewsGet_593951; apiVersion: string; viewName: string): Recallable =
+proc call*(call_568204: Call_ViewsGet_568184; apiVersion: string; viewName: string): Recallable =
   ## viewsGet
   ## Gets the view by view name.
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
@@ -410,20 +410,20 @@ proc call*(call_593971: Call_ViewsGet_593951; apiVersion: string; viewName: stri
   ##             : Version of the API to be used with the client request. The current version is 2019-04-01-preview
   ##   viewName: string (required)
   ##           : View name
-  var path_593972 = newJObject()
-  var query_593973 = newJObject()
-  add(query_593973, "api-version", newJString(apiVersion))
-  add(path_593972, "viewName", newJString(viewName))
-  result = call_593971.call(path_593972, query_593973, nil, nil, nil)
+  var path_568205 = newJObject()
+  var query_568206 = newJObject()
+  add(query_568206, "api-version", newJString(apiVersion))
+  add(path_568205, "viewName", newJString(viewName))
+  result = call_568204.call(path_568205, query_568206, nil, nil, nil)
 
-var viewsGet* = Call_ViewsGet_593951(name: "viewsGet", meth: HttpMethod.HttpGet,
+var viewsGet* = Call_ViewsGet_568184(name: "viewsGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/providers/Microsoft.CostManagement/views/{viewName}",
-                                  validator: validate_ViewsGet_593952, base: "",
-                                  url: url_ViewsGet_593953,
+                                  validator: validate_ViewsGet_568185, base: "",
+                                  url: url_ViewsGet_568186,
                                   schemes: {Scheme.Https})
 type
-  Call_ViewsDelete_593985 = ref object of OpenApiRestCall_593426
-proc url_ViewsDelete_593987(protocol: Scheme; host: string; base: string;
+  Call_ViewsDelete_568218 = ref object of OpenApiRestCall_567659
+proc url_ViewsDelete_568220(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -439,7 +439,7 @@ proc url_ViewsDelete_593987(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ViewsDelete_593986(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ViewsDelete_568219(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to delete a view.
   ## 
@@ -451,11 +451,11 @@ proc validate_ViewsDelete_593986(path: JsonNode; query: JsonNode; header: JsonNo
   ##           : View name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `viewName` field"
-  var valid_593988 = path.getOrDefault("viewName")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_568221 = path.getOrDefault("viewName")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "viewName", valid_593988
+  if valid_568221 != nil:
+    section.add "viewName", valid_568221
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -463,11 +463,11 @@ proc validate_ViewsDelete_593986(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593989 = query.getOrDefault("api-version")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  var valid_568222 = query.getOrDefault("api-version")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "api-version", valid_593989
+  if valid_568222 != nil:
+    section.add "api-version", valid_568222
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -476,21 +476,21 @@ proc validate_ViewsDelete_593986(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593990: Call_ViewsDelete_593985; path: JsonNode; query: JsonNode;
+proc call*(call_568223: Call_ViewsDelete_568218; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to delete a view.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_593990.validator(path, query, header, formData, body)
-  let scheme = call_593990.pickScheme
+  let valid = call_568223.validator(path, query, header, formData, body)
+  let scheme = call_568223.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593990.url(scheme.get, call_593990.host, call_593990.base,
-                         call_593990.route, valid.getOrDefault("path"),
+  let url = call_568223.url(scheme.get, call_568223.host, call_568223.base,
+                         call_568223.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593990, url, valid)
+  result = hook(call_568223, url, valid)
 
-proc call*(call_593991: Call_ViewsDelete_593985; apiVersion: string; viewName: string): Recallable =
+proc call*(call_568224: Call_ViewsDelete_568218; apiVersion: string; viewName: string): Recallable =
   ## viewsDelete
   ## The operation to delete a view.
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
@@ -498,21 +498,21 @@ proc call*(call_593991: Call_ViewsDelete_593985; apiVersion: string; viewName: s
   ##             : Version of the API to be used with the client request. The current version is 2019-04-01-preview
   ##   viewName: string (required)
   ##           : View name
-  var path_593992 = newJObject()
-  var query_593993 = newJObject()
-  add(query_593993, "api-version", newJString(apiVersion))
-  add(path_593992, "viewName", newJString(viewName))
-  result = call_593991.call(path_593992, query_593993, nil, nil, nil)
+  var path_568225 = newJObject()
+  var query_568226 = newJObject()
+  add(query_568226, "api-version", newJString(apiVersion))
+  add(path_568225, "viewName", newJString(viewName))
+  result = call_568224.call(path_568225, query_568226, nil, nil, nil)
 
-var viewsDelete* = Call_ViewsDelete_593985(name: "viewsDelete",
+var viewsDelete* = Call_ViewsDelete_568218(name: "viewsDelete",
                                         meth: HttpMethod.HttpDelete,
                                         host: "management.azure.com", route: "/providers/Microsoft.CostManagement/views/{viewName}",
-                                        validator: validate_ViewsDelete_593986,
-                                        base: "", url: url_ViewsDelete_593987,
+                                        validator: validate_ViewsDelete_568219,
+                                        base: "", url: url_ViewsDelete_568220,
                                         schemes: {Scheme.Https})
 type
-  Call_BudgetsList_593994 = ref object of OpenApiRestCall_593426
-proc url_BudgetsList_593996(protocol: Scheme; host: string; base: string;
+  Call_BudgetsList_568227 = ref object of OpenApiRestCall_567659
+proc url_BudgetsList_568229(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -528,7 +528,7 @@ proc url_BudgetsList_593996(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetsList_593995(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BudgetsList_568228(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all budgets for the defined scope.
   ## 
@@ -544,11 +544,11 @@ proc validate_BudgetsList_593995(path: JsonNode; query: JsonNode; header: JsonNo
   ## 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for invoiceSection scope.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_593997 = path.getOrDefault("scope")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  var valid_568230 = path.getOrDefault("scope")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "scope", valid_593997
+  if valid_568230 != nil:
+    section.add "scope", valid_568230
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -556,11 +556,11 @@ proc validate_BudgetsList_593995(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593998 = query.getOrDefault("api-version")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  var valid_568231 = query.getOrDefault("api-version")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "api-version", valid_593998
+  if valid_568231 != nil:
+    section.add "api-version", valid_568231
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -569,21 +569,21 @@ proc validate_BudgetsList_593995(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593999: Call_BudgetsList_593994; path: JsonNode; query: JsonNode;
+proc call*(call_568232: Call_BudgetsList_568227; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all budgets for the defined scope.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/cost-management/
-  let valid = call_593999.validator(path, query, header, formData, body)
-  let scheme = call_593999.pickScheme
+  let valid = call_568232.validator(path, query, header, formData, body)
+  let scheme = call_568232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593999.url(scheme.get, call_593999.host, call_593999.base,
-                         call_593999.route, valid.getOrDefault("path"),
+  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
+                         call_568232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593999, url, valid)
+  result = hook(call_568232, url, valid)
 
-proc call*(call_594000: Call_BudgetsList_593994; apiVersion: string; scope: string): Recallable =
+proc call*(call_568233: Call_BudgetsList_568227; apiVersion: string; scope: string): Recallable =
   ## budgetsList
   ## Lists all budgets for the defined scope.
   ## https://docs.microsoft.com/en-us/rest/api/cost-management/
@@ -595,21 +595,21 @@ proc call*(call_594000: Call_BudgetsList_593994; apiVersion: string; scope: stri
   ## '/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/enrollmentAccounts/{enrollmentAccountId}' for EnrollmentAccount scope, '/providers/Microsoft.Management/managementGroups/{managementGroupId}' for Management Group scope, 
   ## '/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingProfiles/{billingProfileId}' for billingProfile scope, 
   ## 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for invoiceSection scope.
-  var path_594001 = newJObject()
-  var query_594002 = newJObject()
-  add(query_594002, "api-version", newJString(apiVersion))
-  add(path_594001, "scope", newJString(scope))
-  result = call_594000.call(path_594001, query_594002, nil, nil, nil)
+  var path_568234 = newJObject()
+  var query_568235 = newJObject()
+  add(query_568235, "api-version", newJString(apiVersion))
+  add(path_568234, "scope", newJString(scope))
+  result = call_568233.call(path_568234, query_568235, nil, nil, nil)
 
-var budgetsList* = Call_BudgetsList_593994(name: "budgetsList",
+var budgetsList* = Call_BudgetsList_568227(name: "budgetsList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/{scope}/providers/Microsoft.CostManagement/budgets",
-                                        validator: validate_BudgetsList_593995,
-                                        base: "", url: url_BudgetsList_593996,
+                                        validator: validate_BudgetsList_568228,
+                                        base: "", url: url_BudgetsList_568229,
                                         schemes: {Scheme.Https})
 type
-  Call_BudgetCreateOrUpdate_594013 = ref object of OpenApiRestCall_593426
-proc url_BudgetCreateOrUpdate_594015(protocol: Scheme; host: string; base: string;
+  Call_BudgetCreateOrUpdate_568246 = ref object of OpenApiRestCall_567659
+proc url_BudgetCreateOrUpdate_568248(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -627,7 +627,7 @@ proc url_BudgetCreateOrUpdate_594015(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetCreateOrUpdate_594014(path: JsonNode; query: JsonNode;
+proc validate_BudgetCreateOrUpdate_568247(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create or update a budget. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
@@ -645,16 +645,16 @@ proc validate_BudgetCreateOrUpdate_594014(path: JsonNode; query: JsonNode;
   ##             : Budget Name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_594033 = path.getOrDefault("scope")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  var valid_568266 = path.getOrDefault("scope")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "scope", valid_594033
-  var valid_594034 = path.getOrDefault("budgetName")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  if valid_568266 != nil:
+    section.add "scope", valid_568266
+  var valid_568267 = path.getOrDefault("budgetName")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "budgetName", valid_594034
+  if valid_568267 != nil:
+    section.add "budgetName", valid_568267
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -662,11 +662,11 @@ proc validate_BudgetCreateOrUpdate_594014(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594035 = query.getOrDefault("api-version")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  var valid_568268 = query.getOrDefault("api-version")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "api-version", valid_594035
+  if valid_568268 != nil:
+    section.add "api-version", valid_568268
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -679,21 +679,21 @@ proc validate_BudgetCreateOrUpdate_594014(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594037: Call_BudgetCreateOrUpdate_594013; path: JsonNode;
+proc call*(call_568270: Call_BudgetCreateOrUpdate_568246; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to create or update a budget. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/cost-management/
-  let valid = call_594037.validator(path, query, header, formData, body)
-  let scheme = call_594037.pickScheme
+  let valid = call_568270.validator(path, query, header, formData, body)
+  let scheme = call_568270.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594037.url(scheme.get, call_594037.host, call_594037.base,
-                         call_594037.route, valid.getOrDefault("path"),
+  let url = call_568270.url(scheme.get, call_568270.host, call_568270.base,
+                         call_568270.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594037, url, valid)
+  result = hook(call_568270, url, valid)
 
-proc call*(call_594038: Call_BudgetCreateOrUpdate_594013; apiVersion: string;
+proc call*(call_568271: Call_BudgetCreateOrUpdate_568246; apiVersion: string;
           scope: string; budgetName: string; parameters: JsonNode = nil): Recallable =
   ## budgetCreateOrUpdate
   ## The operation to create or update a budget. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
@@ -710,25 +710,25 @@ proc call*(call_594038: Call_BudgetCreateOrUpdate_594013; apiVersion: string;
   ## 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for invoiceSection scope.
   ##   budgetName: string (required)
   ##             : Budget Name.
-  var path_594039 = newJObject()
-  var query_594040 = newJObject()
-  var body_594041 = newJObject()
-  add(query_594040, "api-version", newJString(apiVersion))
+  var path_568272 = newJObject()
+  var query_568273 = newJObject()
+  var body_568274 = newJObject()
+  add(query_568273, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_594041 = parameters
-  add(path_594039, "scope", newJString(scope))
-  add(path_594039, "budgetName", newJString(budgetName))
-  result = call_594038.call(path_594039, query_594040, nil, nil, body_594041)
+    body_568274 = parameters
+  add(path_568272, "scope", newJString(scope))
+  add(path_568272, "budgetName", newJString(budgetName))
+  result = call_568271.call(path_568272, query_568273, nil, nil, body_568274)
 
-var budgetCreateOrUpdate* = Call_BudgetCreateOrUpdate_594013(
+var budgetCreateOrUpdate* = Call_BudgetCreateOrUpdate_568246(
     name: "budgetCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.CostManagement/budgets/{budgetName}",
-    validator: validate_BudgetCreateOrUpdate_594014, base: "",
-    url: url_BudgetCreateOrUpdate_594015, schemes: {Scheme.Https})
+    validator: validate_BudgetCreateOrUpdate_568247, base: "",
+    url: url_BudgetCreateOrUpdate_568248, schemes: {Scheme.Https})
 type
-  Call_BudgetGet_594003 = ref object of OpenApiRestCall_593426
-proc url_BudgetGet_594005(protocol: Scheme; host: string; base: string; route: string;
+  Call_BudgetGet_568236 = ref object of OpenApiRestCall_567659
+proc url_BudgetGet_568238(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -746,7 +746,7 @@ proc url_BudgetGet_594005(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetGet_594004(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BudgetGet_568237(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the budget for the scope by budget name.
   ## 
@@ -764,16 +764,16 @@ proc validate_BudgetGet_594004(path: JsonNode; query: JsonNode; header: JsonNode
   ##             : Budget Name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_594006 = path.getOrDefault("scope")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_568239 = path.getOrDefault("scope")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "scope", valid_594006
-  var valid_594007 = path.getOrDefault("budgetName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "scope", valid_568239
+  var valid_568240 = path.getOrDefault("budgetName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "budgetName", valid_594007
+  if valid_568240 != nil:
+    section.add "budgetName", valid_568240
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -781,11 +781,11 @@ proc validate_BudgetGet_594004(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594008 = query.getOrDefault("api-version")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  var valid_568241 = query.getOrDefault("api-version")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "api-version", valid_594008
+  if valid_568241 != nil:
+    section.add "api-version", valid_568241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -794,21 +794,21 @@ proc validate_BudgetGet_594004(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594009: Call_BudgetGet_594003; path: JsonNode; query: JsonNode;
+proc call*(call_568242: Call_BudgetGet_568236; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the budget for the scope by budget name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/cost-management/
-  let valid = call_594009.validator(path, query, header, formData, body)
-  let scheme = call_594009.pickScheme
+  let valid = call_568242.validator(path, query, header, formData, body)
+  let scheme = call_568242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594009.url(scheme.get, call_594009.host, call_594009.base,
-                         call_594009.route, valid.getOrDefault("path"),
+  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
+                         call_568242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594009, url, valid)
+  result = hook(call_568242, url, valid)
 
-proc call*(call_594010: Call_BudgetGet_594003; apiVersion: string; scope: string;
+proc call*(call_568243: Call_BudgetGet_568236; apiVersion: string; scope: string;
           budgetName: string): Recallable =
   ## budgetGet
   ## Gets the budget for the scope by budget name.
@@ -823,21 +823,21 @@ proc call*(call_594010: Call_BudgetGet_594003; apiVersion: string; scope: string
   ## 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for invoiceSection scope.
   ##   budgetName: string (required)
   ##             : Budget Name.
-  var path_594011 = newJObject()
-  var query_594012 = newJObject()
-  add(query_594012, "api-version", newJString(apiVersion))
-  add(path_594011, "scope", newJString(scope))
-  add(path_594011, "budgetName", newJString(budgetName))
-  result = call_594010.call(path_594011, query_594012, nil, nil, nil)
+  var path_568244 = newJObject()
+  var query_568245 = newJObject()
+  add(query_568245, "api-version", newJString(apiVersion))
+  add(path_568244, "scope", newJString(scope))
+  add(path_568244, "budgetName", newJString(budgetName))
+  result = call_568243.call(path_568244, query_568245, nil, nil, nil)
 
-var budgetGet* = Call_BudgetGet_594003(name: "budgetGet", meth: HttpMethod.HttpGet,
+var budgetGet* = Call_BudgetGet_568236(name: "budgetGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/{scope}/providers/Microsoft.CostManagement/budgets/{budgetName}",
-                                    validator: validate_BudgetGet_594004,
-                                    base: "", url: url_BudgetGet_594005,
+                                    validator: validate_BudgetGet_568237,
+                                    base: "", url: url_BudgetGet_568238,
                                     schemes: {Scheme.Https})
 type
-  Call_BudgetDelete_594042 = ref object of OpenApiRestCall_593426
-proc url_BudgetDelete_594044(protocol: Scheme; host: string; base: string;
+  Call_BudgetDelete_568275 = ref object of OpenApiRestCall_567659
+proc url_BudgetDelete_568277(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -855,7 +855,7 @@ proc url_BudgetDelete_594044(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BudgetDelete_594043(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BudgetDelete_568276(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to delete a budget.
   ## 
@@ -873,16 +873,16 @@ proc validate_BudgetDelete_594043(path: JsonNode; query: JsonNode; header: JsonN
   ##             : Budget Name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_594045 = path.getOrDefault("scope")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  var valid_568278 = path.getOrDefault("scope")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "scope", valid_594045
-  var valid_594046 = path.getOrDefault("budgetName")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  if valid_568278 != nil:
+    section.add "scope", valid_568278
+  var valid_568279 = path.getOrDefault("budgetName")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "budgetName", valid_594046
+  if valid_568279 != nil:
+    section.add "budgetName", valid_568279
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -890,11 +890,11 @@ proc validate_BudgetDelete_594043(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594047 = query.getOrDefault("api-version")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  var valid_568280 = query.getOrDefault("api-version")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "api-version", valid_594047
+  if valid_568280 != nil:
+    section.add "api-version", valid_568280
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -903,21 +903,21 @@ proc validate_BudgetDelete_594043(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594048: Call_BudgetDelete_594042; path: JsonNode; query: JsonNode;
+proc call*(call_568281: Call_BudgetDelete_568275; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to delete a budget.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/cost-management/
-  let valid = call_594048.validator(path, query, header, formData, body)
-  let scheme = call_594048.pickScheme
+  let valid = call_568281.validator(path, query, header, formData, body)
+  let scheme = call_568281.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594048.url(scheme.get, call_594048.host, call_594048.base,
-                         call_594048.route, valid.getOrDefault("path"),
+  let url = call_568281.url(scheme.get, call_568281.host, call_568281.base,
+                         call_568281.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594048, url, valid)
+  result = hook(call_568281, url, valid)
 
-proc call*(call_594049: Call_BudgetDelete_594042; apiVersion: string; scope: string;
+proc call*(call_568282: Call_BudgetDelete_568275; apiVersion: string; scope: string;
           budgetName: string): Recallable =
   ## budgetDelete
   ## The operation to delete a budget.
@@ -932,21 +932,21 @@ proc call*(call_594049: Call_BudgetDelete_594042; apiVersion: string; scope: str
   ## 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for invoiceSection scope.
   ##   budgetName: string (required)
   ##             : Budget Name.
-  var path_594050 = newJObject()
-  var query_594051 = newJObject()
-  add(query_594051, "api-version", newJString(apiVersion))
-  add(path_594050, "scope", newJString(scope))
-  add(path_594050, "budgetName", newJString(budgetName))
-  result = call_594049.call(path_594050, query_594051, nil, nil, nil)
+  var path_568283 = newJObject()
+  var query_568284 = newJObject()
+  add(query_568284, "api-version", newJString(apiVersion))
+  add(path_568283, "scope", newJString(scope))
+  add(path_568283, "budgetName", newJString(budgetName))
+  result = call_568282.call(path_568283, query_568284, nil, nil, nil)
 
-var budgetDelete* = Call_BudgetDelete_594042(name: "budgetDelete",
+var budgetDelete* = Call_BudgetDelete_568275(name: "budgetDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.CostManagement/budgets/{budgetName}",
-    validator: validate_BudgetDelete_594043, base: "", url: url_BudgetDelete_594044,
+    validator: validate_BudgetDelete_568276, base: "", url: url_BudgetDelete_568277,
     schemes: {Scheme.Https})
 type
-  Call_ViewsListByScope_594052 = ref object of OpenApiRestCall_593426
-proc url_ViewsListByScope_594054(protocol: Scheme; host: string; base: string;
+  Call_ViewsListByScope_568285 = ref object of OpenApiRestCall_567659
+proc url_ViewsListByScope_568287(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -962,7 +962,7 @@ proc url_ViewsListByScope_594054(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ViewsListByScope_594053(path: JsonNode; query: JsonNode;
+proc validate_ViewsListByScope_568286(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Lists all views at the given scope.
@@ -981,11 +981,11 @@ proc validate_ViewsListByScope_594053(path: JsonNode; query: JsonNode;
   ## 'providers/Microsoft.CostManagement/externalSubscriptions/{externalSubscriptionName}' for External Subscription scope.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_594055 = path.getOrDefault("scope")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  var valid_568288 = path.getOrDefault("scope")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "scope", valid_594055
+  if valid_568288 != nil:
+    section.add "scope", valid_568288
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -993,11 +993,11 @@ proc validate_ViewsListByScope_594053(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594056 = query.getOrDefault("api-version")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  var valid_568289 = query.getOrDefault("api-version")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "api-version", valid_594056
+  if valid_568289 != nil:
+    section.add "api-version", valid_568289
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1006,21 +1006,21 @@ proc validate_ViewsListByScope_594053(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594057: Call_ViewsListByScope_594052; path: JsonNode;
+proc call*(call_568290: Call_ViewsListByScope_568285; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all views at the given scope.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594057.validator(path, query, header, formData, body)
-  let scheme = call_594057.pickScheme
+  let valid = call_568290.validator(path, query, header, formData, body)
+  let scheme = call_568290.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594057.url(scheme.get, call_594057.host, call_594057.base,
-                         call_594057.route, valid.getOrDefault("path"),
+  let url = call_568290.url(scheme.get, call_568290.host, call_568290.base,
+                         call_568290.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594057, url, valid)
+  result = hook(call_568290, url, valid)
 
-proc call*(call_594058: Call_ViewsListByScope_594052; apiVersion: string;
+proc call*(call_568291: Call_ViewsListByScope_568285; apiVersion: string;
           scope: string): Recallable =
   ## viewsListByScope
   ## Lists all views at the given scope.
@@ -1035,20 +1035,20 @@ proc call*(call_594058: Call_ViewsListByScope_594052; apiVersion: string;
   ## 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for InvoiceSection scope, 'providers/Microsoft.Management/managementGroups/{managementGroupId}' for Management Group scope, 
   ## 'providers/Microsoft.CostManagement/externalBillingAccounts/{externalBillingAccountName}' for External Billing Account scope and 
   ## 'providers/Microsoft.CostManagement/externalSubscriptions/{externalSubscriptionName}' for External Subscription scope.
-  var path_594059 = newJObject()
-  var query_594060 = newJObject()
-  add(query_594060, "api-version", newJString(apiVersion))
-  add(path_594059, "scope", newJString(scope))
-  result = call_594058.call(path_594059, query_594060, nil, nil, nil)
+  var path_568292 = newJObject()
+  var query_568293 = newJObject()
+  add(query_568293, "api-version", newJString(apiVersion))
+  add(path_568292, "scope", newJString(scope))
+  result = call_568291.call(path_568292, query_568293, nil, nil, nil)
 
-var viewsListByScope* = Call_ViewsListByScope_594052(name: "viewsListByScope",
+var viewsListByScope* = Call_ViewsListByScope_568285(name: "viewsListByScope",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.CostManagement/views",
-    validator: validate_ViewsListByScope_594053, base: "",
-    url: url_ViewsListByScope_594054, schemes: {Scheme.Https})
+    validator: validate_ViewsListByScope_568286, base: "",
+    url: url_ViewsListByScope_568287, schemes: {Scheme.Https})
 type
-  Call_ViewsCreateOrUpdateByScope_594071 = ref object of OpenApiRestCall_593426
-proc url_ViewsCreateOrUpdateByScope_594073(protocol: Scheme; host: string;
+  Call_ViewsCreateOrUpdateByScope_568304 = ref object of OpenApiRestCall_567659
+proc url_ViewsCreateOrUpdateByScope_568306(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1066,7 +1066,7 @@ proc url_ViewsCreateOrUpdateByScope_594073(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ViewsCreateOrUpdateByScope_594072(path: JsonNode; query: JsonNode;
+proc validate_ViewsCreateOrUpdateByScope_568305(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create or update a view. Update operation requires latest eTag to be set in the request. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
@@ -1086,16 +1086,16 @@ proc validate_ViewsCreateOrUpdateByScope_594072(path: JsonNode; query: JsonNode;
   ## 'providers/Microsoft.CostManagement/externalSubscriptions/{externalSubscriptionName}' for External Subscription scope.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `viewName` field"
-  var valid_594074 = path.getOrDefault("viewName")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  var valid_568307 = path.getOrDefault("viewName")
+  valid_568307 = validateParameter(valid_568307, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "viewName", valid_594074
-  var valid_594075 = path.getOrDefault("scope")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  if valid_568307 != nil:
+    section.add "viewName", valid_568307
+  var valid_568308 = path.getOrDefault("scope")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "scope", valid_594075
+  if valid_568308 != nil:
+    section.add "scope", valid_568308
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1103,11 +1103,11 @@ proc validate_ViewsCreateOrUpdateByScope_594072(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594076 = query.getOrDefault("api-version")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  var valid_568309 = query.getOrDefault("api-version")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "api-version", valid_594076
+  if valid_568309 != nil:
+    section.add "api-version", valid_568309
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1121,21 +1121,21 @@ proc validate_ViewsCreateOrUpdateByScope_594072(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594078: Call_ViewsCreateOrUpdateByScope_594071; path: JsonNode;
+proc call*(call_568311: Call_ViewsCreateOrUpdateByScope_568304; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to create or update a view. Update operation requires latest eTag to be set in the request. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594078.validator(path, query, header, formData, body)
-  let scheme = call_594078.pickScheme
+  let valid = call_568311.validator(path, query, header, formData, body)
+  let scheme = call_568311.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594078.url(scheme.get, call_594078.host, call_594078.base,
-                         call_594078.route, valid.getOrDefault("path"),
+  let url = call_568311.url(scheme.get, call_568311.host, call_568311.base,
+                         call_568311.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594078, url, valid)
+  result = hook(call_568311, url, valid)
 
-proc call*(call_594079: Call_ViewsCreateOrUpdateByScope_594071; apiVersion: string;
+proc call*(call_568312: Call_ViewsCreateOrUpdateByScope_568304; apiVersion: string;
           viewName: string; parameters: JsonNode; scope: string): Recallable =
   ## viewsCreateOrUpdateByScope
   ## The operation to create or update a view. Update operation requires latest eTag to be set in the request. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
@@ -1154,25 +1154,25 @@ proc call*(call_594079: Call_ViewsCreateOrUpdateByScope_594071; apiVersion: stri
   ## 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for InvoiceSection scope, 'providers/Microsoft.Management/managementGroups/{managementGroupId}' for Management Group scope, 
   ## 'providers/Microsoft.CostManagement/externalBillingAccounts/{externalBillingAccountName}' for External Billing Account scope and 
   ## 'providers/Microsoft.CostManagement/externalSubscriptions/{externalSubscriptionName}' for External Subscription scope.
-  var path_594080 = newJObject()
-  var query_594081 = newJObject()
-  var body_594082 = newJObject()
-  add(query_594081, "api-version", newJString(apiVersion))
-  add(path_594080, "viewName", newJString(viewName))
+  var path_568313 = newJObject()
+  var query_568314 = newJObject()
+  var body_568315 = newJObject()
+  add(query_568314, "api-version", newJString(apiVersion))
+  add(path_568313, "viewName", newJString(viewName))
   if parameters != nil:
-    body_594082 = parameters
-  add(path_594080, "scope", newJString(scope))
-  result = call_594079.call(path_594080, query_594081, nil, nil, body_594082)
+    body_568315 = parameters
+  add(path_568313, "scope", newJString(scope))
+  result = call_568312.call(path_568313, query_568314, nil, nil, body_568315)
 
-var viewsCreateOrUpdateByScope* = Call_ViewsCreateOrUpdateByScope_594071(
+var viewsCreateOrUpdateByScope* = Call_ViewsCreateOrUpdateByScope_568304(
     name: "viewsCreateOrUpdateByScope", meth: HttpMethod.HttpPut,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.CostManagement/views/{viewName}",
-    validator: validate_ViewsCreateOrUpdateByScope_594072, base: "",
-    url: url_ViewsCreateOrUpdateByScope_594073, schemes: {Scheme.Https})
+    validator: validate_ViewsCreateOrUpdateByScope_568305, base: "",
+    url: url_ViewsCreateOrUpdateByScope_568306, schemes: {Scheme.Https})
 type
-  Call_ViewsGetByScope_594061 = ref object of OpenApiRestCall_593426
-proc url_ViewsGetByScope_594063(protocol: Scheme; host: string; base: string;
+  Call_ViewsGetByScope_568294 = ref object of OpenApiRestCall_567659
+proc url_ViewsGetByScope_568296(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1190,7 +1190,7 @@ proc url_ViewsGetByScope_594063(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ViewsGetByScope_594062(path: JsonNode; query: JsonNode;
+proc validate_ViewsGetByScope_568295(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the view for the defined scope by view name.
@@ -1211,16 +1211,16 @@ proc validate_ViewsGetByScope_594062(path: JsonNode; query: JsonNode;
   ## 'providers/Microsoft.CostManagement/externalSubscriptions/{externalSubscriptionName}' for External Subscription scope.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `viewName` field"
-  var valid_594064 = path.getOrDefault("viewName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  var valid_568297 = path.getOrDefault("viewName")
+  valid_568297 = validateParameter(valid_568297, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "viewName", valid_594064
-  var valid_594065 = path.getOrDefault("scope")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  if valid_568297 != nil:
+    section.add "viewName", valid_568297
+  var valid_568298 = path.getOrDefault("scope")
+  valid_568298 = validateParameter(valid_568298, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "scope", valid_594065
+  if valid_568298 != nil:
+    section.add "scope", valid_568298
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1228,11 +1228,11 @@ proc validate_ViewsGetByScope_594062(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594066 = query.getOrDefault("api-version")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  var valid_568299 = query.getOrDefault("api-version")
+  valid_568299 = validateParameter(valid_568299, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "api-version", valid_594066
+  if valid_568299 != nil:
+    section.add "api-version", valid_568299
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1241,21 +1241,21 @@ proc validate_ViewsGetByScope_594062(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594067: Call_ViewsGetByScope_594061; path: JsonNode; query: JsonNode;
+proc call*(call_568300: Call_ViewsGetByScope_568294; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the view for the defined scope by view name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594067.validator(path, query, header, formData, body)
-  let scheme = call_594067.pickScheme
+  let valid = call_568300.validator(path, query, header, formData, body)
+  let scheme = call_568300.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594067.url(scheme.get, call_594067.host, call_594067.base,
-                         call_594067.route, valid.getOrDefault("path"),
+  let url = call_568300.url(scheme.get, call_568300.host, call_568300.base,
+                         call_568300.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594067, url, valid)
+  result = hook(call_568300, url, valid)
 
-proc call*(call_594068: Call_ViewsGetByScope_594061; apiVersion: string;
+proc call*(call_568301: Call_ViewsGetByScope_568294; apiVersion: string;
           viewName: string; scope: string): Recallable =
   ## viewsGetByScope
   ## Gets the view for the defined scope by view name.
@@ -1272,21 +1272,21 @@ proc call*(call_594068: Call_ViewsGetByScope_594061; apiVersion: string;
   ## 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for InvoiceSection scope, 'providers/Microsoft.Management/managementGroups/{managementGroupId}' for Management Group scope, 
   ## 'providers/Microsoft.CostManagement/externalBillingAccounts/{externalBillingAccountName}' for External Billing Account scope and 
   ## 'providers/Microsoft.CostManagement/externalSubscriptions/{externalSubscriptionName}' for External Subscription scope.
-  var path_594069 = newJObject()
-  var query_594070 = newJObject()
-  add(query_594070, "api-version", newJString(apiVersion))
-  add(path_594069, "viewName", newJString(viewName))
-  add(path_594069, "scope", newJString(scope))
-  result = call_594068.call(path_594069, query_594070, nil, nil, nil)
+  var path_568302 = newJObject()
+  var query_568303 = newJObject()
+  add(query_568303, "api-version", newJString(apiVersion))
+  add(path_568302, "viewName", newJString(viewName))
+  add(path_568302, "scope", newJString(scope))
+  result = call_568301.call(path_568302, query_568303, nil, nil, nil)
 
-var viewsGetByScope* = Call_ViewsGetByScope_594061(name: "viewsGetByScope",
+var viewsGetByScope* = Call_ViewsGetByScope_568294(name: "viewsGetByScope",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.CostManagement/views/{viewName}",
-    validator: validate_ViewsGetByScope_594062, base: "", url: url_ViewsGetByScope_594063,
+    validator: validate_ViewsGetByScope_568295, base: "", url: url_ViewsGetByScope_568296,
     schemes: {Scheme.Https})
 type
-  Call_ViewsDeleteByScope_594083 = ref object of OpenApiRestCall_593426
-proc url_ViewsDeleteByScope_594085(protocol: Scheme; host: string; base: string;
+  Call_ViewsDeleteByScope_568316 = ref object of OpenApiRestCall_567659
+proc url_ViewsDeleteByScope_568318(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1304,7 +1304,7 @@ proc url_ViewsDeleteByScope_594085(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ViewsDeleteByScope_594084(path: JsonNode; query: JsonNode;
+proc validate_ViewsDeleteByScope_568317(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## The operation to delete a view.
@@ -1325,16 +1325,16 @@ proc validate_ViewsDeleteByScope_594084(path: JsonNode; query: JsonNode;
   ## 'providers/Microsoft.CostManagement/externalSubscriptions/{externalSubscriptionName}' for External Subscription scope.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `viewName` field"
-  var valid_594086 = path.getOrDefault("viewName")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  var valid_568319 = path.getOrDefault("viewName")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "viewName", valid_594086
-  var valid_594087 = path.getOrDefault("scope")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  if valid_568319 != nil:
+    section.add "viewName", valid_568319
+  var valid_568320 = path.getOrDefault("scope")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "scope", valid_594087
+  if valid_568320 != nil:
+    section.add "scope", valid_568320
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1342,11 +1342,11 @@ proc validate_ViewsDeleteByScope_594084(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594088 = query.getOrDefault("api-version")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  var valid_568321 = query.getOrDefault("api-version")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "api-version", valid_594088
+  if valid_568321 != nil:
+    section.add "api-version", valid_568321
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1355,21 +1355,21 @@ proc validate_ViewsDeleteByScope_594084(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594089: Call_ViewsDeleteByScope_594083; path: JsonNode;
+proc call*(call_568322: Call_ViewsDeleteByScope_568316; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to delete a view.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/costmanagement/
-  let valid = call_594089.validator(path, query, header, formData, body)
-  let scheme = call_594089.pickScheme
+  let valid = call_568322.validator(path, query, header, formData, body)
+  let scheme = call_568322.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594089.url(scheme.get, call_594089.host, call_594089.base,
-                         call_594089.route, valid.getOrDefault("path"),
+  let url = call_568322.url(scheme.get, call_568322.host, call_568322.base,
+                         call_568322.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594089, url, valid)
+  result = hook(call_568322, url, valid)
 
-proc call*(call_594090: Call_ViewsDeleteByScope_594083; apiVersion: string;
+proc call*(call_568323: Call_ViewsDeleteByScope_568316; apiVersion: string;
           viewName: string; scope: string): Recallable =
   ## viewsDeleteByScope
   ## The operation to delete a view.
@@ -1386,19 +1386,19 @@ proc call*(call_594090: Call_ViewsDeleteByScope_594083; apiVersion: string;
   ## 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for InvoiceSection scope, 'providers/Microsoft.Management/managementGroups/{managementGroupId}' for Management Group scope, 
   ## 'providers/Microsoft.CostManagement/externalBillingAccounts/{externalBillingAccountName}' for External Billing Account scope and 
   ## 'providers/Microsoft.CostManagement/externalSubscriptions/{externalSubscriptionName}' for External Subscription scope.
-  var path_594091 = newJObject()
-  var query_594092 = newJObject()
-  add(query_594092, "api-version", newJString(apiVersion))
-  add(path_594091, "viewName", newJString(viewName))
-  add(path_594091, "scope", newJString(scope))
-  result = call_594090.call(path_594091, query_594092, nil, nil, nil)
+  var path_568324 = newJObject()
+  var query_568325 = newJObject()
+  add(query_568325, "api-version", newJString(apiVersion))
+  add(path_568324, "viewName", newJString(viewName))
+  add(path_568324, "scope", newJString(scope))
+  result = call_568323.call(path_568324, query_568325, nil, nil, nil)
 
-var viewsDeleteByScope* = Call_ViewsDeleteByScope_594083(
+var viewsDeleteByScope* = Call_ViewsDeleteByScope_568316(
     name: "viewsDeleteByScope", meth: HttpMethod.HttpDelete,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.CostManagement/views/{viewName}",
-    validator: validate_ViewsDeleteByScope_594084, base: "",
-    url: url_ViewsDeleteByScope_594085, schemes: {Scheme.Https})
+    validator: validate_ViewsDeleteByScope_568317, base: "",
+    url: url_ViewsDeleteByScope_568318, schemes: {Scheme.Https})
 export
   rest
 

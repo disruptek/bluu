@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "network-availableDelegations"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AvailableDelegationsList_593630 = ref object of OpenApiRestCall_593408
-proc url_AvailableDelegationsList_593632(protocol: Scheme; host: string;
+  Call_AvailableDelegationsList_567863 = ref object of OpenApiRestCall_567641
+proc url_AvailableDelegationsList_567865(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -124,7 +124,7 @@ proc url_AvailableDelegationsList_593632(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailableDelegationsList_593631(path: JsonNode; query: JsonNode;
+proc validate_AvailableDelegationsList_567864(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all of the available subnet delegations for this subscription in this region.
   ## 
@@ -138,16 +138,16 @@ proc validate_AvailableDelegationsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593792 = path.getOrDefault("subscriptionId")
-  valid_593792 = validateParameter(valid_593792, JString, required = true,
+  var valid_568025 = path.getOrDefault("subscriptionId")
+  valid_568025 = validateParameter(valid_568025, JString, required = true,
                                  default = nil)
-  if valid_593792 != nil:
-    section.add "subscriptionId", valid_593792
-  var valid_593793 = path.getOrDefault("location")
-  valid_593793 = validateParameter(valid_593793, JString, required = true,
+  if valid_568025 != nil:
+    section.add "subscriptionId", valid_568025
+  var valid_568026 = path.getOrDefault("location")
+  valid_568026 = validateParameter(valid_568026, JString, required = true,
                                  default = nil)
-  if valid_593793 != nil:
-    section.add "location", valid_593793
+  if valid_568026 != nil:
+    section.add "location", valid_568026
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -155,11 +155,11 @@ proc validate_AvailableDelegationsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593794 = query.getOrDefault("api-version")
-  valid_593794 = validateParameter(valid_593794, JString, required = true,
+  var valid_568027 = query.getOrDefault("api-version")
+  valid_568027 = validateParameter(valid_568027, JString, required = true,
                                  default = nil)
-  if valid_593794 != nil:
-    section.add "api-version", valid_593794
+  if valid_568027 != nil:
+    section.add "api-version", valid_568027
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -168,20 +168,20 @@ proc validate_AvailableDelegationsList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593821: Call_AvailableDelegationsList_593630; path: JsonNode;
+proc call*(call_568054: Call_AvailableDelegationsList_567863; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all of the available subnet delegations for this subscription in this region.
   ## 
-  let valid = call_593821.validator(path, query, header, formData, body)
-  let scheme = call_593821.pickScheme
+  let valid = call_568054.validator(path, query, header, formData, body)
+  let scheme = call_568054.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593821.url(scheme.get, call_593821.host, call_593821.base,
-                         call_593821.route, valid.getOrDefault("path"),
+  let url = call_568054.url(scheme.get, call_568054.host, call_568054.base,
+                         call_568054.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593821, url, valid)
+  result = hook(call_568054, url, valid)
 
-proc call*(call_593892: Call_AvailableDelegationsList_593630; apiVersion: string;
+proc call*(call_568125: Call_AvailableDelegationsList_567863; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## availableDelegationsList
   ## Gets all of the available subnet delegations for this subscription in this region.
@@ -191,21 +191,21 @@ proc call*(call_593892: Call_AvailableDelegationsList_593630; apiVersion: string
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The location of the subnet.
-  var path_593893 = newJObject()
-  var query_593895 = newJObject()
-  add(query_593895, "api-version", newJString(apiVersion))
-  add(path_593893, "subscriptionId", newJString(subscriptionId))
-  add(path_593893, "location", newJString(location))
-  result = call_593892.call(path_593893, query_593895, nil, nil, nil)
+  var path_568126 = newJObject()
+  var query_568128 = newJObject()
+  add(query_568128, "api-version", newJString(apiVersion))
+  add(path_568126, "subscriptionId", newJString(subscriptionId))
+  add(path_568126, "location", newJString(location))
+  result = call_568125.call(path_568126, query_568128, nil, nil, nil)
 
-var availableDelegationsList* = Call_AvailableDelegationsList_593630(
+var availableDelegationsList* = Call_AvailableDelegationsList_567863(
     name: "availableDelegationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/locations/{location}/availableDelegations",
-    validator: validate_AvailableDelegationsList_593631, base: "",
-    url: url_AvailableDelegationsList_593632, schemes: {Scheme.Https})
+    validator: validate_AvailableDelegationsList_567864, base: "",
+    url: url_AvailableDelegationsList_567865, schemes: {Scheme.Https})
 type
-  Call_AvailableResourceGroupDelegationsList_593934 = ref object of OpenApiRestCall_593408
-proc url_AvailableResourceGroupDelegationsList_593936(protocol: Scheme;
+  Call_AvailableResourceGroupDelegationsList_568167 = ref object of OpenApiRestCall_567641
+proc url_AvailableResourceGroupDelegationsList_568169(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -228,7 +228,7 @@ proc url_AvailableResourceGroupDelegationsList_593936(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailableResourceGroupDelegationsList_593935(path: JsonNode;
+proc validate_AvailableResourceGroupDelegationsList_568168(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all of the available subnet delegations for this resource group in this region.
   ## 
@@ -244,21 +244,21 @@ proc validate_AvailableResourceGroupDelegationsList_593935(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593937 = path.getOrDefault("resourceGroupName")
-  valid_593937 = validateParameter(valid_593937, JString, required = true,
+  var valid_568170 = path.getOrDefault("resourceGroupName")
+  valid_568170 = validateParameter(valid_568170, JString, required = true,
                                  default = nil)
-  if valid_593937 != nil:
-    section.add "resourceGroupName", valid_593937
-  var valid_593938 = path.getOrDefault("subscriptionId")
-  valid_593938 = validateParameter(valid_593938, JString, required = true,
+  if valid_568170 != nil:
+    section.add "resourceGroupName", valid_568170
+  var valid_568171 = path.getOrDefault("subscriptionId")
+  valid_568171 = validateParameter(valid_568171, JString, required = true,
                                  default = nil)
-  if valid_593938 != nil:
-    section.add "subscriptionId", valid_593938
-  var valid_593939 = path.getOrDefault("location")
-  valid_593939 = validateParameter(valid_593939, JString, required = true,
+  if valid_568171 != nil:
+    section.add "subscriptionId", valid_568171
+  var valid_568172 = path.getOrDefault("location")
+  valid_568172 = validateParameter(valid_568172, JString, required = true,
                                  default = nil)
-  if valid_593939 != nil:
-    section.add "location", valid_593939
+  if valid_568172 != nil:
+    section.add "location", valid_568172
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -266,11 +266,11 @@ proc validate_AvailableResourceGroupDelegationsList_593935(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593940 = query.getOrDefault("api-version")
-  valid_593940 = validateParameter(valid_593940, JString, required = true,
+  var valid_568173 = query.getOrDefault("api-version")
+  valid_568173 = validateParameter(valid_568173, JString, required = true,
                                  default = nil)
-  if valid_593940 != nil:
-    section.add "api-version", valid_593940
+  if valid_568173 != nil:
+    section.add "api-version", valid_568173
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -279,21 +279,21 @@ proc validate_AvailableResourceGroupDelegationsList_593935(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593941: Call_AvailableResourceGroupDelegationsList_593934;
+proc call*(call_568174: Call_AvailableResourceGroupDelegationsList_568167;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all of the available subnet delegations for this resource group in this region.
   ## 
-  let valid = call_593941.validator(path, query, header, formData, body)
-  let scheme = call_593941.pickScheme
+  let valid = call_568174.validator(path, query, header, formData, body)
+  let scheme = call_568174.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593941.url(scheme.get, call_593941.host, call_593941.base,
-                         call_593941.route, valid.getOrDefault("path"),
+  let url = call_568174.url(scheme.get, call_568174.host, call_568174.base,
+                         call_568174.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593941, url, valid)
+  result = hook(call_568174, url, valid)
 
-proc call*(call_593942: Call_AvailableResourceGroupDelegationsList_593934;
+proc call*(call_568175: Call_AvailableResourceGroupDelegationsList_568167;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           location: string): Recallable =
   ## availableResourceGroupDelegationsList
@@ -306,19 +306,19 @@ proc call*(call_593942: Call_AvailableResourceGroupDelegationsList_593934;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The location of the domain name.
-  var path_593943 = newJObject()
-  var query_593944 = newJObject()
-  add(path_593943, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593944, "api-version", newJString(apiVersion))
-  add(path_593943, "subscriptionId", newJString(subscriptionId))
-  add(path_593943, "location", newJString(location))
-  result = call_593942.call(path_593943, query_593944, nil, nil, nil)
+  var path_568176 = newJObject()
+  var query_568177 = newJObject()
+  add(path_568176, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568177, "api-version", newJString(apiVersion))
+  add(path_568176, "subscriptionId", newJString(subscriptionId))
+  add(path_568176, "location", newJString(location))
+  result = call_568175.call(path_568176, query_568177, nil, nil, nil)
 
-var availableResourceGroupDelegationsList* = Call_AvailableResourceGroupDelegationsList_593934(
+var availableResourceGroupDelegationsList* = Call_AvailableResourceGroupDelegationsList_568167(
     name: "availableResourceGroupDelegationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/locations/{location}/availableDelegations",
-    validator: validate_AvailableResourceGroupDelegationsList_593935, base: "",
-    url: url_AvailableResourceGroupDelegationsList_593936, schemes: {Scheme.Https})
+    validator: validate_AvailableResourceGroupDelegationsList_568168, base: "",
+    url: url_AvailableResourceGroupDelegationsList_568169, schemes: {Scheme.Https})
 export
   rest
 

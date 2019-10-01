@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Personalizer Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_567658 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "cognitiveservices-Personalizer"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_EventsActivate_593647 = ref object of OpenApiRestCall_593425
-proc url_EventsActivate_593649(protocol: Scheme; host: string; base: string;
+  Call_EventsActivate_567880 = ref object of OpenApiRestCall_567658
+proc url_EventsActivate_567882(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +120,7 @@ proc url_EventsActivate_593649(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventsActivate_593648(path: JsonNode; query: JsonNode;
+proc validate_EventsActivate_567881(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   var section: JsonNode
@@ -130,11 +130,11 @@ proc validate_EventsActivate_593648(path: JsonNode; query: JsonNode;
   ##          : The event ID this activation applies to.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `eventId` field"
-  var valid_593809 = path.getOrDefault("eventId")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_568042 = path.getOrDefault("eventId")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "eventId", valid_593809
+  if valid_568042 != nil:
+    section.add "eventId", valid_568042
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -145,33 +145,33 @@ proc validate_EventsActivate_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593836: Call_EventsActivate_593647; path: JsonNode; query: JsonNode;
+proc call*(call_568069: Call_EventsActivate_567880; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593836.validator(path, query, header, formData, body)
-  let scheme = call_593836.pickScheme
+  let valid = call_568069.validator(path, query, header, formData, body)
+  let scheme = call_568069.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593836.url(scheme.get, call_593836.host, call_593836.base,
-                         call_593836.route, valid.getOrDefault("path"),
+  let url = call_568069.url(scheme.get, call_568069.host, call_568069.base,
+                         call_568069.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593836, url, valid)
+  result = hook(call_568069, url, valid)
 
-proc call*(call_593907: Call_EventsActivate_593647; eventId: string): Recallable =
+proc call*(call_568140: Call_EventsActivate_567880; eventId: string): Recallable =
   ## eventsActivate
   ##   eventId: string (required)
   ##          : The event ID this activation applies to.
-  var path_593908 = newJObject()
-  add(path_593908, "eventId", newJString(eventId))
-  result = call_593907.call(path_593908, nil, nil, nil, nil)
+  var path_568141 = newJObject()
+  add(path_568141, "eventId", newJString(eventId))
+  result = call_568140.call(path_568141, nil, nil, nil, nil)
 
-var eventsActivate* = Call_EventsActivate_593647(name: "eventsActivate",
+var eventsActivate* = Call_EventsActivate_567880(name: "eventsActivate",
     meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/events/{eventId}/activate", validator: validate_EventsActivate_593648,
-    base: "/personalizer/v1.0", url: url_EventsActivate_593649,
+    route: "/events/{eventId}/activate", validator: validate_EventsActivate_567881,
+    base: "/personalizer/v1.0", url: url_EventsActivate_567882,
     schemes: {Scheme.Https})
 type
-  Call_EventsReward_593948 = ref object of OpenApiRestCall_593425
-proc url_EventsReward_593950(protocol: Scheme; host: string; base: string;
+  Call_EventsReward_568181 = ref object of OpenApiRestCall_567658
+proc url_EventsReward_568183(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -187,7 +187,7 @@ proc url_EventsReward_593950(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventsReward_593949(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EventsReward_568182(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -196,11 +196,11 @@ proc validate_EventsReward_593949(path: JsonNode; query: JsonNode; header: JsonN
   ##          : The event id this reward applies to.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `eventId` field"
-  var valid_593960 = path.getOrDefault("eventId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_568193 = path.getOrDefault("eventId")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "eventId", valid_593960
+  if valid_568193 != nil:
+    section.add "eventId", valid_568193
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -216,45 +216,45 @@ proc validate_EventsReward_593949(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593962: Call_EventsReward_593948; path: JsonNode; query: JsonNode;
+proc call*(call_568195: Call_EventsReward_568181; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593962.validator(path, query, header, formData, body)
-  let scheme = call_593962.pickScheme
+  let valid = call_568195.validator(path, query, header, formData, body)
+  let scheme = call_568195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593962.url(scheme.get, call_593962.host, call_593962.base,
-                         call_593962.route, valid.getOrDefault("path"),
+  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
+                         call_568195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593962, url, valid)
+  result = hook(call_568195, url, valid)
 
-proc call*(call_593963: Call_EventsReward_593948; eventId: string; reward: JsonNode): Recallable =
+proc call*(call_568196: Call_EventsReward_568181; eventId: string; reward: JsonNode): Recallable =
   ## eventsReward
   ##   eventId: string (required)
   ##          : The event id this reward applies to.
   ##   reward: JObject (required)
   ##         : The reward should be a floating point number.
-  var path_593964 = newJObject()
-  var body_593965 = newJObject()
-  add(path_593964, "eventId", newJString(eventId))
+  var path_568197 = newJObject()
+  var body_568198 = newJObject()
+  add(path_568197, "eventId", newJString(eventId))
   if reward != nil:
-    body_593965 = reward
-  result = call_593963.call(path_593964, nil, nil, nil, body_593965)
+    body_568198 = reward
+  result = call_568196.call(path_568197, nil, nil, nil, body_568198)
 
-var eventsReward* = Call_EventsReward_593948(name: "eventsReward",
+var eventsReward* = Call_EventsReward_568181(name: "eventsReward",
     meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/events/{eventId}/reward", validator: validate_EventsReward_593949,
-    base: "/personalizer/v1.0", url: url_EventsReward_593950,
+    route: "/events/{eventId}/reward", validator: validate_EventsReward_568182,
+    base: "/personalizer/v1.0", url: url_EventsReward_568183,
     schemes: {Scheme.Https})
 type
-  Call_Rank_593966 = ref object of OpenApiRestCall_593425
-proc url_Rank_593968(protocol: Scheme; host: string; base: string; route: string;
+  Call_Rank_568199 = ref object of OpenApiRestCall_567658
+proc url_Rank_568201(protocol: Scheme; host: string; base: string; route: string;
                     path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_Rank_593967(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_Rank_568200(path: JsonNode; query: JsonNode; header: JsonNode;
                          formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -274,30 +274,30 @@ proc validate_Rank_593967(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593970: Call_Rank_593966; path: JsonNode; query: JsonNode;
+proc call*(call_568203: Call_Rank_568199; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_593970.validator(path, query, header, formData, body)
-  let scheme = call_593970.pickScheme
+  let valid = call_568203.validator(path, query, header, formData, body)
+  let scheme = call_568203.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593970.url(scheme.get, call_593970.host, call_593970.base,
-                         call_593970.route, valid.getOrDefault("path"),
+  let url = call_568203.url(scheme.get, call_568203.host, call_568203.base,
+                         call_568203.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593970, url, valid)
+  result = hook(call_568203, url, valid)
 
-proc call*(call_593971: Call_Rank_593966; rankRequest: JsonNode): Recallable =
+proc call*(call_568204: Call_Rank_568199; rankRequest: JsonNode): Recallable =
   ## rank
   ##   rankRequest: JObject (required)
   ##              : A Personalizer request.
-  var body_593972 = newJObject()
+  var body_568205 = newJObject()
   if rankRequest != nil:
-    body_593972 = rankRequest
-  result = call_593971.call(nil, nil, nil, nil, body_593972)
+    body_568205 = rankRequest
+  result = call_568204.call(nil, nil, nil, nil, body_568205)
 
-var rank* = Call_Rank_593966(name: "rank", meth: HttpMethod.HttpPost,
+var rank* = Call_Rank_568199(name: "rank", meth: HttpMethod.HttpPost,
                           host: "azure.local", route: "/rank",
-                          validator: validate_Rank_593967,
-                          base: "/personalizer/v1.0", url: url_Rank_593968,
+                          validator: validate_Rank_568200,
+                          base: "/personalizer/v1.0", url: url_Rank_568201,
                           schemes: {Scheme.Https})
 export
   rest

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: GuestConfiguration
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_567642 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "guestconfiguration"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593631 = ref object of OpenApiRestCall_593409
-proc url_OperationsList_593633(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567864 = ref object of OpenApiRestCall_567642
+proc url_OperationsList_567866(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593632(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567865(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available GuestConfiguration REST API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593632(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593779 = query.getOrDefault("api-version")
-  valid_593779 = validateParameter(valid_593779, JString, required = true,
+  var valid_568012 = query.getOrDefault("api-version")
+  valid_568012 = validateParameter(valid_568012, JString, required = true,
                                  default = nil)
-  if valid_593779 != nil:
-    section.add "api-version", valid_593779
+  if valid_568012 != nil:
+    section.add "api-version", valid_568012
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593632(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593806: Call_OperationsList_593631; path: JsonNode; query: JsonNode;
+proc call*(call_568039: Call_OperationsList_567864; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available GuestConfiguration REST API operations.
   ## 
-  let valid = call_593806.validator(path, query, header, formData, body)
-  let scheme = call_593806.pickScheme
+  let valid = call_568039.validator(path, query, header, formData, body)
+  let scheme = call_568039.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593806.url(scheme.get, call_593806.host, call_593806.base,
-                         call_593806.route, valid.getOrDefault("path"),
+  let url = call_568039.url(scheme.get, call_568039.host, call_568039.base,
+                         call_568039.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593806, url, valid)
+  result = hook(call_568039, url, valid)
 
-proc call*(call_593877: Call_OperationsList_593631; apiVersion: string): Recallable =
+proc call*(call_568110: Call_OperationsList_567864; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available GuestConfiguration REST API operations.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_593878 = newJObject()
-  add(query_593878, "api-version", newJString(apiVersion))
-  result = call_593877.call(nil, query_593878, nil, nil, nil)
+  var query_568111 = newJObject()
+  add(query_568111, "api-version", newJString(apiVersion))
+  result = call_568110.call(nil, query_568111, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593631(name: "operationsList",
+var operationsList* = Call_OperationsList_567864(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.GuestConfiguration/operations",
-    validator: validate_OperationsList_593632, base: "", url: url_OperationsList_593633,
+    validator: validate_OperationsList_567865, base: "", url: url_OperationsList_567866,
     schemes: {Scheme.Https})
 type
-  Call_GuestConfigurationAssignmentsCreateOrUpdate_593944 = ref object of OpenApiRestCall_593409
-proc url_GuestConfigurationAssignmentsCreateOrUpdate_593946(protocol: Scheme;
+  Call_GuestConfigurationAssignmentsCreateOrUpdate_568177 = ref object of OpenApiRestCall_567642
+proc url_GuestConfigurationAssignmentsCreateOrUpdate_568179(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -194,7 +194,7 @@ proc url_GuestConfigurationAssignmentsCreateOrUpdate_593946(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestConfigurationAssignmentsCreateOrUpdate_593945(path: JsonNode;
+proc validate_GuestConfigurationAssignmentsCreateOrUpdate_568178(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates an association between a VM and guest configuration
   ## 
@@ -212,26 +212,26 @@ proc validate_GuestConfigurationAssignmentsCreateOrUpdate_593945(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593973 = path.getOrDefault("resourceGroupName")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568206 = path.getOrDefault("resourceGroupName")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "resourceGroupName", valid_593973
-  var valid_593974 = path.getOrDefault("guestConfigurationAssignmentName")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  if valid_568206 != nil:
+    section.add "resourceGroupName", valid_568206
+  var valid_568207 = path.getOrDefault("guestConfigurationAssignmentName")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "guestConfigurationAssignmentName", valid_593974
-  var valid_593975 = path.getOrDefault("subscriptionId")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  if valid_568207 != nil:
+    section.add "guestConfigurationAssignmentName", valid_568207
+  var valid_568208 = path.getOrDefault("subscriptionId")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "subscriptionId", valid_593975
-  var valid_593976 = path.getOrDefault("vmName")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  if valid_568208 != nil:
+    section.add "subscriptionId", valid_568208
+  var valid_568209 = path.getOrDefault("vmName")
+  valid_568209 = validateParameter(valid_568209, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "vmName", valid_593976
+  if valid_568209 != nil:
+    section.add "vmName", valid_568209
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -239,11 +239,11 @@ proc validate_GuestConfigurationAssignmentsCreateOrUpdate_593945(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593977 = query.getOrDefault("api-version")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  var valid_568210 = query.getOrDefault("api-version")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "api-version", valid_593977
+  if valid_568210 != nil:
+    section.add "api-version", valid_568210
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -257,21 +257,21 @@ proc validate_GuestConfigurationAssignmentsCreateOrUpdate_593945(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593979: Call_GuestConfigurationAssignmentsCreateOrUpdate_593944;
+proc call*(call_568212: Call_GuestConfigurationAssignmentsCreateOrUpdate_568177;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates an association between a VM and guest configuration
   ## 
-  let valid = call_593979.validator(path, query, header, formData, body)
-  let scheme = call_593979.pickScheme
+  let valid = call_568212.validator(path, query, header, formData, body)
+  let scheme = call_568212.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593979.url(scheme.get, call_593979.host, call_593979.base,
-                         call_593979.route, valid.getOrDefault("path"),
+  let url = call_568212.url(scheme.get, call_568212.host, call_568212.base,
+                         call_568212.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593979, url, valid)
+  result = hook(call_568212, url, valid)
 
-proc call*(call_593980: Call_GuestConfigurationAssignmentsCreateOrUpdate_593944;
+proc call*(call_568213: Call_GuestConfigurationAssignmentsCreateOrUpdate_568177;
           resourceGroupName: string; apiVersion: string;
           guestConfigurationAssignmentName: string; subscriptionId: string;
           vmName: string; parameters: JsonNode): Recallable =
@@ -289,28 +289,28 @@ proc call*(call_593980: Call_GuestConfigurationAssignmentsCreateOrUpdate_593944;
   ##         : The name of the virtual machine.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update guest configuration assignment.
-  var path_593981 = newJObject()
-  var query_593982 = newJObject()
-  var body_593983 = newJObject()
-  add(path_593981, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593982, "api-version", newJString(apiVersion))
-  add(path_593981, "guestConfigurationAssignmentName",
+  var path_568214 = newJObject()
+  var query_568215 = newJObject()
+  var body_568216 = newJObject()
+  add(path_568214, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568215, "api-version", newJString(apiVersion))
+  add(path_568214, "guestConfigurationAssignmentName",
       newJString(guestConfigurationAssignmentName))
-  add(path_593981, "subscriptionId", newJString(subscriptionId))
-  add(path_593981, "vmName", newJString(vmName))
+  add(path_568214, "subscriptionId", newJString(subscriptionId))
+  add(path_568214, "vmName", newJString(vmName))
   if parameters != nil:
-    body_593983 = parameters
-  result = call_593980.call(path_593981, query_593982, nil, nil, body_593983)
+    body_568216 = parameters
+  result = call_568213.call(path_568214, query_568215, nil, nil, body_568216)
 
-var guestConfigurationAssignmentsCreateOrUpdate* = Call_GuestConfigurationAssignmentsCreateOrUpdate_593944(
+var guestConfigurationAssignmentsCreateOrUpdate* = Call_GuestConfigurationAssignmentsCreateOrUpdate_568177(
     name: "guestConfigurationAssignmentsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/{guestConfigurationAssignmentName}",
-    validator: validate_GuestConfigurationAssignmentsCreateOrUpdate_593945,
-    base: "", url: url_GuestConfigurationAssignmentsCreateOrUpdate_593946,
+    validator: validate_GuestConfigurationAssignmentsCreateOrUpdate_568178,
+    base: "", url: url_GuestConfigurationAssignmentsCreateOrUpdate_568179,
     schemes: {Scheme.Https})
 type
-  Call_GuestConfigurationAssignmentsGet_593918 = ref object of OpenApiRestCall_593409
-proc url_GuestConfigurationAssignmentsGet_593920(protocol: Scheme; host: string;
+  Call_GuestConfigurationAssignmentsGet_568151 = ref object of OpenApiRestCall_567642
+proc url_GuestConfigurationAssignmentsGet_568153(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -336,7 +336,7 @@ proc url_GuestConfigurationAssignmentsGet_593920(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestConfigurationAssignmentsGet_593919(path: JsonNode;
+proc validate_GuestConfigurationAssignmentsGet_568152(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get information about a guest configuration assignment
   ## 
@@ -354,26 +354,26 @@ proc validate_GuestConfigurationAssignmentsGet_593919(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593935 = path.getOrDefault("resourceGroupName")
-  valid_593935 = validateParameter(valid_593935, JString, required = true,
+  var valid_568168 = path.getOrDefault("resourceGroupName")
+  valid_568168 = validateParameter(valid_568168, JString, required = true,
                                  default = nil)
-  if valid_593935 != nil:
-    section.add "resourceGroupName", valid_593935
-  var valid_593936 = path.getOrDefault("guestConfigurationAssignmentName")
-  valid_593936 = validateParameter(valid_593936, JString, required = true,
+  if valid_568168 != nil:
+    section.add "resourceGroupName", valid_568168
+  var valid_568169 = path.getOrDefault("guestConfigurationAssignmentName")
+  valid_568169 = validateParameter(valid_568169, JString, required = true,
                                  default = nil)
-  if valid_593936 != nil:
-    section.add "guestConfigurationAssignmentName", valid_593936
-  var valid_593937 = path.getOrDefault("subscriptionId")
-  valid_593937 = validateParameter(valid_593937, JString, required = true,
+  if valid_568169 != nil:
+    section.add "guestConfigurationAssignmentName", valid_568169
+  var valid_568170 = path.getOrDefault("subscriptionId")
+  valid_568170 = validateParameter(valid_568170, JString, required = true,
                                  default = nil)
-  if valid_593937 != nil:
-    section.add "subscriptionId", valid_593937
-  var valid_593938 = path.getOrDefault("vmName")
-  valid_593938 = validateParameter(valid_593938, JString, required = true,
+  if valid_568170 != nil:
+    section.add "subscriptionId", valid_568170
+  var valid_568171 = path.getOrDefault("vmName")
+  valid_568171 = validateParameter(valid_568171, JString, required = true,
                                  default = nil)
-  if valid_593938 != nil:
-    section.add "vmName", valid_593938
+  if valid_568171 != nil:
+    section.add "vmName", valid_568171
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -381,11 +381,11 @@ proc validate_GuestConfigurationAssignmentsGet_593919(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593939 = query.getOrDefault("api-version")
-  valid_593939 = validateParameter(valid_593939, JString, required = true,
+  var valid_568172 = query.getOrDefault("api-version")
+  valid_568172 = validateParameter(valid_568172, JString, required = true,
                                  default = nil)
-  if valid_593939 != nil:
-    section.add "api-version", valid_593939
+  if valid_568172 != nil:
+    section.add "api-version", valid_568172
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -394,21 +394,21 @@ proc validate_GuestConfigurationAssignmentsGet_593919(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593940: Call_GuestConfigurationAssignmentsGet_593918;
+proc call*(call_568173: Call_GuestConfigurationAssignmentsGet_568151;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get information about a guest configuration assignment
   ## 
-  let valid = call_593940.validator(path, query, header, formData, body)
-  let scheme = call_593940.pickScheme
+  let valid = call_568173.validator(path, query, header, formData, body)
+  let scheme = call_568173.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593940.url(scheme.get, call_593940.host, call_593940.base,
-                         call_593940.route, valid.getOrDefault("path"),
+  let url = call_568173.url(scheme.get, call_568173.host, call_568173.base,
+                         call_568173.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593940, url, valid)
+  result = hook(call_568173, url, valid)
 
-proc call*(call_593941: Call_GuestConfigurationAssignmentsGet_593918;
+proc call*(call_568174: Call_GuestConfigurationAssignmentsGet_568151;
           resourceGroupName: string; apiVersion: string;
           guestConfigurationAssignmentName: string; subscriptionId: string;
           vmName: string): Recallable =
@@ -424,24 +424,24 @@ proc call*(call_593941: Call_GuestConfigurationAssignmentsGet_593918;
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_593942 = newJObject()
-  var query_593943 = newJObject()
-  add(path_593942, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593943, "api-version", newJString(apiVersion))
-  add(path_593942, "guestConfigurationAssignmentName",
+  var path_568175 = newJObject()
+  var query_568176 = newJObject()
+  add(path_568175, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568176, "api-version", newJString(apiVersion))
+  add(path_568175, "guestConfigurationAssignmentName",
       newJString(guestConfigurationAssignmentName))
-  add(path_593942, "subscriptionId", newJString(subscriptionId))
-  add(path_593942, "vmName", newJString(vmName))
-  result = call_593941.call(path_593942, query_593943, nil, nil, nil)
+  add(path_568175, "subscriptionId", newJString(subscriptionId))
+  add(path_568175, "vmName", newJString(vmName))
+  result = call_568174.call(path_568175, query_568176, nil, nil, nil)
 
-var guestConfigurationAssignmentsGet* = Call_GuestConfigurationAssignmentsGet_593918(
+var guestConfigurationAssignmentsGet* = Call_GuestConfigurationAssignmentsGet_568151(
     name: "guestConfigurationAssignmentsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/{guestConfigurationAssignmentName}",
-    validator: validate_GuestConfigurationAssignmentsGet_593919, base: "",
-    url: url_GuestConfigurationAssignmentsGet_593920, schemes: {Scheme.Https})
+    validator: validate_GuestConfigurationAssignmentsGet_568152, base: "",
+    url: url_GuestConfigurationAssignmentsGet_568153, schemes: {Scheme.Https})
 type
-  Call_GuestConfigurationAssignmentReportsList_593984 = ref object of OpenApiRestCall_593409
-proc url_GuestConfigurationAssignmentReportsList_593986(protocol: Scheme;
+  Call_GuestConfigurationAssignmentReportsList_568217 = ref object of OpenApiRestCall_567642
+proc url_GuestConfigurationAssignmentReportsList_568219(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -468,7 +468,7 @@ proc url_GuestConfigurationAssignmentReportsList_593986(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestConfigurationAssignmentReportsList_593985(path: JsonNode;
+proc validate_GuestConfigurationAssignmentReportsList_568218(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all reports for the guest configuration assignment, latest report first.
   ## 
@@ -486,26 +486,26 @@ proc validate_GuestConfigurationAssignmentReportsList_593985(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593987 = path.getOrDefault("resourceGroupName")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+  var valid_568220 = path.getOrDefault("resourceGroupName")
+  valid_568220 = validateParameter(valid_568220, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "resourceGroupName", valid_593987
-  var valid_593988 = path.getOrDefault("guestConfigurationAssignmentName")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  if valid_568220 != nil:
+    section.add "resourceGroupName", valid_568220
+  var valid_568221 = path.getOrDefault("guestConfigurationAssignmentName")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "guestConfigurationAssignmentName", valid_593988
-  var valid_593989 = path.getOrDefault("subscriptionId")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_568221 != nil:
+    section.add "guestConfigurationAssignmentName", valid_568221
+  var valid_568222 = path.getOrDefault("subscriptionId")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "subscriptionId", valid_593989
-  var valid_593990 = path.getOrDefault("vmName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  if valid_568222 != nil:
+    section.add "subscriptionId", valid_568222
+  var valid_568223 = path.getOrDefault("vmName")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "vmName", valid_593990
+  if valid_568223 != nil:
+    section.add "vmName", valid_568223
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -513,11 +513,11 @@ proc validate_GuestConfigurationAssignmentReportsList_593985(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593991 = query.getOrDefault("api-version")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_568224 = query.getOrDefault("api-version")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "api-version", valid_593991
+  if valid_568224 != nil:
+    section.add "api-version", valid_568224
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -526,21 +526,21 @@ proc validate_GuestConfigurationAssignmentReportsList_593985(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593992: Call_GuestConfigurationAssignmentReportsList_593984;
+proc call*(call_568225: Call_GuestConfigurationAssignmentReportsList_568217;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all reports for the guest configuration assignment, latest report first.
   ## 
-  let valid = call_593992.validator(path, query, header, formData, body)
-  let scheme = call_593992.pickScheme
+  let valid = call_568225.validator(path, query, header, formData, body)
+  let scheme = call_568225.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593992.url(scheme.get, call_593992.host, call_593992.base,
-                         call_593992.route, valid.getOrDefault("path"),
+  let url = call_568225.url(scheme.get, call_568225.host, call_568225.base,
+                         call_568225.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593992, url, valid)
+  result = hook(call_568225, url, valid)
 
-proc call*(call_593993: Call_GuestConfigurationAssignmentReportsList_593984;
+proc call*(call_568226: Call_GuestConfigurationAssignmentReportsList_568217;
           resourceGroupName: string; apiVersion: string;
           guestConfigurationAssignmentName: string; subscriptionId: string;
           vmName: string): Recallable =
@@ -556,25 +556,25 @@ proc call*(call_593993: Call_GuestConfigurationAssignmentReportsList_593984;
   ##                 : Subscription ID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_593994 = newJObject()
-  var query_593995 = newJObject()
-  add(path_593994, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593995, "api-version", newJString(apiVersion))
-  add(path_593994, "guestConfigurationAssignmentName",
+  var path_568227 = newJObject()
+  var query_568228 = newJObject()
+  add(path_568227, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568228, "api-version", newJString(apiVersion))
+  add(path_568227, "guestConfigurationAssignmentName",
       newJString(guestConfigurationAssignmentName))
-  add(path_593994, "subscriptionId", newJString(subscriptionId))
-  add(path_593994, "vmName", newJString(vmName))
-  result = call_593993.call(path_593994, query_593995, nil, nil, nil)
+  add(path_568227, "subscriptionId", newJString(subscriptionId))
+  add(path_568227, "vmName", newJString(vmName))
+  result = call_568226.call(path_568227, query_568228, nil, nil, nil)
 
-var guestConfigurationAssignmentReportsList* = Call_GuestConfigurationAssignmentReportsList_593984(
+var guestConfigurationAssignmentReportsList* = Call_GuestConfigurationAssignmentReportsList_568217(
     name: "guestConfigurationAssignmentReportsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/{guestConfigurationAssignmentName}/reports",
-    validator: validate_GuestConfigurationAssignmentReportsList_593985, base: "",
-    url: url_GuestConfigurationAssignmentReportsList_593986,
+    validator: validate_GuestConfigurationAssignmentReportsList_568218, base: "",
+    url: url_GuestConfigurationAssignmentReportsList_568219,
     schemes: {Scheme.Https})
 type
-  Call_GuestConfigurationAssignmentReportsGet_593996 = ref object of OpenApiRestCall_593409
-proc url_GuestConfigurationAssignmentReportsGet_593998(protocol: Scheme;
+  Call_GuestConfigurationAssignmentReportsGet_568229 = ref object of OpenApiRestCall_567642
+proc url_GuestConfigurationAssignmentReportsGet_568231(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -603,7 +603,7 @@ proc url_GuestConfigurationAssignmentReportsGet_593998(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestConfigurationAssignmentReportsGet_593997(path: JsonNode;
+proc validate_GuestConfigurationAssignmentReportsGet_568230(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a report for the guest configuration assignment, by reportId.
   ## 
@@ -623,31 +623,31 @@ proc validate_GuestConfigurationAssignmentReportsGet_593997(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593999 = path.getOrDefault("resourceGroupName")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  var valid_568232 = path.getOrDefault("resourceGroupName")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "resourceGroupName", valid_593999
-  var valid_594000 = path.getOrDefault("guestConfigurationAssignmentName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  if valid_568232 != nil:
+    section.add "resourceGroupName", valid_568232
+  var valid_568233 = path.getOrDefault("guestConfigurationAssignmentName")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "guestConfigurationAssignmentName", valid_594000
-  var valid_594001 = path.getOrDefault("subscriptionId")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_568233 != nil:
+    section.add "guestConfigurationAssignmentName", valid_568233
+  var valid_568234 = path.getOrDefault("subscriptionId")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "subscriptionId", valid_594001
-  var valid_594002 = path.getOrDefault("vmName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_568234 != nil:
+    section.add "subscriptionId", valid_568234
+  var valid_568235 = path.getOrDefault("vmName")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "vmName", valid_594002
-  var valid_594003 = path.getOrDefault("reportId")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_568235 != nil:
+    section.add "vmName", valid_568235
+  var valid_568236 = path.getOrDefault("reportId")
+  valid_568236 = validateParameter(valid_568236, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "reportId", valid_594003
+  if valid_568236 != nil:
+    section.add "reportId", valid_568236
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -655,11 +655,11 @@ proc validate_GuestConfigurationAssignmentReportsGet_593997(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594004 = query.getOrDefault("api-version")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = query.getOrDefault("api-version")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "api-version", valid_594004
+  if valid_568237 != nil:
+    section.add "api-version", valid_568237
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -668,21 +668,21 @@ proc validate_GuestConfigurationAssignmentReportsGet_593997(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594005: Call_GuestConfigurationAssignmentReportsGet_593996;
+proc call*(call_568238: Call_GuestConfigurationAssignmentReportsGet_568229;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a report for the guest configuration assignment, by reportId.
   ## 
-  let valid = call_594005.validator(path, query, header, formData, body)
-  let scheme = call_594005.pickScheme
+  let valid = call_568238.validator(path, query, header, formData, body)
+  let scheme = call_568238.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594005.url(scheme.get, call_594005.host, call_594005.base,
-                         call_594005.route, valid.getOrDefault("path"),
+  let url = call_568238.url(scheme.get, call_568238.host, call_568238.base,
+                         call_568238.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594005, url, valid)
+  result = hook(call_568238, url, valid)
 
-proc call*(call_594006: Call_GuestConfigurationAssignmentReportsGet_593996;
+proc call*(call_568239: Call_GuestConfigurationAssignmentReportsGet_568229;
           resourceGroupName: string; apiVersion: string;
           guestConfigurationAssignmentName: string; subscriptionId: string;
           vmName: string; reportId: string): Recallable =
@@ -700,22 +700,22 @@ proc call*(call_594006: Call_GuestConfigurationAssignmentReportsGet_593996;
   ##         : The name of the virtual machine.
   ##   reportId: string (required)
   ##           : The GUID for the guest configuration assignment report.
-  var path_594007 = newJObject()
-  var query_594008 = newJObject()
-  add(path_594007, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594008, "api-version", newJString(apiVersion))
-  add(path_594007, "guestConfigurationAssignmentName",
+  var path_568240 = newJObject()
+  var query_568241 = newJObject()
+  add(path_568240, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568241, "api-version", newJString(apiVersion))
+  add(path_568240, "guestConfigurationAssignmentName",
       newJString(guestConfigurationAssignmentName))
-  add(path_594007, "subscriptionId", newJString(subscriptionId))
-  add(path_594007, "vmName", newJString(vmName))
-  add(path_594007, "reportId", newJString(reportId))
-  result = call_594006.call(path_594007, query_594008, nil, nil, nil)
+  add(path_568240, "subscriptionId", newJString(subscriptionId))
+  add(path_568240, "vmName", newJString(vmName))
+  add(path_568240, "reportId", newJString(reportId))
+  result = call_568239.call(path_568240, query_568241, nil, nil, nil)
 
-var guestConfigurationAssignmentReportsGet* = Call_GuestConfigurationAssignmentReportsGet_593996(
+var guestConfigurationAssignmentReportsGet* = Call_GuestConfigurationAssignmentReportsGet_568229(
     name: "guestConfigurationAssignmentReportsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/{guestConfigurationAssignmentName}/reports/{reportId}",
-    validator: validate_GuestConfigurationAssignmentReportsGet_593997, base: "",
-    url: url_GuestConfigurationAssignmentReportsGet_593998,
+    validator: validate_GuestConfigurationAssignmentReportsGet_568230, base: "",
+    url: url_GuestConfigurationAssignmentReportsGet_568231,
     schemes: {Scheme.Https})
 export
   rest

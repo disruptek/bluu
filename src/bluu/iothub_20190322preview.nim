@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: iotHubClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593437 = ref object of OpenApiRestCall
+  OpenApiRestCall_567666 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593437](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567666](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593437): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567666): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "iothub"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593659 = ref object of OpenApiRestCall_593437
-proc url_OperationsList_593661(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567888 = ref object of OpenApiRestCall_567666
+proc url_OperationsList_567890(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593660(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567889(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available IoT Hub REST API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593660(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593820 = query.getOrDefault("api-version")
-  valid_593820 = validateParameter(valid_593820, JString, required = true,
+  var valid_568049 = query.getOrDefault("api-version")
+  valid_568049 = validateParameter(valid_568049, JString, required = true,
                                  default = nil)
-  if valid_593820 != nil:
-    section.add "api-version", valid_593820
+  if valid_568049 != nil:
+    section.add "api-version", valid_568049
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593660(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593843: Call_OperationsList_593659; path: JsonNode; query: JsonNode;
+proc call*(call_568072: Call_OperationsList_567888; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available IoT Hub REST API operations.
   ## 
-  let valid = call_593843.validator(path, query, header, formData, body)
-  let scheme = call_593843.pickScheme
+  let valid = call_568072.validator(path, query, header, formData, body)
+  let scheme = call_568072.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593843.url(scheme.get, call_593843.host, call_593843.base,
-                         call_593843.route, valid.getOrDefault("path"),
+  let url = call_568072.url(scheme.get, call_568072.host, call_568072.base,
+                         call_568072.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593843, url, valid)
+  result = hook(call_568072, url, valid)
 
-proc call*(call_593914: Call_OperationsList_593659; apiVersion: string): Recallable =
+proc call*(call_568143: Call_OperationsList_567888; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available IoT Hub REST API operations.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  var query_593915 = newJObject()
-  add(query_593915, "api-version", newJString(apiVersion))
-  result = call_593914.call(nil, query_593915, nil, nil, nil)
+  var query_568144 = newJObject()
+  add(query_568144, "api-version", newJString(apiVersion))
+  result = call_568143.call(nil, query_568144, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593659(name: "operationsList",
+var operationsList* = Call_OperationsList_567888(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Devices/operations",
-    validator: validate_OperationsList_593660, base: "", url: url_OperationsList_593661,
+    validator: validate_OperationsList_567889, base: "", url: url_OperationsList_567890,
     schemes: {Scheme.Https})
 type
-  Call_IotHubResourceListBySubscription_593955 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceListBySubscription_593957(protocol: Scheme; host: string;
+  Call_IotHubResourceListBySubscription_568184 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceListBySubscription_568186(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +184,7 @@ proc url_IotHubResourceListBySubscription_593957(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceListBySubscription_593956(path: JsonNode;
+proc validate_IotHubResourceListBySubscription_568185(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all the IoT hubs in a subscription.
   ## 
@@ -196,11 +196,11 @@ proc validate_IotHubResourceListBySubscription_593956(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593972 = path.getOrDefault("subscriptionId")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_568201 = path.getOrDefault("subscriptionId")
+  valid_568201 = validateParameter(valid_568201, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "subscriptionId", valid_593972
+  if valid_568201 != nil:
+    section.add "subscriptionId", valid_568201
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -208,11 +208,11 @@ proc validate_IotHubResourceListBySubscription_593956(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593973 = query.getOrDefault("api-version")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568202 = query.getOrDefault("api-version")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "api-version", valid_593973
+  if valid_568202 != nil:
+    section.add "api-version", valid_568202
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -221,21 +221,21 @@ proc validate_IotHubResourceListBySubscription_593956(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593974: Call_IotHubResourceListBySubscription_593955;
+proc call*(call_568203: Call_IotHubResourceListBySubscription_568184;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get all the IoT hubs in a subscription.
   ## 
-  let valid = call_593974.validator(path, query, header, formData, body)
-  let scheme = call_593974.pickScheme
+  let valid = call_568203.validator(path, query, header, formData, body)
+  let scheme = call_568203.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593974.url(scheme.get, call_593974.host, call_593974.base,
-                         call_593974.route, valid.getOrDefault("path"),
+  let url = call_568203.url(scheme.get, call_568203.host, call_568203.base,
+                         call_568203.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593974, url, valid)
+  result = hook(call_568203, url, valid)
 
-proc call*(call_593975: Call_IotHubResourceListBySubscription_593955;
+proc call*(call_568204: Call_IotHubResourceListBySubscription_568184;
           apiVersion: string; subscriptionId: string): Recallable =
   ## iotHubResourceListBySubscription
   ## Get all the IoT hubs in a subscription.
@@ -243,20 +243,20 @@ proc call*(call_593975: Call_IotHubResourceListBySubscription_593955;
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_593976 = newJObject()
-  var query_593977 = newJObject()
-  add(query_593977, "api-version", newJString(apiVersion))
-  add(path_593976, "subscriptionId", newJString(subscriptionId))
-  result = call_593975.call(path_593976, query_593977, nil, nil, nil)
+  var path_568205 = newJObject()
+  var query_568206 = newJObject()
+  add(query_568206, "api-version", newJString(apiVersion))
+  add(path_568205, "subscriptionId", newJString(subscriptionId))
+  result = call_568204.call(path_568205, query_568206, nil, nil, nil)
 
-var iotHubResourceListBySubscription* = Call_IotHubResourceListBySubscription_593955(
+var iotHubResourceListBySubscription* = Call_IotHubResourceListBySubscription_568184(
     name: "iotHubResourceListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Devices/IotHubs",
-    validator: validate_IotHubResourceListBySubscription_593956, base: "",
-    url: url_IotHubResourceListBySubscription_593957, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceListBySubscription_568185, base: "",
+    url: url_IotHubResourceListBySubscription_568186, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceCheckNameAvailability_593978 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceCheckNameAvailability_593980(protocol: Scheme; host: string;
+  Call_IotHubResourceCheckNameAvailability_568207 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceCheckNameAvailability_568209(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -273,7 +273,7 @@ proc url_IotHubResourceCheckNameAvailability_593980(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceCheckNameAvailability_593979(path: JsonNode;
+proc validate_IotHubResourceCheckNameAvailability_568208(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check if an IoT hub name is available.
   ## 
@@ -285,11 +285,11 @@ proc validate_IotHubResourceCheckNameAvailability_593979(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593981 = path.getOrDefault("subscriptionId")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_568210 = path.getOrDefault("subscriptionId")
+  valid_568210 = validateParameter(valid_568210, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "subscriptionId", valid_593981
+  if valid_568210 != nil:
+    section.add "subscriptionId", valid_568210
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -297,11 +297,11 @@ proc validate_IotHubResourceCheckNameAvailability_593979(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593982 = query.getOrDefault("api-version")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568211 = query.getOrDefault("api-version")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "api-version", valid_593982
+  if valid_568211 != nil:
+    section.add "api-version", valid_568211
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -315,21 +315,21 @@ proc validate_IotHubResourceCheckNameAvailability_593979(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_IotHubResourceCheckNameAvailability_593978;
+proc call*(call_568213: Call_IotHubResourceCheckNameAvailability_568207;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Check if an IoT hub name is available.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_568213.validator(path, query, header, formData, body)
+  let scheme = call_568213.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
+                         call_568213.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_568213, url, valid)
 
-proc call*(call_593985: Call_IotHubResourceCheckNameAvailability_593978;
+proc call*(call_568214: Call_IotHubResourceCheckNameAvailability_568207;
           apiVersion: string; subscriptionId: string; operationInputs: JsonNode): Recallable =
   ## iotHubResourceCheckNameAvailability
   ## Check if an IoT hub name is available.
@@ -339,23 +339,23 @@ proc call*(call_593985: Call_IotHubResourceCheckNameAvailability_593978;
   ##                 : The subscription identifier.
   ##   operationInputs: JObject (required)
   ##                  : Set the name parameter in the OperationInputs structure to the name of the IoT hub to check.
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  var body_593988 = newJObject()
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
+  var path_568215 = newJObject()
+  var query_568216 = newJObject()
+  var body_568217 = newJObject()
+  add(query_568216, "api-version", newJString(apiVersion))
+  add(path_568215, "subscriptionId", newJString(subscriptionId))
   if operationInputs != nil:
-    body_593988 = operationInputs
-  result = call_593985.call(path_593986, query_593987, nil, nil, body_593988)
+    body_568217 = operationInputs
+  result = call_568214.call(path_568215, query_568216, nil, nil, body_568217)
 
-var iotHubResourceCheckNameAvailability* = Call_IotHubResourceCheckNameAvailability_593978(
+var iotHubResourceCheckNameAvailability* = Call_IotHubResourceCheckNameAvailability_568207(
     name: "iotHubResourceCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Devices/checkNameAvailability",
-    validator: validate_IotHubResourceCheckNameAvailability_593979, base: "",
-    url: url_IotHubResourceCheckNameAvailability_593980, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceCheckNameAvailability_568208, base: "",
+    url: url_IotHubResourceCheckNameAvailability_568209, schemes: {Scheme.Https})
 type
-  Call_ResourceProviderCommonGetSubscriptionQuota_593989 = ref object of OpenApiRestCall_593437
-proc url_ResourceProviderCommonGetSubscriptionQuota_593991(protocol: Scheme;
+  Call_ResourceProviderCommonGetSubscriptionQuota_568218 = ref object of OpenApiRestCall_567666
+proc url_ResourceProviderCommonGetSubscriptionQuota_568220(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -371,7 +371,7 @@ proc url_ResourceProviderCommonGetSubscriptionQuota_593991(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResourceProviderCommonGetSubscriptionQuota_593990(path: JsonNode;
+proc validate_ResourceProviderCommonGetSubscriptionQuota_568219(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the number of free and paid iot hubs in the subscription
   ## 
@@ -383,11 +383,11 @@ proc validate_ResourceProviderCommonGetSubscriptionQuota_593990(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593992 = path.getOrDefault("subscriptionId")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568221 = path.getOrDefault("subscriptionId")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "subscriptionId", valid_593992
+  if valid_568221 != nil:
+    section.add "subscriptionId", valid_568221
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -395,11 +395,11 @@ proc validate_ResourceProviderCommonGetSubscriptionQuota_593990(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593993 = query.getOrDefault("api-version")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  var valid_568222 = query.getOrDefault("api-version")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "api-version", valid_593993
+  if valid_568222 != nil:
+    section.add "api-version", valid_568222
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -408,21 +408,21 @@ proc validate_ResourceProviderCommonGetSubscriptionQuota_593990(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593994: Call_ResourceProviderCommonGetSubscriptionQuota_593989;
+proc call*(call_568223: Call_ResourceProviderCommonGetSubscriptionQuota_568218;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the number of free and paid iot hubs in the subscription
   ## 
-  let valid = call_593994.validator(path, query, header, formData, body)
-  let scheme = call_593994.pickScheme
+  let valid = call_568223.validator(path, query, header, formData, body)
+  let scheme = call_568223.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593994.url(scheme.get, call_593994.host, call_593994.base,
-                         call_593994.route, valid.getOrDefault("path"),
+  let url = call_568223.url(scheme.get, call_568223.host, call_568223.base,
+                         call_568223.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593994, url, valid)
+  result = hook(call_568223, url, valid)
 
-proc call*(call_593995: Call_ResourceProviderCommonGetSubscriptionQuota_593989;
+proc call*(call_568224: Call_ResourceProviderCommonGetSubscriptionQuota_568218;
           apiVersion: string; subscriptionId: string): Recallable =
   ## resourceProviderCommonGetSubscriptionQuota
   ## Get the number of free and paid iot hubs in the subscription
@@ -430,21 +430,21 @@ proc call*(call_593995: Call_ResourceProviderCommonGetSubscriptionQuota_593989;
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_593996 = newJObject()
-  var query_593997 = newJObject()
-  add(query_593997, "api-version", newJString(apiVersion))
-  add(path_593996, "subscriptionId", newJString(subscriptionId))
-  result = call_593995.call(path_593996, query_593997, nil, nil, nil)
+  var path_568225 = newJObject()
+  var query_568226 = newJObject()
+  add(query_568226, "api-version", newJString(apiVersion))
+  add(path_568225, "subscriptionId", newJString(subscriptionId))
+  result = call_568224.call(path_568225, query_568226, nil, nil, nil)
 
-var resourceProviderCommonGetSubscriptionQuota* = Call_ResourceProviderCommonGetSubscriptionQuota_593989(
+var resourceProviderCommonGetSubscriptionQuota* = Call_ResourceProviderCommonGetSubscriptionQuota_568218(
     name: "resourceProviderCommonGetSubscriptionQuota", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Devices/usages",
-    validator: validate_ResourceProviderCommonGetSubscriptionQuota_593990,
-    base: "", url: url_ResourceProviderCommonGetSubscriptionQuota_593991,
+    validator: validate_ResourceProviderCommonGetSubscriptionQuota_568219,
+    base: "", url: url_ResourceProviderCommonGetSubscriptionQuota_568220,
     schemes: {Scheme.Https})
 type
-  Call_IotHubResourceListByResourceGroup_593998 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceListByResourceGroup_594000(protocol: Scheme; host: string;
+  Call_IotHubResourceListByResourceGroup_568227 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceListByResourceGroup_568229(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -464,7 +464,7 @@ proc url_IotHubResourceListByResourceGroup_594000(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceListByResourceGroup_593999(path: JsonNode;
+proc validate_IotHubResourceListByResourceGroup_568228(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all the IoT hubs in a resource group.
   ## 
@@ -478,16 +478,16 @@ proc validate_IotHubResourceListByResourceGroup_593999(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594001 = path.getOrDefault("resourceGroupName")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568230 = path.getOrDefault("resourceGroupName")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "resourceGroupName", valid_594001
-  var valid_594002 = path.getOrDefault("subscriptionId")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_568230 != nil:
+    section.add "resourceGroupName", valid_568230
+  var valid_568231 = path.getOrDefault("subscriptionId")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "subscriptionId", valid_594002
+  if valid_568231 != nil:
+    section.add "subscriptionId", valid_568231
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -495,11 +495,11 @@ proc validate_IotHubResourceListByResourceGroup_593999(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594003 = query.getOrDefault("api-version")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  var valid_568232 = query.getOrDefault("api-version")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "api-version", valid_594003
+  if valid_568232 != nil:
+    section.add "api-version", valid_568232
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -508,21 +508,21 @@ proc validate_IotHubResourceListByResourceGroup_593999(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594004: Call_IotHubResourceListByResourceGroup_593998;
+proc call*(call_568233: Call_IotHubResourceListByResourceGroup_568227;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get all the IoT hubs in a resource group.
   ## 
-  let valid = call_594004.validator(path, query, header, formData, body)
-  let scheme = call_594004.pickScheme
+  let valid = call_568233.validator(path, query, header, formData, body)
+  let scheme = call_568233.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594004.url(scheme.get, call_594004.host, call_594004.base,
-                         call_594004.route, valid.getOrDefault("path"),
+  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
+                         call_568233.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594004, url, valid)
+  result = hook(call_568233, url, valid)
 
-proc call*(call_594005: Call_IotHubResourceListByResourceGroup_593998;
+proc call*(call_568234: Call_IotHubResourceListByResourceGroup_568227;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## iotHubResourceListByResourceGroup
   ## Get all the IoT hubs in a resource group.
@@ -532,21 +532,21 @@ proc call*(call_594005: Call_IotHubResourceListByResourceGroup_593998;
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_594006 = newJObject()
-  var query_594007 = newJObject()
-  add(path_594006, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594007, "api-version", newJString(apiVersion))
-  add(path_594006, "subscriptionId", newJString(subscriptionId))
-  result = call_594005.call(path_594006, query_594007, nil, nil, nil)
+  var path_568235 = newJObject()
+  var query_568236 = newJObject()
+  add(path_568235, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568236, "api-version", newJString(apiVersion))
+  add(path_568235, "subscriptionId", newJString(subscriptionId))
+  result = call_568234.call(path_568235, query_568236, nil, nil, nil)
 
-var iotHubResourceListByResourceGroup* = Call_IotHubResourceListByResourceGroup_593998(
+var iotHubResourceListByResourceGroup* = Call_IotHubResourceListByResourceGroup_568227(
     name: "iotHubResourceListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs",
-    validator: validate_IotHubResourceListByResourceGroup_593999, base: "",
-    url: url_IotHubResourceListByResourceGroup_594000, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceListByResourceGroup_568228, base: "",
+    url: url_IotHubResourceListByResourceGroup_568229, schemes: {Scheme.Https})
 type
-  Call_IotHubManualFailover_594008 = ref object of OpenApiRestCall_593437
-proc url_IotHubManualFailover_594010(protocol: Scheme; host: string; base: string;
+  Call_IotHubManualFailover_568237 = ref object of OpenApiRestCall_567666
+proc url_IotHubManualFailover_568239(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -569,7 +569,7 @@ proc url_IotHubManualFailover_594010(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubManualFailover_594009(path: JsonNode; query: JsonNode;
+proc validate_IotHubManualFailover_568238(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Perform manual fail over of given hub
   ## 
@@ -585,21 +585,21 @@ proc validate_IotHubManualFailover_594009(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594011 = path.getOrDefault("resourceGroupName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_568240 = path.getOrDefault("resourceGroupName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "resourceGroupName", valid_594011
-  var valid_594012 = path.getOrDefault("subscriptionId")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_568240 != nil:
+    section.add "resourceGroupName", valid_568240
+  var valid_568241 = path.getOrDefault("subscriptionId")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "subscriptionId", valid_594012
-  var valid_594013 = path.getOrDefault("iotHubName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  if valid_568241 != nil:
+    section.add "subscriptionId", valid_568241
+  var valid_568242 = path.getOrDefault("iotHubName")
+  valid_568242 = validateParameter(valid_568242, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "iotHubName", valid_594013
+  if valid_568242 != nil:
+    section.add "iotHubName", valid_568242
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -607,11 +607,11 @@ proc validate_IotHubManualFailover_594009(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594014 = query.getOrDefault("api-version")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_568243 = query.getOrDefault("api-version")
+  valid_568243 = validateParameter(valid_568243, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "api-version", valid_594014
+  if valid_568243 != nil:
+    section.add "api-version", valid_568243
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -625,20 +625,20 @@ proc validate_IotHubManualFailover_594009(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594016: Call_IotHubManualFailover_594008; path: JsonNode;
+proc call*(call_568245: Call_IotHubManualFailover_568237; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Perform manual fail over of given hub
   ## 
-  let valid = call_594016.validator(path, query, header, formData, body)
-  let scheme = call_594016.pickScheme
+  let valid = call_568245.validator(path, query, header, formData, body)
+  let scheme = call_568245.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594016.url(scheme.get, call_594016.host, call_594016.base,
-                         call_594016.route, valid.getOrDefault("path"),
+  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
+                         call_568245.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594016, url, valid)
+  result = hook(call_568245, url, valid)
 
-proc call*(call_594017: Call_IotHubManualFailover_594008;
+proc call*(call_568246: Call_IotHubManualFailover_568237;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           iotHubName: string; failoverInput: JsonNode): Recallable =
   ## iotHubManualFailover
@@ -653,25 +653,25 @@ proc call*(call_594017: Call_IotHubManualFailover_594008;
   ##             : IotHub to fail over
   ##   failoverInput: JObject (required)
   ##                : Region to failover to. Must be a azure DR pair
-  var path_594018 = newJObject()
-  var query_594019 = newJObject()
-  var body_594020 = newJObject()
-  add(path_594018, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594019, "api-version", newJString(apiVersion))
-  add(path_594018, "subscriptionId", newJString(subscriptionId))
-  add(path_594018, "iotHubName", newJString(iotHubName))
+  var path_568247 = newJObject()
+  var query_568248 = newJObject()
+  var body_568249 = newJObject()
+  add(path_568247, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568248, "api-version", newJString(apiVersion))
+  add(path_568247, "subscriptionId", newJString(subscriptionId))
+  add(path_568247, "iotHubName", newJString(iotHubName))
   if failoverInput != nil:
-    body_594020 = failoverInput
-  result = call_594017.call(path_594018, query_594019, nil, nil, body_594020)
+    body_568249 = failoverInput
+  result = call_568246.call(path_568247, query_568248, nil, nil, body_568249)
 
-var iotHubManualFailover* = Call_IotHubManualFailover_594008(
+var iotHubManualFailover* = Call_IotHubManualFailover_568237(
     name: "iotHubManualFailover", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{iotHubName}/failover",
-    validator: validate_IotHubManualFailover_594009, base: "",
-    url: url_IotHubManualFailover_594010, schemes: {Scheme.Https})
+    validator: validate_IotHubManualFailover_568238, base: "",
+    url: url_IotHubManualFailover_568239, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceTestAllRoutes_594021 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceTestAllRoutes_594023(protocol: Scheme; host: string;
+  Call_IotHubResourceTestAllRoutes_568250 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceTestAllRoutes_568252(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -694,7 +694,7 @@ proc url_IotHubResourceTestAllRoutes_594023(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceTestAllRoutes_594022(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceTestAllRoutes_568251(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Test all routes configured in this Iot Hub
   ## 
@@ -710,21 +710,21 @@ proc validate_IotHubResourceTestAllRoutes_594022(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594024 = path.getOrDefault("resourceGroupName")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_568253 = path.getOrDefault("resourceGroupName")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "resourceGroupName", valid_594024
-  var valid_594025 = path.getOrDefault("subscriptionId")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  if valid_568253 != nil:
+    section.add "resourceGroupName", valid_568253
+  var valid_568254 = path.getOrDefault("subscriptionId")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "subscriptionId", valid_594025
-  var valid_594026 = path.getOrDefault("iotHubName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_568254 != nil:
+    section.add "subscriptionId", valid_568254
+  var valid_568255 = path.getOrDefault("iotHubName")
+  valid_568255 = validateParameter(valid_568255, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "iotHubName", valid_594026
+  if valid_568255 != nil:
+    section.add "iotHubName", valid_568255
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -732,11 +732,11 @@ proc validate_IotHubResourceTestAllRoutes_594022(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594027 = query.getOrDefault("api-version")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  var valid_568256 = query.getOrDefault("api-version")
+  valid_568256 = validateParameter(valid_568256, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "api-version", valid_594027
+  if valid_568256 != nil:
+    section.add "api-version", valid_568256
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -750,20 +750,20 @@ proc validate_IotHubResourceTestAllRoutes_594022(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594029: Call_IotHubResourceTestAllRoutes_594021; path: JsonNode;
+proc call*(call_568258: Call_IotHubResourceTestAllRoutes_568250; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Test all routes configured in this Iot Hub
   ## 
-  let valid = call_594029.validator(path, query, header, formData, body)
-  let scheme = call_594029.pickScheme
+  let valid = call_568258.validator(path, query, header, formData, body)
+  let scheme = call_568258.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594029.url(scheme.get, call_594029.host, call_594029.base,
-                         call_594029.route, valid.getOrDefault("path"),
+  let url = call_568258.url(scheme.get, call_568258.host, call_568258.base,
+                         call_568258.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594029, url, valid)
+  result = hook(call_568258, url, valid)
 
-proc call*(call_594030: Call_IotHubResourceTestAllRoutes_594021;
+proc call*(call_568259: Call_IotHubResourceTestAllRoutes_568250;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           input: JsonNode; iotHubName: string): Recallable =
   ## iotHubResourceTestAllRoutes
@@ -778,25 +778,25 @@ proc call*(call_594030: Call_IotHubResourceTestAllRoutes_594021;
   ##        : Input for testing all routes
   ##   iotHubName: string (required)
   ##             : IotHub to be tested
-  var path_594031 = newJObject()
-  var query_594032 = newJObject()
-  var body_594033 = newJObject()
-  add(path_594031, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594032, "api-version", newJString(apiVersion))
-  add(path_594031, "subscriptionId", newJString(subscriptionId))
+  var path_568260 = newJObject()
+  var query_568261 = newJObject()
+  var body_568262 = newJObject()
+  add(path_568260, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568261, "api-version", newJString(apiVersion))
+  add(path_568260, "subscriptionId", newJString(subscriptionId))
   if input != nil:
-    body_594033 = input
-  add(path_594031, "iotHubName", newJString(iotHubName))
-  result = call_594030.call(path_594031, query_594032, nil, nil, body_594033)
+    body_568262 = input
+  add(path_568260, "iotHubName", newJString(iotHubName))
+  result = call_568259.call(path_568260, query_568261, nil, nil, body_568262)
 
-var iotHubResourceTestAllRoutes* = Call_IotHubResourceTestAllRoutes_594021(
+var iotHubResourceTestAllRoutes* = Call_IotHubResourceTestAllRoutes_568250(
     name: "iotHubResourceTestAllRoutes", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{iotHubName}/routing/routes/$testall",
-    validator: validate_IotHubResourceTestAllRoutes_594022, base: "",
-    url: url_IotHubResourceTestAllRoutes_594023, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceTestAllRoutes_568251, base: "",
+    url: url_IotHubResourceTestAllRoutes_568252, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceTestRoute_594034 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceTestRoute_594036(protocol: Scheme; host: string; base: string;
+  Call_IotHubResourceTestRoute_568263 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceTestRoute_568265(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -820,7 +820,7 @@ proc url_IotHubResourceTestRoute_594036(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceTestRoute_594035(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceTestRoute_568264(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Test the new route for this Iot Hub
   ## 
@@ -836,21 +836,21 @@ proc validate_IotHubResourceTestRoute_594035(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594037 = path.getOrDefault("resourceGroupName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  var valid_568266 = path.getOrDefault("resourceGroupName")
+  valid_568266 = validateParameter(valid_568266, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "resourceGroupName", valid_594037
-  var valid_594038 = path.getOrDefault("subscriptionId")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_568266 != nil:
+    section.add "resourceGroupName", valid_568266
+  var valid_568267 = path.getOrDefault("subscriptionId")
+  valid_568267 = validateParameter(valid_568267, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "subscriptionId", valid_594038
-  var valid_594039 = path.getOrDefault("iotHubName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_568267 != nil:
+    section.add "subscriptionId", valid_568267
+  var valid_568268 = path.getOrDefault("iotHubName")
+  valid_568268 = validateParameter(valid_568268, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "iotHubName", valid_594039
+  if valid_568268 != nil:
+    section.add "iotHubName", valid_568268
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -858,11 +858,11 @@ proc validate_IotHubResourceTestRoute_594035(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594040 = query.getOrDefault("api-version")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  var valid_568269 = query.getOrDefault("api-version")
+  valid_568269 = validateParameter(valid_568269, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "api-version", valid_594040
+  if valid_568269 != nil:
+    section.add "api-version", valid_568269
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -876,20 +876,20 @@ proc validate_IotHubResourceTestRoute_594035(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594042: Call_IotHubResourceTestRoute_594034; path: JsonNode;
+proc call*(call_568271: Call_IotHubResourceTestRoute_568263; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Test the new route for this Iot Hub
   ## 
-  let valid = call_594042.validator(path, query, header, formData, body)
-  let scheme = call_594042.pickScheme
+  let valid = call_568271.validator(path, query, header, formData, body)
+  let scheme = call_568271.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594042.url(scheme.get, call_594042.host, call_594042.base,
-                         call_594042.route, valid.getOrDefault("path"),
+  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
+                         call_568271.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594042, url, valid)
+  result = hook(call_568271, url, valid)
 
-proc call*(call_594043: Call_IotHubResourceTestRoute_594034;
+proc call*(call_568272: Call_IotHubResourceTestRoute_568263;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           input: JsonNode; iotHubName: string): Recallable =
   ## iotHubResourceTestRoute
@@ -904,25 +904,25 @@ proc call*(call_594043: Call_IotHubResourceTestRoute_594034;
   ##        : Route that needs to be tested
   ##   iotHubName: string (required)
   ##             : IotHub to be tested
-  var path_594044 = newJObject()
-  var query_594045 = newJObject()
-  var body_594046 = newJObject()
-  add(path_594044, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594045, "api-version", newJString(apiVersion))
-  add(path_594044, "subscriptionId", newJString(subscriptionId))
+  var path_568273 = newJObject()
+  var query_568274 = newJObject()
+  var body_568275 = newJObject()
+  add(path_568273, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568274, "api-version", newJString(apiVersion))
+  add(path_568273, "subscriptionId", newJString(subscriptionId))
   if input != nil:
-    body_594046 = input
-  add(path_594044, "iotHubName", newJString(iotHubName))
-  result = call_594043.call(path_594044, query_594045, nil, nil, body_594046)
+    body_568275 = input
+  add(path_568273, "iotHubName", newJString(iotHubName))
+  result = call_568272.call(path_568273, query_568274, nil, nil, body_568275)
 
-var iotHubResourceTestRoute* = Call_IotHubResourceTestRoute_594034(
+var iotHubResourceTestRoute* = Call_IotHubResourceTestRoute_568263(
     name: "iotHubResourceTestRoute", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{iotHubName}/routing/routes/$testnew",
-    validator: validate_IotHubResourceTestRoute_594035, base: "",
-    url: url_IotHubResourceTestRoute_594036, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceTestRoute_568264, base: "",
+    url: url_IotHubResourceTestRoute_568265, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceGetEndpointHealth_594047 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceGetEndpointHealth_594049(protocol: Scheme; host: string;
+  Call_IotHubResourceGetEndpointHealth_568276 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceGetEndpointHealth_568278(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -945,7 +945,7 @@ proc url_IotHubResourceGetEndpointHealth_594049(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceGetEndpointHealth_594048(path: JsonNode;
+proc validate_IotHubResourceGetEndpointHealth_568277(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the health for routing endpoints.
   ## 
@@ -959,21 +959,21 @@ proc validate_IotHubResourceGetEndpointHealth_594048(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594050 = path.getOrDefault("resourceGroupName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  var valid_568279 = path.getOrDefault("resourceGroupName")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "resourceGroupName", valid_594050
-  var valid_594051 = path.getOrDefault("subscriptionId")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_568279 != nil:
+    section.add "resourceGroupName", valid_568279
+  var valid_568280 = path.getOrDefault("subscriptionId")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "subscriptionId", valid_594051
-  var valid_594052 = path.getOrDefault("iotHubName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_568280 != nil:
+    section.add "subscriptionId", valid_568280
+  var valid_568281 = path.getOrDefault("iotHubName")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "iotHubName", valid_594052
+  if valid_568281 != nil:
+    section.add "iotHubName", valid_568281
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -981,11 +981,11 @@ proc validate_IotHubResourceGetEndpointHealth_594048(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594053 = query.getOrDefault("api-version")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_568282 = query.getOrDefault("api-version")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "api-version", valid_594053
+  if valid_568282 != nil:
+    section.add "api-version", valid_568282
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -994,21 +994,21 @@ proc validate_IotHubResourceGetEndpointHealth_594048(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594054: Call_IotHubResourceGetEndpointHealth_594047;
+proc call*(call_568283: Call_IotHubResourceGetEndpointHealth_568276;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the health for routing endpoints.
   ## 
-  let valid = call_594054.validator(path, query, header, formData, body)
-  let scheme = call_594054.pickScheme
+  let valid = call_568283.validator(path, query, header, formData, body)
+  let scheme = call_568283.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594054.url(scheme.get, call_594054.host, call_594054.base,
-                         call_594054.route, valid.getOrDefault("path"),
+  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
+                         call_568283.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594054, url, valid)
+  result = hook(call_568283, url, valid)
 
-proc call*(call_594055: Call_IotHubResourceGetEndpointHealth_594047;
+proc call*(call_568284: Call_IotHubResourceGetEndpointHealth_568276;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           iotHubName: string): Recallable =
   ## iotHubResourceGetEndpointHealth
@@ -1019,22 +1019,22 @@ proc call*(call_594055: Call_IotHubResourceGetEndpointHealth_594047;
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
   ##   iotHubName: string (required)
-  var path_594056 = newJObject()
-  var query_594057 = newJObject()
-  add(path_594056, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594057, "api-version", newJString(apiVersion))
-  add(path_594056, "subscriptionId", newJString(subscriptionId))
-  add(path_594056, "iotHubName", newJString(iotHubName))
-  result = call_594055.call(path_594056, query_594057, nil, nil, nil)
+  var path_568285 = newJObject()
+  var query_568286 = newJObject()
+  add(path_568285, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568286, "api-version", newJString(apiVersion))
+  add(path_568285, "subscriptionId", newJString(subscriptionId))
+  add(path_568285, "iotHubName", newJString(iotHubName))
+  result = call_568284.call(path_568285, query_568286, nil, nil, nil)
 
-var iotHubResourceGetEndpointHealth* = Call_IotHubResourceGetEndpointHealth_594047(
+var iotHubResourceGetEndpointHealth* = Call_IotHubResourceGetEndpointHealth_568276(
     name: "iotHubResourceGetEndpointHealth", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{iotHubName}/routingEndpointsHealth",
-    validator: validate_IotHubResourceGetEndpointHealth_594048, base: "",
-    url: url_IotHubResourceGetEndpointHealth_594049, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceGetEndpointHealth_568277, base: "",
+    url: url_IotHubResourceGetEndpointHealth_568278, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceCreateOrUpdate_594069 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceCreateOrUpdate_594071(protocol: Scheme; host: string;
+  Call_IotHubResourceCreateOrUpdate_568298 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceCreateOrUpdate_568300(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1056,7 +1056,7 @@ proc url_IotHubResourceCreateOrUpdate_594071(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceCreateOrUpdate_594070(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceCreateOrUpdate_568299(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update the metadata of an Iot hub. The usual pattern to modify a property is to retrieve the IoT hub metadata and security metadata, and then combine them with the modified values in a new body to update the IoT hub.
   ## 
@@ -1072,21 +1072,21 @@ proc validate_IotHubResourceCreateOrUpdate_594070(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594072 = path.getOrDefault("resourceGroupName")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  var valid_568301 = path.getOrDefault("resourceGroupName")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "resourceGroupName", valid_594072
-  var valid_594073 = path.getOrDefault("subscriptionId")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  if valid_568301 != nil:
+    section.add "resourceGroupName", valid_568301
+  var valid_568302 = path.getOrDefault("subscriptionId")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "subscriptionId", valid_594073
-  var valid_594074 = path.getOrDefault("resourceName")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_568302 != nil:
+    section.add "subscriptionId", valid_568302
+  var valid_568303 = path.getOrDefault("resourceName")
+  valid_568303 = validateParameter(valid_568303, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "resourceName", valid_594074
+  if valid_568303 != nil:
+    section.add "resourceName", valid_568303
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1094,21 +1094,21 @@ proc validate_IotHubResourceCreateOrUpdate_594070(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594075 = query.getOrDefault("api-version")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  var valid_568304 = query.getOrDefault("api-version")
+  valid_568304 = validateParameter(valid_568304, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "api-version", valid_594075
+  if valid_568304 != nil:
+    section.add "api-version", valid_568304
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the IoT Hub. Do not specify for creating a brand new IoT Hub. Required to update an existing IoT Hub.
   section = newJObject()
-  var valid_594076 = header.getOrDefault("If-Match")
-  valid_594076 = validateParameter(valid_594076, JString, required = false,
+  var valid_568305 = header.getOrDefault("If-Match")
+  valid_568305 = validateParameter(valid_568305, JString, required = false,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "If-Match", valid_594076
+  if valid_568305 != nil:
+    section.add "If-Match", valid_568305
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1120,20 +1120,20 @@ proc validate_IotHubResourceCreateOrUpdate_594070(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594078: Call_IotHubResourceCreateOrUpdate_594069; path: JsonNode;
+proc call*(call_568307: Call_IotHubResourceCreateOrUpdate_568298; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update the metadata of an Iot hub. The usual pattern to modify a property is to retrieve the IoT hub metadata and security metadata, and then combine them with the modified values in a new body to update the IoT hub.
   ## 
-  let valid = call_594078.validator(path, query, header, formData, body)
-  let scheme = call_594078.pickScheme
+  let valid = call_568307.validator(path, query, header, formData, body)
+  let scheme = call_568307.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594078.url(scheme.get, call_594078.host, call_594078.base,
-                         call_594078.route, valid.getOrDefault("path"),
+  let url = call_568307.url(scheme.get, call_568307.host, call_568307.base,
+                         call_568307.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594078, url, valid)
+  result = hook(call_568307, url, valid)
 
-proc call*(call_594079: Call_IotHubResourceCreateOrUpdate_594069;
+proc call*(call_568308: Call_IotHubResourceCreateOrUpdate_568298;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; iotHubDescription: JsonNode): Recallable =
   ## iotHubResourceCreateOrUpdate
@@ -1148,25 +1148,25 @@ proc call*(call_594079: Call_IotHubResourceCreateOrUpdate_594069;
   ##               : The name of the IoT hub.
   ##   iotHubDescription: JObject (required)
   ##                    : The IoT hub metadata and security metadata.
-  var path_594080 = newJObject()
-  var query_594081 = newJObject()
-  var body_594082 = newJObject()
-  add(path_594080, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594081, "api-version", newJString(apiVersion))
-  add(path_594080, "subscriptionId", newJString(subscriptionId))
-  add(path_594080, "resourceName", newJString(resourceName))
+  var path_568309 = newJObject()
+  var query_568310 = newJObject()
+  var body_568311 = newJObject()
+  add(path_568309, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568310, "api-version", newJString(apiVersion))
+  add(path_568309, "subscriptionId", newJString(subscriptionId))
+  add(path_568309, "resourceName", newJString(resourceName))
   if iotHubDescription != nil:
-    body_594082 = iotHubDescription
-  result = call_594079.call(path_594080, query_594081, nil, nil, body_594082)
+    body_568311 = iotHubDescription
+  result = call_568308.call(path_568309, query_568310, nil, nil, body_568311)
 
-var iotHubResourceCreateOrUpdate* = Call_IotHubResourceCreateOrUpdate_594069(
+var iotHubResourceCreateOrUpdate* = Call_IotHubResourceCreateOrUpdate_568298(
     name: "iotHubResourceCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}",
-    validator: validate_IotHubResourceCreateOrUpdate_594070, base: "",
-    url: url_IotHubResourceCreateOrUpdate_594071, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceCreateOrUpdate_568299, base: "",
+    url: url_IotHubResourceCreateOrUpdate_568300, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceGet_594058 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceGet_594060(protocol: Scheme; host: string; base: string;
+  Call_IotHubResourceGet_568287 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceGet_568289(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1188,7 +1188,7 @@ proc url_IotHubResourceGet_594060(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceGet_594059(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceGet_568288(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get the non-security related metadata of an IoT hub.
@@ -1205,21 +1205,21 @@ proc validate_IotHubResourceGet_594059(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594061 = path.getOrDefault("resourceGroupName")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  var valid_568290 = path.getOrDefault("resourceGroupName")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "resourceGroupName", valid_594061
-  var valid_594062 = path.getOrDefault("subscriptionId")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  if valid_568290 != nil:
+    section.add "resourceGroupName", valid_568290
+  var valid_568291 = path.getOrDefault("subscriptionId")
+  valid_568291 = validateParameter(valid_568291, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "subscriptionId", valid_594062
-  var valid_594063 = path.getOrDefault("resourceName")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  if valid_568291 != nil:
+    section.add "subscriptionId", valid_568291
+  var valid_568292 = path.getOrDefault("resourceName")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "resourceName", valid_594063
+  if valid_568292 != nil:
+    section.add "resourceName", valid_568292
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1227,11 +1227,11 @@ proc validate_IotHubResourceGet_594059(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594064 = query.getOrDefault("api-version")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  var valid_568293 = query.getOrDefault("api-version")
+  valid_568293 = validateParameter(valid_568293, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "api-version", valid_594064
+  if valid_568293 != nil:
+    section.add "api-version", valid_568293
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1240,20 +1240,20 @@ proc validate_IotHubResourceGet_594059(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594065: Call_IotHubResourceGet_594058; path: JsonNode;
+proc call*(call_568294: Call_IotHubResourceGet_568287; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the non-security related metadata of an IoT hub.
   ## 
-  let valid = call_594065.validator(path, query, header, formData, body)
-  let scheme = call_594065.pickScheme
+  let valid = call_568294.validator(path, query, header, formData, body)
+  let scheme = call_568294.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594065.url(scheme.get, call_594065.host, call_594065.base,
-                         call_594065.route, valid.getOrDefault("path"),
+  let url = call_568294.url(scheme.get, call_568294.host, call_568294.base,
+                         call_568294.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594065, url, valid)
+  result = hook(call_568294, url, valid)
 
-proc call*(call_594066: Call_IotHubResourceGet_594058; resourceGroupName: string;
+proc call*(call_568295: Call_IotHubResourceGet_568287; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
   ## iotHubResourceGet
   ## Get the non-security related metadata of an IoT hub.
@@ -1265,21 +1265,21 @@ proc call*(call_594066: Call_IotHubResourceGet_594058; resourceGroupName: string
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594067 = newJObject()
-  var query_594068 = newJObject()
-  add(path_594067, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594068, "api-version", newJString(apiVersion))
-  add(path_594067, "subscriptionId", newJString(subscriptionId))
-  add(path_594067, "resourceName", newJString(resourceName))
-  result = call_594066.call(path_594067, query_594068, nil, nil, nil)
+  var path_568296 = newJObject()
+  var query_568297 = newJObject()
+  add(path_568296, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568297, "api-version", newJString(apiVersion))
+  add(path_568296, "subscriptionId", newJString(subscriptionId))
+  add(path_568296, "resourceName", newJString(resourceName))
+  result = call_568295.call(path_568296, query_568297, nil, nil, nil)
 
-var iotHubResourceGet* = Call_IotHubResourceGet_594058(name: "iotHubResourceGet",
+var iotHubResourceGet* = Call_IotHubResourceGet_568287(name: "iotHubResourceGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}",
-    validator: validate_IotHubResourceGet_594059, base: "",
-    url: url_IotHubResourceGet_594060, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceGet_568288, base: "",
+    url: url_IotHubResourceGet_568289, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceUpdate_594094 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceUpdate_594096(protocol: Scheme; host: string; base: string;
+  Call_IotHubResourceUpdate_568323 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceUpdate_568325(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1301,7 +1301,7 @@ proc url_IotHubResourceUpdate_594096(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceUpdate_594095(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceUpdate_568324(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update an existing IoT Hub tags. to update other fields use the CreateOrUpdate method
   ## 
@@ -1317,21 +1317,21 @@ proc validate_IotHubResourceUpdate_594095(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594114 = path.getOrDefault("resourceGroupName")
-  valid_594114 = validateParameter(valid_594114, JString, required = true,
+  var valid_568343 = path.getOrDefault("resourceGroupName")
+  valid_568343 = validateParameter(valid_568343, JString, required = true,
                                  default = nil)
-  if valid_594114 != nil:
-    section.add "resourceGroupName", valid_594114
-  var valid_594115 = path.getOrDefault("subscriptionId")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  if valid_568343 != nil:
+    section.add "resourceGroupName", valid_568343
+  var valid_568344 = path.getOrDefault("subscriptionId")
+  valid_568344 = validateParameter(valid_568344, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "subscriptionId", valid_594115
-  var valid_594116 = path.getOrDefault("resourceName")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_568344 != nil:
+    section.add "subscriptionId", valid_568344
+  var valid_568345 = path.getOrDefault("resourceName")
+  valid_568345 = validateParameter(valid_568345, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "resourceName", valid_594116
+  if valid_568345 != nil:
+    section.add "resourceName", valid_568345
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1339,11 +1339,11 @@ proc validate_IotHubResourceUpdate_594095(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594117 = query.getOrDefault("api-version")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  var valid_568346 = query.getOrDefault("api-version")
+  valid_568346 = validateParameter(valid_568346, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "api-version", valid_594117
+  if valid_568346 != nil:
+    section.add "api-version", valid_568346
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1357,20 +1357,20 @@ proc validate_IotHubResourceUpdate_594095(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594119: Call_IotHubResourceUpdate_594094; path: JsonNode;
+proc call*(call_568348: Call_IotHubResourceUpdate_568323; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update an existing IoT Hub tags. to update other fields use the CreateOrUpdate method
   ## 
-  let valid = call_594119.validator(path, query, header, formData, body)
-  let scheme = call_594119.pickScheme
+  let valid = call_568348.validator(path, query, header, formData, body)
+  let scheme = call_568348.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594119.url(scheme.get, call_594119.host, call_594119.base,
-                         call_594119.route, valid.getOrDefault("path"),
+  let url = call_568348.url(scheme.get, call_568348.host, call_568348.base,
+                         call_568348.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594119, url, valid)
+  result = hook(call_568348, url, valid)
 
-proc call*(call_594120: Call_IotHubResourceUpdate_594094;
+proc call*(call_568349: Call_IotHubResourceUpdate_568323;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; IotHubTags: JsonNode): Recallable =
   ## iotHubResourceUpdate
@@ -1385,25 +1385,25 @@ proc call*(call_594120: Call_IotHubResourceUpdate_594094;
   ##               : Name of iot hub to update.
   ##   IotHubTags: JObject (required)
   ##             : Updated tag information to set into the iot hub instance.
-  var path_594121 = newJObject()
-  var query_594122 = newJObject()
-  var body_594123 = newJObject()
-  add(path_594121, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594122, "api-version", newJString(apiVersion))
-  add(path_594121, "subscriptionId", newJString(subscriptionId))
-  add(path_594121, "resourceName", newJString(resourceName))
+  var path_568350 = newJObject()
+  var query_568351 = newJObject()
+  var body_568352 = newJObject()
+  add(path_568350, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568351, "api-version", newJString(apiVersion))
+  add(path_568350, "subscriptionId", newJString(subscriptionId))
+  add(path_568350, "resourceName", newJString(resourceName))
   if IotHubTags != nil:
-    body_594123 = IotHubTags
-  result = call_594120.call(path_594121, query_594122, nil, nil, body_594123)
+    body_568352 = IotHubTags
+  result = call_568349.call(path_568350, query_568351, nil, nil, body_568352)
 
-var iotHubResourceUpdate* = Call_IotHubResourceUpdate_594094(
+var iotHubResourceUpdate* = Call_IotHubResourceUpdate_568323(
     name: "iotHubResourceUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}",
-    validator: validate_IotHubResourceUpdate_594095, base: "",
-    url: url_IotHubResourceUpdate_594096, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceUpdate_568324, base: "",
+    url: url_IotHubResourceUpdate_568325, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceDelete_594083 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceDelete_594085(protocol: Scheme; host: string; base: string;
+  Call_IotHubResourceDelete_568312 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceDelete_568314(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1425,7 +1425,7 @@ proc url_IotHubResourceDelete_594085(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceDelete_594084(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceDelete_568313(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an IoT hub.
   ## 
@@ -1441,21 +1441,21 @@ proc validate_IotHubResourceDelete_594084(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594086 = path.getOrDefault("resourceGroupName")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  var valid_568315 = path.getOrDefault("resourceGroupName")
+  valid_568315 = validateParameter(valid_568315, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "resourceGroupName", valid_594086
-  var valid_594087 = path.getOrDefault("subscriptionId")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  if valid_568315 != nil:
+    section.add "resourceGroupName", valid_568315
+  var valid_568316 = path.getOrDefault("subscriptionId")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "subscriptionId", valid_594087
-  var valid_594088 = path.getOrDefault("resourceName")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  if valid_568316 != nil:
+    section.add "subscriptionId", valid_568316
+  var valid_568317 = path.getOrDefault("resourceName")
+  valid_568317 = validateParameter(valid_568317, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "resourceName", valid_594088
+  if valid_568317 != nil:
+    section.add "resourceName", valid_568317
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1463,11 +1463,11 @@ proc validate_IotHubResourceDelete_594084(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594089 = query.getOrDefault("api-version")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_568318 = query.getOrDefault("api-version")
+  valid_568318 = validateParameter(valid_568318, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "api-version", valid_594089
+  if valid_568318 != nil:
+    section.add "api-version", valid_568318
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1476,20 +1476,20 @@ proc validate_IotHubResourceDelete_594084(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594090: Call_IotHubResourceDelete_594083; path: JsonNode;
+proc call*(call_568319: Call_IotHubResourceDelete_568312; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an IoT hub.
   ## 
-  let valid = call_594090.validator(path, query, header, formData, body)
-  let scheme = call_594090.pickScheme
+  let valid = call_568319.validator(path, query, header, formData, body)
+  let scheme = call_568319.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594090.url(scheme.get, call_594090.host, call_594090.base,
-                         call_594090.route, valid.getOrDefault("path"),
+  let url = call_568319.url(scheme.get, call_568319.host, call_568319.base,
+                         call_568319.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594090, url, valid)
+  result = hook(call_568319, url, valid)
 
-proc call*(call_594091: Call_IotHubResourceDelete_594083;
+proc call*(call_568320: Call_IotHubResourceDelete_568312;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## iotHubResourceDelete
@@ -1502,22 +1502,22 @@ proc call*(call_594091: Call_IotHubResourceDelete_594083;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594092 = newJObject()
-  var query_594093 = newJObject()
-  add(path_594092, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594093, "api-version", newJString(apiVersion))
-  add(path_594092, "subscriptionId", newJString(subscriptionId))
-  add(path_594092, "resourceName", newJString(resourceName))
-  result = call_594091.call(path_594092, query_594093, nil, nil, nil)
+  var path_568321 = newJObject()
+  var query_568322 = newJObject()
+  add(path_568321, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568322, "api-version", newJString(apiVersion))
+  add(path_568321, "subscriptionId", newJString(subscriptionId))
+  add(path_568321, "resourceName", newJString(resourceName))
+  result = call_568320.call(path_568321, query_568322, nil, nil, nil)
 
-var iotHubResourceDelete* = Call_IotHubResourceDelete_594083(
+var iotHubResourceDelete* = Call_IotHubResourceDelete_568312(
     name: "iotHubResourceDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}",
-    validator: validate_IotHubResourceDelete_594084, base: "",
-    url: url_IotHubResourceDelete_594085, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceDelete_568313, base: "",
+    url: url_IotHubResourceDelete_568314, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceGetKeysForKeyName_594124 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceGetKeysForKeyName_594126(protocol: Scheme; host: string;
+  Call_IotHubResourceGetKeysForKeyName_568353 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceGetKeysForKeyName_568355(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1543,7 +1543,7 @@ proc url_IotHubResourceGetKeysForKeyName_594126(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceGetKeysForKeyName_594125(path: JsonNode;
+proc validate_IotHubResourceGetKeysForKeyName_568354(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a shared access policy by name from an IoT hub. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security.
   ## 
@@ -1561,26 +1561,26 @@ proc validate_IotHubResourceGetKeysForKeyName_594125(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594127 = path.getOrDefault("resourceGroupName")
-  valid_594127 = validateParameter(valid_594127, JString, required = true,
+  var valid_568356 = path.getOrDefault("resourceGroupName")
+  valid_568356 = validateParameter(valid_568356, JString, required = true,
                                  default = nil)
-  if valid_594127 != nil:
-    section.add "resourceGroupName", valid_594127
-  var valid_594128 = path.getOrDefault("keyName")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  if valid_568356 != nil:
+    section.add "resourceGroupName", valid_568356
+  var valid_568357 = path.getOrDefault("keyName")
+  valid_568357 = validateParameter(valid_568357, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "keyName", valid_594128
-  var valid_594129 = path.getOrDefault("subscriptionId")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  if valid_568357 != nil:
+    section.add "keyName", valid_568357
+  var valid_568358 = path.getOrDefault("subscriptionId")
+  valid_568358 = validateParameter(valid_568358, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "subscriptionId", valid_594129
-  var valid_594130 = path.getOrDefault("resourceName")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  if valid_568358 != nil:
+    section.add "subscriptionId", valid_568358
+  var valid_568359 = path.getOrDefault("resourceName")
+  valid_568359 = validateParameter(valid_568359, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "resourceName", valid_594130
+  if valid_568359 != nil:
+    section.add "resourceName", valid_568359
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1588,11 +1588,11 @@ proc validate_IotHubResourceGetKeysForKeyName_594125(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594131 = query.getOrDefault("api-version")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  var valid_568360 = query.getOrDefault("api-version")
+  valid_568360 = validateParameter(valid_568360, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "api-version", valid_594131
+  if valid_568360 != nil:
+    section.add "api-version", valid_568360
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1601,21 +1601,21 @@ proc validate_IotHubResourceGetKeysForKeyName_594125(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594132: Call_IotHubResourceGetKeysForKeyName_594124;
+proc call*(call_568361: Call_IotHubResourceGetKeysForKeyName_568353;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a shared access policy by name from an IoT hub. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security.
   ## 
-  let valid = call_594132.validator(path, query, header, formData, body)
-  let scheme = call_594132.pickScheme
+  let valid = call_568361.validator(path, query, header, formData, body)
+  let scheme = call_568361.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594132.url(scheme.get, call_594132.host, call_594132.base,
-                         call_594132.route, valid.getOrDefault("path"),
+  let url = call_568361.url(scheme.get, call_568361.host, call_568361.base,
+                         call_568361.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594132, url, valid)
+  result = hook(call_568361, url, valid)
 
-proc call*(call_594133: Call_IotHubResourceGetKeysForKeyName_594124;
+proc call*(call_568362: Call_IotHubResourceGetKeysForKeyName_568353;
           resourceGroupName: string; apiVersion: string; keyName: string;
           subscriptionId: string; resourceName: string): Recallable =
   ## iotHubResourceGetKeysForKeyName
@@ -1630,23 +1630,23 @@ proc call*(call_594133: Call_IotHubResourceGetKeysForKeyName_594124;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594134 = newJObject()
-  var query_594135 = newJObject()
-  add(path_594134, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594135, "api-version", newJString(apiVersion))
-  add(path_594134, "keyName", newJString(keyName))
-  add(path_594134, "subscriptionId", newJString(subscriptionId))
-  add(path_594134, "resourceName", newJString(resourceName))
-  result = call_594133.call(path_594134, query_594135, nil, nil, nil)
+  var path_568363 = newJObject()
+  var query_568364 = newJObject()
+  add(path_568363, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568364, "api-version", newJString(apiVersion))
+  add(path_568363, "keyName", newJString(keyName))
+  add(path_568363, "subscriptionId", newJString(subscriptionId))
+  add(path_568363, "resourceName", newJString(resourceName))
+  result = call_568362.call(path_568363, query_568364, nil, nil, nil)
 
-var iotHubResourceGetKeysForKeyName* = Call_IotHubResourceGetKeysForKeyName_594124(
+var iotHubResourceGetKeysForKeyName* = Call_IotHubResourceGetKeysForKeyName_568353(
     name: "iotHubResourceGetKeysForKeyName", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/IotHubKeys/{keyName}/listkeys",
-    validator: validate_IotHubResourceGetKeysForKeyName_594125, base: "",
-    url: url_IotHubResourceGetKeysForKeyName_594126, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceGetKeysForKeyName_568354, base: "",
+    url: url_IotHubResourceGetKeysForKeyName_568355, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceGetStats_594136 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceGetStats_594138(protocol: Scheme; host: string; base: string;
+  Call_IotHubResourceGetStats_568365 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceGetStats_568367(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1669,7 +1669,7 @@ proc url_IotHubResourceGetStats_594138(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceGetStats_594137(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceGetStats_568366(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the statistics from an IoT hub.
   ## 
@@ -1685,21 +1685,21 @@ proc validate_IotHubResourceGetStats_594137(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594139 = path.getOrDefault("resourceGroupName")
-  valid_594139 = validateParameter(valid_594139, JString, required = true,
+  var valid_568368 = path.getOrDefault("resourceGroupName")
+  valid_568368 = validateParameter(valid_568368, JString, required = true,
                                  default = nil)
-  if valid_594139 != nil:
-    section.add "resourceGroupName", valid_594139
-  var valid_594140 = path.getOrDefault("subscriptionId")
-  valid_594140 = validateParameter(valid_594140, JString, required = true,
+  if valid_568368 != nil:
+    section.add "resourceGroupName", valid_568368
+  var valid_568369 = path.getOrDefault("subscriptionId")
+  valid_568369 = validateParameter(valid_568369, JString, required = true,
                                  default = nil)
-  if valid_594140 != nil:
-    section.add "subscriptionId", valid_594140
-  var valid_594141 = path.getOrDefault("resourceName")
-  valid_594141 = validateParameter(valid_594141, JString, required = true,
+  if valid_568369 != nil:
+    section.add "subscriptionId", valid_568369
+  var valid_568370 = path.getOrDefault("resourceName")
+  valid_568370 = validateParameter(valid_568370, JString, required = true,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "resourceName", valid_594141
+  if valid_568370 != nil:
+    section.add "resourceName", valid_568370
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1707,11 +1707,11 @@ proc validate_IotHubResourceGetStats_594137(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594142 = query.getOrDefault("api-version")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  var valid_568371 = query.getOrDefault("api-version")
+  valid_568371 = validateParameter(valid_568371, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "api-version", valid_594142
+  if valid_568371 != nil:
+    section.add "api-version", valid_568371
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1720,20 +1720,20 @@ proc validate_IotHubResourceGetStats_594137(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594143: Call_IotHubResourceGetStats_594136; path: JsonNode;
+proc call*(call_568372: Call_IotHubResourceGetStats_568365; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the statistics from an IoT hub.
   ## 
-  let valid = call_594143.validator(path, query, header, formData, body)
-  let scheme = call_594143.pickScheme
+  let valid = call_568372.validator(path, query, header, formData, body)
+  let scheme = call_568372.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594143.url(scheme.get, call_594143.host, call_594143.base,
-                         call_594143.route, valid.getOrDefault("path"),
+  let url = call_568372.url(scheme.get, call_568372.host, call_568372.base,
+                         call_568372.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594143, url, valid)
+  result = hook(call_568372, url, valid)
 
-proc call*(call_594144: Call_IotHubResourceGetStats_594136;
+proc call*(call_568373: Call_IotHubResourceGetStats_568365;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## iotHubResourceGetStats
@@ -1746,22 +1746,22 @@ proc call*(call_594144: Call_IotHubResourceGetStats_594136;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594145 = newJObject()
-  var query_594146 = newJObject()
-  add(path_594145, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594146, "api-version", newJString(apiVersion))
-  add(path_594145, "subscriptionId", newJString(subscriptionId))
-  add(path_594145, "resourceName", newJString(resourceName))
-  result = call_594144.call(path_594145, query_594146, nil, nil, nil)
+  var path_568374 = newJObject()
+  var query_568375 = newJObject()
+  add(path_568374, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568375, "api-version", newJString(apiVersion))
+  add(path_568374, "subscriptionId", newJString(subscriptionId))
+  add(path_568374, "resourceName", newJString(resourceName))
+  result = call_568373.call(path_568374, query_568375, nil, nil, nil)
 
-var iotHubResourceGetStats* = Call_IotHubResourceGetStats_594136(
+var iotHubResourceGetStats* = Call_IotHubResourceGetStats_568365(
     name: "iotHubResourceGetStats", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/IotHubStats",
-    validator: validate_IotHubResourceGetStats_594137, base: "",
-    url: url_IotHubResourceGetStats_594138, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceGetStats_568366, base: "",
+    url: url_IotHubResourceGetStats_568367, schemes: {Scheme.Https})
 type
-  Call_CertificatesListByIotHub_594147 = ref object of OpenApiRestCall_593437
-proc url_CertificatesListByIotHub_594149(protocol: Scheme; host: string;
+  Call_CertificatesListByIotHub_568376 = ref object of OpenApiRestCall_567666
+proc url_CertificatesListByIotHub_568378(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1785,7 +1785,7 @@ proc url_CertificatesListByIotHub_594149(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificatesListByIotHub_594148(path: JsonNode; query: JsonNode;
+proc validate_CertificatesListByIotHub_568377(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the list of certificates.
   ## 
@@ -1801,21 +1801,21 @@ proc validate_CertificatesListByIotHub_594148(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594150 = path.getOrDefault("resourceGroupName")
-  valid_594150 = validateParameter(valid_594150, JString, required = true,
+  var valid_568379 = path.getOrDefault("resourceGroupName")
+  valid_568379 = validateParameter(valid_568379, JString, required = true,
                                  default = nil)
-  if valid_594150 != nil:
-    section.add "resourceGroupName", valid_594150
-  var valid_594151 = path.getOrDefault("subscriptionId")
-  valid_594151 = validateParameter(valid_594151, JString, required = true,
+  if valid_568379 != nil:
+    section.add "resourceGroupName", valid_568379
+  var valid_568380 = path.getOrDefault("subscriptionId")
+  valid_568380 = validateParameter(valid_568380, JString, required = true,
                                  default = nil)
-  if valid_594151 != nil:
-    section.add "subscriptionId", valid_594151
-  var valid_594152 = path.getOrDefault("resourceName")
-  valid_594152 = validateParameter(valid_594152, JString, required = true,
+  if valid_568380 != nil:
+    section.add "subscriptionId", valid_568380
+  var valid_568381 = path.getOrDefault("resourceName")
+  valid_568381 = validateParameter(valid_568381, JString, required = true,
                                  default = nil)
-  if valid_594152 != nil:
-    section.add "resourceName", valid_594152
+  if valid_568381 != nil:
+    section.add "resourceName", valid_568381
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1823,11 +1823,11 @@ proc validate_CertificatesListByIotHub_594148(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594153 = query.getOrDefault("api-version")
-  valid_594153 = validateParameter(valid_594153, JString, required = true,
+  var valid_568382 = query.getOrDefault("api-version")
+  valid_568382 = validateParameter(valid_568382, JString, required = true,
                                  default = nil)
-  if valid_594153 != nil:
-    section.add "api-version", valid_594153
+  if valid_568382 != nil:
+    section.add "api-version", valid_568382
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1836,20 +1836,20 @@ proc validate_CertificatesListByIotHub_594148(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594154: Call_CertificatesListByIotHub_594147; path: JsonNode;
+proc call*(call_568383: Call_CertificatesListByIotHub_568376; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of certificates.
   ## 
-  let valid = call_594154.validator(path, query, header, formData, body)
-  let scheme = call_594154.pickScheme
+  let valid = call_568383.validator(path, query, header, formData, body)
+  let scheme = call_568383.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594154.url(scheme.get, call_594154.host, call_594154.base,
-                         call_594154.route, valid.getOrDefault("path"),
+  let url = call_568383.url(scheme.get, call_568383.host, call_568383.base,
+                         call_568383.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594154, url, valid)
+  result = hook(call_568383, url, valid)
 
-proc call*(call_594155: Call_CertificatesListByIotHub_594147;
+proc call*(call_568384: Call_CertificatesListByIotHub_568376;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## certificatesListByIotHub
@@ -1862,22 +1862,22 @@ proc call*(call_594155: Call_CertificatesListByIotHub_594147;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594156 = newJObject()
-  var query_594157 = newJObject()
-  add(path_594156, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594157, "api-version", newJString(apiVersion))
-  add(path_594156, "subscriptionId", newJString(subscriptionId))
-  add(path_594156, "resourceName", newJString(resourceName))
-  result = call_594155.call(path_594156, query_594157, nil, nil, nil)
+  var path_568385 = newJObject()
+  var query_568386 = newJObject()
+  add(path_568385, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568386, "api-version", newJString(apiVersion))
+  add(path_568385, "subscriptionId", newJString(subscriptionId))
+  add(path_568385, "resourceName", newJString(resourceName))
+  result = call_568384.call(path_568385, query_568386, nil, nil, nil)
 
-var certificatesListByIotHub* = Call_CertificatesListByIotHub_594147(
+var certificatesListByIotHub* = Call_CertificatesListByIotHub_568376(
     name: "certificatesListByIotHub", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/certificates",
-    validator: validate_CertificatesListByIotHub_594148, base: "",
-    url: url_CertificatesListByIotHub_594149, schemes: {Scheme.Https})
+    validator: validate_CertificatesListByIotHub_568377, base: "",
+    url: url_CertificatesListByIotHub_568378, schemes: {Scheme.Https})
 type
-  Call_CertificatesCreateOrUpdate_594170 = ref object of OpenApiRestCall_593437
-proc url_CertificatesCreateOrUpdate_594172(protocol: Scheme; host: string;
+  Call_CertificatesCreateOrUpdate_568399 = ref object of OpenApiRestCall_567666
+proc url_CertificatesCreateOrUpdate_568401(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1902,7 +1902,7 @@ proc url_CertificatesCreateOrUpdate_594172(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificatesCreateOrUpdate_594171(path: JsonNode; query: JsonNode;
+proc validate_CertificatesCreateOrUpdate_568400(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Adds new or replaces existing certificate.
   ## 
@@ -1920,26 +1920,26 @@ proc validate_CertificatesCreateOrUpdate_594171(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594173 = path.getOrDefault("resourceGroupName")
-  valid_594173 = validateParameter(valid_594173, JString, required = true,
+  var valid_568402 = path.getOrDefault("resourceGroupName")
+  valid_568402 = validateParameter(valid_568402, JString, required = true,
                                  default = nil)
-  if valid_594173 != nil:
-    section.add "resourceGroupName", valid_594173
-  var valid_594174 = path.getOrDefault("subscriptionId")
-  valid_594174 = validateParameter(valid_594174, JString, required = true,
+  if valid_568402 != nil:
+    section.add "resourceGroupName", valid_568402
+  var valid_568403 = path.getOrDefault("subscriptionId")
+  valid_568403 = validateParameter(valid_568403, JString, required = true,
                                  default = nil)
-  if valid_594174 != nil:
-    section.add "subscriptionId", valid_594174
-  var valid_594175 = path.getOrDefault("resourceName")
-  valid_594175 = validateParameter(valid_594175, JString, required = true,
+  if valid_568403 != nil:
+    section.add "subscriptionId", valid_568403
+  var valid_568404 = path.getOrDefault("resourceName")
+  valid_568404 = validateParameter(valid_568404, JString, required = true,
                                  default = nil)
-  if valid_594175 != nil:
-    section.add "resourceName", valid_594175
-  var valid_594176 = path.getOrDefault("certificateName")
-  valid_594176 = validateParameter(valid_594176, JString, required = true,
+  if valid_568404 != nil:
+    section.add "resourceName", valid_568404
+  var valid_568405 = path.getOrDefault("certificateName")
+  valid_568405 = validateParameter(valid_568405, JString, required = true,
                                  default = nil)
-  if valid_594176 != nil:
-    section.add "certificateName", valid_594176
+  if valid_568405 != nil:
+    section.add "certificateName", valid_568405
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1947,21 +1947,21 @@ proc validate_CertificatesCreateOrUpdate_594171(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594177 = query.getOrDefault("api-version")
-  valid_594177 = validateParameter(valid_594177, JString, required = true,
+  var valid_568406 = query.getOrDefault("api-version")
+  valid_568406 = validateParameter(valid_568406, JString, required = true,
                                  default = nil)
-  if valid_594177 != nil:
-    section.add "api-version", valid_594177
+  if valid_568406 != nil:
+    section.add "api-version", valid_568406
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Certificate. Do not specify for creating a brand new certificate. Required to update an existing certificate.
   section = newJObject()
-  var valid_594178 = header.getOrDefault("If-Match")
-  valid_594178 = validateParameter(valid_594178, JString, required = false,
+  var valid_568407 = header.getOrDefault("If-Match")
+  valid_568407 = validateParameter(valid_568407, JString, required = false,
                                  default = nil)
-  if valid_594178 != nil:
-    section.add "If-Match", valid_594178
+  if valid_568407 != nil:
+    section.add "If-Match", valid_568407
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1973,20 +1973,20 @@ proc validate_CertificatesCreateOrUpdate_594171(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594180: Call_CertificatesCreateOrUpdate_594170; path: JsonNode;
+proc call*(call_568409: Call_CertificatesCreateOrUpdate_568399; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Adds new or replaces existing certificate.
   ## 
-  let valid = call_594180.validator(path, query, header, formData, body)
-  let scheme = call_594180.pickScheme
+  let valid = call_568409.validator(path, query, header, formData, body)
+  let scheme = call_568409.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594180.url(scheme.get, call_594180.host, call_594180.base,
-                         call_594180.route, valid.getOrDefault("path"),
+  let url = call_568409.url(scheme.get, call_568409.host, call_568409.base,
+                         call_568409.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594180, url, valid)
+  result = hook(call_568409, url, valid)
 
-proc call*(call_594181: Call_CertificatesCreateOrUpdate_594170;
+proc call*(call_568410: Call_CertificatesCreateOrUpdate_568399;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; certificateName: string;
           certificateDescription: JsonNode): Recallable =
@@ -2004,26 +2004,26 @@ proc call*(call_594181: Call_CertificatesCreateOrUpdate_594170;
   ##                  : The name of the certificate
   ##   certificateDescription: JObject (required)
   ##                         : The certificate body.
-  var path_594182 = newJObject()
-  var query_594183 = newJObject()
-  var body_594184 = newJObject()
-  add(path_594182, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594183, "api-version", newJString(apiVersion))
-  add(path_594182, "subscriptionId", newJString(subscriptionId))
-  add(path_594182, "resourceName", newJString(resourceName))
-  add(path_594182, "certificateName", newJString(certificateName))
+  var path_568411 = newJObject()
+  var query_568412 = newJObject()
+  var body_568413 = newJObject()
+  add(path_568411, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568412, "api-version", newJString(apiVersion))
+  add(path_568411, "subscriptionId", newJString(subscriptionId))
+  add(path_568411, "resourceName", newJString(resourceName))
+  add(path_568411, "certificateName", newJString(certificateName))
   if certificateDescription != nil:
-    body_594184 = certificateDescription
-  result = call_594181.call(path_594182, query_594183, nil, nil, body_594184)
+    body_568413 = certificateDescription
+  result = call_568410.call(path_568411, query_568412, nil, nil, body_568413)
 
-var certificatesCreateOrUpdate* = Call_CertificatesCreateOrUpdate_594170(
+var certificatesCreateOrUpdate* = Call_CertificatesCreateOrUpdate_568399(
     name: "certificatesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/certificates/{certificateName}",
-    validator: validate_CertificatesCreateOrUpdate_594171, base: "",
-    url: url_CertificatesCreateOrUpdate_594172, schemes: {Scheme.Https})
+    validator: validate_CertificatesCreateOrUpdate_568400, base: "",
+    url: url_CertificatesCreateOrUpdate_568401, schemes: {Scheme.Https})
 type
-  Call_CertificatesGet_594158 = ref object of OpenApiRestCall_593437
-proc url_CertificatesGet_594160(protocol: Scheme; host: string; base: string;
+  Call_CertificatesGet_568387 = ref object of OpenApiRestCall_567666
+proc url_CertificatesGet_568389(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2048,7 +2048,7 @@ proc url_CertificatesGet_594160(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificatesGet_594159(path: JsonNode; query: JsonNode;
+proc validate_CertificatesGet_568388(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Returns the certificate.
@@ -2067,26 +2067,26 @@ proc validate_CertificatesGet_594159(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594161 = path.getOrDefault("resourceGroupName")
-  valid_594161 = validateParameter(valid_594161, JString, required = true,
+  var valid_568390 = path.getOrDefault("resourceGroupName")
+  valid_568390 = validateParameter(valid_568390, JString, required = true,
                                  default = nil)
-  if valid_594161 != nil:
-    section.add "resourceGroupName", valid_594161
-  var valid_594162 = path.getOrDefault("subscriptionId")
-  valid_594162 = validateParameter(valid_594162, JString, required = true,
+  if valid_568390 != nil:
+    section.add "resourceGroupName", valid_568390
+  var valid_568391 = path.getOrDefault("subscriptionId")
+  valid_568391 = validateParameter(valid_568391, JString, required = true,
                                  default = nil)
-  if valid_594162 != nil:
-    section.add "subscriptionId", valid_594162
-  var valid_594163 = path.getOrDefault("resourceName")
-  valid_594163 = validateParameter(valid_594163, JString, required = true,
+  if valid_568391 != nil:
+    section.add "subscriptionId", valid_568391
+  var valid_568392 = path.getOrDefault("resourceName")
+  valid_568392 = validateParameter(valid_568392, JString, required = true,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "resourceName", valid_594163
-  var valid_594164 = path.getOrDefault("certificateName")
-  valid_594164 = validateParameter(valid_594164, JString, required = true,
+  if valid_568392 != nil:
+    section.add "resourceName", valid_568392
+  var valid_568393 = path.getOrDefault("certificateName")
+  valid_568393 = validateParameter(valid_568393, JString, required = true,
                                  default = nil)
-  if valid_594164 != nil:
-    section.add "certificateName", valid_594164
+  if valid_568393 != nil:
+    section.add "certificateName", valid_568393
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2094,11 +2094,11 @@ proc validate_CertificatesGet_594159(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594165 = query.getOrDefault("api-version")
-  valid_594165 = validateParameter(valid_594165, JString, required = true,
+  var valid_568394 = query.getOrDefault("api-version")
+  valid_568394 = validateParameter(valid_568394, JString, required = true,
                                  default = nil)
-  if valid_594165 != nil:
-    section.add "api-version", valid_594165
+  if valid_568394 != nil:
+    section.add "api-version", valid_568394
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2107,20 +2107,20 @@ proc validate_CertificatesGet_594159(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594166: Call_CertificatesGet_594158; path: JsonNode; query: JsonNode;
+proc call*(call_568395: Call_CertificatesGet_568387; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the certificate.
   ## 
-  let valid = call_594166.validator(path, query, header, formData, body)
-  let scheme = call_594166.pickScheme
+  let valid = call_568395.validator(path, query, header, formData, body)
+  let scheme = call_568395.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594166.url(scheme.get, call_594166.host, call_594166.base,
-                         call_594166.route, valid.getOrDefault("path"),
+  let url = call_568395.url(scheme.get, call_568395.host, call_568395.base,
+                         call_568395.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594166, url, valid)
+  result = hook(call_568395, url, valid)
 
-proc call*(call_594167: Call_CertificatesGet_594158; resourceGroupName: string;
+proc call*(call_568396: Call_CertificatesGet_568387; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string;
           certificateName: string): Recallable =
   ## certificatesGet
@@ -2135,22 +2135,22 @@ proc call*(call_594167: Call_CertificatesGet_594158; resourceGroupName: string;
   ##               : The name of the IoT hub.
   ##   certificateName: string (required)
   ##                  : The name of the certificate
-  var path_594168 = newJObject()
-  var query_594169 = newJObject()
-  add(path_594168, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594169, "api-version", newJString(apiVersion))
-  add(path_594168, "subscriptionId", newJString(subscriptionId))
-  add(path_594168, "resourceName", newJString(resourceName))
-  add(path_594168, "certificateName", newJString(certificateName))
-  result = call_594167.call(path_594168, query_594169, nil, nil, nil)
+  var path_568397 = newJObject()
+  var query_568398 = newJObject()
+  add(path_568397, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568398, "api-version", newJString(apiVersion))
+  add(path_568397, "subscriptionId", newJString(subscriptionId))
+  add(path_568397, "resourceName", newJString(resourceName))
+  add(path_568397, "certificateName", newJString(certificateName))
+  result = call_568396.call(path_568397, query_568398, nil, nil, nil)
 
-var certificatesGet* = Call_CertificatesGet_594158(name: "certificatesGet",
+var certificatesGet* = Call_CertificatesGet_568387(name: "certificatesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/certificates/{certificateName}",
-    validator: validate_CertificatesGet_594159, base: "", url: url_CertificatesGet_594160,
+    validator: validate_CertificatesGet_568388, base: "", url: url_CertificatesGet_568389,
     schemes: {Scheme.Https})
 type
-  Call_CertificatesDelete_594185 = ref object of OpenApiRestCall_593437
-proc url_CertificatesDelete_594187(protocol: Scheme; host: string; base: string;
+  Call_CertificatesDelete_568414 = ref object of OpenApiRestCall_567666
+proc url_CertificatesDelete_568416(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2175,7 +2175,7 @@ proc url_CertificatesDelete_594187(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificatesDelete_594186(path: JsonNode; query: JsonNode;
+proc validate_CertificatesDelete_568415(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes an existing X509 certificate or does nothing if it does not exist.
@@ -2194,26 +2194,26 @@ proc validate_CertificatesDelete_594186(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594188 = path.getOrDefault("resourceGroupName")
-  valid_594188 = validateParameter(valid_594188, JString, required = true,
+  var valid_568417 = path.getOrDefault("resourceGroupName")
+  valid_568417 = validateParameter(valid_568417, JString, required = true,
                                  default = nil)
-  if valid_594188 != nil:
-    section.add "resourceGroupName", valid_594188
-  var valid_594189 = path.getOrDefault("subscriptionId")
-  valid_594189 = validateParameter(valid_594189, JString, required = true,
+  if valid_568417 != nil:
+    section.add "resourceGroupName", valid_568417
+  var valid_568418 = path.getOrDefault("subscriptionId")
+  valid_568418 = validateParameter(valid_568418, JString, required = true,
                                  default = nil)
-  if valid_594189 != nil:
-    section.add "subscriptionId", valid_594189
-  var valid_594190 = path.getOrDefault("resourceName")
-  valid_594190 = validateParameter(valid_594190, JString, required = true,
+  if valid_568418 != nil:
+    section.add "subscriptionId", valid_568418
+  var valid_568419 = path.getOrDefault("resourceName")
+  valid_568419 = validateParameter(valid_568419, JString, required = true,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "resourceName", valid_594190
-  var valid_594191 = path.getOrDefault("certificateName")
-  valid_594191 = validateParameter(valid_594191, JString, required = true,
+  if valid_568419 != nil:
+    section.add "resourceName", valid_568419
+  var valid_568420 = path.getOrDefault("certificateName")
+  valid_568420 = validateParameter(valid_568420, JString, required = true,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "certificateName", valid_594191
+  if valid_568420 != nil:
+    section.add "certificateName", valid_568420
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2221,11 +2221,11 @@ proc validate_CertificatesDelete_594186(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594192 = query.getOrDefault("api-version")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  var valid_568421 = query.getOrDefault("api-version")
+  valid_568421 = validateParameter(valid_568421, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "api-version", valid_594192
+  if valid_568421 != nil:
+    section.add "api-version", valid_568421
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -2233,31 +2233,31 @@ proc validate_CertificatesDelete_594186(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594193 = header.getOrDefault("If-Match")
-  valid_594193 = validateParameter(valid_594193, JString, required = true,
+  var valid_568422 = header.getOrDefault("If-Match")
+  valid_568422 = validateParameter(valid_568422, JString, required = true,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "If-Match", valid_594193
+  if valid_568422 != nil:
+    section.add "If-Match", valid_568422
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594194: Call_CertificatesDelete_594185; path: JsonNode;
+proc call*(call_568423: Call_CertificatesDelete_568414; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing X509 certificate or does nothing if it does not exist.
   ## 
-  let valid = call_594194.validator(path, query, header, formData, body)
-  let scheme = call_594194.pickScheme
+  let valid = call_568423.validator(path, query, header, formData, body)
+  let scheme = call_568423.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594194.url(scheme.get, call_594194.host, call_594194.base,
-                         call_594194.route, valid.getOrDefault("path"),
+  let url = call_568423.url(scheme.get, call_568423.host, call_568423.base,
+                         call_568423.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594194, url, valid)
+  result = hook(call_568423, url, valid)
 
-proc call*(call_594195: Call_CertificatesDelete_594185; resourceGroupName: string;
+proc call*(call_568424: Call_CertificatesDelete_568414; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string;
           certificateName: string): Recallable =
   ## certificatesDelete
@@ -2272,23 +2272,23 @@ proc call*(call_594195: Call_CertificatesDelete_594185; resourceGroupName: strin
   ##               : The name of the IoT hub.
   ##   certificateName: string (required)
   ##                  : The name of the certificate
-  var path_594196 = newJObject()
-  var query_594197 = newJObject()
-  add(path_594196, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594197, "api-version", newJString(apiVersion))
-  add(path_594196, "subscriptionId", newJString(subscriptionId))
-  add(path_594196, "resourceName", newJString(resourceName))
-  add(path_594196, "certificateName", newJString(certificateName))
-  result = call_594195.call(path_594196, query_594197, nil, nil, nil)
+  var path_568425 = newJObject()
+  var query_568426 = newJObject()
+  add(path_568425, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568426, "api-version", newJString(apiVersion))
+  add(path_568425, "subscriptionId", newJString(subscriptionId))
+  add(path_568425, "resourceName", newJString(resourceName))
+  add(path_568425, "certificateName", newJString(certificateName))
+  result = call_568424.call(path_568425, query_568426, nil, nil, nil)
 
-var certificatesDelete* = Call_CertificatesDelete_594185(
+var certificatesDelete* = Call_CertificatesDelete_568414(
     name: "certificatesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/certificates/{certificateName}",
-    validator: validate_CertificatesDelete_594186, base: "",
-    url: url_CertificatesDelete_594187, schemes: {Scheme.Https})
+    validator: validate_CertificatesDelete_568415, base: "",
+    url: url_CertificatesDelete_568416, schemes: {Scheme.Https})
 type
-  Call_CertificatesGenerateVerificationCode_594198 = ref object of OpenApiRestCall_593437
-proc url_CertificatesGenerateVerificationCode_594200(protocol: Scheme;
+  Call_CertificatesGenerateVerificationCode_568427 = ref object of OpenApiRestCall_567666
+proc url_CertificatesGenerateVerificationCode_568429(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2314,7 +2314,7 @@ proc url_CertificatesGenerateVerificationCode_594200(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificatesGenerateVerificationCode_594199(path: JsonNode;
+proc validate_CertificatesGenerateVerificationCode_568428(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Generates verification code for proof of possession flow. The verification code will be used to generate a leaf certificate.
   ## 
@@ -2332,26 +2332,26 @@ proc validate_CertificatesGenerateVerificationCode_594199(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594201 = path.getOrDefault("resourceGroupName")
-  valid_594201 = validateParameter(valid_594201, JString, required = true,
+  var valid_568430 = path.getOrDefault("resourceGroupName")
+  valid_568430 = validateParameter(valid_568430, JString, required = true,
                                  default = nil)
-  if valid_594201 != nil:
-    section.add "resourceGroupName", valid_594201
-  var valid_594202 = path.getOrDefault("subscriptionId")
-  valid_594202 = validateParameter(valid_594202, JString, required = true,
+  if valid_568430 != nil:
+    section.add "resourceGroupName", valid_568430
+  var valid_568431 = path.getOrDefault("subscriptionId")
+  valid_568431 = validateParameter(valid_568431, JString, required = true,
                                  default = nil)
-  if valid_594202 != nil:
-    section.add "subscriptionId", valid_594202
-  var valid_594203 = path.getOrDefault("resourceName")
-  valid_594203 = validateParameter(valid_594203, JString, required = true,
+  if valid_568431 != nil:
+    section.add "subscriptionId", valid_568431
+  var valid_568432 = path.getOrDefault("resourceName")
+  valid_568432 = validateParameter(valid_568432, JString, required = true,
                                  default = nil)
-  if valid_594203 != nil:
-    section.add "resourceName", valid_594203
-  var valid_594204 = path.getOrDefault("certificateName")
-  valid_594204 = validateParameter(valid_594204, JString, required = true,
+  if valid_568432 != nil:
+    section.add "resourceName", valid_568432
+  var valid_568433 = path.getOrDefault("certificateName")
+  valid_568433 = validateParameter(valid_568433, JString, required = true,
                                  default = nil)
-  if valid_594204 != nil:
-    section.add "certificateName", valid_594204
+  if valid_568433 != nil:
+    section.add "certificateName", valid_568433
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2359,11 +2359,11 @@ proc validate_CertificatesGenerateVerificationCode_594199(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594205 = query.getOrDefault("api-version")
-  valid_594205 = validateParameter(valid_594205, JString, required = true,
+  var valid_568434 = query.getOrDefault("api-version")
+  valid_568434 = validateParameter(valid_568434, JString, required = true,
                                  default = nil)
-  if valid_594205 != nil:
-    section.add "api-version", valid_594205
+  if valid_568434 != nil:
+    section.add "api-version", valid_568434
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -2371,32 +2371,32 @@ proc validate_CertificatesGenerateVerificationCode_594199(path: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594206 = header.getOrDefault("If-Match")
-  valid_594206 = validateParameter(valid_594206, JString, required = true,
+  var valid_568435 = header.getOrDefault("If-Match")
+  valid_568435 = validateParameter(valid_568435, JString, required = true,
                                  default = nil)
-  if valid_594206 != nil:
-    section.add "If-Match", valid_594206
+  if valid_568435 != nil:
+    section.add "If-Match", valid_568435
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594207: Call_CertificatesGenerateVerificationCode_594198;
+proc call*(call_568436: Call_CertificatesGenerateVerificationCode_568427;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Generates verification code for proof of possession flow. The verification code will be used to generate a leaf certificate.
   ## 
-  let valid = call_594207.validator(path, query, header, formData, body)
-  let scheme = call_594207.pickScheme
+  let valid = call_568436.validator(path, query, header, formData, body)
+  let scheme = call_568436.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594207.url(scheme.get, call_594207.host, call_594207.base,
-                         call_594207.route, valid.getOrDefault("path"),
+  let url = call_568436.url(scheme.get, call_568436.host, call_568436.base,
+                         call_568436.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594207, url, valid)
+  result = hook(call_568436, url, valid)
 
-proc call*(call_594208: Call_CertificatesGenerateVerificationCode_594198;
+proc call*(call_568437: Call_CertificatesGenerateVerificationCode_568427;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; certificateName: string): Recallable =
   ## certificatesGenerateVerificationCode
@@ -2411,23 +2411,23 @@ proc call*(call_594208: Call_CertificatesGenerateVerificationCode_594198;
   ##               : The name of the IoT hub.
   ##   certificateName: string (required)
   ##                  : The name of the certificate
-  var path_594209 = newJObject()
-  var query_594210 = newJObject()
-  add(path_594209, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594210, "api-version", newJString(apiVersion))
-  add(path_594209, "subscriptionId", newJString(subscriptionId))
-  add(path_594209, "resourceName", newJString(resourceName))
-  add(path_594209, "certificateName", newJString(certificateName))
-  result = call_594208.call(path_594209, query_594210, nil, nil, nil)
+  var path_568438 = newJObject()
+  var query_568439 = newJObject()
+  add(path_568438, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568439, "api-version", newJString(apiVersion))
+  add(path_568438, "subscriptionId", newJString(subscriptionId))
+  add(path_568438, "resourceName", newJString(resourceName))
+  add(path_568438, "certificateName", newJString(certificateName))
+  result = call_568437.call(path_568438, query_568439, nil, nil, nil)
 
-var certificatesGenerateVerificationCode* = Call_CertificatesGenerateVerificationCode_594198(
+var certificatesGenerateVerificationCode* = Call_CertificatesGenerateVerificationCode_568427(
     name: "certificatesGenerateVerificationCode", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/certificates/{certificateName}/generateVerificationCode",
-    validator: validate_CertificatesGenerateVerificationCode_594199, base: "",
-    url: url_CertificatesGenerateVerificationCode_594200, schemes: {Scheme.Https})
+    validator: validate_CertificatesGenerateVerificationCode_568428, base: "",
+    url: url_CertificatesGenerateVerificationCode_568429, schemes: {Scheme.Https})
 type
-  Call_CertificatesVerify_594211 = ref object of OpenApiRestCall_593437
-proc url_CertificatesVerify_594213(protocol: Scheme; host: string; base: string;
+  Call_CertificatesVerify_568440 = ref object of OpenApiRestCall_567666
+proc url_CertificatesVerify_568442(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2453,7 +2453,7 @@ proc url_CertificatesVerify_594213(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificatesVerify_594212(path: JsonNode; query: JsonNode;
+proc validate_CertificatesVerify_568441(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Verifies the certificate's private key possession by providing the leaf cert issued by the verifying pre uploaded certificate.
@@ -2472,26 +2472,26 @@ proc validate_CertificatesVerify_594212(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594214 = path.getOrDefault("resourceGroupName")
-  valid_594214 = validateParameter(valid_594214, JString, required = true,
+  var valid_568443 = path.getOrDefault("resourceGroupName")
+  valid_568443 = validateParameter(valid_568443, JString, required = true,
                                  default = nil)
-  if valid_594214 != nil:
-    section.add "resourceGroupName", valid_594214
-  var valid_594215 = path.getOrDefault("subscriptionId")
-  valid_594215 = validateParameter(valid_594215, JString, required = true,
+  if valid_568443 != nil:
+    section.add "resourceGroupName", valid_568443
+  var valid_568444 = path.getOrDefault("subscriptionId")
+  valid_568444 = validateParameter(valid_568444, JString, required = true,
                                  default = nil)
-  if valid_594215 != nil:
-    section.add "subscriptionId", valid_594215
-  var valid_594216 = path.getOrDefault("resourceName")
-  valid_594216 = validateParameter(valid_594216, JString, required = true,
+  if valid_568444 != nil:
+    section.add "subscriptionId", valid_568444
+  var valid_568445 = path.getOrDefault("resourceName")
+  valid_568445 = validateParameter(valid_568445, JString, required = true,
                                  default = nil)
-  if valid_594216 != nil:
-    section.add "resourceName", valid_594216
-  var valid_594217 = path.getOrDefault("certificateName")
-  valid_594217 = validateParameter(valid_594217, JString, required = true,
+  if valid_568445 != nil:
+    section.add "resourceName", valid_568445
+  var valid_568446 = path.getOrDefault("certificateName")
+  valid_568446 = validateParameter(valid_568446, JString, required = true,
                                  default = nil)
-  if valid_594217 != nil:
-    section.add "certificateName", valid_594217
+  if valid_568446 != nil:
+    section.add "certificateName", valid_568446
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2499,11 +2499,11 @@ proc validate_CertificatesVerify_594212(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594218 = query.getOrDefault("api-version")
-  valid_594218 = validateParameter(valid_594218, JString, required = true,
+  var valid_568447 = query.getOrDefault("api-version")
+  valid_568447 = validateParameter(valid_568447, JString, required = true,
                                  default = nil)
-  if valid_594218 != nil:
-    section.add "api-version", valid_594218
+  if valid_568447 != nil:
+    section.add "api-version", valid_568447
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -2511,11 +2511,11 @@ proc validate_CertificatesVerify_594212(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594219 = header.getOrDefault("If-Match")
-  valid_594219 = validateParameter(valid_594219, JString, required = true,
+  var valid_568448 = header.getOrDefault("If-Match")
+  valid_568448 = validateParameter(valid_568448, JString, required = true,
                                  default = nil)
-  if valid_594219 != nil:
-    section.add "If-Match", valid_594219
+  if valid_568448 != nil:
+    section.add "If-Match", valid_568448
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2527,20 +2527,20 @@ proc validate_CertificatesVerify_594212(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594221: Call_CertificatesVerify_594211; path: JsonNode;
+proc call*(call_568450: Call_CertificatesVerify_568440; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Verifies the certificate's private key possession by providing the leaf cert issued by the verifying pre uploaded certificate.
   ## 
-  let valid = call_594221.validator(path, query, header, formData, body)
-  let scheme = call_594221.pickScheme
+  let valid = call_568450.validator(path, query, header, formData, body)
+  let scheme = call_568450.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594221.url(scheme.get, call_594221.host, call_594221.base,
-                         call_594221.route, valid.getOrDefault("path"),
+  let url = call_568450.url(scheme.get, call_568450.host, call_568450.base,
+                         call_568450.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594221, url, valid)
+  result = hook(call_568450, url, valid)
 
-proc call*(call_594222: Call_CertificatesVerify_594211; resourceGroupName: string;
+proc call*(call_568451: Call_CertificatesVerify_568440; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string;
           certificateName: string; certificateVerificationBody: JsonNode): Recallable =
   ## certificatesVerify
@@ -2557,26 +2557,26 @@ proc call*(call_594222: Call_CertificatesVerify_594211; resourceGroupName: strin
   ##                  : The name of the certificate
   ##   certificateVerificationBody: JObject (required)
   ##                              : The name of the certificate
-  var path_594223 = newJObject()
-  var query_594224 = newJObject()
-  var body_594225 = newJObject()
-  add(path_594223, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594224, "api-version", newJString(apiVersion))
-  add(path_594223, "subscriptionId", newJString(subscriptionId))
-  add(path_594223, "resourceName", newJString(resourceName))
-  add(path_594223, "certificateName", newJString(certificateName))
+  var path_568452 = newJObject()
+  var query_568453 = newJObject()
+  var body_568454 = newJObject()
+  add(path_568452, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568453, "api-version", newJString(apiVersion))
+  add(path_568452, "subscriptionId", newJString(subscriptionId))
+  add(path_568452, "resourceName", newJString(resourceName))
+  add(path_568452, "certificateName", newJString(certificateName))
   if certificateVerificationBody != nil:
-    body_594225 = certificateVerificationBody
-  result = call_594222.call(path_594223, query_594224, nil, nil, body_594225)
+    body_568454 = certificateVerificationBody
+  result = call_568451.call(path_568452, query_568453, nil, nil, body_568454)
 
-var certificatesVerify* = Call_CertificatesVerify_594211(
+var certificatesVerify* = Call_CertificatesVerify_568440(
     name: "certificatesVerify", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/certificates/{certificateName}/verify",
-    validator: validate_CertificatesVerify_594212, base: "",
-    url: url_CertificatesVerify_594213, schemes: {Scheme.Https})
+    validator: validate_CertificatesVerify_568441, base: "",
+    url: url_CertificatesVerify_568442, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceListEventHubConsumerGroups_594226 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceListEventHubConsumerGroups_594228(protocol: Scheme;
+  Call_IotHubResourceListEventHubConsumerGroups_568455 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceListEventHubConsumerGroups_568457(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2603,7 +2603,7 @@ proc url_IotHubResourceListEventHubConsumerGroups_594228(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceListEventHubConsumerGroups_594227(path: JsonNode;
+proc validate_IotHubResourceListEventHubConsumerGroups_568456(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a list of the consumer groups in the Event Hub-compatible device-to-cloud endpoint in an IoT hub.
   ## 
@@ -2621,26 +2621,26 @@ proc validate_IotHubResourceListEventHubConsumerGroups_594227(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594229 = path.getOrDefault("resourceGroupName")
-  valid_594229 = validateParameter(valid_594229, JString, required = true,
+  var valid_568458 = path.getOrDefault("resourceGroupName")
+  valid_568458 = validateParameter(valid_568458, JString, required = true,
                                  default = nil)
-  if valid_594229 != nil:
-    section.add "resourceGroupName", valid_594229
-  var valid_594230 = path.getOrDefault("eventHubEndpointName")
-  valid_594230 = validateParameter(valid_594230, JString, required = true,
+  if valid_568458 != nil:
+    section.add "resourceGroupName", valid_568458
+  var valid_568459 = path.getOrDefault("eventHubEndpointName")
+  valid_568459 = validateParameter(valid_568459, JString, required = true,
                                  default = nil)
-  if valid_594230 != nil:
-    section.add "eventHubEndpointName", valid_594230
-  var valid_594231 = path.getOrDefault("subscriptionId")
-  valid_594231 = validateParameter(valid_594231, JString, required = true,
+  if valid_568459 != nil:
+    section.add "eventHubEndpointName", valid_568459
+  var valid_568460 = path.getOrDefault("subscriptionId")
+  valid_568460 = validateParameter(valid_568460, JString, required = true,
                                  default = nil)
-  if valid_594231 != nil:
-    section.add "subscriptionId", valid_594231
-  var valid_594232 = path.getOrDefault("resourceName")
-  valid_594232 = validateParameter(valid_594232, JString, required = true,
+  if valid_568460 != nil:
+    section.add "subscriptionId", valid_568460
+  var valid_568461 = path.getOrDefault("resourceName")
+  valid_568461 = validateParameter(valid_568461, JString, required = true,
                                  default = nil)
-  if valid_594232 != nil:
-    section.add "resourceName", valid_594232
+  if valid_568461 != nil:
+    section.add "resourceName", valid_568461
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2648,11 +2648,11 @@ proc validate_IotHubResourceListEventHubConsumerGroups_594227(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594233 = query.getOrDefault("api-version")
-  valid_594233 = validateParameter(valid_594233, JString, required = true,
+  var valid_568462 = query.getOrDefault("api-version")
+  valid_568462 = validateParameter(valid_568462, JString, required = true,
                                  default = nil)
-  if valid_594233 != nil:
-    section.add "api-version", valid_594233
+  if valid_568462 != nil:
+    section.add "api-version", valid_568462
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2661,21 +2661,21 @@ proc validate_IotHubResourceListEventHubConsumerGroups_594227(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594234: Call_IotHubResourceListEventHubConsumerGroups_594226;
+proc call*(call_568463: Call_IotHubResourceListEventHubConsumerGroups_568455;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a list of the consumer groups in the Event Hub-compatible device-to-cloud endpoint in an IoT hub.
   ## 
-  let valid = call_594234.validator(path, query, header, formData, body)
-  let scheme = call_594234.pickScheme
+  let valid = call_568463.validator(path, query, header, formData, body)
+  let scheme = call_568463.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594234.url(scheme.get, call_594234.host, call_594234.base,
-                         call_594234.route, valid.getOrDefault("path"),
+  let url = call_568463.url(scheme.get, call_568463.host, call_568463.base,
+                         call_568463.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594234, url, valid)
+  result = hook(call_568463, url, valid)
 
-proc call*(call_594235: Call_IotHubResourceListEventHubConsumerGroups_594226;
+proc call*(call_568464: Call_IotHubResourceListEventHubConsumerGroups_568455;
           resourceGroupName: string; apiVersion: string;
           eventHubEndpointName: string; subscriptionId: string; resourceName: string): Recallable =
   ## iotHubResourceListEventHubConsumerGroups
@@ -2690,24 +2690,24 @@ proc call*(call_594235: Call_IotHubResourceListEventHubConsumerGroups_594226;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594236 = newJObject()
-  var query_594237 = newJObject()
-  add(path_594236, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594237, "api-version", newJString(apiVersion))
-  add(path_594236, "eventHubEndpointName", newJString(eventHubEndpointName))
-  add(path_594236, "subscriptionId", newJString(subscriptionId))
-  add(path_594236, "resourceName", newJString(resourceName))
-  result = call_594235.call(path_594236, query_594237, nil, nil, nil)
+  var path_568465 = newJObject()
+  var query_568466 = newJObject()
+  add(path_568465, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568466, "api-version", newJString(apiVersion))
+  add(path_568465, "eventHubEndpointName", newJString(eventHubEndpointName))
+  add(path_568465, "subscriptionId", newJString(subscriptionId))
+  add(path_568465, "resourceName", newJString(resourceName))
+  result = call_568464.call(path_568465, query_568466, nil, nil, nil)
 
-var iotHubResourceListEventHubConsumerGroups* = Call_IotHubResourceListEventHubConsumerGroups_594226(
+var iotHubResourceListEventHubConsumerGroups* = Call_IotHubResourceListEventHubConsumerGroups_568455(
     name: "iotHubResourceListEventHubConsumerGroups", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/eventHubEndpoints/{eventHubEndpointName}/ConsumerGroups",
-    validator: validate_IotHubResourceListEventHubConsumerGroups_594227, base: "",
-    url: url_IotHubResourceListEventHubConsumerGroups_594228,
+    validator: validate_IotHubResourceListEventHubConsumerGroups_568456, base: "",
+    url: url_IotHubResourceListEventHubConsumerGroups_568457,
     schemes: {Scheme.Https})
 type
-  Call_IotHubResourceCreateEventHubConsumerGroup_594251 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceCreateEventHubConsumerGroup_594253(protocol: Scheme;
+  Call_IotHubResourceCreateEventHubConsumerGroup_568480 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceCreateEventHubConsumerGroup_568482(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2736,7 +2736,7 @@ proc url_IotHubResourceCreateEventHubConsumerGroup_594253(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceCreateEventHubConsumerGroup_594252(path: JsonNode;
+proc validate_IotHubResourceCreateEventHubConsumerGroup_568481(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add a consumer group to an Event Hub-compatible endpoint in an IoT hub.
   ## 
@@ -2756,31 +2756,31 @@ proc validate_IotHubResourceCreateEventHubConsumerGroup_594252(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594254 = path.getOrDefault("resourceGroupName")
-  valid_594254 = validateParameter(valid_594254, JString, required = true,
+  var valid_568483 = path.getOrDefault("resourceGroupName")
+  valid_568483 = validateParameter(valid_568483, JString, required = true,
                                  default = nil)
-  if valid_594254 != nil:
-    section.add "resourceGroupName", valid_594254
-  var valid_594255 = path.getOrDefault("name")
-  valid_594255 = validateParameter(valid_594255, JString, required = true,
+  if valid_568483 != nil:
+    section.add "resourceGroupName", valid_568483
+  var valid_568484 = path.getOrDefault("name")
+  valid_568484 = validateParameter(valid_568484, JString, required = true,
                                  default = nil)
-  if valid_594255 != nil:
-    section.add "name", valid_594255
-  var valid_594256 = path.getOrDefault("eventHubEndpointName")
-  valid_594256 = validateParameter(valid_594256, JString, required = true,
+  if valid_568484 != nil:
+    section.add "name", valid_568484
+  var valid_568485 = path.getOrDefault("eventHubEndpointName")
+  valid_568485 = validateParameter(valid_568485, JString, required = true,
                                  default = nil)
-  if valid_594256 != nil:
-    section.add "eventHubEndpointName", valid_594256
-  var valid_594257 = path.getOrDefault("subscriptionId")
-  valid_594257 = validateParameter(valid_594257, JString, required = true,
+  if valid_568485 != nil:
+    section.add "eventHubEndpointName", valid_568485
+  var valid_568486 = path.getOrDefault("subscriptionId")
+  valid_568486 = validateParameter(valid_568486, JString, required = true,
                                  default = nil)
-  if valid_594257 != nil:
-    section.add "subscriptionId", valid_594257
-  var valid_594258 = path.getOrDefault("resourceName")
-  valid_594258 = validateParameter(valid_594258, JString, required = true,
+  if valid_568486 != nil:
+    section.add "subscriptionId", valid_568486
+  var valid_568487 = path.getOrDefault("resourceName")
+  valid_568487 = validateParameter(valid_568487, JString, required = true,
                                  default = nil)
-  if valid_594258 != nil:
-    section.add "resourceName", valid_594258
+  if valid_568487 != nil:
+    section.add "resourceName", valid_568487
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2788,11 +2788,11 @@ proc validate_IotHubResourceCreateEventHubConsumerGroup_594252(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594259 = query.getOrDefault("api-version")
-  valid_594259 = validateParameter(valid_594259, JString, required = true,
+  var valid_568488 = query.getOrDefault("api-version")
+  valid_568488 = validateParameter(valid_568488, JString, required = true,
                                  default = nil)
-  if valid_594259 != nil:
-    section.add "api-version", valid_594259
+  if valid_568488 != nil:
+    section.add "api-version", valid_568488
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2801,21 +2801,21 @@ proc validate_IotHubResourceCreateEventHubConsumerGroup_594252(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594260: Call_IotHubResourceCreateEventHubConsumerGroup_594251;
+proc call*(call_568489: Call_IotHubResourceCreateEventHubConsumerGroup_568480;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Add a consumer group to an Event Hub-compatible endpoint in an IoT hub.
   ## 
-  let valid = call_594260.validator(path, query, header, formData, body)
-  let scheme = call_594260.pickScheme
+  let valid = call_568489.validator(path, query, header, formData, body)
+  let scheme = call_568489.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594260.url(scheme.get, call_594260.host, call_594260.base,
-                         call_594260.route, valid.getOrDefault("path"),
+  let url = call_568489.url(scheme.get, call_568489.host, call_568489.base,
+                         call_568489.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594260, url, valid)
+  result = hook(call_568489, url, valid)
 
-proc call*(call_594261: Call_IotHubResourceCreateEventHubConsumerGroup_594251;
+proc call*(call_568490: Call_IotHubResourceCreateEventHubConsumerGroup_568480;
           resourceGroupName: string; apiVersion: string; name: string;
           eventHubEndpointName: string; subscriptionId: string; resourceName: string): Recallable =
   ## iotHubResourceCreateEventHubConsumerGroup
@@ -2832,25 +2832,25 @@ proc call*(call_594261: Call_IotHubResourceCreateEventHubConsumerGroup_594251;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594262 = newJObject()
-  var query_594263 = newJObject()
-  add(path_594262, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594263, "api-version", newJString(apiVersion))
-  add(path_594262, "name", newJString(name))
-  add(path_594262, "eventHubEndpointName", newJString(eventHubEndpointName))
-  add(path_594262, "subscriptionId", newJString(subscriptionId))
-  add(path_594262, "resourceName", newJString(resourceName))
-  result = call_594261.call(path_594262, query_594263, nil, nil, nil)
+  var path_568491 = newJObject()
+  var query_568492 = newJObject()
+  add(path_568491, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568492, "api-version", newJString(apiVersion))
+  add(path_568491, "name", newJString(name))
+  add(path_568491, "eventHubEndpointName", newJString(eventHubEndpointName))
+  add(path_568491, "subscriptionId", newJString(subscriptionId))
+  add(path_568491, "resourceName", newJString(resourceName))
+  result = call_568490.call(path_568491, query_568492, nil, nil, nil)
 
-var iotHubResourceCreateEventHubConsumerGroup* = Call_IotHubResourceCreateEventHubConsumerGroup_594251(
+var iotHubResourceCreateEventHubConsumerGroup* = Call_IotHubResourceCreateEventHubConsumerGroup_568480(
     name: "iotHubResourceCreateEventHubConsumerGroup", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/eventHubEndpoints/{eventHubEndpointName}/ConsumerGroups/{name}",
-    validator: validate_IotHubResourceCreateEventHubConsumerGroup_594252,
-    base: "", url: url_IotHubResourceCreateEventHubConsumerGroup_594253,
+    validator: validate_IotHubResourceCreateEventHubConsumerGroup_568481,
+    base: "", url: url_IotHubResourceCreateEventHubConsumerGroup_568482,
     schemes: {Scheme.Https})
 type
-  Call_IotHubResourceGetEventHubConsumerGroup_594238 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceGetEventHubConsumerGroup_594240(protocol: Scheme;
+  Call_IotHubResourceGetEventHubConsumerGroup_568467 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceGetEventHubConsumerGroup_568469(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2879,7 +2879,7 @@ proc url_IotHubResourceGetEventHubConsumerGroup_594240(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceGetEventHubConsumerGroup_594239(path: JsonNode;
+proc validate_IotHubResourceGetEventHubConsumerGroup_568468(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a consumer group from the Event Hub-compatible device-to-cloud endpoint for an IoT hub.
   ## 
@@ -2899,31 +2899,31 @@ proc validate_IotHubResourceGetEventHubConsumerGroup_594239(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594241 = path.getOrDefault("resourceGroupName")
-  valid_594241 = validateParameter(valid_594241, JString, required = true,
+  var valid_568470 = path.getOrDefault("resourceGroupName")
+  valid_568470 = validateParameter(valid_568470, JString, required = true,
                                  default = nil)
-  if valid_594241 != nil:
-    section.add "resourceGroupName", valid_594241
-  var valid_594242 = path.getOrDefault("name")
-  valid_594242 = validateParameter(valid_594242, JString, required = true,
+  if valid_568470 != nil:
+    section.add "resourceGroupName", valid_568470
+  var valid_568471 = path.getOrDefault("name")
+  valid_568471 = validateParameter(valid_568471, JString, required = true,
                                  default = nil)
-  if valid_594242 != nil:
-    section.add "name", valid_594242
-  var valid_594243 = path.getOrDefault("eventHubEndpointName")
-  valid_594243 = validateParameter(valid_594243, JString, required = true,
+  if valid_568471 != nil:
+    section.add "name", valid_568471
+  var valid_568472 = path.getOrDefault("eventHubEndpointName")
+  valid_568472 = validateParameter(valid_568472, JString, required = true,
                                  default = nil)
-  if valid_594243 != nil:
-    section.add "eventHubEndpointName", valid_594243
-  var valid_594244 = path.getOrDefault("subscriptionId")
-  valid_594244 = validateParameter(valid_594244, JString, required = true,
+  if valid_568472 != nil:
+    section.add "eventHubEndpointName", valid_568472
+  var valid_568473 = path.getOrDefault("subscriptionId")
+  valid_568473 = validateParameter(valid_568473, JString, required = true,
                                  default = nil)
-  if valid_594244 != nil:
-    section.add "subscriptionId", valid_594244
-  var valid_594245 = path.getOrDefault("resourceName")
-  valid_594245 = validateParameter(valid_594245, JString, required = true,
+  if valid_568473 != nil:
+    section.add "subscriptionId", valid_568473
+  var valid_568474 = path.getOrDefault("resourceName")
+  valid_568474 = validateParameter(valid_568474, JString, required = true,
                                  default = nil)
-  if valid_594245 != nil:
-    section.add "resourceName", valid_594245
+  if valid_568474 != nil:
+    section.add "resourceName", valid_568474
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2931,11 +2931,11 @@ proc validate_IotHubResourceGetEventHubConsumerGroup_594239(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594246 = query.getOrDefault("api-version")
-  valid_594246 = validateParameter(valid_594246, JString, required = true,
+  var valid_568475 = query.getOrDefault("api-version")
+  valid_568475 = validateParameter(valid_568475, JString, required = true,
                                  default = nil)
-  if valid_594246 != nil:
-    section.add "api-version", valid_594246
+  if valid_568475 != nil:
+    section.add "api-version", valid_568475
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2944,21 +2944,21 @@ proc validate_IotHubResourceGetEventHubConsumerGroup_594239(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594247: Call_IotHubResourceGetEventHubConsumerGroup_594238;
+proc call*(call_568476: Call_IotHubResourceGetEventHubConsumerGroup_568467;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a consumer group from the Event Hub-compatible device-to-cloud endpoint for an IoT hub.
   ## 
-  let valid = call_594247.validator(path, query, header, formData, body)
-  let scheme = call_594247.pickScheme
+  let valid = call_568476.validator(path, query, header, formData, body)
+  let scheme = call_568476.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594247.url(scheme.get, call_594247.host, call_594247.base,
-                         call_594247.route, valid.getOrDefault("path"),
+  let url = call_568476.url(scheme.get, call_568476.host, call_568476.base,
+                         call_568476.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594247, url, valid)
+  result = hook(call_568476, url, valid)
 
-proc call*(call_594248: Call_IotHubResourceGetEventHubConsumerGroup_594238;
+proc call*(call_568477: Call_IotHubResourceGetEventHubConsumerGroup_568467;
           resourceGroupName: string; apiVersion: string; name: string;
           eventHubEndpointName: string; subscriptionId: string; resourceName: string): Recallable =
   ## iotHubResourceGetEventHubConsumerGroup
@@ -2975,25 +2975,25 @@ proc call*(call_594248: Call_IotHubResourceGetEventHubConsumerGroup_594238;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594249 = newJObject()
-  var query_594250 = newJObject()
-  add(path_594249, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594250, "api-version", newJString(apiVersion))
-  add(path_594249, "name", newJString(name))
-  add(path_594249, "eventHubEndpointName", newJString(eventHubEndpointName))
-  add(path_594249, "subscriptionId", newJString(subscriptionId))
-  add(path_594249, "resourceName", newJString(resourceName))
-  result = call_594248.call(path_594249, query_594250, nil, nil, nil)
+  var path_568478 = newJObject()
+  var query_568479 = newJObject()
+  add(path_568478, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568479, "api-version", newJString(apiVersion))
+  add(path_568478, "name", newJString(name))
+  add(path_568478, "eventHubEndpointName", newJString(eventHubEndpointName))
+  add(path_568478, "subscriptionId", newJString(subscriptionId))
+  add(path_568478, "resourceName", newJString(resourceName))
+  result = call_568477.call(path_568478, query_568479, nil, nil, nil)
 
-var iotHubResourceGetEventHubConsumerGroup* = Call_IotHubResourceGetEventHubConsumerGroup_594238(
+var iotHubResourceGetEventHubConsumerGroup* = Call_IotHubResourceGetEventHubConsumerGroup_568467(
     name: "iotHubResourceGetEventHubConsumerGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/eventHubEndpoints/{eventHubEndpointName}/ConsumerGroups/{name}",
-    validator: validate_IotHubResourceGetEventHubConsumerGroup_594239, base: "",
-    url: url_IotHubResourceGetEventHubConsumerGroup_594240,
+    validator: validate_IotHubResourceGetEventHubConsumerGroup_568468, base: "",
+    url: url_IotHubResourceGetEventHubConsumerGroup_568469,
     schemes: {Scheme.Https})
 type
-  Call_IotHubResourceDeleteEventHubConsumerGroup_594264 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceDeleteEventHubConsumerGroup_594266(protocol: Scheme;
+  Call_IotHubResourceDeleteEventHubConsumerGroup_568493 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceDeleteEventHubConsumerGroup_568495(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3022,7 +3022,7 @@ proc url_IotHubResourceDeleteEventHubConsumerGroup_594266(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceDeleteEventHubConsumerGroup_594265(path: JsonNode;
+proc validate_IotHubResourceDeleteEventHubConsumerGroup_568494(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a consumer group from an Event Hub-compatible endpoint in an IoT hub.
   ## 
@@ -3042,31 +3042,31 @@ proc validate_IotHubResourceDeleteEventHubConsumerGroup_594265(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594267 = path.getOrDefault("resourceGroupName")
-  valid_594267 = validateParameter(valid_594267, JString, required = true,
+  var valid_568496 = path.getOrDefault("resourceGroupName")
+  valid_568496 = validateParameter(valid_568496, JString, required = true,
                                  default = nil)
-  if valid_594267 != nil:
-    section.add "resourceGroupName", valid_594267
-  var valid_594268 = path.getOrDefault("name")
-  valid_594268 = validateParameter(valid_594268, JString, required = true,
+  if valid_568496 != nil:
+    section.add "resourceGroupName", valid_568496
+  var valid_568497 = path.getOrDefault("name")
+  valid_568497 = validateParameter(valid_568497, JString, required = true,
                                  default = nil)
-  if valid_594268 != nil:
-    section.add "name", valid_594268
-  var valid_594269 = path.getOrDefault("eventHubEndpointName")
-  valid_594269 = validateParameter(valid_594269, JString, required = true,
+  if valid_568497 != nil:
+    section.add "name", valid_568497
+  var valid_568498 = path.getOrDefault("eventHubEndpointName")
+  valid_568498 = validateParameter(valid_568498, JString, required = true,
                                  default = nil)
-  if valid_594269 != nil:
-    section.add "eventHubEndpointName", valid_594269
-  var valid_594270 = path.getOrDefault("subscriptionId")
-  valid_594270 = validateParameter(valid_594270, JString, required = true,
+  if valid_568498 != nil:
+    section.add "eventHubEndpointName", valid_568498
+  var valid_568499 = path.getOrDefault("subscriptionId")
+  valid_568499 = validateParameter(valid_568499, JString, required = true,
                                  default = nil)
-  if valid_594270 != nil:
-    section.add "subscriptionId", valid_594270
-  var valid_594271 = path.getOrDefault("resourceName")
-  valid_594271 = validateParameter(valid_594271, JString, required = true,
+  if valid_568499 != nil:
+    section.add "subscriptionId", valid_568499
+  var valid_568500 = path.getOrDefault("resourceName")
+  valid_568500 = validateParameter(valid_568500, JString, required = true,
                                  default = nil)
-  if valid_594271 != nil:
-    section.add "resourceName", valid_594271
+  if valid_568500 != nil:
+    section.add "resourceName", valid_568500
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3074,11 +3074,11 @@ proc validate_IotHubResourceDeleteEventHubConsumerGroup_594265(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594272 = query.getOrDefault("api-version")
-  valid_594272 = validateParameter(valid_594272, JString, required = true,
+  var valid_568501 = query.getOrDefault("api-version")
+  valid_568501 = validateParameter(valid_568501, JString, required = true,
                                  default = nil)
-  if valid_594272 != nil:
-    section.add "api-version", valid_594272
+  if valid_568501 != nil:
+    section.add "api-version", valid_568501
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3087,21 +3087,21 @@ proc validate_IotHubResourceDeleteEventHubConsumerGroup_594265(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594273: Call_IotHubResourceDeleteEventHubConsumerGroup_594264;
+proc call*(call_568502: Call_IotHubResourceDeleteEventHubConsumerGroup_568493;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete a consumer group from an Event Hub-compatible endpoint in an IoT hub.
   ## 
-  let valid = call_594273.validator(path, query, header, formData, body)
-  let scheme = call_594273.pickScheme
+  let valid = call_568502.validator(path, query, header, formData, body)
+  let scheme = call_568502.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594273.url(scheme.get, call_594273.host, call_594273.base,
-                         call_594273.route, valid.getOrDefault("path"),
+  let url = call_568502.url(scheme.get, call_568502.host, call_568502.base,
+                         call_568502.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594273, url, valid)
+  result = hook(call_568502, url, valid)
 
-proc call*(call_594274: Call_IotHubResourceDeleteEventHubConsumerGroup_594264;
+proc call*(call_568503: Call_IotHubResourceDeleteEventHubConsumerGroup_568493;
           resourceGroupName: string; apiVersion: string; name: string;
           eventHubEndpointName: string; subscriptionId: string; resourceName: string): Recallable =
   ## iotHubResourceDeleteEventHubConsumerGroup
@@ -3118,25 +3118,25 @@ proc call*(call_594274: Call_IotHubResourceDeleteEventHubConsumerGroup_594264;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594275 = newJObject()
-  var query_594276 = newJObject()
-  add(path_594275, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594276, "api-version", newJString(apiVersion))
-  add(path_594275, "name", newJString(name))
-  add(path_594275, "eventHubEndpointName", newJString(eventHubEndpointName))
-  add(path_594275, "subscriptionId", newJString(subscriptionId))
-  add(path_594275, "resourceName", newJString(resourceName))
-  result = call_594274.call(path_594275, query_594276, nil, nil, nil)
+  var path_568504 = newJObject()
+  var query_568505 = newJObject()
+  add(path_568504, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568505, "api-version", newJString(apiVersion))
+  add(path_568504, "name", newJString(name))
+  add(path_568504, "eventHubEndpointName", newJString(eventHubEndpointName))
+  add(path_568504, "subscriptionId", newJString(subscriptionId))
+  add(path_568504, "resourceName", newJString(resourceName))
+  result = call_568503.call(path_568504, query_568505, nil, nil, nil)
 
-var iotHubResourceDeleteEventHubConsumerGroup* = Call_IotHubResourceDeleteEventHubConsumerGroup_594264(
+var iotHubResourceDeleteEventHubConsumerGroup* = Call_IotHubResourceDeleteEventHubConsumerGroup_568493(
     name: "iotHubResourceDeleteEventHubConsumerGroup",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/eventHubEndpoints/{eventHubEndpointName}/ConsumerGroups/{name}",
-    validator: validate_IotHubResourceDeleteEventHubConsumerGroup_594265,
-    base: "", url: url_IotHubResourceDeleteEventHubConsumerGroup_594266,
+    validator: validate_IotHubResourceDeleteEventHubConsumerGroup_568494,
+    base: "", url: url_IotHubResourceDeleteEventHubConsumerGroup_568495,
     schemes: {Scheme.Https})
 type
-  Call_IotHubResourceExportDevices_594277 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceExportDevices_594279(protocol: Scheme; host: string;
+  Call_IotHubResourceExportDevices_568506 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceExportDevices_568508(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3159,7 +3159,7 @@ proc url_IotHubResourceExportDevices_594279(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceExportDevices_594278(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceExportDevices_568507(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Exports all the device identities in the IoT hub identity registry to an Azure Storage blob container. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities.
   ## 
@@ -3175,21 +3175,21 @@ proc validate_IotHubResourceExportDevices_594278(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594280 = path.getOrDefault("resourceGroupName")
-  valid_594280 = validateParameter(valid_594280, JString, required = true,
+  var valid_568509 = path.getOrDefault("resourceGroupName")
+  valid_568509 = validateParameter(valid_568509, JString, required = true,
                                  default = nil)
-  if valid_594280 != nil:
-    section.add "resourceGroupName", valid_594280
-  var valid_594281 = path.getOrDefault("subscriptionId")
-  valid_594281 = validateParameter(valid_594281, JString, required = true,
+  if valid_568509 != nil:
+    section.add "resourceGroupName", valid_568509
+  var valid_568510 = path.getOrDefault("subscriptionId")
+  valid_568510 = validateParameter(valid_568510, JString, required = true,
                                  default = nil)
-  if valid_594281 != nil:
-    section.add "subscriptionId", valid_594281
-  var valid_594282 = path.getOrDefault("resourceName")
-  valid_594282 = validateParameter(valid_594282, JString, required = true,
+  if valid_568510 != nil:
+    section.add "subscriptionId", valid_568510
+  var valid_568511 = path.getOrDefault("resourceName")
+  valid_568511 = validateParameter(valid_568511, JString, required = true,
                                  default = nil)
-  if valid_594282 != nil:
-    section.add "resourceName", valid_594282
+  if valid_568511 != nil:
+    section.add "resourceName", valid_568511
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3197,11 +3197,11 @@ proc validate_IotHubResourceExportDevices_594278(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594283 = query.getOrDefault("api-version")
-  valid_594283 = validateParameter(valid_594283, JString, required = true,
+  var valid_568512 = query.getOrDefault("api-version")
+  valid_568512 = validateParameter(valid_568512, JString, required = true,
                                  default = nil)
-  if valid_594283 != nil:
-    section.add "api-version", valid_594283
+  if valid_568512 != nil:
+    section.add "api-version", valid_568512
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3215,20 +3215,20 @@ proc validate_IotHubResourceExportDevices_594278(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594285: Call_IotHubResourceExportDevices_594277; path: JsonNode;
+proc call*(call_568514: Call_IotHubResourceExportDevices_568506; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Exports all the device identities in the IoT hub identity registry to an Azure Storage blob container. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities.
   ## 
-  let valid = call_594285.validator(path, query, header, formData, body)
-  let scheme = call_594285.pickScheme
+  let valid = call_568514.validator(path, query, header, formData, body)
+  let scheme = call_568514.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594285.url(scheme.get, call_594285.host, call_594285.base,
-                         call_594285.route, valid.getOrDefault("path"),
+  let url = call_568514.url(scheme.get, call_568514.host, call_568514.base,
+                         call_568514.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594285, url, valid)
+  result = hook(call_568514, url, valid)
 
-proc call*(call_594286: Call_IotHubResourceExportDevices_594277;
+proc call*(call_568515: Call_IotHubResourceExportDevices_568506;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; exportDevicesParameters: JsonNode): Recallable =
   ## iotHubResourceExportDevices
@@ -3243,25 +3243,25 @@ proc call*(call_594286: Call_IotHubResourceExportDevices_594277;
   ##               : The name of the IoT hub.
   ##   exportDevicesParameters: JObject (required)
   ##                          : The parameters that specify the export devices operation.
-  var path_594287 = newJObject()
-  var query_594288 = newJObject()
-  var body_594289 = newJObject()
-  add(path_594287, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594288, "api-version", newJString(apiVersion))
-  add(path_594287, "subscriptionId", newJString(subscriptionId))
-  add(path_594287, "resourceName", newJString(resourceName))
+  var path_568516 = newJObject()
+  var query_568517 = newJObject()
+  var body_568518 = newJObject()
+  add(path_568516, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568517, "api-version", newJString(apiVersion))
+  add(path_568516, "subscriptionId", newJString(subscriptionId))
+  add(path_568516, "resourceName", newJString(resourceName))
   if exportDevicesParameters != nil:
-    body_594289 = exportDevicesParameters
-  result = call_594286.call(path_594287, query_594288, nil, nil, body_594289)
+    body_568518 = exportDevicesParameters
+  result = call_568515.call(path_568516, query_568517, nil, nil, body_568518)
 
-var iotHubResourceExportDevices* = Call_IotHubResourceExportDevices_594277(
+var iotHubResourceExportDevices* = Call_IotHubResourceExportDevices_568506(
     name: "iotHubResourceExportDevices", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/exportDevices",
-    validator: validate_IotHubResourceExportDevices_594278, base: "",
-    url: url_IotHubResourceExportDevices_594279, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceExportDevices_568507, base: "",
+    url: url_IotHubResourceExportDevices_568508, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceImportDevices_594290 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceImportDevices_594292(protocol: Scheme; host: string;
+  Call_IotHubResourceImportDevices_568519 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceImportDevices_568521(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3284,7 +3284,7 @@ proc url_IotHubResourceImportDevices_594292(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceImportDevices_594291(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceImportDevices_568520(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Import, update, or delete device identities in the IoT hub identity registry from a blob. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities.
   ## 
@@ -3300,21 +3300,21 @@ proc validate_IotHubResourceImportDevices_594291(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594293 = path.getOrDefault("resourceGroupName")
-  valid_594293 = validateParameter(valid_594293, JString, required = true,
+  var valid_568522 = path.getOrDefault("resourceGroupName")
+  valid_568522 = validateParameter(valid_568522, JString, required = true,
                                  default = nil)
-  if valid_594293 != nil:
-    section.add "resourceGroupName", valid_594293
-  var valid_594294 = path.getOrDefault("subscriptionId")
-  valid_594294 = validateParameter(valid_594294, JString, required = true,
+  if valid_568522 != nil:
+    section.add "resourceGroupName", valid_568522
+  var valid_568523 = path.getOrDefault("subscriptionId")
+  valid_568523 = validateParameter(valid_568523, JString, required = true,
                                  default = nil)
-  if valid_594294 != nil:
-    section.add "subscriptionId", valid_594294
-  var valid_594295 = path.getOrDefault("resourceName")
-  valid_594295 = validateParameter(valid_594295, JString, required = true,
+  if valid_568523 != nil:
+    section.add "subscriptionId", valid_568523
+  var valid_568524 = path.getOrDefault("resourceName")
+  valid_568524 = validateParameter(valid_568524, JString, required = true,
                                  default = nil)
-  if valid_594295 != nil:
-    section.add "resourceName", valid_594295
+  if valid_568524 != nil:
+    section.add "resourceName", valid_568524
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3322,11 +3322,11 @@ proc validate_IotHubResourceImportDevices_594291(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594296 = query.getOrDefault("api-version")
-  valid_594296 = validateParameter(valid_594296, JString, required = true,
+  var valid_568525 = query.getOrDefault("api-version")
+  valid_568525 = validateParameter(valid_568525, JString, required = true,
                                  default = nil)
-  if valid_594296 != nil:
-    section.add "api-version", valid_594296
+  if valid_568525 != nil:
+    section.add "api-version", valid_568525
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3340,20 +3340,20 @@ proc validate_IotHubResourceImportDevices_594291(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594298: Call_IotHubResourceImportDevices_594290; path: JsonNode;
+proc call*(call_568527: Call_IotHubResourceImportDevices_568519; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Import, update, or delete device identities in the IoT hub identity registry from a blob. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities.
   ## 
-  let valid = call_594298.validator(path, query, header, formData, body)
-  let scheme = call_594298.pickScheme
+  let valid = call_568527.validator(path, query, header, formData, body)
+  let scheme = call_568527.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594298.url(scheme.get, call_594298.host, call_594298.base,
-                         call_594298.route, valid.getOrDefault("path"),
+  let url = call_568527.url(scheme.get, call_568527.host, call_568527.base,
+                         call_568527.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594298, url, valid)
+  result = hook(call_568527, url, valid)
 
-proc call*(call_594299: Call_IotHubResourceImportDevices_594290;
+proc call*(call_568528: Call_IotHubResourceImportDevices_568519;
           resourceGroupName: string; apiVersion: string;
           importDevicesParameters: JsonNode; subscriptionId: string;
           resourceName: string): Recallable =
@@ -3369,25 +3369,25 @@ proc call*(call_594299: Call_IotHubResourceImportDevices_594290;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594300 = newJObject()
-  var query_594301 = newJObject()
-  var body_594302 = newJObject()
-  add(path_594300, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594301, "api-version", newJString(apiVersion))
+  var path_568529 = newJObject()
+  var query_568530 = newJObject()
+  var body_568531 = newJObject()
+  add(path_568529, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568530, "api-version", newJString(apiVersion))
   if importDevicesParameters != nil:
-    body_594302 = importDevicesParameters
-  add(path_594300, "subscriptionId", newJString(subscriptionId))
-  add(path_594300, "resourceName", newJString(resourceName))
-  result = call_594299.call(path_594300, query_594301, nil, nil, body_594302)
+    body_568531 = importDevicesParameters
+  add(path_568529, "subscriptionId", newJString(subscriptionId))
+  add(path_568529, "resourceName", newJString(resourceName))
+  result = call_568528.call(path_568529, query_568530, nil, nil, body_568531)
 
-var iotHubResourceImportDevices* = Call_IotHubResourceImportDevices_594290(
+var iotHubResourceImportDevices* = Call_IotHubResourceImportDevices_568519(
     name: "iotHubResourceImportDevices", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/importDevices",
-    validator: validate_IotHubResourceImportDevices_594291, base: "",
-    url: url_IotHubResourceImportDevices_594292, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceImportDevices_568520, base: "",
+    url: url_IotHubResourceImportDevices_568521, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceListJobs_594303 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceListJobs_594305(protocol: Scheme; host: string; base: string;
+  Call_IotHubResourceListJobs_568532 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceListJobs_568534(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3410,7 +3410,7 @@ proc url_IotHubResourceListJobs_594305(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceListJobs_594304(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceListJobs_568533(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a list of all the jobs in an IoT hub. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry.
   ## 
@@ -3426,21 +3426,21 @@ proc validate_IotHubResourceListJobs_594304(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594306 = path.getOrDefault("resourceGroupName")
-  valid_594306 = validateParameter(valid_594306, JString, required = true,
+  var valid_568535 = path.getOrDefault("resourceGroupName")
+  valid_568535 = validateParameter(valid_568535, JString, required = true,
                                  default = nil)
-  if valid_594306 != nil:
-    section.add "resourceGroupName", valid_594306
-  var valid_594307 = path.getOrDefault("subscriptionId")
-  valid_594307 = validateParameter(valid_594307, JString, required = true,
+  if valid_568535 != nil:
+    section.add "resourceGroupName", valid_568535
+  var valid_568536 = path.getOrDefault("subscriptionId")
+  valid_568536 = validateParameter(valid_568536, JString, required = true,
                                  default = nil)
-  if valid_594307 != nil:
-    section.add "subscriptionId", valid_594307
-  var valid_594308 = path.getOrDefault("resourceName")
-  valid_594308 = validateParameter(valid_594308, JString, required = true,
+  if valid_568536 != nil:
+    section.add "subscriptionId", valid_568536
+  var valid_568537 = path.getOrDefault("resourceName")
+  valid_568537 = validateParameter(valid_568537, JString, required = true,
                                  default = nil)
-  if valid_594308 != nil:
-    section.add "resourceName", valid_594308
+  if valid_568537 != nil:
+    section.add "resourceName", valid_568537
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3448,11 +3448,11 @@ proc validate_IotHubResourceListJobs_594304(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594309 = query.getOrDefault("api-version")
-  valid_594309 = validateParameter(valid_594309, JString, required = true,
+  var valid_568538 = query.getOrDefault("api-version")
+  valid_568538 = validateParameter(valid_568538, JString, required = true,
                                  default = nil)
-  if valid_594309 != nil:
-    section.add "api-version", valid_594309
+  if valid_568538 != nil:
+    section.add "api-version", valid_568538
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3461,20 +3461,20 @@ proc validate_IotHubResourceListJobs_594304(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594310: Call_IotHubResourceListJobs_594303; path: JsonNode;
+proc call*(call_568539: Call_IotHubResourceListJobs_568532; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a list of all the jobs in an IoT hub. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry.
   ## 
-  let valid = call_594310.validator(path, query, header, formData, body)
-  let scheme = call_594310.pickScheme
+  let valid = call_568539.validator(path, query, header, formData, body)
+  let scheme = call_568539.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594310.url(scheme.get, call_594310.host, call_594310.base,
-                         call_594310.route, valid.getOrDefault("path"),
+  let url = call_568539.url(scheme.get, call_568539.host, call_568539.base,
+                         call_568539.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594310, url, valid)
+  result = hook(call_568539, url, valid)
 
-proc call*(call_594311: Call_IotHubResourceListJobs_594303;
+proc call*(call_568540: Call_IotHubResourceListJobs_568532;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## iotHubResourceListJobs
@@ -3487,22 +3487,22 @@ proc call*(call_594311: Call_IotHubResourceListJobs_594303;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594312 = newJObject()
-  var query_594313 = newJObject()
-  add(path_594312, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594313, "api-version", newJString(apiVersion))
-  add(path_594312, "subscriptionId", newJString(subscriptionId))
-  add(path_594312, "resourceName", newJString(resourceName))
-  result = call_594311.call(path_594312, query_594313, nil, nil, nil)
+  var path_568541 = newJObject()
+  var query_568542 = newJObject()
+  add(path_568541, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568542, "api-version", newJString(apiVersion))
+  add(path_568541, "subscriptionId", newJString(subscriptionId))
+  add(path_568541, "resourceName", newJString(resourceName))
+  result = call_568540.call(path_568541, query_568542, nil, nil, nil)
 
-var iotHubResourceListJobs* = Call_IotHubResourceListJobs_594303(
+var iotHubResourceListJobs* = Call_IotHubResourceListJobs_568532(
     name: "iotHubResourceListJobs", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/jobs",
-    validator: validate_IotHubResourceListJobs_594304, base: "",
-    url: url_IotHubResourceListJobs_594305, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceListJobs_568533, base: "",
+    url: url_IotHubResourceListJobs_568534, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceGetJob_594314 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceGetJob_594316(protocol: Scheme; host: string; base: string;
+  Call_IotHubResourceGetJob_568543 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceGetJob_568545(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3527,7 +3527,7 @@ proc url_IotHubResourceGetJob_594316(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceGetJob_594315(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceGetJob_568544(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the details of a job from an IoT hub. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry.
   ## 
@@ -3545,26 +3545,26 @@ proc validate_IotHubResourceGetJob_594315(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594317 = path.getOrDefault("resourceGroupName")
-  valid_594317 = validateParameter(valid_594317, JString, required = true,
+  var valid_568546 = path.getOrDefault("resourceGroupName")
+  valid_568546 = validateParameter(valid_568546, JString, required = true,
                                  default = nil)
-  if valid_594317 != nil:
-    section.add "resourceGroupName", valid_594317
-  var valid_594318 = path.getOrDefault("jobId")
-  valid_594318 = validateParameter(valid_594318, JString, required = true,
+  if valid_568546 != nil:
+    section.add "resourceGroupName", valid_568546
+  var valid_568547 = path.getOrDefault("jobId")
+  valid_568547 = validateParameter(valid_568547, JString, required = true,
                                  default = nil)
-  if valid_594318 != nil:
-    section.add "jobId", valid_594318
-  var valid_594319 = path.getOrDefault("subscriptionId")
-  valid_594319 = validateParameter(valid_594319, JString, required = true,
+  if valid_568547 != nil:
+    section.add "jobId", valid_568547
+  var valid_568548 = path.getOrDefault("subscriptionId")
+  valid_568548 = validateParameter(valid_568548, JString, required = true,
                                  default = nil)
-  if valid_594319 != nil:
-    section.add "subscriptionId", valid_594319
-  var valid_594320 = path.getOrDefault("resourceName")
-  valid_594320 = validateParameter(valid_594320, JString, required = true,
+  if valid_568548 != nil:
+    section.add "subscriptionId", valid_568548
+  var valid_568549 = path.getOrDefault("resourceName")
+  valid_568549 = validateParameter(valid_568549, JString, required = true,
                                  default = nil)
-  if valid_594320 != nil:
-    section.add "resourceName", valid_594320
+  if valid_568549 != nil:
+    section.add "resourceName", valid_568549
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3572,11 +3572,11 @@ proc validate_IotHubResourceGetJob_594315(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594321 = query.getOrDefault("api-version")
-  valid_594321 = validateParameter(valid_594321, JString, required = true,
+  var valid_568550 = query.getOrDefault("api-version")
+  valid_568550 = validateParameter(valid_568550, JString, required = true,
                                  default = nil)
-  if valid_594321 != nil:
-    section.add "api-version", valid_594321
+  if valid_568550 != nil:
+    section.add "api-version", valid_568550
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3585,20 +3585,20 @@ proc validate_IotHubResourceGetJob_594315(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594322: Call_IotHubResourceGetJob_594314; path: JsonNode;
+proc call*(call_568551: Call_IotHubResourceGetJob_568543; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of a job from an IoT hub. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry.
   ## 
-  let valid = call_594322.validator(path, query, header, formData, body)
-  let scheme = call_594322.pickScheme
+  let valid = call_568551.validator(path, query, header, formData, body)
+  let scheme = call_568551.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594322.url(scheme.get, call_594322.host, call_594322.base,
-                         call_594322.route, valid.getOrDefault("path"),
+  let url = call_568551.url(scheme.get, call_568551.host, call_568551.base,
+                         call_568551.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594322, url, valid)
+  result = hook(call_568551, url, valid)
 
-proc call*(call_594323: Call_IotHubResourceGetJob_594314;
+proc call*(call_568552: Call_IotHubResourceGetJob_568543;
           resourceGroupName: string; apiVersion: string; jobId: string;
           subscriptionId: string; resourceName: string): Recallable =
   ## iotHubResourceGetJob
@@ -3613,23 +3613,23 @@ proc call*(call_594323: Call_IotHubResourceGetJob_594314;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594324 = newJObject()
-  var query_594325 = newJObject()
-  add(path_594324, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594325, "api-version", newJString(apiVersion))
-  add(path_594324, "jobId", newJString(jobId))
-  add(path_594324, "subscriptionId", newJString(subscriptionId))
-  add(path_594324, "resourceName", newJString(resourceName))
-  result = call_594323.call(path_594324, query_594325, nil, nil, nil)
+  var path_568553 = newJObject()
+  var query_568554 = newJObject()
+  add(path_568553, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568554, "api-version", newJString(apiVersion))
+  add(path_568553, "jobId", newJString(jobId))
+  add(path_568553, "subscriptionId", newJString(subscriptionId))
+  add(path_568553, "resourceName", newJString(resourceName))
+  result = call_568552.call(path_568553, query_568554, nil, nil, nil)
 
-var iotHubResourceGetJob* = Call_IotHubResourceGetJob_594314(
+var iotHubResourceGetJob* = Call_IotHubResourceGetJob_568543(
     name: "iotHubResourceGetJob", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/jobs/{jobId}",
-    validator: validate_IotHubResourceGetJob_594315, base: "",
-    url: url_IotHubResourceGetJob_594316, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceGetJob_568544, base: "",
+    url: url_IotHubResourceGetJob_568545, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceListKeys_594326 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceListKeys_594328(protocol: Scheme; host: string; base: string;
+  Call_IotHubResourceListKeys_568555 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceListKeys_568557(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3652,7 +3652,7 @@ proc url_IotHubResourceListKeys_594328(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceListKeys_594327(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceListKeys_568556(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the security metadata for an IoT hub. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security.
   ## 
@@ -3668,21 +3668,21 @@ proc validate_IotHubResourceListKeys_594327(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594329 = path.getOrDefault("resourceGroupName")
-  valid_594329 = validateParameter(valid_594329, JString, required = true,
+  var valid_568558 = path.getOrDefault("resourceGroupName")
+  valid_568558 = validateParameter(valid_568558, JString, required = true,
                                  default = nil)
-  if valid_594329 != nil:
-    section.add "resourceGroupName", valid_594329
-  var valid_594330 = path.getOrDefault("subscriptionId")
-  valid_594330 = validateParameter(valid_594330, JString, required = true,
+  if valid_568558 != nil:
+    section.add "resourceGroupName", valid_568558
+  var valid_568559 = path.getOrDefault("subscriptionId")
+  valid_568559 = validateParameter(valid_568559, JString, required = true,
                                  default = nil)
-  if valid_594330 != nil:
-    section.add "subscriptionId", valid_594330
-  var valid_594331 = path.getOrDefault("resourceName")
-  valid_594331 = validateParameter(valid_594331, JString, required = true,
+  if valid_568559 != nil:
+    section.add "subscriptionId", valid_568559
+  var valid_568560 = path.getOrDefault("resourceName")
+  valid_568560 = validateParameter(valid_568560, JString, required = true,
                                  default = nil)
-  if valid_594331 != nil:
-    section.add "resourceName", valid_594331
+  if valid_568560 != nil:
+    section.add "resourceName", valid_568560
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3690,11 +3690,11 @@ proc validate_IotHubResourceListKeys_594327(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594332 = query.getOrDefault("api-version")
-  valid_594332 = validateParameter(valid_594332, JString, required = true,
+  var valid_568561 = query.getOrDefault("api-version")
+  valid_568561 = validateParameter(valid_568561, JString, required = true,
                                  default = nil)
-  if valid_594332 != nil:
-    section.add "api-version", valid_594332
+  if valid_568561 != nil:
+    section.add "api-version", valid_568561
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3703,20 +3703,20 @@ proc validate_IotHubResourceListKeys_594327(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594333: Call_IotHubResourceListKeys_594326; path: JsonNode;
+proc call*(call_568562: Call_IotHubResourceListKeys_568555; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the security metadata for an IoT hub. For more information, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security.
   ## 
-  let valid = call_594333.validator(path, query, header, formData, body)
-  let scheme = call_594333.pickScheme
+  let valid = call_568562.validator(path, query, header, formData, body)
+  let scheme = call_568562.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594333.url(scheme.get, call_594333.host, call_594333.base,
-                         call_594333.route, valid.getOrDefault("path"),
+  let url = call_568562.url(scheme.get, call_568562.host, call_568562.base,
+                         call_568562.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594333, url, valid)
+  result = hook(call_568562, url, valid)
 
-proc call*(call_594334: Call_IotHubResourceListKeys_594326;
+proc call*(call_568563: Call_IotHubResourceListKeys_568555;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## iotHubResourceListKeys
@@ -3729,22 +3729,22 @@ proc call*(call_594334: Call_IotHubResourceListKeys_594326;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594335 = newJObject()
-  var query_594336 = newJObject()
-  add(path_594335, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594336, "api-version", newJString(apiVersion))
-  add(path_594335, "subscriptionId", newJString(subscriptionId))
-  add(path_594335, "resourceName", newJString(resourceName))
-  result = call_594334.call(path_594335, query_594336, nil, nil, nil)
+  var path_568564 = newJObject()
+  var query_568565 = newJObject()
+  add(path_568564, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568565, "api-version", newJString(apiVersion))
+  add(path_568564, "subscriptionId", newJString(subscriptionId))
+  add(path_568564, "resourceName", newJString(resourceName))
+  result = call_568563.call(path_568564, query_568565, nil, nil, nil)
 
-var iotHubResourceListKeys* = Call_IotHubResourceListKeys_594326(
+var iotHubResourceListKeys* = Call_IotHubResourceListKeys_568555(
     name: "iotHubResourceListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/listkeys",
-    validator: validate_IotHubResourceListKeys_594327, base: "",
-    url: url_IotHubResourceListKeys_594328, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceListKeys_568556, base: "",
+    url: url_IotHubResourceListKeys_568557, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceGetQuotaMetrics_594337 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceGetQuotaMetrics_594339(protocol: Scheme; host: string;
+  Call_IotHubResourceGetQuotaMetrics_568566 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceGetQuotaMetrics_568568(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3767,7 +3767,7 @@ proc url_IotHubResourceGetQuotaMetrics_594339(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceGetQuotaMetrics_594338(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceGetQuotaMetrics_568567(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the quota metrics for an IoT hub.
   ## 
@@ -3783,21 +3783,21 @@ proc validate_IotHubResourceGetQuotaMetrics_594338(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594340 = path.getOrDefault("resourceGroupName")
-  valid_594340 = validateParameter(valid_594340, JString, required = true,
+  var valid_568569 = path.getOrDefault("resourceGroupName")
+  valid_568569 = validateParameter(valid_568569, JString, required = true,
                                  default = nil)
-  if valid_594340 != nil:
-    section.add "resourceGroupName", valid_594340
-  var valid_594341 = path.getOrDefault("subscriptionId")
-  valid_594341 = validateParameter(valid_594341, JString, required = true,
+  if valid_568569 != nil:
+    section.add "resourceGroupName", valid_568569
+  var valid_568570 = path.getOrDefault("subscriptionId")
+  valid_568570 = validateParameter(valid_568570, JString, required = true,
                                  default = nil)
-  if valid_594341 != nil:
-    section.add "subscriptionId", valid_594341
-  var valid_594342 = path.getOrDefault("resourceName")
-  valid_594342 = validateParameter(valid_594342, JString, required = true,
+  if valid_568570 != nil:
+    section.add "subscriptionId", valid_568570
+  var valid_568571 = path.getOrDefault("resourceName")
+  valid_568571 = validateParameter(valid_568571, JString, required = true,
                                  default = nil)
-  if valid_594342 != nil:
-    section.add "resourceName", valid_594342
+  if valid_568571 != nil:
+    section.add "resourceName", valid_568571
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3805,11 +3805,11 @@ proc validate_IotHubResourceGetQuotaMetrics_594338(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594343 = query.getOrDefault("api-version")
-  valid_594343 = validateParameter(valid_594343, JString, required = true,
+  var valid_568572 = query.getOrDefault("api-version")
+  valid_568572 = validateParameter(valid_568572, JString, required = true,
                                  default = nil)
-  if valid_594343 != nil:
-    section.add "api-version", valid_594343
+  if valid_568572 != nil:
+    section.add "api-version", valid_568572
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3818,20 +3818,20 @@ proc validate_IotHubResourceGetQuotaMetrics_594338(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594344: Call_IotHubResourceGetQuotaMetrics_594337; path: JsonNode;
+proc call*(call_568573: Call_IotHubResourceGetQuotaMetrics_568566; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the quota metrics for an IoT hub.
   ## 
-  let valid = call_594344.validator(path, query, header, formData, body)
-  let scheme = call_594344.pickScheme
+  let valid = call_568573.validator(path, query, header, formData, body)
+  let scheme = call_568573.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594344.url(scheme.get, call_594344.host, call_594344.base,
-                         call_594344.route, valid.getOrDefault("path"),
+  let url = call_568573.url(scheme.get, call_568573.host, call_568573.base,
+                         call_568573.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594344, url, valid)
+  result = hook(call_568573, url, valid)
 
-proc call*(call_594345: Call_IotHubResourceGetQuotaMetrics_594337;
+proc call*(call_568574: Call_IotHubResourceGetQuotaMetrics_568566;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## iotHubResourceGetQuotaMetrics
@@ -3844,22 +3844,22 @@ proc call*(call_594345: Call_IotHubResourceGetQuotaMetrics_594337;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594346 = newJObject()
-  var query_594347 = newJObject()
-  add(path_594346, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594347, "api-version", newJString(apiVersion))
-  add(path_594346, "subscriptionId", newJString(subscriptionId))
-  add(path_594346, "resourceName", newJString(resourceName))
-  result = call_594345.call(path_594346, query_594347, nil, nil, nil)
+  var path_568575 = newJObject()
+  var query_568576 = newJObject()
+  add(path_568575, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568576, "api-version", newJString(apiVersion))
+  add(path_568575, "subscriptionId", newJString(subscriptionId))
+  add(path_568575, "resourceName", newJString(resourceName))
+  result = call_568574.call(path_568575, query_568576, nil, nil, nil)
 
-var iotHubResourceGetQuotaMetrics* = Call_IotHubResourceGetQuotaMetrics_594337(
+var iotHubResourceGetQuotaMetrics* = Call_IotHubResourceGetQuotaMetrics_568566(
     name: "iotHubResourceGetQuotaMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/quotaMetrics",
-    validator: validate_IotHubResourceGetQuotaMetrics_594338, base: "",
-    url: url_IotHubResourceGetQuotaMetrics_594339, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceGetQuotaMetrics_568567, base: "",
+    url: url_IotHubResourceGetQuotaMetrics_568568, schemes: {Scheme.Https})
 type
-  Call_IotHubResourceGetValidSkus_594348 = ref object of OpenApiRestCall_593437
-proc url_IotHubResourceGetValidSkus_594350(protocol: Scheme; host: string;
+  Call_IotHubResourceGetValidSkus_568577 = ref object of OpenApiRestCall_567666
+proc url_IotHubResourceGetValidSkus_568579(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3882,7 +3882,7 @@ proc url_IotHubResourceGetValidSkus_594350(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotHubResourceGetValidSkus_594349(path: JsonNode; query: JsonNode;
+proc validate_IotHubResourceGetValidSkus_568578(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the list of valid SKUs for an IoT hub.
   ## 
@@ -3898,21 +3898,21 @@ proc validate_IotHubResourceGetValidSkus_594349(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594351 = path.getOrDefault("resourceGroupName")
-  valid_594351 = validateParameter(valid_594351, JString, required = true,
+  var valid_568580 = path.getOrDefault("resourceGroupName")
+  valid_568580 = validateParameter(valid_568580, JString, required = true,
                                  default = nil)
-  if valid_594351 != nil:
-    section.add "resourceGroupName", valid_594351
-  var valid_594352 = path.getOrDefault("subscriptionId")
-  valid_594352 = validateParameter(valid_594352, JString, required = true,
+  if valid_568580 != nil:
+    section.add "resourceGroupName", valid_568580
+  var valid_568581 = path.getOrDefault("subscriptionId")
+  valid_568581 = validateParameter(valid_568581, JString, required = true,
                                  default = nil)
-  if valid_594352 != nil:
-    section.add "subscriptionId", valid_594352
-  var valid_594353 = path.getOrDefault("resourceName")
-  valid_594353 = validateParameter(valid_594353, JString, required = true,
+  if valid_568581 != nil:
+    section.add "subscriptionId", valid_568581
+  var valid_568582 = path.getOrDefault("resourceName")
+  valid_568582 = validateParameter(valid_568582, JString, required = true,
                                  default = nil)
-  if valid_594353 != nil:
-    section.add "resourceName", valid_594353
+  if valid_568582 != nil:
+    section.add "resourceName", valid_568582
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3920,11 +3920,11 @@ proc validate_IotHubResourceGetValidSkus_594349(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594354 = query.getOrDefault("api-version")
-  valid_594354 = validateParameter(valid_594354, JString, required = true,
+  var valid_568583 = query.getOrDefault("api-version")
+  valid_568583 = validateParameter(valid_568583, JString, required = true,
                                  default = nil)
-  if valid_594354 != nil:
-    section.add "api-version", valid_594354
+  if valid_568583 != nil:
+    section.add "api-version", valid_568583
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3933,20 +3933,20 @@ proc validate_IotHubResourceGetValidSkus_594349(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594355: Call_IotHubResourceGetValidSkus_594348; path: JsonNode;
+proc call*(call_568584: Call_IotHubResourceGetValidSkus_568577; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the list of valid SKUs for an IoT hub.
   ## 
-  let valid = call_594355.validator(path, query, header, formData, body)
-  let scheme = call_594355.pickScheme
+  let valid = call_568584.validator(path, query, header, formData, body)
+  let scheme = call_568584.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594355.url(scheme.get, call_594355.host, call_594355.base,
-                         call_594355.route, valid.getOrDefault("path"),
+  let url = call_568584.url(scheme.get, call_568584.host, call_568584.base,
+                         call_568584.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594355, url, valid)
+  result = hook(call_568584, url, valid)
 
-proc call*(call_594356: Call_IotHubResourceGetValidSkus_594348;
+proc call*(call_568585: Call_IotHubResourceGetValidSkus_568577;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## iotHubResourceGetValidSkus
@@ -3959,19 +3959,19 @@ proc call*(call_594356: Call_IotHubResourceGetValidSkus_594348;
   ##                 : The subscription identifier.
   ##   resourceName: string (required)
   ##               : The name of the IoT hub.
-  var path_594357 = newJObject()
-  var query_594358 = newJObject()
-  add(path_594357, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594358, "api-version", newJString(apiVersion))
-  add(path_594357, "subscriptionId", newJString(subscriptionId))
-  add(path_594357, "resourceName", newJString(resourceName))
-  result = call_594356.call(path_594357, query_594358, nil, nil, nil)
+  var path_568586 = newJObject()
+  var query_568587 = newJObject()
+  add(path_568586, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568587, "api-version", newJString(apiVersion))
+  add(path_568586, "subscriptionId", newJString(subscriptionId))
+  add(path_568586, "resourceName", newJString(resourceName))
+  result = call_568585.call(path_568586, query_568587, nil, nil, nil)
 
-var iotHubResourceGetValidSkus* = Call_IotHubResourceGetValidSkus_594348(
+var iotHubResourceGetValidSkus* = Call_IotHubResourceGetValidSkus_568577(
     name: "iotHubResourceGetValidSkus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/IotHubs/{resourceName}/skus",
-    validator: validate_IotHubResourceGetValidSkus_594349, base: "",
-    url: url_IotHubResourceGetValidSkus_594350, schemes: {Scheme.Https})
+    validator: validate_IotHubResourceGetValidSkus_568578, base: "",
+    url: url_IotHubResourceGetValidSkus_568579, schemes: {Scheme.Https})
 export
   rest
 

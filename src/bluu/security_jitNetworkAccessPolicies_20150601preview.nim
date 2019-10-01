@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_567657 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "security-jitNetworkAccessPolicies"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_JitNetworkAccessPoliciesList_593646 = ref object of OpenApiRestCall_593424
-proc url_JitNetworkAccessPoliciesList_593648(protocol: Scheme; host: string;
+  Call_JitNetworkAccessPoliciesList_567879 = ref object of OpenApiRestCall_567657
+proc url_JitNetworkAccessPoliciesList_567881(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_JitNetworkAccessPoliciesList_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JitNetworkAccessPoliciesList_593647(path: JsonNode; query: JsonNode;
+proc validate_JitNetworkAccessPoliciesList_567880(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Policies for protecting resources using Just-in-Time access control.
   ## 
@@ -133,11 +133,11 @@ proc validate_JitNetworkAccessPoliciesList_593647(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593808 = path.getOrDefault("subscriptionId")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_568041 = path.getOrDefault("subscriptionId")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "subscriptionId", valid_593808
+  if valid_568041 != nil:
+    section.add "subscriptionId", valid_568041
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_JitNetworkAccessPoliciesList_593647(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593809 = query.getOrDefault("api-version")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_568042 = query.getOrDefault("api-version")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "api-version", valid_593809
+  if valid_568042 != nil:
+    section.add "api-version", valid_568042
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_JitNetworkAccessPoliciesList_593647(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593836: Call_JitNetworkAccessPoliciesList_593646; path: JsonNode;
+proc call*(call_568069: Call_JitNetworkAccessPoliciesList_567879; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Policies for protecting resources using Just-in-Time access control.
   ## 
-  let valid = call_593836.validator(path, query, header, formData, body)
-  let scheme = call_593836.pickScheme
+  let valid = call_568069.validator(path, query, header, formData, body)
+  let scheme = call_568069.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593836.url(scheme.get, call_593836.host, call_593836.base,
-                         call_593836.route, valid.getOrDefault("path"),
+  let url = call_568069.url(scheme.get, call_568069.host, call_568069.base,
+                         call_568069.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593836, url, valid)
+  result = hook(call_568069, url, valid)
 
-proc call*(call_593907: Call_JitNetworkAccessPoliciesList_593646;
+proc call*(call_568140: Call_JitNetworkAccessPoliciesList_567879;
           apiVersion: string; subscriptionId: string): Recallable =
   ## jitNetworkAccessPoliciesList
   ## Policies for protecting resources using Just-in-Time access control.
@@ -179,20 +179,20 @@ proc call*(call_593907: Call_JitNetworkAccessPoliciesList_593646;
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_593908 = newJObject()
-  var query_593910 = newJObject()
-  add(query_593910, "api-version", newJString(apiVersion))
-  add(path_593908, "subscriptionId", newJString(subscriptionId))
-  result = call_593907.call(path_593908, query_593910, nil, nil, nil)
+  var path_568141 = newJObject()
+  var query_568143 = newJObject()
+  add(query_568143, "api-version", newJString(apiVersion))
+  add(path_568141, "subscriptionId", newJString(subscriptionId))
+  result = call_568140.call(path_568141, query_568143, nil, nil, nil)
 
-var jitNetworkAccessPoliciesList* = Call_JitNetworkAccessPoliciesList_593646(
+var jitNetworkAccessPoliciesList* = Call_JitNetworkAccessPoliciesList_567879(
     name: "jitNetworkAccessPoliciesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/jitNetworkAccessPolicies",
-    validator: validate_JitNetworkAccessPoliciesList_593647, base: "",
-    url: url_JitNetworkAccessPoliciesList_593648, schemes: {Scheme.Https})
+    validator: validate_JitNetworkAccessPoliciesList_567880, base: "",
+    url: url_JitNetworkAccessPoliciesList_567881, schemes: {Scheme.Https})
 type
-  Call_JitNetworkAccessPoliciesListByRegion_593949 = ref object of OpenApiRestCall_593424
-proc url_JitNetworkAccessPoliciesListByRegion_593951(protocol: Scheme;
+  Call_JitNetworkAccessPoliciesListByRegion_568182 = ref object of OpenApiRestCall_567657
+proc url_JitNetworkAccessPoliciesListByRegion_568184(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,7 +211,7 @@ proc url_JitNetworkAccessPoliciesListByRegion_593951(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JitNetworkAccessPoliciesListByRegion_593950(path: JsonNode;
+proc validate_JitNetworkAccessPoliciesListByRegion_568183(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Policies for protecting resources using Just-in-Time access control for the subscription, location
   ## 
@@ -225,16 +225,16 @@ proc validate_JitNetworkAccessPoliciesListByRegion_593950(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `ascLocation` field"
-  var valid_593952 = path.getOrDefault("ascLocation")
-  valid_593952 = validateParameter(valid_593952, JString, required = true,
+  var valid_568185 = path.getOrDefault("ascLocation")
+  valid_568185 = validateParameter(valid_568185, JString, required = true,
                                  default = nil)
-  if valid_593952 != nil:
-    section.add "ascLocation", valid_593952
-  var valid_593953 = path.getOrDefault("subscriptionId")
-  valid_593953 = validateParameter(valid_593953, JString, required = true,
+  if valid_568185 != nil:
+    section.add "ascLocation", valid_568185
+  var valid_568186 = path.getOrDefault("subscriptionId")
+  valid_568186 = validateParameter(valid_568186, JString, required = true,
                                  default = nil)
-  if valid_593953 != nil:
-    section.add "subscriptionId", valid_593953
+  if valid_568186 != nil:
+    section.add "subscriptionId", valid_568186
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +242,11 @@ proc validate_JitNetworkAccessPoliciesListByRegion_593950(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593954 = query.getOrDefault("api-version")
-  valid_593954 = validateParameter(valid_593954, JString, required = true,
+  var valid_568187 = query.getOrDefault("api-version")
+  valid_568187 = validateParameter(valid_568187, JString, required = true,
                                  default = nil)
-  if valid_593954 != nil:
-    section.add "api-version", valid_593954
+  if valid_568187 != nil:
+    section.add "api-version", valid_568187
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -255,21 +255,21 @@ proc validate_JitNetworkAccessPoliciesListByRegion_593950(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593955: Call_JitNetworkAccessPoliciesListByRegion_593949;
+proc call*(call_568188: Call_JitNetworkAccessPoliciesListByRegion_568182;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Policies for protecting resources using Just-in-Time access control for the subscription, location
   ## 
-  let valid = call_593955.validator(path, query, header, formData, body)
-  let scheme = call_593955.pickScheme
+  let valid = call_568188.validator(path, query, header, formData, body)
+  let scheme = call_568188.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593955.url(scheme.get, call_593955.host, call_593955.base,
-                         call_593955.route, valid.getOrDefault("path"),
+  let url = call_568188.url(scheme.get, call_568188.host, call_568188.base,
+                         call_568188.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593955, url, valid)
+  result = hook(call_568188, url, valid)
 
-proc call*(call_593956: Call_JitNetworkAccessPoliciesListByRegion_593949;
+proc call*(call_568189: Call_JitNetworkAccessPoliciesListByRegion_568182;
           apiVersion: string; ascLocation: string; subscriptionId: string): Recallable =
   ## jitNetworkAccessPoliciesListByRegion
   ## Policies for protecting resources using Just-in-Time access control for the subscription, location
@@ -279,21 +279,21 @@ proc call*(call_593956: Call_JitNetworkAccessPoliciesListByRegion_593949;
   ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_593957 = newJObject()
-  var query_593958 = newJObject()
-  add(query_593958, "api-version", newJString(apiVersion))
-  add(path_593957, "ascLocation", newJString(ascLocation))
-  add(path_593957, "subscriptionId", newJString(subscriptionId))
-  result = call_593956.call(path_593957, query_593958, nil, nil, nil)
+  var path_568190 = newJObject()
+  var query_568191 = newJObject()
+  add(query_568191, "api-version", newJString(apiVersion))
+  add(path_568190, "ascLocation", newJString(ascLocation))
+  add(path_568190, "subscriptionId", newJString(subscriptionId))
+  result = call_568189.call(path_568190, query_568191, nil, nil, nil)
 
-var jitNetworkAccessPoliciesListByRegion* = Call_JitNetworkAccessPoliciesListByRegion_593949(
+var jitNetworkAccessPoliciesListByRegion* = Call_JitNetworkAccessPoliciesListByRegion_568182(
     name: "jitNetworkAccessPoliciesListByRegion", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/jitNetworkAccessPolicies",
-    validator: validate_JitNetworkAccessPoliciesListByRegion_593950, base: "",
-    url: url_JitNetworkAccessPoliciesListByRegion_593951, schemes: {Scheme.Https})
+    validator: validate_JitNetworkAccessPoliciesListByRegion_568183, base: "",
+    url: url_JitNetworkAccessPoliciesListByRegion_568184, schemes: {Scheme.Https})
 type
-  Call_JitNetworkAccessPoliciesListByResourceGroup_593959 = ref object of OpenApiRestCall_593424
-proc url_JitNetworkAccessPoliciesListByResourceGroup_593961(protocol: Scheme;
+  Call_JitNetworkAccessPoliciesListByResourceGroup_568192 = ref object of OpenApiRestCall_567657
+proc url_JitNetworkAccessPoliciesListByResourceGroup_568194(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -314,7 +314,7 @@ proc url_JitNetworkAccessPoliciesListByResourceGroup_593961(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JitNetworkAccessPoliciesListByResourceGroup_593960(path: JsonNode;
+proc validate_JitNetworkAccessPoliciesListByResourceGroup_568193(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Policies for protecting resources using Just-in-Time access control for the subscription, location
   ## 
@@ -328,16 +328,16 @@ proc validate_JitNetworkAccessPoliciesListByResourceGroup_593960(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593962 = path.getOrDefault("resourceGroupName")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_568195 = path.getOrDefault("resourceGroupName")
+  valid_568195 = validateParameter(valid_568195, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "resourceGroupName", valid_593962
-  var valid_593963 = path.getOrDefault("subscriptionId")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_568195 != nil:
+    section.add "resourceGroupName", valid_568195
+  var valid_568196 = path.getOrDefault("subscriptionId")
+  valid_568196 = validateParameter(valid_568196, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "subscriptionId", valid_593963
+  if valid_568196 != nil:
+    section.add "subscriptionId", valid_568196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -345,11 +345,11 @@ proc validate_JitNetworkAccessPoliciesListByResourceGroup_593960(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593964 = query.getOrDefault("api-version")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_568197 = query.getOrDefault("api-version")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "api-version", valid_593964
+  if valid_568197 != nil:
+    section.add "api-version", valid_568197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -358,21 +358,21 @@ proc validate_JitNetworkAccessPoliciesListByResourceGroup_593960(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593965: Call_JitNetworkAccessPoliciesListByResourceGroup_593959;
+proc call*(call_568198: Call_JitNetworkAccessPoliciesListByResourceGroup_568192;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Policies for protecting resources using Just-in-Time access control for the subscription, location
   ## 
-  let valid = call_593965.validator(path, query, header, formData, body)
-  let scheme = call_593965.pickScheme
+  let valid = call_568198.validator(path, query, header, formData, body)
+  let scheme = call_568198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593965.url(scheme.get, call_593965.host, call_593965.base,
-                         call_593965.route, valid.getOrDefault("path"),
+  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
+                         call_568198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593965, url, valid)
+  result = hook(call_568198, url, valid)
 
-proc call*(call_593966: Call_JitNetworkAccessPoliciesListByResourceGroup_593959;
+proc call*(call_568199: Call_JitNetworkAccessPoliciesListByResourceGroup_568192;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## jitNetworkAccessPoliciesListByResourceGroup
   ## Policies for protecting resources using Just-in-Time access control for the subscription, location
@@ -382,22 +382,22 @@ proc call*(call_593966: Call_JitNetworkAccessPoliciesListByResourceGroup_593959;
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_593967 = newJObject()
-  var query_593968 = newJObject()
-  add(path_593967, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593968, "api-version", newJString(apiVersion))
-  add(path_593967, "subscriptionId", newJString(subscriptionId))
-  result = call_593966.call(path_593967, query_593968, nil, nil, nil)
+  var path_568200 = newJObject()
+  var query_568201 = newJObject()
+  add(path_568200, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568201, "api-version", newJString(apiVersion))
+  add(path_568200, "subscriptionId", newJString(subscriptionId))
+  result = call_568199.call(path_568200, query_568201, nil, nil, nil)
 
-var jitNetworkAccessPoliciesListByResourceGroup* = Call_JitNetworkAccessPoliciesListByResourceGroup_593959(
+var jitNetworkAccessPoliciesListByResourceGroup* = Call_JitNetworkAccessPoliciesListByResourceGroup_568192(
     name: "jitNetworkAccessPoliciesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/jitNetworkAccessPolicies",
-    validator: validate_JitNetworkAccessPoliciesListByResourceGroup_593960,
-    base: "", url: url_JitNetworkAccessPoliciesListByResourceGroup_593961,
+    validator: validate_JitNetworkAccessPoliciesListByResourceGroup_568193,
+    base: "", url: url_JitNetworkAccessPoliciesListByResourceGroup_568194,
     schemes: {Scheme.Https})
 type
-  Call_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593969 = ref object of OpenApiRestCall_593424
-proc url_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593971(
+  Call_JitNetworkAccessPoliciesListByResourceGroupAndRegion_568202 = ref object of OpenApiRestCall_567657
+proc url_JitNetworkAccessPoliciesListByResourceGroupAndRegion_568204(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -421,7 +421,7 @@ proc url_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593971(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593970(
+proc validate_JitNetworkAccessPoliciesListByResourceGroupAndRegion_568203(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Policies for protecting resources using Just-in-Time access control for the subscription, location
@@ -438,21 +438,21 @@ proc validate_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593970(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593972 = path.getOrDefault("resourceGroupName")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_568205 = path.getOrDefault("resourceGroupName")
+  valid_568205 = validateParameter(valid_568205, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "resourceGroupName", valid_593972
-  var valid_593973 = path.getOrDefault("ascLocation")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  if valid_568205 != nil:
+    section.add "resourceGroupName", valid_568205
+  var valid_568206 = path.getOrDefault("ascLocation")
+  valid_568206 = validateParameter(valid_568206, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "ascLocation", valid_593973
-  var valid_593974 = path.getOrDefault("subscriptionId")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  if valid_568206 != nil:
+    section.add "ascLocation", valid_568206
+  var valid_568207 = path.getOrDefault("subscriptionId")
+  valid_568207 = validateParameter(valid_568207, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "subscriptionId", valid_593974
+  if valid_568207 != nil:
+    section.add "subscriptionId", valid_568207
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -460,11 +460,11 @@ proc validate_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593970(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593975 = query.getOrDefault("api-version")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_568208 = query.getOrDefault("api-version")
+  valid_568208 = validateParameter(valid_568208, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "api-version", valid_593975
+  if valid_568208 != nil:
+    section.add "api-version", valid_568208
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -473,21 +473,21 @@ proc validate_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593970(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593976: Call_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593969;
+proc call*(call_568209: Call_JitNetworkAccessPoliciesListByResourceGroupAndRegion_568202;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Policies for protecting resources using Just-in-Time access control for the subscription, location
   ## 
-  let valid = call_593976.validator(path, query, header, formData, body)
-  let scheme = call_593976.pickScheme
+  let valid = call_568209.validator(path, query, header, formData, body)
+  let scheme = call_568209.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593976.url(scheme.get, call_593976.host, call_593976.base,
-                         call_593976.route, valid.getOrDefault("path"),
+  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
+                         call_568209.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593976, url, valid)
+  result = hook(call_568209, url, valid)
 
-proc call*(call_593977: Call_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593969;
+proc call*(call_568210: Call_JitNetworkAccessPoliciesListByResourceGroupAndRegion_568202;
           resourceGroupName: string; apiVersion: string; ascLocation: string;
           subscriptionId: string): Recallable =
   ## jitNetworkAccessPoliciesListByResourceGroupAndRegion
@@ -500,23 +500,23 @@ proc call*(call_593977: Call_JitNetworkAccessPoliciesListByResourceGroupAndRegio
   ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_593978 = newJObject()
-  var query_593979 = newJObject()
-  add(path_593978, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593979, "api-version", newJString(apiVersion))
-  add(path_593978, "ascLocation", newJString(ascLocation))
-  add(path_593978, "subscriptionId", newJString(subscriptionId))
-  result = call_593977.call(path_593978, query_593979, nil, nil, nil)
+  var path_568211 = newJObject()
+  var query_568212 = newJObject()
+  add(path_568211, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568212, "api-version", newJString(apiVersion))
+  add(path_568211, "ascLocation", newJString(ascLocation))
+  add(path_568211, "subscriptionId", newJString(subscriptionId))
+  result = call_568210.call(path_568211, query_568212, nil, nil, nil)
 
-var jitNetworkAccessPoliciesListByResourceGroupAndRegion* = Call_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593969(
+var jitNetworkAccessPoliciesListByResourceGroupAndRegion* = Call_JitNetworkAccessPoliciesListByResourceGroupAndRegion_568202(
     name: "jitNetworkAccessPoliciesListByResourceGroupAndRegion",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/jitNetworkAccessPolicies",
-    validator: validate_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593970,
-    base: "", url: url_JitNetworkAccessPoliciesListByResourceGroupAndRegion_593971,
+    validator: validate_JitNetworkAccessPoliciesListByResourceGroupAndRegion_568203,
+    base: "", url: url_JitNetworkAccessPoliciesListByResourceGroupAndRegion_568204,
     schemes: {Scheme.Https})
 type
-  Call_JitNetworkAccessPoliciesCreateOrUpdate_594001 = ref object of OpenApiRestCall_593424
-proc url_JitNetworkAccessPoliciesCreateOrUpdate_594003(protocol: Scheme;
+  Call_JitNetworkAccessPoliciesCreateOrUpdate_568234 = ref object of OpenApiRestCall_567657
+proc url_JitNetworkAccessPoliciesCreateOrUpdate_568236(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -542,7 +542,7 @@ proc url_JitNetworkAccessPoliciesCreateOrUpdate_594003(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JitNetworkAccessPoliciesCreateOrUpdate_594002(path: JsonNode;
+proc validate_JitNetworkAccessPoliciesCreateOrUpdate_568235(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a policy for protecting resources using Just-in-Time access control
   ## 
@@ -560,26 +560,26 @@ proc validate_JitNetworkAccessPoliciesCreateOrUpdate_594002(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594004 = path.getOrDefault("resourceGroupName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = path.getOrDefault("resourceGroupName")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "resourceGroupName", valid_594004
-  var valid_594005 = path.getOrDefault("ascLocation")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  if valid_568237 != nil:
+    section.add "resourceGroupName", valid_568237
+  var valid_568238 = path.getOrDefault("ascLocation")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "ascLocation", valid_594005
-  var valid_594006 = path.getOrDefault("subscriptionId")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_568238 != nil:
+    section.add "ascLocation", valid_568238
+  var valid_568239 = path.getOrDefault("subscriptionId")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "subscriptionId", valid_594006
-  var valid_594007 = path.getOrDefault("jitNetworkAccessPolicyName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "subscriptionId", valid_568239
+  var valid_568240 = path.getOrDefault("jitNetworkAccessPolicyName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "jitNetworkAccessPolicyName", valid_594007
+  if valid_568240 != nil:
+    section.add "jitNetworkAccessPolicyName", valid_568240
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -587,11 +587,11 @@ proc validate_JitNetworkAccessPoliciesCreateOrUpdate_594002(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594008 = query.getOrDefault("api-version")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  var valid_568241 = query.getOrDefault("api-version")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "api-version", valid_594008
+  if valid_568241 != nil:
+    section.add "api-version", valid_568241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -604,21 +604,21 @@ proc validate_JitNetworkAccessPoliciesCreateOrUpdate_594002(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594010: Call_JitNetworkAccessPoliciesCreateOrUpdate_594001;
+proc call*(call_568243: Call_JitNetworkAccessPoliciesCreateOrUpdate_568234;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create a policy for protecting resources using Just-in-Time access control
   ## 
-  let valid = call_594010.validator(path, query, header, formData, body)
-  let scheme = call_594010.pickScheme
+  let valid = call_568243.validator(path, query, header, formData, body)
+  let scheme = call_568243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594010.url(scheme.get, call_594010.host, call_594010.base,
-                         call_594010.route, valid.getOrDefault("path"),
+  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
+                         call_568243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594010, url, valid)
+  result = hook(call_568243, url, valid)
 
-proc call*(call_594011: Call_JitNetworkAccessPoliciesCreateOrUpdate_594001;
+proc call*(call_568244: Call_JitNetworkAccessPoliciesCreateOrUpdate_568234;
           resourceGroupName: string; apiVersion: string; ascLocation: string;
           subscriptionId: string; jitNetworkAccessPolicyName: string; body: JsonNode): Recallable =
   ## jitNetworkAccessPoliciesCreateOrUpdate
@@ -634,28 +634,28 @@ proc call*(call_594011: Call_JitNetworkAccessPoliciesCreateOrUpdate_594001;
   ##   jitNetworkAccessPolicyName: string (required)
   ##                             : Name of a Just-in-Time access configuration policy.
   ##   body: JObject (required)
-  var path_594012 = newJObject()
-  var query_594013 = newJObject()
-  var body_594014 = newJObject()
-  add(path_594012, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594013, "api-version", newJString(apiVersion))
-  add(path_594012, "ascLocation", newJString(ascLocation))
-  add(path_594012, "subscriptionId", newJString(subscriptionId))
-  add(path_594012, "jitNetworkAccessPolicyName",
+  var path_568245 = newJObject()
+  var query_568246 = newJObject()
+  var body_568247 = newJObject()
+  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568246, "api-version", newJString(apiVersion))
+  add(path_568245, "ascLocation", newJString(ascLocation))
+  add(path_568245, "subscriptionId", newJString(subscriptionId))
+  add(path_568245, "jitNetworkAccessPolicyName",
       newJString(jitNetworkAccessPolicyName))
   if body != nil:
-    body_594014 = body
-  result = call_594011.call(path_594012, query_594013, nil, nil, body_594014)
+    body_568247 = body
+  result = call_568244.call(path_568245, query_568246, nil, nil, body_568247)
 
-var jitNetworkAccessPoliciesCreateOrUpdate* = Call_JitNetworkAccessPoliciesCreateOrUpdate_594001(
+var jitNetworkAccessPoliciesCreateOrUpdate* = Call_JitNetworkAccessPoliciesCreateOrUpdate_568234(
     name: "jitNetworkAccessPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/jitNetworkAccessPolicies/{jitNetworkAccessPolicyName}",
-    validator: validate_JitNetworkAccessPoliciesCreateOrUpdate_594002, base: "",
-    url: url_JitNetworkAccessPoliciesCreateOrUpdate_594003,
+    validator: validate_JitNetworkAccessPoliciesCreateOrUpdate_568235, base: "",
+    url: url_JitNetworkAccessPoliciesCreateOrUpdate_568236,
     schemes: {Scheme.Https})
 type
-  Call_JitNetworkAccessPoliciesGet_593980 = ref object of OpenApiRestCall_593424
-proc url_JitNetworkAccessPoliciesGet_593982(protocol: Scheme; host: string;
+  Call_JitNetworkAccessPoliciesGet_568213 = ref object of OpenApiRestCall_567657
+proc url_JitNetworkAccessPoliciesGet_568215(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -681,7 +681,7 @@ proc url_JitNetworkAccessPoliciesGet_593982(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JitNetworkAccessPoliciesGet_593981(path: JsonNode; query: JsonNode;
+proc validate_JitNetworkAccessPoliciesGet_568214(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Policies for protecting resources using Just-in-Time access control for the subscription, location
   ## 
@@ -699,26 +699,26 @@ proc validate_JitNetworkAccessPoliciesGet_593981(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593992 = path.getOrDefault("resourceGroupName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568225 = path.getOrDefault("resourceGroupName")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "resourceGroupName", valid_593992
-  var valid_593993 = path.getOrDefault("ascLocation")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "resourceGroupName", valid_568225
+  var valid_568226 = path.getOrDefault("ascLocation")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "ascLocation", valid_593993
-  var valid_593994 = path.getOrDefault("subscriptionId")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568226 != nil:
+    section.add "ascLocation", valid_568226
+  var valid_568227 = path.getOrDefault("subscriptionId")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "subscriptionId", valid_593994
-  var valid_593995 = path.getOrDefault("jitNetworkAccessPolicyName")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_568227 != nil:
+    section.add "subscriptionId", valid_568227
+  var valid_568228 = path.getOrDefault("jitNetworkAccessPolicyName")
+  valid_568228 = validateParameter(valid_568228, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "jitNetworkAccessPolicyName", valid_593995
+  if valid_568228 != nil:
+    section.add "jitNetworkAccessPolicyName", valid_568228
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -726,11 +726,11 @@ proc validate_JitNetworkAccessPoliciesGet_593981(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593996 = query.getOrDefault("api-version")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_568229 = query.getOrDefault("api-version")
+  valid_568229 = validateParameter(valid_568229, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "api-version", valid_593996
+  if valid_568229 != nil:
+    section.add "api-version", valid_568229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -739,20 +739,20 @@ proc validate_JitNetworkAccessPoliciesGet_593981(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_JitNetworkAccessPoliciesGet_593980; path: JsonNode;
+proc call*(call_568230: Call_JitNetworkAccessPoliciesGet_568213; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Policies for protecting resources using Just-in-Time access control for the subscription, location
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_568230.validator(path, query, header, formData, body)
+  let scheme = call_568230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
+                         call_568230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_568230, url, valid)
 
-proc call*(call_593998: Call_JitNetworkAccessPoliciesGet_593980;
+proc call*(call_568231: Call_JitNetworkAccessPoliciesGet_568213;
           resourceGroupName: string; apiVersion: string; ascLocation: string;
           subscriptionId: string; jitNetworkAccessPolicyName: string): Recallable =
   ## jitNetworkAccessPoliciesGet
@@ -767,24 +767,24 @@ proc call*(call_593998: Call_JitNetworkAccessPoliciesGet_593980;
   ##                 : Azure subscription ID
   ##   jitNetworkAccessPolicyName: string (required)
   ##                             : Name of a Just-in-Time access configuration policy.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  add(path_593999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "ascLocation", newJString(ascLocation))
-  add(path_593999, "subscriptionId", newJString(subscriptionId))
-  add(path_593999, "jitNetworkAccessPolicyName",
+  var path_568232 = newJObject()
+  var query_568233 = newJObject()
+  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568233, "api-version", newJString(apiVersion))
+  add(path_568232, "ascLocation", newJString(ascLocation))
+  add(path_568232, "subscriptionId", newJString(subscriptionId))
+  add(path_568232, "jitNetworkAccessPolicyName",
       newJString(jitNetworkAccessPolicyName))
-  result = call_593998.call(path_593999, query_594000, nil, nil, nil)
+  result = call_568231.call(path_568232, query_568233, nil, nil, nil)
 
-var jitNetworkAccessPoliciesGet* = Call_JitNetworkAccessPoliciesGet_593980(
+var jitNetworkAccessPoliciesGet* = Call_JitNetworkAccessPoliciesGet_568213(
     name: "jitNetworkAccessPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/jitNetworkAccessPolicies/{jitNetworkAccessPolicyName}",
-    validator: validate_JitNetworkAccessPoliciesGet_593981, base: "",
-    url: url_JitNetworkAccessPoliciesGet_593982, schemes: {Scheme.Https})
+    validator: validate_JitNetworkAccessPoliciesGet_568214, base: "",
+    url: url_JitNetworkAccessPoliciesGet_568215, schemes: {Scheme.Https})
 type
-  Call_JitNetworkAccessPoliciesDelete_594015 = ref object of OpenApiRestCall_593424
-proc url_JitNetworkAccessPoliciesDelete_594017(protocol: Scheme; host: string;
+  Call_JitNetworkAccessPoliciesDelete_568248 = ref object of OpenApiRestCall_567657
+proc url_JitNetworkAccessPoliciesDelete_568250(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -810,7 +810,7 @@ proc url_JitNetworkAccessPoliciesDelete_594017(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JitNetworkAccessPoliciesDelete_594016(path: JsonNode;
+proc validate_JitNetworkAccessPoliciesDelete_568249(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a Just-in-Time access control policy.
   ## 
@@ -828,26 +828,26 @@ proc validate_JitNetworkAccessPoliciesDelete_594016(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594018 = path.getOrDefault("resourceGroupName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  var valid_568251 = path.getOrDefault("resourceGroupName")
+  valid_568251 = validateParameter(valid_568251, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "resourceGroupName", valid_594018
-  var valid_594019 = path.getOrDefault("ascLocation")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  if valid_568251 != nil:
+    section.add "resourceGroupName", valid_568251
+  var valid_568252 = path.getOrDefault("ascLocation")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "ascLocation", valid_594019
-  var valid_594020 = path.getOrDefault("subscriptionId")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  if valid_568252 != nil:
+    section.add "ascLocation", valid_568252
+  var valid_568253 = path.getOrDefault("subscriptionId")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "subscriptionId", valid_594020
-  var valid_594021 = path.getOrDefault("jitNetworkAccessPolicyName")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  if valid_568253 != nil:
+    section.add "subscriptionId", valid_568253
+  var valid_568254 = path.getOrDefault("jitNetworkAccessPolicyName")
+  valid_568254 = validateParameter(valid_568254, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "jitNetworkAccessPolicyName", valid_594021
+  if valid_568254 != nil:
+    section.add "jitNetworkAccessPolicyName", valid_568254
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -855,11 +855,11 @@ proc validate_JitNetworkAccessPoliciesDelete_594016(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594022 = query.getOrDefault("api-version")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  var valid_568255 = query.getOrDefault("api-version")
+  valid_568255 = validateParameter(valid_568255, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "api-version", valid_594022
+  if valid_568255 != nil:
+    section.add "api-version", valid_568255
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -868,20 +868,20 @@ proc validate_JitNetworkAccessPoliciesDelete_594016(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594023: Call_JitNetworkAccessPoliciesDelete_594015; path: JsonNode;
+proc call*(call_568256: Call_JitNetworkAccessPoliciesDelete_568248; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Just-in-Time access control policy.
   ## 
-  let valid = call_594023.validator(path, query, header, formData, body)
-  let scheme = call_594023.pickScheme
+  let valid = call_568256.validator(path, query, header, formData, body)
+  let scheme = call_568256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594023.url(scheme.get, call_594023.host, call_594023.base,
-                         call_594023.route, valid.getOrDefault("path"),
+  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
+                         call_568256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594023, url, valid)
+  result = hook(call_568256, url, valid)
 
-proc call*(call_594024: Call_JitNetworkAccessPoliciesDelete_594015;
+proc call*(call_568257: Call_JitNetworkAccessPoliciesDelete_568248;
           resourceGroupName: string; apiVersion: string; ascLocation: string;
           subscriptionId: string; jitNetworkAccessPolicyName: string): Recallable =
   ## jitNetworkAccessPoliciesDelete
@@ -896,24 +896,24 @@ proc call*(call_594024: Call_JitNetworkAccessPoliciesDelete_594015;
   ##                 : Azure subscription ID
   ##   jitNetworkAccessPolicyName: string (required)
   ##                             : Name of a Just-in-Time access configuration policy.
-  var path_594025 = newJObject()
-  var query_594026 = newJObject()
-  add(path_594025, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594026, "api-version", newJString(apiVersion))
-  add(path_594025, "ascLocation", newJString(ascLocation))
-  add(path_594025, "subscriptionId", newJString(subscriptionId))
-  add(path_594025, "jitNetworkAccessPolicyName",
+  var path_568258 = newJObject()
+  var query_568259 = newJObject()
+  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568259, "api-version", newJString(apiVersion))
+  add(path_568258, "ascLocation", newJString(ascLocation))
+  add(path_568258, "subscriptionId", newJString(subscriptionId))
+  add(path_568258, "jitNetworkAccessPolicyName",
       newJString(jitNetworkAccessPolicyName))
-  result = call_594024.call(path_594025, query_594026, nil, nil, nil)
+  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
 
-var jitNetworkAccessPoliciesDelete* = Call_JitNetworkAccessPoliciesDelete_594015(
+var jitNetworkAccessPoliciesDelete* = Call_JitNetworkAccessPoliciesDelete_568248(
     name: "jitNetworkAccessPoliciesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/jitNetworkAccessPolicies/{jitNetworkAccessPolicyName}",
-    validator: validate_JitNetworkAccessPoliciesDelete_594016, base: "",
-    url: url_JitNetworkAccessPoliciesDelete_594017, schemes: {Scheme.Https})
+    validator: validate_JitNetworkAccessPoliciesDelete_568249, base: "",
+    url: url_JitNetworkAccessPoliciesDelete_568250, schemes: {Scheme.Https})
 type
-  Call_JitNetworkAccessPoliciesInitiate_594027 = ref object of OpenApiRestCall_593424
-proc url_JitNetworkAccessPoliciesInitiate_594029(protocol: Scheme; host: string;
+  Call_JitNetworkAccessPoliciesInitiate_568260 = ref object of OpenApiRestCall_567657
+proc url_JitNetworkAccessPoliciesInitiate_568262(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -943,7 +943,7 @@ proc url_JitNetworkAccessPoliciesInitiate_594029(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JitNetworkAccessPoliciesInitiate_594028(path: JsonNode;
+proc validate_JitNetworkAccessPoliciesInitiate_568261(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Initiate a JIT access from a specific Just-in-Time policy configuration.
   ## 
@@ -962,31 +962,31 @@ proc validate_JitNetworkAccessPoliciesInitiate_594028(path: JsonNode;
   ##                             : Name of a Just-in-Time access configuration policy.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jitNetworkAccessPolicyInitiateType` field"
-  var valid_594043 = path.getOrDefault("jitNetworkAccessPolicyInitiateType")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  var valid_568276 = path.getOrDefault("jitNetworkAccessPolicyInitiateType")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = newJString("initiate"))
-  if valid_594043 != nil:
-    section.add "jitNetworkAccessPolicyInitiateType", valid_594043
-  var valid_594044 = path.getOrDefault("resourceGroupName")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  if valid_568276 != nil:
+    section.add "jitNetworkAccessPolicyInitiateType", valid_568276
+  var valid_568277 = path.getOrDefault("resourceGroupName")
+  valid_568277 = validateParameter(valid_568277, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "resourceGroupName", valid_594044
-  var valid_594045 = path.getOrDefault("ascLocation")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  if valid_568277 != nil:
+    section.add "resourceGroupName", valid_568277
+  var valid_568278 = path.getOrDefault("ascLocation")
+  valid_568278 = validateParameter(valid_568278, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "ascLocation", valid_594045
-  var valid_594046 = path.getOrDefault("subscriptionId")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  if valid_568278 != nil:
+    section.add "ascLocation", valid_568278
+  var valid_568279 = path.getOrDefault("subscriptionId")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "subscriptionId", valid_594046
-  var valid_594047 = path.getOrDefault("jitNetworkAccessPolicyName")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  if valid_568279 != nil:
+    section.add "subscriptionId", valid_568279
+  var valid_568280 = path.getOrDefault("jitNetworkAccessPolicyName")
+  valid_568280 = validateParameter(valid_568280, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "jitNetworkAccessPolicyName", valid_594047
+  if valid_568280 != nil:
+    section.add "jitNetworkAccessPolicyName", valid_568280
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -994,11 +994,11 @@ proc validate_JitNetworkAccessPoliciesInitiate_594028(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594048 = query.getOrDefault("api-version")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  var valid_568281 = query.getOrDefault("api-version")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "api-version", valid_594048
+  if valid_568281 != nil:
+    section.add "api-version", valid_568281
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1011,21 +1011,21 @@ proc validate_JitNetworkAccessPoliciesInitiate_594028(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594050: Call_JitNetworkAccessPoliciesInitiate_594027;
+proc call*(call_568283: Call_JitNetworkAccessPoliciesInitiate_568260;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Initiate a JIT access from a specific Just-in-Time policy configuration.
   ## 
-  let valid = call_594050.validator(path, query, header, formData, body)
-  let scheme = call_594050.pickScheme
+  let valid = call_568283.validator(path, query, header, formData, body)
+  let scheme = call_568283.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594050.url(scheme.get, call_594050.host, call_594050.base,
-                         call_594050.route, valid.getOrDefault("path"),
+  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
+                         call_568283.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594050, url, valid)
+  result = hook(call_568283, url, valid)
 
-proc call*(call_594051: Call_JitNetworkAccessPoliciesInitiate_594027;
+proc call*(call_568284: Call_JitNetworkAccessPoliciesInitiate_568260;
           resourceGroupName: string; apiVersion: string; ascLocation: string;
           subscriptionId: string; jitNetworkAccessPolicyName: string;
           body: JsonNode; jitNetworkAccessPolicyInitiateType: string = "initiate"): Recallable =
@@ -1044,26 +1044,26 @@ proc call*(call_594051: Call_JitNetworkAccessPoliciesInitiate_594027;
   ##   jitNetworkAccessPolicyName: string (required)
   ##                             : Name of a Just-in-Time access configuration policy.
   ##   body: JObject (required)
-  var path_594052 = newJObject()
-  var query_594053 = newJObject()
-  var body_594054 = newJObject()
-  add(path_594052, "jitNetworkAccessPolicyInitiateType",
+  var path_568285 = newJObject()
+  var query_568286 = newJObject()
+  var body_568287 = newJObject()
+  add(path_568285, "jitNetworkAccessPolicyInitiateType",
       newJString(jitNetworkAccessPolicyInitiateType))
-  add(path_594052, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594053, "api-version", newJString(apiVersion))
-  add(path_594052, "ascLocation", newJString(ascLocation))
-  add(path_594052, "subscriptionId", newJString(subscriptionId))
-  add(path_594052, "jitNetworkAccessPolicyName",
+  add(path_568285, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568286, "api-version", newJString(apiVersion))
+  add(path_568285, "ascLocation", newJString(ascLocation))
+  add(path_568285, "subscriptionId", newJString(subscriptionId))
+  add(path_568285, "jitNetworkAccessPolicyName",
       newJString(jitNetworkAccessPolicyName))
   if body != nil:
-    body_594054 = body
-  result = call_594051.call(path_594052, query_594053, nil, nil, body_594054)
+    body_568287 = body
+  result = call_568284.call(path_568285, query_568286, nil, nil, body_568287)
 
-var jitNetworkAccessPoliciesInitiate* = Call_JitNetworkAccessPoliciesInitiate_594027(
+var jitNetworkAccessPoliciesInitiate* = Call_JitNetworkAccessPoliciesInitiate_568260(
     name: "jitNetworkAccessPoliciesInitiate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/jitNetworkAccessPolicies/{jitNetworkAccessPolicyName}/{jitNetworkAccessPolicyInitiateType}",
-    validator: validate_JitNetworkAccessPoliciesInitiate_594028, base: "",
-    url: url_JitNetworkAccessPoliciesInitiate_594029, schemes: {Scheme.Https})
+    validator: validate_JitNetworkAccessPoliciesInitiate_568261, base: "",
+    url: url_JitNetworkAccessPoliciesInitiate_568262, schemes: {Scheme.Https})
 export
   rest
 

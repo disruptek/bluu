@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_596457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "applicationinsights-eaSubscriptionMigration_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_EasubscriptionListMigrationDatePost_593646 = ref object of OpenApiRestCall_593424
-proc url_EasubscriptionListMigrationDatePost_593648(protocol: Scheme; host: string;
+  Call_EasubscriptionListMigrationDatePost_596679 = ref object of OpenApiRestCall_596457
+proc url_EasubscriptionListMigrationDatePost_596681(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_EasubscriptionListMigrationDatePost_593648(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EasubscriptionListMigrationDatePost_593647(path: JsonNode;
+proc validate_EasubscriptionListMigrationDatePost_596680(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## list date to migrate to new pricing model.
   ## 
@@ -133,11 +133,11 @@ proc validate_EasubscriptionListMigrationDatePost_593647(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593808 = path.getOrDefault("subscriptionId")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  var valid_596841 = path.getOrDefault("subscriptionId")
+  valid_596841 = validateParameter(valid_596841, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "subscriptionId", valid_593808
+  if valid_596841 != nil:
+    section.add "subscriptionId", valid_596841
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_EasubscriptionListMigrationDatePost_593647(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593809 = query.getOrDefault("api-version")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_596842 = query.getOrDefault("api-version")
+  valid_596842 = validateParameter(valid_596842, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "api-version", valid_593809
+  if valid_596842 != nil:
+    section.add "api-version", valid_596842
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,21 +158,21 @@ proc validate_EasubscriptionListMigrationDatePost_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593836: Call_EasubscriptionListMigrationDatePost_593646;
+proc call*(call_596869: Call_EasubscriptionListMigrationDatePost_596679;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## list date to migrate to new pricing model.
   ## 
-  let valid = call_593836.validator(path, query, header, formData, body)
-  let scheme = call_593836.pickScheme
+  let valid = call_596869.validator(path, query, header, formData, body)
+  let scheme = call_596869.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593836.url(scheme.get, call_593836.host, call_593836.base,
-                         call_593836.route, valid.getOrDefault("path"),
+  let url = call_596869.url(scheme.get, call_596869.host, call_596869.base,
+                         call_596869.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593836, url, valid)
+  result = hook(call_596869, url, valid)
 
-proc call*(call_593907: Call_EasubscriptionListMigrationDatePost_593646;
+proc call*(call_596940: Call_EasubscriptionListMigrationDatePost_596679;
           apiVersion: string; subscriptionId: string): Recallable =
   ## easubscriptionListMigrationDatePost
   ## list date to migrate to new pricing model.
@@ -180,20 +180,20 @@ proc call*(call_593907: Call_EasubscriptionListMigrationDatePost_593646;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_593908 = newJObject()
-  var query_593910 = newJObject()
-  add(query_593910, "api-version", newJString(apiVersion))
-  add(path_593908, "subscriptionId", newJString(subscriptionId))
-  result = call_593907.call(path_593908, query_593910, nil, nil, nil)
+  var path_596941 = newJObject()
+  var query_596943 = newJObject()
+  add(query_596943, "api-version", newJString(apiVersion))
+  add(path_596941, "subscriptionId", newJString(subscriptionId))
+  result = call_596940.call(path_596941, query_596943, nil, nil, nil)
 
-var easubscriptionListMigrationDatePost* = Call_EasubscriptionListMigrationDatePost_593646(
+var easubscriptionListMigrationDatePost* = Call_EasubscriptionListMigrationDatePost_596679(
     name: "easubscriptionListMigrationDatePost", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/listMigrationdate",
-    validator: validate_EasubscriptionListMigrationDatePost_593647, base: "",
-    url: url_EasubscriptionListMigrationDatePost_593648, schemes: {Scheme.Https})
+    validator: validate_EasubscriptionListMigrationDatePost_596680, base: "",
+    url: url_EasubscriptionListMigrationDatePost_596681, schemes: {Scheme.Https})
 type
-  Call_EasubscriptionMigrateToNewPricingModelPost_593949 = ref object of OpenApiRestCall_593424
-proc url_EasubscriptionMigrateToNewPricingModelPost_593951(protocol: Scheme;
+  Call_EasubscriptionMigrateToNewPricingModelPost_596982 = ref object of OpenApiRestCall_596457
+proc url_EasubscriptionMigrateToNewPricingModelPost_596984(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -210,7 +210,7 @@ proc url_EasubscriptionMigrateToNewPricingModelPost_593951(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EasubscriptionMigrateToNewPricingModelPost_593950(path: JsonNode;
+proc validate_EasubscriptionMigrateToNewPricingModelPost_596983(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Enterprise Agreement Customer opted to use new pricing model.
   ## 
@@ -222,11 +222,11 @@ proc validate_EasubscriptionMigrateToNewPricingModelPost_593950(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593952 = path.getOrDefault("subscriptionId")
-  valid_593952 = validateParameter(valid_593952, JString, required = true,
+  var valid_596985 = path.getOrDefault("subscriptionId")
+  valid_596985 = validateParameter(valid_596985, JString, required = true,
                                  default = nil)
-  if valid_593952 != nil:
-    section.add "subscriptionId", valid_593952
+  if valid_596985 != nil:
+    section.add "subscriptionId", valid_596985
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -234,11 +234,11 @@ proc validate_EasubscriptionMigrateToNewPricingModelPost_593950(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593953 = query.getOrDefault("api-version")
-  valid_593953 = validateParameter(valid_593953, JString, required = true,
+  var valid_596986 = query.getOrDefault("api-version")
+  valid_596986 = validateParameter(valid_596986, JString, required = true,
                                  default = nil)
-  if valid_593953 != nil:
-    section.add "api-version", valid_593953
+  if valid_596986 != nil:
+    section.add "api-version", valid_596986
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -247,21 +247,21 @@ proc validate_EasubscriptionMigrateToNewPricingModelPost_593950(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593954: Call_EasubscriptionMigrateToNewPricingModelPost_593949;
+proc call*(call_596987: Call_EasubscriptionMigrateToNewPricingModelPost_596982;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Enterprise Agreement Customer opted to use new pricing model.
   ## 
-  let valid = call_593954.validator(path, query, header, formData, body)
-  let scheme = call_593954.pickScheme
+  let valid = call_596987.validator(path, query, header, formData, body)
+  let scheme = call_596987.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593954.url(scheme.get, call_593954.host, call_593954.base,
-                         call_593954.route, valid.getOrDefault("path"),
+  let url = call_596987.url(scheme.get, call_596987.host, call_596987.base,
+                         call_596987.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593954, url, valid)
+  result = hook(call_596987, url, valid)
 
-proc call*(call_593955: Call_EasubscriptionMigrateToNewPricingModelPost_593949;
+proc call*(call_596988: Call_EasubscriptionMigrateToNewPricingModelPost_596982;
           apiVersion: string; subscriptionId: string): Recallable =
   ## easubscriptionMigrateToNewPricingModelPost
   ## Enterprise Agreement Customer opted to use new pricing model.
@@ -269,21 +269,21 @@ proc call*(call_593955: Call_EasubscriptionMigrateToNewPricingModelPost_593949;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_593956 = newJObject()
-  var query_593957 = newJObject()
-  add(query_593957, "api-version", newJString(apiVersion))
-  add(path_593956, "subscriptionId", newJString(subscriptionId))
-  result = call_593955.call(path_593956, query_593957, nil, nil, nil)
+  var path_596989 = newJObject()
+  var query_596990 = newJObject()
+  add(query_596990, "api-version", newJString(apiVersion))
+  add(path_596989, "subscriptionId", newJString(subscriptionId))
+  result = call_596988.call(path_596989, query_596990, nil, nil, nil)
 
-var easubscriptionMigrateToNewPricingModelPost* = Call_EasubscriptionMigrateToNewPricingModelPost_593949(
+var easubscriptionMigrateToNewPricingModelPost* = Call_EasubscriptionMigrateToNewPricingModelPost_596982(
     name: "easubscriptionMigrateToNewPricingModelPost", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/migrateToNewPricingModel",
-    validator: validate_EasubscriptionMigrateToNewPricingModelPost_593950,
-    base: "", url: url_EasubscriptionMigrateToNewPricingModelPost_593951,
+    validator: validate_EasubscriptionMigrateToNewPricingModelPost_596983,
+    base: "", url: url_EasubscriptionMigrateToNewPricingModelPost_596984,
     schemes: {Scheme.Https})
 type
-  Call_EasubscriptionRollbackToLegacyPricingModelPost_593958 = ref object of OpenApiRestCall_593424
-proc url_EasubscriptionRollbackToLegacyPricingModelPost_593960(protocol: Scheme;
+  Call_EasubscriptionRollbackToLegacyPricingModelPost_596991 = ref object of OpenApiRestCall_596457
+proc url_EasubscriptionRollbackToLegacyPricingModelPost_596993(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -300,7 +300,7 @@ proc url_EasubscriptionRollbackToLegacyPricingModelPost_593960(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EasubscriptionRollbackToLegacyPricingModelPost_593959(
+proc validate_EasubscriptionRollbackToLegacyPricingModelPost_596992(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Enterprise Agreement Customer roll back to use legacy pricing model.
@@ -313,11 +313,11 @@ proc validate_EasubscriptionRollbackToLegacyPricingModelPost_593959(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593961 = path.getOrDefault("subscriptionId")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_596994 = path.getOrDefault("subscriptionId")
+  valid_596994 = validateParameter(valid_596994, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "subscriptionId", valid_593961
+  if valid_596994 != nil:
+    section.add "subscriptionId", valid_596994
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -325,11 +325,11 @@ proc validate_EasubscriptionRollbackToLegacyPricingModelPost_593959(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593962 = query.getOrDefault("api-version")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_596995 = query.getOrDefault("api-version")
+  valid_596995 = validateParameter(valid_596995, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "api-version", valid_593962
+  if valid_596995 != nil:
+    section.add "api-version", valid_596995
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -338,21 +338,21 @@ proc validate_EasubscriptionRollbackToLegacyPricingModelPost_593959(
   if body != nil:
     result.add "body", body
 
-proc call*(call_593963: Call_EasubscriptionRollbackToLegacyPricingModelPost_593958;
+proc call*(call_596996: Call_EasubscriptionRollbackToLegacyPricingModelPost_596991;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Enterprise Agreement Customer roll back to use legacy pricing model.
   ## 
-  let valid = call_593963.validator(path, query, header, formData, body)
-  let scheme = call_593963.pickScheme
+  let valid = call_596996.validator(path, query, header, formData, body)
+  let scheme = call_596996.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593963.url(scheme.get, call_593963.host, call_593963.base,
-                         call_593963.route, valid.getOrDefault("path"),
+  let url = call_596996.url(scheme.get, call_596996.host, call_596996.base,
+                         call_596996.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593963, url, valid)
+  result = hook(call_596996, url, valid)
 
-proc call*(call_593964: Call_EasubscriptionRollbackToLegacyPricingModelPost_593958;
+proc call*(call_596997: Call_EasubscriptionRollbackToLegacyPricingModelPost_596991;
           apiVersion: string; subscriptionId: string): Recallable =
   ## easubscriptionRollbackToLegacyPricingModelPost
   ## Enterprise Agreement Customer roll back to use legacy pricing model.
@@ -360,17 +360,17 @@ proc call*(call_593964: Call_EasubscriptionRollbackToLegacyPricingModelPost_5939
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_593965 = newJObject()
-  var query_593966 = newJObject()
-  add(query_593966, "api-version", newJString(apiVersion))
-  add(path_593965, "subscriptionId", newJString(subscriptionId))
-  result = call_593964.call(path_593965, query_593966, nil, nil, nil)
+  var path_596998 = newJObject()
+  var query_596999 = newJObject()
+  add(query_596999, "api-version", newJString(apiVersion))
+  add(path_596998, "subscriptionId", newJString(subscriptionId))
+  result = call_596997.call(path_596998, query_596999, nil, nil, nil)
 
-var easubscriptionRollbackToLegacyPricingModelPost* = Call_EasubscriptionRollbackToLegacyPricingModelPost_593958(
+var easubscriptionRollbackToLegacyPricingModelPost* = Call_EasubscriptionRollbackToLegacyPricingModelPost_596991(
     name: "easubscriptionRollbackToLegacyPricingModelPost",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/rollbackToLegacyPricingModel",
-    validator: validate_EasubscriptionRollbackToLegacyPricingModelPost_593959,
-    base: "", url: url_EasubscriptionRollbackToLegacyPricingModelPost_593960,
+    validator: validate_EasubscriptionRollbackToLegacyPricingModelPost_596992,
+    base: "", url: url_EasubscriptionRollbackToLegacyPricingModelPost_596993,
     schemes: {Scheme.Https})
 export
   rest

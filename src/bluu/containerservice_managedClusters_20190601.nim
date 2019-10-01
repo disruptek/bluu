@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ContainerServiceClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593438 = ref object of OpenApiRestCall
+  OpenApiRestCall_567667 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593438](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567667](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593438): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567667): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "containerservice-managedClusters"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593660 = ref object of OpenApiRestCall_593438
-proc url_OperationsList_593662(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_567889 = ref object of OpenApiRestCall_567667
+proc url_OperationsList_567891(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_567890(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets a list of compute operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593821 = query.getOrDefault("api-version")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568050 = query.getOrDefault("api-version")
+  valid_568050 = validateParameter(valid_568050, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "api-version", valid_593821
+  if valid_568050 != nil:
+    section.add "api-version", valid_568050
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593661(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593844: Call_OperationsList_593660; path: JsonNode; query: JsonNode;
+proc call*(call_568073: Call_OperationsList_567889; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of compute operations.
   ## 
-  let valid = call_593844.validator(path, query, header, formData, body)
-  let scheme = call_593844.pickScheme
+  let valid = call_568073.validator(path, query, header, formData, body)
+  let scheme = call_568073.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593844.url(scheme.get, call_593844.host, call_593844.base,
-                         call_593844.route, valid.getOrDefault("path"),
+  let url = call_568073.url(scheme.get, call_568073.host, call_568073.base,
+                         call_568073.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593844, url, valid)
+  result = hook(call_568073, url, valid)
 
-proc call*(call_593915: Call_OperationsList_593660; apiVersion: string): Recallable =
+proc call*(call_568144: Call_OperationsList_567889; apiVersion: string): Recallable =
   ## operationsList
   ## Gets a list of compute operations.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_593916 = newJObject()
-  add(query_593916, "api-version", newJString(apiVersion))
-  result = call_593915.call(nil, query_593916, nil, nil, nil)
+  var query_568145 = newJObject()
+  add(query_568145, "api-version", newJString(apiVersion))
+  result = call_568144.call(nil, query_568145, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593660(name: "operationsList",
+var operationsList* = Call_OperationsList_567889(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.ContainerService/operations",
-    validator: validate_OperationsList_593661, base: "", url: url_OperationsList_593662,
+    validator: validate_OperationsList_567890, base: "", url: url_OperationsList_567891,
     schemes: {Scheme.Https})
 type
-  Call_ManagedClustersList_593956 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersList_593958(protocol: Scheme; host: string; base: string;
+  Call_ManagedClustersList_568185 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersList_568187(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +185,7 @@ proc url_ManagedClustersList_593958(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersList_593957(path: JsonNode; query: JsonNode;
+proc validate_ManagedClustersList_568186(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets a list of managed clusters in the specified subscription. The operation returns properties of each managed cluster.
@@ -198,11 +198,11 @@ proc validate_ManagedClustersList_593957(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593973 = path.getOrDefault("subscriptionId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_568202 = path.getOrDefault("subscriptionId")
+  valid_568202 = validateParameter(valid_568202, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "subscriptionId", valid_593973
+  if valid_568202 != nil:
+    section.add "subscriptionId", valid_568202
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -210,11 +210,11 @@ proc validate_ManagedClustersList_593957(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593974 = query.getOrDefault("api-version")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_568203 = query.getOrDefault("api-version")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "api-version", valid_593974
+  if valid_568203 != nil:
+    section.add "api-version", valid_568203
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -223,20 +223,20 @@ proc validate_ManagedClustersList_593957(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593975: Call_ManagedClustersList_593956; path: JsonNode;
+proc call*(call_568204: Call_ManagedClustersList_568185; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of managed clusters in the specified subscription. The operation returns properties of each managed cluster.
   ## 
-  let valid = call_593975.validator(path, query, header, formData, body)
-  let scheme = call_593975.pickScheme
+  let valid = call_568204.validator(path, query, header, formData, body)
+  let scheme = call_568204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593975.url(scheme.get, call_593975.host, call_593975.base,
-                         call_593975.route, valid.getOrDefault("path"),
+  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
+                         call_568204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593975, url, valid)
+  result = hook(call_568204, url, valid)
 
-proc call*(call_593976: Call_ManagedClustersList_593956; apiVersion: string;
+proc call*(call_568205: Call_ManagedClustersList_568185; apiVersion: string;
           subscriptionId: string): Recallable =
   ## managedClustersList
   ## Gets a list of managed clusters in the specified subscription. The operation returns properties of each managed cluster.
@@ -244,20 +244,20 @@ proc call*(call_593976: Call_ManagedClustersList_593956; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593977 = newJObject()
-  var query_593978 = newJObject()
-  add(query_593978, "api-version", newJString(apiVersion))
-  add(path_593977, "subscriptionId", newJString(subscriptionId))
-  result = call_593976.call(path_593977, query_593978, nil, nil, nil)
+  var path_568206 = newJObject()
+  var query_568207 = newJObject()
+  add(query_568207, "api-version", newJString(apiVersion))
+  add(path_568206, "subscriptionId", newJString(subscriptionId))
+  result = call_568205.call(path_568206, query_568207, nil, nil, nil)
 
-var managedClustersList* = Call_ManagedClustersList_593956(
+var managedClustersList* = Call_ManagedClustersList_568185(
     name: "managedClustersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerService/managedClusters",
-    validator: validate_ManagedClustersList_593957, base: "",
-    url: url_ManagedClustersList_593958, schemes: {Scheme.Https})
+    validator: validate_ManagedClustersList_568186, base: "",
+    url: url_ManagedClustersList_568187, schemes: {Scheme.Https})
 type
-  Call_ManagedClustersListByResourceGroup_593979 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersListByResourceGroup_593981(protocol: Scheme; host: string;
+  Call_ManagedClustersListByResourceGroup_568208 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersListByResourceGroup_568210(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -278,7 +278,7 @@ proc url_ManagedClustersListByResourceGroup_593981(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersListByResourceGroup_593980(path: JsonNode;
+proc validate_ManagedClustersListByResourceGroup_568209(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists managed clusters in the specified subscription and resource group. The operation returns properties of each managed cluster.
   ## 
@@ -292,16 +292,16 @@ proc validate_ManagedClustersListByResourceGroup_593980(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593982 = path.getOrDefault("resourceGroupName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_568211 = path.getOrDefault("resourceGroupName")
+  valid_568211 = validateParameter(valid_568211, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "resourceGroupName", valid_593982
-  var valid_593983 = path.getOrDefault("subscriptionId")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_568211 != nil:
+    section.add "resourceGroupName", valid_568211
+  var valid_568212 = path.getOrDefault("subscriptionId")
+  valid_568212 = validateParameter(valid_568212, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "subscriptionId", valid_593983
+  if valid_568212 != nil:
+    section.add "subscriptionId", valid_568212
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -309,11 +309,11 @@ proc validate_ManagedClustersListByResourceGroup_593980(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593984 = query.getOrDefault("api-version")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_568213 = query.getOrDefault("api-version")
+  valid_568213 = validateParameter(valid_568213, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "api-version", valid_593984
+  if valid_568213 != nil:
+    section.add "api-version", valid_568213
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -322,21 +322,21 @@ proc validate_ManagedClustersListByResourceGroup_593980(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_ManagedClustersListByResourceGroup_593979;
+proc call*(call_568214: Call_ManagedClustersListByResourceGroup_568208;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists managed clusters in the specified subscription and resource group. The operation returns properties of each managed cluster.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_568214.validator(path, query, header, formData, body)
+  let scheme = call_568214.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
+                         call_568214.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_568214, url, valid)
 
-proc call*(call_593986: Call_ManagedClustersListByResourceGroup_593979;
+proc call*(call_568215: Call_ManagedClustersListByResourceGroup_568208;
           resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
   ## managedClustersListByResourceGroup
   ## Lists managed clusters in the specified subscription and resource group. The operation returns properties of each managed cluster.
@@ -346,21 +346,21 @@ proc call*(call_593986: Call_ManagedClustersListByResourceGroup_593979;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  add(path_593987, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
-  result = call_593986.call(path_593987, query_593988, nil, nil, nil)
+  var path_568216 = newJObject()
+  var query_568217 = newJObject()
+  add(path_568216, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568217, "api-version", newJString(apiVersion))
+  add(path_568216, "subscriptionId", newJString(subscriptionId))
+  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
 
-var managedClustersListByResourceGroup* = Call_ManagedClustersListByResourceGroup_593979(
+var managedClustersListByResourceGroup* = Call_ManagedClustersListByResourceGroup_568208(
     name: "managedClustersListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters",
-    validator: validate_ManagedClustersListByResourceGroup_593980, base: "",
-    url: url_ManagedClustersListByResourceGroup_593981, schemes: {Scheme.Https})
+    validator: validate_ManagedClustersListByResourceGroup_568209, base: "",
+    url: url_ManagedClustersListByResourceGroup_568210, schemes: {Scheme.Https})
 type
-  Call_ManagedClustersCreateOrUpdate_594000 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersCreateOrUpdate_594002(protocol: Scheme; host: string;
+  Call_ManagedClustersCreateOrUpdate_568229 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersCreateOrUpdate_568231(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -383,7 +383,7 @@ proc url_ManagedClustersCreateOrUpdate_594002(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersCreateOrUpdate_594001(path: JsonNode; query: JsonNode;
+proc validate_ManagedClustersCreateOrUpdate_568230(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a managed cluster with the specified configuration for agents and Kubernetes version.
   ## 
@@ -399,21 +399,21 @@ proc validate_ManagedClustersCreateOrUpdate_594001(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594003 = path.getOrDefault("resourceGroupName")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  var valid_568232 = path.getOrDefault("resourceGroupName")
+  valid_568232 = validateParameter(valid_568232, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "resourceGroupName", valid_594003
-  var valid_594004 = path.getOrDefault("subscriptionId")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  if valid_568232 != nil:
+    section.add "resourceGroupName", valid_568232
+  var valid_568233 = path.getOrDefault("subscriptionId")
+  valid_568233 = validateParameter(valid_568233, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "subscriptionId", valid_594004
-  var valid_594005 = path.getOrDefault("resourceName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  if valid_568233 != nil:
+    section.add "subscriptionId", valid_568233
+  var valid_568234 = path.getOrDefault("resourceName")
+  valid_568234 = validateParameter(valid_568234, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "resourceName", valid_594005
+  if valid_568234 != nil:
+    section.add "resourceName", valid_568234
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -421,11 +421,11 @@ proc validate_ManagedClustersCreateOrUpdate_594001(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594006 = query.getOrDefault("api-version")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_568235 = query.getOrDefault("api-version")
+  valid_568235 = validateParameter(valid_568235, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "api-version", valid_594006
+  if valid_568235 != nil:
+    section.add "api-version", valid_568235
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -439,20 +439,20 @@ proc validate_ManagedClustersCreateOrUpdate_594001(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594008: Call_ManagedClustersCreateOrUpdate_594000; path: JsonNode;
+proc call*(call_568237: Call_ManagedClustersCreateOrUpdate_568229; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a managed cluster with the specified configuration for agents and Kubernetes version.
   ## 
-  let valid = call_594008.validator(path, query, header, formData, body)
-  let scheme = call_594008.pickScheme
+  let valid = call_568237.validator(path, query, header, formData, body)
+  let scheme = call_568237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594008.url(scheme.get, call_594008.host, call_594008.base,
-                         call_594008.route, valid.getOrDefault("path"),
+  let url = call_568237.url(scheme.get, call_568237.host, call_568237.base,
+                         call_568237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594008, url, valid)
+  result = hook(call_568237, url, valid)
 
-proc call*(call_594009: Call_ManagedClustersCreateOrUpdate_594000;
+proc call*(call_568238: Call_ManagedClustersCreateOrUpdate_568229;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; parameters: JsonNode): Recallable =
   ## managedClustersCreateOrUpdate
@@ -467,25 +467,25 @@ proc call*(call_594009: Call_ManagedClustersCreateOrUpdate_594000;
   ##               : The name of the managed cluster resource.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create or Update a Managed Cluster operation.
-  var path_594010 = newJObject()
-  var query_594011 = newJObject()
-  var body_594012 = newJObject()
-  add(path_594010, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594011, "api-version", newJString(apiVersion))
-  add(path_594010, "subscriptionId", newJString(subscriptionId))
-  add(path_594010, "resourceName", newJString(resourceName))
+  var path_568239 = newJObject()
+  var query_568240 = newJObject()
+  var body_568241 = newJObject()
+  add(path_568239, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568240, "api-version", newJString(apiVersion))
+  add(path_568239, "subscriptionId", newJString(subscriptionId))
+  add(path_568239, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_594012 = parameters
-  result = call_594009.call(path_594010, query_594011, nil, nil, body_594012)
+    body_568241 = parameters
+  result = call_568238.call(path_568239, query_568240, nil, nil, body_568241)
 
-var managedClustersCreateOrUpdate* = Call_ManagedClustersCreateOrUpdate_594000(
+var managedClustersCreateOrUpdate* = Call_ManagedClustersCreateOrUpdate_568229(
     name: "managedClustersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}",
-    validator: validate_ManagedClustersCreateOrUpdate_594001, base: "",
-    url: url_ManagedClustersCreateOrUpdate_594002, schemes: {Scheme.Https})
+    validator: validate_ManagedClustersCreateOrUpdate_568230, base: "",
+    url: url_ManagedClustersCreateOrUpdate_568231, schemes: {Scheme.Https})
 type
-  Call_ManagedClustersGet_593989 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersGet_593991(protocol: Scheme; host: string; base: string;
+  Call_ManagedClustersGet_568218 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersGet_568220(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -508,7 +508,7 @@ proc url_ManagedClustersGet_593991(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersGet_593990(path: JsonNode; query: JsonNode;
+proc validate_ManagedClustersGet_568219(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the details of the managed cluster with a specified resource group and name.
@@ -525,21 +525,21 @@ proc validate_ManagedClustersGet_593990(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593992 = path.getOrDefault("resourceGroupName")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_568221 = path.getOrDefault("resourceGroupName")
+  valid_568221 = validateParameter(valid_568221, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "resourceGroupName", valid_593992
-  var valid_593993 = path.getOrDefault("subscriptionId")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568221 != nil:
+    section.add "resourceGroupName", valid_568221
+  var valid_568222 = path.getOrDefault("subscriptionId")
+  valid_568222 = validateParameter(valid_568222, JString, required = true,
                                  default = nil)
-  if valid_593993 != nil:
-    section.add "subscriptionId", valid_593993
-  var valid_593994 = path.getOrDefault("resourceName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  if valid_568222 != nil:
+    section.add "subscriptionId", valid_568222
+  var valid_568223 = path.getOrDefault("resourceName")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "resourceName", valid_593994
+  if valid_568223 != nil:
+    section.add "resourceName", valid_568223
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -547,11 +547,11 @@ proc validate_ManagedClustersGet_593990(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593995 = query.getOrDefault("api-version")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_568224 = query.getOrDefault("api-version")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "api-version", valid_593995
+  if valid_568224 != nil:
+    section.add "api-version", valid_568224
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -560,20 +560,20 @@ proc validate_ManagedClustersGet_593990(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593996: Call_ManagedClustersGet_593989; path: JsonNode;
+proc call*(call_568225: Call_ManagedClustersGet_568218; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the managed cluster with a specified resource group and name.
   ## 
-  let valid = call_593996.validator(path, query, header, formData, body)
-  let scheme = call_593996.pickScheme
+  let valid = call_568225.validator(path, query, header, formData, body)
+  let scheme = call_568225.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593996.url(scheme.get, call_593996.host, call_593996.base,
-                         call_593996.route, valid.getOrDefault("path"),
+  let url = call_568225.url(scheme.get, call_568225.host, call_568225.base,
+                         call_568225.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593996, url, valid)
+  result = hook(call_568225, url, valid)
 
-proc call*(call_593997: Call_ManagedClustersGet_593989; resourceGroupName: string;
+proc call*(call_568226: Call_ManagedClustersGet_568218; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
   ## managedClustersGet
   ## Gets the details of the managed cluster with a specified resource group and name.
@@ -585,22 +585,22 @@ proc call*(call_593997: Call_ManagedClustersGet_593989; resourceGroupName: strin
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the managed cluster resource.
-  var path_593998 = newJObject()
-  var query_593999 = newJObject()
-  add(path_593998, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593999, "api-version", newJString(apiVersion))
-  add(path_593998, "subscriptionId", newJString(subscriptionId))
-  add(path_593998, "resourceName", newJString(resourceName))
-  result = call_593997.call(path_593998, query_593999, nil, nil, nil)
+  var path_568227 = newJObject()
+  var query_568228 = newJObject()
+  add(path_568227, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568228, "api-version", newJString(apiVersion))
+  add(path_568227, "subscriptionId", newJString(subscriptionId))
+  add(path_568227, "resourceName", newJString(resourceName))
+  result = call_568226.call(path_568227, query_568228, nil, nil, nil)
 
-var managedClustersGet* = Call_ManagedClustersGet_593989(
+var managedClustersGet* = Call_ManagedClustersGet_568218(
     name: "managedClustersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}",
-    validator: validate_ManagedClustersGet_593990, base: "",
-    url: url_ManagedClustersGet_593991, schemes: {Scheme.Https})
+    validator: validate_ManagedClustersGet_568219, base: "",
+    url: url_ManagedClustersGet_568220, schemes: {Scheme.Https})
 type
-  Call_ManagedClustersUpdateTags_594024 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersUpdateTags_594026(protocol: Scheme; host: string;
+  Call_ManagedClustersUpdateTags_568253 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersUpdateTags_568255(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -623,7 +623,7 @@ proc url_ManagedClustersUpdateTags_594026(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersUpdateTags_594025(path: JsonNode; query: JsonNode;
+proc validate_ManagedClustersUpdateTags_568254(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a managed cluster with the specified tags.
   ## 
@@ -639,21 +639,21 @@ proc validate_ManagedClustersUpdateTags_594025(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594044 = path.getOrDefault("resourceGroupName")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  var valid_568273 = path.getOrDefault("resourceGroupName")
+  valid_568273 = validateParameter(valid_568273, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "resourceGroupName", valid_594044
-  var valid_594045 = path.getOrDefault("subscriptionId")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  if valid_568273 != nil:
+    section.add "resourceGroupName", valid_568273
+  var valid_568274 = path.getOrDefault("subscriptionId")
+  valid_568274 = validateParameter(valid_568274, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "subscriptionId", valid_594045
-  var valid_594046 = path.getOrDefault("resourceName")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  if valid_568274 != nil:
+    section.add "subscriptionId", valid_568274
+  var valid_568275 = path.getOrDefault("resourceName")
+  valid_568275 = validateParameter(valid_568275, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "resourceName", valid_594046
+  if valid_568275 != nil:
+    section.add "resourceName", valid_568275
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -661,11 +661,11 @@ proc validate_ManagedClustersUpdateTags_594025(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594047 = query.getOrDefault("api-version")
-  valid_594047 = validateParameter(valid_594047, JString, required = true,
+  var valid_568276 = query.getOrDefault("api-version")
+  valid_568276 = validateParameter(valid_568276, JString, required = true,
                                  default = nil)
-  if valid_594047 != nil:
-    section.add "api-version", valid_594047
+  if valid_568276 != nil:
+    section.add "api-version", valid_568276
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -679,20 +679,20 @@ proc validate_ManagedClustersUpdateTags_594025(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594049: Call_ManagedClustersUpdateTags_594024; path: JsonNode;
+proc call*(call_568278: Call_ManagedClustersUpdateTags_568253; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a managed cluster with the specified tags.
   ## 
-  let valid = call_594049.validator(path, query, header, formData, body)
-  let scheme = call_594049.pickScheme
+  let valid = call_568278.validator(path, query, header, formData, body)
+  let scheme = call_568278.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594049.url(scheme.get, call_594049.host, call_594049.base,
-                         call_594049.route, valid.getOrDefault("path"),
+  let url = call_568278.url(scheme.get, call_568278.host, call_568278.base,
+                         call_568278.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594049, url, valid)
+  result = hook(call_568278, url, valid)
 
-proc call*(call_594050: Call_ManagedClustersUpdateTags_594024;
+proc call*(call_568279: Call_ManagedClustersUpdateTags_568253;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; parameters: JsonNode): Recallable =
   ## managedClustersUpdateTags
@@ -707,25 +707,25 @@ proc call*(call_594050: Call_ManagedClustersUpdateTags_594024;
   ##               : The name of the managed cluster resource.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Update Managed Cluster Tags operation.
-  var path_594051 = newJObject()
-  var query_594052 = newJObject()
-  var body_594053 = newJObject()
-  add(path_594051, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594052, "api-version", newJString(apiVersion))
-  add(path_594051, "subscriptionId", newJString(subscriptionId))
-  add(path_594051, "resourceName", newJString(resourceName))
+  var path_568280 = newJObject()
+  var query_568281 = newJObject()
+  var body_568282 = newJObject()
+  add(path_568280, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568281, "api-version", newJString(apiVersion))
+  add(path_568280, "subscriptionId", newJString(subscriptionId))
+  add(path_568280, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_594053 = parameters
-  result = call_594050.call(path_594051, query_594052, nil, nil, body_594053)
+    body_568282 = parameters
+  result = call_568279.call(path_568280, query_568281, nil, nil, body_568282)
 
-var managedClustersUpdateTags* = Call_ManagedClustersUpdateTags_594024(
+var managedClustersUpdateTags* = Call_ManagedClustersUpdateTags_568253(
     name: "managedClustersUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}",
-    validator: validate_ManagedClustersUpdateTags_594025, base: "",
-    url: url_ManagedClustersUpdateTags_594026, schemes: {Scheme.Https})
+    validator: validate_ManagedClustersUpdateTags_568254, base: "",
+    url: url_ManagedClustersUpdateTags_568255, schemes: {Scheme.Https})
 type
-  Call_ManagedClustersDelete_594013 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersDelete_594015(protocol: Scheme; host: string; base: string;
+  Call_ManagedClustersDelete_568242 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersDelete_568244(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -748,7 +748,7 @@ proc url_ManagedClustersDelete_594015(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersDelete_594014(path: JsonNode; query: JsonNode;
+proc validate_ManagedClustersDelete_568243(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the managed cluster with a specified resource group and name.
   ## 
@@ -764,21 +764,21 @@ proc validate_ManagedClustersDelete_594014(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594016 = path.getOrDefault("resourceGroupName")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_568245 = path.getOrDefault("resourceGroupName")
+  valid_568245 = validateParameter(valid_568245, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "resourceGroupName", valid_594016
-  var valid_594017 = path.getOrDefault("subscriptionId")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  if valid_568245 != nil:
+    section.add "resourceGroupName", valid_568245
+  var valid_568246 = path.getOrDefault("subscriptionId")
+  valid_568246 = validateParameter(valid_568246, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "subscriptionId", valid_594017
-  var valid_594018 = path.getOrDefault("resourceName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  if valid_568246 != nil:
+    section.add "subscriptionId", valid_568246
+  var valid_568247 = path.getOrDefault("resourceName")
+  valid_568247 = validateParameter(valid_568247, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "resourceName", valid_594018
+  if valid_568247 != nil:
+    section.add "resourceName", valid_568247
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -786,11 +786,11 @@ proc validate_ManagedClustersDelete_594014(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594019 = query.getOrDefault("api-version")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_568248 = query.getOrDefault("api-version")
+  valid_568248 = validateParameter(valid_568248, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "api-version", valid_594019
+  if valid_568248 != nil:
+    section.add "api-version", valid_568248
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -799,20 +799,20 @@ proc validate_ManagedClustersDelete_594014(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594020: Call_ManagedClustersDelete_594013; path: JsonNode;
+proc call*(call_568249: Call_ManagedClustersDelete_568242; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the managed cluster with a specified resource group and name.
   ## 
-  let valid = call_594020.validator(path, query, header, formData, body)
-  let scheme = call_594020.pickScheme
+  let valid = call_568249.validator(path, query, header, formData, body)
+  let scheme = call_568249.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594020.url(scheme.get, call_594020.host, call_594020.base,
-                         call_594020.route, valid.getOrDefault("path"),
+  let url = call_568249.url(scheme.get, call_568249.host, call_568249.base,
+                         call_568249.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594020, url, valid)
+  result = hook(call_568249, url, valid)
 
-proc call*(call_594021: Call_ManagedClustersDelete_594013;
+proc call*(call_568250: Call_ManagedClustersDelete_568242;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## managedClustersDelete
@@ -825,22 +825,22 @@ proc call*(call_594021: Call_ManagedClustersDelete_594013;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the managed cluster resource.
-  var path_594022 = newJObject()
-  var query_594023 = newJObject()
-  add(path_594022, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594023, "api-version", newJString(apiVersion))
-  add(path_594022, "subscriptionId", newJString(subscriptionId))
-  add(path_594022, "resourceName", newJString(resourceName))
-  result = call_594021.call(path_594022, query_594023, nil, nil, nil)
+  var path_568251 = newJObject()
+  var query_568252 = newJObject()
+  add(path_568251, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568252, "api-version", newJString(apiVersion))
+  add(path_568251, "subscriptionId", newJString(subscriptionId))
+  add(path_568251, "resourceName", newJString(resourceName))
+  result = call_568250.call(path_568251, query_568252, nil, nil, nil)
 
-var managedClustersDelete* = Call_ManagedClustersDelete_594013(
+var managedClustersDelete* = Call_ManagedClustersDelete_568242(
     name: "managedClustersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}",
-    validator: validate_ManagedClustersDelete_594014, base: "",
-    url: url_ManagedClustersDelete_594015, schemes: {Scheme.Https})
+    validator: validate_ManagedClustersDelete_568243, base: "",
+    url: url_ManagedClustersDelete_568244, schemes: {Scheme.Https})
 type
-  Call_ManagedClustersGetAccessProfile_594054 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersGetAccessProfile_594056(protocol: Scheme; host: string;
+  Call_ManagedClustersGetAccessProfile_568283 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersGetAccessProfile_568285(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -867,7 +867,7 @@ proc url_ManagedClustersGetAccessProfile_594056(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersGetAccessProfile_594055(path: JsonNode;
+proc validate_ManagedClustersGetAccessProfile_568284(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the accessProfile for the specified role name of the managed cluster with a specified resource group and name.
   ## 
@@ -885,26 +885,26 @@ proc validate_ManagedClustersGetAccessProfile_594055(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594057 = path.getOrDefault("resourceGroupName")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  var valid_568286 = path.getOrDefault("resourceGroupName")
+  valid_568286 = validateParameter(valid_568286, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "resourceGroupName", valid_594057
-  var valid_594058 = path.getOrDefault("subscriptionId")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  if valid_568286 != nil:
+    section.add "resourceGroupName", valid_568286
+  var valid_568287 = path.getOrDefault("subscriptionId")
+  valid_568287 = validateParameter(valid_568287, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "subscriptionId", valid_594058
-  var valid_594059 = path.getOrDefault("resourceName")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  if valid_568287 != nil:
+    section.add "subscriptionId", valid_568287
+  var valid_568288 = path.getOrDefault("resourceName")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "resourceName", valid_594059
-  var valid_594060 = path.getOrDefault("roleName")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  if valid_568288 != nil:
+    section.add "resourceName", valid_568288
+  var valid_568289 = path.getOrDefault("roleName")
+  valid_568289 = validateParameter(valid_568289, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "roleName", valid_594060
+  if valid_568289 != nil:
+    section.add "roleName", valid_568289
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -912,11 +912,11 @@ proc validate_ManagedClustersGetAccessProfile_594055(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594061 = query.getOrDefault("api-version")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  var valid_568290 = query.getOrDefault("api-version")
+  valid_568290 = validateParameter(valid_568290, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "api-version", valid_594061
+  if valid_568290 != nil:
+    section.add "api-version", valid_568290
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -925,21 +925,21 @@ proc validate_ManagedClustersGetAccessProfile_594055(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594062: Call_ManagedClustersGetAccessProfile_594054;
+proc call*(call_568291: Call_ManagedClustersGetAccessProfile_568283;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the accessProfile for the specified role name of the managed cluster with a specified resource group and name.
   ## 
-  let valid = call_594062.validator(path, query, header, formData, body)
-  let scheme = call_594062.pickScheme
+  let valid = call_568291.validator(path, query, header, formData, body)
+  let scheme = call_568291.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594062.url(scheme.get, call_594062.host, call_594062.base,
-                         call_594062.route, valid.getOrDefault("path"),
+  let url = call_568291.url(scheme.get, call_568291.host, call_568291.base,
+                         call_568291.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594062, url, valid)
+  result = hook(call_568291, url, valid)
 
-proc call*(call_594063: Call_ManagedClustersGetAccessProfile_594054;
+proc call*(call_568292: Call_ManagedClustersGetAccessProfile_568283;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; roleName: string): Recallable =
   ## managedClustersGetAccessProfile
@@ -954,23 +954,23 @@ proc call*(call_594063: Call_ManagedClustersGetAccessProfile_594054;
   ##               : The name of the managed cluster resource.
   ##   roleName: string (required)
   ##           : The name of the role for managed cluster accessProfile resource.
-  var path_594064 = newJObject()
-  var query_594065 = newJObject()
-  add(path_594064, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594065, "api-version", newJString(apiVersion))
-  add(path_594064, "subscriptionId", newJString(subscriptionId))
-  add(path_594064, "resourceName", newJString(resourceName))
-  add(path_594064, "roleName", newJString(roleName))
-  result = call_594063.call(path_594064, query_594065, nil, nil, nil)
+  var path_568293 = newJObject()
+  var query_568294 = newJObject()
+  add(path_568293, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568294, "api-version", newJString(apiVersion))
+  add(path_568293, "subscriptionId", newJString(subscriptionId))
+  add(path_568293, "resourceName", newJString(resourceName))
+  add(path_568293, "roleName", newJString(roleName))
+  result = call_568292.call(path_568293, query_568294, nil, nil, nil)
 
-var managedClustersGetAccessProfile* = Call_ManagedClustersGetAccessProfile_594054(
+var managedClustersGetAccessProfile* = Call_ManagedClustersGetAccessProfile_568283(
     name: "managedClustersGetAccessProfile", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/accessProfiles/{roleName}/listCredential",
-    validator: validate_ManagedClustersGetAccessProfile_594055, base: "",
-    url: url_ManagedClustersGetAccessProfile_594056, schemes: {Scheme.Https})
+    validator: validate_ManagedClustersGetAccessProfile_568284, base: "",
+    url: url_ManagedClustersGetAccessProfile_568285, schemes: {Scheme.Https})
 type
-  Call_AgentPoolsList_594066 = ref object of OpenApiRestCall_593438
-proc url_AgentPoolsList_594068(protocol: Scheme; host: string; base: string;
+  Call_AgentPoolsList_568295 = ref object of OpenApiRestCall_567667
+proc url_AgentPoolsList_568297(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -994,7 +994,7 @@ proc url_AgentPoolsList_594068(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AgentPoolsList_594067(path: JsonNode; query: JsonNode;
+proc validate_AgentPoolsList_568296(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets a list of agent pools in the specified managed cluster. The operation returns properties of each agent pool.
@@ -1011,21 +1011,21 @@ proc validate_AgentPoolsList_594067(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594069 = path.getOrDefault("resourceGroupName")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  var valid_568298 = path.getOrDefault("resourceGroupName")
+  valid_568298 = validateParameter(valid_568298, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "resourceGroupName", valid_594069
-  var valid_594070 = path.getOrDefault("subscriptionId")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
+  if valid_568298 != nil:
+    section.add "resourceGroupName", valid_568298
+  var valid_568299 = path.getOrDefault("subscriptionId")
+  valid_568299 = validateParameter(valid_568299, JString, required = true,
                                  default = nil)
-  if valid_594070 != nil:
-    section.add "subscriptionId", valid_594070
-  var valid_594071 = path.getOrDefault("resourceName")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  if valid_568299 != nil:
+    section.add "subscriptionId", valid_568299
+  var valid_568300 = path.getOrDefault("resourceName")
+  valid_568300 = validateParameter(valid_568300, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "resourceName", valid_594071
+  if valid_568300 != nil:
+    section.add "resourceName", valid_568300
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1033,11 +1033,11 @@ proc validate_AgentPoolsList_594067(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594072 = query.getOrDefault("api-version")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  var valid_568301 = query.getOrDefault("api-version")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "api-version", valid_594072
+  if valid_568301 != nil:
+    section.add "api-version", valid_568301
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1046,20 +1046,20 @@ proc validate_AgentPoolsList_594067(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594073: Call_AgentPoolsList_594066; path: JsonNode; query: JsonNode;
+proc call*(call_568302: Call_AgentPoolsList_568295; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of agent pools in the specified managed cluster. The operation returns properties of each agent pool.
   ## 
-  let valid = call_594073.validator(path, query, header, formData, body)
-  let scheme = call_594073.pickScheme
+  let valid = call_568302.validator(path, query, header, formData, body)
+  let scheme = call_568302.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594073.url(scheme.get, call_594073.host, call_594073.base,
-                         call_594073.route, valid.getOrDefault("path"),
+  let url = call_568302.url(scheme.get, call_568302.host, call_568302.base,
+                         call_568302.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594073, url, valid)
+  result = hook(call_568302, url, valid)
 
-proc call*(call_594074: Call_AgentPoolsList_594066; resourceGroupName: string;
+proc call*(call_568303: Call_AgentPoolsList_568295; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
   ## agentPoolsList
   ## Gets a list of agent pools in the specified managed cluster. The operation returns properties of each agent pool.
@@ -1071,21 +1071,21 @@ proc call*(call_594074: Call_AgentPoolsList_594066; resourceGroupName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the managed cluster resource.
-  var path_594075 = newJObject()
-  var query_594076 = newJObject()
-  add(path_594075, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594076, "api-version", newJString(apiVersion))
-  add(path_594075, "subscriptionId", newJString(subscriptionId))
-  add(path_594075, "resourceName", newJString(resourceName))
-  result = call_594074.call(path_594075, query_594076, nil, nil, nil)
+  var path_568304 = newJObject()
+  var query_568305 = newJObject()
+  add(path_568304, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568305, "api-version", newJString(apiVersion))
+  add(path_568304, "subscriptionId", newJString(subscriptionId))
+  add(path_568304, "resourceName", newJString(resourceName))
+  result = call_568303.call(path_568304, query_568305, nil, nil, nil)
 
-var agentPoolsList* = Call_AgentPoolsList_594066(name: "agentPoolsList",
+var agentPoolsList* = Call_AgentPoolsList_568295(name: "agentPoolsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools",
-    validator: validate_AgentPoolsList_594067, base: "", url: url_AgentPoolsList_594068,
+    validator: validate_AgentPoolsList_568296, base: "", url: url_AgentPoolsList_568297,
     schemes: {Scheme.Https})
 type
-  Call_AgentPoolsCreateOrUpdate_594089 = ref object of OpenApiRestCall_593438
-proc url_AgentPoolsCreateOrUpdate_594091(protocol: Scheme; host: string;
+  Call_AgentPoolsCreateOrUpdate_568318 = ref object of OpenApiRestCall_567667
+proc url_AgentPoolsCreateOrUpdate_568320(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1112,7 +1112,7 @@ proc url_AgentPoolsCreateOrUpdate_594091(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AgentPoolsCreateOrUpdate_594090(path: JsonNode; query: JsonNode;
+proc validate_AgentPoolsCreateOrUpdate_568319(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an agent pool in the specified managed cluster.
   ## 
@@ -1130,26 +1130,26 @@ proc validate_AgentPoolsCreateOrUpdate_594090(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594092 = path.getOrDefault("resourceGroupName")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  var valid_568321 = path.getOrDefault("resourceGroupName")
+  valid_568321 = validateParameter(valid_568321, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "resourceGroupName", valid_594092
-  var valid_594093 = path.getOrDefault("subscriptionId")
-  valid_594093 = validateParameter(valid_594093, JString, required = true,
+  if valid_568321 != nil:
+    section.add "resourceGroupName", valid_568321
+  var valid_568322 = path.getOrDefault("subscriptionId")
+  valid_568322 = validateParameter(valid_568322, JString, required = true,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "subscriptionId", valid_594093
-  var valid_594094 = path.getOrDefault("resourceName")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  if valid_568322 != nil:
+    section.add "subscriptionId", valid_568322
+  var valid_568323 = path.getOrDefault("resourceName")
+  valid_568323 = validateParameter(valid_568323, JString, required = true,
                                  default = nil)
-  if valid_594094 != nil:
-    section.add "resourceName", valid_594094
-  var valid_594095 = path.getOrDefault("agentPoolName")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  if valid_568323 != nil:
+    section.add "resourceName", valid_568323
+  var valid_568324 = path.getOrDefault("agentPoolName")
+  valid_568324 = validateParameter(valid_568324, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "agentPoolName", valid_594095
+  if valid_568324 != nil:
+    section.add "agentPoolName", valid_568324
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1157,11 +1157,11 @@ proc validate_AgentPoolsCreateOrUpdate_594090(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594096 = query.getOrDefault("api-version")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
+  var valid_568325 = query.getOrDefault("api-version")
+  valid_568325 = validateParameter(valid_568325, JString, required = true,
                                  default = nil)
-  if valid_594096 != nil:
-    section.add "api-version", valid_594096
+  if valid_568325 != nil:
+    section.add "api-version", valid_568325
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1175,20 +1175,20 @@ proc validate_AgentPoolsCreateOrUpdate_594090(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594098: Call_AgentPoolsCreateOrUpdate_594089; path: JsonNode;
+proc call*(call_568327: Call_AgentPoolsCreateOrUpdate_568318; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates an agent pool in the specified managed cluster.
   ## 
-  let valid = call_594098.validator(path, query, header, formData, body)
-  let scheme = call_594098.pickScheme
+  let valid = call_568327.validator(path, query, header, formData, body)
+  let scheme = call_568327.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594098.url(scheme.get, call_594098.host, call_594098.base,
-                         call_594098.route, valid.getOrDefault("path"),
+  let url = call_568327.url(scheme.get, call_568327.host, call_568327.base,
+                         call_568327.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594098, url, valid)
+  result = hook(call_568327, url, valid)
 
-proc call*(call_594099: Call_AgentPoolsCreateOrUpdate_594089;
+proc call*(call_568328: Call_AgentPoolsCreateOrUpdate_568318;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; agentPoolName: string; parameters: JsonNode): Recallable =
   ## agentPoolsCreateOrUpdate
@@ -1205,26 +1205,26 @@ proc call*(call_594099: Call_AgentPoolsCreateOrUpdate_594089;
   ##                : The name of the agent pool.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create or Update an agent pool operation.
-  var path_594100 = newJObject()
-  var query_594101 = newJObject()
-  var body_594102 = newJObject()
-  add(path_594100, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594101, "api-version", newJString(apiVersion))
-  add(path_594100, "subscriptionId", newJString(subscriptionId))
-  add(path_594100, "resourceName", newJString(resourceName))
-  add(path_594100, "agentPoolName", newJString(agentPoolName))
+  var path_568329 = newJObject()
+  var query_568330 = newJObject()
+  var body_568331 = newJObject()
+  add(path_568329, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568330, "api-version", newJString(apiVersion))
+  add(path_568329, "subscriptionId", newJString(subscriptionId))
+  add(path_568329, "resourceName", newJString(resourceName))
+  add(path_568329, "agentPoolName", newJString(agentPoolName))
   if parameters != nil:
-    body_594102 = parameters
-  result = call_594099.call(path_594100, query_594101, nil, nil, body_594102)
+    body_568331 = parameters
+  result = call_568328.call(path_568329, query_568330, nil, nil, body_568331)
 
-var agentPoolsCreateOrUpdate* = Call_AgentPoolsCreateOrUpdate_594089(
+var agentPoolsCreateOrUpdate* = Call_AgentPoolsCreateOrUpdate_568318(
     name: "agentPoolsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
-    validator: validate_AgentPoolsCreateOrUpdate_594090, base: "",
-    url: url_AgentPoolsCreateOrUpdate_594091, schemes: {Scheme.Https})
+    validator: validate_AgentPoolsCreateOrUpdate_568319, base: "",
+    url: url_AgentPoolsCreateOrUpdate_568320, schemes: {Scheme.Https})
 type
-  Call_AgentPoolsGet_594077 = ref object of OpenApiRestCall_593438
-proc url_AgentPoolsGet_594079(protocol: Scheme; host: string; base: string;
+  Call_AgentPoolsGet_568306 = ref object of OpenApiRestCall_567667
+proc url_AgentPoolsGet_568308(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1250,7 +1250,7 @@ proc url_AgentPoolsGet_594079(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AgentPoolsGet_594078(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AgentPoolsGet_568307(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the agent pool by managed cluster and resource group.
   ## 
@@ -1268,26 +1268,26 @@ proc validate_AgentPoolsGet_594078(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594080 = path.getOrDefault("resourceGroupName")
-  valid_594080 = validateParameter(valid_594080, JString, required = true,
+  var valid_568309 = path.getOrDefault("resourceGroupName")
+  valid_568309 = validateParameter(valid_568309, JString, required = true,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "resourceGroupName", valid_594080
-  var valid_594081 = path.getOrDefault("subscriptionId")
-  valid_594081 = validateParameter(valid_594081, JString, required = true,
+  if valid_568309 != nil:
+    section.add "resourceGroupName", valid_568309
+  var valid_568310 = path.getOrDefault("subscriptionId")
+  valid_568310 = validateParameter(valid_568310, JString, required = true,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "subscriptionId", valid_594081
-  var valid_594082 = path.getOrDefault("resourceName")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  if valid_568310 != nil:
+    section.add "subscriptionId", valid_568310
+  var valid_568311 = path.getOrDefault("resourceName")
+  valid_568311 = validateParameter(valid_568311, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "resourceName", valid_594082
-  var valid_594083 = path.getOrDefault("agentPoolName")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
+  if valid_568311 != nil:
+    section.add "resourceName", valid_568311
+  var valid_568312 = path.getOrDefault("agentPoolName")
+  valid_568312 = validateParameter(valid_568312, JString, required = true,
                                  default = nil)
-  if valid_594083 != nil:
-    section.add "agentPoolName", valid_594083
+  if valid_568312 != nil:
+    section.add "agentPoolName", valid_568312
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1295,11 +1295,11 @@ proc validate_AgentPoolsGet_594078(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594084 = query.getOrDefault("api-version")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  var valid_568313 = query.getOrDefault("api-version")
+  valid_568313 = validateParameter(valid_568313, JString, required = true,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "api-version", valid_594084
+  if valid_568313 != nil:
+    section.add "api-version", valid_568313
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1308,20 +1308,20 @@ proc validate_AgentPoolsGet_594078(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594085: Call_AgentPoolsGet_594077; path: JsonNode; query: JsonNode;
+proc call*(call_568314: Call_AgentPoolsGet_568306; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the agent pool by managed cluster and resource group.
   ## 
-  let valid = call_594085.validator(path, query, header, formData, body)
-  let scheme = call_594085.pickScheme
+  let valid = call_568314.validator(path, query, header, formData, body)
+  let scheme = call_568314.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594085.url(scheme.get, call_594085.host, call_594085.base,
-                         call_594085.route, valid.getOrDefault("path"),
+  let url = call_568314.url(scheme.get, call_568314.host, call_568314.base,
+                         call_568314.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594085, url, valid)
+  result = hook(call_568314, url, valid)
 
-proc call*(call_594086: Call_AgentPoolsGet_594077; resourceGroupName: string;
+proc call*(call_568315: Call_AgentPoolsGet_568306; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string;
           agentPoolName: string): Recallable =
   ## agentPoolsGet
@@ -1336,22 +1336,22 @@ proc call*(call_594086: Call_AgentPoolsGet_594077; resourceGroupName: string;
   ##               : The name of the managed cluster resource.
   ##   agentPoolName: string (required)
   ##                : The name of the agent pool.
-  var path_594087 = newJObject()
-  var query_594088 = newJObject()
-  add(path_594087, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594088, "api-version", newJString(apiVersion))
-  add(path_594087, "subscriptionId", newJString(subscriptionId))
-  add(path_594087, "resourceName", newJString(resourceName))
-  add(path_594087, "agentPoolName", newJString(agentPoolName))
-  result = call_594086.call(path_594087, query_594088, nil, nil, nil)
+  var path_568316 = newJObject()
+  var query_568317 = newJObject()
+  add(path_568316, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568317, "api-version", newJString(apiVersion))
+  add(path_568316, "subscriptionId", newJString(subscriptionId))
+  add(path_568316, "resourceName", newJString(resourceName))
+  add(path_568316, "agentPoolName", newJString(agentPoolName))
+  result = call_568315.call(path_568316, query_568317, nil, nil, nil)
 
-var agentPoolsGet* = Call_AgentPoolsGet_594077(name: "agentPoolsGet",
+var agentPoolsGet* = Call_AgentPoolsGet_568306(name: "agentPoolsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
-    validator: validate_AgentPoolsGet_594078, base: "", url: url_AgentPoolsGet_594079,
+    validator: validate_AgentPoolsGet_568307, base: "", url: url_AgentPoolsGet_568308,
     schemes: {Scheme.Https})
 type
-  Call_AgentPoolsDelete_594103 = ref object of OpenApiRestCall_593438
-proc url_AgentPoolsDelete_594105(protocol: Scheme; host: string; base: string;
+  Call_AgentPoolsDelete_568332 = ref object of OpenApiRestCall_567667
+proc url_AgentPoolsDelete_568334(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1377,7 +1377,7 @@ proc url_AgentPoolsDelete_594105(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AgentPoolsDelete_594104(path: JsonNode; query: JsonNode;
+proc validate_AgentPoolsDelete_568333(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes the agent pool in the specified managed cluster.
@@ -1396,26 +1396,26 @@ proc validate_AgentPoolsDelete_594104(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594106 = path.getOrDefault("resourceGroupName")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  var valid_568335 = path.getOrDefault("resourceGroupName")
+  valid_568335 = validateParameter(valid_568335, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "resourceGroupName", valid_594106
-  var valid_594107 = path.getOrDefault("subscriptionId")
-  valid_594107 = validateParameter(valid_594107, JString, required = true,
+  if valid_568335 != nil:
+    section.add "resourceGroupName", valid_568335
+  var valid_568336 = path.getOrDefault("subscriptionId")
+  valid_568336 = validateParameter(valid_568336, JString, required = true,
                                  default = nil)
-  if valid_594107 != nil:
-    section.add "subscriptionId", valid_594107
-  var valid_594108 = path.getOrDefault("resourceName")
-  valid_594108 = validateParameter(valid_594108, JString, required = true,
+  if valid_568336 != nil:
+    section.add "subscriptionId", valid_568336
+  var valid_568337 = path.getOrDefault("resourceName")
+  valid_568337 = validateParameter(valid_568337, JString, required = true,
                                  default = nil)
-  if valid_594108 != nil:
-    section.add "resourceName", valid_594108
-  var valid_594109 = path.getOrDefault("agentPoolName")
-  valid_594109 = validateParameter(valid_594109, JString, required = true,
+  if valid_568337 != nil:
+    section.add "resourceName", valid_568337
+  var valid_568338 = path.getOrDefault("agentPoolName")
+  valid_568338 = validateParameter(valid_568338, JString, required = true,
                                  default = nil)
-  if valid_594109 != nil:
-    section.add "agentPoolName", valid_594109
+  if valid_568338 != nil:
+    section.add "agentPoolName", valid_568338
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1423,11 +1423,11 @@ proc validate_AgentPoolsDelete_594104(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594110 = query.getOrDefault("api-version")
-  valid_594110 = validateParameter(valid_594110, JString, required = true,
+  var valid_568339 = query.getOrDefault("api-version")
+  valid_568339 = validateParameter(valid_568339, JString, required = true,
                                  default = nil)
-  if valid_594110 != nil:
-    section.add "api-version", valid_594110
+  if valid_568339 != nil:
+    section.add "api-version", valid_568339
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1436,20 +1436,20 @@ proc validate_AgentPoolsDelete_594104(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594111: Call_AgentPoolsDelete_594103; path: JsonNode;
+proc call*(call_568340: Call_AgentPoolsDelete_568332; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the agent pool in the specified managed cluster.
   ## 
-  let valid = call_594111.validator(path, query, header, formData, body)
-  let scheme = call_594111.pickScheme
+  let valid = call_568340.validator(path, query, header, formData, body)
+  let scheme = call_568340.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594111.url(scheme.get, call_594111.host, call_594111.base,
-                         call_594111.route, valid.getOrDefault("path"),
+  let url = call_568340.url(scheme.get, call_568340.host, call_568340.base,
+                         call_568340.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594111, url, valid)
+  result = hook(call_568340, url, valid)
 
-proc call*(call_594112: Call_AgentPoolsDelete_594103; resourceGroupName: string;
+proc call*(call_568341: Call_AgentPoolsDelete_568332; resourceGroupName: string;
           apiVersion: string; subscriptionId: string; resourceName: string;
           agentPoolName: string): Recallable =
   ## agentPoolsDelete
@@ -1464,22 +1464,22 @@ proc call*(call_594112: Call_AgentPoolsDelete_594103; resourceGroupName: string;
   ##               : The name of the managed cluster resource.
   ##   agentPoolName: string (required)
   ##                : The name of the agent pool.
-  var path_594113 = newJObject()
-  var query_594114 = newJObject()
-  add(path_594113, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594114, "api-version", newJString(apiVersion))
-  add(path_594113, "subscriptionId", newJString(subscriptionId))
-  add(path_594113, "resourceName", newJString(resourceName))
-  add(path_594113, "agentPoolName", newJString(agentPoolName))
-  result = call_594112.call(path_594113, query_594114, nil, nil, nil)
+  var path_568342 = newJObject()
+  var query_568343 = newJObject()
+  add(path_568342, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568343, "api-version", newJString(apiVersion))
+  add(path_568342, "subscriptionId", newJString(subscriptionId))
+  add(path_568342, "resourceName", newJString(resourceName))
+  add(path_568342, "agentPoolName", newJString(agentPoolName))
+  result = call_568341.call(path_568342, query_568343, nil, nil, nil)
 
-var agentPoolsDelete* = Call_AgentPoolsDelete_594103(name: "agentPoolsDelete",
+var agentPoolsDelete* = Call_AgentPoolsDelete_568332(name: "agentPoolsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
-    validator: validate_AgentPoolsDelete_594104, base: "",
-    url: url_AgentPoolsDelete_594105, schemes: {Scheme.Https})
+    validator: validate_AgentPoolsDelete_568333, base: "",
+    url: url_AgentPoolsDelete_568334, schemes: {Scheme.Https})
 type
-  Call_AgentPoolsGetUpgradeProfile_594115 = ref object of OpenApiRestCall_593438
-proc url_AgentPoolsGetUpgradeProfile_594117(protocol: Scheme; host: string;
+  Call_AgentPoolsGetUpgradeProfile_568344 = ref object of OpenApiRestCall_567667
+proc url_AgentPoolsGetUpgradeProfile_568346(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1506,7 +1506,7 @@ proc url_AgentPoolsGetUpgradeProfile_594117(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AgentPoolsGetUpgradeProfile_594116(path: JsonNode; query: JsonNode;
+proc validate_AgentPoolsGetUpgradeProfile_568345(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the upgrade profile for an agent pool with a specified resource group and managed cluster name.
   ## 
@@ -1524,26 +1524,26 @@ proc validate_AgentPoolsGetUpgradeProfile_594116(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594118 = path.getOrDefault("resourceGroupName")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  var valid_568347 = path.getOrDefault("resourceGroupName")
+  valid_568347 = validateParameter(valid_568347, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "resourceGroupName", valid_594118
-  var valid_594119 = path.getOrDefault("subscriptionId")
-  valid_594119 = validateParameter(valid_594119, JString, required = true,
+  if valid_568347 != nil:
+    section.add "resourceGroupName", valid_568347
+  var valid_568348 = path.getOrDefault("subscriptionId")
+  valid_568348 = validateParameter(valid_568348, JString, required = true,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "subscriptionId", valid_594119
-  var valid_594120 = path.getOrDefault("resourceName")
-  valid_594120 = validateParameter(valid_594120, JString, required = true,
+  if valid_568348 != nil:
+    section.add "subscriptionId", valid_568348
+  var valid_568349 = path.getOrDefault("resourceName")
+  valid_568349 = validateParameter(valid_568349, JString, required = true,
                                  default = nil)
-  if valid_594120 != nil:
-    section.add "resourceName", valid_594120
-  var valid_594121 = path.getOrDefault("agentPoolName")
-  valid_594121 = validateParameter(valid_594121, JString, required = true,
+  if valid_568349 != nil:
+    section.add "resourceName", valid_568349
+  var valid_568350 = path.getOrDefault("agentPoolName")
+  valid_568350 = validateParameter(valid_568350, JString, required = true,
                                  default = nil)
-  if valid_594121 != nil:
-    section.add "agentPoolName", valid_594121
+  if valid_568350 != nil:
+    section.add "agentPoolName", valid_568350
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1551,11 +1551,11 @@ proc validate_AgentPoolsGetUpgradeProfile_594116(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594122 = query.getOrDefault("api-version")
-  valid_594122 = validateParameter(valid_594122, JString, required = true,
+  var valid_568351 = query.getOrDefault("api-version")
+  valid_568351 = validateParameter(valid_568351, JString, required = true,
                                  default = nil)
-  if valid_594122 != nil:
-    section.add "api-version", valid_594122
+  if valid_568351 != nil:
+    section.add "api-version", valid_568351
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1564,20 +1564,20 @@ proc validate_AgentPoolsGetUpgradeProfile_594116(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594123: Call_AgentPoolsGetUpgradeProfile_594115; path: JsonNode;
+proc call*(call_568352: Call_AgentPoolsGetUpgradeProfile_568344; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the upgrade profile for an agent pool with a specified resource group and managed cluster name.
   ## 
-  let valid = call_594123.validator(path, query, header, formData, body)
-  let scheme = call_594123.pickScheme
+  let valid = call_568352.validator(path, query, header, formData, body)
+  let scheme = call_568352.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594123.url(scheme.get, call_594123.host, call_594123.base,
-                         call_594123.route, valid.getOrDefault("path"),
+  let url = call_568352.url(scheme.get, call_568352.host, call_568352.base,
+                         call_568352.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594123, url, valid)
+  result = hook(call_568352, url, valid)
 
-proc call*(call_594124: Call_AgentPoolsGetUpgradeProfile_594115;
+proc call*(call_568353: Call_AgentPoolsGetUpgradeProfile_568344;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; agentPoolName: string): Recallable =
   ## agentPoolsGetUpgradeProfile
@@ -1592,23 +1592,23 @@ proc call*(call_594124: Call_AgentPoolsGetUpgradeProfile_594115;
   ##               : The name of the managed cluster resource.
   ##   agentPoolName: string (required)
   ##                : The name of the agent pool.
-  var path_594125 = newJObject()
-  var query_594126 = newJObject()
-  add(path_594125, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594126, "api-version", newJString(apiVersion))
-  add(path_594125, "subscriptionId", newJString(subscriptionId))
-  add(path_594125, "resourceName", newJString(resourceName))
-  add(path_594125, "agentPoolName", newJString(agentPoolName))
-  result = call_594124.call(path_594125, query_594126, nil, nil, nil)
+  var path_568354 = newJObject()
+  var query_568355 = newJObject()
+  add(path_568354, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568355, "api-version", newJString(apiVersion))
+  add(path_568354, "subscriptionId", newJString(subscriptionId))
+  add(path_568354, "resourceName", newJString(resourceName))
+  add(path_568354, "agentPoolName", newJString(agentPoolName))
+  result = call_568353.call(path_568354, query_568355, nil, nil, nil)
 
-var agentPoolsGetUpgradeProfile* = Call_AgentPoolsGetUpgradeProfile_594115(
+var agentPoolsGetUpgradeProfile* = Call_AgentPoolsGetUpgradeProfile_568344(
     name: "agentPoolsGetUpgradeProfile", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}/upgradeProfiles/default",
-    validator: validate_AgentPoolsGetUpgradeProfile_594116, base: "",
-    url: url_AgentPoolsGetUpgradeProfile_594117, schemes: {Scheme.Https})
+    validator: validate_AgentPoolsGetUpgradeProfile_568345, base: "",
+    url: url_AgentPoolsGetUpgradeProfile_568346, schemes: {Scheme.Https})
 type
-  Call_AgentPoolsGetAvailableAgentPoolVersions_594127 = ref object of OpenApiRestCall_593438
-proc url_AgentPoolsGetAvailableAgentPoolVersions_594129(protocol: Scheme;
+  Call_AgentPoolsGetAvailableAgentPoolVersions_568356 = ref object of OpenApiRestCall_567667
+proc url_AgentPoolsGetAvailableAgentPoolVersions_568358(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1632,7 +1632,7 @@ proc url_AgentPoolsGetAvailableAgentPoolVersions_594129(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AgentPoolsGetAvailableAgentPoolVersions_594128(path: JsonNode;
+proc validate_AgentPoolsGetAvailableAgentPoolVersions_568357(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of supported versions for the specified agent pool.
   ## 
@@ -1648,21 +1648,21 @@ proc validate_AgentPoolsGetAvailableAgentPoolVersions_594128(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594130 = path.getOrDefault("resourceGroupName")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  var valid_568359 = path.getOrDefault("resourceGroupName")
+  valid_568359 = validateParameter(valid_568359, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "resourceGroupName", valid_594130
-  var valid_594131 = path.getOrDefault("subscriptionId")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  if valid_568359 != nil:
+    section.add "resourceGroupName", valid_568359
+  var valid_568360 = path.getOrDefault("subscriptionId")
+  valid_568360 = validateParameter(valid_568360, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "subscriptionId", valid_594131
-  var valid_594132 = path.getOrDefault("resourceName")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  if valid_568360 != nil:
+    section.add "subscriptionId", valid_568360
+  var valid_568361 = path.getOrDefault("resourceName")
+  valid_568361 = validateParameter(valid_568361, JString, required = true,
                                  default = nil)
-  if valid_594132 != nil:
-    section.add "resourceName", valid_594132
+  if valid_568361 != nil:
+    section.add "resourceName", valid_568361
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1670,11 +1670,11 @@ proc validate_AgentPoolsGetAvailableAgentPoolVersions_594128(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594133 = query.getOrDefault("api-version")
-  valid_594133 = validateParameter(valid_594133, JString, required = true,
+  var valid_568362 = query.getOrDefault("api-version")
+  valid_568362 = validateParameter(valid_568362, JString, required = true,
                                  default = nil)
-  if valid_594133 != nil:
-    section.add "api-version", valid_594133
+  if valid_568362 != nil:
+    section.add "api-version", valid_568362
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1683,21 +1683,21 @@ proc validate_AgentPoolsGetAvailableAgentPoolVersions_594128(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594134: Call_AgentPoolsGetAvailableAgentPoolVersions_594127;
+proc call*(call_568363: Call_AgentPoolsGetAvailableAgentPoolVersions_568356;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of supported versions for the specified agent pool.
   ## 
-  let valid = call_594134.validator(path, query, header, formData, body)
-  let scheme = call_594134.pickScheme
+  let valid = call_568363.validator(path, query, header, formData, body)
+  let scheme = call_568363.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594134.url(scheme.get, call_594134.host, call_594134.base,
-                         call_594134.route, valid.getOrDefault("path"),
+  let url = call_568363.url(scheme.get, call_568363.host, call_568363.base,
+                         call_568363.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594134, url, valid)
+  result = hook(call_568363, url, valid)
 
-proc call*(call_594135: Call_AgentPoolsGetAvailableAgentPoolVersions_594127;
+proc call*(call_568364: Call_AgentPoolsGetAvailableAgentPoolVersions_568356;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## agentPoolsGetAvailableAgentPoolVersions
@@ -1710,23 +1710,23 @@ proc call*(call_594135: Call_AgentPoolsGetAvailableAgentPoolVersions_594127;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the managed cluster resource.
-  var path_594136 = newJObject()
-  var query_594137 = newJObject()
-  add(path_594136, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594137, "api-version", newJString(apiVersion))
-  add(path_594136, "subscriptionId", newJString(subscriptionId))
-  add(path_594136, "resourceName", newJString(resourceName))
-  result = call_594135.call(path_594136, query_594137, nil, nil, nil)
+  var path_568365 = newJObject()
+  var query_568366 = newJObject()
+  add(path_568365, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568366, "api-version", newJString(apiVersion))
+  add(path_568365, "subscriptionId", newJString(subscriptionId))
+  add(path_568365, "resourceName", newJString(resourceName))
+  result = call_568364.call(path_568365, query_568366, nil, nil, nil)
 
-var agentPoolsGetAvailableAgentPoolVersions* = Call_AgentPoolsGetAvailableAgentPoolVersions_594127(
+var agentPoolsGetAvailableAgentPoolVersions* = Call_AgentPoolsGetAvailableAgentPoolVersions_568356(
     name: "agentPoolsGetAvailableAgentPoolVersions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/availableAgentPoolVersions",
-    validator: validate_AgentPoolsGetAvailableAgentPoolVersions_594128, base: "",
-    url: url_AgentPoolsGetAvailableAgentPoolVersions_594129,
+    validator: validate_AgentPoolsGetAvailableAgentPoolVersions_568357, base: "",
+    url: url_AgentPoolsGetAvailableAgentPoolVersions_568358,
     schemes: {Scheme.Https})
 type
-  Call_ManagedClustersListClusterAdminCredentials_594138 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersListClusterAdminCredentials_594140(protocol: Scheme;
+  Call_ManagedClustersListClusterAdminCredentials_568367 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersListClusterAdminCredentials_568369(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1750,7 +1750,7 @@ proc url_ManagedClustersListClusterAdminCredentials_594140(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersListClusterAdminCredentials_594139(path: JsonNode;
+proc validate_ManagedClustersListClusterAdminCredentials_568368(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets cluster admin credential of the managed cluster with a specified resource group and name.
   ## 
@@ -1766,21 +1766,21 @@ proc validate_ManagedClustersListClusterAdminCredentials_594139(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594141 = path.getOrDefault("resourceGroupName")
-  valid_594141 = validateParameter(valid_594141, JString, required = true,
+  var valid_568370 = path.getOrDefault("resourceGroupName")
+  valid_568370 = validateParameter(valid_568370, JString, required = true,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "resourceGroupName", valid_594141
-  var valid_594142 = path.getOrDefault("subscriptionId")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  if valid_568370 != nil:
+    section.add "resourceGroupName", valid_568370
+  var valid_568371 = path.getOrDefault("subscriptionId")
+  valid_568371 = validateParameter(valid_568371, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "subscriptionId", valid_594142
-  var valid_594143 = path.getOrDefault("resourceName")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+  if valid_568371 != nil:
+    section.add "subscriptionId", valid_568371
+  var valid_568372 = path.getOrDefault("resourceName")
+  valid_568372 = validateParameter(valid_568372, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "resourceName", valid_594143
+  if valid_568372 != nil:
+    section.add "resourceName", valid_568372
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1788,11 +1788,11 @@ proc validate_ManagedClustersListClusterAdminCredentials_594139(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594144 = query.getOrDefault("api-version")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  var valid_568373 = query.getOrDefault("api-version")
+  valid_568373 = validateParameter(valid_568373, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "api-version", valid_594144
+  if valid_568373 != nil:
+    section.add "api-version", valid_568373
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1801,21 +1801,21 @@ proc validate_ManagedClustersListClusterAdminCredentials_594139(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594145: Call_ManagedClustersListClusterAdminCredentials_594138;
+proc call*(call_568374: Call_ManagedClustersListClusterAdminCredentials_568367;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets cluster admin credential of the managed cluster with a specified resource group and name.
   ## 
-  let valid = call_594145.validator(path, query, header, formData, body)
-  let scheme = call_594145.pickScheme
+  let valid = call_568374.validator(path, query, header, formData, body)
+  let scheme = call_568374.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594145.url(scheme.get, call_594145.host, call_594145.base,
-                         call_594145.route, valid.getOrDefault("path"),
+  let url = call_568374.url(scheme.get, call_568374.host, call_568374.base,
+                         call_568374.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594145, url, valid)
+  result = hook(call_568374, url, valid)
 
-proc call*(call_594146: Call_ManagedClustersListClusterAdminCredentials_594138;
+proc call*(call_568375: Call_ManagedClustersListClusterAdminCredentials_568367;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## managedClustersListClusterAdminCredentials
@@ -1828,23 +1828,23 @@ proc call*(call_594146: Call_ManagedClustersListClusterAdminCredentials_594138;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the managed cluster resource.
-  var path_594147 = newJObject()
-  var query_594148 = newJObject()
-  add(path_594147, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594148, "api-version", newJString(apiVersion))
-  add(path_594147, "subscriptionId", newJString(subscriptionId))
-  add(path_594147, "resourceName", newJString(resourceName))
-  result = call_594146.call(path_594147, query_594148, nil, nil, nil)
+  var path_568376 = newJObject()
+  var query_568377 = newJObject()
+  add(path_568376, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568377, "api-version", newJString(apiVersion))
+  add(path_568376, "subscriptionId", newJString(subscriptionId))
+  add(path_568376, "resourceName", newJString(resourceName))
+  result = call_568375.call(path_568376, query_568377, nil, nil, nil)
 
-var managedClustersListClusterAdminCredentials* = Call_ManagedClustersListClusterAdminCredentials_594138(
+var managedClustersListClusterAdminCredentials* = Call_ManagedClustersListClusterAdminCredentials_568367(
     name: "managedClustersListClusterAdminCredentials", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/listClusterAdminCredential",
-    validator: validate_ManagedClustersListClusterAdminCredentials_594139,
-    base: "", url: url_ManagedClustersListClusterAdminCredentials_594140,
+    validator: validate_ManagedClustersListClusterAdminCredentials_568368,
+    base: "", url: url_ManagedClustersListClusterAdminCredentials_568369,
     schemes: {Scheme.Https})
 type
-  Call_ManagedClustersListClusterUserCredentials_594149 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersListClusterUserCredentials_594151(protocol: Scheme;
+  Call_ManagedClustersListClusterUserCredentials_568378 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersListClusterUserCredentials_568380(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1868,7 +1868,7 @@ proc url_ManagedClustersListClusterUserCredentials_594151(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersListClusterUserCredentials_594150(path: JsonNode;
+proc validate_ManagedClustersListClusterUserCredentials_568379(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets cluster user credential of the managed cluster with a specified resource group and name.
   ## 
@@ -1884,21 +1884,21 @@ proc validate_ManagedClustersListClusterUserCredentials_594150(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594152 = path.getOrDefault("resourceGroupName")
-  valid_594152 = validateParameter(valid_594152, JString, required = true,
+  var valid_568381 = path.getOrDefault("resourceGroupName")
+  valid_568381 = validateParameter(valid_568381, JString, required = true,
                                  default = nil)
-  if valid_594152 != nil:
-    section.add "resourceGroupName", valid_594152
-  var valid_594153 = path.getOrDefault("subscriptionId")
-  valid_594153 = validateParameter(valid_594153, JString, required = true,
+  if valid_568381 != nil:
+    section.add "resourceGroupName", valid_568381
+  var valid_568382 = path.getOrDefault("subscriptionId")
+  valid_568382 = validateParameter(valid_568382, JString, required = true,
                                  default = nil)
-  if valid_594153 != nil:
-    section.add "subscriptionId", valid_594153
-  var valid_594154 = path.getOrDefault("resourceName")
-  valid_594154 = validateParameter(valid_594154, JString, required = true,
+  if valid_568382 != nil:
+    section.add "subscriptionId", valid_568382
+  var valid_568383 = path.getOrDefault("resourceName")
+  valid_568383 = validateParameter(valid_568383, JString, required = true,
                                  default = nil)
-  if valid_594154 != nil:
-    section.add "resourceName", valid_594154
+  if valid_568383 != nil:
+    section.add "resourceName", valid_568383
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1906,11 +1906,11 @@ proc validate_ManagedClustersListClusterUserCredentials_594150(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594155 = query.getOrDefault("api-version")
-  valid_594155 = validateParameter(valid_594155, JString, required = true,
+  var valid_568384 = query.getOrDefault("api-version")
+  valid_568384 = validateParameter(valid_568384, JString, required = true,
                                  default = nil)
-  if valid_594155 != nil:
-    section.add "api-version", valid_594155
+  if valid_568384 != nil:
+    section.add "api-version", valid_568384
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1919,21 +1919,21 @@ proc validate_ManagedClustersListClusterUserCredentials_594150(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594156: Call_ManagedClustersListClusterUserCredentials_594149;
+proc call*(call_568385: Call_ManagedClustersListClusterUserCredentials_568378;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets cluster user credential of the managed cluster with a specified resource group and name.
   ## 
-  let valid = call_594156.validator(path, query, header, formData, body)
-  let scheme = call_594156.pickScheme
+  let valid = call_568385.validator(path, query, header, formData, body)
+  let scheme = call_568385.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594156.url(scheme.get, call_594156.host, call_594156.base,
-                         call_594156.route, valid.getOrDefault("path"),
+  let url = call_568385.url(scheme.get, call_568385.host, call_568385.base,
+                         call_568385.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594156, url, valid)
+  result = hook(call_568385, url, valid)
 
-proc call*(call_594157: Call_ManagedClustersListClusterUserCredentials_594149;
+proc call*(call_568386: Call_ManagedClustersListClusterUserCredentials_568378;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## managedClustersListClusterUserCredentials
@@ -1946,23 +1946,23 @@ proc call*(call_594157: Call_ManagedClustersListClusterUserCredentials_594149;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the managed cluster resource.
-  var path_594158 = newJObject()
-  var query_594159 = newJObject()
-  add(path_594158, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594159, "api-version", newJString(apiVersion))
-  add(path_594158, "subscriptionId", newJString(subscriptionId))
-  add(path_594158, "resourceName", newJString(resourceName))
-  result = call_594157.call(path_594158, query_594159, nil, nil, nil)
+  var path_568387 = newJObject()
+  var query_568388 = newJObject()
+  add(path_568387, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568388, "api-version", newJString(apiVersion))
+  add(path_568387, "subscriptionId", newJString(subscriptionId))
+  add(path_568387, "resourceName", newJString(resourceName))
+  result = call_568386.call(path_568387, query_568388, nil, nil, nil)
 
-var managedClustersListClusterUserCredentials* = Call_ManagedClustersListClusterUserCredentials_594149(
+var managedClustersListClusterUserCredentials* = Call_ManagedClustersListClusterUserCredentials_568378(
     name: "managedClustersListClusterUserCredentials", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/listClusterUserCredential",
-    validator: validate_ManagedClustersListClusterUserCredentials_594150,
-    base: "", url: url_ManagedClustersListClusterUserCredentials_594151,
+    validator: validate_ManagedClustersListClusterUserCredentials_568379,
+    base: "", url: url_ManagedClustersListClusterUserCredentials_568380,
     schemes: {Scheme.Https})
 type
-  Call_ManagedClustersResetAADProfile_594160 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersResetAADProfile_594162(protocol: Scheme; host: string;
+  Call_ManagedClustersResetAADProfile_568389 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersResetAADProfile_568391(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1986,7 +1986,7 @@ proc url_ManagedClustersResetAADProfile_594162(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersResetAADProfile_594161(path: JsonNode;
+proc validate_ManagedClustersResetAADProfile_568390(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the AAD Profile for a managed cluster.
   ## 
@@ -2002,21 +2002,21 @@ proc validate_ManagedClustersResetAADProfile_594161(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594163 = path.getOrDefault("resourceGroupName")
-  valid_594163 = validateParameter(valid_594163, JString, required = true,
+  var valid_568392 = path.getOrDefault("resourceGroupName")
+  valid_568392 = validateParameter(valid_568392, JString, required = true,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "resourceGroupName", valid_594163
-  var valid_594164 = path.getOrDefault("subscriptionId")
-  valid_594164 = validateParameter(valid_594164, JString, required = true,
+  if valid_568392 != nil:
+    section.add "resourceGroupName", valid_568392
+  var valid_568393 = path.getOrDefault("subscriptionId")
+  valid_568393 = validateParameter(valid_568393, JString, required = true,
                                  default = nil)
-  if valid_594164 != nil:
-    section.add "subscriptionId", valid_594164
-  var valid_594165 = path.getOrDefault("resourceName")
-  valid_594165 = validateParameter(valid_594165, JString, required = true,
+  if valid_568393 != nil:
+    section.add "subscriptionId", valid_568393
+  var valid_568394 = path.getOrDefault("resourceName")
+  valid_568394 = validateParameter(valid_568394, JString, required = true,
                                  default = nil)
-  if valid_594165 != nil:
-    section.add "resourceName", valid_594165
+  if valid_568394 != nil:
+    section.add "resourceName", valid_568394
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2024,11 +2024,11 @@ proc validate_ManagedClustersResetAADProfile_594161(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594166 = query.getOrDefault("api-version")
-  valid_594166 = validateParameter(valid_594166, JString, required = true,
+  var valid_568395 = query.getOrDefault("api-version")
+  valid_568395 = validateParameter(valid_568395, JString, required = true,
                                  default = nil)
-  if valid_594166 != nil:
-    section.add "api-version", valid_594166
+  if valid_568395 != nil:
+    section.add "api-version", valid_568395
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2042,20 +2042,20 @@ proc validate_ManagedClustersResetAADProfile_594161(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594168: Call_ManagedClustersResetAADProfile_594160; path: JsonNode;
+proc call*(call_568397: Call_ManagedClustersResetAADProfile_568389; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the AAD Profile for a managed cluster.
   ## 
-  let valid = call_594168.validator(path, query, header, formData, body)
-  let scheme = call_594168.pickScheme
+  let valid = call_568397.validator(path, query, header, formData, body)
+  let scheme = call_568397.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594168.url(scheme.get, call_594168.host, call_594168.base,
-                         call_594168.route, valid.getOrDefault("path"),
+  let url = call_568397.url(scheme.get, call_568397.host, call_568397.base,
+                         call_568397.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594168, url, valid)
+  result = hook(call_568397, url, valid)
 
-proc call*(call_594169: Call_ManagedClustersResetAADProfile_594160;
+proc call*(call_568398: Call_ManagedClustersResetAADProfile_568389;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; parameters: JsonNode): Recallable =
   ## managedClustersResetAADProfile
@@ -2070,25 +2070,25 @@ proc call*(call_594169: Call_ManagedClustersResetAADProfile_594160;
   ##               : The name of the managed cluster resource.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Reset AAD Profile operation for a Managed Cluster.
-  var path_594170 = newJObject()
-  var query_594171 = newJObject()
-  var body_594172 = newJObject()
-  add(path_594170, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594171, "api-version", newJString(apiVersion))
-  add(path_594170, "subscriptionId", newJString(subscriptionId))
-  add(path_594170, "resourceName", newJString(resourceName))
+  var path_568399 = newJObject()
+  var query_568400 = newJObject()
+  var body_568401 = newJObject()
+  add(path_568399, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568400, "api-version", newJString(apiVersion))
+  add(path_568399, "subscriptionId", newJString(subscriptionId))
+  add(path_568399, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_594172 = parameters
-  result = call_594169.call(path_594170, query_594171, nil, nil, body_594172)
+    body_568401 = parameters
+  result = call_568398.call(path_568399, query_568400, nil, nil, body_568401)
 
-var managedClustersResetAADProfile* = Call_ManagedClustersResetAADProfile_594160(
+var managedClustersResetAADProfile* = Call_ManagedClustersResetAADProfile_568389(
     name: "managedClustersResetAADProfile", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/resetAADProfile",
-    validator: validate_ManagedClustersResetAADProfile_594161, base: "",
-    url: url_ManagedClustersResetAADProfile_594162, schemes: {Scheme.Https})
+    validator: validate_ManagedClustersResetAADProfile_568390, base: "",
+    url: url_ManagedClustersResetAADProfile_568391, schemes: {Scheme.Https})
 type
-  Call_ManagedClustersResetServicePrincipalProfile_594173 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersResetServicePrincipalProfile_594175(protocol: Scheme;
+  Call_ManagedClustersResetServicePrincipalProfile_568402 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersResetServicePrincipalProfile_568404(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2112,7 +2112,7 @@ proc url_ManagedClustersResetServicePrincipalProfile_594175(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersResetServicePrincipalProfile_594174(path: JsonNode;
+proc validate_ManagedClustersResetServicePrincipalProfile_568403(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the service principal Profile for a managed cluster.
   ## 
@@ -2128,21 +2128,21 @@ proc validate_ManagedClustersResetServicePrincipalProfile_594174(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594176 = path.getOrDefault("resourceGroupName")
-  valid_594176 = validateParameter(valid_594176, JString, required = true,
+  var valid_568405 = path.getOrDefault("resourceGroupName")
+  valid_568405 = validateParameter(valid_568405, JString, required = true,
                                  default = nil)
-  if valid_594176 != nil:
-    section.add "resourceGroupName", valid_594176
-  var valid_594177 = path.getOrDefault("subscriptionId")
-  valid_594177 = validateParameter(valid_594177, JString, required = true,
+  if valid_568405 != nil:
+    section.add "resourceGroupName", valid_568405
+  var valid_568406 = path.getOrDefault("subscriptionId")
+  valid_568406 = validateParameter(valid_568406, JString, required = true,
                                  default = nil)
-  if valid_594177 != nil:
-    section.add "subscriptionId", valid_594177
-  var valid_594178 = path.getOrDefault("resourceName")
-  valid_594178 = validateParameter(valid_594178, JString, required = true,
+  if valid_568406 != nil:
+    section.add "subscriptionId", valid_568406
+  var valid_568407 = path.getOrDefault("resourceName")
+  valid_568407 = validateParameter(valid_568407, JString, required = true,
                                  default = nil)
-  if valid_594178 != nil:
-    section.add "resourceName", valid_594178
+  if valid_568407 != nil:
+    section.add "resourceName", valid_568407
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2150,11 +2150,11 @@ proc validate_ManagedClustersResetServicePrincipalProfile_594174(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594179 = query.getOrDefault("api-version")
-  valid_594179 = validateParameter(valid_594179, JString, required = true,
+  var valid_568408 = query.getOrDefault("api-version")
+  valid_568408 = validateParameter(valid_568408, JString, required = true,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "api-version", valid_594179
+  if valid_568408 != nil:
+    section.add "api-version", valid_568408
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2168,21 +2168,21 @@ proc validate_ManagedClustersResetServicePrincipalProfile_594174(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594181: Call_ManagedClustersResetServicePrincipalProfile_594173;
+proc call*(call_568410: Call_ManagedClustersResetServicePrincipalProfile_568402;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update the service principal Profile for a managed cluster.
   ## 
-  let valid = call_594181.validator(path, query, header, formData, body)
-  let scheme = call_594181.pickScheme
+  let valid = call_568410.validator(path, query, header, formData, body)
+  let scheme = call_568410.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594181.url(scheme.get, call_594181.host, call_594181.base,
-                         call_594181.route, valid.getOrDefault("path"),
+  let url = call_568410.url(scheme.get, call_568410.host, call_568410.base,
+                         call_568410.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594181, url, valid)
+  result = hook(call_568410, url, valid)
 
-proc call*(call_594182: Call_ManagedClustersResetServicePrincipalProfile_594173;
+proc call*(call_568411: Call_ManagedClustersResetServicePrincipalProfile_568402;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; parameters: JsonNode): Recallable =
   ## managedClustersResetServicePrincipalProfile
@@ -2197,26 +2197,26 @@ proc call*(call_594182: Call_ManagedClustersResetServicePrincipalProfile_594173;
   ##               : The name of the managed cluster resource.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Reset Service Principal Profile operation for a Managed Cluster.
-  var path_594183 = newJObject()
-  var query_594184 = newJObject()
-  var body_594185 = newJObject()
-  add(path_594183, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594184, "api-version", newJString(apiVersion))
-  add(path_594183, "subscriptionId", newJString(subscriptionId))
-  add(path_594183, "resourceName", newJString(resourceName))
+  var path_568412 = newJObject()
+  var query_568413 = newJObject()
+  var body_568414 = newJObject()
+  add(path_568412, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568413, "api-version", newJString(apiVersion))
+  add(path_568412, "subscriptionId", newJString(subscriptionId))
+  add(path_568412, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_594185 = parameters
-  result = call_594182.call(path_594183, query_594184, nil, nil, body_594185)
+    body_568414 = parameters
+  result = call_568411.call(path_568412, query_568413, nil, nil, body_568414)
 
-var managedClustersResetServicePrincipalProfile* = Call_ManagedClustersResetServicePrincipalProfile_594173(
+var managedClustersResetServicePrincipalProfile* = Call_ManagedClustersResetServicePrincipalProfile_568402(
     name: "managedClustersResetServicePrincipalProfile",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/resetServicePrincipalProfile",
-    validator: validate_ManagedClustersResetServicePrincipalProfile_594174,
-    base: "", url: url_ManagedClustersResetServicePrincipalProfile_594175,
+    validator: validate_ManagedClustersResetServicePrincipalProfile_568403,
+    base: "", url: url_ManagedClustersResetServicePrincipalProfile_568404,
     schemes: {Scheme.Https})
 type
-  Call_ManagedClustersGetUpgradeProfile_594186 = ref object of OpenApiRestCall_593438
-proc url_ManagedClustersGetUpgradeProfile_594188(protocol: Scheme; host: string;
+  Call_ManagedClustersGetUpgradeProfile_568415 = ref object of OpenApiRestCall_567667
+proc url_ManagedClustersGetUpgradeProfile_568417(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2240,7 +2240,7 @@ proc url_ManagedClustersGetUpgradeProfile_594188(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedClustersGetUpgradeProfile_594187(path: JsonNode;
+proc validate_ManagedClustersGetUpgradeProfile_568416(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the upgrade profile for a managed cluster with a specified resource group and name.
   ## 
@@ -2256,21 +2256,21 @@ proc validate_ManagedClustersGetUpgradeProfile_594187(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594189 = path.getOrDefault("resourceGroupName")
-  valid_594189 = validateParameter(valid_594189, JString, required = true,
+  var valid_568418 = path.getOrDefault("resourceGroupName")
+  valid_568418 = validateParameter(valid_568418, JString, required = true,
                                  default = nil)
-  if valid_594189 != nil:
-    section.add "resourceGroupName", valid_594189
-  var valid_594190 = path.getOrDefault("subscriptionId")
-  valid_594190 = validateParameter(valid_594190, JString, required = true,
+  if valid_568418 != nil:
+    section.add "resourceGroupName", valid_568418
+  var valid_568419 = path.getOrDefault("subscriptionId")
+  valid_568419 = validateParameter(valid_568419, JString, required = true,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "subscriptionId", valid_594190
-  var valid_594191 = path.getOrDefault("resourceName")
-  valid_594191 = validateParameter(valid_594191, JString, required = true,
+  if valid_568419 != nil:
+    section.add "subscriptionId", valid_568419
+  var valid_568420 = path.getOrDefault("resourceName")
+  valid_568420 = validateParameter(valid_568420, JString, required = true,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "resourceName", valid_594191
+  if valid_568420 != nil:
+    section.add "resourceName", valid_568420
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2278,11 +2278,11 @@ proc validate_ManagedClustersGetUpgradeProfile_594187(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594192 = query.getOrDefault("api-version")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  var valid_568421 = query.getOrDefault("api-version")
+  valid_568421 = validateParameter(valid_568421, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "api-version", valid_594192
+  if valid_568421 != nil:
+    section.add "api-version", valid_568421
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2291,21 +2291,21 @@ proc validate_ManagedClustersGetUpgradeProfile_594187(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594193: Call_ManagedClustersGetUpgradeProfile_594186;
+proc call*(call_568422: Call_ManagedClustersGetUpgradeProfile_568415;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the details of the upgrade profile for a managed cluster with a specified resource group and name.
   ## 
-  let valid = call_594193.validator(path, query, header, formData, body)
-  let scheme = call_594193.pickScheme
+  let valid = call_568422.validator(path, query, header, formData, body)
+  let scheme = call_568422.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594193.url(scheme.get, call_594193.host, call_594193.base,
-                         call_594193.route, valid.getOrDefault("path"),
+  let url = call_568422.url(scheme.get, call_568422.host, call_568422.base,
+                         call_568422.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594193, url, valid)
+  result = hook(call_568422, url, valid)
 
-proc call*(call_594194: Call_ManagedClustersGetUpgradeProfile_594186;
+proc call*(call_568423: Call_ManagedClustersGetUpgradeProfile_568415;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## managedClustersGetUpgradeProfile
@@ -2318,19 +2318,19 @@ proc call*(call_594194: Call_ManagedClustersGetUpgradeProfile_594186;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: string (required)
   ##               : The name of the managed cluster resource.
-  var path_594195 = newJObject()
-  var query_594196 = newJObject()
-  add(path_594195, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594196, "api-version", newJString(apiVersion))
-  add(path_594195, "subscriptionId", newJString(subscriptionId))
-  add(path_594195, "resourceName", newJString(resourceName))
-  result = call_594194.call(path_594195, query_594196, nil, nil, nil)
+  var path_568424 = newJObject()
+  var query_568425 = newJObject()
+  add(path_568424, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568425, "api-version", newJString(apiVersion))
+  add(path_568424, "subscriptionId", newJString(subscriptionId))
+  add(path_568424, "resourceName", newJString(resourceName))
+  result = call_568423.call(path_568424, query_568425, nil, nil, nil)
 
-var managedClustersGetUpgradeProfile* = Call_ManagedClustersGetUpgradeProfile_594186(
+var managedClustersGetUpgradeProfile* = Call_ManagedClustersGetUpgradeProfile_568415(
     name: "managedClustersGetUpgradeProfile", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/upgradeProfiles/default",
-    validator: validate_ManagedClustersGetUpgradeProfile_594187, base: "",
-    url: url_ManagedClustersGetUpgradeProfile_594188, schemes: {Scheme.Https})
+    validator: validate_ManagedClustersGetUpgradeProfile_568416, base: "",
+    url: url_ManagedClustersGetUpgradeProfile_568417, schemes: {Scheme.Https})
 export
   rest
 

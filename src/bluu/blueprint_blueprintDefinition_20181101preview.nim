@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: BlueprintClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_574458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "blueprint-blueprintDefinition"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BlueprintsList_593647 = ref object of OpenApiRestCall_593425
-proc url_BlueprintsList_593649(protocol: Scheme; host: string; base: string;
+  Call_BlueprintsList_574680 = ref object of OpenApiRestCall_574458
+proc url_BlueprintsList_574682(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +120,7 @@ proc url_BlueprintsList_593649(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlueprintsList_593648(path: JsonNode; query: JsonNode;
+proc validate_BlueprintsList_574681(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## List blueprint definitions.
@@ -132,11 +132,11 @@ proc validate_BlueprintsList_593648(path: JsonNode; query: JsonNode;
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_593822 = path.getOrDefault("scope")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_574855 = path.getOrDefault("scope")
+  valid_574855 = validateParameter(valid_574855, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "scope", valid_593822
+  if valid_574855 != nil:
+    section.add "scope", valid_574855
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +144,11 @@ proc validate_BlueprintsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593823 = query.getOrDefault("api-version")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_574856 = query.getOrDefault("api-version")
+  valid_574856 = validateParameter(valid_574856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "api-version", valid_593823
+  if valid_574856 != nil:
+    section.add "api-version", valid_574856
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,40 +157,40 @@ proc validate_BlueprintsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593846: Call_BlueprintsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_574879: Call_BlueprintsList_574680; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List blueprint definitions.
   ## 
-  let valid = call_593846.validator(path, query, header, formData, body)
-  let scheme = call_593846.pickScheme
+  let valid = call_574879.validator(path, query, header, formData, body)
+  let scheme = call_574879.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593846.url(scheme.get, call_593846.host, call_593846.base,
-                         call_593846.route, valid.getOrDefault("path"),
+  let url = call_574879.url(scheme.get, call_574879.host, call_574879.base,
+                         call_574879.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593846, url, valid)
+  result = hook(call_574879, url, valid)
 
-proc call*(call_593917: Call_BlueprintsList_593647; apiVersion: string; scope: string): Recallable =
+proc call*(call_574950: Call_BlueprintsList_574680; apiVersion: string; scope: string): Recallable =
   ## blueprintsList
   ## List blueprint definitions.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_593918 = newJObject()
-  var query_593920 = newJObject()
-  add(query_593920, "api-version", newJString(apiVersion))
-  add(path_593918, "scope", newJString(scope))
-  result = call_593917.call(path_593918, query_593920, nil, nil, nil)
+  var path_574951 = newJObject()
+  var query_574953 = newJObject()
+  add(query_574953, "api-version", newJString(apiVersion))
+  add(path_574951, "scope", newJString(scope))
+  result = call_574950.call(path_574951, query_574953, nil, nil, nil)
 
-var blueprintsList* = Call_BlueprintsList_593647(name: "blueprintsList",
+var blueprintsList* = Call_BlueprintsList_574680(name: "blueprintsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Blueprint/blueprints",
-    validator: validate_BlueprintsList_593648, base: "", url: url_BlueprintsList_593649,
+    validator: validate_BlueprintsList_574681, base: "", url: url_BlueprintsList_574682,
     schemes: {Scheme.Https})
 type
-  Call_BlueprintsCreateOrUpdate_593969 = ref object of OpenApiRestCall_593425
-proc url_BlueprintsCreateOrUpdate_593971(protocol: Scheme; host: string;
+  Call_BlueprintsCreateOrUpdate_575002 = ref object of OpenApiRestCall_574458
+proc url_BlueprintsCreateOrUpdate_575004(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -209,7 +209,7 @@ proc url_BlueprintsCreateOrUpdate_593971(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlueprintsCreateOrUpdate_593970(path: JsonNode; query: JsonNode;
+proc validate_BlueprintsCreateOrUpdate_575003(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a blueprint definition.
   ## 
@@ -223,16 +223,16 @@ proc validate_BlueprintsCreateOrUpdate_593970(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `blueprintName` field"
-  var valid_593972 = path.getOrDefault("blueprintName")
-  valid_593972 = validateParameter(valid_593972, JString, required = true,
+  var valid_575005 = path.getOrDefault("blueprintName")
+  valid_575005 = validateParameter(valid_575005, JString, required = true,
                                  default = nil)
-  if valid_593972 != nil:
-    section.add "blueprintName", valid_593972
-  var valid_593973 = path.getOrDefault("scope")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  if valid_575005 != nil:
+    section.add "blueprintName", valid_575005
+  var valid_575006 = path.getOrDefault("scope")
+  valid_575006 = validateParameter(valid_575006, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "scope", valid_593973
+  if valid_575006 != nil:
+    section.add "scope", valid_575006
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -240,11 +240,11 @@ proc validate_BlueprintsCreateOrUpdate_593970(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593974 = query.getOrDefault("api-version")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_575007 = query.getOrDefault("api-version")
+  valid_575007 = validateParameter(valid_575007, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "api-version", valid_593974
+  if valid_575007 != nil:
+    section.add "api-version", valid_575007
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -258,20 +258,20 @@ proc validate_BlueprintsCreateOrUpdate_593970(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593976: Call_BlueprintsCreateOrUpdate_593969; path: JsonNode;
+proc call*(call_575009: Call_BlueprintsCreateOrUpdate_575002; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a blueprint definition.
   ## 
-  let valid = call_593976.validator(path, query, header, formData, body)
-  let scheme = call_593976.pickScheme
+  let valid = call_575009.validator(path, query, header, formData, body)
+  let scheme = call_575009.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593976.url(scheme.get, call_593976.host, call_593976.base,
-                         call_593976.route, valid.getOrDefault("path"),
+  let url = call_575009.url(scheme.get, call_575009.host, call_575009.base,
+                         call_575009.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593976, url, valid)
+  result = hook(call_575009, url, valid)
 
-proc call*(call_593977: Call_BlueprintsCreateOrUpdate_593969; apiVersion: string;
+proc call*(call_575010: Call_BlueprintsCreateOrUpdate_575002; apiVersion: string;
           blueprintName: string; blueprint: JsonNode; scope: string): Recallable =
   ## blueprintsCreateOrUpdate
   ## Create or update a blueprint definition.
@@ -283,25 +283,25 @@ proc call*(call_593977: Call_BlueprintsCreateOrUpdate_593969; apiVersion: string
   ##            : Blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_593978 = newJObject()
-  var query_593979 = newJObject()
-  var body_593980 = newJObject()
-  add(query_593979, "api-version", newJString(apiVersion))
-  add(path_593978, "blueprintName", newJString(blueprintName))
+  var path_575011 = newJObject()
+  var query_575012 = newJObject()
+  var body_575013 = newJObject()
+  add(query_575012, "api-version", newJString(apiVersion))
+  add(path_575011, "blueprintName", newJString(blueprintName))
   if blueprint != nil:
-    body_593980 = blueprint
-  add(path_593978, "scope", newJString(scope))
-  result = call_593977.call(path_593978, query_593979, nil, nil, body_593980)
+    body_575013 = blueprint
+  add(path_575011, "scope", newJString(scope))
+  result = call_575010.call(path_575011, query_575012, nil, nil, body_575013)
 
-var blueprintsCreateOrUpdate* = Call_BlueprintsCreateOrUpdate_593969(
+var blueprintsCreateOrUpdate* = Call_BlueprintsCreateOrUpdate_575002(
     name: "blueprintsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}",
-    validator: validate_BlueprintsCreateOrUpdate_593970, base: "",
-    url: url_BlueprintsCreateOrUpdate_593971, schemes: {Scheme.Https})
+    validator: validate_BlueprintsCreateOrUpdate_575003, base: "",
+    url: url_BlueprintsCreateOrUpdate_575004, schemes: {Scheme.Https})
 type
-  Call_BlueprintsGet_593959 = ref object of OpenApiRestCall_593425
-proc url_BlueprintsGet_593961(protocol: Scheme; host: string; base: string;
+  Call_BlueprintsGet_574992 = ref object of OpenApiRestCall_574458
+proc url_BlueprintsGet_574994(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -319,7 +319,7 @@ proc url_BlueprintsGet_593961(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlueprintsGet_593960(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BlueprintsGet_574993(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a blueprint definition.
   ## 
@@ -333,16 +333,16 @@ proc validate_BlueprintsGet_593960(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `blueprintName` field"
-  var valid_593962 = path.getOrDefault("blueprintName")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_574995 = path.getOrDefault("blueprintName")
+  valid_574995 = validateParameter(valid_574995, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "blueprintName", valid_593962
-  var valid_593963 = path.getOrDefault("scope")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_574995 != nil:
+    section.add "blueprintName", valid_574995
+  var valid_574996 = path.getOrDefault("scope")
+  valid_574996 = validateParameter(valid_574996, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "scope", valid_593963
+  if valid_574996 != nil:
+    section.add "scope", valid_574996
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -350,11 +350,11 @@ proc validate_BlueprintsGet_593960(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593964 = query.getOrDefault("api-version")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_574997 = query.getOrDefault("api-version")
+  valid_574997 = validateParameter(valid_574997, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "api-version", valid_593964
+  if valid_574997 != nil:
+    section.add "api-version", valid_574997
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -363,20 +363,20 @@ proc validate_BlueprintsGet_593960(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593965: Call_BlueprintsGet_593959; path: JsonNode; query: JsonNode;
+proc call*(call_574998: Call_BlueprintsGet_574992; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a blueprint definition.
   ## 
-  let valid = call_593965.validator(path, query, header, formData, body)
-  let scheme = call_593965.pickScheme
+  let valid = call_574998.validator(path, query, header, formData, body)
+  let scheme = call_574998.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593965.url(scheme.get, call_593965.host, call_593965.base,
-                         call_593965.route, valid.getOrDefault("path"),
+  let url = call_574998.url(scheme.get, call_574998.host, call_574998.base,
+                         call_574998.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593965, url, valid)
+  result = hook(call_574998, url, valid)
 
-proc call*(call_593966: Call_BlueprintsGet_593959; apiVersion: string;
+proc call*(call_574999: Call_BlueprintsGet_574992; apiVersion: string;
           blueprintName: string; scope: string): Recallable =
   ## blueprintsGet
   ## Get a blueprint definition.
@@ -386,21 +386,21 @@ proc call*(call_593966: Call_BlueprintsGet_593959; apiVersion: string;
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_593967 = newJObject()
-  var query_593968 = newJObject()
-  add(query_593968, "api-version", newJString(apiVersion))
-  add(path_593967, "blueprintName", newJString(blueprintName))
-  add(path_593967, "scope", newJString(scope))
-  result = call_593966.call(path_593967, query_593968, nil, nil, nil)
+  var path_575000 = newJObject()
+  var query_575001 = newJObject()
+  add(query_575001, "api-version", newJString(apiVersion))
+  add(path_575000, "blueprintName", newJString(blueprintName))
+  add(path_575000, "scope", newJString(scope))
+  result = call_574999.call(path_575000, query_575001, nil, nil, nil)
 
-var blueprintsGet* = Call_BlueprintsGet_593959(name: "blueprintsGet",
+var blueprintsGet* = Call_BlueprintsGet_574992(name: "blueprintsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}",
-    validator: validate_BlueprintsGet_593960, base: "", url: url_BlueprintsGet_593961,
+    validator: validate_BlueprintsGet_574993, base: "", url: url_BlueprintsGet_574994,
     schemes: {Scheme.Https})
 type
-  Call_BlueprintsDelete_593981 = ref object of OpenApiRestCall_593425
-proc url_BlueprintsDelete_593983(protocol: Scheme; host: string; base: string;
+  Call_BlueprintsDelete_575014 = ref object of OpenApiRestCall_574458
+proc url_BlueprintsDelete_575016(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -418,7 +418,7 @@ proc url_BlueprintsDelete_593983(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlueprintsDelete_593982(path: JsonNode; query: JsonNode;
+proc validate_BlueprintsDelete_575015(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Delete a blueprint definition.
@@ -433,16 +433,16 @@ proc validate_BlueprintsDelete_593982(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `blueprintName` field"
-  var valid_593984 = path.getOrDefault("blueprintName")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_575017 = path.getOrDefault("blueprintName")
+  valid_575017 = validateParameter(valid_575017, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "blueprintName", valid_593984
-  var valid_593985 = path.getOrDefault("scope")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  if valid_575017 != nil:
+    section.add "blueprintName", valid_575017
+  var valid_575018 = path.getOrDefault("scope")
+  valid_575018 = validateParameter(valid_575018, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "scope", valid_593985
+  if valid_575018 != nil:
+    section.add "scope", valid_575018
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -450,11 +450,11 @@ proc validate_BlueprintsDelete_593982(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593986 = query.getOrDefault("api-version")
-  valid_593986 = validateParameter(valid_593986, JString, required = true,
+  var valid_575019 = query.getOrDefault("api-version")
+  valid_575019 = validateParameter(valid_575019, JString, required = true,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "api-version", valid_593986
+  if valid_575019 != nil:
+    section.add "api-version", valid_575019
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -463,20 +463,20 @@ proc validate_BlueprintsDelete_593982(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593987: Call_BlueprintsDelete_593981; path: JsonNode;
+proc call*(call_575020: Call_BlueprintsDelete_575014; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a blueprint definition.
   ## 
-  let valid = call_593987.validator(path, query, header, formData, body)
-  let scheme = call_593987.pickScheme
+  let valid = call_575020.validator(path, query, header, formData, body)
+  let scheme = call_575020.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593987.url(scheme.get, call_593987.host, call_593987.base,
-                         call_593987.route, valid.getOrDefault("path"),
+  let url = call_575020.url(scheme.get, call_575020.host, call_575020.base,
+                         call_575020.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593987, url, valid)
+  result = hook(call_575020, url, valid)
 
-proc call*(call_593988: Call_BlueprintsDelete_593981; apiVersion: string;
+proc call*(call_575021: Call_BlueprintsDelete_575014; apiVersion: string;
           blueprintName: string; scope: string): Recallable =
   ## blueprintsDelete
   ## Delete a blueprint definition.
@@ -486,21 +486,21 @@ proc call*(call_593988: Call_BlueprintsDelete_593981; apiVersion: string;
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_593989 = newJObject()
-  var query_593990 = newJObject()
-  add(query_593990, "api-version", newJString(apiVersion))
-  add(path_593989, "blueprintName", newJString(blueprintName))
-  add(path_593989, "scope", newJString(scope))
-  result = call_593988.call(path_593989, query_593990, nil, nil, nil)
+  var path_575022 = newJObject()
+  var query_575023 = newJObject()
+  add(query_575023, "api-version", newJString(apiVersion))
+  add(path_575022, "blueprintName", newJString(blueprintName))
+  add(path_575022, "scope", newJString(scope))
+  result = call_575021.call(path_575022, query_575023, nil, nil, nil)
 
-var blueprintsDelete* = Call_BlueprintsDelete_593981(name: "blueprintsDelete",
+var blueprintsDelete* = Call_BlueprintsDelete_575014(name: "blueprintsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}",
-    validator: validate_BlueprintsDelete_593982, base: "",
-    url: url_BlueprintsDelete_593983, schemes: {Scheme.Https})
+    validator: validate_BlueprintsDelete_575015, base: "",
+    url: url_BlueprintsDelete_575016, schemes: {Scheme.Https})
 type
-  Call_ArtifactsList_593991 = ref object of OpenApiRestCall_593425
-proc url_ArtifactsList_593993(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsList_575024 = ref object of OpenApiRestCall_574458
+proc url_ArtifactsList_575026(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -519,7 +519,7 @@ proc url_ArtifactsList_593993(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsList_593992(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ArtifactsList_575025(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## List artifacts for a given blueprint definition.
   ## 
@@ -533,16 +533,16 @@ proc validate_ArtifactsList_593992(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `blueprintName` field"
-  var valid_593994 = path.getOrDefault("blueprintName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_575027 = path.getOrDefault("blueprintName")
+  valid_575027 = validateParameter(valid_575027, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "blueprintName", valid_593994
-  var valid_593995 = path.getOrDefault("scope")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  if valid_575027 != nil:
+    section.add "blueprintName", valid_575027
+  var valid_575028 = path.getOrDefault("scope")
+  valid_575028 = validateParameter(valid_575028, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "scope", valid_593995
+  if valid_575028 != nil:
+    section.add "scope", valid_575028
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -550,11 +550,11 @@ proc validate_ArtifactsList_593992(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593996 = query.getOrDefault("api-version")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_575029 = query.getOrDefault("api-version")
+  valid_575029 = validateParameter(valid_575029, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "api-version", valid_593996
+  if valid_575029 != nil:
+    section.add "api-version", valid_575029
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -563,20 +563,20 @@ proc validate_ArtifactsList_593992(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593997: Call_ArtifactsList_593991; path: JsonNode; query: JsonNode;
+proc call*(call_575030: Call_ArtifactsList_575024; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List artifacts for a given blueprint definition.
   ## 
-  let valid = call_593997.validator(path, query, header, formData, body)
-  let scheme = call_593997.pickScheme
+  let valid = call_575030.validator(path, query, header, formData, body)
+  let scheme = call_575030.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593997.url(scheme.get, call_593997.host, call_593997.base,
-                         call_593997.route, valid.getOrDefault("path"),
+  let url = call_575030.url(scheme.get, call_575030.host, call_575030.base,
+                         call_575030.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593997, url, valid)
+  result = hook(call_575030, url, valid)
 
-proc call*(call_593998: Call_ArtifactsList_593991; apiVersion: string;
+proc call*(call_575031: Call_ArtifactsList_575024; apiVersion: string;
           blueprintName: string; scope: string): Recallable =
   ## artifactsList
   ## List artifacts for a given blueprint definition.
@@ -586,20 +586,20 @@ proc call*(call_593998: Call_ArtifactsList_593991; apiVersion: string;
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_593999 = newJObject()
-  var query_594000 = newJObject()
-  add(query_594000, "api-version", newJString(apiVersion))
-  add(path_593999, "blueprintName", newJString(blueprintName))
-  add(path_593999, "scope", newJString(scope))
-  result = call_593998.call(path_593999, query_594000, nil, nil, nil)
+  var path_575032 = newJObject()
+  var query_575033 = newJObject()
+  add(query_575033, "api-version", newJString(apiVersion))
+  add(path_575032, "blueprintName", newJString(blueprintName))
+  add(path_575032, "scope", newJString(scope))
+  result = call_575031.call(path_575032, query_575033, nil, nil, nil)
 
-var artifactsList* = Call_ArtifactsList_593991(name: "artifactsList",
+var artifactsList* = Call_ArtifactsList_575024(name: "artifactsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}/artifacts",
-    validator: validate_ArtifactsList_593992, base: "", url: url_ArtifactsList_593993,
+    validator: validate_ArtifactsList_575025, base: "", url: url_ArtifactsList_575026,
     schemes: {Scheme.Https})
 type
-  Call_ArtifactsCreateOrUpdate_594012 = ref object of OpenApiRestCall_593425
-proc url_ArtifactsCreateOrUpdate_594014(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsCreateOrUpdate_575045 = ref object of OpenApiRestCall_574458
+proc url_ArtifactsCreateOrUpdate_575047(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -621,7 +621,7 @@ proc url_ArtifactsCreateOrUpdate_594014(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsCreateOrUpdate_594013(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsCreateOrUpdate_575046(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update blueprint artifact.
   ## 
@@ -637,21 +637,21 @@ proc validate_ArtifactsCreateOrUpdate_594013(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `artifactName` field"
-  var valid_594015 = path.getOrDefault("artifactName")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_575048 = path.getOrDefault("artifactName")
+  valid_575048 = validateParameter(valid_575048, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "artifactName", valid_594015
-  var valid_594016 = path.getOrDefault("blueprintName")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_575048 != nil:
+    section.add "artifactName", valid_575048
+  var valid_575049 = path.getOrDefault("blueprintName")
+  valid_575049 = validateParameter(valid_575049, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "blueprintName", valid_594016
-  var valid_594017 = path.getOrDefault("scope")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  if valid_575049 != nil:
+    section.add "blueprintName", valid_575049
+  var valid_575050 = path.getOrDefault("scope")
+  valid_575050 = validateParameter(valid_575050, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "scope", valid_594017
+  if valid_575050 != nil:
+    section.add "scope", valid_575050
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -659,11 +659,11 @@ proc validate_ArtifactsCreateOrUpdate_594013(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594018 = query.getOrDefault("api-version")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  var valid_575051 = query.getOrDefault("api-version")
+  valid_575051 = validateParameter(valid_575051, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "api-version", valid_594018
+  if valid_575051 != nil:
+    section.add "api-version", valid_575051
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -677,20 +677,20 @@ proc validate_ArtifactsCreateOrUpdate_594013(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594020: Call_ArtifactsCreateOrUpdate_594012; path: JsonNode;
+proc call*(call_575053: Call_ArtifactsCreateOrUpdate_575045; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update blueprint artifact.
   ## 
-  let valid = call_594020.validator(path, query, header, formData, body)
-  let scheme = call_594020.pickScheme
+  let valid = call_575053.validator(path, query, header, formData, body)
+  let scheme = call_575053.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594020.url(scheme.get, call_594020.host, call_594020.base,
-                         call_594020.route, valid.getOrDefault("path"),
+  let url = call_575053.url(scheme.get, call_575053.host, call_575053.base,
+                         call_575053.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594020, url, valid)
+  result = hook(call_575053, url, valid)
 
-proc call*(call_594021: Call_ArtifactsCreateOrUpdate_594012; artifactName: string;
+proc call*(call_575054: Call_ArtifactsCreateOrUpdate_575045; artifactName: string;
           artifact: JsonNode; apiVersion: string; blueprintName: string; scope: string): Recallable =
   ## artifactsCreateOrUpdate
   ## Create or update blueprint artifact.
@@ -704,25 +704,25 @@ proc call*(call_594021: Call_ArtifactsCreateOrUpdate_594012; artifactName: strin
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_594022 = newJObject()
-  var query_594023 = newJObject()
-  var body_594024 = newJObject()
-  add(path_594022, "artifactName", newJString(artifactName))
+  var path_575055 = newJObject()
+  var query_575056 = newJObject()
+  var body_575057 = newJObject()
+  add(path_575055, "artifactName", newJString(artifactName))
   if artifact != nil:
-    body_594024 = artifact
-  add(query_594023, "api-version", newJString(apiVersion))
-  add(path_594022, "blueprintName", newJString(blueprintName))
-  add(path_594022, "scope", newJString(scope))
-  result = call_594021.call(path_594022, query_594023, nil, nil, body_594024)
+    body_575057 = artifact
+  add(query_575056, "api-version", newJString(apiVersion))
+  add(path_575055, "blueprintName", newJString(blueprintName))
+  add(path_575055, "scope", newJString(scope))
+  result = call_575054.call(path_575055, query_575056, nil, nil, body_575057)
 
-var artifactsCreateOrUpdate* = Call_ArtifactsCreateOrUpdate_594012(
+var artifactsCreateOrUpdate* = Call_ArtifactsCreateOrUpdate_575045(
     name: "artifactsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}/artifacts/{artifactName}",
-    validator: validate_ArtifactsCreateOrUpdate_594013, base: "",
-    url: url_ArtifactsCreateOrUpdate_594014, schemes: {Scheme.Https})
+    validator: validate_ArtifactsCreateOrUpdate_575046, base: "",
+    url: url_ArtifactsCreateOrUpdate_575047, schemes: {Scheme.Https})
 type
-  Call_ArtifactsGet_594001 = ref object of OpenApiRestCall_593425
-proc url_ArtifactsGet_594003(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsGet_575034 = ref object of OpenApiRestCall_574458
+proc url_ArtifactsGet_575036(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -743,7 +743,7 @@ proc url_ArtifactsGet_594003(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsGet_594002(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ArtifactsGet_575035(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a blueprint artifact.
   ## 
@@ -759,21 +759,21 @@ proc validate_ArtifactsGet_594002(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `artifactName` field"
-  var valid_594004 = path.getOrDefault("artifactName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_575037 = path.getOrDefault("artifactName")
+  valid_575037 = validateParameter(valid_575037, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "artifactName", valid_594004
-  var valid_594005 = path.getOrDefault("blueprintName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  if valid_575037 != nil:
+    section.add "artifactName", valid_575037
+  var valid_575038 = path.getOrDefault("blueprintName")
+  valid_575038 = validateParameter(valid_575038, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "blueprintName", valid_594005
-  var valid_594006 = path.getOrDefault("scope")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_575038 != nil:
+    section.add "blueprintName", valid_575038
+  var valid_575039 = path.getOrDefault("scope")
+  valid_575039 = validateParameter(valid_575039, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "scope", valid_594006
+  if valid_575039 != nil:
+    section.add "scope", valid_575039
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -781,11 +781,11 @@ proc validate_ArtifactsGet_594002(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594007 = query.getOrDefault("api-version")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  var valid_575040 = query.getOrDefault("api-version")
+  valid_575040 = validateParameter(valid_575040, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "api-version", valid_594007
+  if valid_575040 != nil:
+    section.add "api-version", valid_575040
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -794,20 +794,20 @@ proc validate_ArtifactsGet_594002(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594008: Call_ArtifactsGet_594001; path: JsonNode; query: JsonNode;
+proc call*(call_575041: Call_ArtifactsGet_575034; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a blueprint artifact.
   ## 
-  let valid = call_594008.validator(path, query, header, formData, body)
-  let scheme = call_594008.pickScheme
+  let valid = call_575041.validator(path, query, header, formData, body)
+  let scheme = call_575041.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594008.url(scheme.get, call_594008.host, call_594008.base,
-                         call_594008.route, valid.getOrDefault("path"),
+  let url = call_575041.url(scheme.get, call_575041.host, call_575041.base,
+                         call_575041.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594008, url, valid)
+  result = hook(call_575041, url, valid)
 
-proc call*(call_594009: Call_ArtifactsGet_594001; artifactName: string;
+proc call*(call_575042: Call_ArtifactsGet_575034; artifactName: string;
           apiVersion: string; blueprintName: string; scope: string): Recallable =
   ## artifactsGet
   ## Get a blueprint artifact.
@@ -819,21 +819,21 @@ proc call*(call_594009: Call_ArtifactsGet_594001; artifactName: string;
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_594010 = newJObject()
-  var query_594011 = newJObject()
-  add(path_594010, "artifactName", newJString(artifactName))
-  add(query_594011, "api-version", newJString(apiVersion))
-  add(path_594010, "blueprintName", newJString(blueprintName))
-  add(path_594010, "scope", newJString(scope))
-  result = call_594009.call(path_594010, query_594011, nil, nil, nil)
+  var path_575043 = newJObject()
+  var query_575044 = newJObject()
+  add(path_575043, "artifactName", newJString(artifactName))
+  add(query_575044, "api-version", newJString(apiVersion))
+  add(path_575043, "blueprintName", newJString(blueprintName))
+  add(path_575043, "scope", newJString(scope))
+  result = call_575042.call(path_575043, query_575044, nil, nil, nil)
 
-var artifactsGet* = Call_ArtifactsGet_594001(name: "artifactsGet",
+var artifactsGet* = Call_ArtifactsGet_575034(name: "artifactsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}/artifacts/{artifactName}",
-    validator: validate_ArtifactsGet_594002, base: "", url: url_ArtifactsGet_594003,
+    validator: validate_ArtifactsGet_575035, base: "", url: url_ArtifactsGet_575036,
     schemes: {Scheme.Https})
 type
-  Call_ArtifactsDelete_594025 = ref object of OpenApiRestCall_593425
-proc url_ArtifactsDelete_594027(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsDelete_575058 = ref object of OpenApiRestCall_574458
+proc url_ArtifactsDelete_575060(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -854,7 +854,7 @@ proc url_ArtifactsDelete_594027(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsDelete_594026(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsDelete_575059(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Delete a blueprint artifact.
@@ -871,21 +871,21 @@ proc validate_ArtifactsDelete_594026(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `artifactName` field"
-  var valid_594028 = path.getOrDefault("artifactName")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  var valid_575061 = path.getOrDefault("artifactName")
+  valid_575061 = validateParameter(valid_575061, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "artifactName", valid_594028
-  var valid_594029 = path.getOrDefault("blueprintName")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  if valid_575061 != nil:
+    section.add "artifactName", valid_575061
+  var valid_575062 = path.getOrDefault("blueprintName")
+  valid_575062 = validateParameter(valid_575062, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "blueprintName", valid_594029
-  var valid_594030 = path.getOrDefault("scope")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  if valid_575062 != nil:
+    section.add "blueprintName", valid_575062
+  var valid_575063 = path.getOrDefault("scope")
+  valid_575063 = validateParameter(valid_575063, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "scope", valid_594030
+  if valid_575063 != nil:
+    section.add "scope", valid_575063
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -893,11 +893,11 @@ proc validate_ArtifactsDelete_594026(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594031 = query.getOrDefault("api-version")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  var valid_575064 = query.getOrDefault("api-version")
+  valid_575064 = validateParameter(valid_575064, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "api-version", valid_594031
+  if valid_575064 != nil:
+    section.add "api-version", valid_575064
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -906,20 +906,20 @@ proc validate_ArtifactsDelete_594026(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594032: Call_ArtifactsDelete_594025; path: JsonNode; query: JsonNode;
+proc call*(call_575065: Call_ArtifactsDelete_575058; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a blueprint artifact.
   ## 
-  let valid = call_594032.validator(path, query, header, formData, body)
-  let scheme = call_594032.pickScheme
+  let valid = call_575065.validator(path, query, header, formData, body)
+  let scheme = call_575065.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594032.url(scheme.get, call_594032.host, call_594032.base,
-                         call_594032.route, valid.getOrDefault("path"),
+  let url = call_575065.url(scheme.get, call_575065.host, call_575065.base,
+                         call_575065.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594032, url, valid)
+  result = hook(call_575065, url, valid)
 
-proc call*(call_594033: Call_ArtifactsDelete_594025; artifactName: string;
+proc call*(call_575066: Call_ArtifactsDelete_575058; artifactName: string;
           apiVersion: string; blueprintName: string; scope: string): Recallable =
   ## artifactsDelete
   ## Delete a blueprint artifact.
@@ -931,21 +931,21 @@ proc call*(call_594033: Call_ArtifactsDelete_594025; artifactName: string;
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_594034 = newJObject()
-  var query_594035 = newJObject()
-  add(path_594034, "artifactName", newJString(artifactName))
-  add(query_594035, "api-version", newJString(apiVersion))
-  add(path_594034, "blueprintName", newJString(blueprintName))
-  add(path_594034, "scope", newJString(scope))
-  result = call_594033.call(path_594034, query_594035, nil, nil, nil)
+  var path_575067 = newJObject()
+  var query_575068 = newJObject()
+  add(path_575067, "artifactName", newJString(artifactName))
+  add(query_575068, "api-version", newJString(apiVersion))
+  add(path_575067, "blueprintName", newJString(blueprintName))
+  add(path_575067, "scope", newJString(scope))
+  result = call_575066.call(path_575067, query_575068, nil, nil, nil)
 
-var artifactsDelete* = Call_ArtifactsDelete_594025(name: "artifactsDelete",
+var artifactsDelete* = Call_ArtifactsDelete_575058(name: "artifactsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}/artifacts/{artifactName}",
-    validator: validate_ArtifactsDelete_594026, base: "", url: url_ArtifactsDelete_594027,
+    validator: validate_ArtifactsDelete_575059, base: "", url: url_ArtifactsDelete_575060,
     schemes: {Scheme.Https})
 type
-  Call_PublishedBlueprintsList_594036 = ref object of OpenApiRestCall_593425
-proc url_PublishedBlueprintsList_594038(protocol: Scheme; host: string; base: string;
+  Call_PublishedBlueprintsList_575069 = ref object of OpenApiRestCall_574458
+proc url_PublishedBlueprintsList_575071(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -965,7 +965,7 @@ proc url_PublishedBlueprintsList_594038(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublishedBlueprintsList_594037(path: JsonNode; query: JsonNode;
+proc validate_PublishedBlueprintsList_575070(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List published versions of given blueprint definition.
   ## 
@@ -979,16 +979,16 @@ proc validate_PublishedBlueprintsList_594037(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `blueprintName` field"
-  var valid_594039 = path.getOrDefault("blueprintName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  var valid_575072 = path.getOrDefault("blueprintName")
+  valid_575072 = validateParameter(valid_575072, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "blueprintName", valid_594039
-  var valid_594040 = path.getOrDefault("scope")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_575072 != nil:
+    section.add "blueprintName", valid_575072
+  var valid_575073 = path.getOrDefault("scope")
+  valid_575073 = validateParameter(valid_575073, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "scope", valid_594040
+  if valid_575073 != nil:
+    section.add "scope", valid_575073
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -996,11 +996,11 @@ proc validate_PublishedBlueprintsList_594037(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594041 = query.getOrDefault("api-version")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_575074 = query.getOrDefault("api-version")
+  valid_575074 = validateParameter(valid_575074, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "api-version", valid_594041
+  if valid_575074 != nil:
+    section.add "api-version", valid_575074
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1009,20 +1009,20 @@ proc validate_PublishedBlueprintsList_594037(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594042: Call_PublishedBlueprintsList_594036; path: JsonNode;
+proc call*(call_575075: Call_PublishedBlueprintsList_575069; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List published versions of given blueprint definition.
   ## 
-  let valid = call_594042.validator(path, query, header, formData, body)
-  let scheme = call_594042.pickScheme
+  let valid = call_575075.validator(path, query, header, formData, body)
+  let scheme = call_575075.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594042.url(scheme.get, call_594042.host, call_594042.base,
-                         call_594042.route, valid.getOrDefault("path"),
+  let url = call_575075.url(scheme.get, call_575075.host, call_575075.base,
+                         call_575075.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594042, url, valid)
+  result = hook(call_575075, url, valid)
 
-proc call*(call_594043: Call_PublishedBlueprintsList_594036; apiVersion: string;
+proc call*(call_575076: Call_PublishedBlueprintsList_575069; apiVersion: string;
           blueprintName: string; scope: string): Recallable =
   ## publishedBlueprintsList
   ## List published versions of given blueprint definition.
@@ -1032,21 +1032,21 @@ proc call*(call_594043: Call_PublishedBlueprintsList_594036; apiVersion: string;
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_594044 = newJObject()
-  var query_594045 = newJObject()
-  add(query_594045, "api-version", newJString(apiVersion))
-  add(path_594044, "blueprintName", newJString(blueprintName))
-  add(path_594044, "scope", newJString(scope))
-  result = call_594043.call(path_594044, query_594045, nil, nil, nil)
+  var path_575077 = newJObject()
+  var query_575078 = newJObject()
+  add(query_575078, "api-version", newJString(apiVersion))
+  add(path_575077, "blueprintName", newJString(blueprintName))
+  add(path_575077, "scope", newJString(scope))
+  result = call_575076.call(path_575077, query_575078, nil, nil, nil)
 
-var publishedBlueprintsList* = Call_PublishedBlueprintsList_594036(
+var publishedBlueprintsList* = Call_PublishedBlueprintsList_575069(
     name: "publishedBlueprintsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}/versions",
-    validator: validate_PublishedBlueprintsList_594037, base: "",
-    url: url_PublishedBlueprintsList_594038, schemes: {Scheme.Https})
+    validator: validate_PublishedBlueprintsList_575070, base: "",
+    url: url_PublishedBlueprintsList_575071, schemes: {Scheme.Https})
 type
-  Call_PublishedBlueprintsCreate_594057 = ref object of OpenApiRestCall_593425
-proc url_PublishedBlueprintsCreate_594059(protocol: Scheme; host: string;
+  Call_PublishedBlueprintsCreate_575090 = ref object of OpenApiRestCall_574458
+proc url_PublishedBlueprintsCreate_575092(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1067,7 +1067,7 @@ proc url_PublishedBlueprintsCreate_594059(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublishedBlueprintsCreate_594058(path: JsonNode; query: JsonNode;
+proc validate_PublishedBlueprintsCreate_575091(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Publish a new version of the blueprint definition with the latest artifacts. Published blueprint definitions are immutable.
   ## 
@@ -1082,21 +1082,21 @@ proc validate_PublishedBlueprintsCreate_594058(path: JsonNode; query: JsonNode;
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `versionId` field"
-  var valid_594060 = path.getOrDefault("versionId")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  var valid_575093 = path.getOrDefault("versionId")
+  valid_575093 = validateParameter(valid_575093, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "versionId", valid_594060
-  var valid_594061 = path.getOrDefault("blueprintName")
-  valid_594061 = validateParameter(valid_594061, JString, required = true,
+  if valid_575093 != nil:
+    section.add "versionId", valid_575093
+  var valid_575094 = path.getOrDefault("blueprintName")
+  valid_575094 = validateParameter(valid_575094, JString, required = true,
                                  default = nil)
-  if valid_594061 != nil:
-    section.add "blueprintName", valid_594061
-  var valid_594062 = path.getOrDefault("scope")
-  valid_594062 = validateParameter(valid_594062, JString, required = true,
+  if valid_575094 != nil:
+    section.add "blueprintName", valid_575094
+  var valid_575095 = path.getOrDefault("scope")
+  valid_575095 = validateParameter(valid_575095, JString, required = true,
                                  default = nil)
-  if valid_594062 != nil:
-    section.add "scope", valid_594062
+  if valid_575095 != nil:
+    section.add "scope", valid_575095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1104,11 +1104,11 @@ proc validate_PublishedBlueprintsCreate_594058(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594063 = query.getOrDefault("api-version")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  var valid_575096 = query.getOrDefault("api-version")
+  valid_575096 = validateParameter(valid_575096, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "api-version", valid_594063
+  if valid_575096 != nil:
+    section.add "api-version", valid_575096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1121,20 +1121,20 @@ proc validate_PublishedBlueprintsCreate_594058(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594065: Call_PublishedBlueprintsCreate_594057; path: JsonNode;
+proc call*(call_575098: Call_PublishedBlueprintsCreate_575090; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Publish a new version of the blueprint definition with the latest artifacts. Published blueprint definitions are immutable.
   ## 
-  let valid = call_594065.validator(path, query, header, formData, body)
-  let scheme = call_594065.pickScheme
+  let valid = call_575098.validator(path, query, header, formData, body)
+  let scheme = call_575098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594065.url(scheme.get, call_594065.host, call_594065.base,
-                         call_594065.route, valid.getOrDefault("path"),
+  let url = call_575098.url(scheme.get, call_575098.host, call_575098.base,
+                         call_575098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594065, url, valid)
+  result = hook(call_575098, url, valid)
 
-proc call*(call_594066: Call_PublishedBlueprintsCreate_594057; versionId: string;
+proc call*(call_575099: Call_PublishedBlueprintsCreate_575090; versionId: string;
           apiVersion: string; blueprintName: string; scope: string;
           publishedBlueprint: JsonNode = nil): Recallable =
   ## publishedBlueprintsCreate
@@ -1149,25 +1149,25 @@ proc call*(call_594066: Call_PublishedBlueprintsCreate_594057; versionId: string
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_594067 = newJObject()
-  var query_594068 = newJObject()
-  var body_594069 = newJObject()
-  add(path_594067, "versionId", newJString(versionId))
-  add(query_594068, "api-version", newJString(apiVersion))
+  var path_575100 = newJObject()
+  var query_575101 = newJObject()
+  var body_575102 = newJObject()
+  add(path_575100, "versionId", newJString(versionId))
+  add(query_575101, "api-version", newJString(apiVersion))
   if publishedBlueprint != nil:
-    body_594069 = publishedBlueprint
-  add(path_594067, "blueprintName", newJString(blueprintName))
-  add(path_594067, "scope", newJString(scope))
-  result = call_594066.call(path_594067, query_594068, nil, nil, body_594069)
+    body_575102 = publishedBlueprint
+  add(path_575100, "blueprintName", newJString(blueprintName))
+  add(path_575100, "scope", newJString(scope))
+  result = call_575099.call(path_575100, query_575101, nil, nil, body_575102)
 
-var publishedBlueprintsCreate* = Call_PublishedBlueprintsCreate_594057(
+var publishedBlueprintsCreate* = Call_PublishedBlueprintsCreate_575090(
     name: "publishedBlueprintsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}/versions/{versionId}",
-    validator: validate_PublishedBlueprintsCreate_594058, base: "",
-    url: url_PublishedBlueprintsCreate_594059, schemes: {Scheme.Https})
+    validator: validate_PublishedBlueprintsCreate_575091, base: "",
+    url: url_PublishedBlueprintsCreate_575092, schemes: {Scheme.Https})
 type
-  Call_PublishedBlueprintsGet_594046 = ref object of OpenApiRestCall_593425
-proc url_PublishedBlueprintsGet_594048(protocol: Scheme; host: string; base: string;
+  Call_PublishedBlueprintsGet_575079 = ref object of OpenApiRestCall_574458
+proc url_PublishedBlueprintsGet_575081(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1188,7 +1188,7 @@ proc url_PublishedBlueprintsGet_594048(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublishedBlueprintsGet_594047(path: JsonNode; query: JsonNode;
+proc validate_PublishedBlueprintsGet_575080(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a published version of a blueprint definition.
   ## 
@@ -1203,21 +1203,21 @@ proc validate_PublishedBlueprintsGet_594047(path: JsonNode; query: JsonNode;
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `versionId` field"
-  var valid_594049 = path.getOrDefault("versionId")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  var valid_575082 = path.getOrDefault("versionId")
+  valid_575082 = validateParameter(valid_575082, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "versionId", valid_594049
-  var valid_594050 = path.getOrDefault("blueprintName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  if valid_575082 != nil:
+    section.add "versionId", valid_575082
+  var valid_575083 = path.getOrDefault("blueprintName")
+  valid_575083 = validateParameter(valid_575083, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "blueprintName", valid_594050
-  var valid_594051 = path.getOrDefault("scope")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_575083 != nil:
+    section.add "blueprintName", valid_575083
+  var valid_575084 = path.getOrDefault("scope")
+  valid_575084 = validateParameter(valid_575084, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "scope", valid_594051
+  if valid_575084 != nil:
+    section.add "scope", valid_575084
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1225,11 +1225,11 @@ proc validate_PublishedBlueprintsGet_594047(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594052 = query.getOrDefault("api-version")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  var valid_575085 = query.getOrDefault("api-version")
+  valid_575085 = validateParameter(valid_575085, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "api-version", valid_594052
+  if valid_575085 != nil:
+    section.add "api-version", valid_575085
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1238,20 +1238,20 @@ proc validate_PublishedBlueprintsGet_594047(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594053: Call_PublishedBlueprintsGet_594046; path: JsonNode;
+proc call*(call_575086: Call_PublishedBlueprintsGet_575079; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a published version of a blueprint definition.
   ## 
-  let valid = call_594053.validator(path, query, header, formData, body)
-  let scheme = call_594053.pickScheme
+  let valid = call_575086.validator(path, query, header, formData, body)
+  let scheme = call_575086.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594053.url(scheme.get, call_594053.host, call_594053.base,
-                         call_594053.route, valid.getOrDefault("path"),
+  let url = call_575086.url(scheme.get, call_575086.host, call_575086.base,
+                         call_575086.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594053, url, valid)
+  result = hook(call_575086, url, valid)
 
-proc call*(call_594054: Call_PublishedBlueprintsGet_594046; versionId: string;
+proc call*(call_575087: Call_PublishedBlueprintsGet_575079; versionId: string;
           apiVersion: string; blueprintName: string; scope: string): Recallable =
   ## publishedBlueprintsGet
   ## Get a published version of a blueprint definition.
@@ -1263,22 +1263,22 @@ proc call*(call_594054: Call_PublishedBlueprintsGet_594046; versionId: string;
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_594055 = newJObject()
-  var query_594056 = newJObject()
-  add(path_594055, "versionId", newJString(versionId))
-  add(query_594056, "api-version", newJString(apiVersion))
-  add(path_594055, "blueprintName", newJString(blueprintName))
-  add(path_594055, "scope", newJString(scope))
-  result = call_594054.call(path_594055, query_594056, nil, nil, nil)
+  var path_575088 = newJObject()
+  var query_575089 = newJObject()
+  add(path_575088, "versionId", newJString(versionId))
+  add(query_575089, "api-version", newJString(apiVersion))
+  add(path_575088, "blueprintName", newJString(blueprintName))
+  add(path_575088, "scope", newJString(scope))
+  result = call_575087.call(path_575088, query_575089, nil, nil, nil)
 
-var publishedBlueprintsGet* = Call_PublishedBlueprintsGet_594046(
+var publishedBlueprintsGet* = Call_PublishedBlueprintsGet_575079(
     name: "publishedBlueprintsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}/versions/{versionId}",
-    validator: validate_PublishedBlueprintsGet_594047, base: "",
-    url: url_PublishedBlueprintsGet_594048, schemes: {Scheme.Https})
+    validator: validate_PublishedBlueprintsGet_575080, base: "",
+    url: url_PublishedBlueprintsGet_575081, schemes: {Scheme.Https})
 type
-  Call_PublishedBlueprintsDelete_594070 = ref object of OpenApiRestCall_593425
-proc url_PublishedBlueprintsDelete_594072(protocol: Scheme; host: string;
+  Call_PublishedBlueprintsDelete_575103 = ref object of OpenApiRestCall_574458
+proc url_PublishedBlueprintsDelete_575105(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1299,7 +1299,7 @@ proc url_PublishedBlueprintsDelete_594072(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublishedBlueprintsDelete_594071(path: JsonNode; query: JsonNode;
+proc validate_PublishedBlueprintsDelete_575104(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a published version of a blueprint definition.
   ## 
@@ -1314,21 +1314,21 @@ proc validate_PublishedBlueprintsDelete_594071(path: JsonNode; query: JsonNode;
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `versionId` field"
-  var valid_594073 = path.getOrDefault("versionId")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  var valid_575106 = path.getOrDefault("versionId")
+  valid_575106 = validateParameter(valid_575106, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "versionId", valid_594073
-  var valid_594074 = path.getOrDefault("blueprintName")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_575106 != nil:
+    section.add "versionId", valid_575106
+  var valid_575107 = path.getOrDefault("blueprintName")
+  valid_575107 = validateParameter(valid_575107, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "blueprintName", valid_594074
-  var valid_594075 = path.getOrDefault("scope")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  if valid_575107 != nil:
+    section.add "blueprintName", valid_575107
+  var valid_575108 = path.getOrDefault("scope")
+  valid_575108 = validateParameter(valid_575108, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "scope", valid_594075
+  if valid_575108 != nil:
+    section.add "scope", valid_575108
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1336,11 +1336,11 @@ proc validate_PublishedBlueprintsDelete_594071(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594076 = query.getOrDefault("api-version")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  var valid_575109 = query.getOrDefault("api-version")
+  valid_575109 = validateParameter(valid_575109, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "api-version", valid_594076
+  if valid_575109 != nil:
+    section.add "api-version", valid_575109
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1349,20 +1349,20 @@ proc validate_PublishedBlueprintsDelete_594071(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594077: Call_PublishedBlueprintsDelete_594070; path: JsonNode;
+proc call*(call_575110: Call_PublishedBlueprintsDelete_575103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a published version of a blueprint definition.
   ## 
-  let valid = call_594077.validator(path, query, header, formData, body)
-  let scheme = call_594077.pickScheme
+  let valid = call_575110.validator(path, query, header, formData, body)
+  let scheme = call_575110.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594077.url(scheme.get, call_594077.host, call_594077.base,
-                         call_594077.route, valid.getOrDefault("path"),
+  let url = call_575110.url(scheme.get, call_575110.host, call_575110.base,
+                         call_575110.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594077, url, valid)
+  result = hook(call_575110, url, valid)
 
-proc call*(call_594078: Call_PublishedBlueprintsDelete_594070; versionId: string;
+proc call*(call_575111: Call_PublishedBlueprintsDelete_575103; versionId: string;
           apiVersion: string; blueprintName: string; scope: string): Recallable =
   ## publishedBlueprintsDelete
   ## Delete a published version of a blueprint definition.
@@ -1374,22 +1374,22 @@ proc call*(call_594078: Call_PublishedBlueprintsDelete_594070; versionId: string
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_594079 = newJObject()
-  var query_594080 = newJObject()
-  add(path_594079, "versionId", newJString(versionId))
-  add(query_594080, "api-version", newJString(apiVersion))
-  add(path_594079, "blueprintName", newJString(blueprintName))
-  add(path_594079, "scope", newJString(scope))
-  result = call_594078.call(path_594079, query_594080, nil, nil, nil)
+  var path_575112 = newJObject()
+  var query_575113 = newJObject()
+  add(path_575112, "versionId", newJString(versionId))
+  add(query_575113, "api-version", newJString(apiVersion))
+  add(path_575112, "blueprintName", newJString(blueprintName))
+  add(path_575112, "scope", newJString(scope))
+  result = call_575111.call(path_575112, query_575113, nil, nil, nil)
 
-var publishedBlueprintsDelete* = Call_PublishedBlueprintsDelete_594070(
+var publishedBlueprintsDelete* = Call_PublishedBlueprintsDelete_575103(
     name: "publishedBlueprintsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}/versions/{versionId}",
-    validator: validate_PublishedBlueprintsDelete_594071, base: "",
-    url: url_PublishedBlueprintsDelete_594072, schemes: {Scheme.Https})
+    validator: validate_PublishedBlueprintsDelete_575104, base: "",
+    url: url_PublishedBlueprintsDelete_575105, schemes: {Scheme.Https})
 type
-  Call_PublishedArtifactsList_594081 = ref object of OpenApiRestCall_593425
-proc url_PublishedArtifactsList_594083(protocol: Scheme; host: string; base: string;
+  Call_PublishedArtifactsList_575114 = ref object of OpenApiRestCall_574458
+proc url_PublishedArtifactsList_575116(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1411,7 +1411,7 @@ proc url_PublishedArtifactsList_594083(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublishedArtifactsList_594082(path: JsonNode; query: JsonNode;
+proc validate_PublishedArtifactsList_575115(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List artifacts for a version of a published blueprint definition.
   ## 
@@ -1426,21 +1426,21 @@ proc validate_PublishedArtifactsList_594082(path: JsonNode; query: JsonNode;
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `versionId` field"
-  var valid_594084 = path.getOrDefault("versionId")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  var valid_575117 = path.getOrDefault("versionId")
+  valid_575117 = validateParameter(valid_575117, JString, required = true,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "versionId", valid_594084
-  var valid_594085 = path.getOrDefault("blueprintName")
-  valid_594085 = validateParameter(valid_594085, JString, required = true,
+  if valid_575117 != nil:
+    section.add "versionId", valid_575117
+  var valid_575118 = path.getOrDefault("blueprintName")
+  valid_575118 = validateParameter(valid_575118, JString, required = true,
                                  default = nil)
-  if valid_594085 != nil:
-    section.add "blueprintName", valid_594085
-  var valid_594086 = path.getOrDefault("scope")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  if valid_575118 != nil:
+    section.add "blueprintName", valid_575118
+  var valid_575119 = path.getOrDefault("scope")
+  valid_575119 = validateParameter(valid_575119, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "scope", valid_594086
+  if valid_575119 != nil:
+    section.add "scope", valid_575119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1448,11 +1448,11 @@ proc validate_PublishedArtifactsList_594082(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594087 = query.getOrDefault("api-version")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  var valid_575120 = query.getOrDefault("api-version")
+  valid_575120 = validateParameter(valid_575120, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "api-version", valid_594087
+  if valid_575120 != nil:
+    section.add "api-version", valid_575120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1461,20 +1461,20 @@ proc validate_PublishedArtifactsList_594082(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594088: Call_PublishedArtifactsList_594081; path: JsonNode;
+proc call*(call_575121: Call_PublishedArtifactsList_575114; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List artifacts for a version of a published blueprint definition.
   ## 
-  let valid = call_594088.validator(path, query, header, formData, body)
-  let scheme = call_594088.pickScheme
+  let valid = call_575121.validator(path, query, header, formData, body)
+  let scheme = call_575121.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594088.url(scheme.get, call_594088.host, call_594088.base,
-                         call_594088.route, valid.getOrDefault("path"),
+  let url = call_575121.url(scheme.get, call_575121.host, call_575121.base,
+                         call_575121.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594088, url, valid)
+  result = hook(call_575121, url, valid)
 
-proc call*(call_594089: Call_PublishedArtifactsList_594081; versionId: string;
+proc call*(call_575122: Call_PublishedArtifactsList_575114; versionId: string;
           apiVersion: string; blueprintName: string; scope: string): Recallable =
   ## publishedArtifactsList
   ## List artifacts for a version of a published blueprint definition.
@@ -1486,22 +1486,22 @@ proc call*(call_594089: Call_PublishedArtifactsList_594081; versionId: string;
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_594090 = newJObject()
-  var query_594091 = newJObject()
-  add(path_594090, "versionId", newJString(versionId))
-  add(query_594091, "api-version", newJString(apiVersion))
-  add(path_594090, "blueprintName", newJString(blueprintName))
-  add(path_594090, "scope", newJString(scope))
-  result = call_594089.call(path_594090, query_594091, nil, nil, nil)
+  var path_575123 = newJObject()
+  var query_575124 = newJObject()
+  add(path_575123, "versionId", newJString(versionId))
+  add(query_575124, "api-version", newJString(apiVersion))
+  add(path_575123, "blueprintName", newJString(blueprintName))
+  add(path_575123, "scope", newJString(scope))
+  result = call_575122.call(path_575123, query_575124, nil, nil, nil)
 
-var publishedArtifactsList* = Call_PublishedArtifactsList_594081(
+var publishedArtifactsList* = Call_PublishedArtifactsList_575114(
     name: "publishedArtifactsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}/versions/{versionId}/artifacts",
-    validator: validate_PublishedArtifactsList_594082, base: "",
-    url: url_PublishedArtifactsList_594083, schemes: {Scheme.Https})
+    validator: validate_PublishedArtifactsList_575115, base: "",
+    url: url_PublishedArtifactsList_575116, schemes: {Scheme.Https})
 type
-  Call_PublishedArtifactsGet_594092 = ref object of OpenApiRestCall_593425
-proc url_PublishedArtifactsGet_594094(protocol: Scheme; host: string; base: string;
+  Call_PublishedArtifactsGet_575125 = ref object of OpenApiRestCall_574458
+proc url_PublishedArtifactsGet_575127(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1525,7 +1525,7 @@ proc url_PublishedArtifactsGet_594094(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublishedArtifactsGet_594093(path: JsonNode; query: JsonNode;
+proc validate_PublishedArtifactsGet_575126(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get an artifact for a published blueprint definition.
   ## 
@@ -1543,26 +1543,26 @@ proc validate_PublishedArtifactsGet_594093(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `artifactName` field"
-  var valid_594095 = path.getOrDefault("artifactName")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  var valid_575128 = path.getOrDefault("artifactName")
+  valid_575128 = validateParameter(valid_575128, JString, required = true,
                                  default = nil)
-  if valid_594095 != nil:
-    section.add "artifactName", valid_594095
-  var valid_594096 = path.getOrDefault("versionId")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
+  if valid_575128 != nil:
+    section.add "artifactName", valid_575128
+  var valid_575129 = path.getOrDefault("versionId")
+  valid_575129 = validateParameter(valid_575129, JString, required = true,
                                  default = nil)
-  if valid_594096 != nil:
-    section.add "versionId", valid_594096
-  var valid_594097 = path.getOrDefault("blueprintName")
-  valid_594097 = validateParameter(valid_594097, JString, required = true,
+  if valid_575129 != nil:
+    section.add "versionId", valid_575129
+  var valid_575130 = path.getOrDefault("blueprintName")
+  valid_575130 = validateParameter(valid_575130, JString, required = true,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "blueprintName", valid_594097
-  var valid_594098 = path.getOrDefault("scope")
-  valid_594098 = validateParameter(valid_594098, JString, required = true,
+  if valid_575130 != nil:
+    section.add "blueprintName", valid_575130
+  var valid_575131 = path.getOrDefault("scope")
+  valid_575131 = validateParameter(valid_575131, JString, required = true,
                                  default = nil)
-  if valid_594098 != nil:
-    section.add "scope", valid_594098
+  if valid_575131 != nil:
+    section.add "scope", valid_575131
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1570,11 +1570,11 @@ proc validate_PublishedArtifactsGet_594093(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594099 = query.getOrDefault("api-version")
-  valid_594099 = validateParameter(valid_594099, JString, required = true,
+  var valid_575132 = query.getOrDefault("api-version")
+  valid_575132 = validateParameter(valid_575132, JString, required = true,
                                  default = nil)
-  if valid_594099 != nil:
-    section.add "api-version", valid_594099
+  if valid_575132 != nil:
+    section.add "api-version", valid_575132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1583,20 +1583,20 @@ proc validate_PublishedArtifactsGet_594093(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594100: Call_PublishedArtifactsGet_594092; path: JsonNode;
+proc call*(call_575133: Call_PublishedArtifactsGet_575125; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get an artifact for a published blueprint definition.
   ## 
-  let valid = call_594100.validator(path, query, header, formData, body)
-  let scheme = call_594100.pickScheme
+  let valid = call_575133.validator(path, query, header, formData, body)
+  let scheme = call_575133.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594100.url(scheme.get, call_594100.host, call_594100.base,
-                         call_594100.route, valid.getOrDefault("path"),
+  let url = call_575133.url(scheme.get, call_575133.host, call_575133.base,
+                         call_575133.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594100, url, valid)
+  result = hook(call_575133, url, valid)
 
-proc call*(call_594101: Call_PublishedArtifactsGet_594092; artifactName: string;
+proc call*(call_575134: Call_PublishedArtifactsGet_575125; artifactName: string;
           versionId: string; apiVersion: string; blueprintName: string; scope: string): Recallable =
   ## publishedArtifactsGet
   ## Get an artifact for a published blueprint definition.
@@ -1610,20 +1610,20 @@ proc call*(call_594101: Call_PublishedArtifactsGet_594092; artifactName: string;
   ##                : Name of the blueprint definition.
   ##   scope: string (required)
   ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
-  var path_594102 = newJObject()
-  var query_594103 = newJObject()
-  add(path_594102, "artifactName", newJString(artifactName))
-  add(path_594102, "versionId", newJString(versionId))
-  add(query_594103, "api-version", newJString(apiVersion))
-  add(path_594102, "blueprintName", newJString(blueprintName))
-  add(path_594102, "scope", newJString(scope))
-  result = call_594101.call(path_594102, query_594103, nil, nil, nil)
+  var path_575135 = newJObject()
+  var query_575136 = newJObject()
+  add(path_575135, "artifactName", newJString(artifactName))
+  add(path_575135, "versionId", newJString(versionId))
+  add(query_575136, "api-version", newJString(apiVersion))
+  add(path_575135, "blueprintName", newJString(blueprintName))
+  add(path_575135, "scope", newJString(scope))
+  result = call_575134.call(path_575135, query_575136, nil, nil, nil)
 
-var publishedArtifactsGet* = Call_PublishedArtifactsGet_594092(
+var publishedArtifactsGet* = Call_PublishedArtifactsGet_575125(
     name: "publishedArtifactsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprints/{blueprintName}/versions/{versionId}/artifacts/{artifactName}",
-    validator: validate_PublishedArtifactsGet_594093, base: "",
-    url: url_PublishedArtifactsGet_594094, schemes: {Scheme.Https})
+    validator: validate_PublishedArtifactsGet_575126, base: "",
+    url: url_PublishedArtifactsGet_575127, schemes: {Scheme.Https})
 export
   rest
 

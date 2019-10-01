@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: CommerceManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_582441 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_582441](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_582441): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "azsadmin-Commerce"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593630 = ref object of OpenApiRestCall_593408
-proc url_OperationsList_593632(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_582663 = ref object of OpenApiRestCall_582441
+proc url_OperationsList_582665(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593631(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_582664(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Returns the list of supported REST operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593631(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593804 = query.getOrDefault("api-version")
-  valid_593804 = validateParameter(valid_593804, JString, required = true,
+  var valid_582837 = query.getOrDefault("api-version")
+  valid_582837 = validateParameter(valid_582837, JString, required = true,
                                  default = newJString("2015-06-01-preview"))
-  if valid_593804 != nil:
-    section.add "api-version", valid_593804
+  if valid_582837 != nil:
+    section.add "api-version", valid_582837
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,37 +139,37 @@ proc validate_OperationsList_593631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593827: Call_OperationsList_593630; path: JsonNode; query: JsonNode;
+proc call*(call_582860: Call_OperationsList_582663; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of supported REST operations.
   ## 
-  let valid = call_593827.validator(path, query, header, formData, body)
-  let scheme = call_593827.pickScheme
+  let valid = call_582860.validator(path, query, header, formData, body)
+  let scheme = call_582860.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593827.url(scheme.get, call_593827.host, call_593827.base,
-                         call_593827.route, valid.getOrDefault("path"),
+  let url = call_582860.url(scheme.get, call_582860.host, call_582860.base,
+                         call_582860.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593827, url, valid)
+  result = hook(call_582860, url, valid)
 
-proc call*(call_593898: Call_OperationsList_593630;
+proc call*(call_582931: Call_OperationsList_582663;
           apiVersion: string = "2015-06-01-preview"): Recallable =
   ## operationsList
   ## Returns the list of supported REST operations.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var query_593899 = newJObject()
-  add(query_593899, "api-version", newJString(apiVersion))
-  result = call_593898.call(nil, query_593899, nil, nil, nil)
+  var query_582932 = newJObject()
+  add(query_582932, "api-version", newJString(apiVersion))
+  result = call_582931.call(nil, query_582932, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593630(name: "operationsList",
+var operationsList* = Call_OperationsList_582663(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external",
     route: "/providers/Microsoft.Commerce.Admin/operations",
-    validator: validate_OperationsList_593631, base: "", url: url_OperationsList_593632,
+    validator: validate_OperationsList_582664, base: "", url: url_OperationsList_582665,
     schemes: {Scheme.Https})
 type
-  Call_SubscriberUsageAggregatesList_593939 = ref object of OpenApiRestCall_593408
-proc url_SubscriberUsageAggregatesList_593941(protocol: Scheme; host: string;
+  Call_SubscriberUsageAggregatesList_582972 = ref object of OpenApiRestCall_582441
+proc url_SubscriberUsageAggregatesList_582974(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -186,7 +186,7 @@ proc url_SubscriberUsageAggregatesList_593941(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriberUsageAggregatesList_593940(path: JsonNode; query: JsonNode;
+proc validate_SubscriberUsageAggregatesList_582973(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a collection of SubscriberUsageAggregates, which are UsageAggregates from users.
   ## 
@@ -198,11 +198,11 @@ proc validate_SubscriberUsageAggregatesList_593940(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593956 = path.getOrDefault("subscriptionId")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  var valid_582989 = path.getOrDefault("subscriptionId")
+  valid_582989 = validateParameter(valid_582989, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "subscriptionId", valid_593956
+  if valid_582989 != nil:
+    section.add "subscriptionId", valid_582989
   result.add "path", section
   ## parameters in `query` object:
   ##   subscriberId: JString
@@ -218,38 +218,38 @@ proc validate_SubscriberUsageAggregatesList_593940(path: JsonNode; query: JsonNo
   ##   aggregationGranularity: JString
   ##                         : The aggregation granularity.
   section = newJObject()
-  var valid_593957 = query.getOrDefault("subscriberId")
-  valid_593957 = validateParameter(valid_593957, JString, required = false,
+  var valid_582990 = query.getOrDefault("subscriberId")
+  valid_582990 = validateParameter(valid_582990, JString, required = false,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "subscriberId", valid_593957
+  if valid_582990 != nil:
+    section.add "subscriberId", valid_582990
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593958 = query.getOrDefault("api-version")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  var valid_582991 = query.getOrDefault("api-version")
+  valid_582991 = validateParameter(valid_582991, JString, required = true,
                                  default = newJString("2015-06-01-preview"))
-  if valid_593958 != nil:
-    section.add "api-version", valid_593958
-  var valid_593959 = query.getOrDefault("reportedStartTime")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_582991 != nil:
+    section.add "api-version", valid_582991
+  var valid_582992 = query.getOrDefault("reportedStartTime")
+  valid_582992 = validateParameter(valid_582992, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "reportedStartTime", valid_593959
-  var valid_593960 = query.getOrDefault("reportedEndTime")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  if valid_582992 != nil:
+    section.add "reportedStartTime", valid_582992
+  var valid_582993 = query.getOrDefault("reportedEndTime")
+  valid_582993 = validateParameter(valid_582993, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "reportedEndTime", valid_593960
-  var valid_593961 = query.getOrDefault("continuationToken")
-  valid_593961 = validateParameter(valid_593961, JString, required = false,
+  if valid_582993 != nil:
+    section.add "reportedEndTime", valid_582993
+  var valid_582994 = query.getOrDefault("continuationToken")
+  valid_582994 = validateParameter(valid_582994, JString, required = false,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "continuationToken", valid_593961
-  var valid_593962 = query.getOrDefault("aggregationGranularity")
-  valid_593962 = validateParameter(valid_593962, JString, required = false,
+  if valid_582994 != nil:
+    section.add "continuationToken", valid_582994
+  var valid_582995 = query.getOrDefault("aggregationGranularity")
+  valid_582995 = validateParameter(valid_582995, JString, required = false,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "aggregationGranularity", valid_593962
+  if valid_582995 != nil:
+    section.add "aggregationGranularity", valid_582995
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -258,20 +258,20 @@ proc validate_SubscriberUsageAggregatesList_593940(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593963: Call_SubscriberUsageAggregatesList_593939; path: JsonNode;
+proc call*(call_582996: Call_SubscriberUsageAggregatesList_582972; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a collection of SubscriberUsageAggregates, which are UsageAggregates from users.
   ## 
-  let valid = call_593963.validator(path, query, header, formData, body)
-  let scheme = call_593963.pickScheme
+  let valid = call_582996.validator(path, query, header, formData, body)
+  let scheme = call_582996.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593963.url(scheme.get, call_593963.host, call_593963.base,
-                         call_593963.route, valid.getOrDefault("path"),
+  let url = call_582996.url(scheme.get, call_582996.host, call_582996.base,
+                         call_582996.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593963, url, valid)
+  result = hook(call_582996, url, valid)
 
-proc call*(call_593964: Call_SubscriberUsageAggregatesList_593939;
+proc call*(call_582997: Call_SubscriberUsageAggregatesList_582972;
           subscriptionId: string; reportedStartTime: string;
           reportedEndTime: string; subscriberId: string = "";
           apiVersion: string = "2015-06-01-preview"; continuationToken: string = "";
@@ -292,25 +292,25 @@ proc call*(call_593964: Call_SubscriberUsageAggregatesList_593939;
   ##                    : The continuation token.
   ##   aggregationGranularity: string
   ##                         : The aggregation granularity.
-  var path_593965 = newJObject()
-  var query_593966 = newJObject()
-  add(query_593966, "subscriberId", newJString(subscriberId))
-  add(query_593966, "api-version", newJString(apiVersion))
-  add(path_593965, "subscriptionId", newJString(subscriptionId))
-  add(query_593966, "reportedStartTime", newJString(reportedStartTime))
-  add(query_593966, "reportedEndTime", newJString(reportedEndTime))
-  add(query_593966, "continuationToken", newJString(continuationToken))
-  add(query_593966, "aggregationGranularity", newJString(aggregationGranularity))
-  result = call_593964.call(path_593965, query_593966, nil, nil, nil)
+  var path_582998 = newJObject()
+  var query_582999 = newJObject()
+  add(query_582999, "subscriberId", newJString(subscriberId))
+  add(query_582999, "api-version", newJString(apiVersion))
+  add(path_582998, "subscriptionId", newJString(subscriptionId))
+  add(query_582999, "reportedStartTime", newJString(reportedStartTime))
+  add(query_582999, "reportedEndTime", newJString(reportedEndTime))
+  add(query_582999, "continuationToken", newJString(continuationToken))
+  add(query_582999, "aggregationGranularity", newJString(aggregationGranularity))
+  result = call_582997.call(path_582998, query_582999, nil, nil, nil)
 
-var subscriberUsageAggregatesList* = Call_SubscriberUsageAggregatesList_593939(
+var subscriberUsageAggregatesList* = Call_SubscriberUsageAggregatesList_582972(
     name: "subscriberUsageAggregatesList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Commerce.Admin/subscriberUsageAggregates",
-    validator: validate_SubscriberUsageAggregatesList_593940, base: "",
-    url: url_SubscriberUsageAggregatesList_593941, schemes: {Scheme.Https})
+    validator: validate_SubscriberUsageAggregatesList_582973, base: "",
+    url: url_SubscriberUsageAggregatesList_582974, schemes: {Scheme.Https})
 type
-  Call_UpdateEncryption_593967 = ref object of OpenApiRestCall_593408
-proc url_UpdateEncryption_593969(protocol: Scheme; host: string; base: string;
+  Call_UpdateEncryption_583000 = ref object of OpenApiRestCall_582441
+proc url_UpdateEncryption_583002(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -327,7 +327,7 @@ proc url_UpdateEncryption_593969(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateEncryption_593968(path: JsonNode; query: JsonNode;
+proc validate_UpdateEncryption_583001(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Update the encryption.
@@ -340,11 +340,11 @@ proc validate_UpdateEncryption_593968(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593970 = path.getOrDefault("subscriptionId")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  var valid_583003 = path.getOrDefault("subscriptionId")
+  valid_583003 = validateParameter(valid_583003, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "subscriptionId", valid_593970
+  if valid_583003 != nil:
+    section.add "subscriptionId", valid_583003
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -352,11 +352,11 @@ proc validate_UpdateEncryption_593968(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_583004 = query.getOrDefault("api-version")
+  valid_583004 = validateParameter(valid_583004, JString, required = true,
                                  default = newJString("2015-06-01-preview"))
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
+  if valid_583004 != nil:
+    section.add "api-version", valid_583004
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -365,20 +365,20 @@ proc validate_UpdateEncryption_593968(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593972: Call_UpdateEncryption_593967; path: JsonNode;
+proc call*(call_583005: Call_UpdateEncryption_583000; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the encryption.
   ## 
-  let valid = call_593972.validator(path, query, header, formData, body)
-  let scheme = call_593972.pickScheme
+  let valid = call_583005.validator(path, query, header, formData, body)
+  let scheme = call_583005.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593972.url(scheme.get, call_593972.host, call_593972.base,
-                         call_593972.route, valid.getOrDefault("path"),
+  let url = call_583005.url(scheme.get, call_583005.host, call_583005.base,
+                         call_583005.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593972, url, valid)
+  result = hook(call_583005, url, valid)
 
-proc call*(call_593973: Call_UpdateEncryption_593967; subscriptionId: string;
+proc call*(call_583006: Call_UpdateEncryption_583000; subscriptionId: string;
           apiVersion: string = "2015-06-01-preview"): Recallable =
   ## updateEncryption
   ## Update the encryption.
@@ -386,16 +386,16 @@ proc call*(call_593973: Call_UpdateEncryption_593967; subscriptionId: string;
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  var path_593974 = newJObject()
-  var query_593975 = newJObject()
-  add(query_593975, "api-version", newJString(apiVersion))
-  add(path_593974, "subscriptionId", newJString(subscriptionId))
-  result = call_593973.call(path_593974, query_593975, nil, nil, nil)
+  var path_583007 = newJObject()
+  var query_583008 = newJObject()
+  add(query_583008, "api-version", newJString(apiVersion))
+  add(path_583007, "subscriptionId", newJString(subscriptionId))
+  result = call_583006.call(path_583007, query_583008, nil, nil, nil)
 
-var updateEncryption* = Call_UpdateEncryption_593967(name: "updateEncryption",
+var updateEncryption* = Call_UpdateEncryption_583000(name: "updateEncryption",
     meth: HttpMethod.HttpPost, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Commerce.Admin/updateEncryption",
-    validator: validate_UpdateEncryption_593968, base: "",
-    url: url_UpdateEncryption_593969, schemes: {Scheme.Https})
+    validator: validate_UpdateEncryption_583001, base: "",
+    url: url_UpdateEncryption_583002, schemes: {Scheme.Https})
 export
   rest
 

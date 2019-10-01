@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: KeyVaultClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593438 = ref object of OpenApiRestCall
+  OpenApiRestCall_567667 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593438](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567667](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593438): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567667): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "keyvault"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_GetCertificates_593660 = ref object of OpenApiRestCall_593438
-proc url_GetCertificates_593662(protocol: Scheme; host: string; base: string;
+  Call_GetCertificates_567889 = ref object of OpenApiRestCall_567667
+proc url_GetCertificates_567891(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetCertificates_593661(path: JsonNode; query: JsonNode;
+proc validate_GetCertificates_567890(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## The GetCertificates operation returns the set of certificates resources in the specified key vault. This operation requires the certificates/list permission.
@@ -130,19 +130,19 @@ proc validate_GetCertificates_593661(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593821 = query.getOrDefault("api-version")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_568050 = query.getOrDefault("api-version")
+  valid_568050 = validateParameter(valid_568050, JString, required = true,
                                  default = nil)
-  if valid_593821 != nil:
-    section.add "api-version", valid_593821
-  var valid_593822 = query.getOrDefault("maxresults")
-  valid_593822 = validateParameter(valid_593822, JInt, required = false, default = nil)
-  if valid_593822 != nil:
-    section.add "maxresults", valid_593822
-  var valid_593823 = query.getOrDefault("includePending")
-  valid_593823 = validateParameter(valid_593823, JBool, required = false, default = nil)
-  if valid_593823 != nil:
-    section.add "includePending", valid_593823
+  if valid_568050 != nil:
+    section.add "api-version", valid_568050
+  var valid_568051 = query.getOrDefault("maxresults")
+  valid_568051 = validateParameter(valid_568051, JInt, required = false, default = nil)
+  if valid_568051 != nil:
+    section.add "maxresults", valid_568051
+  var valid_568052 = query.getOrDefault("includePending")
+  valid_568052 = validateParameter(valid_568052, JBool, required = false, default = nil)
+  if valid_568052 != nil:
+    section.add "includePending", valid_568052
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -151,20 +151,20 @@ proc validate_GetCertificates_593661(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593846: Call_GetCertificates_593660; path: JsonNode; query: JsonNode;
+proc call*(call_568075: Call_GetCertificates_567889; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetCertificates operation returns the set of certificates resources in the specified key vault. This operation requires the certificates/list permission.
   ## 
-  let valid = call_593846.validator(path, query, header, formData, body)
-  let scheme = call_593846.pickScheme
+  let valid = call_568075.validator(path, query, header, formData, body)
+  let scheme = call_568075.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593846.url(scheme.get, call_593846.host, call_593846.base,
-                         call_593846.route, valid.getOrDefault("path"),
+  let url = call_568075.url(scheme.get, call_568075.host, call_568075.base,
+                         call_568075.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593846, url, valid)
+  result = hook(call_568075, url, valid)
 
-proc call*(call_593917: Call_GetCertificates_593660; apiVersion: string;
+proc call*(call_568146: Call_GetCertificates_567889; apiVersion: string;
           maxresults: int = 0; includePending: bool = false): Recallable =
   ## getCertificates
   ## The GetCertificates operation returns the set of certificates resources in the specified key vault. This operation requires the certificates/list permission.
@@ -174,26 +174,26 @@ proc call*(call_593917: Call_GetCertificates_593660; apiVersion: string;
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
   ##   includePending: bool
   ##                 : Specifies whether to include certificates which are not completely provisioned.
-  var query_593918 = newJObject()
-  add(query_593918, "api-version", newJString(apiVersion))
-  add(query_593918, "maxresults", newJInt(maxresults))
-  add(query_593918, "includePending", newJBool(includePending))
-  result = call_593917.call(nil, query_593918, nil, nil, nil)
+  var query_568147 = newJObject()
+  add(query_568147, "api-version", newJString(apiVersion))
+  add(query_568147, "maxresults", newJInt(maxresults))
+  add(query_568147, "includePending", newJBool(includePending))
+  result = call_568146.call(nil, query_568147, nil, nil, nil)
 
-var getCertificates* = Call_GetCertificates_593660(name: "getCertificates",
+var getCertificates* = Call_GetCertificates_567889(name: "getCertificates",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/certificates",
-    validator: validate_GetCertificates_593661, base: "", url: url_GetCertificates_593662,
+    validator: validate_GetCertificates_567890, base: "", url: url_GetCertificates_567891,
     schemes: {Scheme.Https})
 type
-  Call_SetCertificateContacts_593965 = ref object of OpenApiRestCall_593438
-proc url_SetCertificateContacts_593967(protocol: Scheme; host: string; base: string;
+  Call_SetCertificateContacts_568194 = ref object of OpenApiRestCall_567667
+proc url_SetCertificateContacts_568196(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_SetCertificateContacts_593966(path: JsonNode; query: JsonNode;
+proc validate_SetCertificateContacts_568195(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sets the certificate contacts for the specified key vault. This operation requires the certificates/managecontacts permission.
   ## 
@@ -207,11 +207,11 @@ proc validate_SetCertificateContacts_593966(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593985 = query.getOrDefault("api-version")
-  valid_593985 = validateParameter(valid_593985, JString, required = true,
+  var valid_568214 = query.getOrDefault("api-version")
+  valid_568214 = validateParameter(valid_568214, JString, required = true,
                                  default = nil)
-  if valid_593985 != nil:
-    section.add "api-version", valid_593985
+  if valid_568214 != nil:
+    section.add "api-version", valid_568214
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -225,20 +225,20 @@ proc validate_SetCertificateContacts_593966(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593987: Call_SetCertificateContacts_593965; path: JsonNode;
+proc call*(call_568216: Call_SetCertificateContacts_568194; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Sets the certificate contacts for the specified key vault. This operation requires the certificates/managecontacts permission.
   ## 
-  let valid = call_593987.validator(path, query, header, formData, body)
-  let scheme = call_593987.pickScheme
+  let valid = call_568216.validator(path, query, header, formData, body)
+  let scheme = call_568216.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593987.url(scheme.get, call_593987.host, call_593987.base,
-                         call_593987.route, valid.getOrDefault("path"),
+  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
+                         call_568216.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593987, url, valid)
+  result = hook(call_568216, url, valid)
 
-proc call*(call_593988: Call_SetCertificateContacts_593965; apiVersion: string;
+proc call*(call_568217: Call_SetCertificateContacts_568194; apiVersion: string;
           contacts: JsonNode): Recallable =
   ## setCertificateContacts
   ## Sets the certificate contacts for the specified key vault. This operation requires the certificates/managecontacts permission.
@@ -246,27 +246,27 @@ proc call*(call_593988: Call_SetCertificateContacts_593965; apiVersion: string;
   ##             : Client API version.
   ##   contacts: JObject (required)
   ##           : The contacts for the key vault certificate.
-  var query_593989 = newJObject()
-  var body_593990 = newJObject()
-  add(query_593989, "api-version", newJString(apiVersion))
+  var query_568218 = newJObject()
+  var body_568219 = newJObject()
+  add(query_568218, "api-version", newJString(apiVersion))
   if contacts != nil:
-    body_593990 = contacts
-  result = call_593988.call(nil, query_593989, nil, nil, body_593990)
+    body_568219 = contacts
+  result = call_568217.call(nil, query_568218, nil, nil, body_568219)
 
-var setCertificateContacts* = Call_SetCertificateContacts_593965(
+var setCertificateContacts* = Call_SetCertificateContacts_568194(
     name: "setCertificateContacts", meth: HttpMethod.HttpPut, host: "azure.local",
-    route: "/certificates/contacts", validator: validate_SetCertificateContacts_593966,
-    base: "", url: url_SetCertificateContacts_593967, schemes: {Scheme.Https})
+    route: "/certificates/contacts", validator: validate_SetCertificateContacts_568195,
+    base: "", url: url_SetCertificateContacts_568196, schemes: {Scheme.Https})
 type
-  Call_GetCertificateContacts_593958 = ref object of OpenApiRestCall_593438
-proc url_GetCertificateContacts_593960(protocol: Scheme; host: string; base: string;
+  Call_GetCertificateContacts_568187 = ref object of OpenApiRestCall_567667
+proc url_GetCertificateContacts_568189(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetCertificateContacts_593959(path: JsonNode; query: JsonNode;
+proc validate_GetCertificateContacts_568188(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The GetCertificateContacts operation returns the set of certificate contact resources in the specified key vault. This operation requires the certificates/managecontacts permission.
   ## 
@@ -280,11 +280,11 @@ proc validate_GetCertificateContacts_593959(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593961 = query.getOrDefault("api-version")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  var valid_568190 = query.getOrDefault("api-version")
+  valid_568190 = validateParameter(valid_568190, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "api-version", valid_593961
+  if valid_568190 != nil:
+    section.add "api-version", valid_568190
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -293,42 +293,42 @@ proc validate_GetCertificateContacts_593959(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593962: Call_GetCertificateContacts_593958; path: JsonNode;
+proc call*(call_568191: Call_GetCertificateContacts_568187; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetCertificateContacts operation returns the set of certificate contact resources in the specified key vault. This operation requires the certificates/managecontacts permission.
   ## 
-  let valid = call_593962.validator(path, query, header, formData, body)
-  let scheme = call_593962.pickScheme
+  let valid = call_568191.validator(path, query, header, formData, body)
+  let scheme = call_568191.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593962.url(scheme.get, call_593962.host, call_593962.base,
-                         call_593962.route, valid.getOrDefault("path"),
+  let url = call_568191.url(scheme.get, call_568191.host, call_568191.base,
+                         call_568191.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593962, url, valid)
+  result = hook(call_568191, url, valid)
 
-proc call*(call_593963: Call_GetCertificateContacts_593958; apiVersion: string): Recallable =
+proc call*(call_568192: Call_GetCertificateContacts_568187; apiVersion: string): Recallable =
   ## getCertificateContacts
   ## The GetCertificateContacts operation returns the set of certificate contact resources in the specified key vault. This operation requires the certificates/managecontacts permission.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var query_593964 = newJObject()
-  add(query_593964, "api-version", newJString(apiVersion))
-  result = call_593963.call(nil, query_593964, nil, nil, nil)
+  var query_568193 = newJObject()
+  add(query_568193, "api-version", newJString(apiVersion))
+  result = call_568192.call(nil, query_568193, nil, nil, nil)
 
-var getCertificateContacts* = Call_GetCertificateContacts_593958(
+var getCertificateContacts* = Call_GetCertificateContacts_568187(
     name: "getCertificateContacts", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/certificates/contacts", validator: validate_GetCertificateContacts_593959,
-    base: "", url: url_GetCertificateContacts_593960, schemes: {Scheme.Https})
+    route: "/certificates/contacts", validator: validate_GetCertificateContacts_568188,
+    base: "", url: url_GetCertificateContacts_568189, schemes: {Scheme.Https})
 type
-  Call_DeleteCertificateContacts_593991 = ref object of OpenApiRestCall_593438
-proc url_DeleteCertificateContacts_593993(protocol: Scheme; host: string;
+  Call_DeleteCertificateContacts_568220 = ref object of OpenApiRestCall_567667
+proc url_DeleteCertificateContacts_568222(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DeleteCertificateContacts_593992(path: JsonNode; query: JsonNode;
+proc validate_DeleteCertificateContacts_568221(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the certificate contacts for a specified key vault certificate. This operation requires the certificates/managecontacts permission.
   ## 
@@ -342,11 +342,11 @@ proc validate_DeleteCertificateContacts_593992(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568223 = query.getOrDefault("api-version")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
+  if valid_568223 != nil:
+    section.add "api-version", valid_568223
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -355,43 +355,43 @@ proc validate_DeleteCertificateContacts_593992(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593995: Call_DeleteCertificateContacts_593991; path: JsonNode;
+proc call*(call_568224: Call_DeleteCertificateContacts_568220; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the certificate contacts for a specified key vault certificate. This operation requires the certificates/managecontacts permission.
   ## 
-  let valid = call_593995.validator(path, query, header, formData, body)
-  let scheme = call_593995.pickScheme
+  let valid = call_568224.validator(path, query, header, formData, body)
+  let scheme = call_568224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593995.url(scheme.get, call_593995.host, call_593995.base,
-                         call_593995.route, valid.getOrDefault("path"),
+  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
+                         call_568224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593995, url, valid)
+  result = hook(call_568224, url, valid)
 
-proc call*(call_593996: Call_DeleteCertificateContacts_593991; apiVersion: string): Recallable =
+proc call*(call_568225: Call_DeleteCertificateContacts_568220; apiVersion: string): Recallable =
   ## deleteCertificateContacts
   ## Deletes the certificate contacts for a specified key vault certificate. This operation requires the certificates/managecontacts permission.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var query_593997 = newJObject()
-  add(query_593997, "api-version", newJString(apiVersion))
-  result = call_593996.call(nil, query_593997, nil, nil, nil)
+  var query_568226 = newJObject()
+  add(query_568226, "api-version", newJString(apiVersion))
+  result = call_568225.call(nil, query_568226, nil, nil, nil)
 
-var deleteCertificateContacts* = Call_DeleteCertificateContacts_593991(
+var deleteCertificateContacts* = Call_DeleteCertificateContacts_568220(
     name: "deleteCertificateContacts", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/certificates/contacts",
-    validator: validate_DeleteCertificateContacts_593992, base: "",
-    url: url_DeleteCertificateContacts_593993, schemes: {Scheme.Https})
+    validator: validate_DeleteCertificateContacts_568221, base: "",
+    url: url_DeleteCertificateContacts_568222, schemes: {Scheme.Https})
 type
-  Call_GetCertificateIssuers_593998 = ref object of OpenApiRestCall_593438
-proc url_GetCertificateIssuers_594000(protocol: Scheme; host: string; base: string;
+  Call_GetCertificateIssuers_568227 = ref object of OpenApiRestCall_567667
+proc url_GetCertificateIssuers_568229(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetCertificateIssuers_593999(path: JsonNode; query: JsonNode;
+proc validate_GetCertificateIssuers_568228(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The GetCertificateIssuers operation returns the set of certificate issuer resources in the specified key vault. This operation requires the certificates/manageissuers/getissuers permission.
   ## 
@@ -407,15 +407,15 @@ proc validate_GetCertificateIssuers_593999(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594001 = query.getOrDefault("api-version")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_568230 = query.getOrDefault("api-version")
+  valid_568230 = validateParameter(valid_568230, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "api-version", valid_594001
-  var valid_594002 = query.getOrDefault("maxresults")
-  valid_594002 = validateParameter(valid_594002, JInt, required = false, default = nil)
-  if valid_594002 != nil:
-    section.add "maxresults", valid_594002
+  if valid_568230 != nil:
+    section.add "api-version", valid_568230
+  var valid_568231 = query.getOrDefault("maxresults")
+  valid_568231 = validateParameter(valid_568231, JInt, required = false, default = nil)
+  if valid_568231 != nil:
+    section.add "maxresults", valid_568231
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -424,20 +424,20 @@ proc validate_GetCertificateIssuers_593999(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594003: Call_GetCertificateIssuers_593998; path: JsonNode;
+proc call*(call_568232: Call_GetCertificateIssuers_568227; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetCertificateIssuers operation returns the set of certificate issuer resources in the specified key vault. This operation requires the certificates/manageissuers/getissuers permission.
   ## 
-  let valid = call_594003.validator(path, query, header, formData, body)
-  let scheme = call_594003.pickScheme
+  let valid = call_568232.validator(path, query, header, formData, body)
+  let scheme = call_568232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594003.url(scheme.get, call_594003.host, call_594003.base,
-                         call_594003.route, valid.getOrDefault("path"),
+  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
+                         call_568232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594003, url, valid)
+  result = hook(call_568232, url, valid)
 
-proc call*(call_594004: Call_GetCertificateIssuers_593998; apiVersion: string;
+proc call*(call_568233: Call_GetCertificateIssuers_568227; apiVersion: string;
           maxresults: int = 0): Recallable =
   ## getCertificateIssuers
   ## The GetCertificateIssuers operation returns the set of certificate issuer resources in the specified key vault. This operation requires the certificates/manageissuers/getissuers permission.
@@ -445,18 +445,18 @@ proc call*(call_594004: Call_GetCertificateIssuers_593998; apiVersion: string;
   ##             : Client API version.
   ##   maxresults: int
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
-  var query_594005 = newJObject()
-  add(query_594005, "api-version", newJString(apiVersion))
-  add(query_594005, "maxresults", newJInt(maxresults))
-  result = call_594004.call(nil, query_594005, nil, nil, nil)
+  var query_568234 = newJObject()
+  add(query_568234, "api-version", newJString(apiVersion))
+  add(query_568234, "maxresults", newJInt(maxresults))
+  result = call_568233.call(nil, query_568234, nil, nil, nil)
 
-var getCertificateIssuers* = Call_GetCertificateIssuers_593998(
+var getCertificateIssuers* = Call_GetCertificateIssuers_568227(
     name: "getCertificateIssuers", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/certificates/issuers", validator: validate_GetCertificateIssuers_593999,
-    base: "", url: url_GetCertificateIssuers_594000, schemes: {Scheme.Https})
+    route: "/certificates/issuers", validator: validate_GetCertificateIssuers_568228,
+    base: "", url: url_GetCertificateIssuers_568229, schemes: {Scheme.Https})
 type
-  Call_SetCertificateIssuer_594029 = ref object of OpenApiRestCall_593438
-proc url_SetCertificateIssuer_594031(protocol: Scheme; host: string; base: string;
+  Call_SetCertificateIssuer_568258 = ref object of OpenApiRestCall_567667
+proc url_SetCertificateIssuer_568260(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -471,7 +471,7 @@ proc url_SetCertificateIssuer_594031(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SetCertificateIssuer_594030(path: JsonNode; query: JsonNode;
+proc validate_SetCertificateIssuer_568259(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The SetCertificateIssuer operation adds or updates the specified certificate issuer. This operation requires the certificates/setissuers permission.
   ## 
@@ -483,11 +483,11 @@ proc validate_SetCertificateIssuer_594030(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `issuer-name` field"
-  var valid_594032 = path.getOrDefault("issuer-name")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  var valid_568261 = path.getOrDefault("issuer-name")
+  valid_568261 = validateParameter(valid_568261, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "issuer-name", valid_594032
+  if valid_568261 != nil:
+    section.add "issuer-name", valid_568261
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -495,11 +495,11 @@ proc validate_SetCertificateIssuer_594030(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594033 = query.getOrDefault("api-version")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  var valid_568262 = query.getOrDefault("api-version")
+  valid_568262 = validateParameter(valid_568262, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "api-version", valid_594033
+  if valid_568262 != nil:
+    section.add "api-version", valid_568262
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -513,20 +513,20 @@ proc validate_SetCertificateIssuer_594030(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594035: Call_SetCertificateIssuer_594029; path: JsonNode;
+proc call*(call_568264: Call_SetCertificateIssuer_568258; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The SetCertificateIssuer operation adds or updates the specified certificate issuer. This operation requires the certificates/setissuers permission.
   ## 
-  let valid = call_594035.validator(path, query, header, formData, body)
-  let scheme = call_594035.pickScheme
+  let valid = call_568264.validator(path, query, header, formData, body)
+  let scheme = call_568264.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594035.url(scheme.get, call_594035.host, call_594035.base,
-                         call_594035.route, valid.getOrDefault("path"),
+  let url = call_568264.url(scheme.get, call_568264.host, call_568264.base,
+                         call_568264.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594035, url, valid)
+  result = hook(call_568264, url, valid)
 
-proc call*(call_594036: Call_SetCertificateIssuer_594029; apiVersion: string;
+proc call*(call_568265: Call_SetCertificateIssuer_568258; apiVersion: string;
           parameter: JsonNode; issuerName: string): Recallable =
   ## setCertificateIssuer
   ## The SetCertificateIssuer operation adds or updates the specified certificate issuer. This operation requires the certificates/setissuers permission.
@@ -536,23 +536,23 @@ proc call*(call_594036: Call_SetCertificateIssuer_594029; apiVersion: string;
   ##            : Certificate issuer set parameter.
   ##   issuerName: string (required)
   ##             : The name of the issuer.
-  var path_594037 = newJObject()
-  var query_594038 = newJObject()
-  var body_594039 = newJObject()
-  add(query_594038, "api-version", newJString(apiVersion))
+  var path_568266 = newJObject()
+  var query_568267 = newJObject()
+  var body_568268 = newJObject()
+  add(query_568267, "api-version", newJString(apiVersion))
   if parameter != nil:
-    body_594039 = parameter
-  add(path_594037, "issuer-name", newJString(issuerName))
-  result = call_594036.call(path_594037, query_594038, nil, nil, body_594039)
+    body_568268 = parameter
+  add(path_568266, "issuer-name", newJString(issuerName))
+  result = call_568265.call(path_568266, query_568267, nil, nil, body_568268)
 
-var setCertificateIssuer* = Call_SetCertificateIssuer_594029(
+var setCertificateIssuer* = Call_SetCertificateIssuer_568258(
     name: "setCertificateIssuer", meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/certificates/issuers/{issuer-name}",
-    validator: validate_SetCertificateIssuer_594030, base: "",
-    url: url_SetCertificateIssuer_594031, schemes: {Scheme.Https})
+    validator: validate_SetCertificateIssuer_568259, base: "",
+    url: url_SetCertificateIssuer_568260, schemes: {Scheme.Https})
 type
-  Call_GetCertificateIssuer_594006 = ref object of OpenApiRestCall_593438
-proc url_GetCertificateIssuer_594008(protocol: Scheme; host: string; base: string;
+  Call_GetCertificateIssuer_568235 = ref object of OpenApiRestCall_567667
+proc url_GetCertificateIssuer_568237(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -567,7 +567,7 @@ proc url_GetCertificateIssuer_594008(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetCertificateIssuer_594007(path: JsonNode; query: JsonNode;
+proc validate_GetCertificateIssuer_568236(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The GetCertificateIssuer operation returns the specified certificate issuer resources in the specified key vault. This operation requires the certificates/manageissuers/getissuers permission.
   ## 
@@ -579,11 +579,11 @@ proc validate_GetCertificateIssuer_594007(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `issuer-name` field"
-  var valid_594023 = path.getOrDefault("issuer-name")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  var valid_568252 = path.getOrDefault("issuer-name")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "issuer-name", valid_594023
+  if valid_568252 != nil:
+    section.add "issuer-name", valid_568252
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -591,11 +591,11 @@ proc validate_GetCertificateIssuer_594007(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594024 = query.getOrDefault("api-version")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_568253 = query.getOrDefault("api-version")
+  valid_568253 = validateParameter(valid_568253, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "api-version", valid_594024
+  if valid_568253 != nil:
+    section.add "api-version", valid_568253
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -604,20 +604,20 @@ proc validate_GetCertificateIssuer_594007(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594025: Call_GetCertificateIssuer_594006; path: JsonNode;
+proc call*(call_568254: Call_GetCertificateIssuer_568235; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetCertificateIssuer operation returns the specified certificate issuer resources in the specified key vault. This operation requires the certificates/manageissuers/getissuers permission.
   ## 
-  let valid = call_594025.validator(path, query, header, formData, body)
-  let scheme = call_594025.pickScheme
+  let valid = call_568254.validator(path, query, header, formData, body)
+  let scheme = call_568254.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594025.url(scheme.get, call_594025.host, call_594025.base,
-                         call_594025.route, valid.getOrDefault("path"),
+  let url = call_568254.url(scheme.get, call_568254.host, call_568254.base,
+                         call_568254.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594025, url, valid)
+  result = hook(call_568254, url, valid)
 
-proc call*(call_594026: Call_GetCertificateIssuer_594006; apiVersion: string;
+proc call*(call_568255: Call_GetCertificateIssuer_568235; apiVersion: string;
           issuerName: string): Recallable =
   ## getCertificateIssuer
   ## The GetCertificateIssuer operation returns the specified certificate issuer resources in the specified key vault. This operation requires the certificates/manageissuers/getissuers permission.
@@ -625,20 +625,20 @@ proc call*(call_594026: Call_GetCertificateIssuer_594006; apiVersion: string;
   ##             : Client API version.
   ##   issuerName: string (required)
   ##             : The name of the issuer.
-  var path_594027 = newJObject()
-  var query_594028 = newJObject()
-  add(query_594028, "api-version", newJString(apiVersion))
-  add(path_594027, "issuer-name", newJString(issuerName))
-  result = call_594026.call(path_594027, query_594028, nil, nil, nil)
+  var path_568256 = newJObject()
+  var query_568257 = newJObject()
+  add(query_568257, "api-version", newJString(apiVersion))
+  add(path_568256, "issuer-name", newJString(issuerName))
+  result = call_568255.call(path_568256, query_568257, nil, nil, nil)
 
-var getCertificateIssuer* = Call_GetCertificateIssuer_594006(
+var getCertificateIssuer* = Call_GetCertificateIssuer_568235(
     name: "getCertificateIssuer", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/certificates/issuers/{issuer-name}",
-    validator: validate_GetCertificateIssuer_594007, base: "",
-    url: url_GetCertificateIssuer_594008, schemes: {Scheme.Https})
+    validator: validate_GetCertificateIssuer_568236, base: "",
+    url: url_GetCertificateIssuer_568237, schemes: {Scheme.Https})
 type
-  Call_UpdateCertificateIssuer_594049 = ref object of OpenApiRestCall_593438
-proc url_UpdateCertificateIssuer_594051(protocol: Scheme; host: string; base: string;
+  Call_UpdateCertificateIssuer_568278 = ref object of OpenApiRestCall_567667
+proc url_UpdateCertificateIssuer_568280(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -654,7 +654,7 @@ proc url_UpdateCertificateIssuer_594051(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateCertificateIssuer_594050(path: JsonNode; query: JsonNode;
+proc validate_UpdateCertificateIssuer_568279(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The UpdateCertificateIssuer operation performs an update on the specified certificate issuer entity. This operation requires the certificates/setissuers permission.
   ## 
@@ -666,11 +666,11 @@ proc validate_UpdateCertificateIssuer_594050(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `issuer-name` field"
-  var valid_594052 = path.getOrDefault("issuer-name")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  var valid_568281 = path.getOrDefault("issuer-name")
+  valid_568281 = validateParameter(valid_568281, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "issuer-name", valid_594052
+  if valid_568281 != nil:
+    section.add "issuer-name", valid_568281
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -678,11 +678,11 @@ proc validate_UpdateCertificateIssuer_594050(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594053 = query.getOrDefault("api-version")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_568282 = query.getOrDefault("api-version")
+  valid_568282 = validateParameter(valid_568282, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "api-version", valid_594053
+  if valid_568282 != nil:
+    section.add "api-version", valid_568282
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -696,20 +696,20 @@ proc validate_UpdateCertificateIssuer_594050(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594055: Call_UpdateCertificateIssuer_594049; path: JsonNode;
+proc call*(call_568284: Call_UpdateCertificateIssuer_568278; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The UpdateCertificateIssuer operation performs an update on the specified certificate issuer entity. This operation requires the certificates/setissuers permission.
   ## 
-  let valid = call_594055.validator(path, query, header, formData, body)
-  let scheme = call_594055.pickScheme
+  let valid = call_568284.validator(path, query, header, formData, body)
+  let scheme = call_568284.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594055.url(scheme.get, call_594055.host, call_594055.base,
-                         call_594055.route, valid.getOrDefault("path"),
+  let url = call_568284.url(scheme.get, call_568284.host, call_568284.base,
+                         call_568284.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594055, url, valid)
+  result = hook(call_568284, url, valid)
 
-proc call*(call_594056: Call_UpdateCertificateIssuer_594049; apiVersion: string;
+proc call*(call_568285: Call_UpdateCertificateIssuer_568278; apiVersion: string;
           parameter: JsonNode; issuerName: string): Recallable =
   ## updateCertificateIssuer
   ## The UpdateCertificateIssuer operation performs an update on the specified certificate issuer entity. This operation requires the certificates/setissuers permission.
@@ -719,23 +719,23 @@ proc call*(call_594056: Call_UpdateCertificateIssuer_594049; apiVersion: string;
   ##            : Certificate issuer update parameter.
   ##   issuerName: string (required)
   ##             : The name of the issuer.
-  var path_594057 = newJObject()
-  var query_594058 = newJObject()
-  var body_594059 = newJObject()
-  add(query_594058, "api-version", newJString(apiVersion))
+  var path_568286 = newJObject()
+  var query_568287 = newJObject()
+  var body_568288 = newJObject()
+  add(query_568287, "api-version", newJString(apiVersion))
   if parameter != nil:
-    body_594059 = parameter
-  add(path_594057, "issuer-name", newJString(issuerName))
-  result = call_594056.call(path_594057, query_594058, nil, nil, body_594059)
+    body_568288 = parameter
+  add(path_568286, "issuer-name", newJString(issuerName))
+  result = call_568285.call(path_568286, query_568287, nil, nil, body_568288)
 
-var updateCertificateIssuer* = Call_UpdateCertificateIssuer_594049(
+var updateCertificateIssuer* = Call_UpdateCertificateIssuer_568278(
     name: "updateCertificateIssuer", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/certificates/issuers/{issuer-name}",
-    validator: validate_UpdateCertificateIssuer_594050, base: "",
-    url: url_UpdateCertificateIssuer_594051, schemes: {Scheme.Https})
+    validator: validate_UpdateCertificateIssuer_568279, base: "",
+    url: url_UpdateCertificateIssuer_568280, schemes: {Scheme.Https})
 type
-  Call_DeleteCertificateIssuer_594040 = ref object of OpenApiRestCall_593438
-proc url_DeleteCertificateIssuer_594042(protocol: Scheme; host: string; base: string;
+  Call_DeleteCertificateIssuer_568269 = ref object of OpenApiRestCall_567667
+proc url_DeleteCertificateIssuer_568271(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -751,7 +751,7 @@ proc url_DeleteCertificateIssuer_594042(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeleteCertificateIssuer_594041(path: JsonNode; query: JsonNode;
+proc validate_DeleteCertificateIssuer_568270(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The DeleteCertificateIssuer operation permanently removes the specified certificate issuer from the vault. This operation requires the certificates/manageissuers/deleteissuers permission.
   ## 
@@ -763,11 +763,11 @@ proc validate_DeleteCertificateIssuer_594041(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `issuer-name` field"
-  var valid_594043 = path.getOrDefault("issuer-name")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  var valid_568272 = path.getOrDefault("issuer-name")
+  valid_568272 = validateParameter(valid_568272, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "issuer-name", valid_594043
+  if valid_568272 != nil:
+    section.add "issuer-name", valid_568272
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -775,11 +775,11 @@ proc validate_DeleteCertificateIssuer_594041(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594044 = query.getOrDefault("api-version")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  var valid_568273 = query.getOrDefault("api-version")
+  valid_568273 = validateParameter(valid_568273, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "api-version", valid_594044
+  if valid_568273 != nil:
+    section.add "api-version", valid_568273
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -788,20 +788,20 @@ proc validate_DeleteCertificateIssuer_594041(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594045: Call_DeleteCertificateIssuer_594040; path: JsonNode;
+proc call*(call_568274: Call_DeleteCertificateIssuer_568269; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The DeleteCertificateIssuer operation permanently removes the specified certificate issuer from the vault. This operation requires the certificates/manageissuers/deleteissuers permission.
   ## 
-  let valid = call_594045.validator(path, query, header, formData, body)
-  let scheme = call_594045.pickScheme
+  let valid = call_568274.validator(path, query, header, formData, body)
+  let scheme = call_568274.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594045.url(scheme.get, call_594045.host, call_594045.base,
-                         call_594045.route, valid.getOrDefault("path"),
+  let url = call_568274.url(scheme.get, call_568274.host, call_568274.base,
+                         call_568274.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594045, url, valid)
+  result = hook(call_568274, url, valid)
 
-proc call*(call_594046: Call_DeleteCertificateIssuer_594040; apiVersion: string;
+proc call*(call_568275: Call_DeleteCertificateIssuer_568269; apiVersion: string;
           issuerName: string): Recallable =
   ## deleteCertificateIssuer
   ## The DeleteCertificateIssuer operation permanently removes the specified certificate issuer from the vault. This operation requires the certificates/manageissuers/deleteissuers permission.
@@ -809,27 +809,27 @@ proc call*(call_594046: Call_DeleteCertificateIssuer_594040; apiVersion: string;
   ##             : Client API version.
   ##   issuerName: string (required)
   ##             : The name of the issuer.
-  var path_594047 = newJObject()
-  var query_594048 = newJObject()
-  add(query_594048, "api-version", newJString(apiVersion))
-  add(path_594047, "issuer-name", newJString(issuerName))
-  result = call_594046.call(path_594047, query_594048, nil, nil, nil)
+  var path_568276 = newJObject()
+  var query_568277 = newJObject()
+  add(query_568277, "api-version", newJString(apiVersion))
+  add(path_568276, "issuer-name", newJString(issuerName))
+  result = call_568275.call(path_568276, query_568277, nil, nil, nil)
 
-var deleteCertificateIssuer* = Call_DeleteCertificateIssuer_594040(
+var deleteCertificateIssuer* = Call_DeleteCertificateIssuer_568269(
     name: "deleteCertificateIssuer", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/certificates/issuers/{issuer-name}",
-    validator: validate_DeleteCertificateIssuer_594041, base: "",
-    url: url_DeleteCertificateIssuer_594042, schemes: {Scheme.Https})
+    validator: validate_DeleteCertificateIssuer_568270, base: "",
+    url: url_DeleteCertificateIssuer_568271, schemes: {Scheme.Https})
 type
-  Call_RestoreCertificate_594060 = ref object of OpenApiRestCall_593438
-proc url_RestoreCertificate_594062(protocol: Scheme; host: string; base: string;
+  Call_RestoreCertificate_568289 = ref object of OpenApiRestCall_567667
+proc url_RestoreCertificate_568291(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RestoreCertificate_594061(path: JsonNode; query: JsonNode;
+proc validate_RestoreCertificate_568290(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Restores a backed up certificate, and all its versions, to a vault. This operation requires the certificates/restore permission.
@@ -844,11 +844,11 @@ proc validate_RestoreCertificate_594061(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594063 = query.getOrDefault("api-version")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  var valid_568292 = query.getOrDefault("api-version")
+  valid_568292 = validateParameter(valid_568292, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "api-version", valid_594063
+  if valid_568292 != nil:
+    section.add "api-version", valid_568292
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -862,20 +862,20 @@ proc validate_RestoreCertificate_594061(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594065: Call_RestoreCertificate_594060; path: JsonNode;
+proc call*(call_568294: Call_RestoreCertificate_568289; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restores a backed up certificate, and all its versions, to a vault. This operation requires the certificates/restore permission.
   ## 
-  let valid = call_594065.validator(path, query, header, formData, body)
-  let scheme = call_594065.pickScheme
+  let valid = call_568294.validator(path, query, header, formData, body)
+  let scheme = call_568294.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594065.url(scheme.get, call_594065.host, call_594065.base,
-                         call_594065.route, valid.getOrDefault("path"),
+  let url = call_568294.url(scheme.get, call_568294.host, call_568294.base,
+                         call_568294.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594065, url, valid)
+  result = hook(call_568294, url, valid)
 
-proc call*(call_594066: Call_RestoreCertificate_594060; apiVersion: string;
+proc call*(call_568295: Call_RestoreCertificate_568289; apiVersion: string;
           parameters: JsonNode): Recallable =
   ## restoreCertificate
   ## Restores a backed up certificate, and all its versions, to a vault. This operation requires the certificates/restore permission.
@@ -883,20 +883,20 @@ proc call*(call_594066: Call_RestoreCertificate_594060; apiVersion: string;
   ##             : Client API version.
   ##   parameters: JObject (required)
   ##             : The parameters to restore the certificate.
-  var query_594067 = newJObject()
-  var body_594068 = newJObject()
-  add(query_594067, "api-version", newJString(apiVersion))
+  var query_568296 = newJObject()
+  var body_568297 = newJObject()
+  add(query_568296, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_594068 = parameters
-  result = call_594066.call(nil, query_594067, nil, nil, body_594068)
+    body_568297 = parameters
+  result = call_568295.call(nil, query_568296, nil, nil, body_568297)
 
-var restoreCertificate* = Call_RestoreCertificate_594060(
+var restoreCertificate* = Call_RestoreCertificate_568289(
     name: "restoreCertificate", meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/certificates/restore", validator: validate_RestoreCertificate_594061,
-    base: "", url: url_RestoreCertificate_594062, schemes: {Scheme.Https})
+    route: "/certificates/restore", validator: validate_RestoreCertificate_568290,
+    base: "", url: url_RestoreCertificate_568291, schemes: {Scheme.Https})
 type
-  Call_DeleteCertificate_594069 = ref object of OpenApiRestCall_593438
-proc url_DeleteCertificate_594071(protocol: Scheme; host: string; base: string;
+  Call_DeleteCertificate_568298 = ref object of OpenApiRestCall_567667
+proc url_DeleteCertificate_568300(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -912,7 +912,7 @@ proc url_DeleteCertificate_594071(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeleteCertificate_594070(path: JsonNode; query: JsonNode;
+proc validate_DeleteCertificate_568299(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes all versions of a certificate object along with its associated policy. Delete certificate cannot be used to remove individual versions of a certificate object. This operation requires the certificates/delete permission.
@@ -925,11 +925,11 @@ proc validate_DeleteCertificate_594070(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594072 = path.getOrDefault("certificate-name")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  var valid_568301 = path.getOrDefault("certificate-name")
+  valid_568301 = validateParameter(valid_568301, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "certificate-name", valid_594072
+  if valid_568301 != nil:
+    section.add "certificate-name", valid_568301
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -937,11 +937,11 @@ proc validate_DeleteCertificate_594070(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594073 = query.getOrDefault("api-version")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  var valid_568302 = query.getOrDefault("api-version")
+  valid_568302 = validateParameter(valid_568302, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "api-version", valid_594073
+  if valid_568302 != nil:
+    section.add "api-version", valid_568302
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -950,20 +950,20 @@ proc validate_DeleteCertificate_594070(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594074: Call_DeleteCertificate_594069; path: JsonNode;
+proc call*(call_568303: Call_DeleteCertificate_568298; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes all versions of a certificate object along with its associated policy. Delete certificate cannot be used to remove individual versions of a certificate object. This operation requires the certificates/delete permission.
   ## 
-  let valid = call_594074.validator(path, query, header, formData, body)
-  let scheme = call_594074.pickScheme
+  let valid = call_568303.validator(path, query, header, formData, body)
+  let scheme = call_568303.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594074.url(scheme.get, call_594074.host, call_594074.base,
-                         call_594074.route, valid.getOrDefault("path"),
+  let url = call_568303.url(scheme.get, call_568303.host, call_568303.base,
+                         call_568303.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594074, url, valid)
+  result = hook(call_568303, url, valid)
 
-proc call*(call_594075: Call_DeleteCertificate_594069; apiVersion: string;
+proc call*(call_568304: Call_DeleteCertificate_568298; apiVersion: string;
           certificateName: string): Recallable =
   ## deleteCertificate
   ## Deletes all versions of a certificate object along with its associated policy. Delete certificate cannot be used to remove individual versions of a certificate object. This operation requires the certificates/delete permission.
@@ -971,20 +971,20 @@ proc call*(call_594075: Call_DeleteCertificate_594069; apiVersion: string;
   ##             : Client API version.
   ##   certificateName: string (required)
   ##                  : The name of the certificate.
-  var path_594076 = newJObject()
-  var query_594077 = newJObject()
-  add(query_594077, "api-version", newJString(apiVersion))
-  add(path_594076, "certificate-name", newJString(certificateName))
-  result = call_594075.call(path_594076, query_594077, nil, nil, nil)
+  var path_568305 = newJObject()
+  var query_568306 = newJObject()
+  add(query_568306, "api-version", newJString(apiVersion))
+  add(path_568305, "certificate-name", newJString(certificateName))
+  result = call_568304.call(path_568305, query_568306, nil, nil, nil)
 
-var deleteCertificate* = Call_DeleteCertificate_594069(name: "deleteCertificate",
+var deleteCertificate* = Call_DeleteCertificate_568298(name: "deleteCertificate",
     meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/certificates/{certificate-name}",
-    validator: validate_DeleteCertificate_594070, base: "",
-    url: url_DeleteCertificate_594071, schemes: {Scheme.Https})
+    validator: validate_DeleteCertificate_568299, base: "",
+    url: url_DeleteCertificate_568300, schemes: {Scheme.Https})
 type
-  Call_BackupCertificate_594078 = ref object of OpenApiRestCall_593438
-proc url_BackupCertificate_594080(protocol: Scheme; host: string; base: string;
+  Call_BackupCertificate_568307 = ref object of OpenApiRestCall_567667
+proc url_BackupCertificate_568309(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1001,7 +1001,7 @@ proc url_BackupCertificate_594080(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupCertificate_594079(path: JsonNode; query: JsonNode;
+proc validate_BackupCertificate_568308(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Requests that a backup of the specified certificate be downloaded to the client. All versions of the certificate will be downloaded. This operation requires the certificates/backup permission.
@@ -1014,11 +1014,11 @@ proc validate_BackupCertificate_594079(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594081 = path.getOrDefault("certificate-name")
-  valid_594081 = validateParameter(valid_594081, JString, required = true,
+  var valid_568310 = path.getOrDefault("certificate-name")
+  valid_568310 = validateParameter(valid_568310, JString, required = true,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "certificate-name", valid_594081
+  if valid_568310 != nil:
+    section.add "certificate-name", valid_568310
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1026,11 +1026,11 @@ proc validate_BackupCertificate_594079(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594082 = query.getOrDefault("api-version")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  var valid_568311 = query.getOrDefault("api-version")
+  valid_568311 = validateParameter(valid_568311, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "api-version", valid_594082
+  if valid_568311 != nil:
+    section.add "api-version", valid_568311
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1039,20 +1039,20 @@ proc validate_BackupCertificate_594079(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594083: Call_BackupCertificate_594078; path: JsonNode;
+proc call*(call_568312: Call_BackupCertificate_568307; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Requests that a backup of the specified certificate be downloaded to the client. All versions of the certificate will be downloaded. This operation requires the certificates/backup permission.
   ## 
-  let valid = call_594083.validator(path, query, header, formData, body)
-  let scheme = call_594083.pickScheme
+  let valid = call_568312.validator(path, query, header, formData, body)
+  let scheme = call_568312.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594083.url(scheme.get, call_594083.host, call_594083.base,
-                         call_594083.route, valid.getOrDefault("path"),
+  let url = call_568312.url(scheme.get, call_568312.host, call_568312.base,
+                         call_568312.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594083, url, valid)
+  result = hook(call_568312, url, valid)
 
-proc call*(call_594084: Call_BackupCertificate_594078; apiVersion: string;
+proc call*(call_568313: Call_BackupCertificate_568307; apiVersion: string;
           certificateName: string): Recallable =
   ## backupCertificate
   ## Requests that a backup of the specified certificate be downloaded to the client. All versions of the certificate will be downloaded. This operation requires the certificates/backup permission.
@@ -1060,20 +1060,20 @@ proc call*(call_594084: Call_BackupCertificate_594078; apiVersion: string;
   ##             : Client API version.
   ##   certificateName: string (required)
   ##                  : The name of the certificate.
-  var path_594085 = newJObject()
-  var query_594086 = newJObject()
-  add(query_594086, "api-version", newJString(apiVersion))
-  add(path_594085, "certificate-name", newJString(certificateName))
-  result = call_594084.call(path_594085, query_594086, nil, nil, nil)
+  var path_568314 = newJObject()
+  var query_568315 = newJObject()
+  add(query_568315, "api-version", newJString(apiVersion))
+  add(path_568314, "certificate-name", newJString(certificateName))
+  result = call_568313.call(path_568314, query_568315, nil, nil, nil)
 
-var backupCertificate* = Call_BackupCertificate_594078(name: "backupCertificate",
+var backupCertificate* = Call_BackupCertificate_568307(name: "backupCertificate",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/certificates/{certificate-name}/backup",
-    validator: validate_BackupCertificate_594079, base: "",
-    url: url_BackupCertificate_594080, schemes: {Scheme.Https})
+    validator: validate_BackupCertificate_568308, base: "",
+    url: url_BackupCertificate_568309, schemes: {Scheme.Https})
 type
-  Call_CreateCertificate_594087 = ref object of OpenApiRestCall_593438
-proc url_CreateCertificate_594089(protocol: Scheme; host: string; base: string;
+  Call_CreateCertificate_568316 = ref object of OpenApiRestCall_567667
+proc url_CreateCertificate_568318(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1090,7 +1090,7 @@ proc url_CreateCertificate_594089(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CreateCertificate_594088(path: JsonNode; query: JsonNode;
+proc validate_CreateCertificate_568317(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## If this is the first version, the certificate resource is created. This operation requires the certificates/create permission.
@@ -1103,11 +1103,11 @@ proc validate_CreateCertificate_594088(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594090 = path.getOrDefault("certificate-name")
-  valid_594090 = validateParameter(valid_594090, JString, required = true,
+  var valid_568319 = path.getOrDefault("certificate-name")
+  valid_568319 = validateParameter(valid_568319, JString, required = true,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "certificate-name", valid_594090
+  if valid_568319 != nil:
+    section.add "certificate-name", valid_568319
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1115,11 +1115,11 @@ proc validate_CreateCertificate_594088(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594091 = query.getOrDefault("api-version")
-  valid_594091 = validateParameter(valid_594091, JString, required = true,
+  var valid_568320 = query.getOrDefault("api-version")
+  valid_568320 = validateParameter(valid_568320, JString, required = true,
                                  default = nil)
-  if valid_594091 != nil:
-    section.add "api-version", valid_594091
+  if valid_568320 != nil:
+    section.add "api-version", valid_568320
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1133,20 +1133,20 @@ proc validate_CreateCertificate_594088(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594093: Call_CreateCertificate_594087; path: JsonNode;
+proc call*(call_568322: Call_CreateCertificate_568316; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## If this is the first version, the certificate resource is created. This operation requires the certificates/create permission.
   ## 
-  let valid = call_594093.validator(path, query, header, formData, body)
-  let scheme = call_594093.pickScheme
+  let valid = call_568322.validator(path, query, header, formData, body)
+  let scheme = call_568322.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594093.url(scheme.get, call_594093.host, call_594093.base,
-                         call_594093.route, valid.getOrDefault("path"),
+  let url = call_568322.url(scheme.get, call_568322.host, call_568322.base,
+                         call_568322.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594093, url, valid)
+  result = hook(call_568322, url, valid)
 
-proc call*(call_594094: Call_CreateCertificate_594087; apiVersion: string;
+proc call*(call_568323: Call_CreateCertificate_568316; apiVersion: string;
           certificateName: string; parameters: JsonNode): Recallable =
   ## createCertificate
   ## If this is the first version, the certificate resource is created. This operation requires the certificates/create permission.
@@ -1156,23 +1156,23 @@ proc call*(call_594094: Call_CreateCertificate_594087; apiVersion: string;
   ##                  : The name of the certificate.
   ##   parameters: JObject (required)
   ##             : The parameters to create a certificate.
-  var path_594095 = newJObject()
-  var query_594096 = newJObject()
-  var body_594097 = newJObject()
-  add(query_594096, "api-version", newJString(apiVersion))
-  add(path_594095, "certificate-name", newJString(certificateName))
+  var path_568324 = newJObject()
+  var query_568325 = newJObject()
+  var body_568326 = newJObject()
+  add(query_568325, "api-version", newJString(apiVersion))
+  add(path_568324, "certificate-name", newJString(certificateName))
   if parameters != nil:
-    body_594097 = parameters
-  result = call_594094.call(path_594095, query_594096, nil, nil, body_594097)
+    body_568326 = parameters
+  result = call_568323.call(path_568324, query_568325, nil, nil, body_568326)
 
-var createCertificate* = Call_CreateCertificate_594087(name: "createCertificate",
+var createCertificate* = Call_CreateCertificate_568316(name: "createCertificate",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/certificates/{certificate-name}/create",
-    validator: validate_CreateCertificate_594088, base: "",
-    url: url_CreateCertificate_594089, schemes: {Scheme.Https})
+    validator: validate_CreateCertificate_568317, base: "",
+    url: url_CreateCertificate_568318, schemes: {Scheme.Https})
 type
-  Call_ImportCertificate_594098 = ref object of OpenApiRestCall_593438
-proc url_ImportCertificate_594100(protocol: Scheme; host: string; base: string;
+  Call_ImportCertificate_568327 = ref object of OpenApiRestCall_567667
+proc url_ImportCertificate_568329(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1189,7 +1189,7 @@ proc url_ImportCertificate_594100(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ImportCertificate_594099(path: JsonNode; query: JsonNode;
+proc validate_ImportCertificate_568328(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Imports an existing valid certificate, containing a private key, into Azure Key Vault. The certificate to be imported can be in either PFX or PEM format. If the certificate is in PEM format the PEM file must contain the key as well as x509 certificates. This operation requires the certificates/import permission.
@@ -1202,11 +1202,11 @@ proc validate_ImportCertificate_594099(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594101 = path.getOrDefault("certificate-name")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  var valid_568330 = path.getOrDefault("certificate-name")
+  valid_568330 = validateParameter(valid_568330, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "certificate-name", valid_594101
+  if valid_568330 != nil:
+    section.add "certificate-name", valid_568330
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1214,11 +1214,11 @@ proc validate_ImportCertificate_594099(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594102 = query.getOrDefault("api-version")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  var valid_568331 = query.getOrDefault("api-version")
+  valid_568331 = validateParameter(valid_568331, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "api-version", valid_594102
+  if valid_568331 != nil:
+    section.add "api-version", valid_568331
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1232,20 +1232,20 @@ proc validate_ImportCertificate_594099(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594104: Call_ImportCertificate_594098; path: JsonNode;
+proc call*(call_568333: Call_ImportCertificate_568327; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Imports an existing valid certificate, containing a private key, into Azure Key Vault. The certificate to be imported can be in either PFX or PEM format. If the certificate is in PEM format the PEM file must contain the key as well as x509 certificates. This operation requires the certificates/import permission.
   ## 
-  let valid = call_594104.validator(path, query, header, formData, body)
-  let scheme = call_594104.pickScheme
+  let valid = call_568333.validator(path, query, header, formData, body)
+  let scheme = call_568333.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594104.url(scheme.get, call_594104.host, call_594104.base,
-                         call_594104.route, valid.getOrDefault("path"),
+  let url = call_568333.url(scheme.get, call_568333.host, call_568333.base,
+                         call_568333.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594104, url, valid)
+  result = hook(call_568333, url, valid)
 
-proc call*(call_594105: Call_ImportCertificate_594098; apiVersion: string;
+proc call*(call_568334: Call_ImportCertificate_568327; apiVersion: string;
           certificateName: string; parameters: JsonNode): Recallable =
   ## importCertificate
   ## Imports an existing valid certificate, containing a private key, into Azure Key Vault. The certificate to be imported can be in either PFX or PEM format. If the certificate is in PEM format the PEM file must contain the key as well as x509 certificates. This operation requires the certificates/import permission.
@@ -1255,23 +1255,23 @@ proc call*(call_594105: Call_ImportCertificate_594098; apiVersion: string;
   ##                  : The name of the certificate.
   ##   parameters: JObject (required)
   ##             : The parameters to import the certificate.
-  var path_594106 = newJObject()
-  var query_594107 = newJObject()
-  var body_594108 = newJObject()
-  add(query_594107, "api-version", newJString(apiVersion))
-  add(path_594106, "certificate-name", newJString(certificateName))
+  var path_568335 = newJObject()
+  var query_568336 = newJObject()
+  var body_568337 = newJObject()
+  add(query_568336, "api-version", newJString(apiVersion))
+  add(path_568335, "certificate-name", newJString(certificateName))
   if parameters != nil:
-    body_594108 = parameters
-  result = call_594105.call(path_594106, query_594107, nil, nil, body_594108)
+    body_568337 = parameters
+  result = call_568334.call(path_568335, query_568336, nil, nil, body_568337)
 
-var importCertificate* = Call_ImportCertificate_594098(name: "importCertificate",
+var importCertificate* = Call_ImportCertificate_568327(name: "importCertificate",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/certificates/{certificate-name}/import",
-    validator: validate_ImportCertificate_594099, base: "",
-    url: url_ImportCertificate_594100, schemes: {Scheme.Https})
+    validator: validate_ImportCertificate_568328, base: "",
+    url: url_ImportCertificate_568329, schemes: {Scheme.Https})
 type
-  Call_GetCertificateOperation_594109 = ref object of OpenApiRestCall_593438
-proc url_GetCertificateOperation_594111(protocol: Scheme; host: string; base: string;
+  Call_GetCertificateOperation_568338 = ref object of OpenApiRestCall_567667
+proc url_GetCertificateOperation_568340(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1289,7 +1289,7 @@ proc url_GetCertificateOperation_594111(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetCertificateOperation_594110(path: JsonNode; query: JsonNode;
+proc validate_GetCertificateOperation_568339(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the creation operation associated with a specified certificate. This operation requires the certificates/get permission.
   ## 
@@ -1301,11 +1301,11 @@ proc validate_GetCertificateOperation_594110(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594112 = path.getOrDefault("certificate-name")
-  valid_594112 = validateParameter(valid_594112, JString, required = true,
+  var valid_568341 = path.getOrDefault("certificate-name")
+  valid_568341 = validateParameter(valid_568341, JString, required = true,
                                  default = nil)
-  if valid_594112 != nil:
-    section.add "certificate-name", valid_594112
+  if valid_568341 != nil:
+    section.add "certificate-name", valid_568341
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1313,11 +1313,11 @@ proc validate_GetCertificateOperation_594110(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594113 = query.getOrDefault("api-version")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  var valid_568342 = query.getOrDefault("api-version")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = nil)
-  if valid_594113 != nil:
-    section.add "api-version", valid_594113
+  if valid_568342 != nil:
+    section.add "api-version", valid_568342
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1326,20 +1326,20 @@ proc validate_GetCertificateOperation_594110(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594114: Call_GetCertificateOperation_594109; path: JsonNode;
+proc call*(call_568343: Call_GetCertificateOperation_568338; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the creation operation associated with a specified certificate. This operation requires the certificates/get permission.
   ## 
-  let valid = call_594114.validator(path, query, header, formData, body)
-  let scheme = call_594114.pickScheme
+  let valid = call_568343.validator(path, query, header, formData, body)
+  let scheme = call_568343.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594114.url(scheme.get, call_594114.host, call_594114.base,
-                         call_594114.route, valid.getOrDefault("path"),
+  let url = call_568343.url(scheme.get, call_568343.host, call_568343.base,
+                         call_568343.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594114, url, valid)
+  result = hook(call_568343, url, valid)
 
-proc call*(call_594115: Call_GetCertificateOperation_594109; apiVersion: string;
+proc call*(call_568344: Call_GetCertificateOperation_568338; apiVersion: string;
           certificateName: string): Recallable =
   ## getCertificateOperation
   ## Gets the creation operation associated with a specified certificate. This operation requires the certificates/get permission.
@@ -1347,20 +1347,20 @@ proc call*(call_594115: Call_GetCertificateOperation_594109; apiVersion: string;
   ##             : Client API version.
   ##   certificateName: string (required)
   ##                  : The name of the certificate.
-  var path_594116 = newJObject()
-  var query_594117 = newJObject()
-  add(query_594117, "api-version", newJString(apiVersion))
-  add(path_594116, "certificate-name", newJString(certificateName))
-  result = call_594115.call(path_594116, query_594117, nil, nil, nil)
+  var path_568345 = newJObject()
+  var query_568346 = newJObject()
+  add(query_568346, "api-version", newJString(apiVersion))
+  add(path_568345, "certificate-name", newJString(certificateName))
+  result = call_568344.call(path_568345, query_568346, nil, nil, nil)
 
-var getCertificateOperation* = Call_GetCertificateOperation_594109(
+var getCertificateOperation* = Call_GetCertificateOperation_568338(
     name: "getCertificateOperation", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/certificates/{certificate-name}/pending",
-    validator: validate_GetCertificateOperation_594110, base: "",
-    url: url_GetCertificateOperation_594111, schemes: {Scheme.Https})
+    validator: validate_GetCertificateOperation_568339, base: "",
+    url: url_GetCertificateOperation_568340, schemes: {Scheme.Https})
 type
-  Call_UpdateCertificateOperation_594127 = ref object of OpenApiRestCall_593438
-proc url_UpdateCertificateOperation_594129(protocol: Scheme; host: string;
+  Call_UpdateCertificateOperation_568356 = ref object of OpenApiRestCall_567667
+proc url_UpdateCertificateOperation_568358(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1377,7 +1377,7 @@ proc url_UpdateCertificateOperation_594129(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateCertificateOperation_594128(path: JsonNode; query: JsonNode;
+proc validate_UpdateCertificateOperation_568357(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a certificate creation operation that is already in progress. This operation requires the certificates/update permission.
   ## 
@@ -1389,11 +1389,11 @@ proc validate_UpdateCertificateOperation_594128(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594130 = path.getOrDefault("certificate-name")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  var valid_568359 = path.getOrDefault("certificate-name")
+  valid_568359 = validateParameter(valid_568359, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "certificate-name", valid_594130
+  if valid_568359 != nil:
+    section.add "certificate-name", valid_568359
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1401,11 +1401,11 @@ proc validate_UpdateCertificateOperation_594128(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594131 = query.getOrDefault("api-version")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  var valid_568360 = query.getOrDefault("api-version")
+  valid_568360 = validateParameter(valid_568360, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "api-version", valid_594131
+  if valid_568360 != nil:
+    section.add "api-version", valid_568360
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1419,20 +1419,20 @@ proc validate_UpdateCertificateOperation_594128(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594133: Call_UpdateCertificateOperation_594127; path: JsonNode;
+proc call*(call_568362: Call_UpdateCertificateOperation_568356; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a certificate creation operation that is already in progress. This operation requires the certificates/update permission.
   ## 
-  let valid = call_594133.validator(path, query, header, formData, body)
-  let scheme = call_594133.pickScheme
+  let valid = call_568362.validator(path, query, header, formData, body)
+  let scheme = call_568362.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594133.url(scheme.get, call_594133.host, call_594133.base,
-                         call_594133.route, valid.getOrDefault("path"),
+  let url = call_568362.url(scheme.get, call_568362.host, call_568362.base,
+                         call_568362.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594133, url, valid)
+  result = hook(call_568362, url, valid)
 
-proc call*(call_594134: Call_UpdateCertificateOperation_594127; apiVersion: string;
+proc call*(call_568363: Call_UpdateCertificateOperation_568356; apiVersion: string;
           certificateName: string; certificateOperation: JsonNode): Recallable =
   ## updateCertificateOperation
   ## Updates a certificate creation operation that is already in progress. This operation requires the certificates/update permission.
@@ -1442,23 +1442,23 @@ proc call*(call_594134: Call_UpdateCertificateOperation_594127; apiVersion: stri
   ##                  : The name of the certificate.
   ##   certificateOperation: JObject (required)
   ##                       : The certificate operation response.
-  var path_594135 = newJObject()
-  var query_594136 = newJObject()
-  var body_594137 = newJObject()
-  add(query_594136, "api-version", newJString(apiVersion))
-  add(path_594135, "certificate-name", newJString(certificateName))
+  var path_568364 = newJObject()
+  var query_568365 = newJObject()
+  var body_568366 = newJObject()
+  add(query_568365, "api-version", newJString(apiVersion))
+  add(path_568364, "certificate-name", newJString(certificateName))
   if certificateOperation != nil:
-    body_594137 = certificateOperation
-  result = call_594134.call(path_594135, query_594136, nil, nil, body_594137)
+    body_568366 = certificateOperation
+  result = call_568363.call(path_568364, query_568365, nil, nil, body_568366)
 
-var updateCertificateOperation* = Call_UpdateCertificateOperation_594127(
+var updateCertificateOperation* = Call_UpdateCertificateOperation_568356(
     name: "updateCertificateOperation", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/certificates/{certificate-name}/pending",
-    validator: validate_UpdateCertificateOperation_594128, base: "",
-    url: url_UpdateCertificateOperation_594129, schemes: {Scheme.Https})
+    validator: validate_UpdateCertificateOperation_568357, base: "",
+    url: url_UpdateCertificateOperation_568358, schemes: {Scheme.Https})
 type
-  Call_DeleteCertificateOperation_594118 = ref object of OpenApiRestCall_593438
-proc url_DeleteCertificateOperation_594120(protocol: Scheme; host: string;
+  Call_DeleteCertificateOperation_568347 = ref object of OpenApiRestCall_567667
+proc url_DeleteCertificateOperation_568349(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1475,7 +1475,7 @@ proc url_DeleteCertificateOperation_594120(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeleteCertificateOperation_594119(path: JsonNode; query: JsonNode;
+proc validate_DeleteCertificateOperation_568348(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the creation operation for a specified certificate that is in the process of being created. The certificate is no longer created. This operation requires the certificates/update permission.
   ## 
@@ -1487,11 +1487,11 @@ proc validate_DeleteCertificateOperation_594119(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594121 = path.getOrDefault("certificate-name")
-  valid_594121 = validateParameter(valid_594121, JString, required = true,
+  var valid_568350 = path.getOrDefault("certificate-name")
+  valid_568350 = validateParameter(valid_568350, JString, required = true,
                                  default = nil)
-  if valid_594121 != nil:
-    section.add "certificate-name", valid_594121
+  if valid_568350 != nil:
+    section.add "certificate-name", valid_568350
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1499,11 +1499,11 @@ proc validate_DeleteCertificateOperation_594119(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594122 = query.getOrDefault("api-version")
-  valid_594122 = validateParameter(valid_594122, JString, required = true,
+  var valid_568351 = query.getOrDefault("api-version")
+  valid_568351 = validateParameter(valid_568351, JString, required = true,
                                  default = nil)
-  if valid_594122 != nil:
-    section.add "api-version", valid_594122
+  if valid_568351 != nil:
+    section.add "api-version", valid_568351
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1512,20 +1512,20 @@ proc validate_DeleteCertificateOperation_594119(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594123: Call_DeleteCertificateOperation_594118; path: JsonNode;
+proc call*(call_568352: Call_DeleteCertificateOperation_568347; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the creation operation for a specified certificate that is in the process of being created. The certificate is no longer created. This operation requires the certificates/update permission.
   ## 
-  let valid = call_594123.validator(path, query, header, formData, body)
-  let scheme = call_594123.pickScheme
+  let valid = call_568352.validator(path, query, header, formData, body)
+  let scheme = call_568352.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594123.url(scheme.get, call_594123.host, call_594123.base,
-                         call_594123.route, valid.getOrDefault("path"),
+  let url = call_568352.url(scheme.get, call_568352.host, call_568352.base,
+                         call_568352.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594123, url, valid)
+  result = hook(call_568352, url, valid)
 
-proc call*(call_594124: Call_DeleteCertificateOperation_594118; apiVersion: string;
+proc call*(call_568353: Call_DeleteCertificateOperation_568347; apiVersion: string;
           certificateName: string): Recallable =
   ## deleteCertificateOperation
   ## Deletes the creation operation for a specified certificate that is in the process of being created. The certificate is no longer created. This operation requires the certificates/update permission.
@@ -1533,20 +1533,20 @@ proc call*(call_594124: Call_DeleteCertificateOperation_594118; apiVersion: stri
   ##             : Client API version.
   ##   certificateName: string (required)
   ##                  : The name of the certificate.
-  var path_594125 = newJObject()
-  var query_594126 = newJObject()
-  add(query_594126, "api-version", newJString(apiVersion))
-  add(path_594125, "certificate-name", newJString(certificateName))
-  result = call_594124.call(path_594125, query_594126, nil, nil, nil)
+  var path_568354 = newJObject()
+  var query_568355 = newJObject()
+  add(query_568355, "api-version", newJString(apiVersion))
+  add(path_568354, "certificate-name", newJString(certificateName))
+  result = call_568353.call(path_568354, query_568355, nil, nil, nil)
 
-var deleteCertificateOperation* = Call_DeleteCertificateOperation_594118(
+var deleteCertificateOperation* = Call_DeleteCertificateOperation_568347(
     name: "deleteCertificateOperation", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/certificates/{certificate-name}/pending",
-    validator: validate_DeleteCertificateOperation_594119, base: "",
-    url: url_DeleteCertificateOperation_594120, schemes: {Scheme.Https})
+    validator: validate_DeleteCertificateOperation_568348, base: "",
+    url: url_DeleteCertificateOperation_568349, schemes: {Scheme.Https})
 type
-  Call_MergeCertificate_594138 = ref object of OpenApiRestCall_593438
-proc url_MergeCertificate_594140(protocol: Scheme; host: string; base: string;
+  Call_MergeCertificate_568367 = ref object of OpenApiRestCall_567667
+proc url_MergeCertificate_568369(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1563,7 +1563,7 @@ proc url_MergeCertificate_594140(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MergeCertificate_594139(path: JsonNode; query: JsonNode;
+proc validate_MergeCertificate_568368(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## The MergeCertificate operation performs the merging of a certificate or certificate chain with a key pair currently available in the service. This operation requires the certificates/create permission.
@@ -1576,11 +1576,11 @@ proc validate_MergeCertificate_594139(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594141 = path.getOrDefault("certificate-name")
-  valid_594141 = validateParameter(valid_594141, JString, required = true,
+  var valid_568370 = path.getOrDefault("certificate-name")
+  valid_568370 = validateParameter(valid_568370, JString, required = true,
                                  default = nil)
-  if valid_594141 != nil:
-    section.add "certificate-name", valid_594141
+  if valid_568370 != nil:
+    section.add "certificate-name", valid_568370
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1588,11 +1588,11 @@ proc validate_MergeCertificate_594139(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594142 = query.getOrDefault("api-version")
-  valid_594142 = validateParameter(valid_594142, JString, required = true,
+  var valid_568371 = query.getOrDefault("api-version")
+  valid_568371 = validateParameter(valid_568371, JString, required = true,
                                  default = nil)
-  if valid_594142 != nil:
-    section.add "api-version", valid_594142
+  if valid_568371 != nil:
+    section.add "api-version", valid_568371
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1606,20 +1606,20 @@ proc validate_MergeCertificate_594139(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594144: Call_MergeCertificate_594138; path: JsonNode;
+proc call*(call_568373: Call_MergeCertificate_568367; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The MergeCertificate operation performs the merging of a certificate or certificate chain with a key pair currently available in the service. This operation requires the certificates/create permission.
   ## 
-  let valid = call_594144.validator(path, query, header, formData, body)
-  let scheme = call_594144.pickScheme
+  let valid = call_568373.validator(path, query, header, formData, body)
+  let scheme = call_568373.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594144.url(scheme.get, call_594144.host, call_594144.base,
-                         call_594144.route, valid.getOrDefault("path"),
+  let url = call_568373.url(scheme.get, call_568373.host, call_568373.base,
+                         call_568373.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594144, url, valid)
+  result = hook(call_568373, url, valid)
 
-proc call*(call_594145: Call_MergeCertificate_594138; apiVersion: string;
+proc call*(call_568374: Call_MergeCertificate_568367; apiVersion: string;
           certificateName: string; parameters: JsonNode): Recallable =
   ## mergeCertificate
   ## The MergeCertificate operation performs the merging of a certificate or certificate chain with a key pair currently available in the service. This operation requires the certificates/create permission.
@@ -1629,23 +1629,23 @@ proc call*(call_594145: Call_MergeCertificate_594138; apiVersion: string;
   ##                  : The name of the certificate.
   ##   parameters: JObject (required)
   ##             : The parameters to merge certificate.
-  var path_594146 = newJObject()
-  var query_594147 = newJObject()
-  var body_594148 = newJObject()
-  add(query_594147, "api-version", newJString(apiVersion))
-  add(path_594146, "certificate-name", newJString(certificateName))
+  var path_568375 = newJObject()
+  var query_568376 = newJObject()
+  var body_568377 = newJObject()
+  add(query_568376, "api-version", newJString(apiVersion))
+  add(path_568375, "certificate-name", newJString(certificateName))
   if parameters != nil:
-    body_594148 = parameters
-  result = call_594145.call(path_594146, query_594147, nil, nil, body_594148)
+    body_568377 = parameters
+  result = call_568374.call(path_568375, query_568376, nil, nil, body_568377)
 
-var mergeCertificate* = Call_MergeCertificate_594138(name: "mergeCertificate",
+var mergeCertificate* = Call_MergeCertificate_568367(name: "mergeCertificate",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/certificates/{certificate-name}/pending/merge",
-    validator: validate_MergeCertificate_594139, base: "",
-    url: url_MergeCertificate_594140, schemes: {Scheme.Https})
+    validator: validate_MergeCertificate_568368, base: "",
+    url: url_MergeCertificate_568369, schemes: {Scheme.Https})
 type
-  Call_GetCertificatePolicy_594149 = ref object of OpenApiRestCall_593438
-proc url_GetCertificatePolicy_594151(protocol: Scheme; host: string; base: string;
+  Call_GetCertificatePolicy_568378 = ref object of OpenApiRestCall_567667
+proc url_GetCertificatePolicy_568380(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1662,7 +1662,7 @@ proc url_GetCertificatePolicy_594151(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetCertificatePolicy_594150(path: JsonNode; query: JsonNode;
+proc validate_GetCertificatePolicy_568379(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The GetCertificatePolicy operation returns the specified certificate policy resources in the specified key vault. This operation requires the certificates/get permission.
   ## 
@@ -1674,11 +1674,11 @@ proc validate_GetCertificatePolicy_594150(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594152 = path.getOrDefault("certificate-name")
-  valid_594152 = validateParameter(valid_594152, JString, required = true,
+  var valid_568381 = path.getOrDefault("certificate-name")
+  valid_568381 = validateParameter(valid_568381, JString, required = true,
                                  default = nil)
-  if valid_594152 != nil:
-    section.add "certificate-name", valid_594152
+  if valid_568381 != nil:
+    section.add "certificate-name", valid_568381
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1686,11 +1686,11 @@ proc validate_GetCertificatePolicy_594150(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594153 = query.getOrDefault("api-version")
-  valid_594153 = validateParameter(valid_594153, JString, required = true,
+  var valid_568382 = query.getOrDefault("api-version")
+  valid_568382 = validateParameter(valid_568382, JString, required = true,
                                  default = nil)
-  if valid_594153 != nil:
-    section.add "api-version", valid_594153
+  if valid_568382 != nil:
+    section.add "api-version", valid_568382
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1699,20 +1699,20 @@ proc validate_GetCertificatePolicy_594150(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594154: Call_GetCertificatePolicy_594149; path: JsonNode;
+proc call*(call_568383: Call_GetCertificatePolicy_568378; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetCertificatePolicy operation returns the specified certificate policy resources in the specified key vault. This operation requires the certificates/get permission.
   ## 
-  let valid = call_594154.validator(path, query, header, formData, body)
-  let scheme = call_594154.pickScheme
+  let valid = call_568383.validator(path, query, header, formData, body)
+  let scheme = call_568383.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594154.url(scheme.get, call_594154.host, call_594154.base,
-                         call_594154.route, valid.getOrDefault("path"),
+  let url = call_568383.url(scheme.get, call_568383.host, call_568383.base,
+                         call_568383.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594154, url, valid)
+  result = hook(call_568383, url, valid)
 
-proc call*(call_594155: Call_GetCertificatePolicy_594149; apiVersion: string;
+proc call*(call_568384: Call_GetCertificatePolicy_568378; apiVersion: string;
           certificateName: string): Recallable =
   ## getCertificatePolicy
   ## The GetCertificatePolicy operation returns the specified certificate policy resources in the specified key vault. This operation requires the certificates/get permission.
@@ -1720,20 +1720,20 @@ proc call*(call_594155: Call_GetCertificatePolicy_594149; apiVersion: string;
   ##             : Client API version.
   ##   certificateName: string (required)
   ##                  : The name of the certificate in a given key vault.
-  var path_594156 = newJObject()
-  var query_594157 = newJObject()
-  add(query_594157, "api-version", newJString(apiVersion))
-  add(path_594156, "certificate-name", newJString(certificateName))
-  result = call_594155.call(path_594156, query_594157, nil, nil, nil)
+  var path_568385 = newJObject()
+  var query_568386 = newJObject()
+  add(query_568386, "api-version", newJString(apiVersion))
+  add(path_568385, "certificate-name", newJString(certificateName))
+  result = call_568384.call(path_568385, query_568386, nil, nil, nil)
 
-var getCertificatePolicy* = Call_GetCertificatePolicy_594149(
+var getCertificatePolicy* = Call_GetCertificatePolicy_568378(
     name: "getCertificatePolicy", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/certificates/{certificate-name}/policy",
-    validator: validate_GetCertificatePolicy_594150, base: "",
-    url: url_GetCertificatePolicy_594151, schemes: {Scheme.Https})
+    validator: validate_GetCertificatePolicy_568379, base: "",
+    url: url_GetCertificatePolicy_568380, schemes: {Scheme.Https})
 type
-  Call_UpdateCertificatePolicy_594158 = ref object of OpenApiRestCall_593438
-proc url_UpdateCertificatePolicy_594160(protocol: Scheme; host: string; base: string;
+  Call_UpdateCertificatePolicy_568387 = ref object of OpenApiRestCall_567667
+proc url_UpdateCertificatePolicy_568389(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1751,7 +1751,7 @@ proc url_UpdateCertificatePolicy_594160(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateCertificatePolicy_594159(path: JsonNode; query: JsonNode;
+proc validate_UpdateCertificatePolicy_568388(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Set specified members in the certificate policy. Leave others as null. This operation requires the certificates/update permission.
   ## 
@@ -1763,11 +1763,11 @@ proc validate_UpdateCertificatePolicy_594159(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594161 = path.getOrDefault("certificate-name")
-  valid_594161 = validateParameter(valid_594161, JString, required = true,
+  var valid_568390 = path.getOrDefault("certificate-name")
+  valid_568390 = validateParameter(valid_568390, JString, required = true,
                                  default = nil)
-  if valid_594161 != nil:
-    section.add "certificate-name", valid_594161
+  if valid_568390 != nil:
+    section.add "certificate-name", valid_568390
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1775,11 +1775,11 @@ proc validate_UpdateCertificatePolicy_594159(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594162 = query.getOrDefault("api-version")
-  valid_594162 = validateParameter(valid_594162, JString, required = true,
+  var valid_568391 = query.getOrDefault("api-version")
+  valid_568391 = validateParameter(valid_568391, JString, required = true,
                                  default = nil)
-  if valid_594162 != nil:
-    section.add "api-version", valid_594162
+  if valid_568391 != nil:
+    section.add "api-version", valid_568391
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1793,20 +1793,20 @@ proc validate_UpdateCertificatePolicy_594159(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594164: Call_UpdateCertificatePolicy_594158; path: JsonNode;
+proc call*(call_568393: Call_UpdateCertificatePolicy_568387; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Set specified members in the certificate policy. Leave others as null. This operation requires the certificates/update permission.
   ## 
-  let valid = call_594164.validator(path, query, header, formData, body)
-  let scheme = call_594164.pickScheme
+  let valid = call_568393.validator(path, query, header, formData, body)
+  let scheme = call_568393.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594164.url(scheme.get, call_594164.host, call_594164.base,
-                         call_594164.route, valid.getOrDefault("path"),
+  let url = call_568393.url(scheme.get, call_568393.host, call_568393.base,
+                         call_568393.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594164, url, valid)
+  result = hook(call_568393, url, valid)
 
-proc call*(call_594165: Call_UpdateCertificatePolicy_594158; apiVersion: string;
+proc call*(call_568394: Call_UpdateCertificatePolicy_568387; apiVersion: string;
           certificateName: string; certificatePolicy: JsonNode): Recallable =
   ## updateCertificatePolicy
   ## Set specified members in the certificate policy. Leave others as null. This operation requires the certificates/update permission.
@@ -1816,23 +1816,23 @@ proc call*(call_594165: Call_UpdateCertificatePolicy_594158; apiVersion: string;
   ##                  : The name of the certificate in the given vault.
   ##   certificatePolicy: JObject (required)
   ##                    : The policy for the certificate.
-  var path_594166 = newJObject()
-  var query_594167 = newJObject()
-  var body_594168 = newJObject()
-  add(query_594167, "api-version", newJString(apiVersion))
-  add(path_594166, "certificate-name", newJString(certificateName))
+  var path_568395 = newJObject()
+  var query_568396 = newJObject()
+  var body_568397 = newJObject()
+  add(query_568396, "api-version", newJString(apiVersion))
+  add(path_568395, "certificate-name", newJString(certificateName))
   if certificatePolicy != nil:
-    body_594168 = certificatePolicy
-  result = call_594165.call(path_594166, query_594167, nil, nil, body_594168)
+    body_568397 = certificatePolicy
+  result = call_568394.call(path_568395, query_568396, nil, nil, body_568397)
 
-var updateCertificatePolicy* = Call_UpdateCertificatePolicy_594158(
+var updateCertificatePolicy* = Call_UpdateCertificatePolicy_568387(
     name: "updateCertificatePolicy", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/certificates/{certificate-name}/policy",
-    validator: validate_UpdateCertificatePolicy_594159, base: "",
-    url: url_UpdateCertificatePolicy_594160, schemes: {Scheme.Https})
+    validator: validate_UpdateCertificatePolicy_568388, base: "",
+    url: url_UpdateCertificatePolicy_568389, schemes: {Scheme.Https})
 type
-  Call_GetCertificateVersions_594169 = ref object of OpenApiRestCall_593438
-proc url_GetCertificateVersions_594171(protocol: Scheme; host: string; base: string;
+  Call_GetCertificateVersions_568398 = ref object of OpenApiRestCall_567667
+proc url_GetCertificateVersions_568400(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1849,7 +1849,7 @@ proc url_GetCertificateVersions_594171(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetCertificateVersions_594170(path: JsonNode; query: JsonNode;
+proc validate_GetCertificateVersions_568399(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The GetCertificateVersions operation returns the versions of a certificate in the specified key vault. This operation requires the certificates/list permission.
   ## 
@@ -1861,11 +1861,11 @@ proc validate_GetCertificateVersions_594170(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594172 = path.getOrDefault("certificate-name")
-  valid_594172 = validateParameter(valid_594172, JString, required = true,
+  var valid_568401 = path.getOrDefault("certificate-name")
+  valid_568401 = validateParameter(valid_568401, JString, required = true,
                                  default = nil)
-  if valid_594172 != nil:
-    section.add "certificate-name", valid_594172
+  if valid_568401 != nil:
+    section.add "certificate-name", valid_568401
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1875,15 +1875,15 @@ proc validate_GetCertificateVersions_594170(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594173 = query.getOrDefault("api-version")
-  valid_594173 = validateParameter(valid_594173, JString, required = true,
+  var valid_568402 = query.getOrDefault("api-version")
+  valid_568402 = validateParameter(valid_568402, JString, required = true,
                                  default = nil)
-  if valid_594173 != nil:
-    section.add "api-version", valid_594173
-  var valid_594174 = query.getOrDefault("maxresults")
-  valid_594174 = validateParameter(valid_594174, JInt, required = false, default = nil)
-  if valid_594174 != nil:
-    section.add "maxresults", valid_594174
+  if valid_568402 != nil:
+    section.add "api-version", valid_568402
+  var valid_568403 = query.getOrDefault("maxresults")
+  valid_568403 = validateParameter(valid_568403, JInt, required = false, default = nil)
+  if valid_568403 != nil:
+    section.add "maxresults", valid_568403
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1892,20 +1892,20 @@ proc validate_GetCertificateVersions_594170(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594175: Call_GetCertificateVersions_594169; path: JsonNode;
+proc call*(call_568404: Call_GetCertificateVersions_568398; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetCertificateVersions operation returns the versions of a certificate in the specified key vault. This operation requires the certificates/list permission.
   ## 
-  let valid = call_594175.validator(path, query, header, formData, body)
-  let scheme = call_594175.pickScheme
+  let valid = call_568404.validator(path, query, header, formData, body)
+  let scheme = call_568404.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594175.url(scheme.get, call_594175.host, call_594175.base,
-                         call_594175.route, valid.getOrDefault("path"),
+  let url = call_568404.url(scheme.get, call_568404.host, call_568404.base,
+                         call_568404.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594175, url, valid)
+  result = hook(call_568404, url, valid)
 
-proc call*(call_594176: Call_GetCertificateVersions_594169; apiVersion: string;
+proc call*(call_568405: Call_GetCertificateVersions_568398; apiVersion: string;
           certificateName: string; maxresults: int = 0): Recallable =
   ## getCertificateVersions
   ## The GetCertificateVersions operation returns the versions of a certificate in the specified key vault. This operation requires the certificates/list permission.
@@ -1915,21 +1915,21 @@ proc call*(call_594176: Call_GetCertificateVersions_594169; apiVersion: string;
   ##                  : The name of the certificate.
   ##   maxresults: int
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
-  var path_594177 = newJObject()
-  var query_594178 = newJObject()
-  add(query_594178, "api-version", newJString(apiVersion))
-  add(path_594177, "certificate-name", newJString(certificateName))
-  add(query_594178, "maxresults", newJInt(maxresults))
-  result = call_594176.call(path_594177, query_594178, nil, nil, nil)
+  var path_568406 = newJObject()
+  var query_568407 = newJObject()
+  add(query_568407, "api-version", newJString(apiVersion))
+  add(path_568406, "certificate-name", newJString(certificateName))
+  add(query_568407, "maxresults", newJInt(maxresults))
+  result = call_568405.call(path_568406, query_568407, nil, nil, nil)
 
-var getCertificateVersions* = Call_GetCertificateVersions_594169(
+var getCertificateVersions* = Call_GetCertificateVersions_568398(
     name: "getCertificateVersions", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/certificates/{certificate-name}/versions",
-    validator: validate_GetCertificateVersions_594170, base: "",
-    url: url_GetCertificateVersions_594171, schemes: {Scheme.Https})
+    validator: validate_GetCertificateVersions_568399, base: "",
+    url: url_GetCertificateVersions_568400, schemes: {Scheme.Https})
 type
-  Call_GetCertificate_594179 = ref object of OpenApiRestCall_593438
-proc url_GetCertificate_594181(protocol: Scheme; host: string; base: string;
+  Call_GetCertificate_568408 = ref object of OpenApiRestCall_567667
+proc url_GetCertificate_568410(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1949,7 +1949,7 @@ proc url_GetCertificate_594181(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetCertificate_594180(path: JsonNode; query: JsonNode;
+proc validate_GetCertificate_568409(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets information about a specific certificate. This operation requires the certificates/get permission.
@@ -1964,16 +1964,16 @@ proc validate_GetCertificate_594180(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594182 = path.getOrDefault("certificate-name")
-  valid_594182 = validateParameter(valid_594182, JString, required = true,
+  var valid_568411 = path.getOrDefault("certificate-name")
+  valid_568411 = validateParameter(valid_568411, JString, required = true,
                                  default = nil)
-  if valid_594182 != nil:
-    section.add "certificate-name", valid_594182
-  var valid_594183 = path.getOrDefault("certificate-version")
-  valid_594183 = validateParameter(valid_594183, JString, required = true,
+  if valid_568411 != nil:
+    section.add "certificate-name", valid_568411
+  var valid_568412 = path.getOrDefault("certificate-version")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594183 != nil:
-    section.add "certificate-version", valid_594183
+  if valid_568412 != nil:
+    section.add "certificate-version", valid_568412
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1981,11 +1981,11 @@ proc validate_GetCertificate_594180(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594184 = query.getOrDefault("api-version")
-  valid_594184 = validateParameter(valid_594184, JString, required = true,
+  var valid_568413 = query.getOrDefault("api-version")
+  valid_568413 = validateParameter(valid_568413, JString, required = true,
                                  default = nil)
-  if valid_594184 != nil:
-    section.add "api-version", valid_594184
+  if valid_568413 != nil:
+    section.add "api-version", valid_568413
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1994,20 +1994,20 @@ proc validate_GetCertificate_594180(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594185: Call_GetCertificate_594179; path: JsonNode; query: JsonNode;
+proc call*(call_568414: Call_GetCertificate_568408; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about a specific certificate. This operation requires the certificates/get permission.
   ## 
-  let valid = call_594185.validator(path, query, header, formData, body)
-  let scheme = call_594185.pickScheme
+  let valid = call_568414.validator(path, query, header, formData, body)
+  let scheme = call_568414.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594185.url(scheme.get, call_594185.host, call_594185.base,
-                         call_594185.route, valid.getOrDefault("path"),
+  let url = call_568414.url(scheme.get, call_568414.host, call_568414.base,
+                         call_568414.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594185, url, valid)
+  result = hook(call_568414, url, valid)
 
-proc call*(call_594186: Call_GetCertificate_594179; apiVersion: string;
+proc call*(call_568415: Call_GetCertificate_568408; apiVersion: string;
           certificateName: string; certificateVersion: string): Recallable =
   ## getCertificate
   ## Gets information about a specific certificate. This operation requires the certificates/get permission.
@@ -2017,21 +2017,21 @@ proc call*(call_594186: Call_GetCertificate_594179; apiVersion: string;
   ##                  : The name of the certificate in the given vault.
   ##   certificateVersion: string (required)
   ##                     : The version of the certificate.
-  var path_594187 = newJObject()
-  var query_594188 = newJObject()
-  add(query_594188, "api-version", newJString(apiVersion))
-  add(path_594187, "certificate-name", newJString(certificateName))
-  add(path_594187, "certificate-version", newJString(certificateVersion))
-  result = call_594186.call(path_594187, query_594188, nil, nil, nil)
+  var path_568416 = newJObject()
+  var query_568417 = newJObject()
+  add(query_568417, "api-version", newJString(apiVersion))
+  add(path_568416, "certificate-name", newJString(certificateName))
+  add(path_568416, "certificate-version", newJString(certificateVersion))
+  result = call_568415.call(path_568416, query_568417, nil, nil, nil)
 
-var getCertificate* = Call_GetCertificate_594179(name: "getCertificate",
+var getCertificate* = Call_GetCertificate_568408(name: "getCertificate",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/certificates/{certificate-name}/{certificate-version}",
-    validator: validate_GetCertificate_594180, base: "", url: url_GetCertificate_594181,
+    validator: validate_GetCertificate_568409, base: "", url: url_GetCertificate_568410,
     schemes: {Scheme.Https})
 type
-  Call_UpdateCertificate_594189 = ref object of OpenApiRestCall_593438
-proc url_UpdateCertificate_594191(protocol: Scheme; host: string; base: string;
+  Call_UpdateCertificate_568418 = ref object of OpenApiRestCall_567667
+proc url_UpdateCertificate_568420(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2051,7 +2051,7 @@ proc url_UpdateCertificate_594191(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateCertificate_594190(path: JsonNode; query: JsonNode;
+proc validate_UpdateCertificate_568419(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## The UpdateCertificate operation applies the specified update on the given certificate; the only elements updated are the certificate's attributes. This operation requires the certificates/update permission.
@@ -2066,16 +2066,16 @@ proc validate_UpdateCertificate_594190(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594192 = path.getOrDefault("certificate-name")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  var valid_568421 = path.getOrDefault("certificate-name")
+  valid_568421 = validateParameter(valid_568421, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "certificate-name", valid_594192
-  var valid_594193 = path.getOrDefault("certificate-version")
-  valid_594193 = validateParameter(valid_594193, JString, required = true,
+  if valid_568421 != nil:
+    section.add "certificate-name", valid_568421
+  var valid_568422 = path.getOrDefault("certificate-version")
+  valid_568422 = validateParameter(valid_568422, JString, required = true,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "certificate-version", valid_594193
+  if valid_568422 != nil:
+    section.add "certificate-version", valid_568422
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2083,11 +2083,11 @@ proc validate_UpdateCertificate_594190(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594194 = query.getOrDefault("api-version")
-  valid_594194 = validateParameter(valid_594194, JString, required = true,
+  var valid_568423 = query.getOrDefault("api-version")
+  valid_568423 = validateParameter(valid_568423, JString, required = true,
                                  default = nil)
-  if valid_594194 != nil:
-    section.add "api-version", valid_594194
+  if valid_568423 != nil:
+    section.add "api-version", valid_568423
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2101,20 +2101,20 @@ proc validate_UpdateCertificate_594190(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594196: Call_UpdateCertificate_594189; path: JsonNode;
+proc call*(call_568425: Call_UpdateCertificate_568418; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The UpdateCertificate operation applies the specified update on the given certificate; the only elements updated are the certificate's attributes. This operation requires the certificates/update permission.
   ## 
-  let valid = call_594196.validator(path, query, header, formData, body)
-  let scheme = call_594196.pickScheme
+  let valid = call_568425.validator(path, query, header, formData, body)
+  let scheme = call_568425.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594196.url(scheme.get, call_594196.host, call_594196.base,
-                         call_594196.route, valid.getOrDefault("path"),
+  let url = call_568425.url(scheme.get, call_568425.host, call_568425.base,
+                         call_568425.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594196, url, valid)
+  result = hook(call_568425, url, valid)
 
-proc call*(call_594197: Call_UpdateCertificate_594189; apiVersion: string;
+proc call*(call_568426: Call_UpdateCertificate_568418; apiVersion: string;
           certificateName: string; certificateVersion: string; parameters: JsonNode): Recallable =
   ## updateCertificate
   ## The UpdateCertificate operation applies the specified update on the given certificate; the only elements updated are the certificate's attributes. This operation requires the certificates/update permission.
@@ -2126,31 +2126,31 @@ proc call*(call_594197: Call_UpdateCertificate_594189; apiVersion: string;
   ##                     : The version of the certificate.
   ##   parameters: JObject (required)
   ##             : The parameters for certificate update.
-  var path_594198 = newJObject()
-  var query_594199 = newJObject()
-  var body_594200 = newJObject()
-  add(query_594199, "api-version", newJString(apiVersion))
-  add(path_594198, "certificate-name", newJString(certificateName))
-  add(path_594198, "certificate-version", newJString(certificateVersion))
+  var path_568427 = newJObject()
+  var query_568428 = newJObject()
+  var body_568429 = newJObject()
+  add(query_568428, "api-version", newJString(apiVersion))
+  add(path_568427, "certificate-name", newJString(certificateName))
+  add(path_568427, "certificate-version", newJString(certificateVersion))
   if parameters != nil:
-    body_594200 = parameters
-  result = call_594197.call(path_594198, query_594199, nil, nil, body_594200)
+    body_568429 = parameters
+  result = call_568426.call(path_568427, query_568428, nil, nil, body_568429)
 
-var updateCertificate* = Call_UpdateCertificate_594189(name: "updateCertificate",
+var updateCertificate* = Call_UpdateCertificate_568418(name: "updateCertificate",
     meth: HttpMethod.HttpPatch, host: "azure.local",
     route: "/certificates/{certificate-name}/{certificate-version}",
-    validator: validate_UpdateCertificate_594190, base: "",
-    url: url_UpdateCertificate_594191, schemes: {Scheme.Https})
+    validator: validate_UpdateCertificate_568419, base: "",
+    url: url_UpdateCertificate_568420, schemes: {Scheme.Https})
 type
-  Call_GetDeletedCertificates_594201 = ref object of OpenApiRestCall_593438
-proc url_GetDeletedCertificates_594203(protocol: Scheme; host: string; base: string;
+  Call_GetDeletedCertificates_568430 = ref object of OpenApiRestCall_567667
+proc url_GetDeletedCertificates_568432(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetDeletedCertificates_594202(path: JsonNode; query: JsonNode;
+proc validate_GetDeletedCertificates_568431(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The GetDeletedCertificates operation retrieves the certificates in the current vault which are in a deleted state and ready for recovery or purging. This operation includes deletion-specific information. This operation requires the certificates/get/list permission. This operation can only be enabled on soft-delete enabled vaults.
   ## 
@@ -2168,19 +2168,19 @@ proc validate_GetDeletedCertificates_594202(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594204 = query.getOrDefault("api-version")
-  valid_594204 = validateParameter(valid_594204, JString, required = true,
+  var valid_568433 = query.getOrDefault("api-version")
+  valid_568433 = validateParameter(valid_568433, JString, required = true,
                                  default = nil)
-  if valid_594204 != nil:
-    section.add "api-version", valid_594204
-  var valid_594205 = query.getOrDefault("maxresults")
-  valid_594205 = validateParameter(valid_594205, JInt, required = false, default = nil)
-  if valid_594205 != nil:
-    section.add "maxresults", valid_594205
-  var valid_594206 = query.getOrDefault("includePending")
-  valid_594206 = validateParameter(valid_594206, JBool, required = false, default = nil)
-  if valid_594206 != nil:
-    section.add "includePending", valid_594206
+  if valid_568433 != nil:
+    section.add "api-version", valid_568433
+  var valid_568434 = query.getOrDefault("maxresults")
+  valid_568434 = validateParameter(valid_568434, JInt, required = false, default = nil)
+  if valid_568434 != nil:
+    section.add "maxresults", valid_568434
+  var valid_568435 = query.getOrDefault("includePending")
+  valid_568435 = validateParameter(valid_568435, JBool, required = false, default = nil)
+  if valid_568435 != nil:
+    section.add "includePending", valid_568435
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2189,20 +2189,20 @@ proc validate_GetDeletedCertificates_594202(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594207: Call_GetDeletedCertificates_594201; path: JsonNode;
+proc call*(call_568436: Call_GetDeletedCertificates_568430; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetDeletedCertificates operation retrieves the certificates in the current vault which are in a deleted state and ready for recovery or purging. This operation includes deletion-specific information. This operation requires the certificates/get/list permission. This operation can only be enabled on soft-delete enabled vaults.
   ## 
-  let valid = call_594207.validator(path, query, header, formData, body)
-  let scheme = call_594207.pickScheme
+  let valid = call_568436.validator(path, query, header, formData, body)
+  let scheme = call_568436.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594207.url(scheme.get, call_594207.host, call_594207.base,
-                         call_594207.route, valid.getOrDefault("path"),
+  let url = call_568436.url(scheme.get, call_568436.host, call_568436.base,
+                         call_568436.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594207, url, valid)
+  result = hook(call_568436, url, valid)
 
-proc call*(call_594208: Call_GetDeletedCertificates_594201; apiVersion: string;
+proc call*(call_568437: Call_GetDeletedCertificates_568430; apiVersion: string;
           maxresults: int = 0; includePending: bool = false): Recallable =
   ## getDeletedCertificates
   ## The GetDeletedCertificates operation retrieves the certificates in the current vault which are in a deleted state and ready for recovery or purging. This operation includes deletion-specific information. This operation requires the certificates/get/list permission. This operation can only be enabled on soft-delete enabled vaults.
@@ -2212,19 +2212,19 @@ proc call*(call_594208: Call_GetDeletedCertificates_594201; apiVersion: string;
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
   ##   includePending: bool
   ##                 : Specifies whether to include certificates which are not completely provisioned.
-  var query_594209 = newJObject()
-  add(query_594209, "api-version", newJString(apiVersion))
-  add(query_594209, "maxresults", newJInt(maxresults))
-  add(query_594209, "includePending", newJBool(includePending))
-  result = call_594208.call(nil, query_594209, nil, nil, nil)
+  var query_568438 = newJObject()
+  add(query_568438, "api-version", newJString(apiVersion))
+  add(query_568438, "maxresults", newJInt(maxresults))
+  add(query_568438, "includePending", newJBool(includePending))
+  result = call_568437.call(nil, query_568438, nil, nil, nil)
 
-var getDeletedCertificates* = Call_GetDeletedCertificates_594201(
+var getDeletedCertificates* = Call_GetDeletedCertificates_568430(
     name: "getDeletedCertificates", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/deletedcertificates", validator: validate_GetDeletedCertificates_594202,
-    base: "", url: url_GetDeletedCertificates_594203, schemes: {Scheme.Https})
+    route: "/deletedcertificates", validator: validate_GetDeletedCertificates_568431,
+    base: "", url: url_GetDeletedCertificates_568432, schemes: {Scheme.Https})
 type
-  Call_GetDeletedCertificate_594210 = ref object of OpenApiRestCall_593438
-proc url_GetDeletedCertificate_594212(protocol: Scheme; host: string; base: string;
+  Call_GetDeletedCertificate_568439 = ref object of OpenApiRestCall_567667
+proc url_GetDeletedCertificate_568441(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2240,7 +2240,7 @@ proc url_GetDeletedCertificate_594212(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeletedCertificate_594211(path: JsonNode; query: JsonNode;
+proc validate_GetDeletedCertificate_568440(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The GetDeletedCertificate operation retrieves the deleted certificate information plus its attributes, such as retention interval, scheduled permanent deletion and the current deletion recovery level. This operation requires the certificates/get permission.
   ## 
@@ -2252,11 +2252,11 @@ proc validate_GetDeletedCertificate_594211(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594213 = path.getOrDefault("certificate-name")
-  valid_594213 = validateParameter(valid_594213, JString, required = true,
+  var valid_568442 = path.getOrDefault("certificate-name")
+  valid_568442 = validateParameter(valid_568442, JString, required = true,
                                  default = nil)
-  if valid_594213 != nil:
-    section.add "certificate-name", valid_594213
+  if valid_568442 != nil:
+    section.add "certificate-name", valid_568442
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2264,11 +2264,11 @@ proc validate_GetDeletedCertificate_594211(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594214 = query.getOrDefault("api-version")
-  valid_594214 = validateParameter(valid_594214, JString, required = true,
+  var valid_568443 = query.getOrDefault("api-version")
+  valid_568443 = validateParameter(valid_568443, JString, required = true,
                                  default = nil)
-  if valid_594214 != nil:
-    section.add "api-version", valid_594214
+  if valid_568443 != nil:
+    section.add "api-version", valid_568443
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2277,20 +2277,20 @@ proc validate_GetDeletedCertificate_594211(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594215: Call_GetDeletedCertificate_594210; path: JsonNode;
+proc call*(call_568444: Call_GetDeletedCertificate_568439; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetDeletedCertificate operation retrieves the deleted certificate information plus its attributes, such as retention interval, scheduled permanent deletion and the current deletion recovery level. This operation requires the certificates/get permission.
   ## 
-  let valid = call_594215.validator(path, query, header, formData, body)
-  let scheme = call_594215.pickScheme
+  let valid = call_568444.validator(path, query, header, formData, body)
+  let scheme = call_568444.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594215.url(scheme.get, call_594215.host, call_594215.base,
-                         call_594215.route, valid.getOrDefault("path"),
+  let url = call_568444.url(scheme.get, call_568444.host, call_568444.base,
+                         call_568444.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594215, url, valid)
+  result = hook(call_568444, url, valid)
 
-proc call*(call_594216: Call_GetDeletedCertificate_594210; apiVersion: string;
+proc call*(call_568445: Call_GetDeletedCertificate_568439; apiVersion: string;
           certificateName: string): Recallable =
   ## getDeletedCertificate
   ## The GetDeletedCertificate operation retrieves the deleted certificate information plus its attributes, such as retention interval, scheduled permanent deletion and the current deletion recovery level. This operation requires the certificates/get permission.
@@ -2298,20 +2298,20 @@ proc call*(call_594216: Call_GetDeletedCertificate_594210; apiVersion: string;
   ##             : Client API version.
   ##   certificateName: string (required)
   ##                  : The name of the certificate
-  var path_594217 = newJObject()
-  var query_594218 = newJObject()
-  add(query_594218, "api-version", newJString(apiVersion))
-  add(path_594217, "certificate-name", newJString(certificateName))
-  result = call_594216.call(path_594217, query_594218, nil, nil, nil)
+  var path_568446 = newJObject()
+  var query_568447 = newJObject()
+  add(query_568447, "api-version", newJString(apiVersion))
+  add(path_568446, "certificate-name", newJString(certificateName))
+  result = call_568445.call(path_568446, query_568447, nil, nil, nil)
 
-var getDeletedCertificate* = Call_GetDeletedCertificate_594210(
+var getDeletedCertificate* = Call_GetDeletedCertificate_568439(
     name: "getDeletedCertificate", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/deletedcertificates/{certificate-name}",
-    validator: validate_GetDeletedCertificate_594211, base: "",
-    url: url_GetDeletedCertificate_594212, schemes: {Scheme.Https})
+    validator: validate_GetDeletedCertificate_568440, base: "",
+    url: url_GetDeletedCertificate_568441, schemes: {Scheme.Https})
 type
-  Call_PurgeDeletedCertificate_594219 = ref object of OpenApiRestCall_593438
-proc url_PurgeDeletedCertificate_594221(protocol: Scheme; host: string; base: string;
+  Call_PurgeDeletedCertificate_568448 = ref object of OpenApiRestCall_567667
+proc url_PurgeDeletedCertificate_568450(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2328,7 +2328,7 @@ proc url_PurgeDeletedCertificate_594221(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PurgeDeletedCertificate_594220(path: JsonNode; query: JsonNode;
+proc validate_PurgeDeletedCertificate_568449(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The PurgeDeletedCertificate operation performs an irreversible deletion of the specified certificate, without possibility for recovery. The operation is not available if the recovery level does not specify 'Purgeable'. This operation requires the certificate/purge permission.
   ## 
@@ -2340,11 +2340,11 @@ proc validate_PurgeDeletedCertificate_594220(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594222 = path.getOrDefault("certificate-name")
-  valid_594222 = validateParameter(valid_594222, JString, required = true,
+  var valid_568451 = path.getOrDefault("certificate-name")
+  valid_568451 = validateParameter(valid_568451, JString, required = true,
                                  default = nil)
-  if valid_594222 != nil:
-    section.add "certificate-name", valid_594222
+  if valid_568451 != nil:
+    section.add "certificate-name", valid_568451
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2352,11 +2352,11 @@ proc validate_PurgeDeletedCertificate_594220(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594223 = query.getOrDefault("api-version")
-  valid_594223 = validateParameter(valid_594223, JString, required = true,
+  var valid_568452 = query.getOrDefault("api-version")
+  valid_568452 = validateParameter(valid_568452, JString, required = true,
                                  default = nil)
-  if valid_594223 != nil:
-    section.add "api-version", valid_594223
+  if valid_568452 != nil:
+    section.add "api-version", valid_568452
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2365,20 +2365,20 @@ proc validate_PurgeDeletedCertificate_594220(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594224: Call_PurgeDeletedCertificate_594219; path: JsonNode;
+proc call*(call_568453: Call_PurgeDeletedCertificate_568448; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The PurgeDeletedCertificate operation performs an irreversible deletion of the specified certificate, without possibility for recovery. The operation is not available if the recovery level does not specify 'Purgeable'. This operation requires the certificate/purge permission.
   ## 
-  let valid = call_594224.validator(path, query, header, formData, body)
-  let scheme = call_594224.pickScheme
+  let valid = call_568453.validator(path, query, header, formData, body)
+  let scheme = call_568453.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594224.url(scheme.get, call_594224.host, call_594224.base,
-                         call_594224.route, valid.getOrDefault("path"),
+  let url = call_568453.url(scheme.get, call_568453.host, call_568453.base,
+                         call_568453.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594224, url, valid)
+  result = hook(call_568453, url, valid)
 
-proc call*(call_594225: Call_PurgeDeletedCertificate_594219; apiVersion: string;
+proc call*(call_568454: Call_PurgeDeletedCertificate_568448; apiVersion: string;
           certificateName: string): Recallable =
   ## purgeDeletedCertificate
   ## The PurgeDeletedCertificate operation performs an irreversible deletion of the specified certificate, without possibility for recovery. The operation is not available if the recovery level does not specify 'Purgeable'. This operation requires the certificate/purge permission.
@@ -2386,20 +2386,20 @@ proc call*(call_594225: Call_PurgeDeletedCertificate_594219; apiVersion: string;
   ##             : Client API version.
   ##   certificateName: string (required)
   ##                  : The name of the certificate
-  var path_594226 = newJObject()
-  var query_594227 = newJObject()
-  add(query_594227, "api-version", newJString(apiVersion))
-  add(path_594226, "certificate-name", newJString(certificateName))
-  result = call_594225.call(path_594226, query_594227, nil, nil, nil)
+  var path_568455 = newJObject()
+  var query_568456 = newJObject()
+  add(query_568456, "api-version", newJString(apiVersion))
+  add(path_568455, "certificate-name", newJString(certificateName))
+  result = call_568454.call(path_568455, query_568456, nil, nil, nil)
 
-var purgeDeletedCertificate* = Call_PurgeDeletedCertificate_594219(
+var purgeDeletedCertificate* = Call_PurgeDeletedCertificate_568448(
     name: "purgeDeletedCertificate", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/deletedcertificates/{certificate-name}",
-    validator: validate_PurgeDeletedCertificate_594220, base: "",
-    url: url_PurgeDeletedCertificate_594221, schemes: {Scheme.Https})
+    validator: validate_PurgeDeletedCertificate_568449, base: "",
+    url: url_PurgeDeletedCertificate_568450, schemes: {Scheme.Https})
 type
-  Call_RecoverDeletedCertificate_594228 = ref object of OpenApiRestCall_593438
-proc url_RecoverDeletedCertificate_594230(protocol: Scheme; host: string;
+  Call_RecoverDeletedCertificate_568457 = ref object of OpenApiRestCall_567667
+proc url_RecoverDeletedCertificate_568459(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2416,7 +2416,7 @@ proc url_RecoverDeletedCertificate_594230(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoverDeletedCertificate_594229(path: JsonNode; query: JsonNode;
+proc validate_RecoverDeletedCertificate_568458(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The RecoverDeletedCertificate operation performs the reversal of the Delete operation. The operation is applicable in vaults enabled for soft-delete, and must be issued during the retention interval (available in the deleted certificate's attributes). This operation requires the certificates/recover permission.
   ## 
@@ -2428,11 +2428,11 @@ proc validate_RecoverDeletedCertificate_594229(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificate-name` field"
-  var valid_594231 = path.getOrDefault("certificate-name")
-  valid_594231 = validateParameter(valid_594231, JString, required = true,
+  var valid_568460 = path.getOrDefault("certificate-name")
+  valid_568460 = validateParameter(valid_568460, JString, required = true,
                                  default = nil)
-  if valid_594231 != nil:
-    section.add "certificate-name", valid_594231
+  if valid_568460 != nil:
+    section.add "certificate-name", valid_568460
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2440,11 +2440,11 @@ proc validate_RecoverDeletedCertificate_594229(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594232 = query.getOrDefault("api-version")
-  valid_594232 = validateParameter(valid_594232, JString, required = true,
+  var valid_568461 = query.getOrDefault("api-version")
+  valid_568461 = validateParameter(valid_568461, JString, required = true,
                                  default = nil)
-  if valid_594232 != nil:
-    section.add "api-version", valid_594232
+  if valid_568461 != nil:
+    section.add "api-version", valid_568461
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2453,20 +2453,20 @@ proc validate_RecoverDeletedCertificate_594229(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594233: Call_RecoverDeletedCertificate_594228; path: JsonNode;
+proc call*(call_568462: Call_RecoverDeletedCertificate_568457; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The RecoverDeletedCertificate operation performs the reversal of the Delete operation. The operation is applicable in vaults enabled for soft-delete, and must be issued during the retention interval (available in the deleted certificate's attributes). This operation requires the certificates/recover permission.
   ## 
-  let valid = call_594233.validator(path, query, header, formData, body)
-  let scheme = call_594233.pickScheme
+  let valid = call_568462.validator(path, query, header, formData, body)
+  let scheme = call_568462.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594233.url(scheme.get, call_594233.host, call_594233.base,
-                         call_594233.route, valid.getOrDefault("path"),
+  let url = call_568462.url(scheme.get, call_568462.host, call_568462.base,
+                         call_568462.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594233, url, valid)
+  result = hook(call_568462, url, valid)
 
-proc call*(call_594234: Call_RecoverDeletedCertificate_594228; apiVersion: string;
+proc call*(call_568463: Call_RecoverDeletedCertificate_568457; apiVersion: string;
           certificateName: string): Recallable =
   ## recoverDeletedCertificate
   ## The RecoverDeletedCertificate operation performs the reversal of the Delete operation. The operation is applicable in vaults enabled for soft-delete, and must be issued during the retention interval (available in the deleted certificate's attributes). This operation requires the certificates/recover permission.
@@ -2474,27 +2474,27 @@ proc call*(call_594234: Call_RecoverDeletedCertificate_594228; apiVersion: strin
   ##             : Client API version.
   ##   certificateName: string (required)
   ##                  : The name of the deleted certificate
-  var path_594235 = newJObject()
-  var query_594236 = newJObject()
-  add(query_594236, "api-version", newJString(apiVersion))
-  add(path_594235, "certificate-name", newJString(certificateName))
-  result = call_594234.call(path_594235, query_594236, nil, nil, nil)
+  var path_568464 = newJObject()
+  var query_568465 = newJObject()
+  add(query_568465, "api-version", newJString(apiVersion))
+  add(path_568464, "certificate-name", newJString(certificateName))
+  result = call_568463.call(path_568464, query_568465, nil, nil, nil)
 
-var recoverDeletedCertificate* = Call_RecoverDeletedCertificate_594228(
+var recoverDeletedCertificate* = Call_RecoverDeletedCertificate_568457(
     name: "recoverDeletedCertificate", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/deletedcertificates/{certificate-name}/recover",
-    validator: validate_RecoverDeletedCertificate_594229, base: "",
-    url: url_RecoverDeletedCertificate_594230, schemes: {Scheme.Https})
+    validator: validate_RecoverDeletedCertificate_568458, base: "",
+    url: url_RecoverDeletedCertificate_568459, schemes: {Scheme.Https})
 type
-  Call_GetDeletedKeys_594237 = ref object of OpenApiRestCall_593438
-proc url_GetDeletedKeys_594239(protocol: Scheme; host: string; base: string;
+  Call_GetDeletedKeys_568466 = ref object of OpenApiRestCall_567667
+proc url_GetDeletedKeys_568468(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetDeletedKeys_594238(path: JsonNode; query: JsonNode;
+proc validate_GetDeletedKeys_568467(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Retrieves a list of the keys in the Key Vault as JSON Web Key structures that contain the public part of a deleted key. This operation includes deletion-specific information. The Get Deleted Keys operation is applicable for vaults enabled for soft-delete. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/list permission.
@@ -2511,15 +2511,15 @@ proc validate_GetDeletedKeys_594238(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594240 = query.getOrDefault("api-version")
-  valid_594240 = validateParameter(valid_594240, JString, required = true,
+  var valid_568469 = query.getOrDefault("api-version")
+  valid_568469 = validateParameter(valid_568469, JString, required = true,
                                  default = nil)
-  if valid_594240 != nil:
-    section.add "api-version", valid_594240
-  var valid_594241 = query.getOrDefault("maxresults")
-  valid_594241 = validateParameter(valid_594241, JInt, required = false, default = nil)
-  if valid_594241 != nil:
-    section.add "maxresults", valid_594241
+  if valid_568469 != nil:
+    section.add "api-version", valid_568469
+  var valid_568470 = query.getOrDefault("maxresults")
+  valid_568470 = validateParameter(valid_568470, JInt, required = false, default = nil)
+  if valid_568470 != nil:
+    section.add "maxresults", valid_568470
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2528,20 +2528,20 @@ proc validate_GetDeletedKeys_594238(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594242: Call_GetDeletedKeys_594237; path: JsonNode; query: JsonNode;
+proc call*(call_568471: Call_GetDeletedKeys_568466; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves a list of the keys in the Key Vault as JSON Web Key structures that contain the public part of a deleted key. This operation includes deletion-specific information. The Get Deleted Keys operation is applicable for vaults enabled for soft-delete. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/list permission.
   ## 
-  let valid = call_594242.validator(path, query, header, formData, body)
-  let scheme = call_594242.pickScheme
+  let valid = call_568471.validator(path, query, header, formData, body)
+  let scheme = call_568471.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594242.url(scheme.get, call_594242.host, call_594242.base,
-                         call_594242.route, valid.getOrDefault("path"),
+  let url = call_568471.url(scheme.get, call_568471.host, call_568471.base,
+                         call_568471.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594242, url, valid)
+  result = hook(call_568471, url, valid)
 
-proc call*(call_594243: Call_GetDeletedKeys_594237; apiVersion: string;
+proc call*(call_568472: Call_GetDeletedKeys_568466; apiVersion: string;
           maxresults: int = 0): Recallable =
   ## getDeletedKeys
   ## Retrieves a list of the keys in the Key Vault as JSON Web Key structures that contain the public part of a deleted key. This operation includes deletion-specific information. The Get Deleted Keys operation is applicable for vaults enabled for soft-delete. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/list permission.
@@ -2549,18 +2549,18 @@ proc call*(call_594243: Call_GetDeletedKeys_594237; apiVersion: string;
   ##             : Client API version.
   ##   maxresults: int
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
-  var query_594244 = newJObject()
-  add(query_594244, "api-version", newJString(apiVersion))
-  add(query_594244, "maxresults", newJInt(maxresults))
-  result = call_594243.call(nil, query_594244, nil, nil, nil)
+  var query_568473 = newJObject()
+  add(query_568473, "api-version", newJString(apiVersion))
+  add(query_568473, "maxresults", newJInt(maxresults))
+  result = call_568472.call(nil, query_568473, nil, nil, nil)
 
-var getDeletedKeys* = Call_GetDeletedKeys_594237(name: "getDeletedKeys",
+var getDeletedKeys* = Call_GetDeletedKeys_568466(name: "getDeletedKeys",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/deletedkeys",
-    validator: validate_GetDeletedKeys_594238, base: "", url: url_GetDeletedKeys_594239,
+    validator: validate_GetDeletedKeys_568467, base: "", url: url_GetDeletedKeys_568468,
     schemes: {Scheme.Https})
 type
-  Call_GetDeletedKey_594245 = ref object of OpenApiRestCall_593438
-proc url_GetDeletedKey_594247(protocol: Scheme; host: string; base: string;
+  Call_GetDeletedKey_568474 = ref object of OpenApiRestCall_567667
+proc url_GetDeletedKey_568476(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2575,7 +2575,7 @@ proc url_GetDeletedKey_594247(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeletedKey_594246(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GetDeletedKey_568475(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## The Get Deleted Key operation is applicable for soft-delete enabled vaults. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/get permission. 
   ## 
@@ -2586,11 +2586,11 @@ proc validate_GetDeletedKey_594246(path: JsonNode; query: JsonNode; header: Json
   ##           : The name of the key.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `key-name` field"
-  var valid_594248 = path.getOrDefault("key-name")
-  valid_594248 = validateParameter(valid_594248, JString, required = true,
+  var valid_568477 = path.getOrDefault("key-name")
+  valid_568477 = validateParameter(valid_568477, JString, required = true,
                                  default = nil)
-  if valid_594248 != nil:
-    section.add "key-name", valid_594248
+  if valid_568477 != nil:
+    section.add "key-name", valid_568477
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2598,11 +2598,11 @@ proc validate_GetDeletedKey_594246(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594249 = query.getOrDefault("api-version")
-  valid_594249 = validateParameter(valid_594249, JString, required = true,
+  var valid_568478 = query.getOrDefault("api-version")
+  valid_568478 = validateParameter(valid_568478, JString, required = true,
                                  default = nil)
-  if valid_594249 != nil:
-    section.add "api-version", valid_594249
+  if valid_568478 != nil:
+    section.add "api-version", valid_568478
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2611,20 +2611,20 @@ proc validate_GetDeletedKey_594246(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594250: Call_GetDeletedKey_594245; path: JsonNode; query: JsonNode;
+proc call*(call_568479: Call_GetDeletedKey_568474; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get Deleted Key operation is applicable for soft-delete enabled vaults. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/get permission. 
   ## 
-  let valid = call_594250.validator(path, query, header, formData, body)
-  let scheme = call_594250.pickScheme
+  let valid = call_568479.validator(path, query, header, formData, body)
+  let scheme = call_568479.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594250.url(scheme.get, call_594250.host, call_594250.base,
-                         call_594250.route, valid.getOrDefault("path"),
+  let url = call_568479.url(scheme.get, call_568479.host, call_568479.base,
+                         call_568479.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594250, url, valid)
+  result = hook(call_568479, url, valid)
 
-proc call*(call_594251: Call_GetDeletedKey_594245; apiVersion: string;
+proc call*(call_568480: Call_GetDeletedKey_568474; apiVersion: string;
           keyName: string): Recallable =
   ## getDeletedKey
   ## The Get Deleted Key operation is applicable for soft-delete enabled vaults. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/get permission. 
@@ -2632,19 +2632,19 @@ proc call*(call_594251: Call_GetDeletedKey_594245; apiVersion: string;
   ##             : Client API version.
   ##   keyName: string (required)
   ##          : The name of the key.
-  var path_594252 = newJObject()
-  var query_594253 = newJObject()
-  add(query_594253, "api-version", newJString(apiVersion))
-  add(path_594252, "key-name", newJString(keyName))
-  result = call_594251.call(path_594252, query_594253, nil, nil, nil)
+  var path_568481 = newJObject()
+  var query_568482 = newJObject()
+  add(query_568482, "api-version", newJString(apiVersion))
+  add(path_568481, "key-name", newJString(keyName))
+  result = call_568480.call(path_568481, query_568482, nil, nil, nil)
 
-var getDeletedKey* = Call_GetDeletedKey_594245(name: "getDeletedKey",
+var getDeletedKey* = Call_GetDeletedKey_568474(name: "getDeletedKey",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/deletedkeys/{key-name}",
-    validator: validate_GetDeletedKey_594246, base: "", url: url_GetDeletedKey_594247,
+    validator: validate_GetDeletedKey_568475, base: "", url: url_GetDeletedKey_568476,
     schemes: {Scheme.Https})
 type
-  Call_PurgeDeletedKey_594254 = ref object of OpenApiRestCall_593438
-proc url_PurgeDeletedKey_594256(protocol: Scheme; host: string; base: string;
+  Call_PurgeDeletedKey_568483 = ref object of OpenApiRestCall_567667
+proc url_PurgeDeletedKey_568485(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2659,7 +2659,7 @@ proc url_PurgeDeletedKey_594256(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PurgeDeletedKey_594255(path: JsonNode; query: JsonNode;
+proc validate_PurgeDeletedKey_568484(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## The Purge Deleted Key operation is applicable for soft-delete enabled vaults. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/purge permission.
@@ -2671,11 +2671,11 @@ proc validate_PurgeDeletedKey_594255(path: JsonNode; query: JsonNode;
   ##           : The name of the key
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `key-name` field"
-  var valid_594257 = path.getOrDefault("key-name")
-  valid_594257 = validateParameter(valid_594257, JString, required = true,
+  var valid_568486 = path.getOrDefault("key-name")
+  valid_568486 = validateParameter(valid_568486, JString, required = true,
                                  default = nil)
-  if valid_594257 != nil:
-    section.add "key-name", valid_594257
+  if valid_568486 != nil:
+    section.add "key-name", valid_568486
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2683,11 +2683,11 @@ proc validate_PurgeDeletedKey_594255(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594258 = query.getOrDefault("api-version")
-  valid_594258 = validateParameter(valid_594258, JString, required = true,
+  var valid_568487 = query.getOrDefault("api-version")
+  valid_568487 = validateParameter(valid_568487, JString, required = true,
                                  default = nil)
-  if valid_594258 != nil:
-    section.add "api-version", valid_594258
+  if valid_568487 != nil:
+    section.add "api-version", valid_568487
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2696,20 +2696,20 @@ proc validate_PurgeDeletedKey_594255(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594259: Call_PurgeDeletedKey_594254; path: JsonNode; query: JsonNode;
+proc call*(call_568488: Call_PurgeDeletedKey_568483; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Purge Deleted Key operation is applicable for soft-delete enabled vaults. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/purge permission.
   ## 
-  let valid = call_594259.validator(path, query, header, formData, body)
-  let scheme = call_594259.pickScheme
+  let valid = call_568488.validator(path, query, header, formData, body)
+  let scheme = call_568488.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594259.url(scheme.get, call_594259.host, call_594259.base,
-                         call_594259.route, valid.getOrDefault("path"),
+  let url = call_568488.url(scheme.get, call_568488.host, call_568488.base,
+                         call_568488.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594259, url, valid)
+  result = hook(call_568488, url, valid)
 
-proc call*(call_594260: Call_PurgeDeletedKey_594254; apiVersion: string;
+proc call*(call_568489: Call_PurgeDeletedKey_568483; apiVersion: string;
           keyName: string): Recallable =
   ## purgeDeletedKey
   ## The Purge Deleted Key operation is applicable for soft-delete enabled vaults. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/purge permission.
@@ -2717,19 +2717,19 @@ proc call*(call_594260: Call_PurgeDeletedKey_594254; apiVersion: string;
   ##             : Client API version.
   ##   keyName: string (required)
   ##          : The name of the key
-  var path_594261 = newJObject()
-  var query_594262 = newJObject()
-  add(query_594262, "api-version", newJString(apiVersion))
-  add(path_594261, "key-name", newJString(keyName))
-  result = call_594260.call(path_594261, query_594262, nil, nil, nil)
+  var path_568490 = newJObject()
+  var query_568491 = newJObject()
+  add(query_568491, "api-version", newJString(apiVersion))
+  add(path_568490, "key-name", newJString(keyName))
+  result = call_568489.call(path_568490, query_568491, nil, nil, nil)
 
-var purgeDeletedKey* = Call_PurgeDeletedKey_594254(name: "purgeDeletedKey",
+var purgeDeletedKey* = Call_PurgeDeletedKey_568483(name: "purgeDeletedKey",
     meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/deletedkeys/{key-name}", validator: validate_PurgeDeletedKey_594255,
-    base: "", url: url_PurgeDeletedKey_594256, schemes: {Scheme.Https})
+    route: "/deletedkeys/{key-name}", validator: validate_PurgeDeletedKey_568484,
+    base: "", url: url_PurgeDeletedKey_568485, schemes: {Scheme.Https})
 type
-  Call_RecoverDeletedKey_594263 = ref object of OpenApiRestCall_593438
-proc url_RecoverDeletedKey_594265(protocol: Scheme; host: string; base: string;
+  Call_RecoverDeletedKey_568492 = ref object of OpenApiRestCall_567667
+proc url_RecoverDeletedKey_568494(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2745,7 +2745,7 @@ proc url_RecoverDeletedKey_594265(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoverDeletedKey_594264(path: JsonNode; query: JsonNode;
+proc validate_RecoverDeletedKey_568493(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## The Recover Deleted Key operation is applicable for deleted keys in soft-delete enabled vaults. It recovers the deleted key back to its latest version under /keys. An attempt to recover an non-deleted key will return an error. Consider this the inverse of the delete operation on soft-delete enabled vaults. This operation requires the keys/recover permission.
@@ -2757,11 +2757,11 @@ proc validate_RecoverDeletedKey_594264(path: JsonNode; query: JsonNode;
   ##           : The name of the deleted key.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `key-name` field"
-  var valid_594266 = path.getOrDefault("key-name")
-  valid_594266 = validateParameter(valid_594266, JString, required = true,
+  var valid_568495 = path.getOrDefault("key-name")
+  valid_568495 = validateParameter(valid_568495, JString, required = true,
                                  default = nil)
-  if valid_594266 != nil:
-    section.add "key-name", valid_594266
+  if valid_568495 != nil:
+    section.add "key-name", valid_568495
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2769,11 +2769,11 @@ proc validate_RecoverDeletedKey_594264(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594267 = query.getOrDefault("api-version")
-  valid_594267 = validateParameter(valid_594267, JString, required = true,
+  var valid_568496 = query.getOrDefault("api-version")
+  valid_568496 = validateParameter(valid_568496, JString, required = true,
                                  default = nil)
-  if valid_594267 != nil:
-    section.add "api-version", valid_594267
+  if valid_568496 != nil:
+    section.add "api-version", valid_568496
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2782,20 +2782,20 @@ proc validate_RecoverDeletedKey_594264(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594268: Call_RecoverDeletedKey_594263; path: JsonNode;
+proc call*(call_568497: Call_RecoverDeletedKey_568492; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Recover Deleted Key operation is applicable for deleted keys in soft-delete enabled vaults. It recovers the deleted key back to its latest version under /keys. An attempt to recover an non-deleted key will return an error. Consider this the inverse of the delete operation on soft-delete enabled vaults. This operation requires the keys/recover permission.
   ## 
-  let valid = call_594268.validator(path, query, header, formData, body)
-  let scheme = call_594268.pickScheme
+  let valid = call_568497.validator(path, query, header, formData, body)
+  let scheme = call_568497.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594268.url(scheme.get, call_594268.host, call_594268.base,
-                         call_594268.route, valid.getOrDefault("path"),
+  let url = call_568497.url(scheme.get, call_568497.host, call_568497.base,
+                         call_568497.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594268, url, valid)
+  result = hook(call_568497, url, valid)
 
-proc call*(call_594269: Call_RecoverDeletedKey_594263; apiVersion: string;
+proc call*(call_568498: Call_RecoverDeletedKey_568492; apiVersion: string;
           keyName: string): Recallable =
   ## recoverDeletedKey
   ## The Recover Deleted Key operation is applicable for deleted keys in soft-delete enabled vaults. It recovers the deleted key back to its latest version under /keys. An attempt to recover an non-deleted key will return an error. Consider this the inverse of the delete operation on soft-delete enabled vaults. This operation requires the keys/recover permission.
@@ -2803,27 +2803,27 @@ proc call*(call_594269: Call_RecoverDeletedKey_594263; apiVersion: string;
   ##             : Client API version.
   ##   keyName: string (required)
   ##          : The name of the deleted key.
-  var path_594270 = newJObject()
-  var query_594271 = newJObject()
-  add(query_594271, "api-version", newJString(apiVersion))
-  add(path_594270, "key-name", newJString(keyName))
-  result = call_594269.call(path_594270, query_594271, nil, nil, nil)
+  var path_568499 = newJObject()
+  var query_568500 = newJObject()
+  add(query_568500, "api-version", newJString(apiVersion))
+  add(path_568499, "key-name", newJString(keyName))
+  result = call_568498.call(path_568499, query_568500, nil, nil, nil)
 
-var recoverDeletedKey* = Call_RecoverDeletedKey_594263(name: "recoverDeletedKey",
+var recoverDeletedKey* = Call_RecoverDeletedKey_568492(name: "recoverDeletedKey",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/deletedkeys/{key-name}/recover",
-    validator: validate_RecoverDeletedKey_594264, base: "",
-    url: url_RecoverDeletedKey_594265, schemes: {Scheme.Https})
+    validator: validate_RecoverDeletedKey_568493, base: "",
+    url: url_RecoverDeletedKey_568494, schemes: {Scheme.Https})
 type
-  Call_GetDeletedSecrets_594272 = ref object of OpenApiRestCall_593438
-proc url_GetDeletedSecrets_594274(protocol: Scheme; host: string; base: string;
+  Call_GetDeletedSecrets_568501 = ref object of OpenApiRestCall_567667
+proc url_GetDeletedSecrets_568503(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetDeletedSecrets_594273(path: JsonNode; query: JsonNode;
+proc validate_GetDeletedSecrets_568502(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## The Get Deleted Secrets operation returns the secrets that have been deleted for a vault enabled for soft-delete. This operation requires the secrets/list permission.
@@ -2840,15 +2840,15 @@ proc validate_GetDeletedSecrets_594273(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594275 = query.getOrDefault("api-version")
-  valid_594275 = validateParameter(valid_594275, JString, required = true,
+  var valid_568504 = query.getOrDefault("api-version")
+  valid_568504 = validateParameter(valid_568504, JString, required = true,
                                  default = nil)
-  if valid_594275 != nil:
-    section.add "api-version", valid_594275
-  var valid_594276 = query.getOrDefault("maxresults")
-  valid_594276 = validateParameter(valid_594276, JInt, required = false, default = nil)
-  if valid_594276 != nil:
-    section.add "maxresults", valid_594276
+  if valid_568504 != nil:
+    section.add "api-version", valid_568504
+  var valid_568505 = query.getOrDefault("maxresults")
+  valid_568505 = validateParameter(valid_568505, JInt, required = false, default = nil)
+  if valid_568505 != nil:
+    section.add "maxresults", valid_568505
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2857,20 +2857,20 @@ proc validate_GetDeletedSecrets_594273(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594277: Call_GetDeletedSecrets_594272; path: JsonNode;
+proc call*(call_568506: Call_GetDeletedSecrets_568501; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get Deleted Secrets operation returns the secrets that have been deleted for a vault enabled for soft-delete. This operation requires the secrets/list permission.
   ## 
-  let valid = call_594277.validator(path, query, header, formData, body)
-  let scheme = call_594277.pickScheme
+  let valid = call_568506.validator(path, query, header, formData, body)
+  let scheme = call_568506.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594277.url(scheme.get, call_594277.host, call_594277.base,
-                         call_594277.route, valid.getOrDefault("path"),
+  let url = call_568506.url(scheme.get, call_568506.host, call_568506.base,
+                         call_568506.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594277, url, valid)
+  result = hook(call_568506, url, valid)
 
-proc call*(call_594278: Call_GetDeletedSecrets_594272; apiVersion: string;
+proc call*(call_568507: Call_GetDeletedSecrets_568501; apiVersion: string;
           maxresults: int = 0): Recallable =
   ## getDeletedSecrets
   ## The Get Deleted Secrets operation returns the secrets that have been deleted for a vault enabled for soft-delete. This operation requires the secrets/list permission.
@@ -2878,18 +2878,18 @@ proc call*(call_594278: Call_GetDeletedSecrets_594272; apiVersion: string;
   ##             : Client API version.
   ##   maxresults: int
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
-  var query_594279 = newJObject()
-  add(query_594279, "api-version", newJString(apiVersion))
-  add(query_594279, "maxresults", newJInt(maxresults))
-  result = call_594278.call(nil, query_594279, nil, nil, nil)
+  var query_568508 = newJObject()
+  add(query_568508, "api-version", newJString(apiVersion))
+  add(query_568508, "maxresults", newJInt(maxresults))
+  result = call_568507.call(nil, query_568508, nil, nil, nil)
 
-var getDeletedSecrets* = Call_GetDeletedSecrets_594272(name: "getDeletedSecrets",
+var getDeletedSecrets* = Call_GetDeletedSecrets_568501(name: "getDeletedSecrets",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/deletedsecrets",
-    validator: validate_GetDeletedSecrets_594273, base: "",
-    url: url_GetDeletedSecrets_594274, schemes: {Scheme.Https})
+    validator: validate_GetDeletedSecrets_568502, base: "",
+    url: url_GetDeletedSecrets_568503, schemes: {Scheme.Https})
 type
-  Call_GetDeletedSecret_594280 = ref object of OpenApiRestCall_593438
-proc url_GetDeletedSecret_594282(protocol: Scheme; host: string; base: string;
+  Call_GetDeletedSecret_568509 = ref object of OpenApiRestCall_567667
+proc url_GetDeletedSecret_568511(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2904,7 +2904,7 @@ proc url_GetDeletedSecret_594282(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeletedSecret_594281(path: JsonNode; query: JsonNode;
+proc validate_GetDeletedSecret_568510(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## The Get Deleted Secret operation returns the specified deleted secret along with its attributes. This operation requires the secrets/get permission.
@@ -2917,11 +2917,11 @@ proc validate_GetDeletedSecret_594281(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `secret-name` field"
-  var valid_594283 = path.getOrDefault("secret-name")
-  valid_594283 = validateParameter(valid_594283, JString, required = true,
+  var valid_568512 = path.getOrDefault("secret-name")
+  valid_568512 = validateParameter(valid_568512, JString, required = true,
                                  default = nil)
-  if valid_594283 != nil:
-    section.add "secret-name", valid_594283
+  if valid_568512 != nil:
+    section.add "secret-name", valid_568512
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2929,11 +2929,11 @@ proc validate_GetDeletedSecret_594281(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594284 = query.getOrDefault("api-version")
-  valid_594284 = validateParameter(valid_594284, JString, required = true,
+  var valid_568513 = query.getOrDefault("api-version")
+  valid_568513 = validateParameter(valid_568513, JString, required = true,
                                  default = nil)
-  if valid_594284 != nil:
-    section.add "api-version", valid_594284
+  if valid_568513 != nil:
+    section.add "api-version", valid_568513
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2942,20 +2942,20 @@ proc validate_GetDeletedSecret_594281(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594285: Call_GetDeletedSecret_594280; path: JsonNode;
+proc call*(call_568514: Call_GetDeletedSecret_568509; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get Deleted Secret operation returns the specified deleted secret along with its attributes. This operation requires the secrets/get permission.
   ## 
-  let valid = call_594285.validator(path, query, header, formData, body)
-  let scheme = call_594285.pickScheme
+  let valid = call_568514.validator(path, query, header, formData, body)
+  let scheme = call_568514.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594285.url(scheme.get, call_594285.host, call_594285.base,
-                         call_594285.route, valid.getOrDefault("path"),
+  let url = call_568514.url(scheme.get, call_568514.host, call_568514.base,
+                         call_568514.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594285, url, valid)
+  result = hook(call_568514, url, valid)
 
-proc call*(call_594286: Call_GetDeletedSecret_594280; apiVersion: string;
+proc call*(call_568515: Call_GetDeletedSecret_568509; apiVersion: string;
           secretName: string): Recallable =
   ## getDeletedSecret
   ## The Get Deleted Secret operation returns the specified deleted secret along with its attributes. This operation requires the secrets/get permission.
@@ -2963,19 +2963,19 @@ proc call*(call_594286: Call_GetDeletedSecret_594280; apiVersion: string;
   ##             : Client API version.
   ##   secretName: string (required)
   ##             : The name of the secret.
-  var path_594287 = newJObject()
-  var query_594288 = newJObject()
-  add(query_594288, "api-version", newJString(apiVersion))
-  add(path_594287, "secret-name", newJString(secretName))
-  result = call_594286.call(path_594287, query_594288, nil, nil, nil)
+  var path_568516 = newJObject()
+  var query_568517 = newJObject()
+  add(query_568517, "api-version", newJString(apiVersion))
+  add(path_568516, "secret-name", newJString(secretName))
+  result = call_568515.call(path_568516, query_568517, nil, nil, nil)
 
-var getDeletedSecret* = Call_GetDeletedSecret_594280(name: "getDeletedSecret",
+var getDeletedSecret* = Call_GetDeletedSecret_568509(name: "getDeletedSecret",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/deletedsecrets/{secret-name}", validator: validate_GetDeletedSecret_594281,
-    base: "", url: url_GetDeletedSecret_594282, schemes: {Scheme.Https})
+    route: "/deletedsecrets/{secret-name}", validator: validate_GetDeletedSecret_568510,
+    base: "", url: url_GetDeletedSecret_568511, schemes: {Scheme.Https})
 type
-  Call_PurgeDeletedSecret_594289 = ref object of OpenApiRestCall_593438
-proc url_PurgeDeletedSecret_594291(protocol: Scheme; host: string; base: string;
+  Call_PurgeDeletedSecret_568518 = ref object of OpenApiRestCall_567667
+proc url_PurgeDeletedSecret_568520(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2990,7 +2990,7 @@ proc url_PurgeDeletedSecret_594291(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PurgeDeletedSecret_594290(path: JsonNode; query: JsonNode;
+proc validate_PurgeDeletedSecret_568519(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## The purge deleted secret operation removes the secret permanently, without the possibility of recovery. This operation can only be enabled on a soft-delete enabled vault. This operation requires the secrets/purge permission.
@@ -3003,11 +3003,11 @@ proc validate_PurgeDeletedSecret_594290(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `secret-name` field"
-  var valid_594292 = path.getOrDefault("secret-name")
-  valid_594292 = validateParameter(valid_594292, JString, required = true,
+  var valid_568521 = path.getOrDefault("secret-name")
+  valid_568521 = validateParameter(valid_568521, JString, required = true,
                                  default = nil)
-  if valid_594292 != nil:
-    section.add "secret-name", valid_594292
+  if valid_568521 != nil:
+    section.add "secret-name", valid_568521
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3015,11 +3015,11 @@ proc validate_PurgeDeletedSecret_594290(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594293 = query.getOrDefault("api-version")
-  valid_594293 = validateParameter(valid_594293, JString, required = true,
+  var valid_568522 = query.getOrDefault("api-version")
+  valid_568522 = validateParameter(valid_568522, JString, required = true,
                                  default = nil)
-  if valid_594293 != nil:
-    section.add "api-version", valid_594293
+  if valid_568522 != nil:
+    section.add "api-version", valid_568522
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3028,20 +3028,20 @@ proc validate_PurgeDeletedSecret_594290(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594294: Call_PurgeDeletedSecret_594289; path: JsonNode;
+proc call*(call_568523: Call_PurgeDeletedSecret_568518; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The purge deleted secret operation removes the secret permanently, without the possibility of recovery. This operation can only be enabled on a soft-delete enabled vault. This operation requires the secrets/purge permission.
   ## 
-  let valid = call_594294.validator(path, query, header, formData, body)
-  let scheme = call_594294.pickScheme
+  let valid = call_568523.validator(path, query, header, formData, body)
+  let scheme = call_568523.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594294.url(scheme.get, call_594294.host, call_594294.base,
-                         call_594294.route, valid.getOrDefault("path"),
+  let url = call_568523.url(scheme.get, call_568523.host, call_568523.base,
+                         call_568523.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594294, url, valid)
+  result = hook(call_568523, url, valid)
 
-proc call*(call_594295: Call_PurgeDeletedSecret_594289; apiVersion: string;
+proc call*(call_568524: Call_PurgeDeletedSecret_568518; apiVersion: string;
           secretName: string): Recallable =
   ## purgeDeletedSecret
   ## The purge deleted secret operation removes the secret permanently, without the possibility of recovery. This operation can only be enabled on a soft-delete enabled vault. This operation requires the secrets/purge permission.
@@ -3049,20 +3049,20 @@ proc call*(call_594295: Call_PurgeDeletedSecret_594289; apiVersion: string;
   ##             : Client API version.
   ##   secretName: string (required)
   ##             : The name of the secret.
-  var path_594296 = newJObject()
-  var query_594297 = newJObject()
-  add(query_594297, "api-version", newJString(apiVersion))
-  add(path_594296, "secret-name", newJString(secretName))
-  result = call_594295.call(path_594296, query_594297, nil, nil, nil)
+  var path_568525 = newJObject()
+  var query_568526 = newJObject()
+  add(query_568526, "api-version", newJString(apiVersion))
+  add(path_568525, "secret-name", newJString(secretName))
+  result = call_568524.call(path_568525, query_568526, nil, nil, nil)
 
-var purgeDeletedSecret* = Call_PurgeDeletedSecret_594289(
+var purgeDeletedSecret* = Call_PurgeDeletedSecret_568518(
     name: "purgeDeletedSecret", meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/deletedsecrets/{secret-name}",
-    validator: validate_PurgeDeletedSecret_594290, base: "",
-    url: url_PurgeDeletedSecret_594291, schemes: {Scheme.Https})
+    validator: validate_PurgeDeletedSecret_568519, base: "",
+    url: url_PurgeDeletedSecret_568520, schemes: {Scheme.Https})
 type
-  Call_RecoverDeletedSecret_594298 = ref object of OpenApiRestCall_593438
-proc url_RecoverDeletedSecret_594300(protocol: Scheme; host: string; base: string;
+  Call_RecoverDeletedSecret_568527 = ref object of OpenApiRestCall_567667
+proc url_RecoverDeletedSecret_568529(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3078,7 +3078,7 @@ proc url_RecoverDeletedSecret_594300(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoverDeletedSecret_594299(path: JsonNode; query: JsonNode;
+proc validate_RecoverDeletedSecret_568528(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Recovers the deleted secret in the specified vault. This operation can only be performed on a soft-delete enabled vault. This operation requires the secrets/recover permission.
   ## 
@@ -3090,11 +3090,11 @@ proc validate_RecoverDeletedSecret_594299(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `secret-name` field"
-  var valid_594301 = path.getOrDefault("secret-name")
-  valid_594301 = validateParameter(valid_594301, JString, required = true,
+  var valid_568530 = path.getOrDefault("secret-name")
+  valid_568530 = validateParameter(valid_568530, JString, required = true,
                                  default = nil)
-  if valid_594301 != nil:
-    section.add "secret-name", valid_594301
+  if valid_568530 != nil:
+    section.add "secret-name", valid_568530
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3102,11 +3102,11 @@ proc validate_RecoverDeletedSecret_594299(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594302 = query.getOrDefault("api-version")
-  valid_594302 = validateParameter(valid_594302, JString, required = true,
+  var valid_568531 = query.getOrDefault("api-version")
+  valid_568531 = validateParameter(valid_568531, JString, required = true,
                                  default = nil)
-  if valid_594302 != nil:
-    section.add "api-version", valid_594302
+  if valid_568531 != nil:
+    section.add "api-version", valid_568531
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3115,20 +3115,20 @@ proc validate_RecoverDeletedSecret_594299(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594303: Call_RecoverDeletedSecret_594298; path: JsonNode;
+proc call*(call_568532: Call_RecoverDeletedSecret_568527; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Recovers the deleted secret in the specified vault. This operation can only be performed on a soft-delete enabled vault. This operation requires the secrets/recover permission.
   ## 
-  let valid = call_594303.validator(path, query, header, formData, body)
-  let scheme = call_594303.pickScheme
+  let valid = call_568532.validator(path, query, header, formData, body)
+  let scheme = call_568532.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594303.url(scheme.get, call_594303.host, call_594303.base,
-                         call_594303.route, valid.getOrDefault("path"),
+  let url = call_568532.url(scheme.get, call_568532.host, call_568532.base,
+                         call_568532.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594303, url, valid)
+  result = hook(call_568532, url, valid)
 
-proc call*(call_594304: Call_RecoverDeletedSecret_594298; apiVersion: string;
+proc call*(call_568533: Call_RecoverDeletedSecret_568527; apiVersion: string;
           secretName: string): Recallable =
   ## recoverDeletedSecret
   ## Recovers the deleted secret in the specified vault. This operation can only be performed on a soft-delete enabled vault. This operation requires the secrets/recover permission.
@@ -3136,27 +3136,27 @@ proc call*(call_594304: Call_RecoverDeletedSecret_594298; apiVersion: string;
   ##             : Client API version.
   ##   secretName: string (required)
   ##             : The name of the deleted secret.
-  var path_594305 = newJObject()
-  var query_594306 = newJObject()
-  add(query_594306, "api-version", newJString(apiVersion))
-  add(path_594305, "secret-name", newJString(secretName))
-  result = call_594304.call(path_594305, query_594306, nil, nil, nil)
+  var path_568534 = newJObject()
+  var query_568535 = newJObject()
+  add(query_568535, "api-version", newJString(apiVersion))
+  add(path_568534, "secret-name", newJString(secretName))
+  result = call_568533.call(path_568534, query_568535, nil, nil, nil)
 
-var recoverDeletedSecret* = Call_RecoverDeletedSecret_594298(
+var recoverDeletedSecret* = Call_RecoverDeletedSecret_568527(
     name: "recoverDeletedSecret", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/deletedsecrets/{secret-name}/recover",
-    validator: validate_RecoverDeletedSecret_594299, base: "",
-    url: url_RecoverDeletedSecret_594300, schemes: {Scheme.Https})
+    validator: validate_RecoverDeletedSecret_568528, base: "",
+    url: url_RecoverDeletedSecret_568529, schemes: {Scheme.Https})
 type
-  Call_GetDeletedStorageAccounts_594307 = ref object of OpenApiRestCall_593438
-proc url_GetDeletedStorageAccounts_594309(protocol: Scheme; host: string;
+  Call_GetDeletedStorageAccounts_568536 = ref object of OpenApiRestCall_567667
+proc url_GetDeletedStorageAccounts_568538(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetDeletedStorageAccounts_594308(path: JsonNode; query: JsonNode;
+proc validate_GetDeletedStorageAccounts_568537(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Get Deleted Storage Accounts operation returns the storage accounts that have been deleted for a vault enabled for soft-delete. This operation requires the storage/list permission.
   ## 
@@ -3172,15 +3172,15 @@ proc validate_GetDeletedStorageAccounts_594308(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594310 = query.getOrDefault("api-version")
-  valid_594310 = validateParameter(valid_594310, JString, required = true,
+  var valid_568539 = query.getOrDefault("api-version")
+  valid_568539 = validateParameter(valid_568539, JString, required = true,
                                  default = nil)
-  if valid_594310 != nil:
-    section.add "api-version", valid_594310
-  var valid_594311 = query.getOrDefault("maxresults")
-  valid_594311 = validateParameter(valid_594311, JInt, required = false, default = nil)
-  if valid_594311 != nil:
-    section.add "maxresults", valid_594311
+  if valid_568539 != nil:
+    section.add "api-version", valid_568539
+  var valid_568540 = query.getOrDefault("maxresults")
+  valid_568540 = validateParameter(valid_568540, JInt, required = false, default = nil)
+  if valid_568540 != nil:
+    section.add "maxresults", valid_568540
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3189,20 +3189,20 @@ proc validate_GetDeletedStorageAccounts_594308(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594312: Call_GetDeletedStorageAccounts_594307; path: JsonNode;
+proc call*(call_568541: Call_GetDeletedStorageAccounts_568536; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get Deleted Storage Accounts operation returns the storage accounts that have been deleted for a vault enabled for soft-delete. This operation requires the storage/list permission.
   ## 
-  let valid = call_594312.validator(path, query, header, formData, body)
-  let scheme = call_594312.pickScheme
+  let valid = call_568541.validator(path, query, header, formData, body)
+  let scheme = call_568541.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594312.url(scheme.get, call_594312.host, call_594312.base,
-                         call_594312.route, valid.getOrDefault("path"),
+  let url = call_568541.url(scheme.get, call_568541.host, call_568541.base,
+                         call_568541.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594312, url, valid)
+  result = hook(call_568541, url, valid)
 
-proc call*(call_594313: Call_GetDeletedStorageAccounts_594307; apiVersion: string;
+proc call*(call_568542: Call_GetDeletedStorageAccounts_568536; apiVersion: string;
           maxresults: int = 0): Recallable =
   ## getDeletedStorageAccounts
   ## The Get Deleted Storage Accounts operation returns the storage accounts that have been deleted for a vault enabled for soft-delete. This operation requires the storage/list permission.
@@ -3210,19 +3210,19 @@ proc call*(call_594313: Call_GetDeletedStorageAccounts_594307; apiVersion: strin
   ##             : Client API version.
   ##   maxresults: int
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
-  var query_594314 = newJObject()
-  add(query_594314, "api-version", newJString(apiVersion))
-  add(query_594314, "maxresults", newJInt(maxresults))
-  result = call_594313.call(nil, query_594314, nil, nil, nil)
+  var query_568543 = newJObject()
+  add(query_568543, "api-version", newJString(apiVersion))
+  add(query_568543, "maxresults", newJInt(maxresults))
+  result = call_568542.call(nil, query_568543, nil, nil, nil)
 
-var getDeletedStorageAccounts* = Call_GetDeletedStorageAccounts_594307(
+var getDeletedStorageAccounts* = Call_GetDeletedStorageAccounts_568536(
     name: "getDeletedStorageAccounts", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/deletedstorage",
-    validator: validate_GetDeletedStorageAccounts_594308, base: "",
-    url: url_GetDeletedStorageAccounts_594309, schemes: {Scheme.Https})
+    validator: validate_GetDeletedStorageAccounts_568537, base: "",
+    url: url_GetDeletedStorageAccounts_568538, schemes: {Scheme.Https})
 type
-  Call_GetDeletedStorageAccount_594315 = ref object of OpenApiRestCall_593438
-proc url_GetDeletedStorageAccount_594317(protocol: Scheme; host: string;
+  Call_GetDeletedStorageAccount_568544 = ref object of OpenApiRestCall_567667
+proc url_GetDeletedStorageAccount_568546(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3239,7 +3239,7 @@ proc url_GetDeletedStorageAccount_594317(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeletedStorageAccount_594316(path: JsonNode; query: JsonNode;
+proc validate_GetDeletedStorageAccount_568545(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Get Deleted Storage Account operation returns the specified deleted storage account along with its attributes. This operation requires the storage/get permission.
   ## 
@@ -3250,11 +3250,11 @@ proc validate_GetDeletedStorageAccount_594316(path: JsonNode; query: JsonNode;
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594318 = path.getOrDefault("storage-account-name")
-  valid_594318 = validateParameter(valid_594318, JString, required = true,
+  var valid_568547 = path.getOrDefault("storage-account-name")
+  valid_568547 = validateParameter(valid_568547, JString, required = true,
                                  default = nil)
-  if valid_594318 != nil:
-    section.add "storage-account-name", valid_594318
+  if valid_568547 != nil:
+    section.add "storage-account-name", valid_568547
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3262,11 +3262,11 @@ proc validate_GetDeletedStorageAccount_594316(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594319 = query.getOrDefault("api-version")
-  valid_594319 = validateParameter(valid_594319, JString, required = true,
+  var valid_568548 = query.getOrDefault("api-version")
+  valid_568548 = validateParameter(valid_568548, JString, required = true,
                                  default = nil)
-  if valid_594319 != nil:
-    section.add "api-version", valid_594319
+  if valid_568548 != nil:
+    section.add "api-version", valid_568548
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3275,20 +3275,20 @@ proc validate_GetDeletedStorageAccount_594316(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594320: Call_GetDeletedStorageAccount_594315; path: JsonNode;
+proc call*(call_568549: Call_GetDeletedStorageAccount_568544; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get Deleted Storage Account operation returns the specified deleted storage account along with its attributes. This operation requires the storage/get permission.
   ## 
-  let valid = call_594320.validator(path, query, header, formData, body)
-  let scheme = call_594320.pickScheme
+  let valid = call_568549.validator(path, query, header, formData, body)
+  let scheme = call_568549.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594320.url(scheme.get, call_594320.host, call_594320.base,
-                         call_594320.route, valid.getOrDefault("path"),
+  let url = call_568549.url(scheme.get, call_568549.host, call_568549.base,
+                         call_568549.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594320, url, valid)
+  result = hook(call_568549, url, valid)
 
-proc call*(call_594321: Call_GetDeletedStorageAccount_594315; apiVersion: string;
+proc call*(call_568550: Call_GetDeletedStorageAccount_568544; apiVersion: string;
           storageAccountName: string): Recallable =
   ## getDeletedStorageAccount
   ## The Get Deleted Storage Account operation returns the specified deleted storage account along with its attributes. This operation requires the storage/get permission.
@@ -3296,20 +3296,20 @@ proc call*(call_594321: Call_GetDeletedStorageAccount_594315; apiVersion: string
   ##             : Client API version.
   ##   storageAccountName: string (required)
   ##                     : The name of the storage account.
-  var path_594322 = newJObject()
-  var query_594323 = newJObject()
-  add(query_594323, "api-version", newJString(apiVersion))
-  add(path_594322, "storage-account-name", newJString(storageAccountName))
-  result = call_594321.call(path_594322, query_594323, nil, nil, nil)
+  var path_568551 = newJObject()
+  var query_568552 = newJObject()
+  add(query_568552, "api-version", newJString(apiVersion))
+  add(path_568551, "storage-account-name", newJString(storageAccountName))
+  result = call_568550.call(path_568551, query_568552, nil, nil, nil)
 
-var getDeletedStorageAccount* = Call_GetDeletedStorageAccount_594315(
+var getDeletedStorageAccount* = Call_GetDeletedStorageAccount_568544(
     name: "getDeletedStorageAccount", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/deletedstorage/{storage-account-name}",
-    validator: validate_GetDeletedStorageAccount_594316, base: "",
-    url: url_GetDeletedStorageAccount_594317, schemes: {Scheme.Https})
+    validator: validate_GetDeletedStorageAccount_568545, base: "",
+    url: url_GetDeletedStorageAccount_568546, schemes: {Scheme.Https})
 type
-  Call_PurgeDeletedStorageAccount_594324 = ref object of OpenApiRestCall_593438
-proc url_PurgeDeletedStorageAccount_594326(protocol: Scheme; host: string;
+  Call_PurgeDeletedStorageAccount_568553 = ref object of OpenApiRestCall_567667
+proc url_PurgeDeletedStorageAccount_568555(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3325,7 +3325,7 @@ proc url_PurgeDeletedStorageAccount_594326(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PurgeDeletedStorageAccount_594325(path: JsonNode; query: JsonNode;
+proc validate_PurgeDeletedStorageAccount_568554(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The purge deleted storage account operation removes the secret permanently, without the possibility of recovery. This operation can only be performed on a soft-delete enabled vault. This operation requires the storage/purge permission.
   ## 
@@ -3336,11 +3336,11 @@ proc validate_PurgeDeletedStorageAccount_594325(path: JsonNode; query: JsonNode;
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594327 = path.getOrDefault("storage-account-name")
-  valid_594327 = validateParameter(valid_594327, JString, required = true,
+  var valid_568556 = path.getOrDefault("storage-account-name")
+  valid_568556 = validateParameter(valid_568556, JString, required = true,
                                  default = nil)
-  if valid_594327 != nil:
-    section.add "storage-account-name", valid_594327
+  if valid_568556 != nil:
+    section.add "storage-account-name", valid_568556
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3348,11 +3348,11 @@ proc validate_PurgeDeletedStorageAccount_594325(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594328 = query.getOrDefault("api-version")
-  valid_594328 = validateParameter(valid_594328, JString, required = true,
+  var valid_568557 = query.getOrDefault("api-version")
+  valid_568557 = validateParameter(valid_568557, JString, required = true,
                                  default = nil)
-  if valid_594328 != nil:
-    section.add "api-version", valid_594328
+  if valid_568557 != nil:
+    section.add "api-version", valid_568557
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3361,20 +3361,20 @@ proc validate_PurgeDeletedStorageAccount_594325(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594329: Call_PurgeDeletedStorageAccount_594324; path: JsonNode;
+proc call*(call_568558: Call_PurgeDeletedStorageAccount_568553; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The purge deleted storage account operation removes the secret permanently, without the possibility of recovery. This operation can only be performed on a soft-delete enabled vault. This operation requires the storage/purge permission.
   ## 
-  let valid = call_594329.validator(path, query, header, formData, body)
-  let scheme = call_594329.pickScheme
+  let valid = call_568558.validator(path, query, header, formData, body)
+  let scheme = call_568558.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594329.url(scheme.get, call_594329.host, call_594329.base,
-                         call_594329.route, valid.getOrDefault("path"),
+  let url = call_568558.url(scheme.get, call_568558.host, call_568558.base,
+                         call_568558.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594329, url, valid)
+  result = hook(call_568558, url, valid)
 
-proc call*(call_594330: Call_PurgeDeletedStorageAccount_594324; apiVersion: string;
+proc call*(call_568559: Call_PurgeDeletedStorageAccount_568553; apiVersion: string;
           storageAccountName: string): Recallable =
   ## purgeDeletedStorageAccount
   ## The purge deleted storage account operation removes the secret permanently, without the possibility of recovery. This operation can only be performed on a soft-delete enabled vault. This operation requires the storage/purge permission.
@@ -3382,20 +3382,20 @@ proc call*(call_594330: Call_PurgeDeletedStorageAccount_594324; apiVersion: stri
   ##             : Client API version.
   ##   storageAccountName: string (required)
   ##                     : The name of the storage account.
-  var path_594331 = newJObject()
-  var query_594332 = newJObject()
-  add(query_594332, "api-version", newJString(apiVersion))
-  add(path_594331, "storage-account-name", newJString(storageAccountName))
-  result = call_594330.call(path_594331, query_594332, nil, nil, nil)
+  var path_568560 = newJObject()
+  var query_568561 = newJObject()
+  add(query_568561, "api-version", newJString(apiVersion))
+  add(path_568560, "storage-account-name", newJString(storageAccountName))
+  result = call_568559.call(path_568560, query_568561, nil, nil, nil)
 
-var purgeDeletedStorageAccount* = Call_PurgeDeletedStorageAccount_594324(
+var purgeDeletedStorageAccount* = Call_PurgeDeletedStorageAccount_568553(
     name: "purgeDeletedStorageAccount", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/deletedstorage/{storage-account-name}",
-    validator: validate_PurgeDeletedStorageAccount_594325, base: "",
-    url: url_PurgeDeletedStorageAccount_594326, schemes: {Scheme.Https})
+    validator: validate_PurgeDeletedStorageAccount_568554, base: "",
+    url: url_PurgeDeletedStorageAccount_568555, schemes: {Scheme.Https})
 type
-  Call_RecoverDeletedStorageAccount_594333 = ref object of OpenApiRestCall_593438
-proc url_RecoverDeletedStorageAccount_594335(protocol: Scheme; host: string;
+  Call_RecoverDeletedStorageAccount_568562 = ref object of OpenApiRestCall_567667
+proc url_RecoverDeletedStorageAccount_568564(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3412,7 +3412,7 @@ proc url_RecoverDeletedStorageAccount_594335(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoverDeletedStorageAccount_594334(path: JsonNode; query: JsonNode;
+proc validate_RecoverDeletedStorageAccount_568563(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Recovers the deleted storage account in the specified vault. This operation can only be performed on a soft-delete enabled vault. This operation requires the storage/recover permission.
   ## 
@@ -3423,11 +3423,11 @@ proc validate_RecoverDeletedStorageAccount_594334(path: JsonNode; query: JsonNod
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594336 = path.getOrDefault("storage-account-name")
-  valid_594336 = validateParameter(valid_594336, JString, required = true,
+  var valid_568565 = path.getOrDefault("storage-account-name")
+  valid_568565 = validateParameter(valid_568565, JString, required = true,
                                  default = nil)
-  if valid_594336 != nil:
-    section.add "storage-account-name", valid_594336
+  if valid_568565 != nil:
+    section.add "storage-account-name", valid_568565
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3435,11 +3435,11 @@ proc validate_RecoverDeletedStorageAccount_594334(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594337 = query.getOrDefault("api-version")
-  valid_594337 = validateParameter(valid_594337, JString, required = true,
+  var valid_568566 = query.getOrDefault("api-version")
+  valid_568566 = validateParameter(valid_568566, JString, required = true,
                                  default = nil)
-  if valid_594337 != nil:
-    section.add "api-version", valid_594337
+  if valid_568566 != nil:
+    section.add "api-version", valid_568566
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3448,20 +3448,20 @@ proc validate_RecoverDeletedStorageAccount_594334(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594338: Call_RecoverDeletedStorageAccount_594333; path: JsonNode;
+proc call*(call_568567: Call_RecoverDeletedStorageAccount_568562; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Recovers the deleted storage account in the specified vault. This operation can only be performed on a soft-delete enabled vault. This operation requires the storage/recover permission.
   ## 
-  let valid = call_594338.validator(path, query, header, formData, body)
-  let scheme = call_594338.pickScheme
+  let valid = call_568567.validator(path, query, header, formData, body)
+  let scheme = call_568567.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594338.url(scheme.get, call_594338.host, call_594338.base,
-                         call_594338.route, valid.getOrDefault("path"),
+  let url = call_568567.url(scheme.get, call_568567.host, call_568567.base,
+                         call_568567.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594338, url, valid)
+  result = hook(call_568567, url, valid)
 
-proc call*(call_594339: Call_RecoverDeletedStorageAccount_594333;
+proc call*(call_568568: Call_RecoverDeletedStorageAccount_568562;
           apiVersion: string; storageAccountName: string): Recallable =
   ## recoverDeletedStorageAccount
   ## Recovers the deleted storage account in the specified vault. This operation can only be performed on a soft-delete enabled vault. This operation requires the storage/recover permission.
@@ -3469,20 +3469,20 @@ proc call*(call_594339: Call_RecoverDeletedStorageAccount_594333;
   ##             : Client API version.
   ##   storageAccountName: string (required)
   ##                     : The name of the storage account.
-  var path_594340 = newJObject()
-  var query_594341 = newJObject()
-  add(query_594341, "api-version", newJString(apiVersion))
-  add(path_594340, "storage-account-name", newJString(storageAccountName))
-  result = call_594339.call(path_594340, query_594341, nil, nil, nil)
+  var path_568569 = newJObject()
+  var query_568570 = newJObject()
+  add(query_568570, "api-version", newJString(apiVersion))
+  add(path_568569, "storage-account-name", newJString(storageAccountName))
+  result = call_568568.call(path_568569, query_568570, nil, nil, nil)
 
-var recoverDeletedStorageAccount* = Call_RecoverDeletedStorageAccount_594333(
+var recoverDeletedStorageAccount* = Call_RecoverDeletedStorageAccount_568562(
     name: "recoverDeletedStorageAccount", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/deletedstorage/{storage-account-name}/recover",
-    validator: validate_RecoverDeletedStorageAccount_594334, base: "",
-    url: url_RecoverDeletedStorageAccount_594335, schemes: {Scheme.Https})
+    validator: validate_RecoverDeletedStorageAccount_568563, base: "",
+    url: url_RecoverDeletedStorageAccount_568564, schemes: {Scheme.Https})
 type
-  Call_GetDeletedSasDefinitions_594342 = ref object of OpenApiRestCall_593438
-proc url_GetDeletedSasDefinitions_594344(protocol: Scheme; host: string;
+  Call_GetDeletedSasDefinitions_568571 = ref object of OpenApiRestCall_567667
+proc url_GetDeletedSasDefinitions_568573(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3500,7 +3500,7 @@ proc url_GetDeletedSasDefinitions_594344(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeletedSasDefinitions_594343(path: JsonNode; query: JsonNode;
+proc validate_GetDeletedSasDefinitions_568572(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Get Deleted Sas Definitions operation returns the SAS definitions that have been deleted for a vault enabled for soft-delete. This operation requires the storage/listsas permission.
   ## 
@@ -3511,11 +3511,11 @@ proc validate_GetDeletedSasDefinitions_594343(path: JsonNode; query: JsonNode;
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594345 = path.getOrDefault("storage-account-name")
-  valid_594345 = validateParameter(valid_594345, JString, required = true,
+  var valid_568574 = path.getOrDefault("storage-account-name")
+  valid_568574 = validateParameter(valid_568574, JString, required = true,
                                  default = nil)
-  if valid_594345 != nil:
-    section.add "storage-account-name", valid_594345
+  if valid_568574 != nil:
+    section.add "storage-account-name", valid_568574
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3525,15 +3525,15 @@ proc validate_GetDeletedSasDefinitions_594343(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594346 = query.getOrDefault("api-version")
-  valid_594346 = validateParameter(valid_594346, JString, required = true,
+  var valid_568575 = query.getOrDefault("api-version")
+  valid_568575 = validateParameter(valid_568575, JString, required = true,
                                  default = nil)
-  if valid_594346 != nil:
-    section.add "api-version", valid_594346
-  var valid_594347 = query.getOrDefault("maxresults")
-  valid_594347 = validateParameter(valid_594347, JInt, required = false, default = nil)
-  if valid_594347 != nil:
-    section.add "maxresults", valid_594347
+  if valid_568575 != nil:
+    section.add "api-version", valid_568575
+  var valid_568576 = query.getOrDefault("maxresults")
+  valid_568576 = validateParameter(valid_568576, JInt, required = false, default = nil)
+  if valid_568576 != nil:
+    section.add "maxresults", valid_568576
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3542,20 +3542,20 @@ proc validate_GetDeletedSasDefinitions_594343(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594348: Call_GetDeletedSasDefinitions_594342; path: JsonNode;
+proc call*(call_568577: Call_GetDeletedSasDefinitions_568571; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get Deleted Sas Definitions operation returns the SAS definitions that have been deleted for a vault enabled for soft-delete. This operation requires the storage/listsas permission.
   ## 
-  let valid = call_594348.validator(path, query, header, formData, body)
-  let scheme = call_594348.pickScheme
+  let valid = call_568577.validator(path, query, header, formData, body)
+  let scheme = call_568577.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594348.url(scheme.get, call_594348.host, call_594348.base,
-                         call_594348.route, valid.getOrDefault("path"),
+  let url = call_568577.url(scheme.get, call_568577.host, call_568577.base,
+                         call_568577.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594348, url, valid)
+  result = hook(call_568577, url, valid)
 
-proc call*(call_594349: Call_GetDeletedSasDefinitions_594342; apiVersion: string;
+proc call*(call_568578: Call_GetDeletedSasDefinitions_568571; apiVersion: string;
           storageAccountName: string; maxresults: int = 0): Recallable =
   ## getDeletedSasDefinitions
   ## The Get Deleted Sas Definitions operation returns the SAS definitions that have been deleted for a vault enabled for soft-delete. This operation requires the storage/listsas permission.
@@ -3565,21 +3565,21 @@ proc call*(call_594349: Call_GetDeletedSasDefinitions_594342; apiVersion: string
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
   ##   storageAccountName: string (required)
   ##                     : The name of the storage account.
-  var path_594350 = newJObject()
-  var query_594351 = newJObject()
-  add(query_594351, "api-version", newJString(apiVersion))
-  add(query_594351, "maxresults", newJInt(maxresults))
-  add(path_594350, "storage-account-name", newJString(storageAccountName))
-  result = call_594349.call(path_594350, query_594351, nil, nil, nil)
+  var path_568579 = newJObject()
+  var query_568580 = newJObject()
+  add(query_568580, "api-version", newJString(apiVersion))
+  add(query_568580, "maxresults", newJInt(maxresults))
+  add(path_568579, "storage-account-name", newJString(storageAccountName))
+  result = call_568578.call(path_568579, query_568580, nil, nil, nil)
 
-var getDeletedSasDefinitions* = Call_GetDeletedSasDefinitions_594342(
+var getDeletedSasDefinitions* = Call_GetDeletedSasDefinitions_568571(
     name: "getDeletedSasDefinitions", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/deletedstorage/{storage-account-name}/sas",
-    validator: validate_GetDeletedSasDefinitions_594343, base: "",
-    url: url_GetDeletedSasDefinitions_594344, schemes: {Scheme.Https})
+    validator: validate_GetDeletedSasDefinitions_568572, base: "",
+    url: url_GetDeletedSasDefinitions_568573, schemes: {Scheme.Https})
 type
-  Call_GetDeletedSasDefinition_594352 = ref object of OpenApiRestCall_593438
-proc url_GetDeletedSasDefinition_594354(protocol: Scheme; host: string; base: string;
+  Call_GetDeletedSasDefinition_568581 = ref object of OpenApiRestCall_567667
+proc url_GetDeletedSasDefinition_568583(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3600,7 +3600,7 @@ proc url_GetDeletedSasDefinition_594354(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeletedSasDefinition_594353(path: JsonNode; query: JsonNode;
+proc validate_GetDeletedSasDefinition_568582(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Get Deleted SAS Definition operation returns the specified deleted SAS definition along with its attributes. This operation requires the storage/getsas permission.
   ## 
@@ -3613,16 +3613,16 @@ proc validate_GetDeletedSasDefinition_594353(path: JsonNode; query: JsonNode;
   ##                      : The name of the SAS definition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594355 = path.getOrDefault("storage-account-name")
-  valid_594355 = validateParameter(valid_594355, JString, required = true,
+  var valid_568584 = path.getOrDefault("storage-account-name")
+  valid_568584 = validateParameter(valid_568584, JString, required = true,
                                  default = nil)
-  if valid_594355 != nil:
-    section.add "storage-account-name", valid_594355
-  var valid_594356 = path.getOrDefault("sas-definition-name")
-  valid_594356 = validateParameter(valid_594356, JString, required = true,
+  if valid_568584 != nil:
+    section.add "storage-account-name", valid_568584
+  var valid_568585 = path.getOrDefault("sas-definition-name")
+  valid_568585 = validateParameter(valid_568585, JString, required = true,
                                  default = nil)
-  if valid_594356 != nil:
-    section.add "sas-definition-name", valid_594356
+  if valid_568585 != nil:
+    section.add "sas-definition-name", valid_568585
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3630,11 +3630,11 @@ proc validate_GetDeletedSasDefinition_594353(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594357 = query.getOrDefault("api-version")
-  valid_594357 = validateParameter(valid_594357, JString, required = true,
+  var valid_568586 = query.getOrDefault("api-version")
+  valid_568586 = validateParameter(valid_568586, JString, required = true,
                                  default = nil)
-  if valid_594357 != nil:
-    section.add "api-version", valid_594357
+  if valid_568586 != nil:
+    section.add "api-version", valid_568586
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3643,20 +3643,20 @@ proc validate_GetDeletedSasDefinition_594353(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594358: Call_GetDeletedSasDefinition_594352; path: JsonNode;
+proc call*(call_568587: Call_GetDeletedSasDefinition_568581; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get Deleted SAS Definition operation returns the specified deleted SAS definition along with its attributes. This operation requires the storage/getsas permission.
   ## 
-  let valid = call_594358.validator(path, query, header, formData, body)
-  let scheme = call_594358.pickScheme
+  let valid = call_568587.validator(path, query, header, formData, body)
+  let scheme = call_568587.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594358.url(scheme.get, call_594358.host, call_594358.base,
-                         call_594358.route, valid.getOrDefault("path"),
+  let url = call_568587.url(scheme.get, call_568587.host, call_568587.base,
+                         call_568587.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594358, url, valid)
+  result = hook(call_568587, url, valid)
 
-proc call*(call_594359: Call_GetDeletedSasDefinition_594352; apiVersion: string;
+proc call*(call_568588: Call_GetDeletedSasDefinition_568581; apiVersion: string;
           storageAccountName: string; sasDefinitionName: string): Recallable =
   ## getDeletedSasDefinition
   ## The Get Deleted SAS Definition operation returns the specified deleted SAS definition along with its attributes. This operation requires the storage/getsas permission.
@@ -3666,21 +3666,21 @@ proc call*(call_594359: Call_GetDeletedSasDefinition_594352; apiVersion: string;
   ##                     : The name of the storage account.
   ##   sasDefinitionName: string (required)
   ##                    : The name of the SAS definition.
-  var path_594360 = newJObject()
-  var query_594361 = newJObject()
-  add(query_594361, "api-version", newJString(apiVersion))
-  add(path_594360, "storage-account-name", newJString(storageAccountName))
-  add(path_594360, "sas-definition-name", newJString(sasDefinitionName))
-  result = call_594359.call(path_594360, query_594361, nil, nil, nil)
+  var path_568589 = newJObject()
+  var query_568590 = newJObject()
+  add(query_568590, "api-version", newJString(apiVersion))
+  add(path_568589, "storage-account-name", newJString(storageAccountName))
+  add(path_568589, "sas-definition-name", newJString(sasDefinitionName))
+  result = call_568588.call(path_568589, query_568590, nil, nil, nil)
 
-var getDeletedSasDefinition* = Call_GetDeletedSasDefinition_594352(
+var getDeletedSasDefinition* = Call_GetDeletedSasDefinition_568581(
     name: "getDeletedSasDefinition", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/deletedstorage/{storage-account-name}/sas/{sas-definition-name}",
-    validator: validate_GetDeletedSasDefinition_594353, base: "",
-    url: url_GetDeletedSasDefinition_594354, schemes: {Scheme.Https})
+    validator: validate_GetDeletedSasDefinition_568582, base: "",
+    url: url_GetDeletedSasDefinition_568583, schemes: {Scheme.Https})
 type
-  Call_RecoverDeletedSasDefinition_594362 = ref object of OpenApiRestCall_593438
-proc url_RecoverDeletedSasDefinition_594364(protocol: Scheme; host: string;
+  Call_RecoverDeletedSasDefinition_568591 = ref object of OpenApiRestCall_567667
+proc url_RecoverDeletedSasDefinition_568593(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3701,7 +3701,7 @@ proc url_RecoverDeletedSasDefinition_594364(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoverDeletedSasDefinition_594363(path: JsonNode; query: JsonNode;
+proc validate_RecoverDeletedSasDefinition_568592(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Recovers the deleted SAS definition for the specified storage account. This operation can only be performed on a soft-delete enabled vault. This operation requires the storage/recover permission.
   ## 
@@ -3714,16 +3714,16 @@ proc validate_RecoverDeletedSasDefinition_594363(path: JsonNode; query: JsonNode
   ##                      : The name of the SAS definition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594365 = path.getOrDefault("storage-account-name")
-  valid_594365 = validateParameter(valid_594365, JString, required = true,
+  var valid_568594 = path.getOrDefault("storage-account-name")
+  valid_568594 = validateParameter(valid_568594, JString, required = true,
                                  default = nil)
-  if valid_594365 != nil:
-    section.add "storage-account-name", valid_594365
-  var valid_594366 = path.getOrDefault("sas-definition-name")
-  valid_594366 = validateParameter(valid_594366, JString, required = true,
+  if valid_568594 != nil:
+    section.add "storage-account-name", valid_568594
+  var valid_568595 = path.getOrDefault("sas-definition-name")
+  valid_568595 = validateParameter(valid_568595, JString, required = true,
                                  default = nil)
-  if valid_594366 != nil:
-    section.add "sas-definition-name", valid_594366
+  if valid_568595 != nil:
+    section.add "sas-definition-name", valid_568595
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3731,11 +3731,11 @@ proc validate_RecoverDeletedSasDefinition_594363(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594367 = query.getOrDefault("api-version")
-  valid_594367 = validateParameter(valid_594367, JString, required = true,
+  var valid_568596 = query.getOrDefault("api-version")
+  valid_568596 = validateParameter(valid_568596, JString, required = true,
                                  default = nil)
-  if valid_594367 != nil:
-    section.add "api-version", valid_594367
+  if valid_568596 != nil:
+    section.add "api-version", valid_568596
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3744,20 +3744,20 @@ proc validate_RecoverDeletedSasDefinition_594363(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594368: Call_RecoverDeletedSasDefinition_594362; path: JsonNode;
+proc call*(call_568597: Call_RecoverDeletedSasDefinition_568591; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Recovers the deleted SAS definition for the specified storage account. This operation can only be performed on a soft-delete enabled vault. This operation requires the storage/recover permission.
   ## 
-  let valid = call_594368.validator(path, query, header, formData, body)
-  let scheme = call_594368.pickScheme
+  let valid = call_568597.validator(path, query, header, formData, body)
+  let scheme = call_568597.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594368.url(scheme.get, call_594368.host, call_594368.base,
-                         call_594368.route, valid.getOrDefault("path"),
+  let url = call_568597.url(scheme.get, call_568597.host, call_568597.base,
+                         call_568597.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594368, url, valid)
+  result = hook(call_568597, url, valid)
 
-proc call*(call_594369: Call_RecoverDeletedSasDefinition_594362;
+proc call*(call_568598: Call_RecoverDeletedSasDefinition_568591;
           apiVersion: string; storageAccountName: string; sasDefinitionName: string): Recallable =
   ## recoverDeletedSasDefinition
   ## Recovers the deleted SAS definition for the specified storage account. This operation can only be performed on a soft-delete enabled vault. This operation requires the storage/recover permission.
@@ -3767,28 +3767,28 @@ proc call*(call_594369: Call_RecoverDeletedSasDefinition_594362;
   ##                     : The name of the storage account.
   ##   sasDefinitionName: string (required)
   ##                    : The name of the SAS definition.
-  var path_594370 = newJObject()
-  var query_594371 = newJObject()
-  add(query_594371, "api-version", newJString(apiVersion))
-  add(path_594370, "storage-account-name", newJString(storageAccountName))
-  add(path_594370, "sas-definition-name", newJString(sasDefinitionName))
-  result = call_594369.call(path_594370, query_594371, nil, nil, nil)
+  var path_568599 = newJObject()
+  var query_568600 = newJObject()
+  add(query_568600, "api-version", newJString(apiVersion))
+  add(path_568599, "storage-account-name", newJString(storageAccountName))
+  add(path_568599, "sas-definition-name", newJString(sasDefinitionName))
+  result = call_568598.call(path_568599, query_568600, nil, nil, nil)
 
-var recoverDeletedSasDefinition* = Call_RecoverDeletedSasDefinition_594362(
+var recoverDeletedSasDefinition* = Call_RecoverDeletedSasDefinition_568591(
     name: "recoverDeletedSasDefinition", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/deletedstorage/{storage-account-name}/sas/{sas-definition-name}/recover",
-    validator: validate_RecoverDeletedSasDefinition_594363, base: "",
-    url: url_RecoverDeletedSasDefinition_594364, schemes: {Scheme.Https})
+    validator: validate_RecoverDeletedSasDefinition_568592, base: "",
+    url: url_RecoverDeletedSasDefinition_568593, schemes: {Scheme.Https})
 type
-  Call_GetKeys_594372 = ref object of OpenApiRestCall_593438
-proc url_GetKeys_594374(protocol: Scheme; host: string; base: string; route: string;
+  Call_GetKeys_568601 = ref object of OpenApiRestCall_567667
+proc url_GetKeys_568603(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetKeys_594373(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GetKeys_568602(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves a list of the keys in the Key Vault as JSON Web Key structures that contain the public part of a stored key. The LIST operation is applicable to all key types, however only the base key identifier, attributes, and tags are provided in the response. Individual versions of a key are not listed in the response. This operation requires the keys/list permission.
   ## 
@@ -3804,15 +3804,15 @@ proc validate_GetKeys_594373(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594375 = query.getOrDefault("api-version")
-  valid_594375 = validateParameter(valid_594375, JString, required = true,
+  var valid_568604 = query.getOrDefault("api-version")
+  valid_568604 = validateParameter(valid_568604, JString, required = true,
                                  default = nil)
-  if valid_594375 != nil:
-    section.add "api-version", valid_594375
-  var valid_594376 = query.getOrDefault("maxresults")
-  valid_594376 = validateParameter(valid_594376, JInt, required = false, default = nil)
-  if valid_594376 != nil:
-    section.add "maxresults", valid_594376
+  if valid_568604 != nil:
+    section.add "api-version", valid_568604
+  var valid_568605 = query.getOrDefault("maxresults")
+  valid_568605 = validateParameter(valid_568605, JInt, required = false, default = nil)
+  if valid_568605 != nil:
+    section.add "maxresults", valid_568605
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3821,45 +3821,45 @@ proc validate_GetKeys_594373(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594377: Call_GetKeys_594372; path: JsonNode; query: JsonNode;
+proc call*(call_568606: Call_GetKeys_568601; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves a list of the keys in the Key Vault as JSON Web Key structures that contain the public part of a stored key. The LIST operation is applicable to all key types, however only the base key identifier, attributes, and tags are provided in the response. Individual versions of a key are not listed in the response. This operation requires the keys/list permission.
   ## 
-  let valid = call_594377.validator(path, query, header, formData, body)
-  let scheme = call_594377.pickScheme
+  let valid = call_568606.validator(path, query, header, formData, body)
+  let scheme = call_568606.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594377.url(scheme.get, call_594377.host, call_594377.base,
-                         call_594377.route, valid.getOrDefault("path"),
+  let url = call_568606.url(scheme.get, call_568606.host, call_568606.base,
+                         call_568606.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594377, url, valid)
+  result = hook(call_568606, url, valid)
 
-proc call*(call_594378: Call_GetKeys_594372; apiVersion: string; maxresults: int = 0): Recallable =
+proc call*(call_568607: Call_GetKeys_568601; apiVersion: string; maxresults: int = 0): Recallable =
   ## getKeys
   ## Retrieves a list of the keys in the Key Vault as JSON Web Key structures that contain the public part of a stored key. The LIST operation is applicable to all key types, however only the base key identifier, attributes, and tags are provided in the response. Individual versions of a key are not listed in the response. This operation requires the keys/list permission.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   maxresults: int
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
-  var query_594379 = newJObject()
-  add(query_594379, "api-version", newJString(apiVersion))
-  add(query_594379, "maxresults", newJInt(maxresults))
-  result = call_594378.call(nil, query_594379, nil, nil, nil)
+  var query_568608 = newJObject()
+  add(query_568608, "api-version", newJString(apiVersion))
+  add(query_568608, "maxresults", newJInt(maxresults))
+  result = call_568607.call(nil, query_568608, nil, nil, nil)
 
-var getKeys* = Call_GetKeys_594372(name: "getKeys", meth: HttpMethod.HttpGet,
+var getKeys* = Call_GetKeys_568601(name: "getKeys", meth: HttpMethod.HttpGet,
                                 host: "azure.local", route: "/keys",
-                                validator: validate_GetKeys_594373, base: "",
-                                url: url_GetKeys_594374, schemes: {Scheme.Https})
+                                validator: validate_GetKeys_568602, base: "",
+                                url: url_GetKeys_568603, schemes: {Scheme.Https})
 type
-  Call_RestoreKey_594380 = ref object of OpenApiRestCall_593438
-proc url_RestoreKey_594382(protocol: Scheme; host: string; base: string; route: string;
+  Call_RestoreKey_568609 = ref object of OpenApiRestCall_567667
+proc url_RestoreKey_568611(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RestoreKey_594381(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RestoreKey_568610(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Imports a previously backed up key into Azure Key Vault, restoring the key, its key identifier, attributes and access control policies. The RESTORE operation may be used to import a previously backed up key. Individual versions of a key cannot be restored. The key is restored in its entirety with the same key name as it had when it was backed up. If the key name is not available in the target Key Vault, the RESTORE operation will be rejected. While the key name is retained during restore, the final key identifier will change if the key is restored to a different vault. Restore will restore all versions and preserve version identifiers. The RESTORE operation is subject to security constraints: The target Key Vault must be owned by the same Microsoft Azure Subscription as the source Key Vault The user must have RESTORE permission in the target Key Vault. This operation requires the keys/restore permission.
   ## 
@@ -3873,11 +3873,11 @@ proc validate_RestoreKey_594381(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594383 = query.getOrDefault("api-version")
-  valid_594383 = validateParameter(valid_594383, JString, required = true,
+  var valid_568612 = query.getOrDefault("api-version")
+  valid_568612 = validateParameter(valid_568612, JString, required = true,
                                  default = nil)
-  if valid_594383 != nil:
-    section.add "api-version", valid_594383
+  if valid_568612 != nil:
+    section.add "api-version", valid_568612
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3891,20 +3891,20 @@ proc validate_RestoreKey_594381(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594385: Call_RestoreKey_594380; path: JsonNode; query: JsonNode;
+proc call*(call_568614: Call_RestoreKey_568609; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Imports a previously backed up key into Azure Key Vault, restoring the key, its key identifier, attributes and access control policies. The RESTORE operation may be used to import a previously backed up key. Individual versions of a key cannot be restored. The key is restored in its entirety with the same key name as it had when it was backed up. If the key name is not available in the target Key Vault, the RESTORE operation will be rejected. While the key name is retained during restore, the final key identifier will change if the key is restored to a different vault. Restore will restore all versions and preserve version identifiers. The RESTORE operation is subject to security constraints: The target Key Vault must be owned by the same Microsoft Azure Subscription as the source Key Vault The user must have RESTORE permission in the target Key Vault. This operation requires the keys/restore permission.
   ## 
-  let valid = call_594385.validator(path, query, header, formData, body)
-  let scheme = call_594385.pickScheme
+  let valid = call_568614.validator(path, query, header, formData, body)
+  let scheme = call_568614.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594385.url(scheme.get, call_594385.host, call_594385.base,
-                         call_594385.route, valid.getOrDefault("path"),
+  let url = call_568614.url(scheme.get, call_568614.host, call_568614.base,
+                         call_568614.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594385, url, valid)
+  result = hook(call_568614, url, valid)
 
-proc call*(call_594386: Call_RestoreKey_594380; apiVersion: string;
+proc call*(call_568615: Call_RestoreKey_568609; apiVersion: string;
           parameters: JsonNode): Recallable =
   ## restoreKey
   ## Imports a previously backed up key into Azure Key Vault, restoring the key, its key identifier, attributes and access control policies. The RESTORE operation may be used to import a previously backed up key. Individual versions of a key cannot be restored. The key is restored in its entirety with the same key name as it had when it was backed up. If the key name is not available in the target Key Vault, the RESTORE operation will be rejected. While the key name is retained during restore, the final key identifier will change if the key is restored to a different vault. Restore will restore all versions and preserve version identifiers. The RESTORE operation is subject to security constraints: The target Key Vault must be owned by the same Microsoft Azure Subscription as the source Key Vault The user must have RESTORE permission in the target Key Vault. This operation requires the keys/restore permission.
@@ -3912,22 +3912,22 @@ proc call*(call_594386: Call_RestoreKey_594380; apiVersion: string;
   ##             : Client API version.
   ##   parameters: JObject (required)
   ##             : The parameters to restore the key.
-  var query_594387 = newJObject()
-  var body_594388 = newJObject()
-  add(query_594387, "api-version", newJString(apiVersion))
+  var query_568616 = newJObject()
+  var body_568617 = newJObject()
+  add(query_568616, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_594388 = parameters
-  result = call_594386.call(nil, query_594387, nil, nil, body_594388)
+    body_568617 = parameters
+  result = call_568615.call(nil, query_568616, nil, nil, body_568617)
 
-var restoreKey* = Call_RestoreKey_594380(name: "restoreKey",
+var restoreKey* = Call_RestoreKey_568609(name: "restoreKey",
                                       meth: HttpMethod.HttpPost,
                                       host: "azure.local", route: "/keys/restore",
-                                      validator: validate_RestoreKey_594381,
-                                      base: "", url: url_RestoreKey_594382,
+                                      validator: validate_RestoreKey_568610,
+                                      base: "", url: url_RestoreKey_568611,
                                       schemes: {Scheme.Https})
 type
-  Call_ImportKey_594389 = ref object of OpenApiRestCall_593438
-proc url_ImportKey_594391(protocol: Scheme; host: string; base: string; route: string;
+  Call_ImportKey_568618 = ref object of OpenApiRestCall_567667
+proc url_ImportKey_568620(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3942,7 +3942,7 @@ proc url_ImportKey_594391(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ImportKey_594390(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ImportKey_568619(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## The import key operation may be used to import any key type into an Azure Key Vault. If the named key already exists, Azure Key Vault creates a new version of the key. This operation requires the keys/import permission.
   ## 
@@ -3953,11 +3953,11 @@ proc validate_ImportKey_594390(path: JsonNode; query: JsonNode; header: JsonNode
   ##           : Name for the imported key.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `key-name` field"
-  var valid_594392 = path.getOrDefault("key-name")
-  valid_594392 = validateParameter(valid_594392, JString, required = true,
+  var valid_568621 = path.getOrDefault("key-name")
+  valid_568621 = validateParameter(valid_568621, JString, required = true,
                                  default = nil)
-  if valid_594392 != nil:
-    section.add "key-name", valid_594392
+  if valid_568621 != nil:
+    section.add "key-name", valid_568621
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3965,11 +3965,11 @@ proc validate_ImportKey_594390(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594393 = query.getOrDefault("api-version")
-  valid_594393 = validateParameter(valid_594393, JString, required = true,
+  var valid_568622 = query.getOrDefault("api-version")
+  valid_568622 = validateParameter(valid_568622, JString, required = true,
                                  default = nil)
-  if valid_594393 != nil:
-    section.add "api-version", valid_594393
+  if valid_568622 != nil:
+    section.add "api-version", valid_568622
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3983,20 +3983,20 @@ proc validate_ImportKey_594390(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594395: Call_ImportKey_594389; path: JsonNode; query: JsonNode;
+proc call*(call_568624: Call_ImportKey_568618; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The import key operation may be used to import any key type into an Azure Key Vault. If the named key already exists, Azure Key Vault creates a new version of the key. This operation requires the keys/import permission.
   ## 
-  let valid = call_594395.validator(path, query, header, formData, body)
-  let scheme = call_594395.pickScheme
+  let valid = call_568624.validator(path, query, header, formData, body)
+  let scheme = call_568624.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594395.url(scheme.get, call_594395.host, call_594395.base,
-                         call_594395.route, valid.getOrDefault("path"),
+  let url = call_568624.url(scheme.get, call_568624.host, call_568624.base,
+                         call_568624.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594395, url, valid)
+  result = hook(call_568624, url, valid)
 
-proc call*(call_594396: Call_ImportKey_594389; apiVersion: string;
+proc call*(call_568625: Call_ImportKey_568618; apiVersion: string;
           parameters: JsonNode; keyName: string): Recallable =
   ## importKey
   ## The import key operation may be used to import any key type into an Azure Key Vault. If the named key already exists, Azure Key Vault creates a new version of the key. This operation requires the keys/import permission.
@@ -4006,24 +4006,24 @@ proc call*(call_594396: Call_ImportKey_594389; apiVersion: string;
   ##             : The parameters to import a key.
   ##   keyName: string (required)
   ##          : Name for the imported key.
-  var path_594397 = newJObject()
-  var query_594398 = newJObject()
-  var body_594399 = newJObject()
-  add(query_594398, "api-version", newJString(apiVersion))
+  var path_568626 = newJObject()
+  var query_568627 = newJObject()
+  var body_568628 = newJObject()
+  add(query_568627, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_594399 = parameters
-  add(path_594397, "key-name", newJString(keyName))
-  result = call_594396.call(path_594397, query_594398, nil, nil, body_594399)
+    body_568628 = parameters
+  add(path_568626, "key-name", newJString(keyName))
+  result = call_568625.call(path_568626, query_568627, nil, nil, body_568628)
 
-var importKey* = Call_ImportKey_594389(name: "importKey", meth: HttpMethod.HttpPut,
+var importKey* = Call_ImportKey_568618(name: "importKey", meth: HttpMethod.HttpPut,
                                     host: "azure.local",
                                     route: "/keys/{key-name}",
-                                    validator: validate_ImportKey_594390,
-                                    base: "", url: url_ImportKey_594391,
+                                    validator: validate_ImportKey_568619,
+                                    base: "", url: url_ImportKey_568620,
                                     schemes: {Scheme.Https})
 type
-  Call_DeleteKey_594400 = ref object of OpenApiRestCall_593438
-proc url_DeleteKey_594402(protocol: Scheme; host: string; base: string; route: string;
+  Call_DeleteKey_568629 = ref object of OpenApiRestCall_567667
+proc url_DeleteKey_568631(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4038,7 +4038,7 @@ proc url_DeleteKey_594402(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeleteKey_594401(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DeleteKey_568630(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## The delete key operation cannot be used to remove individual versions of a key. This operation removes the cryptographic material associated with the key, which means the key is not usable for Sign/Verify, Wrap/Unwrap or Encrypt/Decrypt operations. This operation requires the keys/delete permission.
   ## 
@@ -4049,11 +4049,11 @@ proc validate_DeleteKey_594401(path: JsonNode; query: JsonNode; header: JsonNode
   ##           : The name of the key to delete.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `key-name` field"
-  var valid_594403 = path.getOrDefault("key-name")
-  valid_594403 = validateParameter(valid_594403, JString, required = true,
+  var valid_568632 = path.getOrDefault("key-name")
+  valid_568632 = validateParameter(valid_568632, JString, required = true,
                                  default = nil)
-  if valid_594403 != nil:
-    section.add "key-name", valid_594403
+  if valid_568632 != nil:
+    section.add "key-name", valid_568632
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4061,11 +4061,11 @@ proc validate_DeleteKey_594401(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594404 = query.getOrDefault("api-version")
-  valid_594404 = validateParameter(valid_594404, JString, required = true,
+  var valid_568633 = query.getOrDefault("api-version")
+  valid_568633 = validateParameter(valid_568633, JString, required = true,
                                  default = nil)
-  if valid_594404 != nil:
-    section.add "api-version", valid_594404
+  if valid_568633 != nil:
+    section.add "api-version", valid_568633
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4074,42 +4074,42 @@ proc validate_DeleteKey_594401(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594405: Call_DeleteKey_594400; path: JsonNode; query: JsonNode;
+proc call*(call_568634: Call_DeleteKey_568629; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The delete key operation cannot be used to remove individual versions of a key. This operation removes the cryptographic material associated with the key, which means the key is not usable for Sign/Verify, Wrap/Unwrap or Encrypt/Decrypt operations. This operation requires the keys/delete permission.
   ## 
-  let valid = call_594405.validator(path, query, header, formData, body)
-  let scheme = call_594405.pickScheme
+  let valid = call_568634.validator(path, query, header, formData, body)
+  let scheme = call_568634.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594405.url(scheme.get, call_594405.host, call_594405.base,
-                         call_594405.route, valid.getOrDefault("path"),
+  let url = call_568634.url(scheme.get, call_568634.host, call_568634.base,
+                         call_568634.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594405, url, valid)
+  result = hook(call_568634, url, valid)
 
-proc call*(call_594406: Call_DeleteKey_594400; apiVersion: string; keyName: string): Recallable =
+proc call*(call_568635: Call_DeleteKey_568629; apiVersion: string; keyName: string): Recallable =
   ## deleteKey
   ## The delete key operation cannot be used to remove individual versions of a key. This operation removes the cryptographic material associated with the key, which means the key is not usable for Sign/Verify, Wrap/Unwrap or Encrypt/Decrypt operations. This operation requires the keys/delete permission.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   keyName: string (required)
   ##          : The name of the key to delete.
-  var path_594407 = newJObject()
-  var query_594408 = newJObject()
-  add(query_594408, "api-version", newJString(apiVersion))
-  add(path_594407, "key-name", newJString(keyName))
-  result = call_594406.call(path_594407, query_594408, nil, nil, nil)
+  var path_568636 = newJObject()
+  var query_568637 = newJObject()
+  add(query_568637, "api-version", newJString(apiVersion))
+  add(path_568636, "key-name", newJString(keyName))
+  result = call_568635.call(path_568636, query_568637, nil, nil, nil)
 
-var deleteKey* = Call_DeleteKey_594400(name: "deleteKey",
+var deleteKey* = Call_DeleteKey_568629(name: "deleteKey",
                                     meth: HttpMethod.HttpDelete,
                                     host: "azure.local",
                                     route: "/keys/{key-name}",
-                                    validator: validate_DeleteKey_594401,
-                                    base: "", url: url_DeleteKey_594402,
+                                    validator: validate_DeleteKey_568630,
+                                    base: "", url: url_DeleteKey_568631,
                                     schemes: {Scheme.Https})
 type
-  Call_BackupKey_594409 = ref object of OpenApiRestCall_593438
-proc url_BackupKey_594411(protocol: Scheme; host: string; base: string; route: string;
+  Call_BackupKey_568638 = ref object of OpenApiRestCall_567667
+proc url_BackupKey_568640(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4125,7 +4125,7 @@ proc url_BackupKey_594411(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupKey_594410(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BackupKey_568639(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## The Key Backup operation exports a key from Azure Key Vault in a protected form. Note that this operation does NOT return key material in a form that can be used outside the Azure Key Vault system, the returned key material is either protected to a Azure Key Vault HSM or to Azure Key Vault itself. The intent of this operation is to allow a client to GENERATE a key in one Azure Key Vault instance, BACKUP the key, and then RESTORE it into another Azure Key Vault instance. The BACKUP operation may be used to export, in protected form, any key type from Azure Key Vault. Individual versions of a key cannot be backed up. BACKUP / RESTORE can be performed within geographical boundaries only; meaning that a BACKUP from one geographical area cannot be restored to another geographical area. For example, a backup from the US geographical area cannot be restored in an EU geographical area. This operation requires the key/backup permission.
   ## 
@@ -4136,11 +4136,11 @@ proc validate_BackupKey_594410(path: JsonNode; query: JsonNode; header: JsonNode
   ##           : The name of the key.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `key-name` field"
-  var valid_594412 = path.getOrDefault("key-name")
-  valid_594412 = validateParameter(valid_594412, JString, required = true,
+  var valid_568641 = path.getOrDefault("key-name")
+  valid_568641 = validateParameter(valid_568641, JString, required = true,
                                  default = nil)
-  if valid_594412 != nil:
-    section.add "key-name", valid_594412
+  if valid_568641 != nil:
+    section.add "key-name", valid_568641
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4148,11 +4148,11 @@ proc validate_BackupKey_594410(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594413 = query.getOrDefault("api-version")
-  valid_594413 = validateParameter(valid_594413, JString, required = true,
+  var valid_568642 = query.getOrDefault("api-version")
+  valid_568642 = validateParameter(valid_568642, JString, required = true,
                                  default = nil)
-  if valid_594413 != nil:
-    section.add "api-version", valid_594413
+  if valid_568642 != nil:
+    section.add "api-version", valid_568642
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4161,41 +4161,41 @@ proc validate_BackupKey_594410(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594414: Call_BackupKey_594409; path: JsonNode; query: JsonNode;
+proc call*(call_568643: Call_BackupKey_568638; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Key Backup operation exports a key from Azure Key Vault in a protected form. Note that this operation does NOT return key material in a form that can be used outside the Azure Key Vault system, the returned key material is either protected to a Azure Key Vault HSM or to Azure Key Vault itself. The intent of this operation is to allow a client to GENERATE a key in one Azure Key Vault instance, BACKUP the key, and then RESTORE it into another Azure Key Vault instance. The BACKUP operation may be used to export, in protected form, any key type from Azure Key Vault. Individual versions of a key cannot be backed up. BACKUP / RESTORE can be performed within geographical boundaries only; meaning that a BACKUP from one geographical area cannot be restored to another geographical area. For example, a backup from the US geographical area cannot be restored in an EU geographical area. This operation requires the key/backup permission.
   ## 
-  let valid = call_594414.validator(path, query, header, formData, body)
-  let scheme = call_594414.pickScheme
+  let valid = call_568643.validator(path, query, header, formData, body)
+  let scheme = call_568643.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594414.url(scheme.get, call_594414.host, call_594414.base,
-                         call_594414.route, valid.getOrDefault("path"),
+  let url = call_568643.url(scheme.get, call_568643.host, call_568643.base,
+                         call_568643.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594414, url, valid)
+  result = hook(call_568643, url, valid)
 
-proc call*(call_594415: Call_BackupKey_594409; apiVersion: string; keyName: string): Recallable =
+proc call*(call_568644: Call_BackupKey_568638; apiVersion: string; keyName: string): Recallable =
   ## backupKey
   ## The Key Backup operation exports a key from Azure Key Vault in a protected form. Note that this operation does NOT return key material in a form that can be used outside the Azure Key Vault system, the returned key material is either protected to a Azure Key Vault HSM or to Azure Key Vault itself. The intent of this operation is to allow a client to GENERATE a key in one Azure Key Vault instance, BACKUP the key, and then RESTORE it into another Azure Key Vault instance. The BACKUP operation may be used to export, in protected form, any key type from Azure Key Vault. Individual versions of a key cannot be backed up. BACKUP / RESTORE can be performed within geographical boundaries only; meaning that a BACKUP from one geographical area cannot be restored to another geographical area. For example, a backup from the US geographical area cannot be restored in an EU geographical area. This operation requires the key/backup permission.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   keyName: string (required)
   ##          : The name of the key.
-  var path_594416 = newJObject()
-  var query_594417 = newJObject()
-  add(query_594417, "api-version", newJString(apiVersion))
-  add(path_594416, "key-name", newJString(keyName))
-  result = call_594415.call(path_594416, query_594417, nil, nil, nil)
+  var path_568645 = newJObject()
+  var query_568646 = newJObject()
+  add(query_568646, "api-version", newJString(apiVersion))
+  add(path_568645, "key-name", newJString(keyName))
+  result = call_568644.call(path_568645, query_568646, nil, nil, nil)
 
-var backupKey* = Call_BackupKey_594409(name: "backupKey", meth: HttpMethod.HttpPost,
+var backupKey* = Call_BackupKey_568638(name: "backupKey", meth: HttpMethod.HttpPost,
                                     host: "azure.local",
                                     route: "/keys/{key-name}/backup",
-                                    validator: validate_BackupKey_594410,
-                                    base: "", url: url_BackupKey_594411,
+                                    validator: validate_BackupKey_568639,
+                                    base: "", url: url_BackupKey_568640,
                                     schemes: {Scheme.Https})
 type
-  Call_CreateKey_594418 = ref object of OpenApiRestCall_593438
-proc url_CreateKey_594420(protocol: Scheme; host: string; base: string; route: string;
+  Call_CreateKey_568647 = ref object of OpenApiRestCall_567667
+proc url_CreateKey_568649(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4211,7 +4211,7 @@ proc url_CreateKey_594420(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CreateKey_594419(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_CreateKey_568648(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## The create key operation can be used to create any key type in Azure Key Vault. If the named key already exists, Azure Key Vault creates a new version of the key. It requires the keys/create permission.
   ## 
@@ -4222,11 +4222,11 @@ proc validate_CreateKey_594419(path: JsonNode; query: JsonNode; header: JsonNode
   ##           : The name for the new key. The system will generate the version name for the new key.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `key-name` field"
-  var valid_594431 = path.getOrDefault("key-name")
-  valid_594431 = validateParameter(valid_594431, JString, required = true,
+  var valid_568660 = path.getOrDefault("key-name")
+  valid_568660 = validateParameter(valid_568660, JString, required = true,
                                  default = nil)
-  if valid_594431 != nil:
-    section.add "key-name", valid_594431
+  if valid_568660 != nil:
+    section.add "key-name", valid_568660
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4234,11 +4234,11 @@ proc validate_CreateKey_594419(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594432 = query.getOrDefault("api-version")
-  valid_594432 = validateParameter(valid_594432, JString, required = true,
+  var valid_568661 = query.getOrDefault("api-version")
+  valid_568661 = validateParameter(valid_568661, JString, required = true,
                                  default = nil)
-  if valid_594432 != nil:
-    section.add "api-version", valid_594432
+  if valid_568661 != nil:
+    section.add "api-version", valid_568661
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4252,20 +4252,20 @@ proc validate_CreateKey_594419(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594434: Call_CreateKey_594418; path: JsonNode; query: JsonNode;
+proc call*(call_568663: Call_CreateKey_568647; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The create key operation can be used to create any key type in Azure Key Vault. If the named key already exists, Azure Key Vault creates a new version of the key. It requires the keys/create permission.
   ## 
-  let valid = call_594434.validator(path, query, header, formData, body)
-  let scheme = call_594434.pickScheme
+  let valid = call_568663.validator(path, query, header, formData, body)
+  let scheme = call_568663.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594434.url(scheme.get, call_594434.host, call_594434.base,
-                         call_594434.route, valid.getOrDefault("path"),
+  let url = call_568663.url(scheme.get, call_568663.host, call_568663.base,
+                         call_568663.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594434, url, valid)
+  result = hook(call_568663, url, valid)
 
-proc call*(call_594435: Call_CreateKey_594418; apiVersion: string;
+proc call*(call_568664: Call_CreateKey_568647; apiVersion: string;
           parameters: JsonNode; keyName: string): Recallable =
   ## createKey
   ## The create key operation can be used to create any key type in Azure Key Vault. If the named key already exists, Azure Key Vault creates a new version of the key. It requires the keys/create permission.
@@ -4275,24 +4275,24 @@ proc call*(call_594435: Call_CreateKey_594418; apiVersion: string;
   ##             : The parameters to create a key.
   ##   keyName: string (required)
   ##          : The name for the new key. The system will generate the version name for the new key.
-  var path_594436 = newJObject()
-  var query_594437 = newJObject()
-  var body_594438 = newJObject()
-  add(query_594437, "api-version", newJString(apiVersion))
+  var path_568665 = newJObject()
+  var query_568666 = newJObject()
+  var body_568667 = newJObject()
+  add(query_568666, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_594438 = parameters
-  add(path_594436, "key-name", newJString(keyName))
-  result = call_594435.call(path_594436, query_594437, nil, nil, body_594438)
+    body_568667 = parameters
+  add(path_568665, "key-name", newJString(keyName))
+  result = call_568664.call(path_568665, query_568666, nil, nil, body_568667)
 
-var createKey* = Call_CreateKey_594418(name: "createKey", meth: HttpMethod.HttpPost,
+var createKey* = Call_CreateKey_568647(name: "createKey", meth: HttpMethod.HttpPost,
                                     host: "azure.local",
                                     route: "/keys/{key-name}/create",
-                                    validator: validate_CreateKey_594419,
-                                    base: "", url: url_CreateKey_594420,
+                                    validator: validate_CreateKey_568648,
+                                    base: "", url: url_CreateKey_568649,
                                     schemes: {Scheme.Https})
 type
-  Call_GetKeyVersions_594439 = ref object of OpenApiRestCall_593438
-proc url_GetKeyVersions_594441(protocol: Scheme; host: string; base: string;
+  Call_GetKeyVersions_568668 = ref object of OpenApiRestCall_567667
+proc url_GetKeyVersions_568670(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4308,7 +4308,7 @@ proc url_GetKeyVersions_594441(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetKeyVersions_594440(path: JsonNode; query: JsonNode;
+proc validate_GetKeyVersions_568669(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## The full key identifier, attributes, and tags are provided in the response. This operation requires the keys/list permission.
@@ -4320,11 +4320,11 @@ proc validate_GetKeyVersions_594440(path: JsonNode; query: JsonNode;
   ##           : The name of the key.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `key-name` field"
-  var valid_594442 = path.getOrDefault("key-name")
-  valid_594442 = validateParameter(valid_594442, JString, required = true,
+  var valid_568671 = path.getOrDefault("key-name")
+  valid_568671 = validateParameter(valid_568671, JString, required = true,
                                  default = nil)
-  if valid_594442 != nil:
-    section.add "key-name", valid_594442
+  if valid_568671 != nil:
+    section.add "key-name", valid_568671
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4334,15 +4334,15 @@ proc validate_GetKeyVersions_594440(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594443 = query.getOrDefault("api-version")
-  valid_594443 = validateParameter(valid_594443, JString, required = true,
+  var valid_568672 = query.getOrDefault("api-version")
+  valid_568672 = validateParameter(valid_568672, JString, required = true,
                                  default = nil)
-  if valid_594443 != nil:
-    section.add "api-version", valid_594443
-  var valid_594444 = query.getOrDefault("maxresults")
-  valid_594444 = validateParameter(valid_594444, JInt, required = false, default = nil)
-  if valid_594444 != nil:
-    section.add "maxresults", valid_594444
+  if valid_568672 != nil:
+    section.add "api-version", valid_568672
+  var valid_568673 = query.getOrDefault("maxresults")
+  valid_568673 = validateParameter(valid_568673, JInt, required = false, default = nil)
+  if valid_568673 != nil:
+    section.add "maxresults", valid_568673
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4351,20 +4351,20 @@ proc validate_GetKeyVersions_594440(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594445: Call_GetKeyVersions_594439; path: JsonNode; query: JsonNode;
+proc call*(call_568674: Call_GetKeyVersions_568668; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The full key identifier, attributes, and tags are provided in the response. This operation requires the keys/list permission.
   ## 
-  let valid = call_594445.validator(path, query, header, formData, body)
-  let scheme = call_594445.pickScheme
+  let valid = call_568674.validator(path, query, header, formData, body)
+  let scheme = call_568674.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594445.url(scheme.get, call_594445.host, call_594445.base,
-                         call_594445.route, valid.getOrDefault("path"),
+  let url = call_568674.url(scheme.get, call_568674.host, call_568674.base,
+                         call_568674.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594445, url, valid)
+  result = hook(call_568674, url, valid)
 
-proc call*(call_594446: Call_GetKeyVersions_594439; apiVersion: string;
+proc call*(call_568675: Call_GetKeyVersions_568668; apiVersion: string;
           keyName: string; maxresults: int = 0): Recallable =
   ## getKeyVersions
   ## The full key identifier, attributes, and tags are provided in the response. This operation requires the keys/list permission.
@@ -4374,20 +4374,20 @@ proc call*(call_594446: Call_GetKeyVersions_594439; apiVersion: string;
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
   ##   keyName: string (required)
   ##          : The name of the key.
-  var path_594447 = newJObject()
-  var query_594448 = newJObject()
-  add(query_594448, "api-version", newJString(apiVersion))
-  add(query_594448, "maxresults", newJInt(maxresults))
-  add(path_594447, "key-name", newJString(keyName))
-  result = call_594446.call(path_594447, query_594448, nil, nil, nil)
+  var path_568676 = newJObject()
+  var query_568677 = newJObject()
+  add(query_568677, "api-version", newJString(apiVersion))
+  add(query_568677, "maxresults", newJInt(maxresults))
+  add(path_568676, "key-name", newJString(keyName))
+  result = call_568675.call(path_568676, query_568677, nil, nil, nil)
 
-var getKeyVersions* = Call_GetKeyVersions_594439(name: "getKeyVersions",
+var getKeyVersions* = Call_GetKeyVersions_568668(name: "getKeyVersions",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/keys/{key-name}/versions", validator: validate_GetKeyVersions_594440,
-    base: "", url: url_GetKeyVersions_594441, schemes: {Scheme.Https})
+    route: "/keys/{key-name}/versions", validator: validate_GetKeyVersions_568669,
+    base: "", url: url_GetKeyVersions_568670, schemes: {Scheme.Https})
 type
-  Call_GetKey_594449 = ref object of OpenApiRestCall_593438
-proc url_GetKey_594451(protocol: Scheme; host: string; base: string; route: string;
+  Call_GetKey_568678 = ref object of OpenApiRestCall_567667
+proc url_GetKey_568680(protocol: Scheme; host: string; base: string; route: string;
                       path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4405,7 +4405,7 @@ proc url_GetKey_594451(protocol: Scheme; host: string; base: string; route: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetKey_594450(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GetKey_568679(path: JsonNode; query: JsonNode; header: JsonNode;
                            formData: JsonNode; body: JsonNode): JsonNode =
   ## The get key operation is applicable to all key types. If the requested key is symmetric, then no key material is released in the response. This operation requires the keys/get permission.
   ## 
@@ -4419,16 +4419,16 @@ proc validate_GetKey_594450(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `key-version` field"
-  var valid_594452 = path.getOrDefault("key-version")
-  valid_594452 = validateParameter(valid_594452, JString, required = true,
+  var valid_568681 = path.getOrDefault("key-version")
+  valid_568681 = validateParameter(valid_568681, JString, required = true,
                                  default = nil)
-  if valid_594452 != nil:
-    section.add "key-version", valid_594452
-  var valid_594453 = path.getOrDefault("key-name")
-  valid_594453 = validateParameter(valid_594453, JString, required = true,
+  if valid_568681 != nil:
+    section.add "key-version", valid_568681
+  var valid_568682 = path.getOrDefault("key-name")
+  valid_568682 = validateParameter(valid_568682, JString, required = true,
                                  default = nil)
-  if valid_594453 != nil:
-    section.add "key-name", valid_594453
+  if valid_568682 != nil:
+    section.add "key-name", valid_568682
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4436,11 +4436,11 @@ proc validate_GetKey_594450(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594454 = query.getOrDefault("api-version")
-  valid_594454 = validateParameter(valid_594454, JString, required = true,
+  var valid_568683 = query.getOrDefault("api-version")
+  valid_568683 = validateParameter(valid_568683, JString, required = true,
                                  default = nil)
-  if valid_594454 != nil:
-    section.add "api-version", valid_594454
+  if valid_568683 != nil:
+    section.add "api-version", valid_568683
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4449,20 +4449,20 @@ proc validate_GetKey_594450(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594455: Call_GetKey_594449; path: JsonNode; query: JsonNode;
+proc call*(call_568684: Call_GetKey_568678; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The get key operation is applicable to all key types. If the requested key is symmetric, then no key material is released in the response. This operation requires the keys/get permission.
   ## 
-  let valid = call_594455.validator(path, query, header, formData, body)
-  let scheme = call_594455.pickScheme
+  let valid = call_568684.validator(path, query, header, formData, body)
+  let scheme = call_568684.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594455.url(scheme.get, call_594455.host, call_594455.base,
-                         call_594455.route, valid.getOrDefault("path"),
+  let url = call_568684.url(scheme.get, call_568684.host, call_568684.base,
+                         call_568684.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594455, url, valid)
+  result = hook(call_568684, url, valid)
 
-proc call*(call_594456: Call_GetKey_594449; apiVersion: string; keyVersion: string;
+proc call*(call_568685: Call_GetKey_568678; apiVersion: string; keyVersion: string;
           keyName: string): Recallable =
   ## getKey
   ## The get key operation is applicable to all key types. If the requested key is symmetric, then no key material is released in the response. This operation requires the keys/get permission.
@@ -4472,21 +4472,21 @@ proc call*(call_594456: Call_GetKey_594449; apiVersion: string; keyVersion: stri
   ##             : Adding the version parameter retrieves a specific version of a key.
   ##   keyName: string (required)
   ##          : The name of the key to get.
-  var path_594457 = newJObject()
-  var query_594458 = newJObject()
-  add(query_594458, "api-version", newJString(apiVersion))
-  add(path_594457, "key-version", newJString(keyVersion))
-  add(path_594457, "key-name", newJString(keyName))
-  result = call_594456.call(path_594457, query_594458, nil, nil, nil)
+  var path_568686 = newJObject()
+  var query_568687 = newJObject()
+  add(query_568687, "api-version", newJString(apiVersion))
+  add(path_568686, "key-version", newJString(keyVersion))
+  add(path_568686, "key-name", newJString(keyName))
+  result = call_568685.call(path_568686, query_568687, nil, nil, nil)
 
-var getKey* = Call_GetKey_594449(name: "getKey", meth: HttpMethod.HttpGet,
+var getKey* = Call_GetKey_568678(name: "getKey", meth: HttpMethod.HttpGet,
                               host: "azure.local",
                               route: "/keys/{key-name}/{key-version}",
-                              validator: validate_GetKey_594450, base: "",
-                              url: url_GetKey_594451, schemes: {Scheme.Https})
+                              validator: validate_GetKey_568679, base: "",
+                              url: url_GetKey_568680, schemes: {Scheme.Https})
 type
-  Call_UpdateKey_594459 = ref object of OpenApiRestCall_593438
-proc url_UpdateKey_594461(protocol: Scheme; host: string; base: string; route: string;
+  Call_UpdateKey_568688 = ref object of OpenApiRestCall_567667
+proc url_UpdateKey_568690(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4504,7 +4504,7 @@ proc url_UpdateKey_594461(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateKey_594460(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UpdateKey_568689(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## In order to perform this operation, the key must already exist in the Key Vault. Note: The cryptographic material of a key itself cannot be changed. This operation requires the keys/update permission.
   ## 
@@ -4518,16 +4518,16 @@ proc validate_UpdateKey_594460(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `key-version` field"
-  var valid_594462 = path.getOrDefault("key-version")
-  valid_594462 = validateParameter(valid_594462, JString, required = true,
+  var valid_568691 = path.getOrDefault("key-version")
+  valid_568691 = validateParameter(valid_568691, JString, required = true,
                                  default = nil)
-  if valid_594462 != nil:
-    section.add "key-version", valid_594462
-  var valid_594463 = path.getOrDefault("key-name")
-  valid_594463 = validateParameter(valid_594463, JString, required = true,
+  if valid_568691 != nil:
+    section.add "key-version", valid_568691
+  var valid_568692 = path.getOrDefault("key-name")
+  valid_568692 = validateParameter(valid_568692, JString, required = true,
                                  default = nil)
-  if valid_594463 != nil:
-    section.add "key-name", valid_594463
+  if valid_568692 != nil:
+    section.add "key-name", valid_568692
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4535,11 +4535,11 @@ proc validate_UpdateKey_594460(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594464 = query.getOrDefault("api-version")
-  valid_594464 = validateParameter(valid_594464, JString, required = true,
+  var valid_568693 = query.getOrDefault("api-version")
+  valid_568693 = validateParameter(valid_568693, JString, required = true,
                                  default = nil)
-  if valid_594464 != nil:
-    section.add "api-version", valid_594464
+  if valid_568693 != nil:
+    section.add "api-version", valid_568693
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4553,20 +4553,20 @@ proc validate_UpdateKey_594460(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594466: Call_UpdateKey_594459; path: JsonNode; query: JsonNode;
+proc call*(call_568695: Call_UpdateKey_568688; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## In order to perform this operation, the key must already exist in the Key Vault. Note: The cryptographic material of a key itself cannot be changed. This operation requires the keys/update permission.
   ## 
-  let valid = call_594466.validator(path, query, header, formData, body)
-  let scheme = call_594466.pickScheme
+  let valid = call_568695.validator(path, query, header, formData, body)
+  let scheme = call_568695.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594466.url(scheme.get, call_594466.host, call_594466.base,
-                         call_594466.route, valid.getOrDefault("path"),
+  let url = call_568695.url(scheme.get, call_568695.host, call_568695.base,
+                         call_568695.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594466, url, valid)
+  result = hook(call_568695, url, valid)
 
-proc call*(call_594467: Call_UpdateKey_594459; apiVersion: string;
+proc call*(call_568696: Call_UpdateKey_568688; apiVersion: string;
           keyVersion: string; parameters: JsonNode; keyName: string): Recallable =
   ## updateKey
   ## In order to perform this operation, the key must already exist in the Key Vault. Note: The cryptographic material of a key itself cannot be changed. This operation requires the keys/update permission.
@@ -4578,25 +4578,25 @@ proc call*(call_594467: Call_UpdateKey_594459; apiVersion: string;
   ##             : The parameters of the key to update.
   ##   keyName: string (required)
   ##          : The name of key to update.
-  var path_594468 = newJObject()
-  var query_594469 = newJObject()
-  var body_594470 = newJObject()
-  add(query_594469, "api-version", newJString(apiVersion))
-  add(path_594468, "key-version", newJString(keyVersion))
+  var path_568697 = newJObject()
+  var query_568698 = newJObject()
+  var body_568699 = newJObject()
+  add(query_568698, "api-version", newJString(apiVersion))
+  add(path_568697, "key-version", newJString(keyVersion))
   if parameters != nil:
-    body_594470 = parameters
-  add(path_594468, "key-name", newJString(keyName))
-  result = call_594467.call(path_594468, query_594469, nil, nil, body_594470)
+    body_568699 = parameters
+  add(path_568697, "key-name", newJString(keyName))
+  result = call_568696.call(path_568697, query_568698, nil, nil, body_568699)
 
-var updateKey* = Call_UpdateKey_594459(name: "updateKey", meth: HttpMethod.HttpPatch,
+var updateKey* = Call_UpdateKey_568688(name: "updateKey", meth: HttpMethod.HttpPatch,
                                     host: "azure.local",
                                     route: "/keys/{key-name}/{key-version}",
-                                    validator: validate_UpdateKey_594460,
-                                    base: "", url: url_UpdateKey_594461,
+                                    validator: validate_UpdateKey_568689,
+                                    base: "", url: url_UpdateKey_568690,
                                     schemes: {Scheme.Https})
 type
-  Call_Decrypt_594471 = ref object of OpenApiRestCall_593438
-proc url_Decrypt_594473(protocol: Scheme; host: string; base: string; route: string;
+  Call_Decrypt_568700 = ref object of OpenApiRestCall_567667
+proc url_Decrypt_568702(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4615,7 +4615,7 @@ proc url_Decrypt_594473(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_Decrypt_594472(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_Decrypt_568701(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## The DECRYPT operation decrypts a well-formed block of ciphertext using the target encryption key and specified algorithm. This operation is the reverse of the ENCRYPT operation; only a single block of data may be decrypted, the size of this block is dependent on the target key and the algorithm to be used. The DECRYPT operation applies to asymmetric and symmetric keys stored in Azure Key Vault since it uses the private portion of the key. This operation requires the keys/decrypt permission.
   ## 
@@ -4629,16 +4629,16 @@ proc validate_Decrypt_594472(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `key-version` field"
-  var valid_594474 = path.getOrDefault("key-version")
-  valid_594474 = validateParameter(valid_594474, JString, required = true,
+  var valid_568703 = path.getOrDefault("key-version")
+  valid_568703 = validateParameter(valid_568703, JString, required = true,
                                  default = nil)
-  if valid_594474 != nil:
-    section.add "key-version", valid_594474
-  var valid_594475 = path.getOrDefault("key-name")
-  valid_594475 = validateParameter(valid_594475, JString, required = true,
+  if valid_568703 != nil:
+    section.add "key-version", valid_568703
+  var valid_568704 = path.getOrDefault("key-name")
+  valid_568704 = validateParameter(valid_568704, JString, required = true,
                                  default = nil)
-  if valid_594475 != nil:
-    section.add "key-name", valid_594475
+  if valid_568704 != nil:
+    section.add "key-name", valid_568704
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4646,11 +4646,11 @@ proc validate_Decrypt_594472(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594476 = query.getOrDefault("api-version")
-  valid_594476 = validateParameter(valid_594476, JString, required = true,
+  var valid_568705 = query.getOrDefault("api-version")
+  valid_568705 = validateParameter(valid_568705, JString, required = true,
                                  default = nil)
-  if valid_594476 != nil:
-    section.add "api-version", valid_594476
+  if valid_568705 != nil:
+    section.add "api-version", valid_568705
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4664,20 +4664,20 @@ proc validate_Decrypt_594472(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594478: Call_Decrypt_594471; path: JsonNode; query: JsonNode;
+proc call*(call_568707: Call_Decrypt_568700; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The DECRYPT operation decrypts a well-formed block of ciphertext using the target encryption key and specified algorithm. This operation is the reverse of the ENCRYPT operation; only a single block of data may be decrypted, the size of this block is dependent on the target key and the algorithm to be used. The DECRYPT operation applies to asymmetric and symmetric keys stored in Azure Key Vault since it uses the private portion of the key. This operation requires the keys/decrypt permission.
   ## 
-  let valid = call_594478.validator(path, query, header, formData, body)
-  let scheme = call_594478.pickScheme
+  let valid = call_568707.validator(path, query, header, formData, body)
+  let scheme = call_568707.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594478.url(scheme.get, call_594478.host, call_594478.base,
-                         call_594478.route, valid.getOrDefault("path"),
+  let url = call_568707.url(scheme.get, call_568707.host, call_568707.base,
+                         call_568707.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594478, url, valid)
+  result = hook(call_568707, url, valid)
 
-proc call*(call_594479: Call_Decrypt_594471; apiVersion: string; keyVersion: string;
+proc call*(call_568708: Call_Decrypt_568700; apiVersion: string; keyVersion: string;
           parameters: JsonNode; keyName: string): Recallable =
   ## decrypt
   ## The DECRYPT operation decrypts a well-formed block of ciphertext using the target encryption key and specified algorithm. This operation is the reverse of the ENCRYPT operation; only a single block of data may be decrypted, the size of this block is dependent on the target key and the algorithm to be used. The DECRYPT operation applies to asymmetric and symmetric keys stored in Azure Key Vault since it uses the private portion of the key. This operation requires the keys/decrypt permission.
@@ -4689,23 +4689,23 @@ proc call*(call_594479: Call_Decrypt_594471; apiVersion: string; keyVersion: str
   ##             : The parameters for the decryption operation.
   ##   keyName: string (required)
   ##          : The name of the key.
-  var path_594480 = newJObject()
-  var query_594481 = newJObject()
-  var body_594482 = newJObject()
-  add(query_594481, "api-version", newJString(apiVersion))
-  add(path_594480, "key-version", newJString(keyVersion))
+  var path_568709 = newJObject()
+  var query_568710 = newJObject()
+  var body_568711 = newJObject()
+  add(query_568710, "api-version", newJString(apiVersion))
+  add(path_568709, "key-version", newJString(keyVersion))
   if parameters != nil:
-    body_594482 = parameters
-  add(path_594480, "key-name", newJString(keyName))
-  result = call_594479.call(path_594480, query_594481, nil, nil, body_594482)
+    body_568711 = parameters
+  add(path_568709, "key-name", newJString(keyName))
+  result = call_568708.call(path_568709, query_568710, nil, nil, body_568711)
 
-var decrypt* = Call_Decrypt_594471(name: "decrypt", meth: HttpMethod.HttpPost,
+var decrypt* = Call_Decrypt_568700(name: "decrypt", meth: HttpMethod.HttpPost,
                                 host: "azure.local", route: "/keys/{key-name}/{key-version}/decrypt",
-                                validator: validate_Decrypt_594472, base: "",
-                                url: url_Decrypt_594473, schemes: {Scheme.Https})
+                                validator: validate_Decrypt_568701, base: "",
+                                url: url_Decrypt_568702, schemes: {Scheme.Https})
 type
-  Call_Encrypt_594483 = ref object of OpenApiRestCall_593438
-proc url_Encrypt_594485(protocol: Scheme; host: string; base: string; route: string;
+  Call_Encrypt_568712 = ref object of OpenApiRestCall_567667
+proc url_Encrypt_568714(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4724,7 +4724,7 @@ proc url_Encrypt_594485(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_Encrypt_594484(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_Encrypt_568713(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## The ENCRYPT operation encrypts an arbitrary sequence of bytes using an encryption key that is stored in Azure Key Vault. Note that the ENCRYPT operation only supports a single block of data, the size of which is dependent on the target key and the encryption algorithm to be used. The ENCRYPT operation is only strictly necessary for symmetric keys stored in Azure Key Vault since protection with an asymmetric key can be performed using public portion of the key. This operation is supported for asymmetric keys as a convenience for callers that have a key-reference but do not have access to the public key material. This operation requires the keys/encrypt permission.
   ## 
@@ -4738,16 +4738,16 @@ proc validate_Encrypt_594484(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `key-version` field"
-  var valid_594486 = path.getOrDefault("key-version")
-  valid_594486 = validateParameter(valid_594486, JString, required = true,
+  var valid_568715 = path.getOrDefault("key-version")
+  valid_568715 = validateParameter(valid_568715, JString, required = true,
                                  default = nil)
-  if valid_594486 != nil:
-    section.add "key-version", valid_594486
-  var valid_594487 = path.getOrDefault("key-name")
-  valid_594487 = validateParameter(valid_594487, JString, required = true,
+  if valid_568715 != nil:
+    section.add "key-version", valid_568715
+  var valid_568716 = path.getOrDefault("key-name")
+  valid_568716 = validateParameter(valid_568716, JString, required = true,
                                  default = nil)
-  if valid_594487 != nil:
-    section.add "key-name", valid_594487
+  if valid_568716 != nil:
+    section.add "key-name", valid_568716
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4755,11 +4755,11 @@ proc validate_Encrypt_594484(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594488 = query.getOrDefault("api-version")
-  valid_594488 = validateParameter(valid_594488, JString, required = true,
+  var valid_568717 = query.getOrDefault("api-version")
+  valid_568717 = validateParameter(valid_568717, JString, required = true,
                                  default = nil)
-  if valid_594488 != nil:
-    section.add "api-version", valid_594488
+  if valid_568717 != nil:
+    section.add "api-version", valid_568717
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4773,20 +4773,20 @@ proc validate_Encrypt_594484(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594490: Call_Encrypt_594483; path: JsonNode; query: JsonNode;
+proc call*(call_568719: Call_Encrypt_568712; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The ENCRYPT operation encrypts an arbitrary sequence of bytes using an encryption key that is stored in Azure Key Vault. Note that the ENCRYPT operation only supports a single block of data, the size of which is dependent on the target key and the encryption algorithm to be used. The ENCRYPT operation is only strictly necessary for symmetric keys stored in Azure Key Vault since protection with an asymmetric key can be performed using public portion of the key. This operation is supported for asymmetric keys as a convenience for callers that have a key-reference but do not have access to the public key material. This operation requires the keys/encrypt permission.
   ## 
-  let valid = call_594490.validator(path, query, header, formData, body)
-  let scheme = call_594490.pickScheme
+  let valid = call_568719.validator(path, query, header, formData, body)
+  let scheme = call_568719.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594490.url(scheme.get, call_594490.host, call_594490.base,
-                         call_594490.route, valid.getOrDefault("path"),
+  let url = call_568719.url(scheme.get, call_568719.host, call_568719.base,
+                         call_568719.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594490, url, valid)
+  result = hook(call_568719, url, valid)
 
-proc call*(call_594491: Call_Encrypt_594483; apiVersion: string; keyVersion: string;
+proc call*(call_568720: Call_Encrypt_568712; apiVersion: string; keyVersion: string;
           parameters: JsonNode; keyName: string): Recallable =
   ## encrypt
   ## The ENCRYPT operation encrypts an arbitrary sequence of bytes using an encryption key that is stored in Azure Key Vault. Note that the ENCRYPT operation only supports a single block of data, the size of which is dependent on the target key and the encryption algorithm to be used. The ENCRYPT operation is only strictly necessary for symmetric keys stored in Azure Key Vault since protection with an asymmetric key can be performed using public portion of the key. This operation is supported for asymmetric keys as a convenience for callers that have a key-reference but do not have access to the public key material. This operation requires the keys/encrypt permission.
@@ -4798,23 +4798,23 @@ proc call*(call_594491: Call_Encrypt_594483; apiVersion: string; keyVersion: str
   ##             : The parameters for the encryption operation.
   ##   keyName: string (required)
   ##          : The name of the key.
-  var path_594492 = newJObject()
-  var query_594493 = newJObject()
-  var body_594494 = newJObject()
-  add(query_594493, "api-version", newJString(apiVersion))
-  add(path_594492, "key-version", newJString(keyVersion))
+  var path_568721 = newJObject()
+  var query_568722 = newJObject()
+  var body_568723 = newJObject()
+  add(query_568722, "api-version", newJString(apiVersion))
+  add(path_568721, "key-version", newJString(keyVersion))
   if parameters != nil:
-    body_594494 = parameters
-  add(path_594492, "key-name", newJString(keyName))
-  result = call_594491.call(path_594492, query_594493, nil, nil, body_594494)
+    body_568723 = parameters
+  add(path_568721, "key-name", newJString(keyName))
+  result = call_568720.call(path_568721, query_568722, nil, nil, body_568723)
 
-var encrypt* = Call_Encrypt_594483(name: "encrypt", meth: HttpMethod.HttpPost,
+var encrypt* = Call_Encrypt_568712(name: "encrypt", meth: HttpMethod.HttpPost,
                                 host: "azure.local", route: "/keys/{key-name}/{key-version}/encrypt",
-                                validator: validate_Encrypt_594484, base: "",
-                                url: url_Encrypt_594485, schemes: {Scheme.Https})
+                                validator: validate_Encrypt_568713, base: "",
+                                url: url_Encrypt_568714, schemes: {Scheme.Https})
 type
-  Call_Sign_594495 = ref object of OpenApiRestCall_593438
-proc url_Sign_594497(protocol: Scheme; host: string; base: string; route: string;
+  Call_Sign_568724 = ref object of OpenApiRestCall_567667
+proc url_Sign_568726(protocol: Scheme; host: string; base: string; route: string;
                     path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4833,7 +4833,7 @@ proc url_Sign_594497(protocol: Scheme; host: string; base: string; route: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_Sign_594496(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_Sign_568725(path: JsonNode; query: JsonNode; header: JsonNode;
                          formData: JsonNode; body: JsonNode): JsonNode =
   ## The SIGN operation is applicable to asymmetric and symmetric keys stored in Azure Key Vault since this operation uses the private portion of the key. This operation requires the keys/sign permission.
   ## 
@@ -4847,16 +4847,16 @@ proc validate_Sign_594496(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `key-version` field"
-  var valid_594498 = path.getOrDefault("key-version")
-  valid_594498 = validateParameter(valid_594498, JString, required = true,
+  var valid_568727 = path.getOrDefault("key-version")
+  valid_568727 = validateParameter(valid_568727, JString, required = true,
                                  default = nil)
-  if valid_594498 != nil:
-    section.add "key-version", valid_594498
-  var valid_594499 = path.getOrDefault("key-name")
-  valid_594499 = validateParameter(valid_594499, JString, required = true,
+  if valid_568727 != nil:
+    section.add "key-version", valid_568727
+  var valid_568728 = path.getOrDefault("key-name")
+  valid_568728 = validateParameter(valid_568728, JString, required = true,
                                  default = nil)
-  if valid_594499 != nil:
-    section.add "key-name", valid_594499
+  if valid_568728 != nil:
+    section.add "key-name", valid_568728
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4864,11 +4864,11 @@ proc validate_Sign_594496(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594500 = query.getOrDefault("api-version")
-  valid_594500 = validateParameter(valid_594500, JString, required = true,
+  var valid_568729 = query.getOrDefault("api-version")
+  valid_568729 = validateParameter(valid_568729, JString, required = true,
                                  default = nil)
-  if valid_594500 != nil:
-    section.add "api-version", valid_594500
+  if valid_568729 != nil:
+    section.add "api-version", valid_568729
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4882,20 +4882,20 @@ proc validate_Sign_594496(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594502: Call_Sign_594495; path: JsonNode; query: JsonNode;
+proc call*(call_568731: Call_Sign_568724; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The SIGN operation is applicable to asymmetric and symmetric keys stored in Azure Key Vault since this operation uses the private portion of the key. This operation requires the keys/sign permission.
   ## 
-  let valid = call_594502.validator(path, query, header, formData, body)
-  let scheme = call_594502.pickScheme
+  let valid = call_568731.validator(path, query, header, formData, body)
+  let scheme = call_568731.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594502.url(scheme.get, call_594502.host, call_594502.base,
-                         call_594502.route, valid.getOrDefault("path"),
+  let url = call_568731.url(scheme.get, call_568731.host, call_568731.base,
+                         call_568731.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594502, url, valid)
+  result = hook(call_568731, url, valid)
 
-proc call*(call_594503: Call_Sign_594495; apiVersion: string; keyVersion: string;
+proc call*(call_568732: Call_Sign_568724; apiVersion: string; keyVersion: string;
           parameters: JsonNode; keyName: string): Recallable =
   ## sign
   ## The SIGN operation is applicable to asymmetric and symmetric keys stored in Azure Key Vault since this operation uses the private portion of the key. This operation requires the keys/sign permission.
@@ -4907,24 +4907,24 @@ proc call*(call_594503: Call_Sign_594495; apiVersion: string; keyVersion: string
   ##             : The parameters for the signing operation.
   ##   keyName: string (required)
   ##          : The name of the key.
-  var path_594504 = newJObject()
-  var query_594505 = newJObject()
-  var body_594506 = newJObject()
-  add(query_594505, "api-version", newJString(apiVersion))
-  add(path_594504, "key-version", newJString(keyVersion))
+  var path_568733 = newJObject()
+  var query_568734 = newJObject()
+  var body_568735 = newJObject()
+  add(query_568734, "api-version", newJString(apiVersion))
+  add(path_568733, "key-version", newJString(keyVersion))
   if parameters != nil:
-    body_594506 = parameters
-  add(path_594504, "key-name", newJString(keyName))
-  result = call_594503.call(path_594504, query_594505, nil, nil, body_594506)
+    body_568735 = parameters
+  add(path_568733, "key-name", newJString(keyName))
+  result = call_568732.call(path_568733, query_568734, nil, nil, body_568735)
 
-var sign* = Call_Sign_594495(name: "sign", meth: HttpMethod.HttpPost,
+var sign* = Call_Sign_568724(name: "sign", meth: HttpMethod.HttpPost,
                           host: "azure.local",
                           route: "/keys/{key-name}/{key-version}/sign",
-                          validator: validate_Sign_594496, base: "", url: url_Sign_594497,
+                          validator: validate_Sign_568725, base: "", url: url_Sign_568726,
                           schemes: {Scheme.Https})
 type
-  Call_UnwrapKey_594507 = ref object of OpenApiRestCall_593438
-proc url_UnwrapKey_594509(protocol: Scheme; host: string; base: string; route: string;
+  Call_UnwrapKey_568736 = ref object of OpenApiRestCall_567667
+proc url_UnwrapKey_568738(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4943,7 +4943,7 @@ proc url_UnwrapKey_594509(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UnwrapKey_594508(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UnwrapKey_568737(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## The UNWRAP operation supports decryption of a symmetric key using the target key encryption key. This operation is the reverse of the WRAP operation. The UNWRAP operation applies to asymmetric and symmetric keys stored in Azure Key Vault since it uses the private portion of the key. This operation requires the keys/unwrapKey permission.
   ## 
@@ -4957,16 +4957,16 @@ proc validate_UnwrapKey_594508(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `key-version` field"
-  var valid_594510 = path.getOrDefault("key-version")
-  valid_594510 = validateParameter(valid_594510, JString, required = true,
+  var valid_568739 = path.getOrDefault("key-version")
+  valid_568739 = validateParameter(valid_568739, JString, required = true,
                                  default = nil)
-  if valid_594510 != nil:
-    section.add "key-version", valid_594510
-  var valid_594511 = path.getOrDefault("key-name")
-  valid_594511 = validateParameter(valid_594511, JString, required = true,
+  if valid_568739 != nil:
+    section.add "key-version", valid_568739
+  var valid_568740 = path.getOrDefault("key-name")
+  valid_568740 = validateParameter(valid_568740, JString, required = true,
                                  default = nil)
-  if valid_594511 != nil:
-    section.add "key-name", valid_594511
+  if valid_568740 != nil:
+    section.add "key-name", valid_568740
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4974,11 +4974,11 @@ proc validate_UnwrapKey_594508(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594512 = query.getOrDefault("api-version")
-  valid_594512 = validateParameter(valid_594512, JString, required = true,
+  var valid_568741 = query.getOrDefault("api-version")
+  valid_568741 = validateParameter(valid_568741, JString, required = true,
                                  default = nil)
-  if valid_594512 != nil:
-    section.add "api-version", valid_594512
+  if valid_568741 != nil:
+    section.add "api-version", valid_568741
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4992,20 +4992,20 @@ proc validate_UnwrapKey_594508(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594514: Call_UnwrapKey_594507; path: JsonNode; query: JsonNode;
+proc call*(call_568743: Call_UnwrapKey_568736; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The UNWRAP operation supports decryption of a symmetric key using the target key encryption key. This operation is the reverse of the WRAP operation. The UNWRAP operation applies to asymmetric and symmetric keys stored in Azure Key Vault since it uses the private portion of the key. This operation requires the keys/unwrapKey permission.
   ## 
-  let valid = call_594514.validator(path, query, header, formData, body)
-  let scheme = call_594514.pickScheme
+  let valid = call_568743.validator(path, query, header, formData, body)
+  let scheme = call_568743.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594514.url(scheme.get, call_594514.host, call_594514.base,
-                         call_594514.route, valid.getOrDefault("path"),
+  let url = call_568743.url(scheme.get, call_568743.host, call_568743.base,
+                         call_568743.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594514, url, valid)
+  result = hook(call_568743, url, valid)
 
-proc call*(call_594515: Call_UnwrapKey_594507; apiVersion: string;
+proc call*(call_568744: Call_UnwrapKey_568736; apiVersion: string;
           keyVersion: string; parameters: JsonNode; keyName: string): Recallable =
   ## unwrapKey
   ## The UNWRAP operation supports decryption of a symmetric key using the target key encryption key. This operation is the reverse of the WRAP operation. The UNWRAP operation applies to asymmetric and symmetric keys stored in Azure Key Vault since it uses the private portion of the key. This operation requires the keys/unwrapKey permission.
@@ -5017,24 +5017,24 @@ proc call*(call_594515: Call_UnwrapKey_594507; apiVersion: string;
   ##             : The parameters for the key operation.
   ##   keyName: string (required)
   ##          : The name of the key.
-  var path_594516 = newJObject()
-  var query_594517 = newJObject()
-  var body_594518 = newJObject()
-  add(query_594517, "api-version", newJString(apiVersion))
-  add(path_594516, "key-version", newJString(keyVersion))
+  var path_568745 = newJObject()
+  var query_568746 = newJObject()
+  var body_568747 = newJObject()
+  add(query_568746, "api-version", newJString(apiVersion))
+  add(path_568745, "key-version", newJString(keyVersion))
   if parameters != nil:
-    body_594518 = parameters
-  add(path_594516, "key-name", newJString(keyName))
-  result = call_594515.call(path_594516, query_594517, nil, nil, body_594518)
+    body_568747 = parameters
+  add(path_568745, "key-name", newJString(keyName))
+  result = call_568744.call(path_568745, query_568746, nil, nil, body_568747)
 
-var unwrapKey* = Call_UnwrapKey_594507(name: "unwrapKey", meth: HttpMethod.HttpPost,
+var unwrapKey* = Call_UnwrapKey_568736(name: "unwrapKey", meth: HttpMethod.HttpPost,
                                     host: "azure.local", route: "/keys/{key-name}/{key-version}/unwrapkey",
-                                    validator: validate_UnwrapKey_594508,
-                                    base: "", url: url_UnwrapKey_594509,
+                                    validator: validate_UnwrapKey_568737,
+                                    base: "", url: url_UnwrapKey_568738,
                                     schemes: {Scheme.Https})
 type
-  Call_Verify_594519 = ref object of OpenApiRestCall_593438
-proc url_Verify_594521(protocol: Scheme; host: string; base: string; route: string;
+  Call_Verify_568748 = ref object of OpenApiRestCall_567667
+proc url_Verify_568750(protocol: Scheme; host: string; base: string; route: string;
                       path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5053,7 +5053,7 @@ proc url_Verify_594521(protocol: Scheme; host: string; base: string; route: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_Verify_594520(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_Verify_568749(path: JsonNode; query: JsonNode; header: JsonNode;
                            formData: JsonNode; body: JsonNode): JsonNode =
   ## The VERIFY operation is applicable to symmetric keys stored in Azure Key Vault. VERIFY is not strictly necessary for asymmetric keys stored in Azure Key Vault since signature verification can be performed using the public portion of the key but this operation is supported as a convenience for callers that only have a key-reference and not the public portion of the key. This operation requires the keys/verify permission.
   ## 
@@ -5067,16 +5067,16 @@ proc validate_Verify_594520(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `key-version` field"
-  var valid_594522 = path.getOrDefault("key-version")
-  valid_594522 = validateParameter(valid_594522, JString, required = true,
+  var valid_568751 = path.getOrDefault("key-version")
+  valid_568751 = validateParameter(valid_568751, JString, required = true,
                                  default = nil)
-  if valid_594522 != nil:
-    section.add "key-version", valid_594522
-  var valid_594523 = path.getOrDefault("key-name")
-  valid_594523 = validateParameter(valid_594523, JString, required = true,
+  if valid_568751 != nil:
+    section.add "key-version", valid_568751
+  var valid_568752 = path.getOrDefault("key-name")
+  valid_568752 = validateParameter(valid_568752, JString, required = true,
                                  default = nil)
-  if valid_594523 != nil:
-    section.add "key-name", valid_594523
+  if valid_568752 != nil:
+    section.add "key-name", valid_568752
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5084,11 +5084,11 @@ proc validate_Verify_594520(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594524 = query.getOrDefault("api-version")
-  valid_594524 = validateParameter(valid_594524, JString, required = true,
+  var valid_568753 = query.getOrDefault("api-version")
+  valid_568753 = validateParameter(valid_568753, JString, required = true,
                                  default = nil)
-  if valid_594524 != nil:
-    section.add "api-version", valid_594524
+  if valid_568753 != nil:
+    section.add "api-version", valid_568753
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5102,20 +5102,20 @@ proc validate_Verify_594520(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594526: Call_Verify_594519; path: JsonNode; query: JsonNode;
+proc call*(call_568755: Call_Verify_568748; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The VERIFY operation is applicable to symmetric keys stored in Azure Key Vault. VERIFY is not strictly necessary for asymmetric keys stored in Azure Key Vault since signature verification can be performed using the public portion of the key but this operation is supported as a convenience for callers that only have a key-reference and not the public portion of the key. This operation requires the keys/verify permission.
   ## 
-  let valid = call_594526.validator(path, query, header, formData, body)
-  let scheme = call_594526.pickScheme
+  let valid = call_568755.validator(path, query, header, formData, body)
+  let scheme = call_568755.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594526.url(scheme.get, call_594526.host, call_594526.base,
-                         call_594526.route, valid.getOrDefault("path"),
+  let url = call_568755.url(scheme.get, call_568755.host, call_568755.base,
+                         call_568755.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594526, url, valid)
+  result = hook(call_568755, url, valid)
 
-proc call*(call_594527: Call_Verify_594519; apiVersion: string; keyVersion: string;
+proc call*(call_568756: Call_Verify_568748; apiVersion: string; keyVersion: string;
           parameters: JsonNode; keyName: string): Recallable =
   ## verify
   ## The VERIFY operation is applicable to symmetric keys stored in Azure Key Vault. VERIFY is not strictly necessary for asymmetric keys stored in Azure Key Vault since signature verification can be performed using the public portion of the key but this operation is supported as a convenience for callers that only have a key-reference and not the public portion of the key. This operation requires the keys/verify permission.
@@ -5127,24 +5127,24 @@ proc call*(call_594527: Call_Verify_594519; apiVersion: string; keyVersion: stri
   ##             : The parameters for verify operations.
   ##   keyName: string (required)
   ##          : The name of the key.
-  var path_594528 = newJObject()
-  var query_594529 = newJObject()
-  var body_594530 = newJObject()
-  add(query_594529, "api-version", newJString(apiVersion))
-  add(path_594528, "key-version", newJString(keyVersion))
+  var path_568757 = newJObject()
+  var query_568758 = newJObject()
+  var body_568759 = newJObject()
+  add(query_568758, "api-version", newJString(apiVersion))
+  add(path_568757, "key-version", newJString(keyVersion))
   if parameters != nil:
-    body_594530 = parameters
-  add(path_594528, "key-name", newJString(keyName))
-  result = call_594527.call(path_594528, query_594529, nil, nil, body_594530)
+    body_568759 = parameters
+  add(path_568757, "key-name", newJString(keyName))
+  result = call_568756.call(path_568757, query_568758, nil, nil, body_568759)
 
-var verify* = Call_Verify_594519(name: "verify", meth: HttpMethod.HttpPost,
+var verify* = Call_Verify_568748(name: "verify", meth: HttpMethod.HttpPost,
                               host: "azure.local",
                               route: "/keys/{key-name}/{key-version}/verify",
-                              validator: validate_Verify_594520, base: "",
-                              url: url_Verify_594521, schemes: {Scheme.Https})
+                              validator: validate_Verify_568749, base: "",
+                              url: url_Verify_568750, schemes: {Scheme.Https})
 type
-  Call_WrapKey_594531 = ref object of OpenApiRestCall_593438
-proc url_WrapKey_594533(protocol: Scheme; host: string; base: string; route: string;
+  Call_WrapKey_568760 = ref object of OpenApiRestCall_567667
+proc url_WrapKey_568762(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5163,7 +5163,7 @@ proc url_WrapKey_594533(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WrapKey_594532(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WrapKey_568761(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## The WRAP operation supports encryption of a symmetric key using a key encryption key that has previously been stored in an Azure Key Vault. The WRAP operation is only strictly necessary for symmetric keys stored in Azure Key Vault since protection with an asymmetric key can be performed using the public portion of the key. This operation is supported for asymmetric keys as a convenience for callers that have a key-reference but do not have access to the public key material. This operation requires the keys/wrapKey permission.
   ## 
@@ -5177,16 +5177,16 @@ proc validate_WrapKey_594532(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `key-version` field"
-  var valid_594534 = path.getOrDefault("key-version")
-  valid_594534 = validateParameter(valid_594534, JString, required = true,
+  var valid_568763 = path.getOrDefault("key-version")
+  valid_568763 = validateParameter(valid_568763, JString, required = true,
                                  default = nil)
-  if valid_594534 != nil:
-    section.add "key-version", valid_594534
-  var valid_594535 = path.getOrDefault("key-name")
-  valid_594535 = validateParameter(valid_594535, JString, required = true,
+  if valid_568763 != nil:
+    section.add "key-version", valid_568763
+  var valid_568764 = path.getOrDefault("key-name")
+  valid_568764 = validateParameter(valid_568764, JString, required = true,
                                  default = nil)
-  if valid_594535 != nil:
-    section.add "key-name", valid_594535
+  if valid_568764 != nil:
+    section.add "key-name", valid_568764
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5194,11 +5194,11 @@ proc validate_WrapKey_594532(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594536 = query.getOrDefault("api-version")
-  valid_594536 = validateParameter(valid_594536, JString, required = true,
+  var valid_568765 = query.getOrDefault("api-version")
+  valid_568765 = validateParameter(valid_568765, JString, required = true,
                                  default = nil)
-  if valid_594536 != nil:
-    section.add "api-version", valid_594536
+  if valid_568765 != nil:
+    section.add "api-version", valid_568765
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5212,20 +5212,20 @@ proc validate_WrapKey_594532(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594538: Call_WrapKey_594531; path: JsonNode; query: JsonNode;
+proc call*(call_568767: Call_WrapKey_568760; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The WRAP operation supports encryption of a symmetric key using a key encryption key that has previously been stored in an Azure Key Vault. The WRAP operation is only strictly necessary for symmetric keys stored in Azure Key Vault since protection with an asymmetric key can be performed using the public portion of the key. This operation is supported for asymmetric keys as a convenience for callers that have a key-reference but do not have access to the public key material. This operation requires the keys/wrapKey permission.
   ## 
-  let valid = call_594538.validator(path, query, header, formData, body)
-  let scheme = call_594538.pickScheme
+  let valid = call_568767.validator(path, query, header, formData, body)
+  let scheme = call_568767.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594538.url(scheme.get, call_594538.host, call_594538.base,
-                         call_594538.route, valid.getOrDefault("path"),
+  let url = call_568767.url(scheme.get, call_568767.host, call_568767.base,
+                         call_568767.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594538, url, valid)
+  result = hook(call_568767, url, valid)
 
-proc call*(call_594539: Call_WrapKey_594531; apiVersion: string; keyVersion: string;
+proc call*(call_568768: Call_WrapKey_568760; apiVersion: string; keyVersion: string;
           parameters: JsonNode; keyName: string): Recallable =
   ## wrapKey
   ## The WRAP operation supports encryption of a symmetric key using a key encryption key that has previously been stored in an Azure Key Vault. The WRAP operation is only strictly necessary for symmetric keys stored in Azure Key Vault since protection with an asymmetric key can be performed using the public portion of the key. This operation is supported for asymmetric keys as a convenience for callers that have a key-reference but do not have access to the public key material. This operation requires the keys/wrapKey permission.
@@ -5237,30 +5237,30 @@ proc call*(call_594539: Call_WrapKey_594531; apiVersion: string; keyVersion: str
   ##             : The parameters for wrap operation.
   ##   keyName: string (required)
   ##          : The name of the key.
-  var path_594540 = newJObject()
-  var query_594541 = newJObject()
-  var body_594542 = newJObject()
-  add(query_594541, "api-version", newJString(apiVersion))
-  add(path_594540, "key-version", newJString(keyVersion))
+  var path_568769 = newJObject()
+  var query_568770 = newJObject()
+  var body_568771 = newJObject()
+  add(query_568770, "api-version", newJString(apiVersion))
+  add(path_568769, "key-version", newJString(keyVersion))
   if parameters != nil:
-    body_594542 = parameters
-  add(path_594540, "key-name", newJString(keyName))
-  result = call_594539.call(path_594540, query_594541, nil, nil, body_594542)
+    body_568771 = parameters
+  add(path_568769, "key-name", newJString(keyName))
+  result = call_568768.call(path_568769, query_568770, nil, nil, body_568771)
 
-var wrapKey* = Call_WrapKey_594531(name: "wrapKey", meth: HttpMethod.HttpPost,
+var wrapKey* = Call_WrapKey_568760(name: "wrapKey", meth: HttpMethod.HttpPost,
                                 host: "azure.local", route: "/keys/{key-name}/{key-version}/wrapkey",
-                                validator: validate_WrapKey_594532, base: "",
-                                url: url_WrapKey_594533, schemes: {Scheme.Https})
+                                validator: validate_WrapKey_568761, base: "",
+                                url: url_WrapKey_568762, schemes: {Scheme.Https})
 type
-  Call_GetSecrets_594543 = ref object of OpenApiRestCall_593438
-proc url_GetSecrets_594545(protocol: Scheme; host: string; base: string; route: string;
+  Call_GetSecrets_568772 = ref object of OpenApiRestCall_567667
+proc url_GetSecrets_568774(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetSecrets_594544(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GetSecrets_568773(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## The Get Secrets operation is applicable to the entire vault. However, only the base secret identifier and its attributes are provided in the response. Individual secret versions are not listed in the response. This operation requires the secrets/list permission.
   ## 
@@ -5276,15 +5276,15 @@ proc validate_GetSecrets_594544(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594546 = query.getOrDefault("api-version")
-  valid_594546 = validateParameter(valid_594546, JString, required = true,
+  var valid_568775 = query.getOrDefault("api-version")
+  valid_568775 = validateParameter(valid_568775, JString, required = true,
                                  default = nil)
-  if valid_594546 != nil:
-    section.add "api-version", valid_594546
-  var valid_594547 = query.getOrDefault("maxresults")
-  valid_594547 = validateParameter(valid_594547, JInt, required = false, default = nil)
-  if valid_594547 != nil:
-    section.add "maxresults", valid_594547
+  if valid_568775 != nil:
+    section.add "api-version", valid_568775
+  var valid_568776 = query.getOrDefault("maxresults")
+  valid_568776 = validateParameter(valid_568776, JInt, required = false, default = nil)
+  if valid_568776 != nil:
+    section.add "maxresults", valid_568776
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5293,20 +5293,20 @@ proc validate_GetSecrets_594544(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594548: Call_GetSecrets_594543; path: JsonNode; query: JsonNode;
+proc call*(call_568777: Call_GetSecrets_568772; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get Secrets operation is applicable to the entire vault. However, only the base secret identifier and its attributes are provided in the response. Individual secret versions are not listed in the response. This operation requires the secrets/list permission.
   ## 
-  let valid = call_594548.validator(path, query, header, formData, body)
-  let scheme = call_594548.pickScheme
+  let valid = call_568777.validator(path, query, header, formData, body)
+  let scheme = call_568777.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594548.url(scheme.get, call_594548.host, call_594548.base,
-                         call_594548.route, valid.getOrDefault("path"),
+  let url = call_568777.url(scheme.get, call_568777.host, call_568777.base,
+                         call_568777.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594548, url, valid)
+  result = hook(call_568777, url, valid)
 
-proc call*(call_594549: Call_GetSecrets_594543; apiVersion: string;
+proc call*(call_568778: Call_GetSecrets_568772; apiVersion: string;
           maxresults: int = 0): Recallable =
   ## getSecrets
   ## The Get Secrets operation is applicable to the entire vault. However, only the base secret identifier and its attributes are provided in the response. Individual secret versions are not listed in the response. This operation requires the secrets/list permission.
@@ -5314,27 +5314,27 @@ proc call*(call_594549: Call_GetSecrets_594543; apiVersion: string;
   ##             : Client API version.
   ##   maxresults: int
   ##             : Maximum number of results to return in a page. If not specified, the service will return up to 25 results.
-  var query_594550 = newJObject()
-  add(query_594550, "api-version", newJString(apiVersion))
-  add(query_594550, "maxresults", newJInt(maxresults))
-  result = call_594549.call(nil, query_594550, nil, nil, nil)
+  var query_568779 = newJObject()
+  add(query_568779, "api-version", newJString(apiVersion))
+  add(query_568779, "maxresults", newJInt(maxresults))
+  result = call_568778.call(nil, query_568779, nil, nil, nil)
 
-var getSecrets* = Call_GetSecrets_594543(name: "getSecrets",
+var getSecrets* = Call_GetSecrets_568772(name: "getSecrets",
                                       meth: HttpMethod.HttpGet,
                                       host: "azure.local", route: "/secrets",
-                                      validator: validate_GetSecrets_594544,
-                                      base: "", url: url_GetSecrets_594545,
+                                      validator: validate_GetSecrets_568773,
+                                      base: "", url: url_GetSecrets_568774,
                                       schemes: {Scheme.Https})
 type
-  Call_RestoreSecret_594551 = ref object of OpenApiRestCall_593438
-proc url_RestoreSecret_594553(protocol: Scheme; host: string; base: string;
+  Call_RestoreSecret_568780 = ref object of OpenApiRestCall_567667
+proc url_RestoreSecret_568782(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RestoreSecret_594552(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RestoreSecret_568781(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Restores a backed up secret, and all its versions, to a vault. This operation requires the secrets/restore permission.
   ## 
@@ -5348,11 +5348,11 @@ proc validate_RestoreSecret_594552(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594554 = query.getOrDefault("api-version")
-  valid_594554 = validateParameter(valid_594554, JString, required = true,
+  var valid_568783 = query.getOrDefault("api-version")
+  valid_568783 = validateParameter(valid_568783, JString, required = true,
                                  default = nil)
-  if valid_594554 != nil:
-    section.add "api-version", valid_594554
+  if valid_568783 != nil:
+    section.add "api-version", valid_568783
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5366,20 +5366,20 @@ proc validate_RestoreSecret_594552(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594556: Call_RestoreSecret_594551; path: JsonNode; query: JsonNode;
+proc call*(call_568785: Call_RestoreSecret_568780; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restores a backed up secret, and all its versions, to a vault. This operation requires the secrets/restore permission.
   ## 
-  let valid = call_594556.validator(path, query, header, formData, body)
-  let scheme = call_594556.pickScheme
+  let valid = call_568785.validator(path, query, header, formData, body)
+  let scheme = call_568785.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594556.url(scheme.get, call_594556.host, call_594556.base,
-                         call_594556.route, valid.getOrDefault("path"),
+  let url = call_568785.url(scheme.get, call_568785.host, call_568785.base,
+                         call_568785.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594556, url, valid)
+  result = hook(call_568785, url, valid)
 
-proc call*(call_594557: Call_RestoreSecret_594551; apiVersion: string;
+proc call*(call_568786: Call_RestoreSecret_568780; apiVersion: string;
           parameters: JsonNode): Recallable =
   ## restoreSecret
   ## Restores a backed up secret, and all its versions, to a vault. This operation requires the secrets/restore permission.
@@ -5387,20 +5387,20 @@ proc call*(call_594557: Call_RestoreSecret_594551; apiVersion: string;
   ##             : Client API version.
   ##   parameters: JObject (required)
   ##             : The parameters to restore the secret.
-  var query_594558 = newJObject()
-  var body_594559 = newJObject()
-  add(query_594558, "api-version", newJString(apiVersion))
+  var query_568787 = newJObject()
+  var body_568788 = newJObject()
+  add(query_568787, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_594559 = parameters
-  result = call_594557.call(nil, query_594558, nil, nil, body_594559)
+    body_568788 = parameters
+  result = call_568786.call(nil, query_568787, nil, nil, body_568788)
 
-var restoreSecret* = Call_RestoreSecret_594551(name: "restoreSecret",
+var restoreSecret* = Call_RestoreSecret_568780(name: "restoreSecret",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/secrets/restore",
-    validator: validate_RestoreSecret_594552, base: "", url: url_RestoreSecret_594553,
+    validator: validate_RestoreSecret_568781, base: "", url: url_RestoreSecret_568782,
     schemes: {Scheme.Https})
 type
-  Call_SetSecret_594560 = ref object of OpenApiRestCall_593438
-proc url_SetSecret_594562(protocol: Scheme; host: string; base: string; route: string;
+  Call_SetSecret_568789 = ref object of OpenApiRestCall_567667
+proc url_SetSecret_568791(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5415,7 +5415,7 @@ proc url_SetSecret_594562(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SetSecret_594561(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SetSecret_568790(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ##  The SET operation adds a secret to the Azure Key Vault. If the named secret already exists, Azure Key Vault creates a new version of that secret. This operation requires the secrets/set permission.
   ## 
@@ -5427,11 +5427,11 @@ proc validate_SetSecret_594561(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `secret-name` field"
-  var valid_594563 = path.getOrDefault("secret-name")
-  valid_594563 = validateParameter(valid_594563, JString, required = true,
+  var valid_568792 = path.getOrDefault("secret-name")
+  valid_568792 = validateParameter(valid_568792, JString, required = true,
                                  default = nil)
-  if valid_594563 != nil:
-    section.add "secret-name", valid_594563
+  if valid_568792 != nil:
+    section.add "secret-name", valid_568792
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5439,11 +5439,11 @@ proc validate_SetSecret_594561(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594564 = query.getOrDefault("api-version")
-  valid_594564 = validateParameter(valid_594564, JString, required = true,
+  var valid_568793 = query.getOrDefault("api-version")
+  valid_568793 = validateParameter(valid_568793, JString, required = true,
                                  default = nil)
-  if valid_594564 != nil:
-    section.add "api-version", valid_594564
+  if valid_568793 != nil:
+    section.add "api-version", valid_568793
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5457,20 +5457,20 @@ proc validate_SetSecret_594561(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594566: Call_SetSecret_594560; path: JsonNode; query: JsonNode;
+proc call*(call_568795: Call_SetSecret_568789; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ##  The SET operation adds a secret to the Azure Key Vault. If the named secret already exists, Azure Key Vault creates a new version of that secret. This operation requires the secrets/set permission.
   ## 
-  let valid = call_594566.validator(path, query, header, formData, body)
-  let scheme = call_594566.pickScheme
+  let valid = call_568795.validator(path, query, header, formData, body)
+  let scheme = call_568795.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594566.url(scheme.get, call_594566.host, call_594566.base,
-                         call_594566.route, valid.getOrDefault("path"),
+  let url = call_568795.url(scheme.get, call_568795.host, call_568795.base,
+                         call_568795.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594566, url, valid)
+  result = hook(call_568795, url, valid)
 
-proc call*(call_594567: Call_SetSecret_594560; apiVersion: string;
+proc call*(call_568796: Call_SetSecret_568789; apiVersion: string;
           secretName: string; parameters: JsonNode): Recallable =
   ## setSecret
   ##  The SET operation adds a secret to the Azure Key Vault. If the named secret already exists, Azure Key Vault creates a new version of that secret. This operation requires the secrets/set permission.
@@ -5480,24 +5480,24 @@ proc call*(call_594567: Call_SetSecret_594560; apiVersion: string;
   ##             : The name of the secret.
   ##   parameters: JObject (required)
   ##             : The parameters for setting the secret.
-  var path_594568 = newJObject()
-  var query_594569 = newJObject()
-  var body_594570 = newJObject()
-  add(query_594569, "api-version", newJString(apiVersion))
-  add(path_594568, "secret-name", newJString(secretName))
+  var path_568797 = newJObject()
+  var query_568798 = newJObject()
+  var body_568799 = newJObject()
+  add(query_568798, "api-version", newJString(apiVersion))
+  add(path_568797, "secret-name", newJString(secretName))
   if parameters != nil:
-    body_594570 = parameters
-  result = call_594567.call(path_594568, query_594569, nil, nil, body_594570)
+    body_568799 = parameters
+  result = call_568796.call(path_568797, query_568798, nil, nil, body_568799)
 
-var setSecret* = Call_SetSecret_594560(name: "setSecret", meth: HttpMethod.HttpPut,
+var setSecret* = Call_SetSecret_568789(name: "setSecret", meth: HttpMethod.HttpPut,
                                     host: "azure.local",
                                     route: "/secrets/{secret-name}",
-                                    validator: validate_SetSecret_594561,
-                                    base: "", url: url_SetSecret_594562,
+                                    validator: validate_SetSecret_568790,
+                                    base: "", url: url_SetSecret_568791,
                                     schemes: {Scheme.Https})
 type
-  Call_DeleteSecret_594571 = ref object of OpenApiRestCall_593438
-proc url_DeleteSecret_594573(protocol: Scheme; host: string; base: string;
+  Call_DeleteSecret_568800 = ref object of OpenApiRestCall_567667
+proc url_DeleteSecret_568802(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5512,7 +5512,7 @@ proc url_DeleteSecret_594573(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeleteSecret_594572(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DeleteSecret_568801(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## The DELETE operation applies to any secret stored in Azure Key Vault. DELETE cannot be applied to an individual version of a secret. This operation requires the secrets/delete permission.
   ## 
@@ -5524,11 +5524,11 @@ proc validate_DeleteSecret_594572(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `secret-name` field"
-  var valid_594574 = path.getOrDefault("secret-name")
-  valid_594574 = validateParameter(valid_594574, JString, required = true,
+  var valid_568803 = path.getOrDefault("secret-name")
+  valid_568803 = validateParameter(valid_568803, JString, required = true,
                                  default = nil)
-  if valid_594574 != nil:
-    section.add "secret-name", valid_594574
+  if valid_568803 != nil:
+    section.add "secret-name", valid_568803
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5536,11 +5536,11 @@ proc validate_DeleteSecret_594572(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594575 = query.getOrDefault("api-version")
-  valid_594575 = validateParameter(valid_594575, JString, required = true,
+  var valid_568804 = query.getOrDefault("api-version")
+  valid_568804 = validateParameter(valid_568804, JString, required = true,
                                  default = nil)
-  if valid_594575 != nil:
-    section.add "api-version", valid_594575
+  if valid_568804 != nil:
+    section.add "api-version", valid_568804
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5549,20 +5549,20 @@ proc validate_DeleteSecret_594572(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594576: Call_DeleteSecret_594571; path: JsonNode; query: JsonNode;
+proc call*(call_568805: Call_DeleteSecret_568800; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The DELETE operation applies to any secret stored in Azure Key Vault. DELETE cannot be applied to an individual version of a secret. This operation requires the secrets/delete permission.
   ## 
-  let valid = call_594576.validator(path, query, header, formData, body)
-  let scheme = call_594576.pickScheme
+  let valid = call_568805.validator(path, query, header, formData, body)
+  let scheme = call_568805.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594576.url(scheme.get, call_594576.host, call_594576.base,
-                         call_594576.route, valid.getOrDefault("path"),
+  let url = call_568805.url(scheme.get, call_568805.host, call_568805.base,
+                         call_568805.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594576, url, valid)
+  result = hook(call_568805, url, valid)
 
-proc call*(call_594577: Call_DeleteSecret_594571; apiVersion: string;
+proc call*(call_568806: Call_DeleteSecret_568800; apiVersion: string;
           secretName: string): Recallable =
   ## deleteSecret
   ## The DELETE operation applies to any secret stored in Azure Key Vault. DELETE cannot be applied to an individual version of a secret. This operation requires the secrets/delete permission.
@@ -5570,19 +5570,19 @@ proc call*(call_594577: Call_DeleteSecret_594571; apiVersion: string;
   ##             : Client API version.
   ##   secretName: string (required)
   ##             : The name of the secret.
-  var path_594578 = newJObject()
-  var query_594579 = newJObject()
-  add(query_594579, "api-version", newJString(apiVersion))
-  add(path_594578, "secret-name", newJString(secretName))
-  result = call_594577.call(path_594578, query_594579, nil, nil, nil)
+  var path_568807 = newJObject()
+  var query_568808 = newJObject()
+  add(query_568808, "api-version", newJString(apiVersion))
+  add(path_568807, "secret-name", newJString(secretName))
+  result = call_568806.call(path_568807, query_568808, nil, nil, nil)
 
-var deleteSecret* = Call_DeleteSecret_594571(name: "deleteSecret",
+var deleteSecret* = Call_DeleteSecret_568800(name: "deleteSecret",
     meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/secrets/{secret-name}", validator: validate_DeleteSecret_594572,
-    base: "", url: url_DeleteSecret_594573, schemes: {Scheme.Https})
+    route: "/secrets/{secret-name}", validator: validate_DeleteSecret_568801,
+    base: "", url: url_DeleteSecret_568802, schemes: {Scheme.Https})
 type
-  Call_BackupSecret_594580 = ref object of OpenApiRestCall_593438
-proc url_BackupSecret_594582(protocol: Scheme; host: string; base: string;
+  Call_BackupSecret_568809 = ref object of OpenApiRestCall_567667
+proc url_BackupSecret_568811(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5598,7 +5598,7 @@ proc url_BackupSecret_594582(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupSecret_594581(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BackupSecret_568810(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Requests that a backup of the specified secret be downloaded to the client. All versions of the secret will be downloaded. This operation requires the secrets/backup permission.
   ## 
@@ -5610,11 +5610,11 @@ proc validate_BackupSecret_594581(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `secret-name` field"
-  var valid_594583 = path.getOrDefault("secret-name")
-  valid_594583 = validateParameter(valid_594583, JString, required = true,
+  var valid_568812 = path.getOrDefault("secret-name")
+  valid_568812 = validateParameter(valid_568812, JString, required = true,
                                  default = nil)
-  if valid_594583 != nil:
-    section.add "secret-name", valid_594583
+  if valid_568812 != nil:
+    section.add "secret-name", valid_568812
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5622,11 +5622,11 @@ proc validate_BackupSecret_594581(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594584 = query.getOrDefault("api-version")
-  valid_594584 = validateParameter(valid_594584, JString, required = true,
+  var valid_568813 = query.getOrDefault("api-version")
+  valid_568813 = validateParameter(valid_568813, JString, required = true,
                                  default = nil)
-  if valid_594584 != nil:
-    section.add "api-version", valid_594584
+  if valid_568813 != nil:
+    section.add "api-version", valid_568813
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5635,20 +5635,20 @@ proc validate_BackupSecret_594581(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594585: Call_BackupSecret_594580; path: JsonNode; query: JsonNode;
+proc call*(call_568814: Call_BackupSecret_568809; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Requests that a backup of the specified secret be downloaded to the client. All versions of the secret will be downloaded. This operation requires the secrets/backup permission.
   ## 
-  let valid = call_594585.validator(path, query, header, formData, body)
-  let scheme = call_594585.pickScheme
+  let valid = call_568814.validator(path, query, header, formData, body)
+  let scheme = call_568814.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594585.url(scheme.get, call_594585.host, call_594585.base,
-                         call_594585.route, valid.getOrDefault("path"),
+  let url = call_568814.url(scheme.get, call_568814.host, call_568814.base,
+                         call_568814.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594585, url, valid)
+  result = hook(call_568814, url, valid)
 
-proc call*(call_594586: Call_BackupSecret_594580; apiVersion: string;
+proc call*(call_568815: Call_BackupSecret_568809; apiVersion: string;
           secretName: string): Recallable =
   ## backupSecret
   ## Requests that a backup of the specified secret be downloaded to the client. All versions of the secret will be downloaded. This operation requires the secrets/backup permission.
@@ -5656,19 +5656,19 @@ proc call*(call_594586: Call_BackupSecret_594580; apiVersion: string;
   ##             : Client API version.
   ##   secretName: string (required)
   ##             : The name of the secret.
-  var path_594587 = newJObject()
-  var query_594588 = newJObject()
-  add(query_594588, "api-version", newJString(apiVersion))
-  add(path_594587, "secret-name", newJString(secretName))
-  result = call_594586.call(path_594587, query_594588, nil, nil, nil)
+  var path_568816 = newJObject()
+  var query_568817 = newJObject()
+  add(query_568817, "api-version", newJString(apiVersion))
+  add(path_568816, "secret-name", newJString(secretName))
+  result = call_568815.call(path_568816, query_568817, nil, nil, nil)
 
-var backupSecret* = Call_BackupSecret_594580(name: "backupSecret",
+var backupSecret* = Call_BackupSecret_568809(name: "backupSecret",
     meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/secrets/{secret-name}/backup", validator: validate_BackupSecret_594581,
-    base: "", url: url_BackupSecret_594582, schemes: {Scheme.Https})
+    route: "/secrets/{secret-name}/backup", validator: validate_BackupSecret_568810,
+    base: "", url: url_BackupSecret_568811, schemes: {Scheme.Https})
 type
-  Call_GetSecretVersions_594589 = ref object of OpenApiRestCall_593438
-proc url_GetSecretVersions_594591(protocol: Scheme; host: string; base: string;
+  Call_GetSecretVersions_568818 = ref object of OpenApiRestCall_567667
+proc url_GetSecretVersions_568820(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5684,7 +5684,7 @@ proc url_GetSecretVersions_594591(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetSecretVersions_594590(path: JsonNode; query: JsonNode;
+proc validate_GetSecretVersions_568819(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## The full secret identifier and attributes are provided in the response. No values are returned for the secrets. This operations requires the secrets/list permission.
@@ -5697,11 +5697,11 @@ proc validate_GetSecretVersions_594590(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `secret-name` field"
-  var valid_594592 = path.getOrDefault("secret-name")
-  valid_594592 = validateParameter(valid_594592, JString, required = true,
+  var valid_568821 = path.getOrDefault("secret-name")
+  valid_568821 = validateParameter(valid_568821, JString, required = true,
                                  default = nil)
-  if valid_594592 != nil:
-    section.add "secret-name", valid_594592
+  if valid_568821 != nil:
+    section.add "secret-name", valid_568821
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5711,15 +5711,15 @@ proc validate_GetSecretVersions_594590(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594593 = query.getOrDefault("api-version")
-  valid_594593 = validateParameter(valid_594593, JString, required = true,
+  var valid_568822 = query.getOrDefault("api-version")
+  valid_568822 = validateParameter(valid_568822, JString, required = true,
                                  default = nil)
-  if valid_594593 != nil:
-    section.add "api-version", valid_594593
-  var valid_594594 = query.getOrDefault("maxresults")
-  valid_594594 = validateParameter(valid_594594, JInt, required = false, default = nil)
-  if valid_594594 != nil:
-    section.add "maxresults", valid_594594
+  if valid_568822 != nil:
+    section.add "api-version", valid_568822
+  var valid_568823 = query.getOrDefault("maxresults")
+  valid_568823 = validateParameter(valid_568823, JInt, required = false, default = nil)
+  if valid_568823 != nil:
+    section.add "maxresults", valid_568823
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5728,20 +5728,20 @@ proc validate_GetSecretVersions_594590(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594595: Call_GetSecretVersions_594589; path: JsonNode;
+proc call*(call_568824: Call_GetSecretVersions_568818; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The full secret identifier and attributes are provided in the response. No values are returned for the secrets. This operations requires the secrets/list permission.
   ## 
-  let valid = call_594595.validator(path, query, header, formData, body)
-  let scheme = call_594595.pickScheme
+  let valid = call_568824.validator(path, query, header, formData, body)
+  let scheme = call_568824.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594595.url(scheme.get, call_594595.host, call_594595.base,
-                         call_594595.route, valid.getOrDefault("path"),
+  let url = call_568824.url(scheme.get, call_568824.host, call_568824.base,
+                         call_568824.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594595, url, valid)
+  result = hook(call_568824, url, valid)
 
-proc call*(call_594596: Call_GetSecretVersions_594589; apiVersion: string;
+proc call*(call_568825: Call_GetSecretVersions_568818; apiVersion: string;
           secretName: string; maxresults: int = 0): Recallable =
   ## getSecretVersions
   ## The full secret identifier and attributes are provided in the response. No values are returned for the secrets. This operations requires the secrets/list permission.
@@ -5751,21 +5751,21 @@ proc call*(call_594596: Call_GetSecretVersions_594589; apiVersion: string;
   ##             : Maximum number of results to return in a page. If not specified, the service will return up to 25 results.
   ##   secretName: string (required)
   ##             : The name of the secret.
-  var path_594597 = newJObject()
-  var query_594598 = newJObject()
-  add(query_594598, "api-version", newJString(apiVersion))
-  add(query_594598, "maxresults", newJInt(maxresults))
-  add(path_594597, "secret-name", newJString(secretName))
-  result = call_594596.call(path_594597, query_594598, nil, nil, nil)
+  var path_568826 = newJObject()
+  var query_568827 = newJObject()
+  add(query_568827, "api-version", newJString(apiVersion))
+  add(query_568827, "maxresults", newJInt(maxresults))
+  add(path_568826, "secret-name", newJString(secretName))
+  result = call_568825.call(path_568826, query_568827, nil, nil, nil)
 
-var getSecretVersions* = Call_GetSecretVersions_594589(name: "getSecretVersions",
+var getSecretVersions* = Call_GetSecretVersions_568818(name: "getSecretVersions",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/secrets/{secret-name}/versions",
-    validator: validate_GetSecretVersions_594590, base: "",
-    url: url_GetSecretVersions_594591, schemes: {Scheme.Https})
+    validator: validate_GetSecretVersions_568819, base: "",
+    url: url_GetSecretVersions_568820, schemes: {Scheme.Https})
 type
-  Call_GetSecret_594599 = ref object of OpenApiRestCall_593438
-proc url_GetSecret_594601(protocol: Scheme; host: string; base: string; route: string;
+  Call_GetSecret_568828 = ref object of OpenApiRestCall_567667
+proc url_GetSecret_568830(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5783,7 +5783,7 @@ proc url_GetSecret_594601(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetSecret_594600(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GetSecret_568829(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## The GET operation is applicable to any secret stored in Azure Key Vault. This operation requires the secrets/get permission.
   ## 
@@ -5797,16 +5797,16 @@ proc validate_GetSecret_594600(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `secret-version` field"
-  var valid_594602 = path.getOrDefault("secret-version")
-  valid_594602 = validateParameter(valid_594602, JString, required = true,
+  var valid_568831 = path.getOrDefault("secret-version")
+  valid_568831 = validateParameter(valid_568831, JString, required = true,
                                  default = nil)
-  if valid_594602 != nil:
-    section.add "secret-version", valid_594602
-  var valid_594603 = path.getOrDefault("secret-name")
-  valid_594603 = validateParameter(valid_594603, JString, required = true,
+  if valid_568831 != nil:
+    section.add "secret-version", valid_568831
+  var valid_568832 = path.getOrDefault("secret-name")
+  valid_568832 = validateParameter(valid_568832, JString, required = true,
                                  default = nil)
-  if valid_594603 != nil:
-    section.add "secret-name", valid_594603
+  if valid_568832 != nil:
+    section.add "secret-name", valid_568832
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5814,11 +5814,11 @@ proc validate_GetSecret_594600(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594604 = query.getOrDefault("api-version")
-  valid_594604 = validateParameter(valid_594604, JString, required = true,
+  var valid_568833 = query.getOrDefault("api-version")
+  valid_568833 = validateParameter(valid_568833, JString, required = true,
                                  default = nil)
-  if valid_594604 != nil:
-    section.add "api-version", valid_594604
+  if valid_568833 != nil:
+    section.add "api-version", valid_568833
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5827,20 +5827,20 @@ proc validate_GetSecret_594600(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594605: Call_GetSecret_594599; path: JsonNode; query: JsonNode;
+proc call*(call_568834: Call_GetSecret_568828; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GET operation is applicable to any secret stored in Azure Key Vault. This operation requires the secrets/get permission.
   ## 
-  let valid = call_594605.validator(path, query, header, formData, body)
-  let scheme = call_594605.pickScheme
+  let valid = call_568834.validator(path, query, header, formData, body)
+  let scheme = call_568834.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594605.url(scheme.get, call_594605.host, call_594605.base,
-                         call_594605.route, valid.getOrDefault("path"),
+  let url = call_568834.url(scheme.get, call_568834.host, call_568834.base,
+                         call_568834.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594605, url, valid)
+  result = hook(call_568834, url, valid)
 
-proc call*(call_594606: Call_GetSecret_594599; apiVersion: string;
+proc call*(call_568835: Call_GetSecret_568828; apiVersion: string;
           secretVersion: string; secretName: string): Recallable =
   ## getSecret
   ## The GET operation is applicable to any secret stored in Azure Key Vault. This operation requires the secrets/get permission.
@@ -5850,21 +5850,21 @@ proc call*(call_594606: Call_GetSecret_594599; apiVersion: string;
   ##                : The version of the secret.
   ##   secretName: string (required)
   ##             : The name of the secret.
-  var path_594607 = newJObject()
-  var query_594608 = newJObject()
-  add(query_594608, "api-version", newJString(apiVersion))
-  add(path_594607, "secret-version", newJString(secretVersion))
-  add(path_594607, "secret-name", newJString(secretName))
-  result = call_594606.call(path_594607, query_594608, nil, nil, nil)
+  var path_568836 = newJObject()
+  var query_568837 = newJObject()
+  add(query_568837, "api-version", newJString(apiVersion))
+  add(path_568836, "secret-version", newJString(secretVersion))
+  add(path_568836, "secret-name", newJString(secretName))
+  result = call_568835.call(path_568836, query_568837, nil, nil, nil)
 
-var getSecret* = Call_GetSecret_594599(name: "getSecret", meth: HttpMethod.HttpGet,
+var getSecret* = Call_GetSecret_568828(name: "getSecret", meth: HttpMethod.HttpGet,
                                     host: "azure.local", route: "/secrets/{secret-name}/{secret-version}",
-                                    validator: validate_GetSecret_594600,
-                                    base: "", url: url_GetSecret_594601,
+                                    validator: validate_GetSecret_568829,
+                                    base: "", url: url_GetSecret_568830,
                                     schemes: {Scheme.Https})
 type
-  Call_UpdateSecret_594609 = ref object of OpenApiRestCall_593438
-proc url_UpdateSecret_594611(protocol: Scheme; host: string; base: string;
+  Call_UpdateSecret_568838 = ref object of OpenApiRestCall_567667
+proc url_UpdateSecret_568840(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5882,7 +5882,7 @@ proc url_UpdateSecret_594611(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateSecret_594610(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UpdateSecret_568839(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## The UPDATE operation changes specified attributes of an existing stored secret. Attributes that are not specified in the request are left unchanged. The value of a secret itself cannot be changed. This operation requires the secrets/set permission.
   ## 
@@ -5896,16 +5896,16 @@ proc validate_UpdateSecret_594610(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `secret-version` field"
-  var valid_594612 = path.getOrDefault("secret-version")
-  valid_594612 = validateParameter(valid_594612, JString, required = true,
+  var valid_568841 = path.getOrDefault("secret-version")
+  valid_568841 = validateParameter(valid_568841, JString, required = true,
                                  default = nil)
-  if valid_594612 != nil:
-    section.add "secret-version", valid_594612
-  var valid_594613 = path.getOrDefault("secret-name")
-  valid_594613 = validateParameter(valid_594613, JString, required = true,
+  if valid_568841 != nil:
+    section.add "secret-version", valid_568841
+  var valid_568842 = path.getOrDefault("secret-name")
+  valid_568842 = validateParameter(valid_568842, JString, required = true,
                                  default = nil)
-  if valid_594613 != nil:
-    section.add "secret-name", valid_594613
+  if valid_568842 != nil:
+    section.add "secret-name", valid_568842
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5913,11 +5913,11 @@ proc validate_UpdateSecret_594610(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594614 = query.getOrDefault("api-version")
-  valid_594614 = validateParameter(valid_594614, JString, required = true,
+  var valid_568843 = query.getOrDefault("api-version")
+  valid_568843 = validateParameter(valid_568843, JString, required = true,
                                  default = nil)
-  if valid_594614 != nil:
-    section.add "api-version", valid_594614
+  if valid_568843 != nil:
+    section.add "api-version", valid_568843
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5931,20 +5931,20 @@ proc validate_UpdateSecret_594610(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594616: Call_UpdateSecret_594609; path: JsonNode; query: JsonNode;
+proc call*(call_568845: Call_UpdateSecret_568838; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The UPDATE operation changes specified attributes of an existing stored secret. Attributes that are not specified in the request are left unchanged. The value of a secret itself cannot be changed. This operation requires the secrets/set permission.
   ## 
-  let valid = call_594616.validator(path, query, header, formData, body)
-  let scheme = call_594616.pickScheme
+  let valid = call_568845.validator(path, query, header, formData, body)
+  let scheme = call_568845.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594616.url(scheme.get, call_594616.host, call_594616.base,
-                         call_594616.route, valid.getOrDefault("path"),
+  let url = call_568845.url(scheme.get, call_568845.host, call_568845.base,
+                         call_568845.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594616, url, valid)
+  result = hook(call_568845, url, valid)
 
-proc call*(call_594617: Call_UpdateSecret_594609; apiVersion: string;
+proc call*(call_568846: Call_UpdateSecret_568838; apiVersion: string;
           secretVersion: string; secretName: string; parameters: JsonNode): Recallable =
   ## updateSecret
   ## The UPDATE operation changes specified attributes of an existing stored secret. Attributes that are not specified in the request are left unchanged. The value of a secret itself cannot be changed. This operation requires the secrets/set permission.
@@ -5956,31 +5956,31 @@ proc call*(call_594617: Call_UpdateSecret_594609; apiVersion: string;
   ##             : The name of the secret.
   ##   parameters: JObject (required)
   ##             : The parameters for update secret operation.
-  var path_594618 = newJObject()
-  var query_594619 = newJObject()
-  var body_594620 = newJObject()
-  add(query_594619, "api-version", newJString(apiVersion))
-  add(path_594618, "secret-version", newJString(secretVersion))
-  add(path_594618, "secret-name", newJString(secretName))
+  var path_568847 = newJObject()
+  var query_568848 = newJObject()
+  var body_568849 = newJObject()
+  add(query_568848, "api-version", newJString(apiVersion))
+  add(path_568847, "secret-version", newJString(secretVersion))
+  add(path_568847, "secret-name", newJString(secretName))
   if parameters != nil:
-    body_594620 = parameters
-  result = call_594617.call(path_594618, query_594619, nil, nil, body_594620)
+    body_568849 = parameters
+  result = call_568846.call(path_568847, query_568848, nil, nil, body_568849)
 
-var updateSecret* = Call_UpdateSecret_594609(name: "updateSecret",
+var updateSecret* = Call_UpdateSecret_568838(name: "updateSecret",
     meth: HttpMethod.HttpPatch, host: "azure.local",
     route: "/secrets/{secret-name}/{secret-version}",
-    validator: validate_UpdateSecret_594610, base: "", url: url_UpdateSecret_594611,
+    validator: validate_UpdateSecret_568839, base: "", url: url_UpdateSecret_568840,
     schemes: {Scheme.Https})
 type
-  Call_GetStorageAccounts_594621 = ref object of OpenApiRestCall_593438
-proc url_GetStorageAccounts_594623(protocol: Scheme; host: string; base: string;
+  Call_GetStorageAccounts_568850 = ref object of OpenApiRestCall_567667
+proc url_GetStorageAccounts_568852(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetStorageAccounts_594622(path: JsonNode; query: JsonNode;
+proc validate_GetStorageAccounts_568851(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## List storage accounts managed by the specified key vault. This operation requires the storage/list permission.
@@ -5997,15 +5997,15 @@ proc validate_GetStorageAccounts_594622(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594624 = query.getOrDefault("api-version")
-  valid_594624 = validateParameter(valid_594624, JString, required = true,
+  var valid_568853 = query.getOrDefault("api-version")
+  valid_568853 = validateParameter(valid_568853, JString, required = true,
                                  default = nil)
-  if valid_594624 != nil:
-    section.add "api-version", valid_594624
-  var valid_594625 = query.getOrDefault("maxresults")
-  valid_594625 = validateParameter(valid_594625, JInt, required = false, default = nil)
-  if valid_594625 != nil:
-    section.add "maxresults", valid_594625
+  if valid_568853 != nil:
+    section.add "api-version", valid_568853
+  var valid_568854 = query.getOrDefault("maxresults")
+  valid_568854 = validateParameter(valid_568854, JInt, required = false, default = nil)
+  if valid_568854 != nil:
+    section.add "maxresults", valid_568854
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6014,20 +6014,20 @@ proc validate_GetStorageAccounts_594622(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594626: Call_GetStorageAccounts_594621; path: JsonNode;
+proc call*(call_568855: Call_GetStorageAccounts_568850; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List storage accounts managed by the specified key vault. This operation requires the storage/list permission.
   ## 
-  let valid = call_594626.validator(path, query, header, formData, body)
-  let scheme = call_594626.pickScheme
+  let valid = call_568855.validator(path, query, header, formData, body)
+  let scheme = call_568855.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594626.url(scheme.get, call_594626.host, call_594626.base,
-                         call_594626.route, valid.getOrDefault("path"),
+  let url = call_568855.url(scheme.get, call_568855.host, call_568855.base,
+                         call_568855.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594626, url, valid)
+  result = hook(call_568855, url, valid)
 
-proc call*(call_594627: Call_GetStorageAccounts_594621; apiVersion: string;
+proc call*(call_568856: Call_GetStorageAccounts_568850; apiVersion: string;
           maxresults: int = 0): Recallable =
   ## getStorageAccounts
   ## List storage accounts managed by the specified key vault. This operation requires the storage/list permission.
@@ -6035,25 +6035,25 @@ proc call*(call_594627: Call_GetStorageAccounts_594621; apiVersion: string;
   ##             : Client API version.
   ##   maxresults: int
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
-  var query_594628 = newJObject()
-  add(query_594628, "api-version", newJString(apiVersion))
-  add(query_594628, "maxresults", newJInt(maxresults))
-  result = call_594627.call(nil, query_594628, nil, nil, nil)
+  var query_568857 = newJObject()
+  add(query_568857, "api-version", newJString(apiVersion))
+  add(query_568857, "maxresults", newJInt(maxresults))
+  result = call_568856.call(nil, query_568857, nil, nil, nil)
 
-var getStorageAccounts* = Call_GetStorageAccounts_594621(
+var getStorageAccounts* = Call_GetStorageAccounts_568850(
     name: "getStorageAccounts", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/storage", validator: validate_GetStorageAccounts_594622, base: "",
-    url: url_GetStorageAccounts_594623, schemes: {Scheme.Https})
+    route: "/storage", validator: validate_GetStorageAccounts_568851, base: "",
+    url: url_GetStorageAccounts_568852, schemes: {Scheme.Https})
 type
-  Call_RestoreStorageAccount_594629 = ref object of OpenApiRestCall_593438
-proc url_RestoreStorageAccount_594631(protocol: Scheme; host: string; base: string;
+  Call_RestoreStorageAccount_568858 = ref object of OpenApiRestCall_567667
+proc url_RestoreStorageAccount_568860(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RestoreStorageAccount_594630(path: JsonNode; query: JsonNode;
+proc validate_RestoreStorageAccount_568859(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Restores a backed up storage account to a vault. This operation requires the storage/restore permission.
   ## 
@@ -6067,11 +6067,11 @@ proc validate_RestoreStorageAccount_594630(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594632 = query.getOrDefault("api-version")
-  valid_594632 = validateParameter(valid_594632, JString, required = true,
+  var valid_568861 = query.getOrDefault("api-version")
+  valid_568861 = validateParameter(valid_568861, JString, required = true,
                                  default = nil)
-  if valid_594632 != nil:
-    section.add "api-version", valid_594632
+  if valid_568861 != nil:
+    section.add "api-version", valid_568861
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6085,20 +6085,20 @@ proc validate_RestoreStorageAccount_594630(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594634: Call_RestoreStorageAccount_594629; path: JsonNode;
+proc call*(call_568863: Call_RestoreStorageAccount_568858; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restores a backed up storage account to a vault. This operation requires the storage/restore permission.
   ## 
-  let valid = call_594634.validator(path, query, header, formData, body)
-  let scheme = call_594634.pickScheme
+  let valid = call_568863.validator(path, query, header, formData, body)
+  let scheme = call_568863.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594634.url(scheme.get, call_594634.host, call_594634.base,
-                         call_594634.route, valid.getOrDefault("path"),
+  let url = call_568863.url(scheme.get, call_568863.host, call_568863.base,
+                         call_568863.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594634, url, valid)
+  result = hook(call_568863, url, valid)
 
-proc call*(call_594635: Call_RestoreStorageAccount_594629; apiVersion: string;
+proc call*(call_568864: Call_RestoreStorageAccount_568858; apiVersion: string;
           parameters: JsonNode): Recallable =
   ## restoreStorageAccount
   ## Restores a backed up storage account to a vault. This operation requires the storage/restore permission.
@@ -6106,20 +6106,20 @@ proc call*(call_594635: Call_RestoreStorageAccount_594629; apiVersion: string;
   ##             : Client API version.
   ##   parameters: JObject (required)
   ##             : The parameters to restore the storage account.
-  var query_594636 = newJObject()
-  var body_594637 = newJObject()
-  add(query_594636, "api-version", newJString(apiVersion))
+  var query_568865 = newJObject()
+  var body_568866 = newJObject()
+  add(query_568865, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_594637 = parameters
-  result = call_594635.call(nil, query_594636, nil, nil, body_594637)
+    body_568866 = parameters
+  result = call_568864.call(nil, query_568865, nil, nil, body_568866)
 
-var restoreStorageAccount* = Call_RestoreStorageAccount_594629(
+var restoreStorageAccount* = Call_RestoreStorageAccount_568858(
     name: "restoreStorageAccount", meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/storage/restore", validator: validate_RestoreStorageAccount_594630,
-    base: "", url: url_RestoreStorageAccount_594631, schemes: {Scheme.Https})
+    route: "/storage/restore", validator: validate_RestoreStorageAccount_568859,
+    base: "", url: url_RestoreStorageAccount_568860, schemes: {Scheme.Https})
 type
-  Call_SetStorageAccount_594647 = ref object of OpenApiRestCall_593438
-proc url_SetStorageAccount_594649(protocol: Scheme; host: string; base: string;
+  Call_SetStorageAccount_568876 = ref object of OpenApiRestCall_567667
+proc url_SetStorageAccount_568878(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6135,7 +6135,7 @@ proc url_SetStorageAccount_594649(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SetStorageAccount_594648(path: JsonNode; query: JsonNode;
+proc validate_SetStorageAccount_568877(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Creates or updates a new storage account. This operation requires the storage/set permission.
@@ -6147,11 +6147,11 @@ proc validate_SetStorageAccount_594648(path: JsonNode; query: JsonNode;
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594650 = path.getOrDefault("storage-account-name")
-  valid_594650 = validateParameter(valid_594650, JString, required = true,
+  var valid_568879 = path.getOrDefault("storage-account-name")
+  valid_568879 = validateParameter(valid_568879, JString, required = true,
                                  default = nil)
-  if valid_594650 != nil:
-    section.add "storage-account-name", valid_594650
+  if valid_568879 != nil:
+    section.add "storage-account-name", valid_568879
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6159,11 +6159,11 @@ proc validate_SetStorageAccount_594648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594651 = query.getOrDefault("api-version")
-  valid_594651 = validateParameter(valid_594651, JString, required = true,
+  var valid_568880 = query.getOrDefault("api-version")
+  valid_568880 = validateParameter(valid_568880, JString, required = true,
                                  default = nil)
-  if valid_594651 != nil:
-    section.add "api-version", valid_594651
+  if valid_568880 != nil:
+    section.add "api-version", valid_568880
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6177,20 +6177,20 @@ proc validate_SetStorageAccount_594648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594653: Call_SetStorageAccount_594647; path: JsonNode;
+proc call*(call_568882: Call_SetStorageAccount_568876; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a new storage account. This operation requires the storage/set permission.
   ## 
-  let valid = call_594653.validator(path, query, header, formData, body)
-  let scheme = call_594653.pickScheme
+  let valid = call_568882.validator(path, query, header, formData, body)
+  let scheme = call_568882.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594653.url(scheme.get, call_594653.host, call_594653.base,
-                         call_594653.route, valid.getOrDefault("path"),
+  let url = call_568882.url(scheme.get, call_568882.host, call_568882.base,
+                         call_568882.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594653, url, valid)
+  result = hook(call_568882, url, valid)
 
-proc call*(call_594654: Call_SetStorageAccount_594647; apiVersion: string;
+proc call*(call_568883: Call_SetStorageAccount_568876; apiVersion: string;
           storageAccountName: string; parameters: JsonNode): Recallable =
   ## setStorageAccount
   ## Creates or updates a new storage account. This operation requires the storage/set permission.
@@ -6200,23 +6200,23 @@ proc call*(call_594654: Call_SetStorageAccount_594647; apiVersion: string;
   ##                     : The name of the storage account.
   ##   parameters: JObject (required)
   ##             : The parameters to create a storage account.
-  var path_594655 = newJObject()
-  var query_594656 = newJObject()
-  var body_594657 = newJObject()
-  add(query_594656, "api-version", newJString(apiVersion))
-  add(path_594655, "storage-account-name", newJString(storageAccountName))
+  var path_568884 = newJObject()
+  var query_568885 = newJObject()
+  var body_568886 = newJObject()
+  add(query_568885, "api-version", newJString(apiVersion))
+  add(path_568884, "storage-account-name", newJString(storageAccountName))
   if parameters != nil:
-    body_594657 = parameters
-  result = call_594654.call(path_594655, query_594656, nil, nil, body_594657)
+    body_568886 = parameters
+  result = call_568883.call(path_568884, query_568885, nil, nil, body_568886)
 
-var setStorageAccount* = Call_SetStorageAccount_594647(name: "setStorageAccount",
+var setStorageAccount* = Call_SetStorageAccount_568876(name: "setStorageAccount",
     meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/storage/{storage-account-name}",
-    validator: validate_SetStorageAccount_594648, base: "",
-    url: url_SetStorageAccount_594649, schemes: {Scheme.Https})
+    validator: validate_SetStorageAccount_568877, base: "",
+    url: url_SetStorageAccount_568878, schemes: {Scheme.Https})
 type
-  Call_GetStorageAccount_594638 = ref object of OpenApiRestCall_593438
-proc url_GetStorageAccount_594640(protocol: Scheme; host: string; base: string;
+  Call_GetStorageAccount_568867 = ref object of OpenApiRestCall_567667
+proc url_GetStorageAccount_568869(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6232,7 +6232,7 @@ proc url_GetStorageAccount_594640(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetStorageAccount_594639(path: JsonNode; query: JsonNode;
+proc validate_GetStorageAccount_568868(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets information about a specified storage account. This operation requires the storage/get permission.
@@ -6244,11 +6244,11 @@ proc validate_GetStorageAccount_594639(path: JsonNode; query: JsonNode;
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594641 = path.getOrDefault("storage-account-name")
-  valid_594641 = validateParameter(valid_594641, JString, required = true,
+  var valid_568870 = path.getOrDefault("storage-account-name")
+  valid_568870 = validateParameter(valid_568870, JString, required = true,
                                  default = nil)
-  if valid_594641 != nil:
-    section.add "storage-account-name", valid_594641
+  if valid_568870 != nil:
+    section.add "storage-account-name", valid_568870
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6256,11 +6256,11 @@ proc validate_GetStorageAccount_594639(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594642 = query.getOrDefault("api-version")
-  valid_594642 = validateParameter(valid_594642, JString, required = true,
+  var valid_568871 = query.getOrDefault("api-version")
+  valid_568871 = validateParameter(valid_568871, JString, required = true,
                                  default = nil)
-  if valid_594642 != nil:
-    section.add "api-version", valid_594642
+  if valid_568871 != nil:
+    section.add "api-version", valid_568871
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6269,20 +6269,20 @@ proc validate_GetStorageAccount_594639(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594643: Call_GetStorageAccount_594638; path: JsonNode;
+proc call*(call_568872: Call_GetStorageAccount_568867; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about a specified storage account. This operation requires the storage/get permission.
   ## 
-  let valid = call_594643.validator(path, query, header, formData, body)
-  let scheme = call_594643.pickScheme
+  let valid = call_568872.validator(path, query, header, formData, body)
+  let scheme = call_568872.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594643.url(scheme.get, call_594643.host, call_594643.base,
-                         call_594643.route, valid.getOrDefault("path"),
+  let url = call_568872.url(scheme.get, call_568872.host, call_568872.base,
+                         call_568872.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594643, url, valid)
+  result = hook(call_568872, url, valid)
 
-proc call*(call_594644: Call_GetStorageAccount_594638; apiVersion: string;
+proc call*(call_568873: Call_GetStorageAccount_568867; apiVersion: string;
           storageAccountName: string): Recallable =
   ## getStorageAccount
   ## Gets information about a specified storage account. This operation requires the storage/get permission.
@@ -6290,20 +6290,20 @@ proc call*(call_594644: Call_GetStorageAccount_594638; apiVersion: string;
   ##             : Client API version.
   ##   storageAccountName: string (required)
   ##                     : The name of the storage account.
-  var path_594645 = newJObject()
-  var query_594646 = newJObject()
-  add(query_594646, "api-version", newJString(apiVersion))
-  add(path_594645, "storage-account-name", newJString(storageAccountName))
-  result = call_594644.call(path_594645, query_594646, nil, nil, nil)
+  var path_568874 = newJObject()
+  var query_568875 = newJObject()
+  add(query_568875, "api-version", newJString(apiVersion))
+  add(path_568874, "storage-account-name", newJString(storageAccountName))
+  result = call_568873.call(path_568874, query_568875, nil, nil, nil)
 
-var getStorageAccount* = Call_GetStorageAccount_594638(name: "getStorageAccount",
+var getStorageAccount* = Call_GetStorageAccount_568867(name: "getStorageAccount",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/storage/{storage-account-name}",
-    validator: validate_GetStorageAccount_594639, base: "",
-    url: url_GetStorageAccount_594640, schemes: {Scheme.Https})
+    validator: validate_GetStorageAccount_568868, base: "",
+    url: url_GetStorageAccount_568869, schemes: {Scheme.Https})
 type
-  Call_UpdateStorageAccount_594667 = ref object of OpenApiRestCall_593438
-proc url_UpdateStorageAccount_594669(protocol: Scheme; host: string; base: string;
+  Call_UpdateStorageAccount_568896 = ref object of OpenApiRestCall_567667
+proc url_UpdateStorageAccount_568898(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6319,7 +6319,7 @@ proc url_UpdateStorageAccount_594669(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateStorageAccount_594668(path: JsonNode; query: JsonNode;
+proc validate_UpdateStorageAccount_568897(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the specified attributes associated with the given storage account. This operation requires the storage/set/update permission.
   ## 
@@ -6330,11 +6330,11 @@ proc validate_UpdateStorageAccount_594668(path: JsonNode; query: JsonNode;
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594670 = path.getOrDefault("storage-account-name")
-  valid_594670 = validateParameter(valid_594670, JString, required = true,
+  var valid_568899 = path.getOrDefault("storage-account-name")
+  valid_568899 = validateParameter(valid_568899, JString, required = true,
                                  default = nil)
-  if valid_594670 != nil:
-    section.add "storage-account-name", valid_594670
+  if valid_568899 != nil:
+    section.add "storage-account-name", valid_568899
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6342,11 +6342,11 @@ proc validate_UpdateStorageAccount_594668(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594671 = query.getOrDefault("api-version")
-  valid_594671 = validateParameter(valid_594671, JString, required = true,
+  var valid_568900 = query.getOrDefault("api-version")
+  valid_568900 = validateParameter(valid_568900, JString, required = true,
                                  default = nil)
-  if valid_594671 != nil:
-    section.add "api-version", valid_594671
+  if valid_568900 != nil:
+    section.add "api-version", valid_568900
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6360,20 +6360,20 @@ proc validate_UpdateStorageAccount_594668(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594673: Call_UpdateStorageAccount_594667; path: JsonNode;
+proc call*(call_568902: Call_UpdateStorageAccount_568896; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specified attributes associated with the given storage account. This operation requires the storage/set/update permission.
   ## 
-  let valid = call_594673.validator(path, query, header, formData, body)
-  let scheme = call_594673.pickScheme
+  let valid = call_568902.validator(path, query, header, formData, body)
+  let scheme = call_568902.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594673.url(scheme.get, call_594673.host, call_594673.base,
-                         call_594673.route, valid.getOrDefault("path"),
+  let url = call_568902.url(scheme.get, call_568902.host, call_568902.base,
+                         call_568902.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594673, url, valid)
+  result = hook(call_568902, url, valid)
 
-proc call*(call_594674: Call_UpdateStorageAccount_594667; apiVersion: string;
+proc call*(call_568903: Call_UpdateStorageAccount_568896; apiVersion: string;
           storageAccountName: string; parameters: JsonNode): Recallable =
   ## updateStorageAccount
   ## Updates the specified attributes associated with the given storage account. This operation requires the storage/set/update permission.
@@ -6383,23 +6383,23 @@ proc call*(call_594674: Call_UpdateStorageAccount_594667; apiVersion: string;
   ##                     : The name of the storage account.
   ##   parameters: JObject (required)
   ##             : The parameters to update a storage account.
-  var path_594675 = newJObject()
-  var query_594676 = newJObject()
-  var body_594677 = newJObject()
-  add(query_594676, "api-version", newJString(apiVersion))
-  add(path_594675, "storage-account-name", newJString(storageAccountName))
+  var path_568904 = newJObject()
+  var query_568905 = newJObject()
+  var body_568906 = newJObject()
+  add(query_568905, "api-version", newJString(apiVersion))
+  add(path_568904, "storage-account-name", newJString(storageAccountName))
   if parameters != nil:
-    body_594677 = parameters
-  result = call_594674.call(path_594675, query_594676, nil, nil, body_594677)
+    body_568906 = parameters
+  result = call_568903.call(path_568904, query_568905, nil, nil, body_568906)
 
-var updateStorageAccount* = Call_UpdateStorageAccount_594667(
+var updateStorageAccount* = Call_UpdateStorageAccount_568896(
     name: "updateStorageAccount", meth: HttpMethod.HttpPatch, host: "azure.local",
     route: "/storage/{storage-account-name}",
-    validator: validate_UpdateStorageAccount_594668, base: "",
-    url: url_UpdateStorageAccount_594669, schemes: {Scheme.Https})
+    validator: validate_UpdateStorageAccount_568897, base: "",
+    url: url_UpdateStorageAccount_568898, schemes: {Scheme.Https})
 type
-  Call_DeleteStorageAccount_594658 = ref object of OpenApiRestCall_593438
-proc url_DeleteStorageAccount_594660(protocol: Scheme; host: string; base: string;
+  Call_DeleteStorageAccount_568887 = ref object of OpenApiRestCall_567667
+proc url_DeleteStorageAccount_568889(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6415,7 +6415,7 @@ proc url_DeleteStorageAccount_594660(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeleteStorageAccount_594659(path: JsonNode; query: JsonNode;
+proc validate_DeleteStorageAccount_568888(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a storage account. This operation requires the storage/delete permission.
   ## 
@@ -6426,11 +6426,11 @@ proc validate_DeleteStorageAccount_594659(path: JsonNode; query: JsonNode;
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594661 = path.getOrDefault("storage-account-name")
-  valid_594661 = validateParameter(valid_594661, JString, required = true,
+  var valid_568890 = path.getOrDefault("storage-account-name")
+  valid_568890 = validateParameter(valid_568890, JString, required = true,
                                  default = nil)
-  if valid_594661 != nil:
-    section.add "storage-account-name", valid_594661
+  if valid_568890 != nil:
+    section.add "storage-account-name", valid_568890
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6438,11 +6438,11 @@ proc validate_DeleteStorageAccount_594659(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594662 = query.getOrDefault("api-version")
-  valid_594662 = validateParameter(valid_594662, JString, required = true,
+  var valid_568891 = query.getOrDefault("api-version")
+  valid_568891 = validateParameter(valid_568891, JString, required = true,
                                  default = nil)
-  if valid_594662 != nil:
-    section.add "api-version", valid_594662
+  if valid_568891 != nil:
+    section.add "api-version", valid_568891
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6451,20 +6451,20 @@ proc validate_DeleteStorageAccount_594659(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594663: Call_DeleteStorageAccount_594658; path: JsonNode;
+proc call*(call_568892: Call_DeleteStorageAccount_568887; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a storage account. This operation requires the storage/delete permission.
   ## 
-  let valid = call_594663.validator(path, query, header, formData, body)
-  let scheme = call_594663.pickScheme
+  let valid = call_568892.validator(path, query, header, formData, body)
+  let scheme = call_568892.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594663.url(scheme.get, call_594663.host, call_594663.base,
-                         call_594663.route, valid.getOrDefault("path"),
+  let url = call_568892.url(scheme.get, call_568892.host, call_568892.base,
+                         call_568892.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594663, url, valid)
+  result = hook(call_568892, url, valid)
 
-proc call*(call_594664: Call_DeleteStorageAccount_594658; apiVersion: string;
+proc call*(call_568893: Call_DeleteStorageAccount_568887; apiVersion: string;
           storageAccountName: string): Recallable =
   ## deleteStorageAccount
   ## Deletes a storage account. This operation requires the storage/delete permission.
@@ -6472,20 +6472,20 @@ proc call*(call_594664: Call_DeleteStorageAccount_594658; apiVersion: string;
   ##             : Client API version.
   ##   storageAccountName: string (required)
   ##                     : The name of the storage account.
-  var path_594665 = newJObject()
-  var query_594666 = newJObject()
-  add(query_594666, "api-version", newJString(apiVersion))
-  add(path_594665, "storage-account-name", newJString(storageAccountName))
-  result = call_594664.call(path_594665, query_594666, nil, nil, nil)
+  var path_568894 = newJObject()
+  var query_568895 = newJObject()
+  add(query_568895, "api-version", newJString(apiVersion))
+  add(path_568894, "storage-account-name", newJString(storageAccountName))
+  result = call_568893.call(path_568894, query_568895, nil, nil, nil)
 
-var deleteStorageAccount* = Call_DeleteStorageAccount_594658(
+var deleteStorageAccount* = Call_DeleteStorageAccount_568887(
     name: "deleteStorageAccount", meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/storage/{storage-account-name}",
-    validator: validate_DeleteStorageAccount_594659, base: "",
-    url: url_DeleteStorageAccount_594660, schemes: {Scheme.Https})
+    validator: validate_DeleteStorageAccount_568888, base: "",
+    url: url_DeleteStorageAccount_568889, schemes: {Scheme.Https})
 type
-  Call_BackupStorageAccount_594678 = ref object of OpenApiRestCall_593438
-proc url_BackupStorageAccount_594680(protocol: Scheme; host: string; base: string;
+  Call_BackupStorageAccount_568907 = ref object of OpenApiRestCall_567667
+proc url_BackupStorageAccount_568909(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6502,7 +6502,7 @@ proc url_BackupStorageAccount_594680(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupStorageAccount_594679(path: JsonNode; query: JsonNode;
+proc validate_BackupStorageAccount_568908(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Requests that a backup of the specified storage account be downloaded to the client. This operation requires the storage/backup permission.
   ## 
@@ -6513,11 +6513,11 @@ proc validate_BackupStorageAccount_594679(path: JsonNode; query: JsonNode;
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594681 = path.getOrDefault("storage-account-name")
-  valid_594681 = validateParameter(valid_594681, JString, required = true,
+  var valid_568910 = path.getOrDefault("storage-account-name")
+  valid_568910 = validateParameter(valid_568910, JString, required = true,
                                  default = nil)
-  if valid_594681 != nil:
-    section.add "storage-account-name", valid_594681
+  if valid_568910 != nil:
+    section.add "storage-account-name", valid_568910
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6525,11 +6525,11 @@ proc validate_BackupStorageAccount_594679(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594682 = query.getOrDefault("api-version")
-  valid_594682 = validateParameter(valid_594682, JString, required = true,
+  var valid_568911 = query.getOrDefault("api-version")
+  valid_568911 = validateParameter(valid_568911, JString, required = true,
                                  default = nil)
-  if valid_594682 != nil:
-    section.add "api-version", valid_594682
+  if valid_568911 != nil:
+    section.add "api-version", valid_568911
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6538,20 +6538,20 @@ proc validate_BackupStorageAccount_594679(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594683: Call_BackupStorageAccount_594678; path: JsonNode;
+proc call*(call_568912: Call_BackupStorageAccount_568907; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Requests that a backup of the specified storage account be downloaded to the client. This operation requires the storage/backup permission.
   ## 
-  let valid = call_594683.validator(path, query, header, formData, body)
-  let scheme = call_594683.pickScheme
+  let valid = call_568912.validator(path, query, header, formData, body)
+  let scheme = call_568912.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594683.url(scheme.get, call_594683.host, call_594683.base,
-                         call_594683.route, valid.getOrDefault("path"),
+  let url = call_568912.url(scheme.get, call_568912.host, call_568912.base,
+                         call_568912.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594683, url, valid)
+  result = hook(call_568912, url, valid)
 
-proc call*(call_594684: Call_BackupStorageAccount_594678; apiVersion: string;
+proc call*(call_568913: Call_BackupStorageAccount_568907; apiVersion: string;
           storageAccountName: string): Recallable =
   ## backupStorageAccount
   ## Requests that a backup of the specified storage account be downloaded to the client. This operation requires the storage/backup permission.
@@ -6559,20 +6559,20 @@ proc call*(call_594684: Call_BackupStorageAccount_594678; apiVersion: string;
   ##             : Client API version.
   ##   storageAccountName: string (required)
   ##                     : The name of the storage account.
-  var path_594685 = newJObject()
-  var query_594686 = newJObject()
-  add(query_594686, "api-version", newJString(apiVersion))
-  add(path_594685, "storage-account-name", newJString(storageAccountName))
-  result = call_594684.call(path_594685, query_594686, nil, nil, nil)
+  var path_568914 = newJObject()
+  var query_568915 = newJObject()
+  add(query_568915, "api-version", newJString(apiVersion))
+  add(path_568914, "storage-account-name", newJString(storageAccountName))
+  result = call_568913.call(path_568914, query_568915, nil, nil, nil)
 
-var backupStorageAccount* = Call_BackupStorageAccount_594678(
+var backupStorageAccount* = Call_BackupStorageAccount_568907(
     name: "backupStorageAccount", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/storage/{storage-account-name}/backup",
-    validator: validate_BackupStorageAccount_594679, base: "",
-    url: url_BackupStorageAccount_594680, schemes: {Scheme.Https})
+    validator: validate_BackupStorageAccount_568908, base: "",
+    url: url_BackupStorageAccount_568909, schemes: {Scheme.Https})
 type
-  Call_RegenerateStorageAccountKey_594687 = ref object of OpenApiRestCall_593438
-proc url_RegenerateStorageAccountKey_594689(protocol: Scheme; host: string;
+  Call_RegenerateStorageAccountKey_568916 = ref object of OpenApiRestCall_567667
+proc url_RegenerateStorageAccountKey_568918(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6589,7 +6589,7 @@ proc url_RegenerateStorageAccountKey_594689(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegenerateStorageAccountKey_594688(path: JsonNode; query: JsonNode;
+proc validate_RegenerateStorageAccountKey_568917(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates the specified key value for the given storage account. This operation requires the storage/regeneratekey permission.
   ## 
@@ -6600,11 +6600,11 @@ proc validate_RegenerateStorageAccountKey_594688(path: JsonNode; query: JsonNode
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594690 = path.getOrDefault("storage-account-name")
-  valid_594690 = validateParameter(valid_594690, JString, required = true,
+  var valid_568919 = path.getOrDefault("storage-account-name")
+  valid_568919 = validateParameter(valid_568919, JString, required = true,
                                  default = nil)
-  if valid_594690 != nil:
-    section.add "storage-account-name", valid_594690
+  if valid_568919 != nil:
+    section.add "storage-account-name", valid_568919
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6612,11 +6612,11 @@ proc validate_RegenerateStorageAccountKey_594688(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594691 = query.getOrDefault("api-version")
-  valid_594691 = validateParameter(valid_594691, JString, required = true,
+  var valid_568920 = query.getOrDefault("api-version")
+  valid_568920 = validateParameter(valid_568920, JString, required = true,
                                  default = nil)
-  if valid_594691 != nil:
-    section.add "api-version", valid_594691
+  if valid_568920 != nil:
+    section.add "api-version", valid_568920
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6630,20 +6630,20 @@ proc validate_RegenerateStorageAccountKey_594688(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594693: Call_RegenerateStorageAccountKey_594687; path: JsonNode;
+proc call*(call_568922: Call_RegenerateStorageAccountKey_568916; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerates the specified key value for the given storage account. This operation requires the storage/regeneratekey permission.
   ## 
-  let valid = call_594693.validator(path, query, header, formData, body)
-  let scheme = call_594693.pickScheme
+  let valid = call_568922.validator(path, query, header, formData, body)
+  let scheme = call_568922.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594693.url(scheme.get, call_594693.host, call_594693.base,
-                         call_594693.route, valid.getOrDefault("path"),
+  let url = call_568922.url(scheme.get, call_568922.host, call_568922.base,
+                         call_568922.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594693, url, valid)
+  result = hook(call_568922, url, valid)
 
-proc call*(call_594694: Call_RegenerateStorageAccountKey_594687;
+proc call*(call_568923: Call_RegenerateStorageAccountKey_568916;
           apiVersion: string; storageAccountName: string; parameters: JsonNode): Recallable =
   ## regenerateStorageAccountKey
   ## Regenerates the specified key value for the given storage account. This operation requires the storage/regeneratekey permission.
@@ -6653,23 +6653,23 @@ proc call*(call_594694: Call_RegenerateStorageAccountKey_594687;
   ##                     : The name of the storage account.
   ##   parameters: JObject (required)
   ##             : The parameters to regenerate storage account key.
-  var path_594695 = newJObject()
-  var query_594696 = newJObject()
-  var body_594697 = newJObject()
-  add(query_594696, "api-version", newJString(apiVersion))
-  add(path_594695, "storage-account-name", newJString(storageAccountName))
+  var path_568924 = newJObject()
+  var query_568925 = newJObject()
+  var body_568926 = newJObject()
+  add(query_568925, "api-version", newJString(apiVersion))
+  add(path_568924, "storage-account-name", newJString(storageAccountName))
   if parameters != nil:
-    body_594697 = parameters
-  result = call_594694.call(path_594695, query_594696, nil, nil, body_594697)
+    body_568926 = parameters
+  result = call_568923.call(path_568924, query_568925, nil, nil, body_568926)
 
-var regenerateStorageAccountKey* = Call_RegenerateStorageAccountKey_594687(
+var regenerateStorageAccountKey* = Call_RegenerateStorageAccountKey_568916(
     name: "regenerateStorageAccountKey", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/storage/{storage-account-name}/regeneratekey",
-    validator: validate_RegenerateStorageAccountKey_594688, base: "",
-    url: url_RegenerateStorageAccountKey_594689, schemes: {Scheme.Https})
+    validator: validate_RegenerateStorageAccountKey_568917, base: "",
+    url: url_RegenerateStorageAccountKey_568918, schemes: {Scheme.Https})
 type
-  Call_GetSasDefinitions_594698 = ref object of OpenApiRestCall_593438
-proc url_GetSasDefinitions_594700(protocol: Scheme; host: string; base: string;
+  Call_GetSasDefinitions_568927 = ref object of OpenApiRestCall_567667
+proc url_GetSasDefinitions_568929(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6686,7 +6686,7 @@ proc url_GetSasDefinitions_594700(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetSasDefinitions_594699(path: JsonNode; query: JsonNode;
+proc validate_GetSasDefinitions_568928(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## List storage SAS definitions for the given storage account. This operation requires the storage/listsas permission.
@@ -6698,11 +6698,11 @@ proc validate_GetSasDefinitions_594699(path: JsonNode; query: JsonNode;
   ##                       : The name of the storage account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594701 = path.getOrDefault("storage-account-name")
-  valid_594701 = validateParameter(valid_594701, JString, required = true,
+  var valid_568930 = path.getOrDefault("storage-account-name")
+  valid_568930 = validateParameter(valid_568930, JString, required = true,
                                  default = nil)
-  if valid_594701 != nil:
-    section.add "storage-account-name", valid_594701
+  if valid_568930 != nil:
+    section.add "storage-account-name", valid_568930
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6712,15 +6712,15 @@ proc validate_GetSasDefinitions_594699(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594702 = query.getOrDefault("api-version")
-  valid_594702 = validateParameter(valid_594702, JString, required = true,
+  var valid_568931 = query.getOrDefault("api-version")
+  valid_568931 = validateParameter(valid_568931, JString, required = true,
                                  default = nil)
-  if valid_594702 != nil:
-    section.add "api-version", valid_594702
-  var valid_594703 = query.getOrDefault("maxresults")
-  valid_594703 = validateParameter(valid_594703, JInt, required = false, default = nil)
-  if valid_594703 != nil:
-    section.add "maxresults", valid_594703
+  if valid_568931 != nil:
+    section.add "api-version", valid_568931
+  var valid_568932 = query.getOrDefault("maxresults")
+  valid_568932 = validateParameter(valid_568932, JInt, required = false, default = nil)
+  if valid_568932 != nil:
+    section.add "maxresults", valid_568932
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6729,20 +6729,20 @@ proc validate_GetSasDefinitions_594699(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594704: Call_GetSasDefinitions_594698; path: JsonNode;
+proc call*(call_568933: Call_GetSasDefinitions_568927; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List storage SAS definitions for the given storage account. This operation requires the storage/listsas permission.
   ## 
-  let valid = call_594704.validator(path, query, header, formData, body)
-  let scheme = call_594704.pickScheme
+  let valid = call_568933.validator(path, query, header, formData, body)
+  let scheme = call_568933.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594704.url(scheme.get, call_594704.host, call_594704.base,
-                         call_594704.route, valid.getOrDefault("path"),
+  let url = call_568933.url(scheme.get, call_568933.host, call_568933.base,
+                         call_568933.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594704, url, valid)
+  result = hook(call_568933, url, valid)
 
-proc call*(call_594705: Call_GetSasDefinitions_594698; apiVersion: string;
+proc call*(call_568934: Call_GetSasDefinitions_568927; apiVersion: string;
           storageAccountName: string; maxresults: int = 0): Recallable =
   ## getSasDefinitions
   ## List storage SAS definitions for the given storage account. This operation requires the storage/listsas permission.
@@ -6752,21 +6752,21 @@ proc call*(call_594705: Call_GetSasDefinitions_594698; apiVersion: string;
   ##             : Maximum number of results to return in a page. If not specified the service will return up to 25 results.
   ##   storageAccountName: string (required)
   ##                     : The name of the storage account.
-  var path_594706 = newJObject()
-  var query_594707 = newJObject()
-  add(query_594707, "api-version", newJString(apiVersion))
-  add(query_594707, "maxresults", newJInt(maxresults))
-  add(path_594706, "storage-account-name", newJString(storageAccountName))
-  result = call_594705.call(path_594706, query_594707, nil, nil, nil)
+  var path_568935 = newJObject()
+  var query_568936 = newJObject()
+  add(query_568936, "api-version", newJString(apiVersion))
+  add(query_568936, "maxresults", newJInt(maxresults))
+  add(path_568935, "storage-account-name", newJString(storageAccountName))
+  result = call_568934.call(path_568935, query_568936, nil, nil, nil)
 
-var getSasDefinitions* = Call_GetSasDefinitions_594698(name: "getSasDefinitions",
+var getSasDefinitions* = Call_GetSasDefinitions_568927(name: "getSasDefinitions",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/storage/{storage-account-name}/sas",
-    validator: validate_GetSasDefinitions_594699, base: "",
-    url: url_GetSasDefinitions_594700, schemes: {Scheme.Https})
+    validator: validate_GetSasDefinitions_568928, base: "",
+    url: url_GetSasDefinitions_568929, schemes: {Scheme.Https})
 type
-  Call_SetSasDefinition_594718 = ref object of OpenApiRestCall_593438
-proc url_SetSasDefinition_594720(protocol: Scheme; host: string; base: string;
+  Call_SetSasDefinition_568947 = ref object of OpenApiRestCall_567667
+proc url_SetSasDefinition_568949(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6786,7 +6786,7 @@ proc url_SetSasDefinition_594720(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SetSasDefinition_594719(path: JsonNode; query: JsonNode;
+proc validate_SetSasDefinition_568948(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Creates or updates a new SAS definition for the specified storage account. This operation requires the storage/setsas permission.
@@ -6800,16 +6800,16 @@ proc validate_SetSasDefinition_594719(path: JsonNode; query: JsonNode;
   ##                      : The name of the SAS definition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594721 = path.getOrDefault("storage-account-name")
-  valid_594721 = validateParameter(valid_594721, JString, required = true,
+  var valid_568950 = path.getOrDefault("storage-account-name")
+  valid_568950 = validateParameter(valid_568950, JString, required = true,
                                  default = nil)
-  if valid_594721 != nil:
-    section.add "storage-account-name", valid_594721
-  var valid_594722 = path.getOrDefault("sas-definition-name")
-  valid_594722 = validateParameter(valid_594722, JString, required = true,
+  if valid_568950 != nil:
+    section.add "storage-account-name", valid_568950
+  var valid_568951 = path.getOrDefault("sas-definition-name")
+  valid_568951 = validateParameter(valid_568951, JString, required = true,
                                  default = nil)
-  if valid_594722 != nil:
-    section.add "sas-definition-name", valid_594722
+  if valid_568951 != nil:
+    section.add "sas-definition-name", valid_568951
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6817,11 +6817,11 @@ proc validate_SetSasDefinition_594719(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594723 = query.getOrDefault("api-version")
-  valid_594723 = validateParameter(valid_594723, JString, required = true,
+  var valid_568952 = query.getOrDefault("api-version")
+  valid_568952 = validateParameter(valid_568952, JString, required = true,
                                  default = nil)
-  if valid_594723 != nil:
-    section.add "api-version", valid_594723
+  if valid_568952 != nil:
+    section.add "api-version", valid_568952
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6835,20 +6835,20 @@ proc validate_SetSasDefinition_594719(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594725: Call_SetSasDefinition_594718; path: JsonNode;
+proc call*(call_568954: Call_SetSasDefinition_568947; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a new SAS definition for the specified storage account. This operation requires the storage/setsas permission.
   ## 
-  let valid = call_594725.validator(path, query, header, formData, body)
-  let scheme = call_594725.pickScheme
+  let valid = call_568954.validator(path, query, header, formData, body)
+  let scheme = call_568954.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594725.url(scheme.get, call_594725.host, call_594725.base,
-                         call_594725.route, valid.getOrDefault("path"),
+  let url = call_568954.url(scheme.get, call_568954.host, call_568954.base,
+                         call_568954.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594725, url, valid)
+  result = hook(call_568954, url, valid)
 
-proc call*(call_594726: Call_SetSasDefinition_594718; apiVersion: string;
+proc call*(call_568955: Call_SetSasDefinition_568947; apiVersion: string;
           storageAccountName: string; parameters: JsonNode;
           sasDefinitionName: string): Recallable =
   ## setSasDefinition
@@ -6861,24 +6861,24 @@ proc call*(call_594726: Call_SetSasDefinition_594718; apiVersion: string;
   ##             : The parameters to create a SAS definition.
   ##   sasDefinitionName: string (required)
   ##                    : The name of the SAS definition.
-  var path_594727 = newJObject()
-  var query_594728 = newJObject()
-  var body_594729 = newJObject()
-  add(query_594728, "api-version", newJString(apiVersion))
-  add(path_594727, "storage-account-name", newJString(storageAccountName))
+  var path_568956 = newJObject()
+  var query_568957 = newJObject()
+  var body_568958 = newJObject()
+  add(query_568957, "api-version", newJString(apiVersion))
+  add(path_568956, "storage-account-name", newJString(storageAccountName))
   if parameters != nil:
-    body_594729 = parameters
-  add(path_594727, "sas-definition-name", newJString(sasDefinitionName))
-  result = call_594726.call(path_594727, query_594728, nil, nil, body_594729)
+    body_568958 = parameters
+  add(path_568956, "sas-definition-name", newJString(sasDefinitionName))
+  result = call_568955.call(path_568956, query_568957, nil, nil, body_568958)
 
-var setSasDefinition* = Call_SetSasDefinition_594718(name: "setSasDefinition",
+var setSasDefinition* = Call_SetSasDefinition_568947(name: "setSasDefinition",
     meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/storage/{storage-account-name}/sas/{sas-definition-name}",
-    validator: validate_SetSasDefinition_594719, base: "",
-    url: url_SetSasDefinition_594720, schemes: {Scheme.Https})
+    validator: validate_SetSasDefinition_568948, base: "",
+    url: url_SetSasDefinition_568949, schemes: {Scheme.Https})
 type
-  Call_GetSasDefinition_594708 = ref object of OpenApiRestCall_593438
-proc url_GetSasDefinition_594710(protocol: Scheme; host: string; base: string;
+  Call_GetSasDefinition_568937 = ref object of OpenApiRestCall_567667
+proc url_GetSasDefinition_568939(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6898,7 +6898,7 @@ proc url_GetSasDefinition_594710(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetSasDefinition_594709(path: JsonNode; query: JsonNode;
+proc validate_GetSasDefinition_568938(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets information about a SAS definition for the specified storage account. This operation requires the storage/getsas permission.
@@ -6912,16 +6912,16 @@ proc validate_GetSasDefinition_594709(path: JsonNode; query: JsonNode;
   ##                      : The name of the SAS definition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594711 = path.getOrDefault("storage-account-name")
-  valid_594711 = validateParameter(valid_594711, JString, required = true,
+  var valid_568940 = path.getOrDefault("storage-account-name")
+  valid_568940 = validateParameter(valid_568940, JString, required = true,
                                  default = nil)
-  if valid_594711 != nil:
-    section.add "storage-account-name", valid_594711
-  var valid_594712 = path.getOrDefault("sas-definition-name")
-  valid_594712 = validateParameter(valid_594712, JString, required = true,
+  if valid_568940 != nil:
+    section.add "storage-account-name", valid_568940
+  var valid_568941 = path.getOrDefault("sas-definition-name")
+  valid_568941 = validateParameter(valid_568941, JString, required = true,
                                  default = nil)
-  if valid_594712 != nil:
-    section.add "sas-definition-name", valid_594712
+  if valid_568941 != nil:
+    section.add "sas-definition-name", valid_568941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6929,11 +6929,11 @@ proc validate_GetSasDefinition_594709(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594713 = query.getOrDefault("api-version")
-  valid_594713 = validateParameter(valid_594713, JString, required = true,
+  var valid_568942 = query.getOrDefault("api-version")
+  valid_568942 = validateParameter(valid_568942, JString, required = true,
                                  default = nil)
-  if valid_594713 != nil:
-    section.add "api-version", valid_594713
+  if valid_568942 != nil:
+    section.add "api-version", valid_568942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6942,20 +6942,20 @@ proc validate_GetSasDefinition_594709(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594714: Call_GetSasDefinition_594708; path: JsonNode;
+proc call*(call_568943: Call_GetSasDefinition_568937; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about a SAS definition for the specified storage account. This operation requires the storage/getsas permission.
   ## 
-  let valid = call_594714.validator(path, query, header, formData, body)
-  let scheme = call_594714.pickScheme
+  let valid = call_568943.validator(path, query, header, formData, body)
+  let scheme = call_568943.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594714.url(scheme.get, call_594714.host, call_594714.base,
-                         call_594714.route, valid.getOrDefault("path"),
+  let url = call_568943.url(scheme.get, call_568943.host, call_568943.base,
+                         call_568943.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594714, url, valid)
+  result = hook(call_568943, url, valid)
 
-proc call*(call_594715: Call_GetSasDefinition_594708; apiVersion: string;
+proc call*(call_568944: Call_GetSasDefinition_568937; apiVersion: string;
           storageAccountName: string; sasDefinitionName: string): Recallable =
   ## getSasDefinition
   ## Gets information about a SAS definition for the specified storage account. This operation requires the storage/getsas permission.
@@ -6965,21 +6965,21 @@ proc call*(call_594715: Call_GetSasDefinition_594708; apiVersion: string;
   ##                     : The name of the storage account.
   ##   sasDefinitionName: string (required)
   ##                    : The name of the SAS definition.
-  var path_594716 = newJObject()
-  var query_594717 = newJObject()
-  add(query_594717, "api-version", newJString(apiVersion))
-  add(path_594716, "storage-account-name", newJString(storageAccountName))
-  add(path_594716, "sas-definition-name", newJString(sasDefinitionName))
-  result = call_594715.call(path_594716, query_594717, nil, nil, nil)
+  var path_568945 = newJObject()
+  var query_568946 = newJObject()
+  add(query_568946, "api-version", newJString(apiVersion))
+  add(path_568945, "storage-account-name", newJString(storageAccountName))
+  add(path_568945, "sas-definition-name", newJString(sasDefinitionName))
+  result = call_568944.call(path_568945, query_568946, nil, nil, nil)
 
-var getSasDefinition* = Call_GetSasDefinition_594708(name: "getSasDefinition",
+var getSasDefinition* = Call_GetSasDefinition_568937(name: "getSasDefinition",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/storage/{storage-account-name}/sas/{sas-definition-name}",
-    validator: validate_GetSasDefinition_594709, base: "",
-    url: url_GetSasDefinition_594710, schemes: {Scheme.Https})
+    validator: validate_GetSasDefinition_568938, base: "",
+    url: url_GetSasDefinition_568939, schemes: {Scheme.Https})
 type
-  Call_UpdateSasDefinition_594740 = ref object of OpenApiRestCall_593438
-proc url_UpdateSasDefinition_594742(protocol: Scheme; host: string; base: string;
+  Call_UpdateSasDefinition_568969 = ref object of OpenApiRestCall_567667
+proc url_UpdateSasDefinition_568971(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6999,7 +6999,7 @@ proc url_UpdateSasDefinition_594742(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateSasDefinition_594741(path: JsonNode; query: JsonNode;
+proc validate_UpdateSasDefinition_568970(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Updates the specified attributes associated with the given SAS definition. This operation requires the storage/setsas permission.
@@ -7013,16 +7013,16 @@ proc validate_UpdateSasDefinition_594741(path: JsonNode; query: JsonNode;
   ##                      : The name of the SAS definition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594743 = path.getOrDefault("storage-account-name")
-  valid_594743 = validateParameter(valid_594743, JString, required = true,
+  var valid_568972 = path.getOrDefault("storage-account-name")
+  valid_568972 = validateParameter(valid_568972, JString, required = true,
                                  default = nil)
-  if valid_594743 != nil:
-    section.add "storage-account-name", valid_594743
-  var valid_594744 = path.getOrDefault("sas-definition-name")
-  valid_594744 = validateParameter(valid_594744, JString, required = true,
+  if valid_568972 != nil:
+    section.add "storage-account-name", valid_568972
+  var valid_568973 = path.getOrDefault("sas-definition-name")
+  valid_568973 = validateParameter(valid_568973, JString, required = true,
                                  default = nil)
-  if valid_594744 != nil:
-    section.add "sas-definition-name", valid_594744
+  if valid_568973 != nil:
+    section.add "sas-definition-name", valid_568973
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7030,11 +7030,11 @@ proc validate_UpdateSasDefinition_594741(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594745 = query.getOrDefault("api-version")
-  valid_594745 = validateParameter(valid_594745, JString, required = true,
+  var valid_568974 = query.getOrDefault("api-version")
+  valid_568974 = validateParameter(valid_568974, JString, required = true,
                                  default = nil)
-  if valid_594745 != nil:
-    section.add "api-version", valid_594745
+  if valid_568974 != nil:
+    section.add "api-version", valid_568974
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7048,20 +7048,20 @@ proc validate_UpdateSasDefinition_594741(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594747: Call_UpdateSasDefinition_594740; path: JsonNode;
+proc call*(call_568976: Call_UpdateSasDefinition_568969; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specified attributes associated with the given SAS definition. This operation requires the storage/setsas permission.
   ## 
-  let valid = call_594747.validator(path, query, header, formData, body)
-  let scheme = call_594747.pickScheme
+  let valid = call_568976.validator(path, query, header, formData, body)
+  let scheme = call_568976.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594747.url(scheme.get, call_594747.host, call_594747.base,
-                         call_594747.route, valid.getOrDefault("path"),
+  let url = call_568976.url(scheme.get, call_568976.host, call_568976.base,
+                         call_568976.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594747, url, valid)
+  result = hook(call_568976, url, valid)
 
-proc call*(call_594748: Call_UpdateSasDefinition_594740; apiVersion: string;
+proc call*(call_568977: Call_UpdateSasDefinition_568969; apiVersion: string;
           storageAccountName: string; parameters: JsonNode;
           sasDefinitionName: string): Recallable =
   ## updateSasDefinition
@@ -7074,24 +7074,24 @@ proc call*(call_594748: Call_UpdateSasDefinition_594740; apiVersion: string;
   ##             : The parameters to update a SAS definition.
   ##   sasDefinitionName: string (required)
   ##                    : The name of the SAS definition.
-  var path_594749 = newJObject()
-  var query_594750 = newJObject()
-  var body_594751 = newJObject()
-  add(query_594750, "api-version", newJString(apiVersion))
-  add(path_594749, "storage-account-name", newJString(storageAccountName))
+  var path_568978 = newJObject()
+  var query_568979 = newJObject()
+  var body_568980 = newJObject()
+  add(query_568979, "api-version", newJString(apiVersion))
+  add(path_568978, "storage-account-name", newJString(storageAccountName))
   if parameters != nil:
-    body_594751 = parameters
-  add(path_594749, "sas-definition-name", newJString(sasDefinitionName))
-  result = call_594748.call(path_594749, query_594750, nil, nil, body_594751)
+    body_568980 = parameters
+  add(path_568978, "sas-definition-name", newJString(sasDefinitionName))
+  result = call_568977.call(path_568978, query_568979, nil, nil, body_568980)
 
-var updateSasDefinition* = Call_UpdateSasDefinition_594740(
+var updateSasDefinition* = Call_UpdateSasDefinition_568969(
     name: "updateSasDefinition", meth: HttpMethod.HttpPatch, host: "azure.local",
     route: "/storage/{storage-account-name}/sas/{sas-definition-name}",
-    validator: validate_UpdateSasDefinition_594741, base: "",
-    url: url_UpdateSasDefinition_594742, schemes: {Scheme.Https})
+    validator: validate_UpdateSasDefinition_568970, base: "",
+    url: url_UpdateSasDefinition_568971, schemes: {Scheme.Https})
 type
-  Call_DeleteSasDefinition_594730 = ref object of OpenApiRestCall_593438
-proc url_DeleteSasDefinition_594732(protocol: Scheme; host: string; base: string;
+  Call_DeleteSasDefinition_568959 = ref object of OpenApiRestCall_567667
+proc url_DeleteSasDefinition_568961(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7111,7 +7111,7 @@ proc url_DeleteSasDefinition_594732(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeleteSasDefinition_594731(path: JsonNode; query: JsonNode;
+proc validate_DeleteSasDefinition_568960(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes a SAS definition from a specified storage account. This operation requires the storage/deletesas permission.
@@ -7125,16 +7125,16 @@ proc validate_DeleteSasDefinition_594731(path: JsonNode; query: JsonNode;
   ##                      : The name of the SAS definition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `storage-account-name` field"
-  var valid_594733 = path.getOrDefault("storage-account-name")
-  valid_594733 = validateParameter(valid_594733, JString, required = true,
+  var valid_568962 = path.getOrDefault("storage-account-name")
+  valid_568962 = validateParameter(valid_568962, JString, required = true,
                                  default = nil)
-  if valid_594733 != nil:
-    section.add "storage-account-name", valid_594733
-  var valid_594734 = path.getOrDefault("sas-definition-name")
-  valid_594734 = validateParameter(valid_594734, JString, required = true,
+  if valid_568962 != nil:
+    section.add "storage-account-name", valid_568962
+  var valid_568963 = path.getOrDefault("sas-definition-name")
+  valid_568963 = validateParameter(valid_568963, JString, required = true,
                                  default = nil)
-  if valid_594734 != nil:
-    section.add "sas-definition-name", valid_594734
+  if valid_568963 != nil:
+    section.add "sas-definition-name", valid_568963
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7142,11 +7142,11 @@ proc validate_DeleteSasDefinition_594731(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594735 = query.getOrDefault("api-version")
-  valid_594735 = validateParameter(valid_594735, JString, required = true,
+  var valid_568964 = query.getOrDefault("api-version")
+  valid_568964 = validateParameter(valid_568964, JString, required = true,
                                  default = nil)
-  if valid_594735 != nil:
-    section.add "api-version", valid_594735
+  if valid_568964 != nil:
+    section.add "api-version", valid_568964
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7155,20 +7155,20 @@ proc validate_DeleteSasDefinition_594731(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594736: Call_DeleteSasDefinition_594730; path: JsonNode;
+proc call*(call_568965: Call_DeleteSasDefinition_568959; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a SAS definition from a specified storage account. This operation requires the storage/deletesas permission.
   ## 
-  let valid = call_594736.validator(path, query, header, formData, body)
-  let scheme = call_594736.pickScheme
+  let valid = call_568965.validator(path, query, header, formData, body)
+  let scheme = call_568965.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594736.url(scheme.get, call_594736.host, call_594736.base,
-                         call_594736.route, valid.getOrDefault("path"),
+  let url = call_568965.url(scheme.get, call_568965.host, call_568965.base,
+                         call_568965.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594736, url, valid)
+  result = hook(call_568965, url, valid)
 
-proc call*(call_594737: Call_DeleteSasDefinition_594730; apiVersion: string;
+proc call*(call_568966: Call_DeleteSasDefinition_568959; apiVersion: string;
           storageAccountName: string; sasDefinitionName: string): Recallable =
   ## deleteSasDefinition
   ## Deletes a SAS definition from a specified storage account. This operation requires the storage/deletesas permission.
@@ -7178,18 +7178,18 @@ proc call*(call_594737: Call_DeleteSasDefinition_594730; apiVersion: string;
   ##                     : The name of the storage account.
   ##   sasDefinitionName: string (required)
   ##                    : The name of the SAS definition.
-  var path_594738 = newJObject()
-  var query_594739 = newJObject()
-  add(query_594739, "api-version", newJString(apiVersion))
-  add(path_594738, "storage-account-name", newJString(storageAccountName))
-  add(path_594738, "sas-definition-name", newJString(sasDefinitionName))
-  result = call_594737.call(path_594738, query_594739, nil, nil, nil)
+  var path_568967 = newJObject()
+  var query_568968 = newJObject()
+  add(query_568968, "api-version", newJString(apiVersion))
+  add(path_568967, "storage-account-name", newJString(storageAccountName))
+  add(path_568967, "sas-definition-name", newJString(sasDefinitionName))
+  result = call_568966.call(path_568967, query_568968, nil, nil, nil)
 
-var deleteSasDefinition* = Call_DeleteSasDefinition_594730(
+var deleteSasDefinition* = Call_DeleteSasDefinition_568959(
     name: "deleteSasDefinition", meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/storage/{storage-account-name}/sas/{sas-definition-name}",
-    validator: validate_DeleteSasDefinition_594731, base: "",
-    url: url_DeleteSasDefinition_594732, schemes: {Scheme.Https})
+    validator: validate_DeleteSasDefinition_568960, base: "",
+    url: url_DeleteSasDefinition_568961, schemes: {Scheme.Https})
 export
   rest
 

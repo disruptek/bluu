@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database API spec
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593409 = ref object of OpenApiRestCall
+  OpenApiRestCall_567642 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593409](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593409): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "sql-serverAzureADAdministrators"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServerAzureADAdministratorsListByServer_593631 = ref object of OpenApiRestCall_593409
-proc url_ServerAzureADAdministratorsListByServer_593633(protocol: Scheme;
+  Call_ServerAzureADAdministratorsListByServer_567864 = ref object of OpenApiRestCall_567642
+proc url_ServerAzureADAdministratorsListByServer_567866(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_ServerAzureADAdministratorsListByServer_593633(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerAzureADAdministratorsListByServer_593632(path: JsonNode;
+proc validate_ServerAzureADAdministratorsListByServer_567865(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of server Administrators.
   ## 
@@ -143,21 +143,21 @@ proc validate_ServerAzureADAdministratorsListByServer_593632(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593806 = path.getOrDefault("resourceGroupName")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_568039 = path.getOrDefault("resourceGroupName")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = nil)
-  if valid_593806 != nil:
-    section.add "resourceGroupName", valid_593806
-  var valid_593807 = path.getOrDefault("serverName")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  if valid_568039 != nil:
+    section.add "resourceGroupName", valid_568039
+  var valid_568040 = path.getOrDefault("serverName")
+  valid_568040 = validateParameter(valid_568040, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "serverName", valid_593807
-  var valid_593808 = path.getOrDefault("subscriptionId")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+  if valid_568040 != nil:
+    section.add "serverName", valid_568040
+  var valid_568041 = path.getOrDefault("subscriptionId")
+  valid_568041 = validateParameter(valid_568041, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "subscriptionId", valid_593808
+  if valid_568041 != nil:
+    section.add "subscriptionId", valid_568041
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +165,11 @@ proc validate_ServerAzureADAdministratorsListByServer_593632(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593809 = query.getOrDefault("api-version")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  var valid_568042 = query.getOrDefault("api-version")
+  valid_568042 = validateParameter(valid_568042, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "api-version", valid_593809
+  if valid_568042 != nil:
+    section.add "api-version", valid_568042
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,21 +178,21 @@ proc validate_ServerAzureADAdministratorsListByServer_593632(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593832: Call_ServerAzureADAdministratorsListByServer_593631;
+proc call*(call_568065: Call_ServerAzureADAdministratorsListByServer_567864;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns a list of server Administrators.
   ## 
-  let valid = call_593832.validator(path, query, header, formData, body)
-  let scheme = call_593832.pickScheme
+  let valid = call_568065.validator(path, query, header, formData, body)
+  let scheme = call_568065.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593832.url(scheme.get, call_593832.host, call_593832.base,
-                         call_593832.route, valid.getOrDefault("path"),
+  let url = call_568065.url(scheme.get, call_568065.host, call_568065.base,
+                         call_568065.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593832, url, valid)
+  result = hook(call_568065, url, valid)
 
-proc call*(call_593903: Call_ServerAzureADAdministratorsListByServer_593631;
+proc call*(call_568136: Call_ServerAzureADAdministratorsListByServer_567864;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string): Recallable =
   ## serverAzureADAdministratorsListByServer
@@ -205,23 +205,23 @@ proc call*(call_593903: Call_ServerAzureADAdministratorsListByServer_593631;
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_593904 = newJObject()
-  var query_593906 = newJObject()
-  add(path_593904, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593906, "api-version", newJString(apiVersion))
-  add(path_593904, "serverName", newJString(serverName))
-  add(path_593904, "subscriptionId", newJString(subscriptionId))
-  result = call_593903.call(path_593904, query_593906, nil, nil, nil)
+  var path_568137 = newJObject()
+  var query_568139 = newJObject()
+  add(path_568137, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568139, "api-version", newJString(apiVersion))
+  add(path_568137, "serverName", newJString(serverName))
+  add(path_568137, "subscriptionId", newJString(subscriptionId))
+  result = call_568136.call(path_568137, query_568139, nil, nil, nil)
 
-var serverAzureADAdministratorsListByServer* = Call_ServerAzureADAdministratorsListByServer_593631(
+var serverAzureADAdministratorsListByServer* = Call_ServerAzureADAdministratorsListByServer_567864(
     name: "serverAzureADAdministratorsListByServer", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/administrators",
-    validator: validate_ServerAzureADAdministratorsListByServer_593632, base: "",
-    url: url_ServerAzureADAdministratorsListByServer_593633,
+    validator: validate_ServerAzureADAdministratorsListByServer_567865, base: "",
+    url: url_ServerAzureADAdministratorsListByServer_567866,
     schemes: {Scheme.Https})
 type
-  Call_ServerAzureADAdministratorsCreateOrUpdate_593970 = ref object of OpenApiRestCall_593409
-proc url_ServerAzureADAdministratorsCreateOrUpdate_593972(protocol: Scheme;
+  Call_ServerAzureADAdministratorsCreateOrUpdate_568203 = ref object of OpenApiRestCall_567642
+proc url_ServerAzureADAdministratorsCreateOrUpdate_568205(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -247,7 +247,7 @@ proc url_ServerAzureADAdministratorsCreateOrUpdate_593972(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerAzureADAdministratorsCreateOrUpdate_593971(path: JsonNode;
+proc validate_ServerAzureADAdministratorsCreateOrUpdate_568204(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new Server Active Directory Administrator or updates an existing server Active Directory Administrator.
   ## 
@@ -265,26 +265,26 @@ proc validate_ServerAzureADAdministratorsCreateOrUpdate_593971(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593990 = path.getOrDefault("resourceGroupName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  var valid_568223 = path.getOrDefault("resourceGroupName")
+  valid_568223 = validateParameter(valid_568223, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "resourceGroupName", valid_593990
-  var valid_593991 = path.getOrDefault("serverName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_568223 != nil:
+    section.add "resourceGroupName", valid_568223
+  var valid_568224 = path.getOrDefault("serverName")
+  valid_568224 = validateParameter(valid_568224, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "serverName", valid_593991
-  var valid_593992 = path.getOrDefault("subscriptionId")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_568224 != nil:
+    section.add "serverName", valid_568224
+  var valid_568225 = path.getOrDefault("subscriptionId")
+  valid_568225 = validateParameter(valid_568225, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "subscriptionId", valid_593992
-  var valid_593993 = path.getOrDefault("administratorName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true,
+  if valid_568225 != nil:
+    section.add "subscriptionId", valid_568225
+  var valid_568226 = path.getOrDefault("administratorName")
+  valid_568226 = validateParameter(valid_568226, JString, required = true,
                                  default = newJString("activeDirectory"))
-  if valid_593993 != nil:
-    section.add "administratorName", valid_593993
+  if valid_568226 != nil:
+    section.add "administratorName", valid_568226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -292,11 +292,11 @@ proc validate_ServerAzureADAdministratorsCreateOrUpdate_593971(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593994 = query.getOrDefault("api-version")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
+  var valid_568227 = query.getOrDefault("api-version")
+  valid_568227 = validateParameter(valid_568227, JString, required = true,
                                  default = nil)
-  if valid_593994 != nil:
-    section.add "api-version", valid_593994
+  if valid_568227 != nil:
+    section.add "api-version", valid_568227
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -310,21 +310,21 @@ proc validate_ServerAzureADAdministratorsCreateOrUpdate_593971(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593996: Call_ServerAzureADAdministratorsCreateOrUpdate_593970;
+proc call*(call_568229: Call_ServerAzureADAdministratorsCreateOrUpdate_568203;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates a new Server Active Directory Administrator or updates an existing server Active Directory Administrator.
   ## 
-  let valid = call_593996.validator(path, query, header, formData, body)
-  let scheme = call_593996.pickScheme
+  let valid = call_568229.validator(path, query, header, formData, body)
+  let scheme = call_568229.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593996.url(scheme.get, call_593996.host, call_593996.base,
-                         call_593996.route, valid.getOrDefault("path"),
+  let url = call_568229.url(scheme.get, call_568229.host, call_568229.base,
+                         call_568229.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593996, url, valid)
+  result = hook(call_568229, url, valid)
 
-proc call*(call_593997: Call_ServerAzureADAdministratorsCreateOrUpdate_593970;
+proc call*(call_568230: Call_ServerAzureADAdministratorsCreateOrUpdate_568203;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; properties: JsonNode;
           administratorName: string = "activeDirectory"): Recallable =
@@ -342,27 +342,27 @@ proc call*(call_593997: Call_ServerAzureADAdministratorsCreateOrUpdate_593970;
   ##                    : Name of the server administrator resource.
   ##   properties: JObject (required)
   ##             : The required parameters for creating or updating an Active Directory Administrator.
-  var path_593998 = newJObject()
-  var query_593999 = newJObject()
-  var body_594000 = newJObject()
-  add(path_593998, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593999, "api-version", newJString(apiVersion))
-  add(path_593998, "serverName", newJString(serverName))
-  add(path_593998, "subscriptionId", newJString(subscriptionId))
-  add(path_593998, "administratorName", newJString(administratorName))
+  var path_568231 = newJObject()
+  var query_568232 = newJObject()
+  var body_568233 = newJObject()
+  add(path_568231, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568232, "api-version", newJString(apiVersion))
+  add(path_568231, "serverName", newJString(serverName))
+  add(path_568231, "subscriptionId", newJString(subscriptionId))
+  add(path_568231, "administratorName", newJString(administratorName))
   if properties != nil:
-    body_594000 = properties
-  result = call_593997.call(path_593998, query_593999, nil, nil, body_594000)
+    body_568233 = properties
+  result = call_568230.call(path_568231, query_568232, nil, nil, body_568233)
 
-var serverAzureADAdministratorsCreateOrUpdate* = Call_ServerAzureADAdministratorsCreateOrUpdate_593970(
+var serverAzureADAdministratorsCreateOrUpdate* = Call_ServerAzureADAdministratorsCreateOrUpdate_568203(
     name: "serverAzureADAdministratorsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/administrators/{administratorName}",
-    validator: validate_ServerAzureADAdministratorsCreateOrUpdate_593971,
-    base: "", url: url_ServerAzureADAdministratorsCreateOrUpdate_593972,
+    validator: validate_ServerAzureADAdministratorsCreateOrUpdate_568204,
+    base: "", url: url_ServerAzureADAdministratorsCreateOrUpdate_568205,
     schemes: {Scheme.Https})
 type
-  Call_ServerAzureADAdministratorsGet_593945 = ref object of OpenApiRestCall_593409
-proc url_ServerAzureADAdministratorsGet_593947(protocol: Scheme; host: string;
+  Call_ServerAzureADAdministratorsGet_568178 = ref object of OpenApiRestCall_567642
+proc url_ServerAzureADAdministratorsGet_568180(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -388,7 +388,7 @@ proc url_ServerAzureADAdministratorsGet_593947(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerAzureADAdministratorsGet_593946(path: JsonNode;
+proc validate_ServerAzureADAdministratorsGet_568179(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns an server Administrator.
   ## 
@@ -406,26 +406,26 @@ proc validate_ServerAzureADAdministratorsGet_593946(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593948 = path.getOrDefault("resourceGroupName")
-  valid_593948 = validateParameter(valid_593948, JString, required = true,
+  var valid_568181 = path.getOrDefault("resourceGroupName")
+  valid_568181 = validateParameter(valid_568181, JString, required = true,
                                  default = nil)
-  if valid_593948 != nil:
-    section.add "resourceGroupName", valid_593948
-  var valid_593949 = path.getOrDefault("serverName")
-  valid_593949 = validateParameter(valid_593949, JString, required = true,
+  if valid_568181 != nil:
+    section.add "resourceGroupName", valid_568181
+  var valid_568182 = path.getOrDefault("serverName")
+  valid_568182 = validateParameter(valid_568182, JString, required = true,
                                  default = nil)
-  if valid_593949 != nil:
-    section.add "serverName", valid_593949
-  var valid_593950 = path.getOrDefault("subscriptionId")
-  valid_593950 = validateParameter(valid_593950, JString, required = true,
+  if valid_568182 != nil:
+    section.add "serverName", valid_568182
+  var valid_568183 = path.getOrDefault("subscriptionId")
+  valid_568183 = validateParameter(valid_568183, JString, required = true,
                                  default = nil)
-  if valid_593950 != nil:
-    section.add "subscriptionId", valid_593950
-  var valid_593964 = path.getOrDefault("administratorName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_568183 != nil:
+    section.add "subscriptionId", valid_568183
+  var valid_568197 = path.getOrDefault("administratorName")
+  valid_568197 = validateParameter(valid_568197, JString, required = true,
                                  default = newJString("activeDirectory"))
-  if valid_593964 != nil:
-    section.add "administratorName", valid_593964
+  if valid_568197 != nil:
+    section.add "administratorName", valid_568197
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -433,11 +433,11 @@ proc validate_ServerAzureADAdministratorsGet_593946(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593965 = query.getOrDefault("api-version")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_568198 = query.getOrDefault("api-version")
+  valid_568198 = validateParameter(valid_568198, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "api-version", valid_593965
+  if valid_568198 != nil:
+    section.add "api-version", valid_568198
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -446,20 +446,20 @@ proc validate_ServerAzureADAdministratorsGet_593946(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593966: Call_ServerAzureADAdministratorsGet_593945; path: JsonNode;
+proc call*(call_568199: Call_ServerAzureADAdministratorsGet_568178; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns an server Administrator.
   ## 
-  let valid = call_593966.validator(path, query, header, formData, body)
-  let scheme = call_593966.pickScheme
+  let valid = call_568199.validator(path, query, header, formData, body)
+  let scheme = call_568199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593966.url(scheme.get, call_593966.host, call_593966.base,
-                         call_593966.route, valid.getOrDefault("path"),
+  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
+                         call_568199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593966, url, valid)
+  result = hook(call_568199, url, valid)
 
-proc call*(call_593967: Call_ServerAzureADAdministratorsGet_593945;
+proc call*(call_568200: Call_ServerAzureADAdministratorsGet_568178;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; administratorName: string = "activeDirectory"): Recallable =
   ## serverAzureADAdministratorsGet
@@ -474,23 +474,23 @@ proc call*(call_593967: Call_ServerAzureADAdministratorsGet_593945;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   administratorName: string (required)
   ##                    : Name of the server administrator resource.
-  var path_593968 = newJObject()
-  var query_593969 = newJObject()
-  add(path_593968, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593969, "api-version", newJString(apiVersion))
-  add(path_593968, "serverName", newJString(serverName))
-  add(path_593968, "subscriptionId", newJString(subscriptionId))
-  add(path_593968, "administratorName", newJString(administratorName))
-  result = call_593967.call(path_593968, query_593969, nil, nil, nil)
+  var path_568201 = newJObject()
+  var query_568202 = newJObject()
+  add(path_568201, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568202, "api-version", newJString(apiVersion))
+  add(path_568201, "serverName", newJString(serverName))
+  add(path_568201, "subscriptionId", newJString(subscriptionId))
+  add(path_568201, "administratorName", newJString(administratorName))
+  result = call_568200.call(path_568201, query_568202, nil, nil, nil)
 
-var serverAzureADAdministratorsGet* = Call_ServerAzureADAdministratorsGet_593945(
+var serverAzureADAdministratorsGet* = Call_ServerAzureADAdministratorsGet_568178(
     name: "serverAzureADAdministratorsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/administrators/{administratorName}",
-    validator: validate_ServerAzureADAdministratorsGet_593946, base: "",
-    url: url_ServerAzureADAdministratorsGet_593947, schemes: {Scheme.Https})
+    validator: validate_ServerAzureADAdministratorsGet_568179, base: "",
+    url: url_ServerAzureADAdministratorsGet_568180, schemes: {Scheme.Https})
 type
-  Call_ServerAzureADAdministratorsDelete_594001 = ref object of OpenApiRestCall_593409
-proc url_ServerAzureADAdministratorsDelete_594003(protocol: Scheme; host: string;
+  Call_ServerAzureADAdministratorsDelete_568234 = ref object of OpenApiRestCall_567642
+proc url_ServerAzureADAdministratorsDelete_568236(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -516,7 +516,7 @@ proc url_ServerAzureADAdministratorsDelete_594003(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerAzureADAdministratorsDelete_594002(path: JsonNode;
+proc validate_ServerAzureADAdministratorsDelete_568235(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing server Active Directory Administrator.
   ## 
@@ -534,26 +534,26 @@ proc validate_ServerAzureADAdministratorsDelete_594002(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594004 = path.getOrDefault("resourceGroupName")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_568237 = path.getOrDefault("resourceGroupName")
+  valid_568237 = validateParameter(valid_568237, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "resourceGroupName", valid_594004
-  var valid_594005 = path.getOrDefault("serverName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  if valid_568237 != nil:
+    section.add "resourceGroupName", valid_568237
+  var valid_568238 = path.getOrDefault("serverName")
+  valid_568238 = validateParameter(valid_568238, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "serverName", valid_594005
-  var valid_594006 = path.getOrDefault("subscriptionId")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_568238 != nil:
+    section.add "serverName", valid_568238
+  var valid_568239 = path.getOrDefault("subscriptionId")
+  valid_568239 = validateParameter(valid_568239, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "subscriptionId", valid_594006
-  var valid_594007 = path.getOrDefault("administratorName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_568239 != nil:
+    section.add "subscriptionId", valid_568239
+  var valid_568240 = path.getOrDefault("administratorName")
+  valid_568240 = validateParameter(valid_568240, JString, required = true,
                                  default = newJString("activeDirectory"))
-  if valid_594007 != nil:
-    section.add "administratorName", valid_594007
+  if valid_568240 != nil:
+    section.add "administratorName", valid_568240
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -561,11 +561,11 @@ proc validate_ServerAzureADAdministratorsDelete_594002(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594008 = query.getOrDefault("api-version")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  var valid_568241 = query.getOrDefault("api-version")
+  valid_568241 = validateParameter(valid_568241, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "api-version", valid_594008
+  if valid_568241 != nil:
+    section.add "api-version", valid_568241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -574,21 +574,21 @@ proc validate_ServerAzureADAdministratorsDelete_594002(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594009: Call_ServerAzureADAdministratorsDelete_594001;
+proc call*(call_568242: Call_ServerAzureADAdministratorsDelete_568234;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing server Active Directory Administrator.
   ## 
-  let valid = call_594009.validator(path, query, header, formData, body)
-  let scheme = call_594009.pickScheme
+  let valid = call_568242.validator(path, query, header, formData, body)
+  let scheme = call_568242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594009.url(scheme.get, call_594009.host, call_594009.base,
-                         call_594009.route, valid.getOrDefault("path"),
+  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
+                         call_568242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594009, url, valid)
+  result = hook(call_568242, url, valid)
 
-proc call*(call_594010: Call_ServerAzureADAdministratorsDelete_594001;
+proc call*(call_568243: Call_ServerAzureADAdministratorsDelete_568234;
           resourceGroupName: string; apiVersion: string; serverName: string;
           subscriptionId: string; administratorName: string = "activeDirectory"): Recallable =
   ## serverAzureADAdministratorsDelete
@@ -603,20 +603,20 @@ proc call*(call_594010: Call_ServerAzureADAdministratorsDelete_594001;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   administratorName: string (required)
   ##                    : Name of the server administrator resource.
-  var path_594011 = newJObject()
-  var query_594012 = newJObject()
-  add(path_594011, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594012, "api-version", newJString(apiVersion))
-  add(path_594011, "serverName", newJString(serverName))
-  add(path_594011, "subscriptionId", newJString(subscriptionId))
-  add(path_594011, "administratorName", newJString(administratorName))
-  result = call_594010.call(path_594011, query_594012, nil, nil, nil)
+  var path_568244 = newJObject()
+  var query_568245 = newJObject()
+  add(path_568244, "resourceGroupName", newJString(resourceGroupName))
+  add(query_568245, "api-version", newJString(apiVersion))
+  add(path_568244, "serverName", newJString(serverName))
+  add(path_568244, "subscriptionId", newJString(subscriptionId))
+  add(path_568244, "administratorName", newJString(administratorName))
+  result = call_568243.call(path_568244, query_568245, nil, nil, nil)
 
-var serverAzureADAdministratorsDelete* = Call_ServerAzureADAdministratorsDelete_594001(
+var serverAzureADAdministratorsDelete* = Call_ServerAzureADAdministratorsDelete_568234(
     name: "serverAzureADAdministratorsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/administrators/{administratorName}",
-    validator: validate_ServerAzureADAdministratorsDelete_594002, base: "",
-    url: url_ServerAzureADAdministratorsDelete_594003, schemes: {Scheme.Https})
+    validator: validate_ServerAzureADAdministratorsDelete_568235, base: "",
+    url: url_ServerAzureADAdministratorsDelete_568236, schemes: {Scheme.Https})
 export
   rest
 

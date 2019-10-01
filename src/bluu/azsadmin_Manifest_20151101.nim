@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: SubscriptionsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593408 = ref object of OpenApiRestCall
+  OpenApiRestCall_567641 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593408](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593408): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "azsadmin-Manifest"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ManifestsList_593630 = ref object of OpenApiRestCall_593408
-proc url_ManifestsList_593632(protocol: Scheme; host: string; base: string;
+  Call_ManifestsList_567863 = ref object of OpenApiRestCall_567641
+proc url_ManifestsList_567865(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +121,7 @@ proc url_ManifestsList_593632(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManifestsList_593631(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ManifestsList_567864(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a list of all manifests.
   ## 
@@ -133,11 +133,11 @@ proc validate_ManifestsList_593631(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593792 = path.getOrDefault("subscriptionId")
-  valid_593792 = validateParameter(valid_593792, JString, required = true,
+  var valid_568025 = path.getOrDefault("subscriptionId")
+  valid_568025 = validateParameter(valid_568025, JString, required = true,
                                  default = nil)
-  if valid_593792 != nil:
-    section.add "subscriptionId", valid_593792
+  if valid_568025 != nil:
+    section.add "subscriptionId", valid_568025
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +145,11 @@ proc validate_ManifestsList_593631(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593806 = query.getOrDefault("api-version")
-  valid_593806 = validateParameter(valid_593806, JString, required = true,
+  var valid_568039 = query.getOrDefault("api-version")
+  valid_568039 = validateParameter(valid_568039, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_593806 != nil:
-    section.add "api-version", valid_593806
+  if valid_568039 != nil:
+    section.add "api-version", valid_568039
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +158,20 @@ proc validate_ManifestsList_593631(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593833: Call_ManifestsList_593630; path: JsonNode; query: JsonNode;
+proc call*(call_568066: Call_ManifestsList_567863; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a list of all manifests.
   ## 
-  let valid = call_593833.validator(path, query, header, formData, body)
-  let scheme = call_593833.pickScheme
+  let valid = call_568066.validator(path, query, header, formData, body)
+  let scheme = call_568066.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593833.url(scheme.get, call_593833.host, call_593833.base,
-                         call_593833.route, valid.getOrDefault("path"),
+  let url = call_568066.url(scheme.get, call_568066.host, call_568066.base,
+                         call_568066.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593833, url, valid)
+  result = hook(call_568066, url, valid)
 
-proc call*(call_593904: Call_ManifestsList_593630; subscriptionId: string;
+proc call*(call_568137: Call_ManifestsList_567863; subscriptionId: string;
           apiVersion: string = "2015-11-01"): Recallable =
   ## manifestsList
   ## Get a list of all manifests.
@@ -179,19 +179,19 @@ proc call*(call_593904: Call_ManifestsList_593630; subscriptionId: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  var path_593905 = newJObject()
-  var query_593907 = newJObject()
-  add(query_593907, "api-version", newJString(apiVersion))
-  add(path_593905, "subscriptionId", newJString(subscriptionId))
-  result = call_593904.call(path_593905, query_593907, nil, nil, nil)
+  var path_568138 = newJObject()
+  var query_568140 = newJObject()
+  add(query_568140, "api-version", newJString(apiVersion))
+  add(path_568138, "subscriptionId", newJString(subscriptionId))
+  result = call_568137.call(path_568138, query_568140, nil, nil, nil)
 
-var manifestsList* = Call_ManifestsList_593630(name: "manifestsList",
+var manifestsList* = Call_ManifestsList_567863(name: "manifestsList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/manifests",
-    validator: validate_ManifestsList_593631, base: "", url: url_ManifestsList_593632,
+    validator: validate_ManifestsList_567864, base: "", url: url_ManifestsList_567865,
     schemes: {Scheme.Https})
 type
-  Call_ManifestsGet_593946 = ref object of OpenApiRestCall_593408
-proc url_ManifestsGet_593948(protocol: Scheme; host: string; base: string;
+  Call_ManifestsGet_568179 = ref object of OpenApiRestCall_567641
+proc url_ManifestsGet_568181(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -210,7 +210,7 @@ proc url_ManifestsGet_593948(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManifestsGet_593947(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ManifestsGet_568180(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the specified manifest.
   ## 
@@ -224,16 +224,16 @@ proc validate_ManifestsGet_593947(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593958 = path.getOrDefault("subscriptionId")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  var valid_568191 = path.getOrDefault("subscriptionId")
+  valid_568191 = validateParameter(valid_568191, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "subscriptionId", valid_593958
-  var valid_593959 = path.getOrDefault("manifestName")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_568191 != nil:
+    section.add "subscriptionId", valid_568191
+  var valid_568192 = path.getOrDefault("manifestName")
+  valid_568192 = validateParameter(valid_568192, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "manifestName", valid_593959
+  if valid_568192 != nil:
+    section.add "manifestName", valid_568192
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -241,11 +241,11 @@ proc validate_ManifestsGet_593947(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593960 = query.getOrDefault("api-version")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_568193 = query.getOrDefault("api-version")
+  valid_568193 = validateParameter(valid_568193, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_593960 != nil:
-    section.add "api-version", valid_593960
+  if valid_568193 != nil:
+    section.add "api-version", valid_568193
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -254,20 +254,20 @@ proc validate_ManifestsGet_593947(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593961: Call_ManifestsGet_593946; path: JsonNode; query: JsonNode;
+proc call*(call_568194: Call_ManifestsGet_568179; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the specified manifest.
   ## 
-  let valid = call_593961.validator(path, query, header, formData, body)
-  let scheme = call_593961.pickScheme
+  let valid = call_568194.validator(path, query, header, formData, body)
+  let scheme = call_568194.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593961.url(scheme.get, call_593961.host, call_593961.base,
-                         call_593961.route, valid.getOrDefault("path"),
+  let url = call_568194.url(scheme.get, call_568194.host, call_568194.base,
+                         call_568194.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593961, url, valid)
+  result = hook(call_568194, url, valid)
 
-proc call*(call_593962: Call_ManifestsGet_593946; subscriptionId: string;
+proc call*(call_568195: Call_ManifestsGet_568179; subscriptionId: string;
           manifestName: string; apiVersion: string = "2015-11-01"): Recallable =
   ## manifestsGet
   ## Get the specified manifest.
@@ -277,16 +277,16 @@ proc call*(call_593962: Call_ManifestsGet_593946; subscriptionId: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   manifestName: string (required)
   ##               : The manifest name.
-  var path_593963 = newJObject()
-  var query_593964 = newJObject()
-  add(query_593964, "api-version", newJString(apiVersion))
-  add(path_593963, "subscriptionId", newJString(subscriptionId))
-  add(path_593963, "manifestName", newJString(manifestName))
-  result = call_593962.call(path_593963, query_593964, nil, nil, nil)
+  var path_568196 = newJObject()
+  var query_568197 = newJObject()
+  add(query_568197, "api-version", newJString(apiVersion))
+  add(path_568196, "subscriptionId", newJString(subscriptionId))
+  add(path_568196, "manifestName", newJString(manifestName))
+  result = call_568195.call(path_568196, query_568197, nil, nil, nil)
 
-var manifestsGet* = Call_ManifestsGet_593946(name: "manifestsGet",
+var manifestsGet* = Call_ManifestsGet_568179(name: "manifestsGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/manifests/{manifestName}",
-    validator: validate_ManifestsGet_593947, base: "", url: url_ManifestsGet_593948,
+    validator: validate_ManifestsGet_568180, base: "", url: url_ManifestsGet_568181,
     schemes: {Scheme.Https})
 export
   rest

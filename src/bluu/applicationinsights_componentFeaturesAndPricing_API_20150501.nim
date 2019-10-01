@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593426 = ref object of OpenApiRestCall
+  OpenApiRestCall_596459 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593426](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596459](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593426): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596459): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "applicationinsights-componentFeaturesAndPricing_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ComponentCurrentBillingFeaturesUpdate_593962 = ref object of OpenApiRestCall_593426
-proc url_ComponentCurrentBillingFeaturesUpdate_593964(protocol: Scheme;
+  Call_ComponentCurrentBillingFeaturesUpdate_596995 = ref object of OpenApiRestCall_596459
+proc url_ComponentCurrentBillingFeaturesUpdate_596997(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_ComponentCurrentBillingFeaturesUpdate_593964(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentCurrentBillingFeaturesUpdate_593963(path: JsonNode;
+proc validate_ComponentCurrentBillingFeaturesUpdate_596996(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update current billing features for an Application Insights component.
   ## 
@@ -143,21 +143,21 @@ proc validate_ComponentCurrentBillingFeaturesUpdate_593963(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593965 = path.getOrDefault("resourceGroupName")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_596998 = path.getOrDefault("resourceGroupName")
+  valid_596998 = validateParameter(valid_596998, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "resourceGroupName", valid_593965
-  var valid_593966 = path.getOrDefault("subscriptionId")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_596998 != nil:
+    section.add "resourceGroupName", valid_596998
+  var valid_596999 = path.getOrDefault("subscriptionId")
+  valid_596999 = validateParameter(valid_596999, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "subscriptionId", valid_593966
-  var valid_593967 = path.getOrDefault("resourceName")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_596999 != nil:
+    section.add "subscriptionId", valid_596999
+  var valid_597000 = path.getOrDefault("resourceName")
+  valid_597000 = validateParameter(valid_597000, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "resourceName", valid_593967
+  if valid_597000 != nil:
+    section.add "resourceName", valid_597000
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +165,11 @@ proc validate_ComponentCurrentBillingFeaturesUpdate_593963(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593968 = query.getOrDefault("api-version")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  var valid_597001 = query.getOrDefault("api-version")
+  valid_597001 = validateParameter(valid_597001, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "api-version", valid_593968
+  if valid_597001 != nil:
+    section.add "api-version", valid_597001
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -183,21 +183,21 @@ proc validate_ComponentCurrentBillingFeaturesUpdate_593963(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593970: Call_ComponentCurrentBillingFeaturesUpdate_593962;
+proc call*(call_597003: Call_ComponentCurrentBillingFeaturesUpdate_596995;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update current billing features for an Application Insights component.
   ## 
-  let valid = call_593970.validator(path, query, header, formData, body)
-  let scheme = call_593970.pickScheme
+  let valid = call_597003.validator(path, query, header, formData, body)
+  let scheme = call_597003.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593970.url(scheme.get, call_593970.host, call_593970.base,
-                         call_593970.route, valid.getOrDefault("path"),
+  let url = call_597003.url(scheme.get, call_597003.host, call_597003.base,
+                         call_597003.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593970, url, valid)
+  result = hook(call_597003, url, valid)
 
-proc call*(call_593971: Call_ComponentCurrentBillingFeaturesUpdate_593962;
+proc call*(call_597004: Call_ComponentCurrentBillingFeaturesUpdate_596995;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; BillingFeaturesProperties: JsonNode): Recallable =
   ## componentCurrentBillingFeaturesUpdate
@@ -212,25 +212,25 @@ proc call*(call_593971: Call_ComponentCurrentBillingFeaturesUpdate_593962;
   ##               : The name of the Application Insights component resource.
   ##   BillingFeaturesProperties: JObject (required)
   ##                            : Properties that need to be specified to update billing features for an Application Insights component.
-  var path_593972 = newJObject()
-  var query_593973 = newJObject()
-  var body_593974 = newJObject()
-  add(path_593972, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593973, "api-version", newJString(apiVersion))
-  add(path_593972, "subscriptionId", newJString(subscriptionId))
-  add(path_593972, "resourceName", newJString(resourceName))
+  var path_597005 = newJObject()
+  var query_597006 = newJObject()
+  var body_597007 = newJObject()
+  add(path_597005, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597006, "api-version", newJString(apiVersion))
+  add(path_597005, "subscriptionId", newJString(subscriptionId))
+  add(path_597005, "resourceName", newJString(resourceName))
   if BillingFeaturesProperties != nil:
-    body_593974 = BillingFeaturesProperties
-  result = call_593971.call(path_593972, query_593973, nil, nil, body_593974)
+    body_597007 = BillingFeaturesProperties
+  result = call_597004.call(path_597005, query_597006, nil, nil, body_597007)
 
-var componentCurrentBillingFeaturesUpdate* = Call_ComponentCurrentBillingFeaturesUpdate_593962(
+var componentCurrentBillingFeaturesUpdate* = Call_ComponentCurrentBillingFeaturesUpdate_596995(
     name: "componentCurrentBillingFeaturesUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/currentbillingfeatures",
-    validator: validate_ComponentCurrentBillingFeaturesUpdate_593963, base: "",
-    url: url_ComponentCurrentBillingFeaturesUpdate_593964, schemes: {Scheme.Https})
+    validator: validate_ComponentCurrentBillingFeaturesUpdate_596996, base: "",
+    url: url_ComponentCurrentBillingFeaturesUpdate_596997, schemes: {Scheme.Https})
 type
-  Call_ComponentCurrentBillingFeaturesGet_593648 = ref object of OpenApiRestCall_593426
-proc url_ComponentCurrentBillingFeaturesGet_593650(protocol: Scheme; host: string;
+  Call_ComponentCurrentBillingFeaturesGet_596681 = ref object of OpenApiRestCall_596459
+proc url_ComponentCurrentBillingFeaturesGet_596683(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -253,7 +253,7 @@ proc url_ComponentCurrentBillingFeaturesGet_593650(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentCurrentBillingFeaturesGet_593649(path: JsonNode;
+proc validate_ComponentCurrentBillingFeaturesGet_596682(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns current billing features for an Application Insights component.
   ## 
@@ -269,21 +269,21 @@ proc validate_ComponentCurrentBillingFeaturesGet_593649(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593823 = path.getOrDefault("resourceGroupName")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  var valid_596856 = path.getOrDefault("resourceGroupName")
+  valid_596856 = validateParameter(valid_596856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "resourceGroupName", valid_593823
-  var valid_593824 = path.getOrDefault("subscriptionId")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_596856 != nil:
+    section.add "resourceGroupName", valid_596856
+  var valid_596857 = path.getOrDefault("subscriptionId")
+  valid_596857 = validateParameter(valid_596857, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "subscriptionId", valid_593824
-  var valid_593825 = path.getOrDefault("resourceName")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  if valid_596857 != nil:
+    section.add "subscriptionId", valid_596857
+  var valid_596858 = path.getOrDefault("resourceName")
+  valid_596858 = validateParameter(valid_596858, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "resourceName", valid_593825
+  if valid_596858 != nil:
+    section.add "resourceName", valid_596858
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -291,11 +291,11 @@ proc validate_ComponentCurrentBillingFeaturesGet_593649(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593826 = query.getOrDefault("api-version")
-  valid_593826 = validateParameter(valid_593826, JString, required = true,
+  var valid_596859 = query.getOrDefault("api-version")
+  valid_596859 = validateParameter(valid_596859, JString, required = true,
                                  default = nil)
-  if valid_593826 != nil:
-    section.add "api-version", valid_593826
+  if valid_596859 != nil:
+    section.add "api-version", valid_596859
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -304,21 +304,21 @@ proc validate_ComponentCurrentBillingFeaturesGet_593649(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593849: Call_ComponentCurrentBillingFeaturesGet_593648;
+proc call*(call_596882: Call_ComponentCurrentBillingFeaturesGet_596681;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns current billing features for an Application Insights component.
   ## 
-  let valid = call_593849.validator(path, query, header, formData, body)
-  let scheme = call_593849.pickScheme
+  let valid = call_596882.validator(path, query, header, formData, body)
+  let scheme = call_596882.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593849.url(scheme.get, call_593849.host, call_593849.base,
-                         call_593849.route, valid.getOrDefault("path"),
+  let url = call_596882.url(scheme.get, call_596882.host, call_596882.base,
+                         call_596882.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593849, url, valid)
+  result = hook(call_596882, url, valid)
 
-proc call*(call_593920: Call_ComponentCurrentBillingFeaturesGet_593648;
+proc call*(call_596953: Call_ComponentCurrentBillingFeaturesGet_596681;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## componentCurrentBillingFeaturesGet
@@ -331,22 +331,22 @@ proc call*(call_593920: Call_ComponentCurrentBillingFeaturesGet_593648;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593921 = newJObject()
-  var query_593923 = newJObject()
-  add(path_593921, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593923, "api-version", newJString(apiVersion))
-  add(path_593921, "subscriptionId", newJString(subscriptionId))
-  add(path_593921, "resourceName", newJString(resourceName))
-  result = call_593920.call(path_593921, query_593923, nil, nil, nil)
+  var path_596954 = newJObject()
+  var query_596956 = newJObject()
+  add(path_596954, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596956, "api-version", newJString(apiVersion))
+  add(path_596954, "subscriptionId", newJString(subscriptionId))
+  add(path_596954, "resourceName", newJString(resourceName))
+  result = call_596953.call(path_596954, query_596956, nil, nil, nil)
 
-var componentCurrentBillingFeaturesGet* = Call_ComponentCurrentBillingFeaturesGet_593648(
+var componentCurrentBillingFeaturesGet* = Call_ComponentCurrentBillingFeaturesGet_596681(
     name: "componentCurrentBillingFeaturesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/currentbillingfeatures",
-    validator: validate_ComponentCurrentBillingFeaturesGet_593649, base: "",
-    url: url_ComponentCurrentBillingFeaturesGet_593650, schemes: {Scheme.Https})
+    validator: validate_ComponentCurrentBillingFeaturesGet_596682, base: "",
+    url: url_ComponentCurrentBillingFeaturesGet_596683, schemes: {Scheme.Https})
 type
-  Call_ComponentFeatureCapabilitiesGet_593975 = ref object of OpenApiRestCall_593426
-proc url_ComponentFeatureCapabilitiesGet_593977(protocol: Scheme; host: string;
+  Call_ComponentFeatureCapabilitiesGet_597008 = ref object of OpenApiRestCall_596459
+proc url_ComponentFeatureCapabilitiesGet_597010(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -369,7 +369,7 @@ proc url_ComponentFeatureCapabilitiesGet_593977(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentFeatureCapabilitiesGet_593976(path: JsonNode;
+proc validate_ComponentFeatureCapabilitiesGet_597009(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns feature capabilities of the application insights component.
   ## 
@@ -385,21 +385,21 @@ proc validate_ComponentFeatureCapabilitiesGet_593976(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593978 = path.getOrDefault("resourceGroupName")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_597011 = path.getOrDefault("resourceGroupName")
+  valid_597011 = validateParameter(valid_597011, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "resourceGroupName", valid_593978
-  var valid_593979 = path.getOrDefault("subscriptionId")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  if valid_597011 != nil:
+    section.add "resourceGroupName", valid_597011
+  var valid_597012 = path.getOrDefault("subscriptionId")
+  valid_597012 = validateParameter(valid_597012, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "subscriptionId", valid_593979
-  var valid_593980 = path.getOrDefault("resourceName")
-  valid_593980 = validateParameter(valid_593980, JString, required = true,
+  if valid_597012 != nil:
+    section.add "subscriptionId", valid_597012
+  var valid_597013 = path.getOrDefault("resourceName")
+  valid_597013 = validateParameter(valid_597013, JString, required = true,
                                  default = nil)
-  if valid_593980 != nil:
-    section.add "resourceName", valid_593980
+  if valid_597013 != nil:
+    section.add "resourceName", valid_597013
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -407,11 +407,11 @@ proc validate_ComponentFeatureCapabilitiesGet_593976(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593981 = query.getOrDefault("api-version")
-  valid_593981 = validateParameter(valid_593981, JString, required = true,
+  var valid_597014 = query.getOrDefault("api-version")
+  valid_597014 = validateParameter(valid_597014, JString, required = true,
                                  default = nil)
-  if valid_593981 != nil:
-    section.add "api-version", valid_593981
+  if valid_597014 != nil:
+    section.add "api-version", valid_597014
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -420,21 +420,21 @@ proc validate_ComponentFeatureCapabilitiesGet_593976(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593982: Call_ComponentFeatureCapabilitiesGet_593975;
+proc call*(call_597015: Call_ComponentFeatureCapabilitiesGet_597008;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns feature capabilities of the application insights component.
   ## 
-  let valid = call_593982.validator(path, query, header, formData, body)
-  let scheme = call_593982.pickScheme
+  let valid = call_597015.validator(path, query, header, formData, body)
+  let scheme = call_597015.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593982.url(scheme.get, call_593982.host, call_593982.base,
-                         call_593982.route, valid.getOrDefault("path"),
+  let url = call_597015.url(scheme.get, call_597015.host, call_597015.base,
+                         call_597015.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593982, url, valid)
+  result = hook(call_597015, url, valid)
 
-proc call*(call_593983: Call_ComponentFeatureCapabilitiesGet_593975;
+proc call*(call_597016: Call_ComponentFeatureCapabilitiesGet_597008;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## componentFeatureCapabilitiesGet
@@ -447,22 +447,22 @@ proc call*(call_593983: Call_ComponentFeatureCapabilitiesGet_593975;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593984 = newJObject()
-  var query_593985 = newJObject()
-  add(path_593984, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593985, "api-version", newJString(apiVersion))
-  add(path_593984, "subscriptionId", newJString(subscriptionId))
-  add(path_593984, "resourceName", newJString(resourceName))
-  result = call_593983.call(path_593984, query_593985, nil, nil, nil)
+  var path_597017 = newJObject()
+  var query_597018 = newJObject()
+  add(path_597017, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597018, "api-version", newJString(apiVersion))
+  add(path_597017, "subscriptionId", newJString(subscriptionId))
+  add(path_597017, "resourceName", newJString(resourceName))
+  result = call_597016.call(path_597017, query_597018, nil, nil, nil)
 
-var componentFeatureCapabilitiesGet* = Call_ComponentFeatureCapabilitiesGet_593975(
+var componentFeatureCapabilitiesGet* = Call_ComponentFeatureCapabilitiesGet_597008(
     name: "componentFeatureCapabilitiesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/featurecapabilities",
-    validator: validate_ComponentFeatureCapabilitiesGet_593976, base: "",
-    url: url_ComponentFeatureCapabilitiesGet_593977, schemes: {Scheme.Https})
+    validator: validate_ComponentFeatureCapabilitiesGet_597009, base: "",
+    url: url_ComponentFeatureCapabilitiesGet_597010, schemes: {Scheme.Https})
 type
-  Call_ComponentAvailableFeaturesGet_593986 = ref object of OpenApiRestCall_593426
-proc url_ComponentAvailableFeaturesGet_593988(protocol: Scheme; host: string;
+  Call_ComponentAvailableFeaturesGet_597019 = ref object of OpenApiRestCall_596459
+proc url_ComponentAvailableFeaturesGet_597021(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -485,7 +485,7 @@ proc url_ComponentAvailableFeaturesGet_593988(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentAvailableFeaturesGet_593987(path: JsonNode; query: JsonNode;
+proc validate_ComponentAvailableFeaturesGet_597020(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all available features of the application insights component.
   ## 
@@ -501,21 +501,21 @@ proc validate_ComponentAvailableFeaturesGet_593987(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593989 = path.getOrDefault("resourceGroupName")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  var valid_597022 = path.getOrDefault("resourceGroupName")
+  valid_597022 = validateParameter(valid_597022, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "resourceGroupName", valid_593989
-  var valid_593990 = path.getOrDefault("subscriptionId")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  if valid_597022 != nil:
+    section.add "resourceGroupName", valid_597022
+  var valid_597023 = path.getOrDefault("subscriptionId")
+  valid_597023 = validateParameter(valid_597023, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "subscriptionId", valid_593990
-  var valid_593991 = path.getOrDefault("resourceName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_597023 != nil:
+    section.add "subscriptionId", valid_597023
+  var valid_597024 = path.getOrDefault("resourceName")
+  valid_597024 = validateParameter(valid_597024, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "resourceName", valid_593991
+  if valid_597024 != nil:
+    section.add "resourceName", valid_597024
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -523,11 +523,11 @@ proc validate_ComponentAvailableFeaturesGet_593987(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593992 = query.getOrDefault("api-version")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_597025 = query.getOrDefault("api-version")
+  valid_597025 = validateParameter(valid_597025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "api-version", valid_593992
+  if valid_597025 != nil:
+    section.add "api-version", valid_597025
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -536,20 +536,20 @@ proc validate_ComponentAvailableFeaturesGet_593987(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593993: Call_ComponentAvailableFeaturesGet_593986; path: JsonNode;
+proc call*(call_597026: Call_ComponentAvailableFeaturesGet_597019; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns all available features of the application insights component.
   ## 
-  let valid = call_593993.validator(path, query, header, formData, body)
-  let scheme = call_593993.pickScheme
+  let valid = call_597026.validator(path, query, header, formData, body)
+  let scheme = call_597026.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593993.url(scheme.get, call_593993.host, call_593993.base,
-                         call_593993.route, valid.getOrDefault("path"),
+  let url = call_597026.url(scheme.get, call_597026.host, call_597026.base,
+                         call_597026.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593993, url, valid)
+  result = hook(call_597026, url, valid)
 
-proc call*(call_593994: Call_ComponentAvailableFeaturesGet_593986;
+proc call*(call_597027: Call_ComponentAvailableFeaturesGet_597019;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## componentAvailableFeaturesGet
@@ -562,22 +562,22 @@ proc call*(call_593994: Call_ComponentAvailableFeaturesGet_593986;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593995 = newJObject()
-  var query_593996 = newJObject()
-  add(path_593995, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593996, "api-version", newJString(apiVersion))
-  add(path_593995, "subscriptionId", newJString(subscriptionId))
-  add(path_593995, "resourceName", newJString(resourceName))
-  result = call_593994.call(path_593995, query_593996, nil, nil, nil)
+  var path_597028 = newJObject()
+  var query_597029 = newJObject()
+  add(path_597028, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597029, "api-version", newJString(apiVersion))
+  add(path_597028, "subscriptionId", newJString(subscriptionId))
+  add(path_597028, "resourceName", newJString(resourceName))
+  result = call_597027.call(path_597028, query_597029, nil, nil, nil)
 
-var componentAvailableFeaturesGet* = Call_ComponentAvailableFeaturesGet_593986(
+var componentAvailableFeaturesGet* = Call_ComponentAvailableFeaturesGet_597019(
     name: "componentAvailableFeaturesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/getavailablebillingfeatures",
-    validator: validate_ComponentAvailableFeaturesGet_593987, base: "",
-    url: url_ComponentAvailableFeaturesGet_593988, schemes: {Scheme.Https})
+    validator: validate_ComponentAvailableFeaturesGet_597020, base: "",
+    url: url_ComponentAvailableFeaturesGet_597021, schemes: {Scheme.Https})
 type
-  Call_ComponentQuotaStatusGet_593997 = ref object of OpenApiRestCall_593426
-proc url_ComponentQuotaStatusGet_593999(protocol: Scheme; host: string; base: string;
+  Call_ComponentQuotaStatusGet_597030 = ref object of OpenApiRestCall_596459
+proc url_ComponentQuotaStatusGet_597032(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -601,7 +601,7 @@ proc url_ComponentQuotaStatusGet_593999(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentQuotaStatusGet_593998(path: JsonNode; query: JsonNode;
+proc validate_ComponentQuotaStatusGet_597031(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns daily data volume cap (quota) status for an Application Insights component.
   ## 
@@ -617,21 +617,21 @@ proc validate_ComponentQuotaStatusGet_593998(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594000 = path.getOrDefault("resourceGroupName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_597033 = path.getOrDefault("resourceGroupName")
+  valid_597033 = validateParameter(valid_597033, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "resourceGroupName", valid_594000
-  var valid_594001 = path.getOrDefault("subscriptionId")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_597033 != nil:
+    section.add "resourceGroupName", valid_597033
+  var valid_597034 = path.getOrDefault("subscriptionId")
+  valid_597034 = validateParameter(valid_597034, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "subscriptionId", valid_594001
-  var valid_594002 = path.getOrDefault("resourceName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_597034 != nil:
+    section.add "subscriptionId", valid_597034
+  var valid_597035 = path.getOrDefault("resourceName")
+  valid_597035 = validateParameter(valid_597035, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "resourceName", valid_594002
+  if valid_597035 != nil:
+    section.add "resourceName", valid_597035
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -639,11 +639,11 @@ proc validate_ComponentQuotaStatusGet_593998(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594003 = query.getOrDefault("api-version")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  var valid_597036 = query.getOrDefault("api-version")
+  valid_597036 = validateParameter(valid_597036, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "api-version", valid_594003
+  if valid_597036 != nil:
+    section.add "api-version", valid_597036
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -652,20 +652,20 @@ proc validate_ComponentQuotaStatusGet_593998(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594004: Call_ComponentQuotaStatusGet_593997; path: JsonNode;
+proc call*(call_597037: Call_ComponentQuotaStatusGet_597030; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns daily data volume cap (quota) status for an Application Insights component.
   ## 
-  let valid = call_594004.validator(path, query, header, formData, body)
-  let scheme = call_594004.pickScheme
+  let valid = call_597037.validator(path, query, header, formData, body)
+  let scheme = call_597037.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594004.url(scheme.get, call_594004.host, call_594004.base,
-                         call_594004.route, valid.getOrDefault("path"),
+  let url = call_597037.url(scheme.get, call_597037.host, call_597037.base,
+                         call_597037.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594004, url, valid)
+  result = hook(call_597037, url, valid)
 
-proc call*(call_594005: Call_ComponentQuotaStatusGet_593997;
+proc call*(call_597038: Call_ComponentQuotaStatusGet_597030;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## componentQuotaStatusGet
@@ -678,19 +678,19 @@ proc call*(call_594005: Call_ComponentQuotaStatusGet_593997;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_594006 = newJObject()
-  var query_594007 = newJObject()
-  add(path_594006, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594007, "api-version", newJString(apiVersion))
-  add(path_594006, "subscriptionId", newJString(subscriptionId))
-  add(path_594006, "resourceName", newJString(resourceName))
-  result = call_594005.call(path_594006, query_594007, nil, nil, nil)
+  var path_597039 = newJObject()
+  var query_597040 = newJObject()
+  add(path_597039, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597040, "api-version", newJString(apiVersion))
+  add(path_597039, "subscriptionId", newJString(subscriptionId))
+  add(path_597039, "resourceName", newJString(resourceName))
+  result = call_597038.call(path_597039, query_597040, nil, nil, nil)
 
-var componentQuotaStatusGet* = Call_ComponentQuotaStatusGet_593997(
+var componentQuotaStatusGet* = Call_ComponentQuotaStatusGet_597030(
     name: "componentQuotaStatusGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/quotastatus",
-    validator: validate_ComponentQuotaStatusGet_593998, base: "",
-    url: url_ComponentQuotaStatusGet_593999, schemes: {Scheme.Https})
+    validator: validate_ComponentQuotaStatusGet_597031, base: "",
+    url: url_ComponentQuotaStatusGet_597032, schemes: {Scheme.Https})
 export
   rest
 

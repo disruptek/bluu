@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_596458 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,8 +103,8 @@ const
   macServiceName = "applicationinsights-componentWorkItemConfigs_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_WorkItemConfigurationsGetDefault_593647 = ref object of OpenApiRestCall_593425
-proc url_WorkItemConfigurationsGetDefault_593649(protocol: Scheme; host: string;
+  Call_WorkItemConfigurationsGetDefault_596680 = ref object of OpenApiRestCall_596458
+proc url_WorkItemConfigurationsGetDefault_596682(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +127,7 @@ proc url_WorkItemConfigurationsGetDefault_593649(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkItemConfigurationsGetDefault_593648(path: JsonNode;
+proc validate_WorkItemConfigurationsGetDefault_596681(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets default work item configurations that exist for the application
   ## 
@@ -143,21 +143,21 @@ proc validate_WorkItemConfigurationsGetDefault_593648(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593822 = path.getOrDefault("resourceGroupName")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_596855 = path.getOrDefault("resourceGroupName")
+  valid_596855 = validateParameter(valid_596855, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "resourceGroupName", valid_593822
-  var valid_593823 = path.getOrDefault("subscriptionId")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_596855 != nil:
+    section.add "resourceGroupName", valid_596855
+  var valid_596856 = path.getOrDefault("subscriptionId")
+  valid_596856 = validateParameter(valid_596856, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "subscriptionId", valid_593823
-  var valid_593824 = path.getOrDefault("resourceName")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  if valid_596856 != nil:
+    section.add "subscriptionId", valid_596856
+  var valid_596857 = path.getOrDefault("resourceName")
+  valid_596857 = validateParameter(valid_596857, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "resourceName", valid_593824
+  if valid_596857 != nil:
+    section.add "resourceName", valid_596857
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +165,11 @@ proc validate_WorkItemConfigurationsGetDefault_593648(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593825 = query.getOrDefault("api-version")
-  valid_593825 = validateParameter(valid_593825, JString, required = true,
+  var valid_596858 = query.getOrDefault("api-version")
+  valid_596858 = validateParameter(valid_596858, JString, required = true,
                                  default = nil)
-  if valid_593825 != nil:
-    section.add "api-version", valid_593825
+  if valid_596858 != nil:
+    section.add "api-version", valid_596858
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,21 +178,21 @@ proc validate_WorkItemConfigurationsGetDefault_593648(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593848: Call_WorkItemConfigurationsGetDefault_593647;
+proc call*(call_596881: Call_WorkItemConfigurationsGetDefault_596680;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets default work item configurations that exist for the application
   ## 
-  let valid = call_593848.validator(path, query, header, formData, body)
-  let scheme = call_593848.pickScheme
+  let valid = call_596881.validator(path, query, header, formData, body)
+  let scheme = call_596881.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593848.url(scheme.get, call_593848.host, call_593848.base,
-                         call_593848.route, valid.getOrDefault("path"),
+  let url = call_596881.url(scheme.get, call_596881.host, call_596881.base,
+                         call_596881.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593848, url, valid)
+  result = hook(call_596881, url, valid)
 
-proc call*(call_593919: Call_WorkItemConfigurationsGetDefault_593647;
+proc call*(call_596952: Call_WorkItemConfigurationsGetDefault_596680;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## workItemConfigurationsGetDefault
@@ -205,22 +205,22 @@ proc call*(call_593919: Call_WorkItemConfigurationsGetDefault_593647;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593920 = newJObject()
-  var query_593922 = newJObject()
-  add(path_593920, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593922, "api-version", newJString(apiVersion))
-  add(path_593920, "subscriptionId", newJString(subscriptionId))
-  add(path_593920, "resourceName", newJString(resourceName))
-  result = call_593919.call(path_593920, query_593922, nil, nil, nil)
+  var path_596953 = newJObject()
+  var query_596955 = newJObject()
+  add(path_596953, "resourceGroupName", newJString(resourceGroupName))
+  add(query_596955, "api-version", newJString(apiVersion))
+  add(path_596953, "subscriptionId", newJString(subscriptionId))
+  add(path_596953, "resourceName", newJString(resourceName))
+  result = call_596952.call(path_596953, query_596955, nil, nil, nil)
 
-var workItemConfigurationsGetDefault* = Call_WorkItemConfigurationsGetDefault_593647(
+var workItemConfigurationsGetDefault* = Call_WorkItemConfigurationsGetDefault_596680(
     name: "workItemConfigurationsGetDefault", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/DefaultWorkItemConfig",
-    validator: validate_WorkItemConfigurationsGetDefault_593648, base: "",
-    url: url_WorkItemConfigurationsGetDefault_593649, schemes: {Scheme.Https})
+    validator: validate_WorkItemConfigurationsGetDefault_596681, base: "",
+    url: url_WorkItemConfigurationsGetDefault_596682, schemes: {Scheme.Https})
 type
-  Call_WorkItemConfigurationsCreate_593972 = ref object of OpenApiRestCall_593425
-proc url_WorkItemConfigurationsCreate_593974(protocol: Scheme; host: string;
+  Call_WorkItemConfigurationsCreate_597005 = ref object of OpenApiRestCall_596458
+proc url_WorkItemConfigurationsCreate_597007(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -243,7 +243,7 @@ proc url_WorkItemConfigurationsCreate_593974(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkItemConfigurationsCreate_593973(path: JsonNode; query: JsonNode;
+proc validate_WorkItemConfigurationsCreate_597006(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a work item configuration for an Application Insights component.
   ## 
@@ -259,21 +259,21 @@ proc validate_WorkItemConfigurationsCreate_593973(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593975 = path.getOrDefault("resourceGroupName")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_597008 = path.getOrDefault("resourceGroupName")
+  valid_597008 = validateParameter(valid_597008, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "resourceGroupName", valid_593975
-  var valid_593976 = path.getOrDefault("subscriptionId")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+  if valid_597008 != nil:
+    section.add "resourceGroupName", valid_597008
+  var valid_597009 = path.getOrDefault("subscriptionId")
+  valid_597009 = validateParameter(valid_597009, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "subscriptionId", valid_593976
-  var valid_593977 = path.getOrDefault("resourceName")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_597009 != nil:
+    section.add "subscriptionId", valid_597009
+  var valid_597010 = path.getOrDefault("resourceName")
+  valid_597010 = validateParameter(valid_597010, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "resourceName", valid_593977
+  if valid_597010 != nil:
+    section.add "resourceName", valid_597010
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -281,11 +281,11 @@ proc validate_WorkItemConfigurationsCreate_593973(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593978 = query.getOrDefault("api-version")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  var valid_597011 = query.getOrDefault("api-version")
+  valid_597011 = validateParameter(valid_597011, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "api-version", valid_593978
+  if valid_597011 != nil:
+    section.add "api-version", valid_597011
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -299,20 +299,20 @@ proc validate_WorkItemConfigurationsCreate_593973(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593980: Call_WorkItemConfigurationsCreate_593972; path: JsonNode;
+proc call*(call_597013: Call_WorkItemConfigurationsCreate_597005; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a work item configuration for an Application Insights component.
   ## 
-  let valid = call_593980.validator(path, query, header, formData, body)
-  let scheme = call_593980.pickScheme
+  let valid = call_597013.validator(path, query, header, formData, body)
+  let scheme = call_597013.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593980.url(scheme.get, call_593980.host, call_593980.base,
-                         call_593980.route, valid.getOrDefault("path"),
+  let url = call_597013.url(scheme.get, call_597013.host, call_597013.base,
+                         call_597013.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593980, url, valid)
+  result = hook(call_597013, url, valid)
 
-proc call*(call_593981: Call_WorkItemConfigurationsCreate_593972;
+proc call*(call_597014: Call_WorkItemConfigurationsCreate_597005;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; WorkItemConfigurationProperties: JsonNode): Recallable =
   ## workItemConfigurationsCreate
@@ -327,25 +327,25 @@ proc call*(call_593981: Call_WorkItemConfigurationsCreate_593972;
   ##               : The name of the Application Insights component resource.
   ##   WorkItemConfigurationProperties: JObject (required)
   ##                                  : Properties that need to be specified to create a work item configuration of a Application Insights component.
-  var path_593982 = newJObject()
-  var query_593983 = newJObject()
-  var body_593984 = newJObject()
-  add(path_593982, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593983, "api-version", newJString(apiVersion))
-  add(path_593982, "subscriptionId", newJString(subscriptionId))
-  add(path_593982, "resourceName", newJString(resourceName))
+  var path_597015 = newJObject()
+  var query_597016 = newJObject()
+  var body_597017 = newJObject()
+  add(path_597015, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597016, "api-version", newJString(apiVersion))
+  add(path_597015, "subscriptionId", newJString(subscriptionId))
+  add(path_597015, "resourceName", newJString(resourceName))
   if WorkItemConfigurationProperties != nil:
-    body_593984 = WorkItemConfigurationProperties
-  result = call_593981.call(path_593982, query_593983, nil, nil, body_593984)
+    body_597017 = WorkItemConfigurationProperties
+  result = call_597014.call(path_597015, query_597016, nil, nil, body_597017)
 
-var workItemConfigurationsCreate* = Call_WorkItemConfigurationsCreate_593972(
+var workItemConfigurationsCreate* = Call_WorkItemConfigurationsCreate_597005(
     name: "workItemConfigurationsCreate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/WorkItemConfigs",
-    validator: validate_WorkItemConfigurationsCreate_593973, base: "",
-    url: url_WorkItemConfigurationsCreate_593974, schemes: {Scheme.Https})
+    validator: validate_WorkItemConfigurationsCreate_597006, base: "",
+    url: url_WorkItemConfigurationsCreate_597007, schemes: {Scheme.Https})
 type
-  Call_WorkItemConfigurationsList_593961 = ref object of OpenApiRestCall_593425
-proc url_WorkItemConfigurationsList_593963(protocol: Scheme; host: string;
+  Call_WorkItemConfigurationsList_596994 = ref object of OpenApiRestCall_596458
+proc url_WorkItemConfigurationsList_596996(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -368,7 +368,7 @@ proc url_WorkItemConfigurationsList_593963(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkItemConfigurationsList_593962(path: JsonNode; query: JsonNode;
+proc validate_WorkItemConfigurationsList_596995(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list work item configurations that exist for the application
   ## 
@@ -384,21 +384,21 @@ proc validate_WorkItemConfigurationsList_593962(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593964 = path.getOrDefault("resourceGroupName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  var valid_596997 = path.getOrDefault("resourceGroupName")
+  valid_596997 = validateParameter(valid_596997, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "resourceGroupName", valid_593964
-  var valid_593965 = path.getOrDefault("subscriptionId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  if valid_596997 != nil:
+    section.add "resourceGroupName", valid_596997
+  var valid_596998 = path.getOrDefault("subscriptionId")
+  valid_596998 = validateParameter(valid_596998, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "subscriptionId", valid_593965
-  var valid_593966 = path.getOrDefault("resourceName")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_596998 != nil:
+    section.add "subscriptionId", valid_596998
+  var valid_596999 = path.getOrDefault("resourceName")
+  valid_596999 = validateParameter(valid_596999, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "resourceName", valid_593966
+  if valid_596999 != nil:
+    section.add "resourceName", valid_596999
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -406,11 +406,11 @@ proc validate_WorkItemConfigurationsList_593962(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593967 = query.getOrDefault("api-version")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  var valid_597000 = query.getOrDefault("api-version")
+  valid_597000 = validateParameter(valid_597000, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "api-version", valid_593967
+  if valid_597000 != nil:
+    section.add "api-version", valid_597000
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -419,20 +419,20 @@ proc validate_WorkItemConfigurationsList_593962(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593968: Call_WorkItemConfigurationsList_593961; path: JsonNode;
+proc call*(call_597001: Call_WorkItemConfigurationsList_596994; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list work item configurations that exist for the application
   ## 
-  let valid = call_593968.validator(path, query, header, formData, body)
-  let scheme = call_593968.pickScheme
+  let valid = call_597001.validator(path, query, header, formData, body)
+  let scheme = call_597001.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593968.url(scheme.get, call_593968.host, call_593968.base,
-                         call_593968.route, valid.getOrDefault("path"),
+  let url = call_597001.url(scheme.get, call_597001.host, call_597001.base,
+                         call_597001.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593968, url, valid)
+  result = hook(call_597001, url, valid)
 
-proc call*(call_593969: Call_WorkItemConfigurationsList_593961;
+proc call*(call_597002: Call_WorkItemConfigurationsList_596994;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string): Recallable =
   ## workItemConfigurationsList
@@ -445,22 +445,22 @@ proc call*(call_593969: Call_WorkItemConfigurationsList_593961;
   ##                 : The ID of the target subscription.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_593970 = newJObject()
-  var query_593971 = newJObject()
-  add(path_593970, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593971, "api-version", newJString(apiVersion))
-  add(path_593970, "subscriptionId", newJString(subscriptionId))
-  add(path_593970, "resourceName", newJString(resourceName))
-  result = call_593969.call(path_593970, query_593971, nil, nil, nil)
+  var path_597003 = newJObject()
+  var query_597004 = newJObject()
+  add(path_597003, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597004, "api-version", newJString(apiVersion))
+  add(path_597003, "subscriptionId", newJString(subscriptionId))
+  add(path_597003, "resourceName", newJString(resourceName))
+  result = call_597002.call(path_597003, query_597004, nil, nil, nil)
 
-var workItemConfigurationsList* = Call_WorkItemConfigurationsList_593961(
+var workItemConfigurationsList* = Call_WorkItemConfigurationsList_596994(
     name: "workItemConfigurationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/WorkItemConfigs",
-    validator: validate_WorkItemConfigurationsList_593962, base: "",
-    url: url_WorkItemConfigurationsList_593963, schemes: {Scheme.Https})
+    validator: validate_WorkItemConfigurationsList_596995, base: "",
+    url: url_WorkItemConfigurationsList_596996, schemes: {Scheme.Https})
 type
-  Call_WorkItemConfigurationsGetItem_593985 = ref object of OpenApiRestCall_593425
-proc url_WorkItemConfigurationsGetItem_593987(protocol: Scheme; host: string;
+  Call_WorkItemConfigurationsGetItem_597018 = ref object of OpenApiRestCall_596458
+proc url_WorkItemConfigurationsGetItem_597020(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -486,7 +486,7 @@ proc url_WorkItemConfigurationsGetItem_593987(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkItemConfigurationsGetItem_593986(path: JsonNode; query: JsonNode;
+proc validate_WorkItemConfigurationsGetItem_597019(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets specified work item configuration for an Application Insights component.
   ## 
@@ -504,26 +504,26 @@ proc validate_WorkItemConfigurationsGetItem_593986(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593988 = path.getOrDefault("resourceGroupName")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_597021 = path.getOrDefault("resourceGroupName")
+  valid_597021 = validateParameter(valid_597021, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "resourceGroupName", valid_593988
-  var valid_593989 = path.getOrDefault("subscriptionId")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_597021 != nil:
+    section.add "resourceGroupName", valid_597021
+  var valid_597022 = path.getOrDefault("subscriptionId")
+  valid_597022 = validateParameter(valid_597022, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "subscriptionId", valid_593989
-  var valid_593990 = path.getOrDefault("resourceName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  if valid_597022 != nil:
+    section.add "subscriptionId", valid_597022
+  var valid_597023 = path.getOrDefault("resourceName")
+  valid_597023 = validateParameter(valid_597023, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "resourceName", valid_593990
-  var valid_593991 = path.getOrDefault("workItemConfigId")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  if valid_597023 != nil:
+    section.add "resourceName", valid_597023
+  var valid_597024 = path.getOrDefault("workItemConfigId")
+  valid_597024 = validateParameter(valid_597024, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "workItemConfigId", valid_593991
+  if valid_597024 != nil:
+    section.add "workItemConfigId", valid_597024
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -531,11 +531,11 @@ proc validate_WorkItemConfigurationsGetItem_593986(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593992 = query.getOrDefault("api-version")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  var valid_597025 = query.getOrDefault("api-version")
+  valid_597025 = validateParameter(valid_597025, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "api-version", valid_593992
+  if valid_597025 != nil:
+    section.add "api-version", valid_597025
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -544,20 +544,20 @@ proc validate_WorkItemConfigurationsGetItem_593986(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593993: Call_WorkItemConfigurationsGetItem_593985; path: JsonNode;
+proc call*(call_597026: Call_WorkItemConfigurationsGetItem_597018; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets specified work item configuration for an Application Insights component.
   ## 
-  let valid = call_593993.validator(path, query, header, formData, body)
-  let scheme = call_593993.pickScheme
+  let valid = call_597026.validator(path, query, header, formData, body)
+  let scheme = call_597026.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593993.url(scheme.get, call_593993.host, call_593993.base,
-                         call_593993.route, valid.getOrDefault("path"),
+  let url = call_597026.url(scheme.get, call_597026.host, call_597026.base,
+                         call_597026.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593993, url, valid)
+  result = hook(call_597026, url, valid)
 
-proc call*(call_593994: Call_WorkItemConfigurationsGetItem_593985;
+proc call*(call_597027: Call_WorkItemConfigurationsGetItem_597018;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; workItemConfigId: string): Recallable =
   ## workItemConfigurationsGetItem
@@ -572,23 +572,23 @@ proc call*(call_593994: Call_WorkItemConfigurationsGetItem_593985;
   ##               : The name of the Application Insights component resource.
   ##   workItemConfigId: string (required)
   ##                   : The unique work item configuration Id. This can be either friendly name of connector as defined in connector configuration
-  var path_593995 = newJObject()
-  var query_593996 = newJObject()
-  add(path_593995, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593996, "api-version", newJString(apiVersion))
-  add(path_593995, "subscriptionId", newJString(subscriptionId))
-  add(path_593995, "resourceName", newJString(resourceName))
-  add(path_593995, "workItemConfigId", newJString(workItemConfigId))
-  result = call_593994.call(path_593995, query_593996, nil, nil, nil)
+  var path_597028 = newJObject()
+  var query_597029 = newJObject()
+  add(path_597028, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597029, "api-version", newJString(apiVersion))
+  add(path_597028, "subscriptionId", newJString(subscriptionId))
+  add(path_597028, "resourceName", newJString(resourceName))
+  add(path_597028, "workItemConfigId", newJString(workItemConfigId))
+  result = call_597027.call(path_597028, query_597029, nil, nil, nil)
 
-var workItemConfigurationsGetItem* = Call_WorkItemConfigurationsGetItem_593985(
+var workItemConfigurationsGetItem* = Call_WorkItemConfigurationsGetItem_597018(
     name: "workItemConfigurationsGetItem", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/WorkItemConfigs/{workItemConfigId}",
-    validator: validate_WorkItemConfigurationsGetItem_593986, base: "",
-    url: url_WorkItemConfigurationsGetItem_593987, schemes: {Scheme.Https})
+    validator: validate_WorkItemConfigurationsGetItem_597019, base: "",
+    url: url_WorkItemConfigurationsGetItem_597020, schemes: {Scheme.Https})
 type
-  Call_WorkItemConfigurationsUpdateItem_594009 = ref object of OpenApiRestCall_593425
-proc url_WorkItemConfigurationsUpdateItem_594011(protocol: Scheme; host: string;
+  Call_WorkItemConfigurationsUpdateItem_597042 = ref object of OpenApiRestCall_596458
+proc url_WorkItemConfigurationsUpdateItem_597044(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -614,7 +614,7 @@ proc url_WorkItemConfigurationsUpdateItem_594011(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkItemConfigurationsUpdateItem_594010(path: JsonNode;
+proc validate_WorkItemConfigurationsUpdateItem_597043(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update a work item configuration for an Application Insights component.
   ## 
@@ -632,26 +632,26 @@ proc validate_WorkItemConfigurationsUpdateItem_594010(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594012 = path.getOrDefault("resourceGroupName")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  var valid_597045 = path.getOrDefault("resourceGroupName")
+  valid_597045 = validateParameter(valid_597045, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "resourceGroupName", valid_594012
-  var valid_594013 = path.getOrDefault("subscriptionId")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  if valid_597045 != nil:
+    section.add "resourceGroupName", valid_597045
+  var valid_597046 = path.getOrDefault("subscriptionId")
+  valid_597046 = validateParameter(valid_597046, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "subscriptionId", valid_594013
-  var valid_594014 = path.getOrDefault("resourceName")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_597046 != nil:
+    section.add "subscriptionId", valid_597046
+  var valid_597047 = path.getOrDefault("resourceName")
+  valid_597047 = validateParameter(valid_597047, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "resourceName", valid_594014
-  var valid_594015 = path.getOrDefault("workItemConfigId")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_597047 != nil:
+    section.add "resourceName", valid_597047
+  var valid_597048 = path.getOrDefault("workItemConfigId")
+  valid_597048 = validateParameter(valid_597048, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "workItemConfigId", valid_594015
+  if valid_597048 != nil:
+    section.add "workItemConfigId", valid_597048
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -659,11 +659,11 @@ proc validate_WorkItemConfigurationsUpdateItem_594010(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594016 = query.getOrDefault("api-version")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_597049 = query.getOrDefault("api-version")
+  valid_597049 = validateParameter(valid_597049, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "api-version", valid_594016
+  if valid_597049 != nil:
+    section.add "api-version", valid_597049
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -677,21 +677,21 @@ proc validate_WorkItemConfigurationsUpdateItem_594010(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_WorkItemConfigurationsUpdateItem_594009;
+proc call*(call_597051: Call_WorkItemConfigurationsUpdateItem_597042;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update a work item configuration for an Application Insights component.
   ## 
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_597051.validator(path, query, header, formData, body)
+  let scheme = call_597051.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_597051.url(scheme.get, call_597051.host, call_597051.base,
+                         call_597051.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_597051, url, valid)
 
-proc call*(call_594019: Call_WorkItemConfigurationsUpdateItem_594009;
+proc call*(call_597052: Call_WorkItemConfigurationsUpdateItem_597042;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; WorkItemConfigurationProperties: JsonNode;
           workItemConfigId: string): Recallable =
@@ -709,26 +709,26 @@ proc call*(call_594019: Call_WorkItemConfigurationsUpdateItem_594009;
   ##                                  : Properties that need to be specified to update a work item configuration for this Application Insights component.
   ##   workItemConfigId: string (required)
   ##                   : The unique work item configuration Id. This can be either friendly name of connector as defined in connector configuration
-  var path_594020 = newJObject()
-  var query_594021 = newJObject()
-  var body_594022 = newJObject()
-  add(path_594020, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594021, "api-version", newJString(apiVersion))
-  add(path_594020, "subscriptionId", newJString(subscriptionId))
-  add(path_594020, "resourceName", newJString(resourceName))
+  var path_597053 = newJObject()
+  var query_597054 = newJObject()
+  var body_597055 = newJObject()
+  add(path_597053, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597054, "api-version", newJString(apiVersion))
+  add(path_597053, "subscriptionId", newJString(subscriptionId))
+  add(path_597053, "resourceName", newJString(resourceName))
   if WorkItemConfigurationProperties != nil:
-    body_594022 = WorkItemConfigurationProperties
-  add(path_594020, "workItemConfigId", newJString(workItemConfigId))
-  result = call_594019.call(path_594020, query_594021, nil, nil, body_594022)
+    body_597055 = WorkItemConfigurationProperties
+  add(path_597053, "workItemConfigId", newJString(workItemConfigId))
+  result = call_597052.call(path_597053, query_597054, nil, nil, body_597055)
 
-var workItemConfigurationsUpdateItem* = Call_WorkItemConfigurationsUpdateItem_594009(
+var workItemConfigurationsUpdateItem* = Call_WorkItemConfigurationsUpdateItem_597042(
     name: "workItemConfigurationsUpdateItem", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/WorkItemConfigs/{workItemConfigId}",
-    validator: validate_WorkItemConfigurationsUpdateItem_594010, base: "",
-    url: url_WorkItemConfigurationsUpdateItem_594011, schemes: {Scheme.Https})
+    validator: validate_WorkItemConfigurationsUpdateItem_597043, base: "",
+    url: url_WorkItemConfigurationsUpdateItem_597044, schemes: {Scheme.Https})
 type
-  Call_WorkItemConfigurationsDelete_593997 = ref object of OpenApiRestCall_593425
-proc url_WorkItemConfigurationsDelete_593999(protocol: Scheme; host: string;
+  Call_WorkItemConfigurationsDelete_597030 = ref object of OpenApiRestCall_596458
+proc url_WorkItemConfigurationsDelete_597032(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -754,7 +754,7 @@ proc url_WorkItemConfigurationsDelete_593999(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkItemConfigurationsDelete_593998(path: JsonNode; query: JsonNode;
+proc validate_WorkItemConfigurationsDelete_597031(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a work item configuration of an Application Insights component.
   ## 
@@ -772,26 +772,26 @@ proc validate_WorkItemConfigurationsDelete_593998(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594000 = path.getOrDefault("resourceGroupName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_597033 = path.getOrDefault("resourceGroupName")
+  valid_597033 = validateParameter(valid_597033, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "resourceGroupName", valid_594000
-  var valid_594001 = path.getOrDefault("subscriptionId")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_597033 != nil:
+    section.add "resourceGroupName", valid_597033
+  var valid_597034 = path.getOrDefault("subscriptionId")
+  valid_597034 = validateParameter(valid_597034, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "subscriptionId", valid_594001
-  var valid_594002 = path.getOrDefault("resourceName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_597034 != nil:
+    section.add "subscriptionId", valid_597034
+  var valid_597035 = path.getOrDefault("resourceName")
+  valid_597035 = validateParameter(valid_597035, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "resourceName", valid_594002
-  var valid_594003 = path.getOrDefault("workItemConfigId")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_597035 != nil:
+    section.add "resourceName", valid_597035
+  var valid_597036 = path.getOrDefault("workItemConfigId")
+  valid_597036 = validateParameter(valid_597036, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "workItemConfigId", valid_594003
+  if valid_597036 != nil:
+    section.add "workItemConfigId", valid_597036
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -799,11 +799,11 @@ proc validate_WorkItemConfigurationsDelete_593998(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594004 = query.getOrDefault("api-version")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_597037 = query.getOrDefault("api-version")
+  valid_597037 = validateParameter(valid_597037, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "api-version", valid_594004
+  if valid_597037 != nil:
+    section.add "api-version", valid_597037
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -812,20 +812,20 @@ proc validate_WorkItemConfigurationsDelete_593998(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594005: Call_WorkItemConfigurationsDelete_593997; path: JsonNode;
+proc call*(call_597038: Call_WorkItemConfigurationsDelete_597030; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a work item configuration of an Application Insights component.
   ## 
-  let valid = call_594005.validator(path, query, header, formData, body)
-  let scheme = call_594005.pickScheme
+  let valid = call_597038.validator(path, query, header, formData, body)
+  let scheme = call_597038.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594005.url(scheme.get, call_594005.host, call_594005.base,
-                         call_594005.route, valid.getOrDefault("path"),
+  let url = call_597038.url(scheme.get, call_597038.host, call_597038.base,
+                         call_597038.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594005, url, valid)
+  result = hook(call_597038, url, valid)
 
-proc call*(call_594006: Call_WorkItemConfigurationsDelete_593997;
+proc call*(call_597039: Call_WorkItemConfigurationsDelete_597030;
           resourceGroupName: string; apiVersion: string; subscriptionId: string;
           resourceName: string; workItemConfigId: string): Recallable =
   ## workItemConfigurationsDelete
@@ -840,20 +840,20 @@ proc call*(call_594006: Call_WorkItemConfigurationsDelete_593997;
   ##               : The name of the Application Insights component resource.
   ##   workItemConfigId: string (required)
   ##                   : The unique work item configuration Id. This can be either friendly name of connector as defined in connector configuration
-  var path_594007 = newJObject()
-  var query_594008 = newJObject()
-  add(path_594007, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594008, "api-version", newJString(apiVersion))
-  add(path_594007, "subscriptionId", newJString(subscriptionId))
-  add(path_594007, "resourceName", newJString(resourceName))
-  add(path_594007, "workItemConfigId", newJString(workItemConfigId))
-  result = call_594006.call(path_594007, query_594008, nil, nil, nil)
+  var path_597040 = newJObject()
+  var query_597041 = newJObject()
+  add(path_597040, "resourceGroupName", newJString(resourceGroupName))
+  add(query_597041, "api-version", newJString(apiVersion))
+  add(path_597040, "subscriptionId", newJString(subscriptionId))
+  add(path_597040, "resourceName", newJString(resourceName))
+  add(path_597040, "workItemConfigId", newJString(workItemConfigId))
+  result = call_597039.call(path_597040, query_597041, nil, nil, nil)
 
-var workItemConfigurationsDelete* = Call_WorkItemConfigurationsDelete_593997(
+var workItemConfigurationsDelete* = Call_WorkItemConfigurationsDelete_597030(
     name: "workItemConfigurationsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/WorkItemConfigs/{workItemConfigId}",
-    validator: validate_WorkItemConfigurationsDelete_593998, base: "",
-    url: url_WorkItemConfigurationsDelete_593999, schemes: {Scheme.Https})
+    validator: validate_WorkItemConfigurationsDelete_597031, base: "",
+    url: url_WorkItemConfigurationsDelete_597032, schemes: {Scheme.Https})
 export
   rest
 

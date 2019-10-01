@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: Service Fabric Client APIs
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593437 = ref object of OpenApiRestCall
+  OpenApiRestCall_567666 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593437](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_567666](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593437): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_567666): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "servicefabric"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_GetAadMetadata_593659 = ref object of OpenApiRestCall_593437
-proc url_GetAadMetadata_593661(protocol: Scheme; host: string; base: string;
+  Call_GetAadMetadata_567888 = ref object of OpenApiRestCall_567666
+proc url_GetAadMetadata_567890(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetAadMetadata_593660(path: JsonNode; query: JsonNode;
+proc validate_GetAadMetadata_567889(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets the Azure Active Directory metadata used for secured connection to cluster.
@@ -128,18 +128,18 @@ proc validate_GetAadMetadata_593660(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "1.0".
   section = newJObject()
-  var valid_593834 = query.getOrDefault("timeout")
-  valid_593834 = validateParameter(valid_593834, JInt, required = false,
+  var valid_568063 = query.getOrDefault("timeout")
+  valid_568063 = validateParameter(valid_568063, JInt, required = false,
                                  default = newJInt(60))
-  if valid_593834 != nil:
-    section.add "timeout", valid_593834
+  if valid_568063 != nil:
+    section.add "timeout", valid_568063
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593835 = query.getOrDefault("api-version")
-  valid_593835 = validateParameter(valid_593835, JString, required = true,
+  var valid_568064 = query.getOrDefault("api-version")
+  valid_568064 = validateParameter(valid_568064, JString, required = true,
                                  default = newJString("1.0"))
-  if valid_593835 != nil:
-    section.add "api-version", valid_593835
+  if valid_568064 != nil:
+    section.add "api-version", valid_568064
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -148,22 +148,22 @@ proc validate_GetAadMetadata_593660(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593858: Call_GetAadMetadata_593659; path: JsonNode; query: JsonNode;
+proc call*(call_568087: Call_GetAadMetadata_567888; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Azure Active Directory metadata used for secured connection to cluster.
   ## This API is not supposed to be called separately. It provides information needed to set up an Azure Active Directory secured connection with a Service Fabric cluster.
   ## 
   ## 
-  let valid = call_593858.validator(path, query, header, formData, body)
-  let scheme = call_593858.pickScheme
+  let valid = call_568087.validator(path, query, header, formData, body)
+  let scheme = call_568087.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593858.url(scheme.get, call_593858.host, call_593858.base,
-                         call_593858.route, valid.getOrDefault("path"),
+  let url = call_568087.url(scheme.get, call_568087.host, call_568087.base,
+                         call_568087.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593858, url, valid)
+  result = hook(call_568087, url, valid)
 
-proc call*(call_593929: Call_GetAadMetadata_593659; timeout: int = 60;
+proc call*(call_568158: Call_GetAadMetadata_567888; timeout: int = 60;
           apiVersion: string = "1.0"): Recallable =
   ## getAadMetadata
   ## Gets the Azure Active Directory metadata used for secured connection to cluster.
@@ -173,25 +173,25 @@ proc call*(call_593929: Call_GetAadMetadata_593659; timeout: int = 60;
   ##          : The server timeout for performing the operation in seconds. This specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
   ##   apiVersion: string (required)
   ##             : The version of the API. This is a required parameter and it's value must be "1.0".
-  var query_593930 = newJObject()
-  add(query_593930, "timeout", newJInt(timeout))
-  add(query_593930, "api-version", newJString(apiVersion))
-  result = call_593929.call(nil, query_593930, nil, nil, nil)
+  var query_568159 = newJObject()
+  add(query_568159, "timeout", newJInt(timeout))
+  add(query_568159, "api-version", newJString(apiVersion))
+  result = call_568158.call(nil, query_568159, nil, nil, nil)
 
-var getAadMetadata* = Call_GetAadMetadata_593659(name: "getAadMetadata",
+var getAadMetadata* = Call_GetAadMetadata_567888(name: "getAadMetadata",
     meth: HttpMethod.HttpGet, host: "azure.local:19080", route: "/$/GetAadMetadata",
-    validator: validate_GetAadMetadata_593660, base: "", url: url_GetAadMetadata_593661,
+    validator: validate_GetAadMetadata_567889, base: "", url: url_GetAadMetadata_567890,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetClusterHealthUsingPolicy_593981 = ref object of OpenApiRestCall_593437
-proc url_GetClusterHealthUsingPolicy_593983(protocol: Scheme; host: string;
+  Call_GetClusterHealthUsingPolicy_568210 = ref object of OpenApiRestCall_567666
+proc url_GetClusterHealthUsingPolicy_568212(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetClusterHealthUsingPolicy_593982(path: JsonNode; query: JsonNode;
+proc validate_GetClusterHealthUsingPolicy_568211(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the health of a Service Fabric cluster.
   ## Use EventsHealthStateFilter to filter the collection of health events reported on the cluster based on the health state.
@@ -253,33 +253,33 @@ proc validate_GetClusterHealthUsingPolicy_593982(path: JsonNode; query: JsonNode
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594001 = query.getOrDefault("timeout")
-  valid_594001 = validateParameter(valid_594001, JInt, required = false,
+  var valid_568230 = query.getOrDefault("timeout")
+  valid_568230 = validateParameter(valid_568230, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594001 != nil:
-    section.add "timeout", valid_594001
+  if valid_568230 != nil:
+    section.add "timeout", valid_568230
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594002 = query.getOrDefault("api-version")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_568231 = query.getOrDefault("api-version")
+  valid_568231 = validateParameter(valid_568231, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594002 != nil:
-    section.add "api-version", valid_594002
-  var valid_594003 = query.getOrDefault("ApplicationsHealthStateFilter")
-  valid_594003 = validateParameter(valid_594003, JInt, required = false,
+  if valid_568231 != nil:
+    section.add "api-version", valid_568231
+  var valid_568232 = query.getOrDefault("ApplicationsHealthStateFilter")
+  valid_568232 = validateParameter(valid_568232, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594003 != nil:
-    section.add "ApplicationsHealthStateFilter", valid_594003
-  var valid_594004 = query.getOrDefault("EventsHealthStateFilter")
-  valid_594004 = validateParameter(valid_594004, JInt, required = false,
+  if valid_568232 != nil:
+    section.add "ApplicationsHealthStateFilter", valid_568232
+  var valid_568233 = query.getOrDefault("EventsHealthStateFilter")
+  valid_568233 = validateParameter(valid_568233, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594004 != nil:
-    section.add "EventsHealthStateFilter", valid_594004
-  var valid_594005 = query.getOrDefault("NodesHealthStateFilter")
-  valid_594005 = validateParameter(valid_594005, JInt, required = false,
+  if valid_568233 != nil:
+    section.add "EventsHealthStateFilter", valid_568233
+  var valid_568234 = query.getOrDefault("NodesHealthStateFilter")
+  valid_568234 = validateParameter(valid_568234, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594005 != nil:
-    section.add "NodesHealthStateFilter", valid_594005
+  if valid_568234 != nil:
+    section.add "NodesHealthStateFilter", valid_568234
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -297,7 +297,7 @@ proc validate_GetClusterHealthUsingPolicy_593982(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594007: Call_GetClusterHealthUsingPolicy_593981; path: JsonNode;
+proc call*(call_568236: Call_GetClusterHealthUsingPolicy_568210; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health of a Service Fabric cluster.
   ## Use EventsHealthStateFilter to filter the collection of health events reported on the cluster based on the health state.
@@ -305,16 +305,16 @@ proc call*(call_594007: Call_GetClusterHealthUsingPolicy_593981; path: JsonNode;
   ## Use ClusterHealthPolicies to override the health policies used to evaluate the health.
   ## 
   ## 
-  let valid = call_594007.validator(path, query, header, formData, body)
-  let scheme = call_594007.pickScheme
+  let valid = call_568236.validator(path, query, header, formData, body)
+  let scheme = call_568236.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594007.url(scheme.get, call_594007.host, call_594007.base,
-                         call_594007.route, valid.getOrDefault("path"),
+  let url = call_568236.url(scheme.get, call_568236.host, call_568236.base,
+                         call_568236.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594007, url, valid)
+  result = hook(call_568236, url, valid)
 
-proc call*(call_594008: Call_GetClusterHealthUsingPolicy_593981; timeout: int = 60;
+proc call*(call_568237: Call_GetClusterHealthUsingPolicy_568210; timeout: int = 60;
           apiVersion: string = "3.0"; ApplicationsHealthStateFilter: int = 0;
           ClusterHealthPolicies: JsonNode = nil; EventsHealthStateFilter: int = 0;
           NodesHealthStateFilter: int = 0): Recallable =
@@ -379,34 +379,34 @@ proc call*(call_594008: Call_GetClusterHealthUsingPolicy_593981; timeout: int = 
   ## - Error - Filter that matches input with HealthState value Error. The value is 8.
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
-  var query_594009 = newJObject()
-  var body_594010 = newJObject()
-  add(query_594009, "timeout", newJInt(timeout))
-  add(query_594009, "api-version", newJString(apiVersion))
-  add(query_594009, "ApplicationsHealthStateFilter",
+  var query_568238 = newJObject()
+  var body_568239 = newJObject()
+  add(query_568238, "timeout", newJInt(timeout))
+  add(query_568238, "api-version", newJString(apiVersion))
+  add(query_568238, "ApplicationsHealthStateFilter",
       newJInt(ApplicationsHealthStateFilter))
   if ClusterHealthPolicies != nil:
-    body_594010 = ClusterHealthPolicies
-  add(query_594009, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(query_594009, "NodesHealthStateFilter", newJInt(NodesHealthStateFilter))
-  result = call_594008.call(nil, query_594009, nil, nil, body_594010)
+    body_568239 = ClusterHealthPolicies
+  add(query_568238, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(query_568238, "NodesHealthStateFilter", newJInt(NodesHealthStateFilter))
+  result = call_568237.call(nil, query_568238, nil, nil, body_568239)
 
-var getClusterHealthUsingPolicy* = Call_GetClusterHealthUsingPolicy_593981(
+var getClusterHealthUsingPolicy* = Call_GetClusterHealthUsingPolicy_568210(
     name: "getClusterHealthUsingPolicy", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/$/GetClusterHealth",
-    validator: validate_GetClusterHealthUsingPolicy_593982, base: "",
-    url: url_GetClusterHealthUsingPolicy_593983,
+    validator: validate_GetClusterHealthUsingPolicy_568211, base: "",
+    url: url_GetClusterHealthUsingPolicy_568212,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetClusterHealth_593970 = ref object of OpenApiRestCall_593437
-proc url_GetClusterHealth_593972(protocol: Scheme; host: string; base: string;
+  Call_GetClusterHealth_568199 = ref object of OpenApiRestCall_567666
+proc url_GetClusterHealth_568201(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetClusterHealth_593971(path: JsonNode; query: JsonNode;
+proc validate_GetClusterHealth_568200(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets the health of a Service Fabric cluster.
@@ -468,33 +468,33 @@ proc validate_GetClusterHealth_593971(path: JsonNode; query: JsonNode;
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_593973 = query.getOrDefault("timeout")
-  valid_593973 = validateParameter(valid_593973, JInt, required = false,
+  var valid_568202 = query.getOrDefault("timeout")
+  valid_568202 = validateParameter(valid_568202, JInt, required = false,
                                  default = newJInt(60))
-  if valid_593973 != nil:
-    section.add "timeout", valid_593973
+  if valid_568202 != nil:
+    section.add "timeout", valid_568202
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593974 = query.getOrDefault("api-version")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_568203 = query.getOrDefault("api-version")
+  valid_568203 = validateParameter(valid_568203, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_593974 != nil:
-    section.add "api-version", valid_593974
-  var valid_593975 = query.getOrDefault("ApplicationsHealthStateFilter")
-  valid_593975 = validateParameter(valid_593975, JInt, required = false,
+  if valid_568203 != nil:
+    section.add "api-version", valid_568203
+  var valid_568204 = query.getOrDefault("ApplicationsHealthStateFilter")
+  valid_568204 = validateParameter(valid_568204, JInt, required = false,
                                  default = newJInt(0))
-  if valid_593975 != nil:
-    section.add "ApplicationsHealthStateFilter", valid_593975
-  var valid_593976 = query.getOrDefault("EventsHealthStateFilter")
-  valid_593976 = validateParameter(valid_593976, JInt, required = false,
+  if valid_568204 != nil:
+    section.add "ApplicationsHealthStateFilter", valid_568204
+  var valid_568205 = query.getOrDefault("EventsHealthStateFilter")
+  valid_568205 = validateParameter(valid_568205, JInt, required = false,
                                  default = newJInt(0))
-  if valid_593976 != nil:
-    section.add "EventsHealthStateFilter", valid_593976
-  var valid_593977 = query.getOrDefault("NodesHealthStateFilter")
-  valid_593977 = validateParameter(valid_593977, JInt, required = false,
+  if valid_568205 != nil:
+    section.add "EventsHealthStateFilter", valid_568205
+  var valid_568206 = query.getOrDefault("NodesHealthStateFilter")
+  valid_568206 = validateParameter(valid_568206, JInt, required = false,
                                  default = newJInt(0))
-  if valid_593977 != nil:
-    section.add "NodesHealthStateFilter", valid_593977
+  if valid_568206 != nil:
+    section.add "NodesHealthStateFilter", valid_568206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -503,23 +503,23 @@ proc validate_GetClusterHealth_593971(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593978: Call_GetClusterHealth_593970; path: JsonNode;
+proc call*(call_568207: Call_GetClusterHealth_568199; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health of a Service Fabric cluster.
   ## Use EventsHealthStateFilter to filter the collection of health events reported on the cluster based on the health state.
   ## Similarly, use NodesHealthStateFilter and ApplicationsHealthStateFilter to filter the collection of nodes and applications returned based on their aggregated health state.
   ## 
   ## 
-  let valid = call_593978.validator(path, query, header, formData, body)
-  let scheme = call_593978.pickScheme
+  let valid = call_568207.validator(path, query, header, formData, body)
+  let scheme = call_568207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593978.url(scheme.get, call_593978.host, call_593978.base,
-                         call_593978.route, valid.getOrDefault("path"),
+  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
+                         call_568207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593978, url, valid)
+  result = hook(call_568207, url, valid)
 
-proc call*(call_593979: Call_GetClusterHealth_593970; timeout: int = 60;
+proc call*(call_568208: Call_GetClusterHealth_568199; timeout: int = 60;
           apiVersion: string = "3.0"; ApplicationsHealthStateFilter: int = 0;
           EventsHealthStateFilter: int = 0; NodesHealthStateFilter: int = 0): Recallable =
   ## getClusterHealth
@@ -575,22 +575,22 @@ proc call*(call_593979: Call_GetClusterHealth_593970; timeout: int = 60;
   ## - Error - Filter that matches input with HealthState value Error. The value is 8.
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
-  var query_593980 = newJObject()
-  add(query_593980, "timeout", newJInt(timeout))
-  add(query_593980, "api-version", newJString(apiVersion))
-  add(query_593980, "ApplicationsHealthStateFilter",
+  var query_568209 = newJObject()
+  add(query_568209, "timeout", newJInt(timeout))
+  add(query_568209, "api-version", newJString(apiVersion))
+  add(query_568209, "ApplicationsHealthStateFilter",
       newJInt(ApplicationsHealthStateFilter))
-  add(query_593980, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(query_593980, "NodesHealthStateFilter", newJInt(NodesHealthStateFilter))
-  result = call_593979.call(nil, query_593980, nil, nil, nil)
+  add(query_568209, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(query_568209, "NodesHealthStateFilter", newJInt(NodesHealthStateFilter))
+  result = call_568208.call(nil, query_568209, nil, nil, nil)
 
-var getClusterHealth* = Call_GetClusterHealth_593970(name: "getClusterHealth",
+var getClusterHealth* = Call_GetClusterHealth_568199(name: "getClusterHealth",
     meth: HttpMethod.HttpGet, host: "azure.local:19080",
-    route: "/$/GetClusterHealth", validator: validate_GetClusterHealth_593971,
-    base: "", url: url_GetClusterHealth_593972, schemes: {Scheme.Https, Scheme.Http})
+    route: "/$/GetClusterHealth", validator: validate_GetClusterHealth_568200,
+    base: "", url: url_GetClusterHealth_568201, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594019 = ref object of OpenApiRestCall_593437
-proc url_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594021(
+  Call_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_568248 = ref object of OpenApiRestCall_567666
+proc url_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_568250(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -598,7 +598,7 @@ proc url_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594021(
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594020(
+proc validate_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_568249(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets the health of a Service Fabric cluster using health chunks. The health evaluation is done based on the input cluster health chunk query description.
@@ -618,18 +618,18 @@ proc validate_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594020(
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594022 = query.getOrDefault("timeout")
-  valid_594022 = validateParameter(valid_594022, JInt, required = false,
+  var valid_568251 = query.getOrDefault("timeout")
+  valid_568251 = validateParameter(valid_568251, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594022 != nil:
-    section.add "timeout", valid_594022
+  if valid_568251 != nil:
+    section.add "timeout", valid_568251
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594023 = query.getOrDefault("api-version")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  var valid_568252 = query.getOrDefault("api-version")
+  valid_568252 = validateParameter(valid_568252, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594023 != nil:
-    section.add "api-version", valid_594023
+  if valid_568252 != nil:
+    section.add "api-version", valid_568252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -650,7 +650,7 @@ proc validate_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594020(
   if body != nil:
     result.add "body", body
 
-proc call*(call_594025: Call_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594019;
+proc call*(call_568254: Call_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_568248;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the health of a Service Fabric cluster using health chunks. The health evaluation is done based on the input cluster health chunk query description.
@@ -660,16 +660,16 @@ proc call*(call_594025: Call_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_
   ## only services that are in Error or Warning, and all partitions and replicas for one of these services.
   ## 
   ## 
-  let valid = call_594025.validator(path, query, header, formData, body)
-  let scheme = call_594025.pickScheme
+  let valid = call_568254.validator(path, query, header, formData, body)
+  let scheme = call_568254.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594025.url(scheme.get, call_594025.host, call_594025.base,
-                         call_594025.route, valid.getOrDefault("path"),
+  let url = call_568254.url(scheme.get, call_568254.host, call_568254.base,
+                         call_568254.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594025, url, valid)
+  result = hook(call_568254, url, valid)
 
-proc call*(call_594026: Call_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594019;
+proc call*(call_568255: Call_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_568248;
           timeout: int = 60; apiVersion: string = "3.0";
           ClusterHealthChunkQueryDescription: JsonNode = nil): Recallable =
   ## getClusterHealthChunkUsingPolicyAndAdvancedFilters
@@ -693,31 +693,31 @@ proc call*(call_594026: Call_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_
   ## The query can return multi-level children of the entities based on the specified filters. For example, it can return one application with a specified name, and for this application, return
   ## only services that are in Error or Warning, and all partitions and replicas for one of these services.
   ## 
-  var query_594027 = newJObject()
-  var body_594028 = newJObject()
-  add(query_594027, "timeout", newJInt(timeout))
-  add(query_594027, "api-version", newJString(apiVersion))
+  var query_568256 = newJObject()
+  var body_568257 = newJObject()
+  add(query_568256, "timeout", newJInt(timeout))
+  add(query_568256, "api-version", newJString(apiVersion))
   if ClusterHealthChunkQueryDescription != nil:
-    body_594028 = ClusterHealthChunkQueryDescription
-  result = call_594026.call(nil, query_594027, nil, nil, body_594028)
+    body_568257 = ClusterHealthChunkQueryDescription
+  result = call_568255.call(nil, query_568256, nil, nil, body_568257)
 
-var getClusterHealthChunkUsingPolicyAndAdvancedFilters* = Call_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594019(
+var getClusterHealthChunkUsingPolicyAndAdvancedFilters* = Call_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_568248(
     name: "getClusterHealthChunkUsingPolicyAndAdvancedFilters",
     meth: HttpMethod.HttpPost, host: "azure.local:19080",
     route: "/$/GetClusterHealthChunk",
-    validator: validate_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594020,
-    base: "", url: url_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_594021,
+    validator: validate_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_568249,
+    base: "", url: url_GetClusterHealthChunkUsingPolicyAndAdvancedFilters_568250,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetClusterHealthChunk_594011 = ref object of OpenApiRestCall_593437
-proc url_GetClusterHealthChunk_594013(protocol: Scheme; host: string; base: string;
+  Call_GetClusterHealthChunk_568240 = ref object of OpenApiRestCall_567666
+proc url_GetClusterHealthChunk_568242(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetClusterHealthChunk_594012(path: JsonNode; query: JsonNode;
+proc validate_GetClusterHealthChunk_568241(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the health of a Service Fabric cluster using health chunks. Includes the aggregated health state of the cluster, but none of the cluster entities.
   ## To expand the cluster health and get the health state of all or some of the entities, use the POST URI and specify the cluster health chunk query description.
@@ -733,18 +733,18 @@ proc validate_GetClusterHealthChunk_594012(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594014 = query.getOrDefault("timeout")
-  valid_594014 = validateParameter(valid_594014, JInt, required = false,
+  var valid_568243 = query.getOrDefault("timeout")
+  valid_568243 = validateParameter(valid_568243, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594014 != nil:
-    section.add "timeout", valid_594014
+  if valid_568243 != nil:
+    section.add "timeout", valid_568243
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594015 = query.getOrDefault("api-version")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_568244 = query.getOrDefault("api-version")
+  valid_568244 = validateParameter(valid_568244, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594015 != nil:
-    section.add "api-version", valid_594015
+  if valid_568244 != nil:
+    section.add "api-version", valid_568244
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -753,22 +753,22 @@ proc validate_GetClusterHealthChunk_594012(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594016: Call_GetClusterHealthChunk_594011; path: JsonNode;
+proc call*(call_568245: Call_GetClusterHealthChunk_568240; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health of a Service Fabric cluster using health chunks. Includes the aggregated health state of the cluster, but none of the cluster entities.
   ## To expand the cluster health and get the health state of all or some of the entities, use the POST URI and specify the cluster health chunk query description.
   ## 
   ## 
-  let valid = call_594016.validator(path, query, header, formData, body)
-  let scheme = call_594016.pickScheme
+  let valid = call_568245.validator(path, query, header, formData, body)
+  let scheme = call_568245.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594016.url(scheme.get, call_594016.host, call_594016.base,
-                         call_594016.route, valid.getOrDefault("path"),
+  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
+                         call_568245.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594016, url, valid)
+  result = hook(call_568245, url, valid)
 
-proc call*(call_594017: Call_GetClusterHealthChunk_594011; timeout: int = 60;
+proc call*(call_568246: Call_GetClusterHealthChunk_568240; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## getClusterHealthChunk
   ## Gets the health of a Service Fabric cluster using health chunks. Includes the aggregated health state of the cluster, but none of the cluster entities.
@@ -778,26 +778,26 @@ proc call*(call_594017: Call_GetClusterHealthChunk_594011; timeout: int = 60;
   ##          : The server timeout for performing the operation in seconds. This specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
   ##   apiVersion: string (required)
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
-  var query_594018 = newJObject()
-  add(query_594018, "timeout", newJInt(timeout))
-  add(query_594018, "api-version", newJString(apiVersion))
-  result = call_594017.call(nil, query_594018, nil, nil, nil)
+  var query_568247 = newJObject()
+  add(query_568247, "timeout", newJInt(timeout))
+  add(query_568247, "api-version", newJString(apiVersion))
+  result = call_568246.call(nil, query_568247, nil, nil, nil)
 
-var getClusterHealthChunk* = Call_GetClusterHealthChunk_594011(
+var getClusterHealthChunk* = Call_GetClusterHealthChunk_568240(
     name: "getClusterHealthChunk", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/$/GetClusterHealthChunk",
-    validator: validate_GetClusterHealthChunk_594012, base: "",
-    url: url_GetClusterHealthChunk_594013, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetClusterHealthChunk_568241, base: "",
+    url: url_GetClusterHealthChunk_568242, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetClusterManifest_594029 = ref object of OpenApiRestCall_593437
-proc url_GetClusterManifest_594031(protocol: Scheme; host: string; base: string;
+  Call_GetClusterManifest_568258 = ref object of OpenApiRestCall_567666
+proc url_GetClusterManifest_568260(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetClusterManifest_594030(path: JsonNode; query: JsonNode;
+proc validate_GetClusterManifest_568259(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get the Service Fabric cluster manifest. The cluster manifest contains properties of the cluster that include different node types on the cluster,
@@ -819,18 +819,18 @@ proc validate_GetClusterManifest_594030(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594032 = query.getOrDefault("timeout")
-  valid_594032 = validateParameter(valid_594032, JInt, required = false,
+  var valid_568261 = query.getOrDefault("timeout")
+  valid_568261 = validateParameter(valid_568261, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594032 != nil:
-    section.add "timeout", valid_594032
+  if valid_568261 != nil:
+    section.add "timeout", valid_568261
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594033 = query.getOrDefault("api-version")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  var valid_568262 = query.getOrDefault("api-version")
+  valid_568262 = validateParameter(valid_568262, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594033 != nil:
-    section.add "api-version", valid_594033
+  if valid_568262 != nil:
+    section.add "api-version", valid_568262
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -839,7 +839,7 @@ proc validate_GetClusterManifest_594030(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594034: Call_GetClusterManifest_594029; path: JsonNode;
+proc call*(call_568263: Call_GetClusterManifest_568258; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the Service Fabric cluster manifest. The cluster manifest contains properties of the cluster that include different node types on the cluster,
   ## security configurations, fault and upgrade domain topologies etc.
@@ -850,16 +850,16 @@ proc call*(call_594034: Call_GetClusterManifest_594029; path: JsonNode;
   ## The contents of the cluster manifest are for informational purposes only and users are not expected to take a dependency on the format of the file contents or its interpretation.
   ## 
   ## 
-  let valid = call_594034.validator(path, query, header, formData, body)
-  let scheme = call_594034.pickScheme
+  let valid = call_568263.validator(path, query, header, formData, body)
+  let scheme = call_568263.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594034.url(scheme.get, call_594034.host, call_594034.base,
-                         call_594034.route, valid.getOrDefault("path"),
+  let url = call_568263.url(scheme.get, call_568263.host, call_568263.base,
+                         call_568263.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594034, url, valid)
+  result = hook(call_568263, url, valid)
 
-proc call*(call_594035: Call_GetClusterManifest_594029; timeout: int = 60;
+proc call*(call_568264: Call_GetClusterManifest_568258; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## getClusterManifest
   ## Get the Service Fabric cluster manifest. The cluster manifest contains properties of the cluster that include different node types on the cluster,
@@ -874,26 +874,26 @@ proc call*(call_594035: Call_GetClusterManifest_594029; timeout: int = 60;
   ##          : The server timeout for performing the operation in seconds. This specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
   ##   apiVersion: string (required)
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
-  var query_594036 = newJObject()
-  add(query_594036, "timeout", newJInt(timeout))
-  add(query_594036, "api-version", newJString(apiVersion))
-  result = call_594035.call(nil, query_594036, nil, nil, nil)
+  var query_568265 = newJObject()
+  add(query_568265, "timeout", newJInt(timeout))
+  add(query_568265, "api-version", newJString(apiVersion))
+  result = call_568264.call(nil, query_568265, nil, nil, nil)
 
-var getClusterManifest* = Call_GetClusterManifest_594029(
+var getClusterManifest* = Call_GetClusterManifest_568258(
     name: "getClusterManifest", meth: HttpMethod.HttpGet, host: "azure.local:19080",
-    route: "/$/GetClusterManifest", validator: validate_GetClusterManifest_594030,
-    base: "", url: url_GetClusterManifest_594031,
+    route: "/$/GetClusterManifest", validator: validate_GetClusterManifest_568259,
+    base: "", url: url_GetClusterManifest_568260,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetProvisionedFabricCodeVersionInfoList_594037 = ref object of OpenApiRestCall_593437
-proc url_GetProvisionedFabricCodeVersionInfoList_594039(protocol: Scheme;
+  Call_GetProvisionedFabricCodeVersionInfoList_568266 = ref object of OpenApiRestCall_567666
+proc url_GetProvisionedFabricCodeVersionInfoList_568268(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetProvisionedFabricCodeVersionInfoList_594038(path: JsonNode;
+proc validate_GetProvisionedFabricCodeVersionInfoList_568267(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of information about fabric code versions that are provisioned in the cluster. The parameter CodeVersion can be used to optionally filter the output to only that particular version.
   ## 
@@ -909,23 +909,23 @@ proc validate_GetProvisionedFabricCodeVersionInfoList_594038(path: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594040 = query.getOrDefault("timeout")
-  valid_594040 = validateParameter(valid_594040, JInt, required = false,
+  var valid_568269 = query.getOrDefault("timeout")
+  valid_568269 = validateParameter(valid_568269, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594040 != nil:
-    section.add "timeout", valid_594040
-  var valid_594041 = query.getOrDefault("CodeVersion")
-  valid_594041 = validateParameter(valid_594041, JString, required = false,
+  if valid_568269 != nil:
+    section.add "timeout", valid_568269
+  var valid_568270 = query.getOrDefault("CodeVersion")
+  valid_568270 = validateParameter(valid_568270, JString, required = false,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "CodeVersion", valid_594041
+  if valid_568270 != nil:
+    section.add "CodeVersion", valid_568270
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594042 = query.getOrDefault("api-version")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  var valid_568271 = query.getOrDefault("api-version")
+  valid_568271 = validateParameter(valid_568271, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594042 != nil:
-    section.add "api-version", valid_594042
+  if valid_568271 != nil:
+    section.add "api-version", valid_568271
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -934,21 +934,21 @@ proc validate_GetProvisionedFabricCodeVersionInfoList_594038(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594043: Call_GetProvisionedFabricCodeVersionInfoList_594037;
+proc call*(call_568272: Call_GetProvisionedFabricCodeVersionInfoList_568266;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of information about fabric code versions that are provisioned in the cluster. The parameter CodeVersion can be used to optionally filter the output to only that particular version.
   ## 
-  let valid = call_594043.validator(path, query, header, formData, body)
-  let scheme = call_594043.pickScheme
+  let valid = call_568272.validator(path, query, header, formData, body)
+  let scheme = call_568272.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594043.url(scheme.get, call_594043.host, call_594043.base,
-                         call_594043.route, valid.getOrDefault("path"),
+  let url = call_568272.url(scheme.get, call_568272.host, call_568272.base,
+                         call_568272.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594043, url, valid)
+  result = hook(call_568272, url, valid)
 
-proc call*(call_594044: Call_GetProvisionedFabricCodeVersionInfoList_594037;
+proc call*(call_568273: Call_GetProvisionedFabricCodeVersionInfoList_568266;
           timeout: int = 60; CodeVersion: string = ""; apiVersion: string = "3.0"): Recallable =
   ## getProvisionedFabricCodeVersionInfoList
   ## Gets a list of information about fabric code versions that are provisioned in the cluster. The parameter CodeVersion can be used to optionally filter the output to only that particular version.
@@ -958,28 +958,28 @@ proc call*(call_594044: Call_GetProvisionedFabricCodeVersionInfoList_594037;
   ##              : The product version of Service Fabric.
   ##   apiVersion: string (required)
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
-  var query_594045 = newJObject()
-  add(query_594045, "timeout", newJInt(timeout))
-  add(query_594045, "CodeVersion", newJString(CodeVersion))
-  add(query_594045, "api-version", newJString(apiVersion))
-  result = call_594044.call(nil, query_594045, nil, nil, nil)
+  var query_568274 = newJObject()
+  add(query_568274, "timeout", newJInt(timeout))
+  add(query_568274, "CodeVersion", newJString(CodeVersion))
+  add(query_568274, "api-version", newJString(apiVersion))
+  result = call_568273.call(nil, query_568274, nil, nil, nil)
 
-var getProvisionedFabricCodeVersionInfoList* = Call_GetProvisionedFabricCodeVersionInfoList_594037(
+var getProvisionedFabricCodeVersionInfoList* = Call_GetProvisionedFabricCodeVersionInfoList_568266(
     name: "getProvisionedFabricCodeVersionInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/$/GetProvisionedCodeVersions",
-    validator: validate_GetProvisionedFabricCodeVersionInfoList_594038, base: "",
-    url: url_GetProvisionedFabricCodeVersionInfoList_594039,
+    validator: validate_GetProvisionedFabricCodeVersionInfoList_568267, base: "",
+    url: url_GetProvisionedFabricCodeVersionInfoList_568268,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetProvisionedFabricConfigVersionInfoList_594046 = ref object of OpenApiRestCall_593437
-proc url_GetProvisionedFabricConfigVersionInfoList_594048(protocol: Scheme;
+  Call_GetProvisionedFabricConfigVersionInfoList_568275 = ref object of OpenApiRestCall_567666
+proc url_GetProvisionedFabricConfigVersionInfoList_568277(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetProvisionedFabricConfigVersionInfoList_594047(path: JsonNode;
+proc validate_GetProvisionedFabricConfigVersionInfoList_568276(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of information about fabric config versions that are provisioned in the cluster. The parameter ConfigVersion can be used to optionally filter the output to only that particular version.
   ## 
@@ -995,23 +995,23 @@ proc validate_GetProvisionedFabricConfigVersionInfoList_594047(path: JsonNode;
   ##   ConfigVersion: JString
   ##                : The config version of Service Fabric.
   section = newJObject()
-  var valid_594049 = query.getOrDefault("timeout")
-  valid_594049 = validateParameter(valid_594049, JInt, required = false,
+  var valid_568278 = query.getOrDefault("timeout")
+  valid_568278 = validateParameter(valid_568278, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594049 != nil:
-    section.add "timeout", valid_594049
+  if valid_568278 != nil:
+    section.add "timeout", valid_568278
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594050 = query.getOrDefault("api-version")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  var valid_568279 = query.getOrDefault("api-version")
+  valid_568279 = validateParameter(valid_568279, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594050 != nil:
-    section.add "api-version", valid_594050
-  var valid_594051 = query.getOrDefault("ConfigVersion")
-  valid_594051 = validateParameter(valid_594051, JString, required = false,
+  if valid_568279 != nil:
+    section.add "api-version", valid_568279
+  var valid_568280 = query.getOrDefault("ConfigVersion")
+  valid_568280 = validateParameter(valid_568280, JString, required = false,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "ConfigVersion", valid_594051
+  if valid_568280 != nil:
+    section.add "ConfigVersion", valid_568280
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1020,21 +1020,21 @@ proc validate_GetProvisionedFabricConfigVersionInfoList_594047(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594052: Call_GetProvisionedFabricConfigVersionInfoList_594046;
+proc call*(call_568281: Call_GetProvisionedFabricConfigVersionInfoList_568275;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of information about fabric config versions that are provisioned in the cluster. The parameter ConfigVersion can be used to optionally filter the output to only that particular version.
   ## 
-  let valid = call_594052.validator(path, query, header, formData, body)
-  let scheme = call_594052.pickScheme
+  let valid = call_568281.validator(path, query, header, formData, body)
+  let scheme = call_568281.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594052.url(scheme.get, call_594052.host, call_594052.base,
-                         call_594052.route, valid.getOrDefault("path"),
+  let url = call_568281.url(scheme.get, call_568281.host, call_568281.base,
+                         call_568281.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594052, url, valid)
+  result = hook(call_568281, url, valid)
 
-proc call*(call_594053: Call_GetProvisionedFabricConfigVersionInfoList_594046;
+proc call*(call_568282: Call_GetProvisionedFabricConfigVersionInfoList_568275;
           timeout: int = 60; apiVersion: string = "3.0"; ConfigVersion: string = ""): Recallable =
   ## getProvisionedFabricConfigVersionInfoList
   ## Gets a list of information about fabric config versions that are provisioned in the cluster. The parameter ConfigVersion can be used to optionally filter the output to only that particular version.
@@ -1044,28 +1044,28 @@ proc call*(call_594053: Call_GetProvisionedFabricConfigVersionInfoList_594046;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   ConfigVersion: string
   ##                : The config version of Service Fabric.
-  var query_594054 = newJObject()
-  add(query_594054, "timeout", newJInt(timeout))
-  add(query_594054, "api-version", newJString(apiVersion))
-  add(query_594054, "ConfigVersion", newJString(ConfigVersion))
-  result = call_594053.call(nil, query_594054, nil, nil, nil)
+  var query_568283 = newJObject()
+  add(query_568283, "timeout", newJInt(timeout))
+  add(query_568283, "api-version", newJString(apiVersion))
+  add(query_568283, "ConfigVersion", newJString(ConfigVersion))
+  result = call_568282.call(nil, query_568283, nil, nil, nil)
 
-var getProvisionedFabricConfigVersionInfoList* = Call_GetProvisionedFabricConfigVersionInfoList_594046(
+var getProvisionedFabricConfigVersionInfoList* = Call_GetProvisionedFabricConfigVersionInfoList_568275(
     name: "getProvisionedFabricConfigVersionInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/$/GetProvisionedConfigVersions",
-    validator: validate_GetProvisionedFabricConfigVersionInfoList_594047,
-    base: "", url: url_GetProvisionedFabricConfigVersionInfoList_594048,
+    validator: validate_GetProvisionedFabricConfigVersionInfoList_568276,
+    base: "", url: url_GetProvisionedFabricConfigVersionInfoList_568277,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetClusterUpgradeProgress_594055 = ref object of OpenApiRestCall_593437
-proc url_GetClusterUpgradeProgress_594057(protocol: Scheme; host: string;
+  Call_GetClusterUpgradeProgress_568284 = ref object of OpenApiRestCall_567666
+proc url_GetClusterUpgradeProgress_568286(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetClusterUpgradeProgress_594056(path: JsonNode; query: JsonNode;
+proc validate_GetClusterUpgradeProgress_568285(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the current progress of the ongoing cluster upgrade. If no upgrade is currently in progress, gets the last state of the previous cluster upgrade.
   ## 
@@ -1079,18 +1079,18 @@ proc validate_GetClusterUpgradeProgress_594056(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594058 = query.getOrDefault("timeout")
-  valid_594058 = validateParameter(valid_594058, JInt, required = false,
+  var valid_568287 = query.getOrDefault("timeout")
+  valid_568287 = validateParameter(valid_568287, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594058 != nil:
-    section.add "timeout", valid_594058
+  if valid_568287 != nil:
+    section.add "timeout", valid_568287
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594059 = query.getOrDefault("api-version")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  var valid_568288 = query.getOrDefault("api-version")
+  valid_568288 = validateParameter(valid_568288, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594059 != nil:
-    section.add "api-version", valid_594059
+  if valid_568288 != nil:
+    section.add "api-version", valid_568288
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1099,20 +1099,20 @@ proc validate_GetClusterUpgradeProgress_594056(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594060: Call_GetClusterUpgradeProgress_594055; path: JsonNode;
+proc call*(call_568289: Call_GetClusterUpgradeProgress_568284; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the current progress of the ongoing cluster upgrade. If no upgrade is currently in progress, gets the last state of the previous cluster upgrade.
   ## 
-  let valid = call_594060.validator(path, query, header, formData, body)
-  let scheme = call_594060.pickScheme
+  let valid = call_568289.validator(path, query, header, formData, body)
+  let scheme = call_568289.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594060.url(scheme.get, call_594060.host, call_594060.base,
-                         call_594060.route, valid.getOrDefault("path"),
+  let url = call_568289.url(scheme.get, call_568289.host, call_568289.base,
+                         call_568289.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594060, url, valid)
+  result = hook(call_568289, url, valid)
 
-proc call*(call_594061: Call_GetClusterUpgradeProgress_594055; timeout: int = 60;
+proc call*(call_568290: Call_GetClusterUpgradeProgress_568284; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## getClusterUpgradeProgress
   ## Gets the current progress of the ongoing cluster upgrade. If no upgrade is currently in progress, gets the last state of the previous cluster upgrade.
@@ -1120,27 +1120,27 @@ proc call*(call_594061: Call_GetClusterUpgradeProgress_594055; timeout: int = 60
   ##          : The server timeout for performing the operation in seconds. This specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
   ##   apiVersion: string (required)
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
-  var query_594062 = newJObject()
-  add(query_594062, "timeout", newJInt(timeout))
-  add(query_594062, "api-version", newJString(apiVersion))
-  result = call_594061.call(nil, query_594062, nil, nil, nil)
+  var query_568291 = newJObject()
+  add(query_568291, "timeout", newJInt(timeout))
+  add(query_568291, "api-version", newJString(apiVersion))
+  result = call_568290.call(nil, query_568291, nil, nil, nil)
 
-var getClusterUpgradeProgress* = Call_GetClusterUpgradeProgress_594055(
+var getClusterUpgradeProgress* = Call_GetClusterUpgradeProgress_568284(
     name: "getClusterUpgradeProgress", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/$/GetUpgradeProgress",
-    validator: validate_GetClusterUpgradeProgress_594056, base: "",
-    url: url_GetClusterUpgradeProgress_594057,
+    validator: validate_GetClusterUpgradeProgress_568285, base: "",
+    url: url_GetClusterUpgradeProgress_568286,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_InvokeInfrastructureCommand_594063 = ref object of OpenApiRestCall_593437
-proc url_InvokeInfrastructureCommand_594065(protocol: Scheme; host: string;
+  Call_InvokeInfrastructureCommand_568292 = ref object of OpenApiRestCall_567666
+proc url_InvokeInfrastructureCommand_568294(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_InvokeInfrastructureCommand_594064(path: JsonNode; query: JsonNode;
+proc validate_InvokeInfrastructureCommand_568293(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## For clusters that have one or more instances of the Infrastructure Service configured,
   ## this API provides a way to send infrastructure-specific commands to a particular
@@ -1166,28 +1166,28 @@ proc validate_InvokeInfrastructureCommand_594064(path: JsonNode; query: JsonNode
   ##   Command: JString (required)
   ##          : The text of the command to be invoked. The content of the command is infrastructure-specific.
   section = newJObject()
-  var valid_594066 = query.getOrDefault("timeout")
-  valid_594066 = validateParameter(valid_594066, JInt, required = false,
+  var valid_568295 = query.getOrDefault("timeout")
+  valid_568295 = validateParameter(valid_568295, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594066 != nil:
-    section.add "timeout", valid_594066
+  if valid_568295 != nil:
+    section.add "timeout", valid_568295
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594067 = query.getOrDefault("api-version")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  var valid_568296 = query.getOrDefault("api-version")
+  valid_568296 = validateParameter(valid_568296, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594067 != nil:
-    section.add "api-version", valid_594067
-  var valid_594068 = query.getOrDefault("ServiceId")
-  valid_594068 = validateParameter(valid_594068, JString, required = false,
+  if valid_568296 != nil:
+    section.add "api-version", valid_568296
+  var valid_568297 = query.getOrDefault("ServiceId")
+  valid_568297 = validateParameter(valid_568297, JString, required = false,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "ServiceId", valid_594068
-  var valid_594069 = query.getOrDefault("Command")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
+  if valid_568297 != nil:
+    section.add "ServiceId", valid_568297
+  var valid_568298 = query.getOrDefault("Command")
+  valid_568298 = validateParameter(valid_568298, JString, required = true,
                                  default = nil)
-  if valid_594069 != nil:
-    section.add "Command", valid_594069
+  if valid_568298 != nil:
+    section.add "Command", valid_568298
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1196,7 +1196,7 @@ proc validate_InvokeInfrastructureCommand_594064(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594070: Call_InvokeInfrastructureCommand_594063; path: JsonNode;
+proc call*(call_568299: Call_InvokeInfrastructureCommand_568292; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## For clusters that have one or more instances of the Infrastructure Service configured,
   ## this API provides a way to send infrastructure-specific commands to a particular
@@ -1208,16 +1208,16 @@ proc call*(call_594070: Call_InvokeInfrastructureCommand_594063; path: JsonNode;
   ## This API supports the Service Fabric platform; it is not meant to be used directly from your code.
   ## 
   ## 
-  let valid = call_594070.validator(path, query, header, formData, body)
-  let scheme = call_594070.pickScheme
+  let valid = call_568299.validator(path, query, header, formData, body)
+  let scheme = call_568299.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594070.url(scheme.get, call_594070.host, call_594070.base,
-                         call_594070.route, valid.getOrDefault("path"),
+  let url = call_568299.url(scheme.get, call_568299.host, call_568299.base,
+                         call_568299.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594070, url, valid)
+  result = hook(call_568299, url, valid)
 
-proc call*(call_594071: Call_InvokeInfrastructureCommand_594063; Command: string;
+proc call*(call_568300: Call_InvokeInfrastructureCommand_568292; Command: string;
           timeout: int = 60; apiVersion: string = "3.0"; ServiceId: string = ""): Recallable =
   ## invokeInfrastructureCommand
   ## For clusters that have one or more instances of the Infrastructure Service configured,
@@ -1237,29 +1237,29 @@ proc call*(call_594071: Call_InvokeInfrastructureCommand_594063; Command: string
   ##            : The identity of the infrastructure service. This is  the full name of the infrastructure service without the 'fabric:' URI scheme. This parameter required only for the cluster that have more than one instance of infrastructure service running.
   ##   Command: string (required)
   ##          : The text of the command to be invoked. The content of the command is infrastructure-specific.
-  var query_594072 = newJObject()
-  add(query_594072, "timeout", newJInt(timeout))
-  add(query_594072, "api-version", newJString(apiVersion))
-  add(query_594072, "ServiceId", newJString(ServiceId))
-  add(query_594072, "Command", newJString(Command))
-  result = call_594071.call(nil, query_594072, nil, nil, nil)
+  var query_568301 = newJObject()
+  add(query_568301, "timeout", newJInt(timeout))
+  add(query_568301, "api-version", newJString(apiVersion))
+  add(query_568301, "ServiceId", newJString(ServiceId))
+  add(query_568301, "Command", newJString(Command))
+  result = call_568300.call(nil, query_568301, nil, nil, nil)
 
-var invokeInfrastructureCommand* = Call_InvokeInfrastructureCommand_594063(
+var invokeInfrastructureCommand* = Call_InvokeInfrastructureCommand_568292(
     name: "invokeInfrastructureCommand", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/$/InvokeInfrastructureCommand",
-    validator: validate_InvokeInfrastructureCommand_594064, base: "",
-    url: url_InvokeInfrastructureCommand_594065,
+    validator: validate_InvokeInfrastructureCommand_568293, base: "",
+    url: url_InvokeInfrastructureCommand_568294,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_InvokeInfrastructureQuery_594073 = ref object of OpenApiRestCall_593437
-proc url_InvokeInfrastructureQuery_594075(protocol: Scheme; host: string;
+  Call_InvokeInfrastructureQuery_568302 = ref object of OpenApiRestCall_567666
+proc url_InvokeInfrastructureQuery_568304(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_InvokeInfrastructureQuery_594074(path: JsonNode; query: JsonNode;
+proc validate_InvokeInfrastructureQuery_568303(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## For clusters that have one or more instances of the Infrastructure Service configured,
   ## this API provides a way to send infrastructure-specific queries to a particular
@@ -1285,28 +1285,28 @@ proc validate_InvokeInfrastructureQuery_594074(path: JsonNode; query: JsonNode;
   ##   Command: JString (required)
   ##          : The text of the command to be invoked. The content of the command is infrastructure-specific.
   section = newJObject()
-  var valid_594076 = query.getOrDefault("timeout")
-  valid_594076 = validateParameter(valid_594076, JInt, required = false,
+  var valid_568305 = query.getOrDefault("timeout")
+  valid_568305 = validateParameter(valid_568305, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594076 != nil:
-    section.add "timeout", valid_594076
+  if valid_568305 != nil:
+    section.add "timeout", valid_568305
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594077 = query.getOrDefault("api-version")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  var valid_568306 = query.getOrDefault("api-version")
+  valid_568306 = validateParameter(valid_568306, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594077 != nil:
-    section.add "api-version", valid_594077
-  var valid_594078 = query.getOrDefault("ServiceId")
-  valid_594078 = validateParameter(valid_594078, JString, required = false,
+  if valid_568306 != nil:
+    section.add "api-version", valid_568306
+  var valid_568307 = query.getOrDefault("ServiceId")
+  valid_568307 = validateParameter(valid_568307, JString, required = false,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "ServiceId", valid_594078
-  var valid_594079 = query.getOrDefault("Command")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+  if valid_568307 != nil:
+    section.add "ServiceId", valid_568307
+  var valid_568308 = query.getOrDefault("Command")
+  valid_568308 = validateParameter(valid_568308, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "Command", valid_594079
+  if valid_568308 != nil:
+    section.add "Command", valid_568308
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1315,7 +1315,7 @@ proc validate_InvokeInfrastructureQuery_594074(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594080: Call_InvokeInfrastructureQuery_594073; path: JsonNode;
+proc call*(call_568309: Call_InvokeInfrastructureQuery_568302; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## For clusters that have one or more instances of the Infrastructure Service configured,
   ## this API provides a way to send infrastructure-specific queries to a particular
@@ -1327,16 +1327,16 @@ proc call*(call_594080: Call_InvokeInfrastructureQuery_594073; path: JsonNode;
   ## This API supports the Service Fabric platform; it is not meant to be used directly from your code.
   ## 
   ## 
-  let valid = call_594080.validator(path, query, header, formData, body)
-  let scheme = call_594080.pickScheme
+  let valid = call_568309.validator(path, query, header, formData, body)
+  let scheme = call_568309.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594080.url(scheme.get, call_594080.host, call_594080.base,
-                         call_594080.route, valid.getOrDefault("path"),
+  let url = call_568309.url(scheme.get, call_568309.host, call_568309.base,
+                         call_568309.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594080, url, valid)
+  result = hook(call_568309, url, valid)
 
-proc call*(call_594081: Call_InvokeInfrastructureQuery_594073; Command: string;
+proc call*(call_568310: Call_InvokeInfrastructureQuery_568302; Command: string;
           timeout: int = 60; apiVersion: string = "3.0"; ServiceId: string = ""): Recallable =
   ## invokeInfrastructureQuery
   ## For clusters that have one or more instances of the Infrastructure Service configured,
@@ -1356,29 +1356,29 @@ proc call*(call_594081: Call_InvokeInfrastructureQuery_594073; Command: string;
   ##            : The identity of the infrastructure service. This is  the full name of the infrastructure service without the 'fabric:' URI scheme. This parameter required only for the cluster that have more than one instance of infrastructure service running.
   ##   Command: string (required)
   ##          : The text of the command to be invoked. The content of the command is infrastructure-specific.
-  var query_594082 = newJObject()
-  add(query_594082, "timeout", newJInt(timeout))
-  add(query_594082, "api-version", newJString(apiVersion))
-  add(query_594082, "ServiceId", newJString(ServiceId))
-  add(query_594082, "Command", newJString(Command))
-  result = call_594081.call(nil, query_594082, nil, nil, nil)
+  var query_568311 = newJObject()
+  add(query_568311, "timeout", newJInt(timeout))
+  add(query_568311, "api-version", newJString(apiVersion))
+  add(query_568311, "ServiceId", newJString(ServiceId))
+  add(query_568311, "Command", newJString(Command))
+  result = call_568310.call(nil, query_568311, nil, nil, nil)
 
-var invokeInfrastructureQuery* = Call_InvokeInfrastructureQuery_594073(
+var invokeInfrastructureQuery* = Call_InvokeInfrastructureQuery_568302(
     name: "invokeInfrastructureQuery", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/$/InvokeInfrastructureQuery",
-    validator: validate_InvokeInfrastructureQuery_594074, base: "",
-    url: url_InvokeInfrastructureQuery_594075,
+    validator: validate_InvokeInfrastructureQuery_568303, base: "",
+    url: url_InvokeInfrastructureQuery_568304,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RecoverAllPartitions_594083 = ref object of OpenApiRestCall_593437
-proc url_RecoverAllPartitions_594085(protocol: Scheme; host: string; base: string;
+  Call_RecoverAllPartitions_568312 = ref object of OpenApiRestCall_567666
+proc url_RecoverAllPartitions_568314(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RecoverAllPartitions_594084(path: JsonNode; query: JsonNode;
+proc validate_RecoverAllPartitions_568313(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Indicates to the Service Fabric cluster that it should attempt to recover any services (including system services) which are currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
   ## 
@@ -1392,18 +1392,18 @@ proc validate_RecoverAllPartitions_594084(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594086 = query.getOrDefault("timeout")
-  valid_594086 = validateParameter(valid_594086, JInt, required = false,
+  var valid_568315 = query.getOrDefault("timeout")
+  valid_568315 = validateParameter(valid_568315, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594086 != nil:
-    section.add "timeout", valid_594086
+  if valid_568315 != nil:
+    section.add "timeout", valid_568315
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594087 = query.getOrDefault("api-version")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  var valid_568316 = query.getOrDefault("api-version")
+  valid_568316 = validateParameter(valid_568316, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594087 != nil:
-    section.add "api-version", valid_594087
+  if valid_568316 != nil:
+    section.add "api-version", valid_568316
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1412,20 +1412,20 @@ proc validate_RecoverAllPartitions_594084(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594088: Call_RecoverAllPartitions_594083; path: JsonNode;
+proc call*(call_568317: Call_RecoverAllPartitions_568312; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Indicates to the Service Fabric cluster that it should attempt to recover any services (including system services) which are currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
   ## 
-  let valid = call_594088.validator(path, query, header, formData, body)
-  let scheme = call_594088.pickScheme
+  let valid = call_568317.validator(path, query, header, formData, body)
+  let scheme = call_568317.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594088.url(scheme.get, call_594088.host, call_594088.base,
-                         call_594088.route, valid.getOrDefault("path"),
+  let url = call_568317.url(scheme.get, call_568317.host, call_568317.base,
+                         call_568317.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594088, url, valid)
+  result = hook(call_568317, url, valid)
 
-proc call*(call_594089: Call_RecoverAllPartitions_594083; timeout: int = 60;
+proc call*(call_568318: Call_RecoverAllPartitions_568312; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## recoverAllPartitions
   ## Indicates to the Service Fabric cluster that it should attempt to recover any services (including system services) which are currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
@@ -1433,19 +1433,19 @@ proc call*(call_594089: Call_RecoverAllPartitions_594083; timeout: int = 60;
   ##          : The server timeout for performing the operation in seconds. This specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
   ##   apiVersion: string (required)
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
-  var query_594090 = newJObject()
-  add(query_594090, "timeout", newJInt(timeout))
-  add(query_594090, "api-version", newJString(apiVersion))
-  result = call_594089.call(nil, query_594090, nil, nil, nil)
+  var query_568319 = newJObject()
+  add(query_568319, "timeout", newJInt(timeout))
+  add(query_568319, "api-version", newJString(apiVersion))
+  result = call_568318.call(nil, query_568319, nil, nil, nil)
 
-var recoverAllPartitions* = Call_RecoverAllPartitions_594083(
+var recoverAllPartitions* = Call_RecoverAllPartitions_568312(
     name: "recoverAllPartitions", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/$/RecoverAllPartitions",
-    validator: validate_RecoverAllPartitions_594084, base: "",
-    url: url_RecoverAllPartitions_594085, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_RecoverAllPartitions_568313, base: "",
+    url: url_RecoverAllPartitions_568314, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RecoverSystemPartitions_594091 = ref object of OpenApiRestCall_593437
-proc url_RecoverSystemPartitions_594093(protocol: Scheme; host: string; base: string;
+  Call_RecoverSystemPartitions_568320 = ref object of OpenApiRestCall_567666
+proc url_RecoverSystemPartitions_568322(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1453,7 +1453,7 @@ proc url_RecoverSystemPartitions_594093(protocol: Scheme; host: string; base: st
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RecoverSystemPartitions_594092(path: JsonNode; query: JsonNode;
+proc validate_RecoverSystemPartitions_568321(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Indicates to the Service Fabric cluster that it should attempt to recover the system services which are currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
   ## 
@@ -1467,18 +1467,18 @@ proc validate_RecoverSystemPartitions_594092(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594094 = query.getOrDefault("timeout")
-  valid_594094 = validateParameter(valid_594094, JInt, required = false,
+  var valid_568323 = query.getOrDefault("timeout")
+  valid_568323 = validateParameter(valid_568323, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594094 != nil:
-    section.add "timeout", valid_594094
+  if valid_568323 != nil:
+    section.add "timeout", valid_568323
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594095 = query.getOrDefault("api-version")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
+  var valid_568324 = query.getOrDefault("api-version")
+  valid_568324 = validateParameter(valid_568324, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594095 != nil:
-    section.add "api-version", valid_594095
+  if valid_568324 != nil:
+    section.add "api-version", valid_568324
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1487,20 +1487,20 @@ proc validate_RecoverSystemPartitions_594092(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594096: Call_RecoverSystemPartitions_594091; path: JsonNode;
+proc call*(call_568325: Call_RecoverSystemPartitions_568320; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Indicates to the Service Fabric cluster that it should attempt to recover the system services which are currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
   ## 
-  let valid = call_594096.validator(path, query, header, formData, body)
-  let scheme = call_594096.pickScheme
+  let valid = call_568325.validator(path, query, header, formData, body)
+  let scheme = call_568325.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594096.url(scheme.get, call_594096.host, call_594096.base,
-                         call_594096.route, valid.getOrDefault("path"),
+  let url = call_568325.url(scheme.get, call_568325.host, call_568325.base,
+                         call_568325.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594096, url, valid)
+  result = hook(call_568325, url, valid)
 
-proc call*(call_594097: Call_RecoverSystemPartitions_594091; timeout: int = 60;
+proc call*(call_568326: Call_RecoverSystemPartitions_568320; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## recoverSystemPartitions
   ## Indicates to the Service Fabric cluster that it should attempt to recover the system services which are currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
@@ -1508,26 +1508,26 @@ proc call*(call_594097: Call_RecoverSystemPartitions_594091; timeout: int = 60;
   ##          : The server timeout for performing the operation in seconds. This specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
   ##   apiVersion: string (required)
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
-  var query_594098 = newJObject()
-  add(query_594098, "timeout", newJInt(timeout))
-  add(query_594098, "api-version", newJString(apiVersion))
-  result = call_594097.call(nil, query_594098, nil, nil, nil)
+  var query_568327 = newJObject()
+  add(query_568327, "timeout", newJInt(timeout))
+  add(query_568327, "api-version", newJString(apiVersion))
+  result = call_568326.call(nil, query_568327, nil, nil, nil)
 
-var recoverSystemPartitions* = Call_RecoverSystemPartitions_594091(
+var recoverSystemPartitions* = Call_RecoverSystemPartitions_568320(
     name: "recoverSystemPartitions", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/$/RecoverSystemPartitions",
-    validator: validate_RecoverSystemPartitions_594092, base: "",
-    url: url_RecoverSystemPartitions_594093, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_RecoverSystemPartitions_568321, base: "",
+    url: url_RecoverSystemPartitions_568322, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ReportClusterHealth_594099 = ref object of OpenApiRestCall_593437
-proc url_ReportClusterHealth_594101(protocol: Scheme; host: string; base: string;
+  Call_ReportClusterHealth_568328 = ref object of OpenApiRestCall_567666
+proc url_ReportClusterHealth_568330(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ReportClusterHealth_594100(path: JsonNode; query: JsonNode;
+proc validate_ReportClusterHealth_568329(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Sends a health report on a Service Fabric cluster. The report must contain the information about the source of the health report and property on which it is reported.
@@ -1547,18 +1547,18 @@ proc validate_ReportClusterHealth_594100(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594102 = query.getOrDefault("timeout")
-  valid_594102 = validateParameter(valid_594102, JInt, required = false,
+  var valid_568331 = query.getOrDefault("timeout")
+  valid_568331 = validateParameter(valid_568331, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594102 != nil:
-    section.add "timeout", valid_594102
+  if valid_568331 != nil:
+    section.add "timeout", valid_568331
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594103 = query.getOrDefault("api-version")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  var valid_568332 = query.getOrDefault("api-version")
+  valid_568332 = validateParameter(valid_568332, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594103 != nil:
-    section.add "api-version", valid_594103
+  if valid_568332 != nil:
+    section.add "api-version", valid_568332
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1572,7 +1572,7 @@ proc validate_ReportClusterHealth_594100(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594105: Call_ReportClusterHealth_594099; path: JsonNode;
+proc call*(call_568334: Call_ReportClusterHealth_568328; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Sends a health report on a Service Fabric cluster. The report must contain the information about the source of the health report and property on which it is reported.
   ## The report is sent to a Service Fabric gateway node, which forwards to the health store.
@@ -1581,16 +1581,16 @@ proc call*(call_594105: Call_ReportClusterHealth_594099; path: JsonNode;
   ## To see whether the report was applied in the health store, run GetClusterHealth and check that the report appears in the HealthEvents section.
   ## 
   ## 
-  let valid = call_594105.validator(path, query, header, formData, body)
-  let scheme = call_594105.pickScheme
+  let valid = call_568334.validator(path, query, header, formData, body)
+  let scheme = call_568334.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594105.url(scheme.get, call_594105.host, call_594105.base,
-                         call_594105.route, valid.getOrDefault("path"),
+  let url = call_568334.url(scheme.get, call_568334.host, call_568334.base,
+                         call_568334.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594105, url, valid)
+  result = hook(call_568334, url, valid)
 
-proc call*(call_594106: Call_ReportClusterHealth_594099;
+proc call*(call_568335: Call_ReportClusterHealth_568328;
           HealthInformation: JsonNode; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## reportClusterHealth
   ## Sends a health report on a Service Fabric cluster. The report must contain the information about the source of the health report and property on which it is reported.
@@ -1605,29 +1605,29 @@ proc call*(call_594106: Call_ReportClusterHealth_594099;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   HealthInformation: JObject (required)
   ##                    : Describes the health information for the health report. This information needs to be present in all of the health reports sent to the health manager.
-  var query_594107 = newJObject()
-  var body_594108 = newJObject()
-  add(query_594107, "timeout", newJInt(timeout))
-  add(query_594107, "api-version", newJString(apiVersion))
+  var query_568336 = newJObject()
+  var body_568337 = newJObject()
+  add(query_568336, "timeout", newJInt(timeout))
+  add(query_568336, "api-version", newJString(apiVersion))
   if HealthInformation != nil:
-    body_594108 = HealthInformation
-  result = call_594106.call(nil, query_594107, nil, nil, body_594108)
+    body_568337 = HealthInformation
+  result = call_568335.call(nil, query_568336, nil, nil, body_568337)
 
-var reportClusterHealth* = Call_ReportClusterHealth_594099(
+var reportClusterHealth* = Call_ReportClusterHealth_568328(
     name: "reportClusterHealth", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/$/ReportClusterHealth",
-    validator: validate_ReportClusterHealth_594100, base: "",
-    url: url_ReportClusterHealth_594101, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_ReportClusterHealth_568329, base: "",
+    url: url_ReportClusterHealth_568330, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetApplicationTypeInfoList_594109 = ref object of OpenApiRestCall_593437
-proc url_GetApplicationTypeInfoList_594111(protocol: Scheme; host: string;
+  Call_GetApplicationTypeInfoList_568338 = ref object of OpenApiRestCall_567666
+proc url_GetApplicationTypeInfoList_568340(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetApplicationTypeInfoList_594110(path: JsonNode; query: JsonNode;
+proc validate_GetApplicationTypeInfoList_568339(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the information about the application types that are provisioned or in the process of being provisioned in the Service Fabric cluster. Each version of an application type is returned as one application type. The response includes the name, version, status and other details about the application type. This is a paged query, meaning that if not all of the application types fit in a page, one page of results is returned as well as a continuation token which can be used to get the next page. For example, if there are 10 application types but a page only fits the first 3 application types, or if max results is set to 3, then 3 is returned. To access the rest of the results, retrieve subsequent pages by using the returned continuation token in the next query. An empty continuation token is returned if there are no subsequent pages.
   ## 
@@ -1647,33 +1647,33 @@ proc validate_GetApplicationTypeInfoList_594110(path: JsonNode; query: JsonNode;
   ##   ExcludeApplicationParameters: JBool
   ##                               : The flag that specifies whether application parameters will be excluded from the result.
   section = newJObject()
-  var valid_594112 = query.getOrDefault("timeout")
-  valid_594112 = validateParameter(valid_594112, JInt, required = false,
+  var valid_568341 = query.getOrDefault("timeout")
+  valid_568341 = validateParameter(valid_568341, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594112 != nil:
-    section.add "timeout", valid_594112
+  if valid_568341 != nil:
+    section.add "timeout", valid_568341
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594113 = query.getOrDefault("api-version")
-  valid_594113 = validateParameter(valid_594113, JString, required = true,
+  var valid_568342 = query.getOrDefault("api-version")
+  valid_568342 = validateParameter(valid_568342, JString, required = true,
                                  default = newJString("4.0"))
-  if valid_594113 != nil:
-    section.add "api-version", valid_594113
-  var valid_594114 = query.getOrDefault("ContinuationToken")
-  valid_594114 = validateParameter(valid_594114, JString, required = false,
+  if valid_568342 != nil:
+    section.add "api-version", valid_568342
+  var valid_568343 = query.getOrDefault("ContinuationToken")
+  valid_568343 = validateParameter(valid_568343, JString, required = false,
                                  default = nil)
-  if valid_594114 != nil:
-    section.add "ContinuationToken", valid_594114
-  var valid_594115 = query.getOrDefault("MaxResults")
-  valid_594115 = validateParameter(valid_594115, JInt, required = false,
+  if valid_568343 != nil:
+    section.add "ContinuationToken", valid_568343
+  var valid_568344 = query.getOrDefault("MaxResults")
+  valid_568344 = validateParameter(valid_568344, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594115 != nil:
-    section.add "MaxResults", valid_594115
-  var valid_594116 = query.getOrDefault("ExcludeApplicationParameters")
-  valid_594116 = validateParameter(valid_594116, JBool, required = false,
+  if valid_568344 != nil:
+    section.add "MaxResults", valid_568344
+  var valid_568345 = query.getOrDefault("ExcludeApplicationParameters")
+  valid_568345 = validateParameter(valid_568345, JBool, required = false,
                                  default = newJBool(false))
-  if valid_594116 != nil:
-    section.add "ExcludeApplicationParameters", valid_594116
+  if valid_568345 != nil:
+    section.add "ExcludeApplicationParameters", valid_568345
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1682,20 +1682,20 @@ proc validate_GetApplicationTypeInfoList_594110(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594117: Call_GetApplicationTypeInfoList_594109; path: JsonNode;
+proc call*(call_568346: Call_GetApplicationTypeInfoList_568338; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the information about the application types that are provisioned or in the process of being provisioned in the Service Fabric cluster. Each version of an application type is returned as one application type. The response includes the name, version, status and other details about the application type. This is a paged query, meaning that if not all of the application types fit in a page, one page of results is returned as well as a continuation token which can be used to get the next page. For example, if there are 10 application types but a page only fits the first 3 application types, or if max results is set to 3, then 3 is returned. To access the rest of the results, retrieve subsequent pages by using the returned continuation token in the next query. An empty continuation token is returned if there are no subsequent pages.
   ## 
-  let valid = call_594117.validator(path, query, header, formData, body)
-  let scheme = call_594117.pickScheme
+  let valid = call_568346.validator(path, query, header, formData, body)
+  let scheme = call_568346.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594117.url(scheme.get, call_594117.host, call_594117.base,
-                         call_594117.route, valid.getOrDefault("path"),
+  let url = call_568346.url(scheme.get, call_568346.host, call_568346.base,
+                         call_568346.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594117, url, valid)
+  result = hook(call_568346, url, valid)
 
-proc call*(call_594118: Call_GetApplicationTypeInfoList_594109; timeout: int = 60;
+proc call*(call_568347: Call_GetApplicationTypeInfoList_568338; timeout: int = 60;
           apiVersion: string = "4.0"; ContinuationToken: string = "";
           MaxResults: int = 0; ExcludeApplicationParameters: bool = false): Recallable =
   ## getApplicationTypeInfoList
@@ -1710,24 +1710,24 @@ proc call*(call_594118: Call_GetApplicationTypeInfoList_594109; timeout: int = 6
   ##             : The maximum number of results to be returned as part of the paged queries. This parameter defines the upper bound on the number of results returned. The results returned can be less than the specified maximum results if they do not fit in the message as per the max message size restrictions defined in the configuration. If this parameter is zero or not specified, the paged queries includes as much results as possible that fit in the return message.
   ##   ExcludeApplicationParameters: bool
   ##                               : The flag that specifies whether application parameters will be excluded from the result.
-  var query_594119 = newJObject()
-  add(query_594119, "timeout", newJInt(timeout))
-  add(query_594119, "api-version", newJString(apiVersion))
-  add(query_594119, "ContinuationToken", newJString(ContinuationToken))
-  add(query_594119, "MaxResults", newJInt(MaxResults))
-  add(query_594119, "ExcludeApplicationParameters",
+  var query_568348 = newJObject()
+  add(query_568348, "timeout", newJInt(timeout))
+  add(query_568348, "api-version", newJString(apiVersion))
+  add(query_568348, "ContinuationToken", newJString(ContinuationToken))
+  add(query_568348, "MaxResults", newJInt(MaxResults))
+  add(query_568348, "ExcludeApplicationParameters",
       newJBool(ExcludeApplicationParameters))
-  result = call_594118.call(nil, query_594119, nil, nil, nil)
+  result = call_568347.call(nil, query_568348, nil, nil, nil)
 
-var getApplicationTypeInfoList* = Call_GetApplicationTypeInfoList_594109(
+var getApplicationTypeInfoList* = Call_GetApplicationTypeInfoList_568338(
     name: "getApplicationTypeInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/ApplicationTypes",
-    validator: validate_GetApplicationTypeInfoList_594110, base: "",
-    url: url_GetApplicationTypeInfoList_594111,
+    validator: validate_GetApplicationTypeInfoList_568339, base: "",
+    url: url_GetApplicationTypeInfoList_568340,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ProvisionApplicationType_594120 = ref object of OpenApiRestCall_593437
-proc url_ProvisionApplicationType_594122(protocol: Scheme; host: string;
+  Call_ProvisionApplicationType_568349 = ref object of OpenApiRestCall_567666
+proc url_ProvisionApplicationType_568351(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1735,7 +1735,7 @@ proc url_ProvisionApplicationType_594122(protocol: Scheme; host: string;
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ProvisionApplicationType_594121(path: JsonNode; query: JsonNode;
+proc validate_ProvisionApplicationType_568350(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Provisions or registers a Service Fabric application type with the cluster. This is required before any new applications can be instantiated.
   ## 
@@ -1749,18 +1749,18 @@ proc validate_ProvisionApplicationType_594121(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594123 = query.getOrDefault("timeout")
-  valid_594123 = validateParameter(valid_594123, JInt, required = false,
+  var valid_568352 = query.getOrDefault("timeout")
+  valid_568352 = validateParameter(valid_568352, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594123 != nil:
-    section.add "timeout", valid_594123
+  if valid_568352 != nil:
+    section.add "timeout", valid_568352
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594124 = query.getOrDefault("api-version")
-  valid_594124 = validateParameter(valid_594124, JString, required = true,
+  var valid_568353 = query.getOrDefault("api-version")
+  valid_568353 = validateParameter(valid_568353, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594124 != nil:
-    section.add "api-version", valid_594124
+  if valid_568353 != nil:
+    section.add "api-version", valid_568353
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1774,20 +1774,20 @@ proc validate_ProvisionApplicationType_594121(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594126: Call_ProvisionApplicationType_594120; path: JsonNode;
+proc call*(call_568355: Call_ProvisionApplicationType_568349; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Provisions or registers a Service Fabric application type with the cluster. This is required before any new applications can be instantiated.
   ## 
-  let valid = call_594126.validator(path, query, header, formData, body)
-  let scheme = call_594126.pickScheme
+  let valid = call_568355.validator(path, query, header, formData, body)
+  let scheme = call_568355.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594126.url(scheme.get, call_594126.host, call_594126.base,
-                         call_594126.route, valid.getOrDefault("path"),
+  let url = call_568355.url(scheme.get, call_568355.host, call_568355.base,
+                         call_568355.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594126, url, valid)
+  result = hook(call_568355, url, valid)
 
-proc call*(call_594127: Call_ProvisionApplicationType_594120;
+proc call*(call_568356: Call_ProvisionApplicationType_568349;
           ApplicationTypeImageStorePath: JsonNode; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## provisionApplicationType
@@ -1798,22 +1798,22 @@ proc call*(call_594127: Call_ProvisionApplicationType_594120;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   ApplicationTypeImageStorePath: JObject (required)
   ##                                : The relative path for the application package in the image store specified during the prior copy operation.
-  var query_594128 = newJObject()
-  var body_594129 = newJObject()
-  add(query_594128, "timeout", newJInt(timeout))
-  add(query_594128, "api-version", newJString(apiVersion))
+  var query_568357 = newJObject()
+  var body_568358 = newJObject()
+  add(query_568357, "timeout", newJInt(timeout))
+  add(query_568357, "api-version", newJString(apiVersion))
   if ApplicationTypeImageStorePath != nil:
-    body_594129 = ApplicationTypeImageStorePath
-  result = call_594127.call(nil, query_594128, nil, nil, body_594129)
+    body_568358 = ApplicationTypeImageStorePath
+  result = call_568356.call(nil, query_568357, nil, nil, body_568358)
 
-var provisionApplicationType* = Call_ProvisionApplicationType_594120(
+var provisionApplicationType* = Call_ProvisionApplicationType_568349(
     name: "provisionApplicationType", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/ApplicationTypes/$/Provision",
-    validator: validate_ProvisionApplicationType_594121, base: "",
-    url: url_ProvisionApplicationType_594122, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_ProvisionApplicationType_568350, base: "",
+    url: url_ProvisionApplicationType_568351, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetApplicationTypeInfoListByName_594130 = ref object of OpenApiRestCall_593437
-proc url_GetApplicationTypeInfoListByName_594132(protocol: Scheme; host: string;
+  Call_GetApplicationTypeInfoListByName_568359 = ref object of OpenApiRestCall_567666
+proc url_GetApplicationTypeInfoListByName_568361(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1829,7 +1829,7 @@ proc url_GetApplicationTypeInfoListByName_594132(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetApplicationTypeInfoListByName_594131(path: JsonNode;
+proc validate_GetApplicationTypeInfoListByName_568360(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the information about the application types that are provisioned or in the process of being provisioned in the Service Fabric cluster. These results are of application types whose name match exactly the one specified as the parameter, and which comply with the given query parameters. All versions of the application type matching the application type name are returned, with each version returned as one application type. The response includes the name, version, status and other details about the application type. This is a paged query, meaning that if not all of the application types fit in a page, one page of results is returned as well as a continuation token which can be used to get the next page. For example, if there are 10 application types but a page only fits the first 3 application types, or if max results is set to 3, then 3 is returned. To access the rest of the results, retrieve subsequent pages by using the returned continuation token in the next query. An empty continuation token is returned if there are no subsequent pages.
   ## 
@@ -1840,11 +1840,11 @@ proc validate_GetApplicationTypeInfoListByName_594131(path: JsonNode;
   ##                      : The name of the application type.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `applicationTypeName` field"
-  var valid_594147 = path.getOrDefault("applicationTypeName")
-  valid_594147 = validateParameter(valid_594147, JString, required = true,
+  var valid_568376 = path.getOrDefault("applicationTypeName")
+  valid_568376 = validateParameter(valid_568376, JString, required = true,
                                  default = nil)
-  if valid_594147 != nil:
-    section.add "applicationTypeName", valid_594147
+  if valid_568376 != nil:
+    section.add "applicationTypeName", valid_568376
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -1858,33 +1858,33 @@ proc validate_GetApplicationTypeInfoListByName_594131(path: JsonNode;
   ##   ExcludeApplicationParameters: JBool
   ##                               : The flag that specifies whether application parameters will be excluded from the result.
   section = newJObject()
-  var valid_594148 = query.getOrDefault("timeout")
-  valid_594148 = validateParameter(valid_594148, JInt, required = false,
+  var valid_568377 = query.getOrDefault("timeout")
+  valid_568377 = validateParameter(valid_568377, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594148 != nil:
-    section.add "timeout", valid_594148
+  if valid_568377 != nil:
+    section.add "timeout", valid_568377
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594149 = query.getOrDefault("api-version")
-  valid_594149 = validateParameter(valid_594149, JString, required = true,
+  var valid_568378 = query.getOrDefault("api-version")
+  valid_568378 = validateParameter(valid_568378, JString, required = true,
                                  default = newJString("4.0"))
-  if valid_594149 != nil:
-    section.add "api-version", valid_594149
-  var valid_594150 = query.getOrDefault("ContinuationToken")
-  valid_594150 = validateParameter(valid_594150, JString, required = false,
+  if valid_568378 != nil:
+    section.add "api-version", valid_568378
+  var valid_568379 = query.getOrDefault("ContinuationToken")
+  valid_568379 = validateParameter(valid_568379, JString, required = false,
                                  default = nil)
-  if valid_594150 != nil:
-    section.add "ContinuationToken", valid_594150
-  var valid_594151 = query.getOrDefault("MaxResults")
-  valid_594151 = validateParameter(valid_594151, JInt, required = false,
+  if valid_568379 != nil:
+    section.add "ContinuationToken", valid_568379
+  var valid_568380 = query.getOrDefault("MaxResults")
+  valid_568380 = validateParameter(valid_568380, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594151 != nil:
-    section.add "MaxResults", valid_594151
-  var valid_594152 = query.getOrDefault("ExcludeApplicationParameters")
-  valid_594152 = validateParameter(valid_594152, JBool, required = false,
+  if valid_568380 != nil:
+    section.add "MaxResults", valid_568380
+  var valid_568381 = query.getOrDefault("ExcludeApplicationParameters")
+  valid_568381 = validateParameter(valid_568381, JBool, required = false,
                                  default = newJBool(false))
-  if valid_594152 != nil:
-    section.add "ExcludeApplicationParameters", valid_594152
+  if valid_568381 != nil:
+    section.add "ExcludeApplicationParameters", valid_568381
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1893,21 +1893,21 @@ proc validate_GetApplicationTypeInfoListByName_594131(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594153: Call_GetApplicationTypeInfoListByName_594130;
+proc call*(call_568382: Call_GetApplicationTypeInfoListByName_568359;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns the information about the application types that are provisioned or in the process of being provisioned in the Service Fabric cluster. These results are of application types whose name match exactly the one specified as the parameter, and which comply with the given query parameters. All versions of the application type matching the application type name are returned, with each version returned as one application type. The response includes the name, version, status and other details about the application type. This is a paged query, meaning that if not all of the application types fit in a page, one page of results is returned as well as a continuation token which can be used to get the next page. For example, if there are 10 application types but a page only fits the first 3 application types, or if max results is set to 3, then 3 is returned. To access the rest of the results, retrieve subsequent pages by using the returned continuation token in the next query. An empty continuation token is returned if there are no subsequent pages.
   ## 
-  let valid = call_594153.validator(path, query, header, formData, body)
-  let scheme = call_594153.pickScheme
+  let valid = call_568382.validator(path, query, header, formData, body)
+  let scheme = call_568382.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594153.url(scheme.get, call_594153.host, call_594153.base,
-                         call_594153.route, valid.getOrDefault("path"),
+  let url = call_568382.url(scheme.get, call_568382.host, call_568382.base,
+                         call_568382.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594153, url, valid)
+  result = hook(call_568382, url, valid)
 
-proc call*(call_594154: Call_GetApplicationTypeInfoListByName_594130;
+proc call*(call_568383: Call_GetApplicationTypeInfoListByName_568359;
           applicationTypeName: string; timeout: int = 60; apiVersion: string = "4.0";
           ContinuationToken: string = ""; MaxResults: int = 0;
           ExcludeApplicationParameters: bool = false): Recallable =
@@ -1925,26 +1925,26 @@ proc call*(call_594154: Call_GetApplicationTypeInfoListByName_594130;
   ##             : The maximum number of results to be returned as part of the paged queries. This parameter defines the upper bound on the number of results returned. The results returned can be less than the specified maximum results if they do not fit in the message as per the max message size restrictions defined in the configuration. If this parameter is zero or not specified, the paged queries includes as much results as possible that fit in the return message.
   ##   ExcludeApplicationParameters: bool
   ##                               : The flag that specifies whether application parameters will be excluded from the result.
-  var path_594155 = newJObject()
-  var query_594156 = newJObject()
-  add(query_594156, "timeout", newJInt(timeout))
-  add(query_594156, "api-version", newJString(apiVersion))
-  add(path_594155, "applicationTypeName", newJString(applicationTypeName))
-  add(query_594156, "ContinuationToken", newJString(ContinuationToken))
-  add(query_594156, "MaxResults", newJInt(MaxResults))
-  add(query_594156, "ExcludeApplicationParameters",
+  var path_568384 = newJObject()
+  var query_568385 = newJObject()
+  add(query_568385, "timeout", newJInt(timeout))
+  add(query_568385, "api-version", newJString(apiVersion))
+  add(path_568384, "applicationTypeName", newJString(applicationTypeName))
+  add(query_568385, "ContinuationToken", newJString(ContinuationToken))
+  add(query_568385, "MaxResults", newJInt(MaxResults))
+  add(query_568385, "ExcludeApplicationParameters",
       newJBool(ExcludeApplicationParameters))
-  result = call_594154.call(path_594155, query_594156, nil, nil, nil)
+  result = call_568383.call(path_568384, query_568385, nil, nil, nil)
 
-var getApplicationTypeInfoListByName* = Call_GetApplicationTypeInfoListByName_594130(
+var getApplicationTypeInfoListByName* = Call_GetApplicationTypeInfoListByName_568359(
     name: "getApplicationTypeInfoListByName", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/ApplicationTypes/{applicationTypeName}",
-    validator: validate_GetApplicationTypeInfoListByName_594131, base: "",
-    url: url_GetApplicationTypeInfoListByName_594132,
+    validator: validate_GetApplicationTypeInfoListByName_568360, base: "",
+    url: url_GetApplicationTypeInfoListByName_568361,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetApplicationManifest_594157 = ref object of OpenApiRestCall_593437
-proc url_GetApplicationManifest_594159(protocol: Scheme; host: string; base: string;
+  Call_GetApplicationManifest_568386 = ref object of OpenApiRestCall_567666
+proc url_GetApplicationManifest_568388(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1961,7 +1961,7 @@ proc url_GetApplicationManifest_594159(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetApplicationManifest_594158(path: JsonNode; query: JsonNode;
+proc validate_GetApplicationManifest_568387(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the manifest describing an application type. The response contains the application manifest XML as a string.
   ## 
@@ -1972,11 +1972,11 @@ proc validate_GetApplicationManifest_594158(path: JsonNode; query: JsonNode;
   ##                      : The name of the application type.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `applicationTypeName` field"
-  var valid_594160 = path.getOrDefault("applicationTypeName")
-  valid_594160 = validateParameter(valid_594160, JString, required = true,
+  var valid_568389 = path.getOrDefault("applicationTypeName")
+  valid_568389 = validateParameter(valid_568389, JString, required = true,
                                  default = nil)
-  if valid_594160 != nil:
-    section.add "applicationTypeName", valid_594160
+  if valid_568389 != nil:
+    section.add "applicationTypeName", valid_568389
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -1986,23 +1986,23 @@ proc validate_GetApplicationManifest_594158(path: JsonNode; query: JsonNode;
   ##   ApplicationTypeVersion: JString (required)
   ##                         : The version of the application type.
   section = newJObject()
-  var valid_594161 = query.getOrDefault("timeout")
-  valid_594161 = validateParameter(valid_594161, JInt, required = false,
+  var valid_568390 = query.getOrDefault("timeout")
+  valid_568390 = validateParameter(valid_568390, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594161 != nil:
-    section.add "timeout", valid_594161
+  if valid_568390 != nil:
+    section.add "timeout", valid_568390
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594162 = query.getOrDefault("api-version")
-  valid_594162 = validateParameter(valid_594162, JString, required = true,
+  var valid_568391 = query.getOrDefault("api-version")
+  valid_568391 = validateParameter(valid_568391, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594162 != nil:
-    section.add "api-version", valid_594162
-  var valid_594163 = query.getOrDefault("ApplicationTypeVersion")
-  valid_594163 = validateParameter(valid_594163, JString, required = true,
+  if valid_568391 != nil:
+    section.add "api-version", valid_568391
+  var valid_568392 = query.getOrDefault("ApplicationTypeVersion")
+  valid_568392 = validateParameter(valid_568392, JString, required = true,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "ApplicationTypeVersion", valid_594163
+  if valid_568392 != nil:
+    section.add "ApplicationTypeVersion", valid_568392
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2011,20 +2011,20 @@ proc validate_GetApplicationManifest_594158(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594164: Call_GetApplicationManifest_594157; path: JsonNode;
+proc call*(call_568393: Call_GetApplicationManifest_568386; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the manifest describing an application type. The response contains the application manifest XML as a string.
   ## 
-  let valid = call_594164.validator(path, query, header, formData, body)
-  let scheme = call_594164.pickScheme
+  let valid = call_568393.validator(path, query, header, formData, body)
+  let scheme = call_568393.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594164.url(scheme.get, call_594164.host, call_594164.base,
-                         call_594164.route, valid.getOrDefault("path"),
+  let url = call_568393.url(scheme.get, call_568393.host, call_568393.base,
+                         call_568393.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594164, url, valid)
+  result = hook(call_568393, url, valid)
 
-proc call*(call_594165: Call_GetApplicationManifest_594157;
+proc call*(call_568394: Call_GetApplicationManifest_568386;
           applicationTypeName: string; ApplicationTypeVersion: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getApplicationManifest
@@ -2037,23 +2037,23 @@ proc call*(call_594165: Call_GetApplicationManifest_594157;
   ##                      : The name of the application type.
   ##   ApplicationTypeVersion: string (required)
   ##                         : The version of the application type.
-  var path_594166 = newJObject()
-  var query_594167 = newJObject()
-  add(query_594167, "timeout", newJInt(timeout))
-  add(query_594167, "api-version", newJString(apiVersion))
-  add(path_594166, "applicationTypeName", newJString(applicationTypeName))
-  add(query_594167, "ApplicationTypeVersion", newJString(ApplicationTypeVersion))
-  result = call_594165.call(path_594166, query_594167, nil, nil, nil)
+  var path_568395 = newJObject()
+  var query_568396 = newJObject()
+  add(query_568396, "timeout", newJInt(timeout))
+  add(query_568396, "api-version", newJString(apiVersion))
+  add(path_568395, "applicationTypeName", newJString(applicationTypeName))
+  add(query_568396, "ApplicationTypeVersion", newJString(ApplicationTypeVersion))
+  result = call_568394.call(path_568395, query_568396, nil, nil, nil)
 
-var getApplicationManifest* = Call_GetApplicationManifest_594157(
+var getApplicationManifest* = Call_GetApplicationManifest_568386(
     name: "getApplicationManifest", meth: HttpMethod.HttpGet,
     host: "azure.local:19080",
     route: "/ApplicationTypes/{applicationTypeName}/$/GetApplicationManifest",
-    validator: validate_GetApplicationManifest_594158, base: "",
-    url: url_GetApplicationManifest_594159, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetApplicationManifest_568387, base: "",
+    url: url_GetApplicationManifest_568388, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetServiceManifest_594168 = ref object of OpenApiRestCall_593437
-proc url_GetServiceManifest_594170(protocol: Scheme; host: string; base: string;
+  Call_GetServiceManifest_568397 = ref object of OpenApiRestCall_567666
+proc url_GetServiceManifest_568399(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2070,7 +2070,7 @@ proc url_GetServiceManifest_594170(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetServiceManifest_594169(path: JsonNode; query: JsonNode;
+proc validate_GetServiceManifest_568398(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the manifest describing a service type. The response contains the service manifest XML as a string.
@@ -2082,11 +2082,11 @@ proc validate_GetServiceManifest_594169(path: JsonNode; query: JsonNode;
   ##                      : The name of the application type.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `applicationTypeName` field"
-  var valid_594171 = path.getOrDefault("applicationTypeName")
-  valid_594171 = validateParameter(valid_594171, JString, required = true,
+  var valid_568400 = path.getOrDefault("applicationTypeName")
+  valid_568400 = validateParameter(valid_568400, JString, required = true,
                                  default = nil)
-  if valid_594171 != nil:
-    section.add "applicationTypeName", valid_594171
+  if valid_568400 != nil:
+    section.add "applicationTypeName", valid_568400
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -2098,28 +2098,28 @@ proc validate_GetServiceManifest_594169(path: JsonNode; query: JsonNode;
   ##   ServiceManifestName: JString (required)
   ##                      : The name of a service manifest registered as part of an application type in a Service Fabric cluster.
   section = newJObject()
-  var valid_594172 = query.getOrDefault("timeout")
-  valid_594172 = validateParameter(valid_594172, JInt, required = false,
+  var valid_568401 = query.getOrDefault("timeout")
+  valid_568401 = validateParameter(valid_568401, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594172 != nil:
-    section.add "timeout", valid_594172
+  if valid_568401 != nil:
+    section.add "timeout", valid_568401
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594173 = query.getOrDefault("api-version")
-  valid_594173 = validateParameter(valid_594173, JString, required = true,
+  var valid_568402 = query.getOrDefault("api-version")
+  valid_568402 = validateParameter(valid_568402, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594173 != nil:
-    section.add "api-version", valid_594173
-  var valid_594174 = query.getOrDefault("ApplicationTypeVersion")
-  valid_594174 = validateParameter(valid_594174, JString, required = true,
+  if valid_568402 != nil:
+    section.add "api-version", valid_568402
+  var valid_568403 = query.getOrDefault("ApplicationTypeVersion")
+  valid_568403 = validateParameter(valid_568403, JString, required = true,
                                  default = nil)
-  if valid_594174 != nil:
-    section.add "ApplicationTypeVersion", valid_594174
-  var valid_594175 = query.getOrDefault("ServiceManifestName")
-  valid_594175 = validateParameter(valid_594175, JString, required = true,
+  if valid_568403 != nil:
+    section.add "ApplicationTypeVersion", valid_568403
+  var valid_568404 = query.getOrDefault("ServiceManifestName")
+  valid_568404 = validateParameter(valid_568404, JString, required = true,
                                  default = nil)
-  if valid_594175 != nil:
-    section.add "ServiceManifestName", valid_594175
+  if valid_568404 != nil:
+    section.add "ServiceManifestName", valid_568404
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2128,20 +2128,20 @@ proc validate_GetServiceManifest_594169(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594176: Call_GetServiceManifest_594168; path: JsonNode;
+proc call*(call_568405: Call_GetServiceManifest_568397; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the manifest describing a service type. The response contains the service manifest XML as a string.
   ## 
-  let valid = call_594176.validator(path, query, header, formData, body)
-  let scheme = call_594176.pickScheme
+  let valid = call_568405.validator(path, query, header, formData, body)
+  let scheme = call_568405.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594176.url(scheme.get, call_594176.host, call_594176.base,
-                         call_594176.route, valid.getOrDefault("path"),
+  let url = call_568405.url(scheme.get, call_568405.host, call_568405.base,
+                         call_568405.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594176, url, valid)
+  result = hook(call_568405, url, valid)
 
-proc call*(call_594177: Call_GetServiceManifest_594168;
+proc call*(call_568406: Call_GetServiceManifest_568397;
           applicationTypeName: string; ApplicationTypeVersion: string;
           ServiceManifestName: string; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getServiceManifest
@@ -2156,23 +2156,23 @@ proc call*(call_594177: Call_GetServiceManifest_594168;
   ##                         : The version of the application type.
   ##   ServiceManifestName: string (required)
   ##                      : The name of a service manifest registered as part of an application type in a Service Fabric cluster.
-  var path_594178 = newJObject()
-  var query_594179 = newJObject()
-  add(query_594179, "timeout", newJInt(timeout))
-  add(query_594179, "api-version", newJString(apiVersion))
-  add(path_594178, "applicationTypeName", newJString(applicationTypeName))
-  add(query_594179, "ApplicationTypeVersion", newJString(ApplicationTypeVersion))
-  add(query_594179, "ServiceManifestName", newJString(ServiceManifestName))
-  result = call_594177.call(path_594178, query_594179, nil, nil, nil)
+  var path_568407 = newJObject()
+  var query_568408 = newJObject()
+  add(query_568408, "timeout", newJInt(timeout))
+  add(query_568408, "api-version", newJString(apiVersion))
+  add(path_568407, "applicationTypeName", newJString(applicationTypeName))
+  add(query_568408, "ApplicationTypeVersion", newJString(ApplicationTypeVersion))
+  add(query_568408, "ServiceManifestName", newJString(ServiceManifestName))
+  result = call_568406.call(path_568407, query_568408, nil, nil, nil)
 
-var getServiceManifest* = Call_GetServiceManifest_594168(
+var getServiceManifest* = Call_GetServiceManifest_568397(
     name: "getServiceManifest", meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/ApplicationTypes/{applicationTypeName}/$/GetServiceManifest",
-    validator: validate_GetServiceManifest_594169, base: "",
-    url: url_GetServiceManifest_594170, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetServiceManifest_568398, base: "",
+    url: url_GetServiceManifest_568399, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetServiceTypeInfoList_594180 = ref object of OpenApiRestCall_593437
-proc url_GetServiceTypeInfoList_594182(protocol: Scheme; host: string; base: string;
+  Call_GetServiceTypeInfoList_568409 = ref object of OpenApiRestCall_567666
+proc url_GetServiceTypeInfoList_568411(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2189,7 +2189,7 @@ proc url_GetServiceTypeInfoList_594182(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetServiceTypeInfoList_594181(path: JsonNode; query: JsonNode;
+proc validate_GetServiceTypeInfoList_568410(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list containing the information about service types that are supported by a provisioned application type in a Service Fabric cluster. The response includes the name of the service type, the name and version of the service manifest the type is defined in, kind (stateless or stateless) of the service type and other information about it.
   ## 
@@ -2200,11 +2200,11 @@ proc validate_GetServiceTypeInfoList_594181(path: JsonNode; query: JsonNode;
   ##                      : The name of the application type.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `applicationTypeName` field"
-  var valid_594183 = path.getOrDefault("applicationTypeName")
-  valid_594183 = validateParameter(valid_594183, JString, required = true,
+  var valid_568412 = path.getOrDefault("applicationTypeName")
+  valid_568412 = validateParameter(valid_568412, JString, required = true,
                                  default = nil)
-  if valid_594183 != nil:
-    section.add "applicationTypeName", valid_594183
+  if valid_568412 != nil:
+    section.add "applicationTypeName", valid_568412
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -2214,23 +2214,23 @@ proc validate_GetServiceTypeInfoList_594181(path: JsonNode; query: JsonNode;
   ##   ApplicationTypeVersion: JString (required)
   ##                         : The version of the application type.
   section = newJObject()
-  var valid_594184 = query.getOrDefault("timeout")
-  valid_594184 = validateParameter(valid_594184, JInt, required = false,
+  var valid_568413 = query.getOrDefault("timeout")
+  valid_568413 = validateParameter(valid_568413, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594184 != nil:
-    section.add "timeout", valid_594184
+  if valid_568413 != nil:
+    section.add "timeout", valid_568413
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594185 = query.getOrDefault("api-version")
-  valid_594185 = validateParameter(valid_594185, JString, required = true,
+  var valid_568414 = query.getOrDefault("api-version")
+  valid_568414 = validateParameter(valid_568414, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594185 != nil:
-    section.add "api-version", valid_594185
-  var valid_594186 = query.getOrDefault("ApplicationTypeVersion")
-  valid_594186 = validateParameter(valid_594186, JString, required = true,
+  if valid_568414 != nil:
+    section.add "api-version", valid_568414
+  var valid_568415 = query.getOrDefault("ApplicationTypeVersion")
+  valid_568415 = validateParameter(valid_568415, JString, required = true,
                                  default = nil)
-  if valid_594186 != nil:
-    section.add "ApplicationTypeVersion", valid_594186
+  if valid_568415 != nil:
+    section.add "ApplicationTypeVersion", valid_568415
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2239,20 +2239,20 @@ proc validate_GetServiceTypeInfoList_594181(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594187: Call_GetServiceTypeInfoList_594180; path: JsonNode;
+proc call*(call_568416: Call_GetServiceTypeInfoList_568409; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list containing the information about service types that are supported by a provisioned application type in a Service Fabric cluster. The response includes the name of the service type, the name and version of the service manifest the type is defined in, kind (stateless or stateless) of the service type and other information about it.
   ## 
-  let valid = call_594187.validator(path, query, header, formData, body)
-  let scheme = call_594187.pickScheme
+  let valid = call_568416.validator(path, query, header, formData, body)
+  let scheme = call_568416.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594187.url(scheme.get, call_594187.host, call_594187.base,
-                         call_594187.route, valid.getOrDefault("path"),
+  let url = call_568416.url(scheme.get, call_568416.host, call_568416.base,
+                         call_568416.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594187, url, valid)
+  result = hook(call_568416, url, valid)
 
-proc call*(call_594188: Call_GetServiceTypeInfoList_594180;
+proc call*(call_568417: Call_GetServiceTypeInfoList_568409;
           applicationTypeName: string; ApplicationTypeVersion: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getServiceTypeInfoList
@@ -2265,23 +2265,23 @@ proc call*(call_594188: Call_GetServiceTypeInfoList_594180;
   ##                      : The name of the application type.
   ##   ApplicationTypeVersion: string (required)
   ##                         : The version of the application type.
-  var path_594189 = newJObject()
-  var query_594190 = newJObject()
-  add(query_594190, "timeout", newJInt(timeout))
-  add(query_594190, "api-version", newJString(apiVersion))
-  add(path_594189, "applicationTypeName", newJString(applicationTypeName))
-  add(query_594190, "ApplicationTypeVersion", newJString(ApplicationTypeVersion))
-  result = call_594188.call(path_594189, query_594190, nil, nil, nil)
+  var path_568418 = newJObject()
+  var query_568419 = newJObject()
+  add(query_568419, "timeout", newJInt(timeout))
+  add(query_568419, "api-version", newJString(apiVersion))
+  add(path_568418, "applicationTypeName", newJString(applicationTypeName))
+  add(query_568419, "ApplicationTypeVersion", newJString(ApplicationTypeVersion))
+  result = call_568417.call(path_568418, query_568419, nil, nil, nil)
 
-var getServiceTypeInfoList* = Call_GetServiceTypeInfoList_594180(
+var getServiceTypeInfoList* = Call_GetServiceTypeInfoList_568409(
     name: "getServiceTypeInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080",
     route: "/ApplicationTypes/{applicationTypeName}/$/GetServiceTypes",
-    validator: validate_GetServiceTypeInfoList_594181, base: "",
-    url: url_GetServiceTypeInfoList_594182, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetServiceTypeInfoList_568410, base: "",
+    url: url_GetServiceTypeInfoList_568411, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_UnprovisionApplicationType_594191 = ref object of OpenApiRestCall_593437
-proc url_UnprovisionApplicationType_594193(protocol: Scheme; host: string;
+  Call_UnprovisionApplicationType_568420 = ref object of OpenApiRestCall_567666
+proc url_UnprovisionApplicationType_568422(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2298,7 +2298,7 @@ proc url_UnprovisionApplicationType_594193(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UnprovisionApplicationType_594192(path: JsonNode; query: JsonNode;
+proc validate_UnprovisionApplicationType_568421(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Removes or unregisters a Service Fabric application type from the cluster. This operation can only be performed if all application instance of the application type has been deleted. Once the application type is unregistered, no new application instance can be created for this particular application type.
   ## 
@@ -2309,11 +2309,11 @@ proc validate_UnprovisionApplicationType_594192(path: JsonNode; query: JsonNode;
   ##                      : The name of the application type.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `applicationTypeName` field"
-  var valid_594194 = path.getOrDefault("applicationTypeName")
-  valid_594194 = validateParameter(valid_594194, JString, required = true,
+  var valid_568423 = path.getOrDefault("applicationTypeName")
+  valid_568423 = validateParameter(valid_568423, JString, required = true,
                                  default = nil)
-  if valid_594194 != nil:
-    section.add "applicationTypeName", valid_594194
+  if valid_568423 != nil:
+    section.add "applicationTypeName", valid_568423
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -2321,18 +2321,18 @@ proc validate_UnprovisionApplicationType_594192(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594195 = query.getOrDefault("timeout")
-  valid_594195 = validateParameter(valid_594195, JInt, required = false,
+  var valid_568424 = query.getOrDefault("timeout")
+  valid_568424 = validateParameter(valid_568424, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594195 != nil:
-    section.add "timeout", valid_594195
+  if valid_568424 != nil:
+    section.add "timeout", valid_568424
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594196 = query.getOrDefault("api-version")
-  valid_594196 = validateParameter(valid_594196, JString, required = true,
+  var valid_568425 = query.getOrDefault("api-version")
+  valid_568425 = validateParameter(valid_568425, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594196 != nil:
-    section.add "api-version", valid_594196
+  if valid_568425 != nil:
+    section.add "api-version", valid_568425
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2346,20 +2346,20 @@ proc validate_UnprovisionApplicationType_594192(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594198: Call_UnprovisionApplicationType_594191; path: JsonNode;
+proc call*(call_568427: Call_UnprovisionApplicationType_568420; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Removes or unregisters a Service Fabric application type from the cluster. This operation can only be performed if all application instance of the application type has been deleted. Once the application type is unregistered, no new application instance can be created for this particular application type.
   ## 
-  let valid = call_594198.validator(path, query, header, formData, body)
-  let scheme = call_594198.pickScheme
+  let valid = call_568427.validator(path, query, header, formData, body)
+  let scheme = call_568427.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594198.url(scheme.get, call_594198.host, call_594198.base,
-                         call_594198.route, valid.getOrDefault("path"),
+  let url = call_568427.url(scheme.get, call_568427.host, call_568427.base,
+                         call_568427.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594198, url, valid)
+  result = hook(call_568427, url, valid)
 
-proc call*(call_594199: Call_UnprovisionApplicationType_594191;
+proc call*(call_568428: Call_UnprovisionApplicationType_568420;
           ApplicationTypeImageStoreVersion: JsonNode; applicationTypeName: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## unprovisionApplicationType
@@ -2372,33 +2372,33 @@ proc call*(call_594199: Call_UnprovisionApplicationType_594191;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   applicationTypeName: string (required)
   ##                      : The name of the application type.
-  var path_594200 = newJObject()
-  var query_594201 = newJObject()
-  var body_594202 = newJObject()
+  var path_568429 = newJObject()
+  var query_568430 = newJObject()
+  var body_568431 = newJObject()
   if ApplicationTypeImageStoreVersion != nil:
-    body_594202 = ApplicationTypeImageStoreVersion
-  add(query_594201, "timeout", newJInt(timeout))
-  add(query_594201, "api-version", newJString(apiVersion))
-  add(path_594200, "applicationTypeName", newJString(applicationTypeName))
-  result = call_594199.call(path_594200, query_594201, nil, nil, body_594202)
+    body_568431 = ApplicationTypeImageStoreVersion
+  add(query_568430, "timeout", newJInt(timeout))
+  add(query_568430, "api-version", newJString(apiVersion))
+  add(path_568429, "applicationTypeName", newJString(applicationTypeName))
+  result = call_568428.call(path_568429, query_568430, nil, nil, body_568431)
 
-var unprovisionApplicationType* = Call_UnprovisionApplicationType_594191(
+var unprovisionApplicationType* = Call_UnprovisionApplicationType_568420(
     name: "unprovisionApplicationType", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/ApplicationTypes/{applicationTypeName}/$/Unprovision",
-    validator: validate_UnprovisionApplicationType_594192, base: "",
-    url: url_UnprovisionApplicationType_594193,
+    validator: validate_UnprovisionApplicationType_568421, base: "",
+    url: url_UnprovisionApplicationType_568422,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetApplicationInfoList_594203 = ref object of OpenApiRestCall_593437
-proc url_GetApplicationInfoList_594205(protocol: Scheme; host: string; base: string;
+  Call_GetApplicationInfoList_568432 = ref object of OpenApiRestCall_567666
+proc url_GetApplicationInfoList_568434(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetApplicationInfoList_594204(path: JsonNode; query: JsonNode;
+proc validate_GetApplicationInfoList_568433(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the information about the applications that were created or in the process of being created in the Service Fabric cluster and match filters specified as the parameter. The response includes the name, type, status, parameters and other details about the application. If the applications do not fit in a page, one page of results is returned as well as a continuation token which can be used to get the next page.
   ## 
@@ -2418,33 +2418,33 @@ proc validate_GetApplicationInfoList_594204(path: JsonNode; query: JsonNode;
   ##   ExcludeApplicationParameters: JBool
   ##                               : The flag that specifies whether application parameters will be excluded from the result.
   section = newJObject()
-  var valid_594206 = query.getOrDefault("timeout")
-  valid_594206 = validateParameter(valid_594206, JInt, required = false,
+  var valid_568435 = query.getOrDefault("timeout")
+  valid_568435 = validateParameter(valid_568435, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594206 != nil:
-    section.add "timeout", valid_594206
+  if valid_568435 != nil:
+    section.add "timeout", valid_568435
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594207 = query.getOrDefault("api-version")
-  valid_594207 = validateParameter(valid_594207, JString, required = true,
+  var valid_568436 = query.getOrDefault("api-version")
+  valid_568436 = validateParameter(valid_568436, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594207 != nil:
-    section.add "api-version", valid_594207
-  var valid_594208 = query.getOrDefault("ApplicationTypeName")
-  valid_594208 = validateParameter(valid_594208, JString, required = false,
+  if valid_568436 != nil:
+    section.add "api-version", valid_568436
+  var valid_568437 = query.getOrDefault("ApplicationTypeName")
+  valid_568437 = validateParameter(valid_568437, JString, required = false,
                                  default = nil)
-  if valid_594208 != nil:
-    section.add "ApplicationTypeName", valid_594208
-  var valid_594209 = query.getOrDefault("ContinuationToken")
-  valid_594209 = validateParameter(valid_594209, JString, required = false,
+  if valid_568437 != nil:
+    section.add "ApplicationTypeName", valid_568437
+  var valid_568438 = query.getOrDefault("ContinuationToken")
+  valid_568438 = validateParameter(valid_568438, JString, required = false,
                                  default = nil)
-  if valid_594209 != nil:
-    section.add "ContinuationToken", valid_594209
-  var valid_594210 = query.getOrDefault("ExcludeApplicationParameters")
-  valid_594210 = validateParameter(valid_594210, JBool, required = false,
+  if valid_568438 != nil:
+    section.add "ContinuationToken", valid_568438
+  var valid_568439 = query.getOrDefault("ExcludeApplicationParameters")
+  valid_568439 = validateParameter(valid_568439, JBool, required = false,
                                  default = newJBool(false))
-  if valid_594210 != nil:
-    section.add "ExcludeApplicationParameters", valid_594210
+  if valid_568439 != nil:
+    section.add "ExcludeApplicationParameters", valid_568439
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2453,20 +2453,20 @@ proc validate_GetApplicationInfoList_594204(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594211: Call_GetApplicationInfoList_594203; path: JsonNode;
+proc call*(call_568440: Call_GetApplicationInfoList_568432; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the information about the applications that were created or in the process of being created in the Service Fabric cluster and match filters specified as the parameter. The response includes the name, type, status, parameters and other details about the application. If the applications do not fit in a page, one page of results is returned as well as a continuation token which can be used to get the next page.
   ## 
-  let valid = call_594211.validator(path, query, header, formData, body)
-  let scheme = call_594211.pickScheme
+  let valid = call_568440.validator(path, query, header, formData, body)
+  let scheme = call_568440.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594211.url(scheme.get, call_594211.host, call_594211.base,
-                         call_594211.route, valid.getOrDefault("path"),
+  let url = call_568440.url(scheme.get, call_568440.host, call_568440.base,
+                         call_568440.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594211, url, valid)
+  result = hook(call_568440, url, valid)
 
-proc call*(call_594212: Call_GetApplicationInfoList_594203; timeout: int = 60;
+proc call*(call_568441: Call_GetApplicationInfoList_568432; timeout: int = 60;
           apiVersion: string = "3.0"; ApplicationTypeName: string = "";
           ContinuationToken: string = ""; ExcludeApplicationParameters: bool = false): Recallable =
   ## getApplicationInfoList
@@ -2481,30 +2481,30 @@ proc call*(call_594212: Call_GetApplicationInfoList_594203; timeout: int = 60;
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
   ##   ExcludeApplicationParameters: bool
   ##                               : The flag that specifies whether application parameters will be excluded from the result.
-  var query_594213 = newJObject()
-  add(query_594213, "timeout", newJInt(timeout))
-  add(query_594213, "api-version", newJString(apiVersion))
-  add(query_594213, "ApplicationTypeName", newJString(ApplicationTypeName))
-  add(query_594213, "ContinuationToken", newJString(ContinuationToken))
-  add(query_594213, "ExcludeApplicationParameters",
+  var query_568442 = newJObject()
+  add(query_568442, "timeout", newJInt(timeout))
+  add(query_568442, "api-version", newJString(apiVersion))
+  add(query_568442, "ApplicationTypeName", newJString(ApplicationTypeName))
+  add(query_568442, "ContinuationToken", newJString(ContinuationToken))
+  add(query_568442, "ExcludeApplicationParameters",
       newJBool(ExcludeApplicationParameters))
-  result = call_594212.call(nil, query_594213, nil, nil, nil)
+  result = call_568441.call(nil, query_568442, nil, nil, nil)
 
-var getApplicationInfoList* = Call_GetApplicationInfoList_594203(
+var getApplicationInfoList* = Call_GetApplicationInfoList_568432(
     name: "getApplicationInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Applications",
-    validator: validate_GetApplicationInfoList_594204, base: "",
-    url: url_GetApplicationInfoList_594205, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetApplicationInfoList_568433, base: "",
+    url: url_GetApplicationInfoList_568434, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_CreateApplication_594214 = ref object of OpenApiRestCall_593437
-proc url_CreateApplication_594216(protocol: Scheme; host: string; base: string;
+  Call_CreateApplication_568443 = ref object of OpenApiRestCall_567666
+proc url_CreateApplication_568445(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CreateApplication_594215(path: JsonNode; query: JsonNode;
+proc validate_CreateApplication_568444(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Creates a Service Fabric application using the specified description.
@@ -2519,18 +2519,18 @@ proc validate_CreateApplication_594215(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594217 = query.getOrDefault("timeout")
-  valid_594217 = validateParameter(valid_594217, JInt, required = false,
+  var valid_568446 = query.getOrDefault("timeout")
+  valid_568446 = validateParameter(valid_568446, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594217 != nil:
-    section.add "timeout", valid_594217
+  if valid_568446 != nil:
+    section.add "timeout", valid_568446
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594218 = query.getOrDefault("api-version")
-  valid_594218 = validateParameter(valid_594218, JString, required = true,
+  var valid_568447 = query.getOrDefault("api-version")
+  valid_568447 = validateParameter(valid_568447, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594218 != nil:
-    section.add "api-version", valid_594218
+  if valid_568447 != nil:
+    section.add "api-version", valid_568447
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2544,20 +2544,20 @@ proc validate_CreateApplication_594215(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594220: Call_CreateApplication_594214; path: JsonNode;
+proc call*(call_568449: Call_CreateApplication_568443; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Service Fabric application using the specified description.
   ## 
-  let valid = call_594220.validator(path, query, header, formData, body)
-  let scheme = call_594220.pickScheme
+  let valid = call_568449.validator(path, query, header, formData, body)
+  let scheme = call_568449.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594220.url(scheme.get, call_594220.host, call_594220.base,
-                         call_594220.route, valid.getOrDefault("path"),
+  let url = call_568449.url(scheme.get, call_568449.host, call_568449.base,
+                         call_568449.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594220, url, valid)
+  result = hook(call_568449, url, valid)
 
-proc call*(call_594221: Call_CreateApplication_594214;
+proc call*(call_568450: Call_CreateApplication_568443;
           ApplicationDescription: JsonNode; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## createApplication
@@ -2568,22 +2568,22 @@ proc call*(call_594221: Call_CreateApplication_594214;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   ApplicationDescription: JObject (required)
   ##                         : Describes the application to be created.
-  var query_594222 = newJObject()
-  var body_594223 = newJObject()
-  add(query_594222, "timeout", newJInt(timeout))
-  add(query_594222, "api-version", newJString(apiVersion))
+  var query_568451 = newJObject()
+  var body_568452 = newJObject()
+  add(query_568451, "timeout", newJInt(timeout))
+  add(query_568451, "api-version", newJString(apiVersion))
   if ApplicationDescription != nil:
-    body_594223 = ApplicationDescription
-  result = call_594221.call(nil, query_594222, nil, nil, body_594223)
+    body_568452 = ApplicationDescription
+  result = call_568450.call(nil, query_568451, nil, nil, body_568452)
 
-var createApplication* = Call_CreateApplication_594214(name: "createApplication",
+var createApplication* = Call_CreateApplication_568443(name: "createApplication",
     meth: HttpMethod.HttpPost, host: "azure.local:19080",
-    route: "/Applications/$/Create", validator: validate_CreateApplication_594215,
-    base: "", url: url_CreateApplication_594216,
+    route: "/Applications/$/Create", validator: validate_CreateApplication_568444,
+    base: "", url: url_CreateApplication_568445,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetApplicationInfo_594224 = ref object of OpenApiRestCall_593437
-proc url_GetApplicationInfo_594226(protocol: Scheme; host: string; base: string;
+  Call_GetApplicationInfo_568453 = ref object of OpenApiRestCall_567666
+proc url_GetApplicationInfo_568455(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2598,7 +2598,7 @@ proc url_GetApplicationInfo_594226(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetApplicationInfo_594225(path: JsonNode; query: JsonNode;
+proc validate_GetApplicationInfo_568454(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Returns the information about the application that was created or in the process of being created in the Service Fabric cluster and whose name matches the one specified as the parameter. The response includes the name, type, status, parameters and other details about the application.
@@ -2611,11 +2611,11 @@ proc validate_GetApplicationInfo_594225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594227 = path.getOrDefault("applicationId")
-  valid_594227 = validateParameter(valid_594227, JString, required = true,
+  var valid_568456 = path.getOrDefault("applicationId")
+  valid_568456 = validateParameter(valid_568456, JString, required = true,
                                  default = nil)
-  if valid_594227 != nil:
-    section.add "applicationId", valid_594227
+  if valid_568456 != nil:
+    section.add "applicationId", valid_568456
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -2625,23 +2625,23 @@ proc validate_GetApplicationInfo_594225(path: JsonNode; query: JsonNode;
   ##   ExcludeApplicationParameters: JBool
   ##                               : The flag that specifies whether application parameters will be excluded from the result.
   section = newJObject()
-  var valid_594228 = query.getOrDefault("timeout")
-  valid_594228 = validateParameter(valid_594228, JInt, required = false,
+  var valid_568457 = query.getOrDefault("timeout")
+  valid_568457 = validateParameter(valid_568457, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594228 != nil:
-    section.add "timeout", valid_594228
+  if valid_568457 != nil:
+    section.add "timeout", valid_568457
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594229 = query.getOrDefault("api-version")
-  valid_594229 = validateParameter(valid_594229, JString, required = true,
+  var valid_568458 = query.getOrDefault("api-version")
+  valid_568458 = validateParameter(valid_568458, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594229 != nil:
-    section.add "api-version", valid_594229
-  var valid_594230 = query.getOrDefault("ExcludeApplicationParameters")
-  valid_594230 = validateParameter(valid_594230, JBool, required = false,
+  if valid_568458 != nil:
+    section.add "api-version", valid_568458
+  var valid_568459 = query.getOrDefault("ExcludeApplicationParameters")
+  valid_568459 = validateParameter(valid_568459, JBool, required = false,
                                  default = newJBool(false))
-  if valid_594230 != nil:
-    section.add "ExcludeApplicationParameters", valid_594230
+  if valid_568459 != nil:
+    section.add "ExcludeApplicationParameters", valid_568459
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2650,20 +2650,20 @@ proc validate_GetApplicationInfo_594225(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594231: Call_GetApplicationInfo_594224; path: JsonNode;
+proc call*(call_568460: Call_GetApplicationInfo_568453; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the information about the application that was created or in the process of being created in the Service Fabric cluster and whose name matches the one specified as the parameter. The response includes the name, type, status, parameters and other details about the application.
   ## 
-  let valid = call_594231.validator(path, query, header, formData, body)
-  let scheme = call_594231.pickScheme
+  let valid = call_568460.validator(path, query, header, formData, body)
+  let scheme = call_568460.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594231.url(scheme.get, call_594231.host, call_594231.base,
-                         call_594231.route, valid.getOrDefault("path"),
+  let url = call_568460.url(scheme.get, call_568460.host, call_568460.base,
+                         call_568460.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594231, url, valid)
+  result = hook(call_568460, url, valid)
 
-proc call*(call_594232: Call_GetApplicationInfo_594224; applicationId: string;
+proc call*(call_568461: Call_GetApplicationInfo_568453; applicationId: string;
           timeout: int = 60; apiVersion: string = "3.0";
           ExcludeApplicationParameters: bool = false): Recallable =
   ## getApplicationInfo
@@ -2676,23 +2676,23 @@ proc call*(call_594232: Call_GetApplicationInfo_594224; applicationId: string;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   ExcludeApplicationParameters: bool
   ##                               : The flag that specifies whether application parameters will be excluded from the result.
-  var path_594233 = newJObject()
-  var query_594234 = newJObject()
-  add(query_594234, "timeout", newJInt(timeout))
-  add(query_594234, "api-version", newJString(apiVersion))
-  add(path_594233, "applicationId", newJString(applicationId))
-  add(query_594234, "ExcludeApplicationParameters",
+  var path_568462 = newJObject()
+  var query_568463 = newJObject()
+  add(query_568463, "timeout", newJInt(timeout))
+  add(query_568463, "api-version", newJString(apiVersion))
+  add(path_568462, "applicationId", newJString(applicationId))
+  add(query_568463, "ExcludeApplicationParameters",
       newJBool(ExcludeApplicationParameters))
-  result = call_594232.call(path_594233, query_594234, nil, nil, nil)
+  result = call_568461.call(path_568462, query_568463, nil, nil, nil)
 
-var getApplicationInfo* = Call_GetApplicationInfo_594224(
+var getApplicationInfo* = Call_GetApplicationInfo_568453(
     name: "getApplicationInfo", meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Applications/{applicationId}",
-    validator: validate_GetApplicationInfo_594225, base: "",
-    url: url_GetApplicationInfo_594226, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetApplicationInfo_568454, base: "",
+    url: url_GetApplicationInfo_568455, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_DeleteApplication_594235 = ref object of OpenApiRestCall_593437
-proc url_DeleteApplication_594237(protocol: Scheme; host: string; base: string;
+  Call_DeleteApplication_568464 = ref object of OpenApiRestCall_567666
+proc url_DeleteApplication_568466(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2708,7 +2708,7 @@ proc url_DeleteApplication_594237(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeleteApplication_594236(path: JsonNode; query: JsonNode;
+proc validate_DeleteApplication_568465(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes an existing Service Fabric application. An application must be created before it can be deleted. Deleting an application will delete all services that are part of that application. By default Service Fabric will try to close service replicas in a graceful manner and then delete the service. However if service is having issues closing the replica gracefully, the delete operation may take a long time or get stuck. Use the optional ForceRemove flag to skip the graceful close sequence and forcefully delete the application and all of the its services.
@@ -2721,11 +2721,11 @@ proc validate_DeleteApplication_594236(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594238 = path.getOrDefault("applicationId")
-  valid_594238 = validateParameter(valid_594238, JString, required = true,
+  var valid_568467 = path.getOrDefault("applicationId")
+  valid_568467 = validateParameter(valid_568467, JString, required = true,
                                  default = nil)
-  if valid_594238 != nil:
-    section.add "applicationId", valid_594238
+  if valid_568467 != nil:
+    section.add "applicationId", valid_568467
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -2735,22 +2735,22 @@ proc validate_DeleteApplication_594236(path: JsonNode; query: JsonNode;
   ##   ForceRemove: JBool
   ##              : Remove a Service Fabric application or service forcefully without going through the graceful shutdown sequence. This parameter can be used to forcefully delete an application or service for which delete is timing out due to issues in the service code that prevents graceful close of replicas.
   section = newJObject()
-  var valid_594239 = query.getOrDefault("timeout")
-  valid_594239 = validateParameter(valid_594239, JInt, required = false,
+  var valid_568468 = query.getOrDefault("timeout")
+  valid_568468 = validateParameter(valid_568468, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594239 != nil:
-    section.add "timeout", valid_594239
+  if valid_568468 != nil:
+    section.add "timeout", valid_568468
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594240 = query.getOrDefault("api-version")
-  valid_594240 = validateParameter(valid_594240, JString, required = true,
+  var valid_568469 = query.getOrDefault("api-version")
+  valid_568469 = validateParameter(valid_568469, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594240 != nil:
-    section.add "api-version", valid_594240
-  var valid_594241 = query.getOrDefault("ForceRemove")
-  valid_594241 = validateParameter(valid_594241, JBool, required = false, default = nil)
-  if valid_594241 != nil:
-    section.add "ForceRemove", valid_594241
+  if valid_568469 != nil:
+    section.add "api-version", valid_568469
+  var valid_568470 = query.getOrDefault("ForceRemove")
+  valid_568470 = validateParameter(valid_568470, JBool, required = false, default = nil)
+  if valid_568470 != nil:
+    section.add "ForceRemove", valid_568470
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2759,20 +2759,20 @@ proc validate_DeleteApplication_594236(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594242: Call_DeleteApplication_594235; path: JsonNode;
+proc call*(call_568471: Call_DeleteApplication_568464; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing Service Fabric application. An application must be created before it can be deleted. Deleting an application will delete all services that are part of that application. By default Service Fabric will try to close service replicas in a graceful manner and then delete the service. However if service is having issues closing the replica gracefully, the delete operation may take a long time or get stuck. Use the optional ForceRemove flag to skip the graceful close sequence and forcefully delete the application and all of the its services.
   ## 
-  let valid = call_594242.validator(path, query, header, formData, body)
-  let scheme = call_594242.pickScheme
+  let valid = call_568471.validator(path, query, header, formData, body)
+  let scheme = call_568471.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594242.url(scheme.get, call_594242.host, call_594242.base,
-                         call_594242.route, valid.getOrDefault("path"),
+  let url = call_568471.url(scheme.get, call_568471.host, call_568471.base,
+                         call_568471.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594242, url, valid)
+  result = hook(call_568471, url, valid)
 
-proc call*(call_594243: Call_DeleteApplication_594235; applicationId: string;
+proc call*(call_568472: Call_DeleteApplication_568464; applicationId: string;
           timeout: int = 60; apiVersion: string = "3.0"; ForceRemove: bool = false): Recallable =
   ## deleteApplication
   ## Deletes an existing Service Fabric application. An application must be created before it can be deleted. Deleting an application will delete all services that are part of that application. By default Service Fabric will try to close service replicas in a graceful manner and then delete the service. However if service is having issues closing the replica gracefully, the delete operation may take a long time or get stuck. Use the optional ForceRemove flag to skip the graceful close sequence and forcefully delete the application and all of the its services.
@@ -2784,22 +2784,22 @@ proc call*(call_594243: Call_DeleteApplication_594235; applicationId: string;
   ##              : Remove a Service Fabric application or service forcefully without going through the graceful shutdown sequence. This parameter can be used to forcefully delete an application or service for which delete is timing out due to issues in the service code that prevents graceful close of replicas.
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594244 = newJObject()
-  var query_594245 = newJObject()
-  add(query_594245, "timeout", newJInt(timeout))
-  add(query_594245, "api-version", newJString(apiVersion))
-  add(query_594245, "ForceRemove", newJBool(ForceRemove))
-  add(path_594244, "applicationId", newJString(applicationId))
-  result = call_594243.call(path_594244, query_594245, nil, nil, nil)
+  var path_568473 = newJObject()
+  var query_568474 = newJObject()
+  add(query_568474, "timeout", newJInt(timeout))
+  add(query_568474, "api-version", newJString(apiVersion))
+  add(query_568474, "ForceRemove", newJBool(ForceRemove))
+  add(path_568473, "applicationId", newJString(applicationId))
+  result = call_568472.call(path_568473, query_568474, nil, nil, nil)
 
-var deleteApplication* = Call_DeleteApplication_594235(name: "deleteApplication",
+var deleteApplication* = Call_DeleteApplication_568464(name: "deleteApplication",
     meth: HttpMethod.HttpPost, host: "azure.local:19080",
     route: "/Applications/{applicationId}/$/Delete",
-    validator: validate_DeleteApplication_594236, base: "",
-    url: url_DeleteApplication_594237, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_DeleteApplication_568465, base: "",
+    url: url_DeleteApplication_568466, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetApplicationHealthUsingPolicy_594259 = ref object of OpenApiRestCall_593437
-proc url_GetApplicationHealthUsingPolicy_594261(protocol: Scheme; host: string;
+  Call_GetApplicationHealthUsingPolicy_568488 = ref object of OpenApiRestCall_567666
+proc url_GetApplicationHealthUsingPolicy_568490(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2815,7 +2815,7 @@ proc url_GetApplicationHealthUsingPolicy_594261(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetApplicationHealthUsingPolicy_594260(path: JsonNode;
+proc validate_GetApplicationHealthUsingPolicy_568489(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the health of a Service Fabric application. Use EventsHealthStateFilter to filter the collection of health events reported on the node based on the health state. Use ClusterHealthPolicies to override the health policies used to evaluate the health.
   ## 
@@ -2827,11 +2827,11 @@ proc validate_GetApplicationHealthUsingPolicy_594260(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594262 = path.getOrDefault("applicationId")
-  valid_594262 = validateParameter(valid_594262, JString, required = true,
+  var valid_568491 = path.getOrDefault("applicationId")
+  valid_568491 = validateParameter(valid_568491, JString, required = true,
                                  default = nil)
-  if valid_594262 != nil:
-    section.add "applicationId", valid_594262
+  if valid_568491 != nil:
+    section.add "applicationId", valid_568491
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -2880,33 +2880,33 @@ proc validate_GetApplicationHealthUsingPolicy_594260(path: JsonNode;
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594263 = query.getOrDefault("timeout")
-  valid_594263 = validateParameter(valid_594263, JInt, required = false,
+  var valid_568492 = query.getOrDefault("timeout")
+  valid_568492 = validateParameter(valid_568492, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594263 != nil:
-    section.add "timeout", valid_594263
+  if valid_568492 != nil:
+    section.add "timeout", valid_568492
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594264 = query.getOrDefault("api-version")
-  valid_594264 = validateParameter(valid_594264, JString, required = true,
+  var valid_568493 = query.getOrDefault("api-version")
+  valid_568493 = validateParameter(valid_568493, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594264 != nil:
-    section.add "api-version", valid_594264
-  var valid_594265 = query.getOrDefault("EventsHealthStateFilter")
-  valid_594265 = validateParameter(valid_594265, JInt, required = false,
+  if valid_568493 != nil:
+    section.add "api-version", valid_568493
+  var valid_568494 = query.getOrDefault("EventsHealthStateFilter")
+  valid_568494 = validateParameter(valid_568494, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594265 != nil:
-    section.add "EventsHealthStateFilter", valid_594265
-  var valid_594266 = query.getOrDefault("ServicesHealthStateFilter")
-  valid_594266 = validateParameter(valid_594266, JInt, required = false,
+  if valid_568494 != nil:
+    section.add "EventsHealthStateFilter", valid_568494
+  var valid_568495 = query.getOrDefault("ServicesHealthStateFilter")
+  valid_568495 = validateParameter(valid_568495, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594266 != nil:
-    section.add "ServicesHealthStateFilter", valid_594266
-  var valid_594267 = query.getOrDefault("DeployedApplicationsHealthStateFilter")
-  valid_594267 = validateParameter(valid_594267, JInt, required = false,
+  if valid_568495 != nil:
+    section.add "ServicesHealthStateFilter", valid_568495
+  var valid_568496 = query.getOrDefault("DeployedApplicationsHealthStateFilter")
+  valid_568496 = validateParameter(valid_568496, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594267 != nil:
-    section.add "DeployedApplicationsHealthStateFilter", valid_594267
+  if valid_568496 != nil:
+    section.add "DeployedApplicationsHealthStateFilter", valid_568496
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2921,21 +2921,21 @@ proc validate_GetApplicationHealthUsingPolicy_594260(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594269: Call_GetApplicationHealthUsingPolicy_594259;
+proc call*(call_568498: Call_GetApplicationHealthUsingPolicy_568488;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the health of a Service Fabric application. Use EventsHealthStateFilter to filter the collection of health events reported on the node based on the health state. Use ClusterHealthPolicies to override the health policies used to evaluate the health.
   ## 
-  let valid = call_594269.validator(path, query, header, formData, body)
-  let scheme = call_594269.pickScheme
+  let valid = call_568498.validator(path, query, header, formData, body)
+  let scheme = call_568498.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594269.url(scheme.get, call_594269.host, call_594269.base,
-                         call_594269.route, valid.getOrDefault("path"),
+  let url = call_568498.url(scheme.get, call_568498.host, call_568498.base,
+                         call_568498.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594269, url, valid)
+  result = hook(call_568498, url, valid)
 
-proc call*(call_594270: Call_GetApplicationHealthUsingPolicy_594259;
+proc call*(call_568499: Call_GetApplicationHealthUsingPolicy_568488;
           applicationId: string; timeout: int = 60; apiVersion: string = "3.0";
           ApplicationHealthPolicy: JsonNode = nil; EventsHealthStateFilter: int = 0;
           ServicesHealthStateFilter: int = 0;
@@ -2993,30 +2993,30 @@ proc call*(call_594270: Call_GetApplicationHealthUsingPolicy_594259;
   ## - Error - Filter that matches input with HealthState value Error. The value is 8.
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
-  var path_594271 = newJObject()
-  var query_594272 = newJObject()
-  var body_594273 = newJObject()
-  add(query_594272, "timeout", newJInt(timeout))
-  add(query_594272, "api-version", newJString(apiVersion))
+  var path_568500 = newJObject()
+  var query_568501 = newJObject()
+  var body_568502 = newJObject()
+  add(query_568501, "timeout", newJInt(timeout))
+  add(query_568501, "api-version", newJString(apiVersion))
   if ApplicationHealthPolicy != nil:
-    body_594273 = ApplicationHealthPolicy
-  add(query_594272, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_594271, "applicationId", newJString(applicationId))
-  add(query_594272, "ServicesHealthStateFilter",
+    body_568502 = ApplicationHealthPolicy
+  add(query_568501, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_568500, "applicationId", newJString(applicationId))
+  add(query_568501, "ServicesHealthStateFilter",
       newJInt(ServicesHealthStateFilter))
-  add(query_594272, "DeployedApplicationsHealthStateFilter",
+  add(query_568501, "DeployedApplicationsHealthStateFilter",
       newJInt(DeployedApplicationsHealthStateFilter))
-  result = call_594270.call(path_594271, query_594272, nil, nil, body_594273)
+  result = call_568499.call(path_568500, query_568501, nil, nil, body_568502)
 
-var getApplicationHealthUsingPolicy* = Call_GetApplicationHealthUsingPolicy_594259(
+var getApplicationHealthUsingPolicy* = Call_GetApplicationHealthUsingPolicy_568488(
     name: "getApplicationHealthUsingPolicy", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Applications/{applicationId}/$/GetHealth",
-    validator: validate_GetApplicationHealthUsingPolicy_594260, base: "",
-    url: url_GetApplicationHealthUsingPolicy_594261,
+    validator: validate_GetApplicationHealthUsingPolicy_568489, base: "",
+    url: url_GetApplicationHealthUsingPolicy_568490,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetApplicationHealth_594246 = ref object of OpenApiRestCall_593437
-proc url_GetApplicationHealth_594248(protocol: Scheme; host: string; base: string;
+  Call_GetApplicationHealth_568475 = ref object of OpenApiRestCall_567666
+proc url_GetApplicationHealth_568477(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3032,7 +3032,7 @@ proc url_GetApplicationHealth_594248(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetApplicationHealth_594247(path: JsonNode; query: JsonNode;
+proc validate_GetApplicationHealth_568476(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the heath state of the service fabric application. The response reports either Ok, Error or Warning health state. If the entity is not found in the helath store, it will return Error.
   ## 
@@ -3044,11 +3044,11 @@ proc validate_GetApplicationHealth_594247(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594249 = path.getOrDefault("applicationId")
-  valid_594249 = validateParameter(valid_594249, JString, required = true,
+  var valid_568478 = path.getOrDefault("applicationId")
+  valid_568478 = validateParameter(valid_568478, JString, required = true,
                                  default = nil)
-  if valid_594249 != nil:
-    section.add "applicationId", valid_594249
+  if valid_568478 != nil:
+    section.add "applicationId", valid_568478
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -3097,33 +3097,33 @@ proc validate_GetApplicationHealth_594247(path: JsonNode; query: JsonNode;
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594250 = query.getOrDefault("timeout")
-  valid_594250 = validateParameter(valid_594250, JInt, required = false,
+  var valid_568479 = query.getOrDefault("timeout")
+  valid_568479 = validateParameter(valid_568479, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594250 != nil:
-    section.add "timeout", valid_594250
+  if valid_568479 != nil:
+    section.add "timeout", valid_568479
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594251 = query.getOrDefault("api-version")
-  valid_594251 = validateParameter(valid_594251, JString, required = true,
+  var valid_568480 = query.getOrDefault("api-version")
+  valid_568480 = validateParameter(valid_568480, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594251 != nil:
-    section.add "api-version", valid_594251
-  var valid_594252 = query.getOrDefault("EventsHealthStateFilter")
-  valid_594252 = validateParameter(valid_594252, JInt, required = false,
+  if valid_568480 != nil:
+    section.add "api-version", valid_568480
+  var valid_568481 = query.getOrDefault("EventsHealthStateFilter")
+  valid_568481 = validateParameter(valid_568481, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594252 != nil:
-    section.add "EventsHealthStateFilter", valid_594252
-  var valid_594253 = query.getOrDefault("ServicesHealthStateFilter")
-  valid_594253 = validateParameter(valid_594253, JInt, required = false,
+  if valid_568481 != nil:
+    section.add "EventsHealthStateFilter", valid_568481
+  var valid_568482 = query.getOrDefault("ServicesHealthStateFilter")
+  valid_568482 = validateParameter(valid_568482, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594253 != nil:
-    section.add "ServicesHealthStateFilter", valid_594253
-  var valid_594254 = query.getOrDefault("DeployedApplicationsHealthStateFilter")
-  valid_594254 = validateParameter(valid_594254, JInt, required = false,
+  if valid_568482 != nil:
+    section.add "ServicesHealthStateFilter", valid_568482
+  var valid_568483 = query.getOrDefault("DeployedApplicationsHealthStateFilter")
+  valid_568483 = validateParameter(valid_568483, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594254 != nil:
-    section.add "DeployedApplicationsHealthStateFilter", valid_594254
+  if valid_568483 != nil:
+    section.add "DeployedApplicationsHealthStateFilter", valid_568483
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3132,20 +3132,20 @@ proc validate_GetApplicationHealth_594247(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594255: Call_GetApplicationHealth_594246; path: JsonNode;
+proc call*(call_568484: Call_GetApplicationHealth_568475; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the heath state of the service fabric application. The response reports either Ok, Error or Warning health state. If the entity is not found in the helath store, it will return Error.
   ## 
-  let valid = call_594255.validator(path, query, header, formData, body)
-  let scheme = call_594255.pickScheme
+  let valid = call_568484.validator(path, query, header, formData, body)
+  let scheme = call_568484.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594255.url(scheme.get, call_594255.host, call_594255.base,
-                         call_594255.route, valid.getOrDefault("path"),
+  let url = call_568484.url(scheme.get, call_568484.host, call_568484.base,
+                         call_568484.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594255, url, valid)
+  result = hook(call_568484, url, valid)
 
-proc call*(call_594256: Call_GetApplicationHealth_594246; applicationId: string;
+proc call*(call_568485: Call_GetApplicationHealth_568475; applicationId: string;
           timeout: int = 60; apiVersion: string = "3.0";
           EventsHealthStateFilter: int = 0; ServicesHealthStateFilter: int = 0;
           DeployedApplicationsHealthStateFilter: int = 0): Recallable =
@@ -3198,26 +3198,26 @@ proc call*(call_594256: Call_GetApplicationHealth_594246; applicationId: string;
   ## - Error - Filter that matches input with HealthState value Error. The value is 8.
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
-  var path_594257 = newJObject()
-  var query_594258 = newJObject()
-  add(query_594258, "timeout", newJInt(timeout))
-  add(query_594258, "api-version", newJString(apiVersion))
-  add(query_594258, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_594257, "applicationId", newJString(applicationId))
-  add(query_594258, "ServicesHealthStateFilter",
+  var path_568486 = newJObject()
+  var query_568487 = newJObject()
+  add(query_568487, "timeout", newJInt(timeout))
+  add(query_568487, "api-version", newJString(apiVersion))
+  add(query_568487, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_568486, "applicationId", newJString(applicationId))
+  add(query_568487, "ServicesHealthStateFilter",
       newJInt(ServicesHealthStateFilter))
-  add(query_594258, "DeployedApplicationsHealthStateFilter",
+  add(query_568487, "DeployedApplicationsHealthStateFilter",
       newJInt(DeployedApplicationsHealthStateFilter))
-  result = call_594256.call(path_594257, query_594258, nil, nil, nil)
+  result = call_568485.call(path_568486, query_568487, nil, nil, nil)
 
-var getApplicationHealth* = Call_GetApplicationHealth_594246(
+var getApplicationHealth* = Call_GetApplicationHealth_568475(
     name: "getApplicationHealth", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Applications/{applicationId}/$/GetHealth",
-    validator: validate_GetApplicationHealth_594247, base: "",
-    url: url_GetApplicationHealth_594248, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetApplicationHealth_568476, base: "",
+    url: url_GetApplicationHealth_568477, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetServiceInfoList_594274 = ref object of OpenApiRestCall_593437
-proc url_GetServiceInfoList_594276(protocol: Scheme; host: string; base: string;
+  Call_GetServiceInfoList_568503 = ref object of OpenApiRestCall_567666
+proc url_GetServiceInfoList_568505(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3233,7 +3233,7 @@ proc url_GetServiceInfoList_594276(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetServiceInfoList_594275(path: JsonNode; query: JsonNode;
+proc validate_GetServiceInfoList_568504(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Returns the information about all services belonging to the application specified by the application id.
@@ -3246,11 +3246,11 @@ proc validate_GetServiceInfoList_594275(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594277 = path.getOrDefault("applicationId")
-  valid_594277 = validateParameter(valid_594277, JString, required = true,
+  var valid_568506 = path.getOrDefault("applicationId")
+  valid_568506 = validateParameter(valid_568506, JString, required = true,
                                  default = nil)
-  if valid_594277 != nil:
-    section.add "applicationId", valid_594277
+  if valid_568506 != nil:
+    section.add "applicationId", valid_568506
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -3262,28 +3262,28 @@ proc validate_GetServiceInfoList_594275(path: JsonNode; query: JsonNode;
   ##   ServiceTypeName: JString
   ##                  : The service type name used to filter the services to query for.
   section = newJObject()
-  var valid_594278 = query.getOrDefault("timeout")
-  valid_594278 = validateParameter(valid_594278, JInt, required = false,
+  var valid_568507 = query.getOrDefault("timeout")
+  valid_568507 = validateParameter(valid_568507, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594278 != nil:
-    section.add "timeout", valid_594278
+  if valid_568507 != nil:
+    section.add "timeout", valid_568507
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594279 = query.getOrDefault("api-version")
-  valid_594279 = validateParameter(valid_594279, JString, required = true,
+  var valid_568508 = query.getOrDefault("api-version")
+  valid_568508 = validateParameter(valid_568508, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594279 != nil:
-    section.add "api-version", valid_594279
-  var valid_594280 = query.getOrDefault("ContinuationToken")
-  valid_594280 = validateParameter(valid_594280, JString, required = false,
+  if valid_568508 != nil:
+    section.add "api-version", valid_568508
+  var valid_568509 = query.getOrDefault("ContinuationToken")
+  valid_568509 = validateParameter(valid_568509, JString, required = false,
                                  default = nil)
-  if valid_594280 != nil:
-    section.add "ContinuationToken", valid_594280
-  var valid_594281 = query.getOrDefault("ServiceTypeName")
-  valid_594281 = validateParameter(valid_594281, JString, required = false,
+  if valid_568509 != nil:
+    section.add "ContinuationToken", valid_568509
+  var valid_568510 = query.getOrDefault("ServiceTypeName")
+  valid_568510 = validateParameter(valid_568510, JString, required = false,
                                  default = nil)
-  if valid_594281 != nil:
-    section.add "ServiceTypeName", valid_594281
+  if valid_568510 != nil:
+    section.add "ServiceTypeName", valid_568510
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3292,20 +3292,20 @@ proc validate_GetServiceInfoList_594275(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594282: Call_GetServiceInfoList_594274; path: JsonNode;
+proc call*(call_568511: Call_GetServiceInfoList_568503; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the information about all services belonging to the application specified by the application id.
   ## 
-  let valid = call_594282.validator(path, query, header, formData, body)
-  let scheme = call_594282.pickScheme
+  let valid = call_568511.validator(path, query, header, formData, body)
+  let scheme = call_568511.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594282.url(scheme.get, call_594282.host, call_594282.base,
-                         call_594282.route, valid.getOrDefault("path"),
+  let url = call_568511.url(scheme.get, call_568511.host, call_568511.base,
+                         call_568511.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594282, url, valid)
+  result = hook(call_568511, url, valid)
 
-proc call*(call_594283: Call_GetServiceInfoList_594274; applicationId: string;
+proc call*(call_568512: Call_GetServiceInfoList_568503; applicationId: string;
           timeout: int = 60; apiVersion: string = "3.0"; ContinuationToken: string = "";
           ServiceTypeName: string = ""): Recallable =
   ## getServiceInfoList
@@ -3320,23 +3320,23 @@ proc call*(call_594283: Call_GetServiceInfoList_594274; applicationId: string;
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
   ##   ServiceTypeName: string
   ##                  : The service type name used to filter the services to query for.
-  var path_594284 = newJObject()
-  var query_594285 = newJObject()
-  add(query_594285, "timeout", newJInt(timeout))
-  add(query_594285, "api-version", newJString(apiVersion))
-  add(path_594284, "applicationId", newJString(applicationId))
-  add(query_594285, "ContinuationToken", newJString(ContinuationToken))
-  add(query_594285, "ServiceTypeName", newJString(ServiceTypeName))
-  result = call_594283.call(path_594284, query_594285, nil, nil, nil)
+  var path_568513 = newJObject()
+  var query_568514 = newJObject()
+  add(query_568514, "timeout", newJInt(timeout))
+  add(query_568514, "api-version", newJString(apiVersion))
+  add(path_568513, "applicationId", newJString(applicationId))
+  add(query_568514, "ContinuationToken", newJString(ContinuationToken))
+  add(query_568514, "ServiceTypeName", newJString(ServiceTypeName))
+  result = call_568512.call(path_568513, query_568514, nil, nil, nil)
 
-var getServiceInfoList* = Call_GetServiceInfoList_594274(
+var getServiceInfoList* = Call_GetServiceInfoList_568503(
     name: "getServiceInfoList", meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Applications/{applicationId}/$/GetServices",
-    validator: validate_GetServiceInfoList_594275, base: "",
-    url: url_GetServiceInfoList_594276, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetServiceInfoList_568504, base: "",
+    url: url_GetServiceInfoList_568505, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_CreateService_594286 = ref object of OpenApiRestCall_593437
-proc url_CreateService_594288(protocol: Scheme; host: string; base: string;
+  Call_CreateService_568515 = ref object of OpenApiRestCall_567666
+proc url_CreateService_568517(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3352,7 +3352,7 @@ proc url_CreateService_594288(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CreateService_594287(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_CreateService_568516(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates the specified service.
   ## 
@@ -3364,11 +3364,11 @@ proc validate_CreateService_594287(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594289 = path.getOrDefault("applicationId")
-  valid_594289 = validateParameter(valid_594289, JString, required = true,
+  var valid_568518 = path.getOrDefault("applicationId")
+  valid_568518 = validateParameter(valid_568518, JString, required = true,
                                  default = nil)
-  if valid_594289 != nil:
-    section.add "applicationId", valid_594289
+  if valid_568518 != nil:
+    section.add "applicationId", valid_568518
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -3376,18 +3376,18 @@ proc validate_CreateService_594287(path: JsonNode; query: JsonNode; header: Json
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594290 = query.getOrDefault("timeout")
-  valid_594290 = validateParameter(valid_594290, JInt, required = false,
+  var valid_568519 = query.getOrDefault("timeout")
+  valid_568519 = validateParameter(valid_568519, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594290 != nil:
-    section.add "timeout", valid_594290
+  if valid_568519 != nil:
+    section.add "timeout", valid_568519
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594291 = query.getOrDefault("api-version")
-  valid_594291 = validateParameter(valid_594291, JString, required = true,
+  var valid_568520 = query.getOrDefault("api-version")
+  valid_568520 = validateParameter(valid_568520, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594291 != nil:
-    section.add "api-version", valid_594291
+  if valid_568520 != nil:
+    section.add "api-version", valid_568520
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3401,20 +3401,20 @@ proc validate_CreateService_594287(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594293: Call_CreateService_594286; path: JsonNode; query: JsonNode;
+proc call*(call_568522: Call_CreateService_568515; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates the specified service.
   ## 
-  let valid = call_594293.validator(path, query, header, formData, body)
-  let scheme = call_594293.pickScheme
+  let valid = call_568522.validator(path, query, header, formData, body)
+  let scheme = call_568522.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594293.url(scheme.get, call_594293.host, call_594293.base,
-                         call_594293.route, valid.getOrDefault("path"),
+  let url = call_568522.url(scheme.get, call_568522.host, call_568522.base,
+                         call_568522.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594293, url, valid)
+  result = hook(call_568522, url, valid)
 
-proc call*(call_594294: Call_CreateService_594286; applicationId: string;
+proc call*(call_568523: Call_CreateService_568515; applicationId: string;
           ServiceDescription: JsonNode; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## createService
   ## Creates the specified service.
@@ -3426,24 +3426,24 @@ proc call*(call_594294: Call_CreateService_594286; applicationId: string;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   ServiceDescription: JObject (required)
   ##                     : The configuration for the service.
-  var path_594295 = newJObject()
-  var query_594296 = newJObject()
-  var body_594297 = newJObject()
-  add(query_594296, "timeout", newJInt(timeout))
-  add(query_594296, "api-version", newJString(apiVersion))
-  add(path_594295, "applicationId", newJString(applicationId))
+  var path_568524 = newJObject()
+  var query_568525 = newJObject()
+  var body_568526 = newJObject()
+  add(query_568525, "timeout", newJInt(timeout))
+  add(query_568525, "api-version", newJString(apiVersion))
+  add(path_568524, "applicationId", newJString(applicationId))
   if ServiceDescription != nil:
-    body_594297 = ServiceDescription
-  result = call_594294.call(path_594295, query_594296, nil, nil, body_594297)
+    body_568526 = ServiceDescription
+  result = call_568523.call(path_568524, query_568525, nil, nil, body_568526)
 
-var createService* = Call_CreateService_594286(name: "createService",
+var createService* = Call_CreateService_568515(name: "createService",
     meth: HttpMethod.HttpPost, host: "azure.local:19080",
     route: "/Applications/{applicationId}/$/GetServices/$/Create",
-    validator: validate_CreateService_594287, base: "", url: url_CreateService_594288,
+    validator: validate_CreateService_568516, base: "", url: url_CreateService_568517,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_CreateServiceFromTemplate_594298 = ref object of OpenApiRestCall_593437
-proc url_CreateServiceFromTemplate_594300(protocol: Scheme; host: string;
+  Call_CreateServiceFromTemplate_568527 = ref object of OpenApiRestCall_567666
+proc url_CreateServiceFromTemplate_568529(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3459,7 +3459,7 @@ proc url_CreateServiceFromTemplate_594300(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CreateServiceFromTemplate_594299(path: JsonNode; query: JsonNode;
+proc validate_CreateServiceFromTemplate_568528(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a Service Fabric service from the service template defined in the application manifest.
   ## 
@@ -3471,11 +3471,11 @@ proc validate_CreateServiceFromTemplate_594299(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594301 = path.getOrDefault("applicationId")
-  valid_594301 = validateParameter(valid_594301, JString, required = true,
+  var valid_568530 = path.getOrDefault("applicationId")
+  valid_568530 = validateParameter(valid_568530, JString, required = true,
                                  default = nil)
-  if valid_594301 != nil:
-    section.add "applicationId", valid_594301
+  if valid_568530 != nil:
+    section.add "applicationId", valid_568530
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -3483,18 +3483,18 @@ proc validate_CreateServiceFromTemplate_594299(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594302 = query.getOrDefault("timeout")
-  valid_594302 = validateParameter(valid_594302, JInt, required = false,
+  var valid_568531 = query.getOrDefault("timeout")
+  valid_568531 = validateParameter(valid_568531, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594302 != nil:
-    section.add "timeout", valid_594302
+  if valid_568531 != nil:
+    section.add "timeout", valid_568531
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594303 = query.getOrDefault("api-version")
-  valid_594303 = validateParameter(valid_594303, JString, required = true,
+  var valid_568532 = query.getOrDefault("api-version")
+  valid_568532 = validateParameter(valid_568532, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594303 != nil:
-    section.add "api-version", valid_594303
+  if valid_568532 != nil:
+    section.add "api-version", valid_568532
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3508,20 +3508,20 @@ proc validate_CreateServiceFromTemplate_594299(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594305: Call_CreateServiceFromTemplate_594298; path: JsonNode;
+proc call*(call_568534: Call_CreateServiceFromTemplate_568527; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Service Fabric service from the service template defined in the application manifest.
   ## 
-  let valid = call_594305.validator(path, query, header, formData, body)
-  let scheme = call_594305.pickScheme
+  let valid = call_568534.validator(path, query, header, formData, body)
+  let scheme = call_568534.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594305.url(scheme.get, call_594305.host, call_594305.base,
-                         call_594305.route, valid.getOrDefault("path"),
+  let url = call_568534.url(scheme.get, call_568534.host, call_568534.base,
+                         call_568534.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594305, url, valid)
+  result = hook(call_568534, url, valid)
 
-proc call*(call_594306: Call_CreateServiceFromTemplate_594298;
+proc call*(call_568535: Call_CreateServiceFromTemplate_568527;
           ServiceFromTemplateDescription: JsonNode; applicationId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## createServiceFromTemplate
@@ -3534,26 +3534,26 @@ proc call*(call_594306: Call_CreateServiceFromTemplate_594298;
   ##                                 : Describes the service that needs to be created from the template defined in the application manifest.
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594307 = newJObject()
-  var query_594308 = newJObject()
-  var body_594309 = newJObject()
-  add(query_594308, "timeout", newJInt(timeout))
-  add(query_594308, "api-version", newJString(apiVersion))
+  var path_568536 = newJObject()
+  var query_568537 = newJObject()
+  var body_568538 = newJObject()
+  add(query_568537, "timeout", newJInt(timeout))
+  add(query_568537, "api-version", newJString(apiVersion))
   if ServiceFromTemplateDescription != nil:
-    body_594309 = ServiceFromTemplateDescription
-  add(path_594307, "applicationId", newJString(applicationId))
-  result = call_594306.call(path_594307, query_594308, nil, nil, body_594309)
+    body_568538 = ServiceFromTemplateDescription
+  add(path_568536, "applicationId", newJString(applicationId))
+  result = call_568535.call(path_568536, query_568537, nil, nil, body_568538)
 
-var createServiceFromTemplate* = Call_CreateServiceFromTemplate_594298(
+var createServiceFromTemplate* = Call_CreateServiceFromTemplate_568527(
     name: "createServiceFromTemplate", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/Applications/{applicationId}/$/GetServices/$/CreateFromTemplate",
-    validator: validate_CreateServiceFromTemplate_594299, base: "",
-    url: url_CreateServiceFromTemplate_594300,
+    validator: validate_CreateServiceFromTemplate_568528, base: "",
+    url: url_CreateServiceFromTemplate_568529,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetServiceInfo_594310 = ref object of OpenApiRestCall_593437
-proc url_GetServiceInfo_594312(protocol: Scheme; host: string; base: string;
+  Call_GetServiceInfo_568539 = ref object of OpenApiRestCall_567666
+proc url_GetServiceInfo_568541(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3571,7 +3571,7 @@ proc url_GetServiceInfo_594312(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetServiceInfo_594311(path: JsonNode; query: JsonNode;
+proc validate_GetServiceInfo_568540(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Returns the information about specified service belonging to the specified Service Fabric application.
@@ -3586,16 +3586,16 @@ proc validate_GetServiceInfo_594311(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594313 = path.getOrDefault("applicationId")
-  valid_594313 = validateParameter(valid_594313, JString, required = true,
+  var valid_568542 = path.getOrDefault("applicationId")
+  valid_568542 = validateParameter(valid_568542, JString, required = true,
                                  default = nil)
-  if valid_594313 != nil:
-    section.add "applicationId", valid_594313
-  var valid_594314 = path.getOrDefault("serviceId")
-  valid_594314 = validateParameter(valid_594314, JString, required = true,
+  if valid_568542 != nil:
+    section.add "applicationId", valid_568542
+  var valid_568543 = path.getOrDefault("serviceId")
+  valid_568543 = validateParameter(valid_568543, JString, required = true,
                                  default = nil)
-  if valid_594314 != nil:
-    section.add "serviceId", valid_594314
+  if valid_568543 != nil:
+    section.add "serviceId", valid_568543
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -3603,18 +3603,18 @@ proc validate_GetServiceInfo_594311(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594315 = query.getOrDefault("timeout")
-  valid_594315 = validateParameter(valid_594315, JInt, required = false,
+  var valid_568544 = query.getOrDefault("timeout")
+  valid_568544 = validateParameter(valid_568544, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594315 != nil:
-    section.add "timeout", valid_594315
+  if valid_568544 != nil:
+    section.add "timeout", valid_568544
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594316 = query.getOrDefault("api-version")
-  valid_594316 = validateParameter(valid_594316, JString, required = true,
+  var valid_568545 = query.getOrDefault("api-version")
+  valid_568545 = validateParameter(valid_568545, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594316 != nil:
-    section.add "api-version", valid_594316
+  if valid_568545 != nil:
+    section.add "api-version", valid_568545
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3623,20 +3623,20 @@ proc validate_GetServiceInfo_594311(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594317: Call_GetServiceInfo_594310; path: JsonNode; query: JsonNode;
+proc call*(call_568546: Call_GetServiceInfo_568539; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the information about specified service belonging to the specified Service Fabric application.
   ## 
-  let valid = call_594317.validator(path, query, header, formData, body)
-  let scheme = call_594317.pickScheme
+  let valid = call_568546.validator(path, query, header, formData, body)
+  let scheme = call_568546.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594317.url(scheme.get, call_594317.host, call_594317.base,
-                         call_594317.route, valid.getOrDefault("path"),
+  let url = call_568546.url(scheme.get, call_568546.host, call_568546.base,
+                         call_568546.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594317, url, valid)
+  result = hook(call_568546, url, valid)
 
-proc call*(call_594318: Call_GetServiceInfo_594310; applicationId: string;
+proc call*(call_568547: Call_GetServiceInfo_568539; applicationId: string;
           serviceId: string; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getServiceInfo
   ## Returns the information about specified service belonging to the specified Service Fabric application.
@@ -3648,22 +3648,22 @@ proc call*(call_594318: Call_GetServiceInfo_594310; applicationId: string;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   serviceId: string (required)
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
-  var path_594319 = newJObject()
-  var query_594320 = newJObject()
-  add(query_594320, "timeout", newJInt(timeout))
-  add(query_594320, "api-version", newJString(apiVersion))
-  add(path_594319, "applicationId", newJString(applicationId))
-  add(path_594319, "serviceId", newJString(serviceId))
-  result = call_594318.call(path_594319, query_594320, nil, nil, nil)
+  var path_568548 = newJObject()
+  var query_568549 = newJObject()
+  add(query_568549, "timeout", newJInt(timeout))
+  add(query_568549, "api-version", newJString(apiVersion))
+  add(path_568548, "applicationId", newJString(applicationId))
+  add(path_568548, "serviceId", newJString(serviceId))
+  result = call_568547.call(path_568548, query_568549, nil, nil, nil)
 
-var getServiceInfo* = Call_GetServiceInfo_594310(name: "getServiceInfo",
+var getServiceInfo* = Call_GetServiceInfo_568539(name: "getServiceInfo",
     meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Applications/{applicationId}/$/GetServices/{serviceId}",
-    validator: validate_GetServiceInfo_594311, base: "", url: url_GetServiceInfo_594312,
+    validator: validate_GetServiceInfo_568540, base: "", url: url_GetServiceInfo_568541,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetApplicationUpgrade_594321 = ref object of OpenApiRestCall_593437
-proc url_GetApplicationUpgrade_594323(protocol: Scheme; host: string; base: string;
+  Call_GetApplicationUpgrade_568550 = ref object of OpenApiRestCall_567666
+proc url_GetApplicationUpgrade_568552(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3679,7 +3679,7 @@ proc url_GetApplicationUpgrade_594323(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetApplicationUpgrade_594322(path: JsonNode; query: JsonNode;
+proc validate_GetApplicationUpgrade_568551(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns information about the state of the latest application upgrade along with details to aid debugging application health issues.
   ## 
@@ -3691,11 +3691,11 @@ proc validate_GetApplicationUpgrade_594322(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594324 = path.getOrDefault("applicationId")
-  valid_594324 = validateParameter(valid_594324, JString, required = true,
+  var valid_568553 = path.getOrDefault("applicationId")
+  valid_568553 = validateParameter(valid_568553, JString, required = true,
                                  default = nil)
-  if valid_594324 != nil:
-    section.add "applicationId", valid_594324
+  if valid_568553 != nil:
+    section.add "applicationId", valid_568553
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -3703,18 +3703,18 @@ proc validate_GetApplicationUpgrade_594322(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594325 = query.getOrDefault("timeout")
-  valid_594325 = validateParameter(valid_594325, JInt, required = false,
+  var valid_568554 = query.getOrDefault("timeout")
+  valid_568554 = validateParameter(valid_568554, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594325 != nil:
-    section.add "timeout", valid_594325
+  if valid_568554 != nil:
+    section.add "timeout", valid_568554
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594326 = query.getOrDefault("api-version")
-  valid_594326 = validateParameter(valid_594326, JString, required = true,
+  var valid_568555 = query.getOrDefault("api-version")
+  valid_568555 = validateParameter(valid_568555, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594326 != nil:
-    section.add "api-version", valid_594326
+  if valid_568555 != nil:
+    section.add "api-version", valid_568555
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3723,20 +3723,20 @@ proc validate_GetApplicationUpgrade_594322(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594327: Call_GetApplicationUpgrade_594321; path: JsonNode;
+proc call*(call_568556: Call_GetApplicationUpgrade_568550; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns information about the state of the latest application upgrade along with details to aid debugging application health issues.
   ## 
-  let valid = call_594327.validator(path, query, header, formData, body)
-  let scheme = call_594327.pickScheme
+  let valid = call_568556.validator(path, query, header, formData, body)
+  let scheme = call_568556.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594327.url(scheme.get, call_594327.host, call_594327.base,
-                         call_594327.route, valid.getOrDefault("path"),
+  let url = call_568556.url(scheme.get, call_568556.host, call_568556.base,
+                         call_568556.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594327, url, valid)
+  result = hook(call_568556, url, valid)
 
-proc call*(call_594328: Call_GetApplicationUpgrade_594321; applicationId: string;
+proc call*(call_568557: Call_GetApplicationUpgrade_568550; applicationId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getApplicationUpgrade
   ## Returns information about the state of the latest application upgrade along with details to aid debugging application health issues.
@@ -3746,22 +3746,22 @@ proc call*(call_594328: Call_GetApplicationUpgrade_594321; applicationId: string
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594329 = newJObject()
-  var query_594330 = newJObject()
-  add(query_594330, "timeout", newJInt(timeout))
-  add(query_594330, "api-version", newJString(apiVersion))
-  add(path_594329, "applicationId", newJString(applicationId))
-  result = call_594328.call(path_594329, query_594330, nil, nil, nil)
+  var path_568558 = newJObject()
+  var query_568559 = newJObject()
+  add(query_568559, "timeout", newJInt(timeout))
+  add(query_568559, "api-version", newJString(apiVersion))
+  add(path_568558, "applicationId", newJString(applicationId))
+  result = call_568557.call(path_568558, query_568559, nil, nil, nil)
 
-var getApplicationUpgrade* = Call_GetApplicationUpgrade_594321(
+var getApplicationUpgrade* = Call_GetApplicationUpgrade_568550(
     name: "getApplicationUpgrade", meth: HttpMethod.HttpGet,
     host: "azure.local:19080",
     route: "/Applications/{applicationId}/$/GetUpgradeProgress",
-    validator: validate_GetApplicationUpgrade_594322, base: "",
-    url: url_GetApplicationUpgrade_594323, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetApplicationUpgrade_568551, base: "",
+    url: url_GetApplicationUpgrade_568552, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ResumeApplicationUpgrade_594331 = ref object of OpenApiRestCall_593437
-proc url_ResumeApplicationUpgrade_594333(protocol: Scheme; host: string;
+  Call_ResumeApplicationUpgrade_568560 = ref object of OpenApiRestCall_567666
+proc url_ResumeApplicationUpgrade_568562(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3778,7 +3778,7 @@ proc url_ResumeApplicationUpgrade_594333(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResumeApplicationUpgrade_594332(path: JsonNode; query: JsonNode;
+proc validate_ResumeApplicationUpgrade_568561(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Resumes an unmonitored manual Service Fabric application upgrade. Service Fabric upgrades one upgrade domain at a time. For unmonitored manual upgrades, after Service Fabric finishes an upgrade domain, it waits for you to call this API before proceeding to the next upgrade domain.
   ## 
@@ -3790,11 +3790,11 @@ proc validate_ResumeApplicationUpgrade_594332(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594334 = path.getOrDefault("applicationId")
-  valid_594334 = validateParameter(valid_594334, JString, required = true,
+  var valid_568563 = path.getOrDefault("applicationId")
+  valid_568563 = validateParameter(valid_568563, JString, required = true,
                                  default = nil)
-  if valid_594334 != nil:
-    section.add "applicationId", valid_594334
+  if valid_568563 != nil:
+    section.add "applicationId", valid_568563
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -3802,18 +3802,18 @@ proc validate_ResumeApplicationUpgrade_594332(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594335 = query.getOrDefault("timeout")
-  valid_594335 = validateParameter(valid_594335, JInt, required = false,
+  var valid_568564 = query.getOrDefault("timeout")
+  valid_568564 = validateParameter(valid_568564, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594335 != nil:
-    section.add "timeout", valid_594335
+  if valid_568564 != nil:
+    section.add "timeout", valid_568564
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594336 = query.getOrDefault("api-version")
-  valid_594336 = validateParameter(valid_594336, JString, required = true,
+  var valid_568565 = query.getOrDefault("api-version")
+  valid_568565 = validateParameter(valid_568565, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594336 != nil:
-    section.add "api-version", valid_594336
+  if valid_568565 != nil:
+    section.add "api-version", valid_568565
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3827,20 +3827,20 @@ proc validate_ResumeApplicationUpgrade_594332(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594338: Call_ResumeApplicationUpgrade_594331; path: JsonNode;
+proc call*(call_568567: Call_ResumeApplicationUpgrade_568560; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resumes an unmonitored manual Service Fabric application upgrade. Service Fabric upgrades one upgrade domain at a time. For unmonitored manual upgrades, after Service Fabric finishes an upgrade domain, it waits for you to call this API before proceeding to the next upgrade domain.
   ## 
-  let valid = call_594338.validator(path, query, header, formData, body)
-  let scheme = call_594338.pickScheme
+  let valid = call_568567.validator(path, query, header, formData, body)
+  let scheme = call_568567.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594338.url(scheme.get, call_594338.host, call_594338.base,
-                         call_594338.route, valid.getOrDefault("path"),
+  let url = call_568567.url(scheme.get, call_568567.host, call_568567.base,
+                         call_568567.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594338, url, valid)
+  result = hook(call_568567, url, valid)
 
-proc call*(call_594339: Call_ResumeApplicationUpgrade_594331;
+proc call*(call_568568: Call_ResumeApplicationUpgrade_568560;
           ResumeApplicationUpgradeDescription: JsonNode; applicationId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## resumeApplicationUpgrade
@@ -3853,25 +3853,25 @@ proc call*(call_594339: Call_ResumeApplicationUpgrade_594331;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594340 = newJObject()
-  var query_594341 = newJObject()
-  var body_594342 = newJObject()
-  add(query_594341, "timeout", newJInt(timeout))
+  var path_568569 = newJObject()
+  var query_568570 = newJObject()
+  var body_568571 = newJObject()
+  add(query_568570, "timeout", newJInt(timeout))
   if ResumeApplicationUpgradeDescription != nil:
-    body_594342 = ResumeApplicationUpgradeDescription
-  add(query_594341, "api-version", newJString(apiVersion))
-  add(path_594340, "applicationId", newJString(applicationId))
-  result = call_594339.call(path_594340, query_594341, nil, nil, body_594342)
+    body_568571 = ResumeApplicationUpgradeDescription
+  add(query_568570, "api-version", newJString(apiVersion))
+  add(path_568569, "applicationId", newJString(applicationId))
+  result = call_568568.call(path_568569, query_568570, nil, nil, body_568571)
 
-var resumeApplicationUpgrade* = Call_ResumeApplicationUpgrade_594331(
+var resumeApplicationUpgrade* = Call_ResumeApplicationUpgrade_568560(
     name: "resumeApplicationUpgrade", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/Applications/{applicationId}/$/MoveToNextUpgradeDomain",
-    validator: validate_ResumeApplicationUpgrade_594332, base: "",
-    url: url_ResumeApplicationUpgrade_594333, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_ResumeApplicationUpgrade_568561, base: "",
+    url: url_ResumeApplicationUpgrade_568562, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ReportApplicationHealth_594343 = ref object of OpenApiRestCall_593437
-proc url_ReportApplicationHealth_594345(protocol: Scheme; host: string; base: string;
+  Call_ReportApplicationHealth_568572 = ref object of OpenApiRestCall_567666
+proc url_ReportApplicationHealth_568574(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3888,7 +3888,7 @@ proc url_ReportApplicationHealth_594345(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportApplicationHealth_594344(path: JsonNode; query: JsonNode;
+proc validate_ReportApplicationHealth_568573(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reports health state of the specified Service Fabric application. The report must contain the information about the source of the health report and property on which it is reported.
   ## The report is sent to a Service Fabric gateway Application, which forwards to the health store.
@@ -3905,11 +3905,11 @@ proc validate_ReportApplicationHealth_594344(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594346 = path.getOrDefault("applicationId")
-  valid_594346 = validateParameter(valid_594346, JString, required = true,
+  var valid_568575 = path.getOrDefault("applicationId")
+  valid_568575 = validateParameter(valid_568575, JString, required = true,
                                  default = nil)
-  if valid_594346 != nil:
-    section.add "applicationId", valid_594346
+  if valid_568575 != nil:
+    section.add "applicationId", valid_568575
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -3917,18 +3917,18 @@ proc validate_ReportApplicationHealth_594344(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594347 = query.getOrDefault("timeout")
-  valid_594347 = validateParameter(valid_594347, JInt, required = false,
+  var valid_568576 = query.getOrDefault("timeout")
+  valid_568576 = validateParameter(valid_568576, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594347 != nil:
-    section.add "timeout", valid_594347
+  if valid_568576 != nil:
+    section.add "timeout", valid_568576
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594348 = query.getOrDefault("api-version")
-  valid_594348 = validateParameter(valid_594348, JString, required = true,
+  var valid_568577 = query.getOrDefault("api-version")
+  valid_568577 = validateParameter(valid_568577, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594348 != nil:
-    section.add "api-version", valid_594348
+  if valid_568577 != nil:
+    section.add "api-version", valid_568577
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3942,7 +3942,7 @@ proc validate_ReportApplicationHealth_594344(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594350: Call_ReportApplicationHealth_594343; path: JsonNode;
+proc call*(call_568579: Call_ReportApplicationHealth_568572; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reports health state of the specified Service Fabric application. The report must contain the information about the source of the health report and property on which it is reported.
   ## The report is sent to a Service Fabric gateway Application, which forwards to the health store.
@@ -3951,16 +3951,16 @@ proc call*(call_594350: Call_ReportApplicationHealth_594343; path: JsonNode;
   ## To see whether the report was applied in the health store, run GetApplicationHealth and check that the report appears in the HealthEvents section.
   ## 
   ## 
-  let valid = call_594350.validator(path, query, header, formData, body)
-  let scheme = call_594350.pickScheme
+  let valid = call_568579.validator(path, query, header, formData, body)
+  let scheme = call_568579.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594350.url(scheme.get, call_594350.host, call_594350.base,
-                         call_594350.route, valid.getOrDefault("path"),
+  let url = call_568579.url(scheme.get, call_568579.host, call_568579.base,
+                         call_568579.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594350, url, valid)
+  result = hook(call_568579, url, valid)
 
-proc call*(call_594351: Call_ReportApplicationHealth_594343;
+proc call*(call_568580: Call_ReportApplicationHealth_568572;
           HealthInformation: JsonNode; applicationId: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## reportApplicationHealth
@@ -3978,25 +3978,25 @@ proc call*(call_594351: Call_ReportApplicationHealth_594343;
   ##                    : Describes the health information for the health report. This information needs to be present in all of the health reports sent to the health manager.
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594352 = newJObject()
-  var query_594353 = newJObject()
-  var body_594354 = newJObject()
-  add(query_594353, "timeout", newJInt(timeout))
-  add(query_594353, "api-version", newJString(apiVersion))
+  var path_568581 = newJObject()
+  var query_568582 = newJObject()
+  var body_568583 = newJObject()
+  add(query_568582, "timeout", newJInt(timeout))
+  add(query_568582, "api-version", newJString(apiVersion))
   if HealthInformation != nil:
-    body_594354 = HealthInformation
-  add(path_594352, "applicationId", newJString(applicationId))
-  result = call_594351.call(path_594352, query_594353, nil, nil, body_594354)
+    body_568583 = HealthInformation
+  add(path_568581, "applicationId", newJString(applicationId))
+  result = call_568580.call(path_568581, query_568582, nil, nil, body_568583)
 
-var reportApplicationHealth* = Call_ReportApplicationHealth_594343(
+var reportApplicationHealth* = Call_ReportApplicationHealth_568572(
     name: "reportApplicationHealth", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/Applications/{applicationId}/$/ReportHealth",
-    validator: validate_ReportApplicationHealth_594344, base: "",
-    url: url_ReportApplicationHealth_594345, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_ReportApplicationHealth_568573, base: "",
+    url: url_ReportApplicationHealth_568574, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RollbackApplicationUpgrade_594355 = ref object of OpenApiRestCall_593437
-proc url_RollbackApplicationUpgrade_594357(protocol: Scheme; host: string;
+  Call_RollbackApplicationUpgrade_568584 = ref object of OpenApiRestCall_567666
+proc url_RollbackApplicationUpgrade_568586(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4012,7 +4012,7 @@ proc url_RollbackApplicationUpgrade_594357(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RollbackApplicationUpgrade_594356(path: JsonNode; query: JsonNode;
+proc validate_RollbackApplicationUpgrade_568585(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Starts rolling back the current application upgrade to the previous version. This API can only be used to rollback the current in-progress upgrade that is rolling forward to new version. If the application is not currently being upgraded use StartApplicationUpgrade API to upgrade it to desired version including rolling back to a previous version.
   ## 
@@ -4024,11 +4024,11 @@ proc validate_RollbackApplicationUpgrade_594356(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594358 = path.getOrDefault("applicationId")
-  valid_594358 = validateParameter(valid_594358, JString, required = true,
+  var valid_568587 = path.getOrDefault("applicationId")
+  valid_568587 = validateParameter(valid_568587, JString, required = true,
                                  default = nil)
-  if valid_594358 != nil:
-    section.add "applicationId", valid_594358
+  if valid_568587 != nil:
+    section.add "applicationId", valid_568587
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -4036,18 +4036,18 @@ proc validate_RollbackApplicationUpgrade_594356(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594359 = query.getOrDefault("timeout")
-  valid_594359 = validateParameter(valid_594359, JInt, required = false,
+  var valid_568588 = query.getOrDefault("timeout")
+  valid_568588 = validateParameter(valid_568588, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594359 != nil:
-    section.add "timeout", valid_594359
+  if valid_568588 != nil:
+    section.add "timeout", valid_568588
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594360 = query.getOrDefault("api-version")
-  valid_594360 = validateParameter(valid_594360, JString, required = true,
+  var valid_568589 = query.getOrDefault("api-version")
+  valid_568589 = validateParameter(valid_568589, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594360 != nil:
-    section.add "api-version", valid_594360
+  if valid_568589 != nil:
+    section.add "api-version", valid_568589
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4056,20 +4056,20 @@ proc validate_RollbackApplicationUpgrade_594356(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594361: Call_RollbackApplicationUpgrade_594355; path: JsonNode;
+proc call*(call_568590: Call_RollbackApplicationUpgrade_568584; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts rolling back the current application upgrade to the previous version. This API can only be used to rollback the current in-progress upgrade that is rolling forward to new version. If the application is not currently being upgraded use StartApplicationUpgrade API to upgrade it to desired version including rolling back to a previous version.
   ## 
-  let valid = call_594361.validator(path, query, header, formData, body)
-  let scheme = call_594361.pickScheme
+  let valid = call_568590.validator(path, query, header, formData, body)
+  let scheme = call_568590.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594361.url(scheme.get, call_594361.host, call_594361.base,
-                         call_594361.route, valid.getOrDefault("path"),
+  let url = call_568590.url(scheme.get, call_568590.host, call_568590.base,
+                         call_568590.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594361, url, valid)
+  result = hook(call_568590, url, valid)
 
-proc call*(call_594362: Call_RollbackApplicationUpgrade_594355;
+proc call*(call_568591: Call_RollbackApplicationUpgrade_568584;
           applicationId: string; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## rollbackApplicationUpgrade
   ## Starts rolling back the current application upgrade to the previous version. This API can only be used to rollback the current in-progress upgrade that is rolling forward to new version. If the application is not currently being upgraded use StartApplicationUpgrade API to upgrade it to desired version including rolling back to a previous version.
@@ -4079,23 +4079,23 @@ proc call*(call_594362: Call_RollbackApplicationUpgrade_594355;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594363 = newJObject()
-  var query_594364 = newJObject()
-  add(query_594364, "timeout", newJInt(timeout))
-  add(query_594364, "api-version", newJString(apiVersion))
-  add(path_594363, "applicationId", newJString(applicationId))
-  result = call_594362.call(path_594363, query_594364, nil, nil, nil)
+  var path_568592 = newJObject()
+  var query_568593 = newJObject()
+  add(query_568593, "timeout", newJInt(timeout))
+  add(query_568593, "api-version", newJString(apiVersion))
+  add(path_568592, "applicationId", newJString(applicationId))
+  result = call_568591.call(path_568592, query_568593, nil, nil, nil)
 
-var rollbackApplicationUpgrade* = Call_RollbackApplicationUpgrade_594355(
+var rollbackApplicationUpgrade* = Call_RollbackApplicationUpgrade_568584(
     name: "rollbackApplicationUpgrade", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/Applications/{applicationId}/$/RollbackUpgrade",
-    validator: validate_RollbackApplicationUpgrade_594356, base: "",
-    url: url_RollbackApplicationUpgrade_594357,
+    validator: validate_RollbackApplicationUpgrade_568585, base: "",
+    url: url_RollbackApplicationUpgrade_568586,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_UpdateApplicationUpgrade_594365 = ref object of OpenApiRestCall_593437
-proc url_UpdateApplicationUpgrade_594367(protocol: Scheme; host: string;
+  Call_UpdateApplicationUpgrade_568594 = ref object of OpenApiRestCall_567666
+proc url_UpdateApplicationUpgrade_568596(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4112,7 +4112,7 @@ proc url_UpdateApplicationUpgrade_594367(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateApplicationUpgrade_594366(path: JsonNode; query: JsonNode;
+proc validate_UpdateApplicationUpgrade_568595(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the parameters of an ongoing application upgrade from the ones specified at the time of starting the application upgrade. This may be required to mitigate stuck application upgrades due to incorrect parameters or issues in the application to make progress.
   ## 
@@ -4124,11 +4124,11 @@ proc validate_UpdateApplicationUpgrade_594366(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594368 = path.getOrDefault("applicationId")
-  valid_594368 = validateParameter(valid_594368, JString, required = true,
+  var valid_568597 = path.getOrDefault("applicationId")
+  valid_568597 = validateParameter(valid_568597, JString, required = true,
                                  default = nil)
-  if valid_594368 != nil:
-    section.add "applicationId", valid_594368
+  if valid_568597 != nil:
+    section.add "applicationId", valid_568597
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -4136,18 +4136,18 @@ proc validate_UpdateApplicationUpgrade_594366(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594369 = query.getOrDefault("timeout")
-  valid_594369 = validateParameter(valid_594369, JInt, required = false,
+  var valid_568598 = query.getOrDefault("timeout")
+  valid_568598 = validateParameter(valid_568598, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594369 != nil:
-    section.add "timeout", valid_594369
+  if valid_568598 != nil:
+    section.add "timeout", valid_568598
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594370 = query.getOrDefault("api-version")
-  valid_594370 = validateParameter(valid_594370, JString, required = true,
+  var valid_568599 = query.getOrDefault("api-version")
+  valid_568599 = validateParameter(valid_568599, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594370 != nil:
-    section.add "api-version", valid_594370
+  if valid_568599 != nil:
+    section.add "api-version", valid_568599
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4161,20 +4161,20 @@ proc validate_UpdateApplicationUpgrade_594366(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594372: Call_UpdateApplicationUpgrade_594365; path: JsonNode;
+proc call*(call_568601: Call_UpdateApplicationUpgrade_568594; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the parameters of an ongoing application upgrade from the ones specified at the time of starting the application upgrade. This may be required to mitigate stuck application upgrades due to incorrect parameters or issues in the application to make progress.
   ## 
-  let valid = call_594372.validator(path, query, header, formData, body)
-  let scheme = call_594372.pickScheme
+  let valid = call_568601.validator(path, query, header, formData, body)
+  let scheme = call_568601.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594372.url(scheme.get, call_594372.host, call_594372.base,
-                         call_594372.route, valid.getOrDefault("path"),
+  let url = call_568601.url(scheme.get, call_568601.host, call_568601.base,
+                         call_568601.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594372, url, valid)
+  result = hook(call_568601, url, valid)
 
-proc call*(call_594373: Call_UpdateApplicationUpgrade_594365;
+proc call*(call_568602: Call_UpdateApplicationUpgrade_568594;
           applicationId: string; ApplicationUpgradeUpdateDescription: JsonNode;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## updateApplicationUpgrade
@@ -4187,25 +4187,25 @@ proc call*(call_594373: Call_UpdateApplicationUpgrade_594365;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   ApplicationUpgradeUpdateDescription: JObject (required)
   ##                                      : Describes the parameters for updating an existing application upgrade.
-  var path_594374 = newJObject()
-  var query_594375 = newJObject()
-  var body_594376 = newJObject()
-  add(query_594375, "timeout", newJInt(timeout))
-  add(query_594375, "api-version", newJString(apiVersion))
-  add(path_594374, "applicationId", newJString(applicationId))
+  var path_568603 = newJObject()
+  var query_568604 = newJObject()
+  var body_568605 = newJObject()
+  add(query_568604, "timeout", newJInt(timeout))
+  add(query_568604, "api-version", newJString(apiVersion))
+  add(path_568603, "applicationId", newJString(applicationId))
   if ApplicationUpgradeUpdateDescription != nil:
-    body_594376 = ApplicationUpgradeUpdateDescription
-  result = call_594373.call(path_594374, query_594375, nil, nil, body_594376)
+    body_568605 = ApplicationUpgradeUpdateDescription
+  result = call_568602.call(path_568603, query_568604, nil, nil, body_568605)
 
-var updateApplicationUpgrade* = Call_UpdateApplicationUpgrade_594365(
+var updateApplicationUpgrade* = Call_UpdateApplicationUpgrade_568594(
     name: "updateApplicationUpgrade", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/Applications/{applicationId}/$/UpdateUpgrade",
-    validator: validate_UpdateApplicationUpgrade_594366, base: "",
-    url: url_UpdateApplicationUpgrade_594367, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_UpdateApplicationUpgrade_568595, base: "",
+    url: url_UpdateApplicationUpgrade_568596, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_StartApplicationUpgrade_594377 = ref object of OpenApiRestCall_593437
-proc url_StartApplicationUpgrade_594379(protocol: Scheme; host: string; base: string;
+  Call_StartApplicationUpgrade_568606 = ref object of OpenApiRestCall_567666
+proc url_StartApplicationUpgrade_568608(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4222,7 +4222,7 @@ proc url_StartApplicationUpgrade_594379(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StartApplicationUpgrade_594378(path: JsonNode; query: JsonNode;
+proc validate_StartApplicationUpgrade_568607(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Validates the supplied application upgrade parameters and starts upgrading the application if the parameters are valid.
   ## 
@@ -4234,11 +4234,11 @@ proc validate_StartApplicationUpgrade_594378(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594380 = path.getOrDefault("applicationId")
-  valid_594380 = validateParameter(valid_594380, JString, required = true,
+  var valid_568609 = path.getOrDefault("applicationId")
+  valid_568609 = validateParameter(valid_568609, JString, required = true,
                                  default = nil)
-  if valid_594380 != nil:
-    section.add "applicationId", valid_594380
+  if valid_568609 != nil:
+    section.add "applicationId", valid_568609
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -4246,18 +4246,18 @@ proc validate_StartApplicationUpgrade_594378(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594381 = query.getOrDefault("timeout")
-  valid_594381 = validateParameter(valid_594381, JInt, required = false,
+  var valid_568610 = query.getOrDefault("timeout")
+  valid_568610 = validateParameter(valid_568610, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594381 != nil:
-    section.add "timeout", valid_594381
+  if valid_568610 != nil:
+    section.add "timeout", valid_568610
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594382 = query.getOrDefault("api-version")
-  valid_594382 = validateParameter(valid_594382, JString, required = true,
+  var valid_568611 = query.getOrDefault("api-version")
+  valid_568611 = validateParameter(valid_568611, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594382 != nil:
-    section.add "api-version", valid_594382
+  if valid_568611 != nil:
+    section.add "api-version", valid_568611
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4271,20 +4271,20 @@ proc validate_StartApplicationUpgrade_594378(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594384: Call_StartApplicationUpgrade_594377; path: JsonNode;
+proc call*(call_568613: Call_StartApplicationUpgrade_568606; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Validates the supplied application upgrade parameters and starts upgrading the application if the parameters are valid.
   ## 
-  let valid = call_594384.validator(path, query, header, formData, body)
-  let scheme = call_594384.pickScheme
+  let valid = call_568613.validator(path, query, header, formData, body)
+  let scheme = call_568613.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594384.url(scheme.get, call_594384.host, call_594384.base,
-                         call_594384.route, valid.getOrDefault("path"),
+  let url = call_568613.url(scheme.get, call_568613.host, call_568613.base,
+                         call_568613.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594384, url, valid)
+  result = hook(call_568613, url, valid)
 
-proc call*(call_594385: Call_StartApplicationUpgrade_594377; applicationId: string;
+proc call*(call_568614: Call_StartApplicationUpgrade_568606; applicationId: string;
           ApplicationUpgradeDescription: JsonNode; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## startApplicationUpgrade
@@ -4297,31 +4297,31 @@ proc call*(call_594385: Call_StartApplicationUpgrade_594377; applicationId: stri
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   ApplicationUpgradeDescription: JObject (required)
   ##                                : Describes the parameters for an application upgrade.
-  var path_594386 = newJObject()
-  var query_594387 = newJObject()
-  var body_594388 = newJObject()
-  add(query_594387, "timeout", newJInt(timeout))
-  add(query_594387, "api-version", newJString(apiVersion))
-  add(path_594386, "applicationId", newJString(applicationId))
+  var path_568615 = newJObject()
+  var query_568616 = newJObject()
+  var body_568617 = newJObject()
+  add(query_568616, "timeout", newJInt(timeout))
+  add(query_568616, "api-version", newJString(apiVersion))
+  add(path_568615, "applicationId", newJString(applicationId))
   if ApplicationUpgradeDescription != nil:
-    body_594388 = ApplicationUpgradeDescription
-  result = call_594385.call(path_594386, query_594387, nil, nil, body_594388)
+    body_568617 = ApplicationUpgradeDescription
+  result = call_568614.call(path_568615, query_568616, nil, nil, body_568617)
 
-var startApplicationUpgrade* = Call_StartApplicationUpgrade_594377(
+var startApplicationUpgrade* = Call_StartApplicationUpgrade_568606(
     name: "startApplicationUpgrade", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Applications/{applicationId}/$/Upgrade",
-    validator: validate_StartApplicationUpgrade_594378, base: "",
-    url: url_StartApplicationUpgrade_594379, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_StartApplicationUpgrade_568607, base: "",
+    url: url_StartApplicationUpgrade_568608, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetComposeApplicationStatusList_594389 = ref object of OpenApiRestCall_593437
-proc url_GetComposeApplicationStatusList_594391(protocol: Scheme; host: string;
+  Call_GetComposeApplicationStatusList_568618 = ref object of OpenApiRestCall_567666
+proc url_GetComposeApplicationStatusList_568620(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetComposeApplicationStatusList_594390(path: JsonNode;
+proc validate_GetComposeApplicationStatusList_568619(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the status about the compose applications that were created or in the process of being created in the Service Fabric cluster. The response includes the name, status and other details about the compose application. If the applications do not fit in a page, one page of results is returned as well as a continuation token which can be used to get the next page.
   ## 
@@ -4339,28 +4339,28 @@ proc validate_GetComposeApplicationStatusList_594390(path: JsonNode;
   ##   MaxResults: JInt
   ##             : The maximum number of results to be returned as part of the paged queries. This parameter defines the upper bound on the number of results returned. The results returned can be less than the specified maximum results if they do not fit in the message as per the max message size restrictions defined in the configuration. If this parameter is zero or not specified, the paged queries includes as much results as possible that fit in the return message.
   section = newJObject()
-  var valid_594392 = query.getOrDefault("timeout")
-  valid_594392 = validateParameter(valid_594392, JInt, required = false,
+  var valid_568621 = query.getOrDefault("timeout")
+  valid_568621 = validateParameter(valid_568621, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594392 != nil:
-    section.add "timeout", valid_594392
+  if valid_568621 != nil:
+    section.add "timeout", valid_568621
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594393 = query.getOrDefault("api-version")
-  valid_594393 = validateParameter(valid_594393, JString, required = true,
+  var valid_568622 = query.getOrDefault("api-version")
+  valid_568622 = validateParameter(valid_568622, JString, required = true,
                                  default = newJString("4.0-preview"))
-  if valid_594393 != nil:
-    section.add "api-version", valid_594393
-  var valid_594394 = query.getOrDefault("ContinuationToken")
-  valid_594394 = validateParameter(valid_594394, JString, required = false,
+  if valid_568622 != nil:
+    section.add "api-version", valid_568622
+  var valid_568623 = query.getOrDefault("ContinuationToken")
+  valid_568623 = validateParameter(valid_568623, JString, required = false,
                                  default = nil)
-  if valid_594394 != nil:
-    section.add "ContinuationToken", valid_594394
-  var valid_594395 = query.getOrDefault("MaxResults")
-  valid_594395 = validateParameter(valid_594395, JInt, required = false,
+  if valid_568623 != nil:
+    section.add "ContinuationToken", valid_568623
+  var valid_568624 = query.getOrDefault("MaxResults")
+  valid_568624 = validateParameter(valid_568624, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594395 != nil:
-    section.add "MaxResults", valid_594395
+  if valid_568624 != nil:
+    section.add "MaxResults", valid_568624
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4369,21 +4369,21 @@ proc validate_GetComposeApplicationStatusList_594390(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594396: Call_GetComposeApplicationStatusList_594389;
+proc call*(call_568625: Call_GetComposeApplicationStatusList_568618;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the status about the compose applications that were created or in the process of being created in the Service Fabric cluster. The response includes the name, status and other details about the compose application. If the applications do not fit in a page, one page of results is returned as well as a continuation token which can be used to get the next page.
   ## 
-  let valid = call_594396.validator(path, query, header, formData, body)
-  let scheme = call_594396.pickScheme
+  let valid = call_568625.validator(path, query, header, formData, body)
+  let scheme = call_568625.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594396.url(scheme.get, call_594396.host, call_594396.base,
-                         call_594396.route, valid.getOrDefault("path"),
+  let url = call_568625.url(scheme.get, call_568625.host, call_568625.base,
+                         call_568625.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594396, url, valid)
+  result = hook(call_568625, url, valid)
 
-proc call*(call_594397: Call_GetComposeApplicationStatusList_594389;
+proc call*(call_568626: Call_GetComposeApplicationStatusList_568618;
           timeout: int = 60; apiVersion: string = "4.0-preview";
           ContinuationToken: string = ""; MaxResults: int = 0): Recallable =
   ## getComposeApplicationStatusList
@@ -4396,22 +4396,22 @@ proc call*(call_594397: Call_GetComposeApplicationStatusList_594389;
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
   ##   MaxResults: int
   ##             : The maximum number of results to be returned as part of the paged queries. This parameter defines the upper bound on the number of results returned. The results returned can be less than the specified maximum results if they do not fit in the message as per the max message size restrictions defined in the configuration. If this parameter is zero or not specified, the paged queries includes as much results as possible that fit in the return message.
-  var query_594398 = newJObject()
-  add(query_594398, "timeout", newJInt(timeout))
-  add(query_594398, "api-version", newJString(apiVersion))
-  add(query_594398, "ContinuationToken", newJString(ContinuationToken))
-  add(query_594398, "MaxResults", newJInt(MaxResults))
-  result = call_594397.call(nil, query_594398, nil, nil, nil)
+  var query_568627 = newJObject()
+  add(query_568627, "timeout", newJInt(timeout))
+  add(query_568627, "api-version", newJString(apiVersion))
+  add(query_568627, "ContinuationToken", newJString(ContinuationToken))
+  add(query_568627, "MaxResults", newJInt(MaxResults))
+  result = call_568626.call(nil, query_568627, nil, nil, nil)
 
-var getComposeApplicationStatusList* = Call_GetComposeApplicationStatusList_594389(
+var getComposeApplicationStatusList* = Call_GetComposeApplicationStatusList_568618(
     name: "getComposeApplicationStatusList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/ComposeDeployments",
-    validator: validate_GetComposeApplicationStatusList_594390, base: "",
-    url: url_GetComposeApplicationStatusList_594391,
+    validator: validate_GetComposeApplicationStatusList_568619, base: "",
+    url: url_GetComposeApplicationStatusList_568620,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_CreateComposeApplication_594399 = ref object of OpenApiRestCall_593437
-proc url_CreateComposeApplication_594401(protocol: Scheme; host: string;
+  Call_CreateComposeApplication_568628 = ref object of OpenApiRestCall_567666
+proc url_CreateComposeApplication_568630(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4419,7 +4419,7 @@ proc url_CreateComposeApplication_594401(protocol: Scheme; host: string;
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CreateComposeApplication_594400(path: JsonNode; query: JsonNode;
+proc validate_CreateComposeApplication_568629(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a Service Fabric compose application.
   ## 
@@ -4433,18 +4433,18 @@ proc validate_CreateComposeApplication_594400(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "4.0-preview".
   section = newJObject()
-  var valid_594402 = query.getOrDefault("timeout")
-  valid_594402 = validateParameter(valid_594402, JInt, required = false,
+  var valid_568631 = query.getOrDefault("timeout")
+  valid_568631 = validateParameter(valid_568631, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594402 != nil:
-    section.add "timeout", valid_594402
+  if valid_568631 != nil:
+    section.add "timeout", valid_568631
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594403 = query.getOrDefault("api-version")
-  valid_594403 = validateParameter(valid_594403, JString, required = true,
+  var valid_568632 = query.getOrDefault("api-version")
+  valid_568632 = validateParameter(valid_568632, JString, required = true,
                                  default = newJString("4.0-preview"))
-  if valid_594403 != nil:
-    section.add "api-version", valid_594403
+  if valid_568632 != nil:
+    section.add "api-version", valid_568632
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4458,20 +4458,20 @@ proc validate_CreateComposeApplication_594400(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594405: Call_CreateComposeApplication_594399; path: JsonNode;
+proc call*(call_568634: Call_CreateComposeApplication_568628; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Service Fabric compose application.
   ## 
-  let valid = call_594405.validator(path, query, header, formData, body)
-  let scheme = call_594405.pickScheme
+  let valid = call_568634.validator(path, query, header, formData, body)
+  let scheme = call_568634.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594405.url(scheme.get, call_594405.host, call_594405.base,
-                         call_594405.route, valid.getOrDefault("path"),
+  let url = call_568634.url(scheme.get, call_568634.host, call_568634.base,
+                         call_568634.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594405, url, valid)
+  result = hook(call_568634, url, valid)
 
-proc call*(call_594406: Call_CreateComposeApplication_594399;
+proc call*(call_568635: Call_CreateComposeApplication_568628;
           CreateComposeApplicationDescription: JsonNode; timeout: int = 60;
           apiVersion: string = "4.0-preview"): Recallable =
   ## createComposeApplication
@@ -4482,22 +4482,22 @@ proc call*(call_594406: Call_CreateComposeApplication_594399;
   ##             : The version of the API. This is a required parameter and it's value must be "4.0-preview".
   ##   CreateComposeApplicationDescription: JObject (required)
   ##                                      : Describes the compose application that needs to be created.
-  var query_594407 = newJObject()
-  var body_594408 = newJObject()
-  add(query_594407, "timeout", newJInt(timeout))
-  add(query_594407, "api-version", newJString(apiVersion))
+  var query_568636 = newJObject()
+  var body_568637 = newJObject()
+  add(query_568636, "timeout", newJInt(timeout))
+  add(query_568636, "api-version", newJString(apiVersion))
   if CreateComposeApplicationDescription != nil:
-    body_594408 = CreateComposeApplicationDescription
-  result = call_594406.call(nil, query_594407, nil, nil, body_594408)
+    body_568637 = CreateComposeApplicationDescription
+  result = call_568635.call(nil, query_568636, nil, nil, body_568637)
 
-var createComposeApplication* = Call_CreateComposeApplication_594399(
+var createComposeApplication* = Call_CreateComposeApplication_568628(
     name: "createComposeApplication", meth: HttpMethod.HttpPut,
     host: "azure.local:19080", route: "/ComposeDeployments/$/Create",
-    validator: validate_CreateComposeApplication_594400, base: "",
-    url: url_CreateComposeApplication_594401, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_CreateComposeApplication_568629, base: "",
+    url: url_CreateComposeApplication_568630, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetComposeApplicationStatus_594409 = ref object of OpenApiRestCall_593437
-proc url_GetComposeApplicationStatus_594411(protocol: Scheme; host: string;
+  Call_GetComposeApplicationStatus_568638 = ref object of OpenApiRestCall_567666
+proc url_GetComposeApplicationStatus_568640(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4512,7 +4512,7 @@ proc url_GetComposeApplicationStatus_594411(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetComposeApplicationStatus_594410(path: JsonNode; query: JsonNode;
+proc validate_GetComposeApplicationStatus_568639(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the status of compose application that was created or in the process of being created in the Service Fabric cluster and whose name matches the one specified as the parameter. The response includes the name, status and other details about the application.
   ## 
@@ -4524,11 +4524,11 @@ proc validate_GetComposeApplicationStatus_594410(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594412 = path.getOrDefault("applicationId")
-  valid_594412 = validateParameter(valid_594412, JString, required = true,
+  var valid_568641 = path.getOrDefault("applicationId")
+  valid_568641 = validateParameter(valid_568641, JString, required = true,
                                  default = nil)
-  if valid_594412 != nil:
-    section.add "applicationId", valid_594412
+  if valid_568641 != nil:
+    section.add "applicationId", valid_568641
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -4536,18 +4536,18 @@ proc validate_GetComposeApplicationStatus_594410(path: JsonNode; query: JsonNode
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "4.0-preview".
   section = newJObject()
-  var valid_594413 = query.getOrDefault("timeout")
-  valid_594413 = validateParameter(valid_594413, JInt, required = false,
+  var valid_568642 = query.getOrDefault("timeout")
+  valid_568642 = validateParameter(valid_568642, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594413 != nil:
-    section.add "timeout", valid_594413
+  if valid_568642 != nil:
+    section.add "timeout", valid_568642
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594414 = query.getOrDefault("api-version")
-  valid_594414 = validateParameter(valid_594414, JString, required = true,
+  var valid_568643 = query.getOrDefault("api-version")
+  valid_568643 = validateParameter(valid_568643, JString, required = true,
                                  default = newJString("4.0-preview"))
-  if valid_594414 != nil:
-    section.add "api-version", valid_594414
+  if valid_568643 != nil:
+    section.add "api-version", valid_568643
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4556,20 +4556,20 @@ proc validate_GetComposeApplicationStatus_594410(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594415: Call_GetComposeApplicationStatus_594409; path: JsonNode;
+proc call*(call_568644: Call_GetComposeApplicationStatus_568638; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the status of compose application that was created or in the process of being created in the Service Fabric cluster and whose name matches the one specified as the parameter. The response includes the name, status and other details about the application.
   ## 
-  let valid = call_594415.validator(path, query, header, formData, body)
-  let scheme = call_594415.pickScheme
+  let valid = call_568644.validator(path, query, header, formData, body)
+  let scheme = call_568644.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594415.url(scheme.get, call_594415.host, call_594415.base,
-                         call_594415.route, valid.getOrDefault("path"),
+  let url = call_568644.url(scheme.get, call_568644.host, call_568644.base,
+                         call_568644.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594415, url, valid)
+  result = hook(call_568644, url, valid)
 
-proc call*(call_594416: Call_GetComposeApplicationStatus_594409;
+proc call*(call_568645: Call_GetComposeApplicationStatus_568638;
           applicationId: string; timeout: int = 60; apiVersion: string = "4.0-preview"): Recallable =
   ## getComposeApplicationStatus
   ## Returns the status of compose application that was created or in the process of being created in the Service Fabric cluster and whose name matches the one specified as the parameter. The response includes the name, status and other details about the application.
@@ -4579,22 +4579,22 @@ proc call*(call_594416: Call_GetComposeApplicationStatus_594409;
   ##             : The version of the API. This is a required parameter and it's value must be "4.0-preview".
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594417 = newJObject()
-  var query_594418 = newJObject()
-  add(query_594418, "timeout", newJInt(timeout))
-  add(query_594418, "api-version", newJString(apiVersion))
-  add(path_594417, "applicationId", newJString(applicationId))
-  result = call_594416.call(path_594417, query_594418, nil, nil, nil)
+  var path_568646 = newJObject()
+  var query_568647 = newJObject()
+  add(query_568647, "timeout", newJInt(timeout))
+  add(query_568647, "api-version", newJString(apiVersion))
+  add(path_568646, "applicationId", newJString(applicationId))
+  result = call_568645.call(path_568646, query_568647, nil, nil, nil)
 
-var getComposeApplicationStatus* = Call_GetComposeApplicationStatus_594409(
+var getComposeApplicationStatus* = Call_GetComposeApplicationStatus_568638(
     name: "getComposeApplicationStatus", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/ComposeDeployments/{applicationId}",
-    validator: validate_GetComposeApplicationStatus_594410, base: "",
-    url: url_GetComposeApplicationStatus_594411,
+    validator: validate_GetComposeApplicationStatus_568639, base: "",
+    url: url_GetComposeApplicationStatus_568640,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RemoveComposeApplication_594419 = ref object of OpenApiRestCall_593437
-proc url_RemoveComposeApplication_594421(protocol: Scheme; host: string;
+  Call_RemoveComposeApplication_568648 = ref object of OpenApiRestCall_567666
+proc url_RemoveComposeApplication_568650(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4611,7 +4611,7 @@ proc url_RemoveComposeApplication_594421(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemoveComposeApplication_594420(path: JsonNode; query: JsonNode;
+proc validate_RemoveComposeApplication_568649(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Service Fabric compose application. An application must be created before it can be deleted.
   ## 
@@ -4623,11 +4623,11 @@ proc validate_RemoveComposeApplication_594420(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_594422 = path.getOrDefault("applicationId")
-  valid_594422 = validateParameter(valid_594422, JString, required = true,
+  var valid_568651 = path.getOrDefault("applicationId")
+  valid_568651 = validateParameter(valid_568651, JString, required = true,
                                  default = nil)
-  if valid_594422 != nil:
-    section.add "applicationId", valid_594422
+  if valid_568651 != nil:
+    section.add "applicationId", valid_568651
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -4635,18 +4635,18 @@ proc validate_RemoveComposeApplication_594420(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "4.0-preview".
   section = newJObject()
-  var valid_594423 = query.getOrDefault("timeout")
-  valid_594423 = validateParameter(valid_594423, JInt, required = false,
+  var valid_568652 = query.getOrDefault("timeout")
+  valid_568652 = validateParameter(valid_568652, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594423 != nil:
-    section.add "timeout", valid_594423
+  if valid_568652 != nil:
+    section.add "timeout", valid_568652
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594424 = query.getOrDefault("api-version")
-  valid_594424 = validateParameter(valid_594424, JString, required = true,
+  var valid_568653 = query.getOrDefault("api-version")
+  valid_568653 = validateParameter(valid_568653, JString, required = true,
                                  default = newJString("4.0-preview"))
-  if valid_594424 != nil:
-    section.add "api-version", valid_594424
+  if valid_568653 != nil:
+    section.add "api-version", valid_568653
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4655,20 +4655,20 @@ proc validate_RemoveComposeApplication_594420(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594425: Call_RemoveComposeApplication_594419; path: JsonNode;
+proc call*(call_568654: Call_RemoveComposeApplication_568648; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing Service Fabric compose application. An application must be created before it can be deleted.
   ## 
-  let valid = call_594425.validator(path, query, header, formData, body)
-  let scheme = call_594425.pickScheme
+  let valid = call_568654.validator(path, query, header, formData, body)
+  let scheme = call_568654.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594425.url(scheme.get, call_594425.host, call_594425.base,
-                         call_594425.route, valid.getOrDefault("path"),
+  let url = call_568654.url(scheme.get, call_568654.host, call_568654.base,
+                         call_568654.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594425, url, valid)
+  result = hook(call_568654, url, valid)
 
-proc call*(call_594426: Call_RemoveComposeApplication_594419;
+proc call*(call_568655: Call_RemoveComposeApplication_568648;
           applicationId: string; timeout: int = 60; apiVersion: string = "4.0-preview"): Recallable =
   ## removeComposeApplication
   ## Deletes an existing Service Fabric compose application. An application must be created before it can be deleted.
@@ -4678,29 +4678,29 @@ proc call*(call_594426: Call_RemoveComposeApplication_594419;
   ##             : The version of the API. This is a required parameter and it's value must be "4.0-preview".
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594427 = newJObject()
-  var query_594428 = newJObject()
-  add(query_594428, "timeout", newJInt(timeout))
-  add(query_594428, "api-version", newJString(apiVersion))
-  add(path_594427, "applicationId", newJString(applicationId))
-  result = call_594426.call(path_594427, query_594428, nil, nil, nil)
+  var path_568656 = newJObject()
+  var query_568657 = newJObject()
+  add(query_568657, "timeout", newJInt(timeout))
+  add(query_568657, "api-version", newJString(apiVersion))
+  add(path_568656, "applicationId", newJString(applicationId))
+  result = call_568655.call(path_568656, query_568657, nil, nil, nil)
 
-var removeComposeApplication* = Call_RemoveComposeApplication_594419(
+var removeComposeApplication* = Call_RemoveComposeApplication_568648(
     name: "removeComposeApplication", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/ComposeDeployments/{applicationId}/$/Delete",
-    validator: validate_RemoveComposeApplication_594420, base: "",
-    url: url_RemoveComposeApplication_594421, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_RemoveComposeApplication_568649, base: "",
+    url: url_RemoveComposeApplication_568650, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetFaultOperationList_594429 = ref object of OpenApiRestCall_593437
-proc url_GetFaultOperationList_594431(protocol: Scheme; host: string; base: string;
+  Call_GetFaultOperationList_568658 = ref object of OpenApiRestCall_567666
+proc url_GetFaultOperationList_568660(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetFaultOperationList_594430(path: JsonNode; query: JsonNode;
+proc validate_GetFaultOperationList_568659(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the a list of user-induced fault operations filtered by provided input.
   ## 
@@ -4732,28 +4732,28 @@ proc validate_GetFaultOperationList_594430(path: JsonNode; query: JsonNode;
   ## 64    - select ForceCancelled
   ## 
   section = newJObject()
-  var valid_594432 = query.getOrDefault("timeout")
-  valid_594432 = validateParameter(valid_594432, JInt, required = false,
+  var valid_568661 = query.getOrDefault("timeout")
+  valid_568661 = validateParameter(valid_568661, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594432 != nil:
-    section.add "timeout", valid_594432
+  if valid_568661 != nil:
+    section.add "timeout", valid_568661
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594433 = query.getOrDefault("api-version")
-  valid_594433 = validateParameter(valid_594433, JString, required = true,
+  var valid_568662 = query.getOrDefault("api-version")
+  valid_568662 = validateParameter(valid_568662, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594433 != nil:
-    section.add "api-version", valid_594433
-  var valid_594434 = query.getOrDefault("TypeFilter")
-  valid_594434 = validateParameter(valid_594434, JInt, required = true,
+  if valid_568662 != nil:
+    section.add "api-version", valid_568662
+  var valid_568663 = query.getOrDefault("TypeFilter")
+  valid_568663 = validateParameter(valid_568663, JInt, required = true,
                                  default = newJInt(65535))
-  if valid_594434 != nil:
-    section.add "TypeFilter", valid_594434
-  var valid_594435 = query.getOrDefault("StateFilter")
-  valid_594435 = validateParameter(valid_594435, JInt, required = true,
+  if valid_568663 != nil:
+    section.add "TypeFilter", valid_568663
+  var valid_568664 = query.getOrDefault("StateFilter")
+  valid_568664 = validateParameter(valid_568664, JInt, required = true,
                                  default = newJInt(65535))
-  if valid_594435 != nil:
-    section.add "StateFilter", valid_594435
+  if valid_568664 != nil:
+    section.add "StateFilter", valid_568664
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4762,20 +4762,20 @@ proc validate_GetFaultOperationList_594430(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594436: Call_GetFaultOperationList_594429; path: JsonNode;
+proc call*(call_568665: Call_GetFaultOperationList_568658; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the a list of user-induced fault operations filtered by provided input.
   ## 
-  let valid = call_594436.validator(path, query, header, formData, body)
-  let scheme = call_594436.pickScheme
+  let valid = call_568665.validator(path, query, header, formData, body)
+  let scheme = call_568665.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594436.url(scheme.get, call_594436.host, call_594436.base,
-                         call_594436.route, valid.getOrDefault("path"),
+  let url = call_568665.url(scheme.get, call_568665.host, call_568665.base,
+                         call_568665.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594436, url, valid)
+  result = hook(call_568665, url, valid)
 
-proc call*(call_594437: Call_GetFaultOperationList_594429; timeout: int = 60;
+proc call*(call_568666: Call_GetFaultOperationList_568658; timeout: int = 60;
           apiVersion: string = "3.0"; TypeFilter: int = 65535; StateFilter: int = 65535): Recallable =
   ## getFaultOperationList
   ## Gets the a list of user-induced fault operations filtered by provided input.
@@ -4801,28 +4801,28 @@ proc call*(call_594437: Call_GetFaultOperationList_594429; timeout: int = 60;
   ## 32    - select Cancelled
   ## 64    - select ForceCancelled
   ## 
-  var query_594438 = newJObject()
-  add(query_594438, "timeout", newJInt(timeout))
-  add(query_594438, "api-version", newJString(apiVersion))
-  add(query_594438, "TypeFilter", newJInt(TypeFilter))
-  add(query_594438, "StateFilter", newJInt(StateFilter))
-  result = call_594437.call(nil, query_594438, nil, nil, nil)
+  var query_568667 = newJObject()
+  add(query_568667, "timeout", newJInt(timeout))
+  add(query_568667, "api-version", newJString(apiVersion))
+  add(query_568667, "TypeFilter", newJInt(TypeFilter))
+  add(query_568667, "StateFilter", newJInt(StateFilter))
+  result = call_568666.call(nil, query_568667, nil, nil, nil)
 
-var getFaultOperationList* = Call_GetFaultOperationList_594429(
+var getFaultOperationList* = Call_GetFaultOperationList_568658(
     name: "getFaultOperationList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Faults/",
-    validator: validate_GetFaultOperationList_594430, base: "",
-    url: url_GetFaultOperationList_594431, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetFaultOperationList_568659, base: "",
+    url: url_GetFaultOperationList_568660, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_CancelOperation_594439 = ref object of OpenApiRestCall_593437
-proc url_CancelOperation_594441(protocol: Scheme; host: string; base: string;
+  Call_CancelOperation_568668 = ref object of OpenApiRestCall_567666
+proc url_CancelOperation_568670(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CancelOperation_594440(path: JsonNode; query: JsonNode;
+proc validate_CancelOperation_568669(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## The following is a list of APIs that start fault operations that may be cancelled using CancelOperation -
@@ -4855,28 +4855,28 @@ proc validate_CancelOperation_594440(path: JsonNode; query: JsonNode;
   ##   Force: JBool (required)
   ##        : Indicates whether to gracefully rollback and clean up internal system state modified by executing the user-induced operation.
   section = newJObject()
-  var valid_594442 = query.getOrDefault("timeout")
-  valid_594442 = validateParameter(valid_594442, JInt, required = false,
+  var valid_568671 = query.getOrDefault("timeout")
+  valid_568671 = validateParameter(valid_568671, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594442 != nil:
-    section.add "timeout", valid_594442
+  if valid_568671 != nil:
+    section.add "timeout", valid_568671
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594443 = query.getOrDefault("api-version")
-  valid_594443 = validateParameter(valid_594443, JString, required = true,
+  var valid_568672 = query.getOrDefault("api-version")
+  valid_568672 = validateParameter(valid_568672, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594443 != nil:
-    section.add "api-version", valid_594443
-  var valid_594444 = query.getOrDefault("OperationId")
-  valid_594444 = validateParameter(valid_594444, JString, required = true,
+  if valid_568672 != nil:
+    section.add "api-version", valid_568672
+  var valid_568673 = query.getOrDefault("OperationId")
+  valid_568673 = validateParameter(valid_568673, JString, required = true,
                                  default = nil)
-  if valid_594444 != nil:
-    section.add "OperationId", valid_594444
-  var valid_594445 = query.getOrDefault("Force")
-  valid_594445 = validateParameter(valid_594445, JBool, required = true,
+  if valid_568673 != nil:
+    section.add "OperationId", valid_568673
+  var valid_568674 = query.getOrDefault("Force")
+  valid_568674 = validateParameter(valid_568674, JBool, required = true,
                                  default = newJBool(false))
-  if valid_594445 != nil:
-    section.add "Force", valid_594445
+  if valid_568674 != nil:
+    section.add "Force", valid_568674
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4885,7 +4885,7 @@ proc validate_CancelOperation_594440(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594446: Call_CancelOperation_594439; path: JsonNode; query: JsonNode;
+proc call*(call_568675: Call_CancelOperation_568668; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The following is a list of APIs that start fault operations that may be cancelled using CancelOperation -
   ## - StartDataLoss
@@ -4903,16 +4903,16 @@ proc call*(call_594446: Call_CancelOperation_594439; path: JsonNode; query: Json
   ## Important note:  if this API is invoked with force==true, internal state may be left behind.
   ## 
   ## 
-  let valid = call_594446.validator(path, query, header, formData, body)
-  let scheme = call_594446.pickScheme
+  let valid = call_568675.validator(path, query, header, formData, body)
+  let scheme = call_568675.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594446.url(scheme.get, call_594446.host, call_594446.base,
-                         call_594446.route, valid.getOrDefault("path"),
+  let url = call_568675.url(scheme.get, call_568675.host, call_568675.base,
+                         call_568675.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594446, url, valid)
+  result = hook(call_568675, url, valid)
 
-proc call*(call_594447: Call_CancelOperation_594439; OperationId: string;
+proc call*(call_568676: Call_CancelOperation_568668; OperationId: string;
           timeout: int = 60; apiVersion: string = "3.0"; Force: bool = false): Recallable =
   ## cancelOperation
   ## The following is a list of APIs that start fault operations that may be cancelled using CancelOperation -
@@ -4938,20 +4938,20 @@ proc call*(call_594447: Call_CancelOperation_594439; OperationId: string;
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
   ##   Force: bool (required)
   ##        : Indicates whether to gracefully rollback and clean up internal system state modified by executing the user-induced operation.
-  var query_594448 = newJObject()
-  add(query_594448, "timeout", newJInt(timeout))
-  add(query_594448, "api-version", newJString(apiVersion))
-  add(query_594448, "OperationId", newJString(OperationId))
-  add(query_594448, "Force", newJBool(Force))
-  result = call_594447.call(nil, query_594448, nil, nil, nil)
+  var query_568677 = newJObject()
+  add(query_568677, "timeout", newJInt(timeout))
+  add(query_568677, "api-version", newJString(apiVersion))
+  add(query_568677, "OperationId", newJString(OperationId))
+  add(query_568677, "Force", newJBool(Force))
+  result = call_568676.call(nil, query_568677, nil, nil, nil)
 
-var cancelOperation* = Call_CancelOperation_594439(name: "cancelOperation",
+var cancelOperation* = Call_CancelOperation_568668(name: "cancelOperation",
     meth: HttpMethod.HttpPost, host: "azure.local:19080", route: "/Faults/$/Cancel",
-    validator: validate_CancelOperation_594440, base: "", url: url_CancelOperation_594441,
+    validator: validate_CancelOperation_568669, base: "", url: url_CancelOperation_568670,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetNodeTransitionProgress_594449 = ref object of OpenApiRestCall_593437
-proc url_GetNodeTransitionProgress_594451(protocol: Scheme; host: string;
+  Call_GetNodeTransitionProgress_568678 = ref object of OpenApiRestCall_567666
+proc url_GetNodeTransitionProgress_568680(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4967,7 +4967,7 @@ proc url_GetNodeTransitionProgress_594451(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetNodeTransitionProgress_594450(path: JsonNode; query: JsonNode;
+proc validate_GetNodeTransitionProgress_568679(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the progress of an operation started with StartNodeTransition using the provided OperationId.
   ## 
@@ -4979,11 +4979,11 @@ proc validate_GetNodeTransitionProgress_594450(path: JsonNode; query: JsonNode;
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594452 = path.getOrDefault("nodeName")
-  valid_594452 = validateParameter(valid_594452, JString, required = true,
+  var valid_568681 = path.getOrDefault("nodeName")
+  valid_568681 = validateParameter(valid_568681, JString, required = true,
                                  default = nil)
-  if valid_594452 != nil:
-    section.add "nodeName", valid_594452
+  if valid_568681 != nil:
+    section.add "nodeName", valid_568681
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -4993,23 +4993,23 @@ proc validate_GetNodeTransitionProgress_594450(path: JsonNode; query: JsonNode;
   ##   OperationId: JString (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
   section = newJObject()
-  var valid_594453 = query.getOrDefault("timeout")
-  valid_594453 = validateParameter(valid_594453, JInt, required = false,
+  var valid_568682 = query.getOrDefault("timeout")
+  valid_568682 = validateParameter(valid_568682, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594453 != nil:
-    section.add "timeout", valid_594453
+  if valid_568682 != nil:
+    section.add "timeout", valid_568682
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594454 = query.getOrDefault("api-version")
-  valid_594454 = validateParameter(valid_594454, JString, required = true,
+  var valid_568683 = query.getOrDefault("api-version")
+  valid_568683 = validateParameter(valid_568683, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594454 != nil:
-    section.add "api-version", valid_594454
-  var valid_594455 = query.getOrDefault("OperationId")
-  valid_594455 = validateParameter(valid_594455, JString, required = true,
+  if valid_568683 != nil:
+    section.add "api-version", valid_568683
+  var valid_568684 = query.getOrDefault("OperationId")
+  valid_568684 = validateParameter(valid_568684, JString, required = true,
                                  default = nil)
-  if valid_594455 != nil:
-    section.add "OperationId", valid_594455
+  if valid_568684 != nil:
+    section.add "OperationId", valid_568684
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5018,21 +5018,21 @@ proc validate_GetNodeTransitionProgress_594450(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594456: Call_GetNodeTransitionProgress_594449; path: JsonNode;
+proc call*(call_568685: Call_GetNodeTransitionProgress_568678; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the progress of an operation started with StartNodeTransition using the provided OperationId.
   ## 
   ## 
-  let valid = call_594456.validator(path, query, header, formData, body)
-  let scheme = call_594456.pickScheme
+  let valid = call_568685.validator(path, query, header, formData, body)
+  let scheme = call_568685.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594456.url(scheme.get, call_594456.host, call_594456.base,
-                         call_594456.route, valid.getOrDefault("path"),
+  let url = call_568685.url(scheme.get, call_568685.host, call_568685.base,
+                         call_568685.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594456, url, valid)
+  result = hook(call_568685, url, valid)
 
-proc call*(call_594457: Call_GetNodeTransitionProgress_594449; nodeName: string;
+proc call*(call_568686: Call_GetNodeTransitionProgress_568678; nodeName: string;
           OperationId: string; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getNodeTransitionProgress
   ## Gets the progress of an operation started with StartNodeTransition using the provided OperationId.
@@ -5045,24 +5045,24 @@ proc call*(call_594457: Call_GetNodeTransitionProgress_594449; nodeName: string;
   ##           : The name of the node.
   ##   OperationId: string (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
-  var path_594458 = newJObject()
-  var query_594459 = newJObject()
-  add(query_594459, "timeout", newJInt(timeout))
-  add(query_594459, "api-version", newJString(apiVersion))
-  add(path_594458, "nodeName", newJString(nodeName))
-  add(query_594459, "OperationId", newJString(OperationId))
-  result = call_594457.call(path_594458, query_594459, nil, nil, nil)
+  var path_568687 = newJObject()
+  var query_568688 = newJObject()
+  add(query_568688, "timeout", newJInt(timeout))
+  add(query_568688, "api-version", newJString(apiVersion))
+  add(path_568687, "nodeName", newJString(nodeName))
+  add(query_568688, "OperationId", newJString(OperationId))
+  result = call_568686.call(path_568687, query_568688, nil, nil, nil)
 
-var getNodeTransitionProgress* = Call_GetNodeTransitionProgress_594449(
+var getNodeTransitionProgress* = Call_GetNodeTransitionProgress_568678(
     name: "getNodeTransitionProgress", meth: HttpMethod.HttpGet,
     host: "azure.local:19080",
     route: "/Faults/Nodes/{nodeName}/$/GetTransitionProgress",
-    validator: validate_GetNodeTransitionProgress_594450, base: "",
-    url: url_GetNodeTransitionProgress_594451,
+    validator: validate_GetNodeTransitionProgress_568679, base: "",
+    url: url_GetNodeTransitionProgress_568680,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_StartNodeTransition_594460 = ref object of OpenApiRestCall_593437
-proc url_StartNodeTransition_594462(protocol: Scheme; host: string; base: string;
+  Call_StartNodeTransition_568689 = ref object of OpenApiRestCall_567666
+proc url_StartNodeTransition_568691(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5078,7 +5078,7 @@ proc url_StartNodeTransition_594462(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StartNodeTransition_594461(path: JsonNode; query: JsonNode;
+proc validate_StartNodeTransition_568690(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Starts or stops a cluster node.  A cluster node is a process, not the OS instance itself.  To start a node, pass in "Start" for the NodeTransitionType parameter.
@@ -5093,11 +5093,11 @@ proc validate_StartNodeTransition_594461(path: JsonNode; query: JsonNode;
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594463 = path.getOrDefault("nodeName")
-  valid_594463 = validateParameter(valid_594463, JString, required = true,
+  var valid_568692 = path.getOrDefault("nodeName")
+  valid_568692 = validateParameter(valid_568692, JString, required = true,
                                  default = nil)
-  if valid_594463 != nil:
-    section.add "nodeName", valid_594463
+  if valid_568692 != nil:
+    section.add "nodeName", valid_568692
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -5117,37 +5117,37 @@ proc validate_StartNodeTransition_594461(path: JsonNode; query: JsonNode;
   ##   OperationId: JString (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
   section = newJObject()
-  var valid_594464 = query.getOrDefault("timeout")
-  valid_594464 = validateParameter(valid_594464, JInt, required = false,
+  var valid_568693 = query.getOrDefault("timeout")
+  valid_568693 = validateParameter(valid_568693, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594464 != nil:
-    section.add "timeout", valid_594464
+  if valid_568693 != nil:
+    section.add "timeout", valid_568693
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594465 = query.getOrDefault("api-version")
-  valid_594465 = validateParameter(valid_594465, JString, required = true,
+  var valid_568694 = query.getOrDefault("api-version")
+  valid_568694 = validateParameter(valid_568694, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594465 != nil:
-    section.add "api-version", valid_594465
-  var valid_594466 = query.getOrDefault("NodeInstanceId")
-  valid_594466 = validateParameter(valid_594466, JString, required = true,
+  if valid_568694 != nil:
+    section.add "api-version", valid_568694
+  var valid_568695 = query.getOrDefault("NodeInstanceId")
+  valid_568695 = validateParameter(valid_568695, JString, required = true,
                                  default = nil)
-  if valid_594466 != nil:
-    section.add "NodeInstanceId", valid_594466
-  var valid_594467 = query.getOrDefault("StopDurationInSeconds")
-  valid_594467 = validateParameter(valid_594467, JInt, required = true, default = nil)
-  if valid_594467 != nil:
-    section.add "StopDurationInSeconds", valid_594467
-  var valid_594468 = query.getOrDefault("NodeTransitionType")
-  valid_594468 = validateParameter(valid_594468, JString, required = true,
+  if valid_568695 != nil:
+    section.add "NodeInstanceId", valid_568695
+  var valid_568696 = query.getOrDefault("StopDurationInSeconds")
+  valid_568696 = validateParameter(valid_568696, JInt, required = true, default = nil)
+  if valid_568696 != nil:
+    section.add "StopDurationInSeconds", valid_568696
+  var valid_568697 = query.getOrDefault("NodeTransitionType")
+  valid_568697 = validateParameter(valid_568697, JString, required = true,
                                  default = newJString("Invalid"))
-  if valid_594468 != nil:
-    section.add "NodeTransitionType", valid_594468
-  var valid_594469 = query.getOrDefault("OperationId")
-  valid_594469 = validateParameter(valid_594469, JString, required = true,
+  if valid_568697 != nil:
+    section.add "NodeTransitionType", valid_568697
+  var valid_568698 = query.getOrDefault("OperationId")
+  valid_568698 = validateParameter(valid_568698, JString, required = true,
                                  default = nil)
-  if valid_594469 != nil:
-    section.add "OperationId", valid_594469
+  if valid_568698 != nil:
+    section.add "OperationId", valid_568698
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5156,23 +5156,23 @@ proc validate_StartNodeTransition_594461(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594470: Call_StartNodeTransition_594460; path: JsonNode;
+proc call*(call_568699: Call_StartNodeTransition_568689; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts or stops a cluster node.  A cluster node is a process, not the OS instance itself.  To start a node, pass in "Start" for the NodeTransitionType parameter.
   ## To stop a node, pass in "Stop" for the NodeTransitionType parameter.  This API starts the operation - when the API returns the node may not have finished transitioning yet.
   ## Call GetNodeTransitionProgress with the same OperationId to get the progress of the operation.
   ## 
   ## 
-  let valid = call_594470.validator(path, query, header, formData, body)
-  let scheme = call_594470.pickScheme
+  let valid = call_568699.validator(path, query, header, formData, body)
+  let scheme = call_568699.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594470.url(scheme.get, call_594470.host, call_594470.base,
-                         call_594470.route, valid.getOrDefault("path"),
+  let url = call_568699.url(scheme.get, call_568699.host, call_568699.base,
+                         call_568699.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594470, url, valid)
+  result = hook(call_568699, url, valid)
 
-proc call*(call_594471: Call_StartNodeTransition_594460; nodeName: string;
+proc call*(call_568700: Call_StartNodeTransition_568689; nodeName: string;
           NodeInstanceId: string; StopDurationInSeconds: int; OperationId: string;
           timeout: int = 60; apiVersion: string = "3.0";
           NodeTransitionType: string = "Invalid"): Recallable =
@@ -5199,26 +5199,26 @@ proc call*(call_594471: Call_StartNodeTransition_594460; nodeName: string;
   ## 
   ##   OperationId: string (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
-  var path_594472 = newJObject()
-  var query_594473 = newJObject()
-  add(query_594473, "timeout", newJInt(timeout))
-  add(query_594473, "api-version", newJString(apiVersion))
-  add(path_594472, "nodeName", newJString(nodeName))
-  add(query_594473, "NodeInstanceId", newJString(NodeInstanceId))
-  add(query_594473, "StopDurationInSeconds", newJInt(StopDurationInSeconds))
-  add(query_594473, "NodeTransitionType", newJString(NodeTransitionType))
-  add(query_594473, "OperationId", newJString(OperationId))
-  result = call_594471.call(path_594472, query_594473, nil, nil, nil)
+  var path_568701 = newJObject()
+  var query_568702 = newJObject()
+  add(query_568702, "timeout", newJInt(timeout))
+  add(query_568702, "api-version", newJString(apiVersion))
+  add(path_568701, "nodeName", newJString(nodeName))
+  add(query_568702, "NodeInstanceId", newJString(NodeInstanceId))
+  add(query_568702, "StopDurationInSeconds", newJInt(StopDurationInSeconds))
+  add(query_568702, "NodeTransitionType", newJString(NodeTransitionType))
+  add(query_568702, "OperationId", newJString(OperationId))
+  result = call_568700.call(path_568701, query_568702, nil, nil, nil)
 
-var startNodeTransition* = Call_StartNodeTransition_594460(
+var startNodeTransition* = Call_StartNodeTransition_568689(
     name: "startNodeTransition", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/Faults/Nodes/{nodeName}/$/StartTransition/",
-    validator: validate_StartNodeTransition_594461, base: "",
-    url: url_StartNodeTransition_594462, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_StartNodeTransition_568690, base: "",
+    url: url_StartNodeTransition_568691, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDataLossProgress_594474 = ref object of OpenApiRestCall_593437
-proc url_GetDataLossProgress_594476(protocol: Scheme; host: string; base: string;
+  Call_GetDataLossProgress_568703 = ref object of OpenApiRestCall_567666
+proc url_GetDataLossProgress_568705(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5237,7 +5237,7 @@ proc url_GetDataLossProgress_594476(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDataLossProgress_594475(path: JsonNode; query: JsonNode;
+proc validate_GetDataLossProgress_568704(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets the progress of a data loss operation started with StartDataLoss, using the OperationId.
@@ -5253,16 +5253,16 @@ proc validate_GetDataLossProgress_594475(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_594477 = path.getOrDefault("partitionId")
-  valid_594477 = validateParameter(valid_594477, JString, required = true,
+  var valid_568706 = path.getOrDefault("partitionId")
+  valid_568706 = validateParameter(valid_568706, JString, required = true,
                                  default = nil)
-  if valid_594477 != nil:
-    section.add "partitionId", valid_594477
-  var valid_594478 = path.getOrDefault("serviceId")
-  valid_594478 = validateParameter(valid_594478, JString, required = true,
+  if valid_568706 != nil:
+    section.add "partitionId", valid_568706
+  var valid_568707 = path.getOrDefault("serviceId")
+  valid_568707 = validateParameter(valid_568707, JString, required = true,
                                  default = nil)
-  if valid_594478 != nil:
-    section.add "serviceId", valid_594478
+  if valid_568707 != nil:
+    section.add "serviceId", valid_568707
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -5272,23 +5272,23 @@ proc validate_GetDataLossProgress_594475(path: JsonNode; query: JsonNode;
   ##   OperationId: JString (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
   section = newJObject()
-  var valid_594479 = query.getOrDefault("timeout")
-  valid_594479 = validateParameter(valid_594479, JInt, required = false,
+  var valid_568708 = query.getOrDefault("timeout")
+  valid_568708 = validateParameter(valid_568708, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594479 != nil:
-    section.add "timeout", valid_594479
+  if valid_568708 != nil:
+    section.add "timeout", valid_568708
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594480 = query.getOrDefault("api-version")
-  valid_594480 = validateParameter(valid_594480, JString, required = true,
+  var valid_568709 = query.getOrDefault("api-version")
+  valid_568709 = validateParameter(valid_568709, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594480 != nil:
-    section.add "api-version", valid_594480
-  var valid_594481 = query.getOrDefault("OperationId")
-  valid_594481 = validateParameter(valid_594481, JString, required = true,
+  if valid_568709 != nil:
+    section.add "api-version", valid_568709
+  var valid_568710 = query.getOrDefault("OperationId")
+  valid_568710 = validateParameter(valid_568710, JString, required = true,
                                  default = nil)
-  if valid_594481 != nil:
-    section.add "OperationId", valid_594481
+  if valid_568710 != nil:
+    section.add "OperationId", valid_568710
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5297,21 +5297,21 @@ proc validate_GetDataLossProgress_594475(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594482: Call_GetDataLossProgress_594474; path: JsonNode;
+proc call*(call_568711: Call_GetDataLossProgress_568703; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the progress of a data loss operation started with StartDataLoss, using the OperationId.
   ## 
   ## 
-  let valid = call_594482.validator(path, query, header, formData, body)
-  let scheme = call_594482.pickScheme
+  let valid = call_568711.validator(path, query, header, formData, body)
+  let scheme = call_568711.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594482.url(scheme.get, call_594482.host, call_594482.base,
-                         call_594482.route, valid.getOrDefault("path"),
+  let url = call_568711.url(scheme.get, call_568711.host, call_568711.base,
+                         call_568711.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594482, url, valid)
+  result = hook(call_568711, url, valid)
 
-proc call*(call_594483: Call_GetDataLossProgress_594474; partitionId: string;
+proc call*(call_568712: Call_GetDataLossProgress_568703; partitionId: string;
           serviceId: string; OperationId: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## getDataLossProgress
@@ -5327,23 +5327,23 @@ proc call*(call_594483: Call_GetDataLossProgress_594474; partitionId: string;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   ##   OperationId: string (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
-  var path_594484 = newJObject()
-  var query_594485 = newJObject()
-  add(query_594485, "timeout", newJInt(timeout))
-  add(query_594485, "api-version", newJString(apiVersion))
-  add(path_594484, "partitionId", newJString(partitionId))
-  add(path_594484, "serviceId", newJString(serviceId))
-  add(query_594485, "OperationId", newJString(OperationId))
-  result = call_594483.call(path_594484, query_594485, nil, nil, nil)
+  var path_568713 = newJObject()
+  var query_568714 = newJObject()
+  add(query_568714, "timeout", newJInt(timeout))
+  add(query_568714, "api-version", newJString(apiVersion))
+  add(path_568713, "partitionId", newJString(partitionId))
+  add(path_568713, "serviceId", newJString(serviceId))
+  add(query_568714, "OperationId", newJString(OperationId))
+  result = call_568712.call(path_568713, query_568714, nil, nil, nil)
 
-var getDataLossProgress* = Call_GetDataLossProgress_594474(
+var getDataLossProgress* = Call_GetDataLossProgress_568703(
     name: "getDataLossProgress", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Faults/Services/{serviceId}/$/GetPartitions/{partitionId}/$/GetDataLossProgress",
-    validator: validate_GetDataLossProgress_594475, base: "",
-    url: url_GetDataLossProgress_594476, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetDataLossProgress_568704, base: "",
+    url: url_GetDataLossProgress_568705, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetQuorumLossProgress_594486 = ref object of OpenApiRestCall_593437
-proc url_GetQuorumLossProgress_594488(protocol: Scheme; host: string; base: string;
+  Call_GetQuorumLossProgress_568715 = ref object of OpenApiRestCall_567666
+proc url_GetQuorumLossProgress_568717(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5362,7 +5362,7 @@ proc url_GetQuorumLossProgress_594488(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetQuorumLossProgress_594487(path: JsonNode; query: JsonNode;
+proc validate_GetQuorumLossProgress_568716(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the progress of a quorum loss operation started with StartQuorumLoss, using the provided OperationId.
   ## 
@@ -5377,16 +5377,16 @@ proc validate_GetQuorumLossProgress_594487(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_594489 = path.getOrDefault("partitionId")
-  valid_594489 = validateParameter(valid_594489, JString, required = true,
+  var valid_568718 = path.getOrDefault("partitionId")
+  valid_568718 = validateParameter(valid_568718, JString, required = true,
                                  default = nil)
-  if valid_594489 != nil:
-    section.add "partitionId", valid_594489
-  var valid_594490 = path.getOrDefault("serviceId")
-  valid_594490 = validateParameter(valid_594490, JString, required = true,
+  if valid_568718 != nil:
+    section.add "partitionId", valid_568718
+  var valid_568719 = path.getOrDefault("serviceId")
+  valid_568719 = validateParameter(valid_568719, JString, required = true,
                                  default = nil)
-  if valid_594490 != nil:
-    section.add "serviceId", valid_594490
+  if valid_568719 != nil:
+    section.add "serviceId", valid_568719
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -5396,23 +5396,23 @@ proc validate_GetQuorumLossProgress_594487(path: JsonNode; query: JsonNode;
   ##   OperationId: JString (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
   section = newJObject()
-  var valid_594491 = query.getOrDefault("timeout")
-  valid_594491 = validateParameter(valid_594491, JInt, required = false,
+  var valid_568720 = query.getOrDefault("timeout")
+  valid_568720 = validateParameter(valid_568720, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594491 != nil:
-    section.add "timeout", valid_594491
+  if valid_568720 != nil:
+    section.add "timeout", valid_568720
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594492 = query.getOrDefault("api-version")
-  valid_594492 = validateParameter(valid_594492, JString, required = true,
+  var valid_568721 = query.getOrDefault("api-version")
+  valid_568721 = validateParameter(valid_568721, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594492 != nil:
-    section.add "api-version", valid_594492
-  var valid_594493 = query.getOrDefault("OperationId")
-  valid_594493 = validateParameter(valid_594493, JString, required = true,
+  if valid_568721 != nil:
+    section.add "api-version", valid_568721
+  var valid_568722 = query.getOrDefault("OperationId")
+  valid_568722 = validateParameter(valid_568722, JString, required = true,
                                  default = nil)
-  if valid_594493 != nil:
-    section.add "OperationId", valid_594493
+  if valid_568722 != nil:
+    section.add "OperationId", valid_568722
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5421,21 +5421,21 @@ proc validate_GetQuorumLossProgress_594487(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594494: Call_GetQuorumLossProgress_594486; path: JsonNode;
+proc call*(call_568723: Call_GetQuorumLossProgress_568715; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the progress of a quorum loss operation started with StartQuorumLoss, using the provided OperationId.
   ## 
   ## 
-  let valid = call_594494.validator(path, query, header, formData, body)
-  let scheme = call_594494.pickScheme
+  let valid = call_568723.validator(path, query, header, formData, body)
+  let scheme = call_568723.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594494.url(scheme.get, call_594494.host, call_594494.base,
-                         call_594494.route, valid.getOrDefault("path"),
+  let url = call_568723.url(scheme.get, call_568723.host, call_568723.base,
+                         call_568723.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594494, url, valid)
+  result = hook(call_568723, url, valid)
 
-proc call*(call_594495: Call_GetQuorumLossProgress_594486; partitionId: string;
+proc call*(call_568724: Call_GetQuorumLossProgress_568715; partitionId: string;
           serviceId: string; OperationId: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## getQuorumLossProgress
@@ -5451,23 +5451,23 @@ proc call*(call_594495: Call_GetQuorumLossProgress_594486; partitionId: string;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   ##   OperationId: string (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
-  var path_594496 = newJObject()
-  var query_594497 = newJObject()
-  add(query_594497, "timeout", newJInt(timeout))
-  add(query_594497, "api-version", newJString(apiVersion))
-  add(path_594496, "partitionId", newJString(partitionId))
-  add(path_594496, "serviceId", newJString(serviceId))
-  add(query_594497, "OperationId", newJString(OperationId))
-  result = call_594495.call(path_594496, query_594497, nil, nil, nil)
+  var path_568725 = newJObject()
+  var query_568726 = newJObject()
+  add(query_568726, "timeout", newJInt(timeout))
+  add(query_568726, "api-version", newJString(apiVersion))
+  add(path_568725, "partitionId", newJString(partitionId))
+  add(path_568725, "serviceId", newJString(serviceId))
+  add(query_568726, "OperationId", newJString(OperationId))
+  result = call_568724.call(path_568725, query_568726, nil, nil, nil)
 
-var getQuorumLossProgress* = Call_GetQuorumLossProgress_594486(
+var getQuorumLossProgress* = Call_GetQuorumLossProgress_568715(
     name: "getQuorumLossProgress", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Faults/Services/{serviceId}/$/GetPartitions/{partitionId}/$/GetQuorumLossProgress",
-    validator: validate_GetQuorumLossProgress_594487, base: "",
-    url: url_GetQuorumLossProgress_594488, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetQuorumLossProgress_568716, base: "",
+    url: url_GetQuorumLossProgress_568717, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetPartitionRestartProgress_594498 = ref object of OpenApiRestCall_593437
-proc url_GetPartitionRestartProgress_594500(protocol: Scheme; host: string;
+  Call_GetPartitionRestartProgress_568727 = ref object of OpenApiRestCall_567666
+proc url_GetPartitionRestartProgress_568729(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5486,7 +5486,7 @@ proc url_GetPartitionRestartProgress_594500(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetPartitionRestartProgress_594499(path: JsonNode; query: JsonNode;
+proc validate_GetPartitionRestartProgress_568728(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the progress of a PartitionRestart started with StartPartitionRestart using the provided OperationId.
   ## 
@@ -5501,16 +5501,16 @@ proc validate_GetPartitionRestartProgress_594499(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_594501 = path.getOrDefault("partitionId")
-  valid_594501 = validateParameter(valid_594501, JString, required = true,
+  var valid_568730 = path.getOrDefault("partitionId")
+  valid_568730 = validateParameter(valid_568730, JString, required = true,
                                  default = nil)
-  if valid_594501 != nil:
-    section.add "partitionId", valid_594501
-  var valid_594502 = path.getOrDefault("serviceId")
-  valid_594502 = validateParameter(valid_594502, JString, required = true,
+  if valid_568730 != nil:
+    section.add "partitionId", valid_568730
+  var valid_568731 = path.getOrDefault("serviceId")
+  valid_568731 = validateParameter(valid_568731, JString, required = true,
                                  default = nil)
-  if valid_594502 != nil:
-    section.add "serviceId", valid_594502
+  if valid_568731 != nil:
+    section.add "serviceId", valid_568731
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -5520,23 +5520,23 @@ proc validate_GetPartitionRestartProgress_594499(path: JsonNode; query: JsonNode
   ##   OperationId: JString (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
   section = newJObject()
-  var valid_594503 = query.getOrDefault("timeout")
-  valid_594503 = validateParameter(valid_594503, JInt, required = false,
+  var valid_568732 = query.getOrDefault("timeout")
+  valid_568732 = validateParameter(valid_568732, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594503 != nil:
-    section.add "timeout", valid_594503
+  if valid_568732 != nil:
+    section.add "timeout", valid_568732
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594504 = query.getOrDefault("api-version")
-  valid_594504 = validateParameter(valid_594504, JString, required = true,
+  var valid_568733 = query.getOrDefault("api-version")
+  valid_568733 = validateParameter(valid_568733, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594504 != nil:
-    section.add "api-version", valid_594504
-  var valid_594505 = query.getOrDefault("OperationId")
-  valid_594505 = validateParameter(valid_594505, JString, required = true,
+  if valid_568733 != nil:
+    section.add "api-version", valid_568733
+  var valid_568734 = query.getOrDefault("OperationId")
+  valid_568734 = validateParameter(valid_568734, JString, required = true,
                                  default = nil)
-  if valid_594505 != nil:
-    section.add "OperationId", valid_594505
+  if valid_568734 != nil:
+    section.add "OperationId", valid_568734
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5545,21 +5545,21 @@ proc validate_GetPartitionRestartProgress_594499(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594506: Call_GetPartitionRestartProgress_594498; path: JsonNode;
+proc call*(call_568735: Call_GetPartitionRestartProgress_568727; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the progress of a PartitionRestart started with StartPartitionRestart using the provided OperationId.
   ## 
   ## 
-  let valid = call_594506.validator(path, query, header, formData, body)
-  let scheme = call_594506.pickScheme
+  let valid = call_568735.validator(path, query, header, formData, body)
+  let scheme = call_568735.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594506.url(scheme.get, call_594506.host, call_594506.base,
-                         call_594506.route, valid.getOrDefault("path"),
+  let url = call_568735.url(scheme.get, call_568735.host, call_568735.base,
+                         call_568735.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594506, url, valid)
+  result = hook(call_568735, url, valid)
 
-proc call*(call_594507: Call_GetPartitionRestartProgress_594498;
+proc call*(call_568736: Call_GetPartitionRestartProgress_568727;
           partitionId: string; serviceId: string; OperationId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getPartitionRestartProgress
@@ -5575,24 +5575,24 @@ proc call*(call_594507: Call_GetPartitionRestartProgress_594498;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   ##   OperationId: string (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
-  var path_594508 = newJObject()
-  var query_594509 = newJObject()
-  add(query_594509, "timeout", newJInt(timeout))
-  add(query_594509, "api-version", newJString(apiVersion))
-  add(path_594508, "partitionId", newJString(partitionId))
-  add(path_594508, "serviceId", newJString(serviceId))
-  add(query_594509, "OperationId", newJString(OperationId))
-  result = call_594507.call(path_594508, query_594509, nil, nil, nil)
+  var path_568737 = newJObject()
+  var query_568738 = newJObject()
+  add(query_568738, "timeout", newJInt(timeout))
+  add(query_568738, "api-version", newJString(apiVersion))
+  add(path_568737, "partitionId", newJString(partitionId))
+  add(path_568737, "serviceId", newJString(serviceId))
+  add(query_568738, "OperationId", newJString(OperationId))
+  result = call_568736.call(path_568737, query_568738, nil, nil, nil)
 
-var getPartitionRestartProgress* = Call_GetPartitionRestartProgress_594498(
+var getPartitionRestartProgress* = Call_GetPartitionRestartProgress_568727(
     name: "getPartitionRestartProgress", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Faults/Services/{serviceId}/$/GetPartitions/{partitionId}/$/GetRestartProgress",
-    validator: validate_GetPartitionRestartProgress_594499, base: "",
-    url: url_GetPartitionRestartProgress_594500,
+    validator: validate_GetPartitionRestartProgress_568728, base: "",
+    url: url_GetPartitionRestartProgress_568729,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_StartDataLoss_594510 = ref object of OpenApiRestCall_593437
-proc url_StartDataLoss_594512(protocol: Scheme; host: string; base: string;
+  Call_StartDataLoss_568739 = ref object of OpenApiRestCall_567666
+proc url_StartDataLoss_568741(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5611,7 +5611,7 @@ proc url_StartDataLoss_594512(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StartDataLoss_594511(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_StartDataLoss_568740(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## This API will induce data loss for the specified partition. It will trigger a call to the OnDataLoss API of the partition.
   ## Actual data loss will depend on the specified DataLossMode
@@ -5638,16 +5638,16 @@ proc validate_StartDataLoss_594511(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_594513 = path.getOrDefault("partitionId")
-  valid_594513 = validateParameter(valid_594513, JString, required = true,
+  var valid_568742 = path.getOrDefault("partitionId")
+  valid_568742 = validateParameter(valid_568742, JString, required = true,
                                  default = nil)
-  if valid_594513 != nil:
-    section.add "partitionId", valid_594513
-  var valid_594514 = path.getOrDefault("serviceId")
-  valid_594514 = validateParameter(valid_594514, JString, required = true,
+  if valid_568742 != nil:
+    section.add "partitionId", valid_568742
+  var valid_568743 = path.getOrDefault("serviceId")
+  valid_568743 = validateParameter(valid_568743, JString, required = true,
                                  default = nil)
-  if valid_594514 != nil:
-    section.add "serviceId", valid_594514
+  if valid_568743 != nil:
+    section.add "serviceId", valid_568743
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -5663,28 +5663,28 @@ proc validate_StartDataLoss_594511(path: JsonNode; query: JsonNode; header: Json
   ##   OperationId: JString (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
   section = newJObject()
-  var valid_594515 = query.getOrDefault("timeout")
-  valid_594515 = validateParameter(valid_594515, JInt, required = false,
+  var valid_568744 = query.getOrDefault("timeout")
+  valid_568744 = validateParameter(valid_568744, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594515 != nil:
-    section.add "timeout", valid_594515
+  if valid_568744 != nil:
+    section.add "timeout", valid_568744
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594516 = query.getOrDefault("api-version")
-  valid_594516 = validateParameter(valid_594516, JString, required = true,
+  var valid_568745 = query.getOrDefault("api-version")
+  valid_568745 = validateParameter(valid_568745, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594516 != nil:
-    section.add "api-version", valid_594516
-  var valid_594517 = query.getOrDefault("DataLossMode")
-  valid_594517 = validateParameter(valid_594517, JString, required = true,
+  if valid_568745 != nil:
+    section.add "api-version", valid_568745
+  var valid_568746 = query.getOrDefault("DataLossMode")
+  valid_568746 = validateParameter(valid_568746, JString, required = true,
                                  default = newJString("Invalid"))
-  if valid_594517 != nil:
-    section.add "DataLossMode", valid_594517
-  var valid_594518 = query.getOrDefault("OperationId")
-  valid_594518 = validateParameter(valid_594518, JString, required = true,
+  if valid_568746 != nil:
+    section.add "DataLossMode", valid_568746
+  var valid_568747 = query.getOrDefault("OperationId")
+  valid_568747 = validateParameter(valid_568747, JString, required = true,
                                  default = nil)
-  if valid_594518 != nil:
-    section.add "OperationId", valid_594518
+  if valid_568747 != nil:
+    section.add "OperationId", valid_568747
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5693,7 +5693,7 @@ proc validate_StartDataLoss_594511(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594519: Call_StartDataLoss_594510; path: JsonNode; query: JsonNode;
+proc call*(call_568748: Call_StartDataLoss_568739; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This API will induce data loss for the specified partition. It will trigger a call to the OnDataLoss API of the partition.
   ## Actual data loss will depend on the specified DataLossMode
@@ -5710,16 +5710,16 @@ proc call*(call_594519: Call_StartDataLoss_594510; path: JsonNode; query: JsonNo
   ## Call the GetDataLossProgress API with the same OperationId to return information on the operation started with this API.
   ## 
   ## 
-  let valid = call_594519.validator(path, query, header, formData, body)
-  let scheme = call_594519.pickScheme
+  let valid = call_568748.validator(path, query, header, formData, body)
+  let scheme = call_568748.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594519.url(scheme.get, call_594519.host, call_594519.base,
-                         call_594519.route, valid.getOrDefault("path"),
+  let url = call_568748.url(scheme.get, call_568748.host, call_568748.base,
+                         call_568748.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594519, url, valid)
+  result = hook(call_568748, url, valid)
 
-proc call*(call_594520: Call_StartDataLoss_594510; partitionId: string;
+proc call*(call_568749: Call_StartDataLoss_568739; partitionId: string;
           serviceId: string; OperationId: string; timeout: int = 60;
           apiVersion: string = "3.0"; DataLossMode: string = "Invalid"): Recallable =
   ## startDataLoss
@@ -5753,23 +5753,23 @@ proc call*(call_594520: Call_StartDataLoss_594510; partitionId: string;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   ##   OperationId: string (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
-  var path_594521 = newJObject()
-  var query_594522 = newJObject()
-  add(query_594522, "timeout", newJInt(timeout))
-  add(query_594522, "api-version", newJString(apiVersion))
-  add(path_594521, "partitionId", newJString(partitionId))
-  add(query_594522, "DataLossMode", newJString(DataLossMode))
-  add(path_594521, "serviceId", newJString(serviceId))
-  add(query_594522, "OperationId", newJString(OperationId))
-  result = call_594520.call(path_594521, query_594522, nil, nil, nil)
+  var path_568750 = newJObject()
+  var query_568751 = newJObject()
+  add(query_568751, "timeout", newJInt(timeout))
+  add(query_568751, "api-version", newJString(apiVersion))
+  add(path_568750, "partitionId", newJString(partitionId))
+  add(query_568751, "DataLossMode", newJString(DataLossMode))
+  add(path_568750, "serviceId", newJString(serviceId))
+  add(query_568751, "OperationId", newJString(OperationId))
+  result = call_568749.call(path_568750, query_568751, nil, nil, nil)
 
-var startDataLoss* = Call_StartDataLoss_594510(name: "startDataLoss",
+var startDataLoss* = Call_StartDataLoss_568739(name: "startDataLoss",
     meth: HttpMethod.HttpPost, host: "azure.local:19080", route: "/Faults/Services/{serviceId}/$/GetPartitions/{partitionId}/$/StartDataLoss",
-    validator: validate_StartDataLoss_594511, base: "", url: url_StartDataLoss_594512,
+    validator: validate_StartDataLoss_568740, base: "", url: url_StartDataLoss_568741,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_StartQuorumLoss_594523 = ref object of OpenApiRestCall_593437
-proc url_StartQuorumLoss_594525(protocol: Scheme; host: string; base: string;
+  Call_StartQuorumLoss_568752 = ref object of OpenApiRestCall_567666
+proc url_StartQuorumLoss_568754(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5788,7 +5788,7 @@ proc url_StartQuorumLoss_594525(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StartQuorumLoss_594524(path: JsonNode; query: JsonNode;
+proc validate_StartQuorumLoss_568753(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Induces quorum loss for a given stateful service partition.  This API is useful for a temporary quorum loss situation on your service.
@@ -5808,16 +5808,16 @@ proc validate_StartQuorumLoss_594524(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_594526 = path.getOrDefault("partitionId")
-  valid_594526 = validateParameter(valid_594526, JString, required = true,
+  var valid_568755 = path.getOrDefault("partitionId")
+  valid_568755 = validateParameter(valid_568755, JString, required = true,
                                  default = nil)
-  if valid_594526 != nil:
-    section.add "partitionId", valid_594526
-  var valid_594527 = path.getOrDefault("serviceId")
-  valid_594527 = validateParameter(valid_594527, JString, required = true,
+  if valid_568755 != nil:
+    section.add "partitionId", valid_568755
+  var valid_568756 = path.getOrDefault("serviceId")
+  valid_568756 = validateParameter(valid_568756, JString, required = true,
                                  default = nil)
-  if valid_594527 != nil:
-    section.add "serviceId", valid_594527
+  if valid_568756 != nil:
+    section.add "serviceId", valid_568756
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -5835,32 +5835,32 @@ proc validate_StartQuorumLoss_594524(path: JsonNode; query: JsonNode;
   ##   OperationId: JString (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
   section = newJObject()
-  var valid_594528 = query.getOrDefault("timeout")
-  valid_594528 = validateParameter(valid_594528, JInt, required = false,
+  var valid_568757 = query.getOrDefault("timeout")
+  valid_568757 = validateParameter(valid_568757, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594528 != nil:
-    section.add "timeout", valid_594528
+  if valid_568757 != nil:
+    section.add "timeout", valid_568757
   assert query != nil,
         "query argument is necessary due to required `QuorumLossMode` field"
-  var valid_594529 = query.getOrDefault("QuorumLossMode")
-  valid_594529 = validateParameter(valid_594529, JString, required = true,
+  var valid_568758 = query.getOrDefault("QuorumLossMode")
+  valid_568758 = validateParameter(valid_568758, JString, required = true,
                                  default = newJString("Invalid"))
-  if valid_594529 != nil:
-    section.add "QuorumLossMode", valid_594529
-  var valid_594530 = query.getOrDefault("api-version")
-  valid_594530 = validateParameter(valid_594530, JString, required = true,
+  if valid_568758 != nil:
+    section.add "QuorumLossMode", valid_568758
+  var valid_568759 = query.getOrDefault("api-version")
+  valid_568759 = validateParameter(valid_568759, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594530 != nil:
-    section.add "api-version", valid_594530
-  var valid_594531 = query.getOrDefault("QuorumLossDuration")
-  valid_594531 = validateParameter(valid_594531, JInt, required = true, default = nil)
-  if valid_594531 != nil:
-    section.add "QuorumLossDuration", valid_594531
-  var valid_594532 = query.getOrDefault("OperationId")
-  valid_594532 = validateParameter(valid_594532, JString, required = true,
+  if valid_568759 != nil:
+    section.add "api-version", valid_568759
+  var valid_568760 = query.getOrDefault("QuorumLossDuration")
+  valid_568760 = validateParameter(valid_568760, JInt, required = true, default = nil)
+  if valid_568760 != nil:
+    section.add "QuorumLossDuration", valid_568760
+  var valid_568761 = query.getOrDefault("OperationId")
+  valid_568761 = validateParameter(valid_568761, JString, required = true,
                                  default = nil)
-  if valid_594532 != nil:
-    section.add "OperationId", valid_594532
+  if valid_568761 != nil:
+    section.add "OperationId", valid_568761
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5869,7 +5869,7 @@ proc validate_StartQuorumLoss_594524(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594533: Call_StartQuorumLoss_594523; path: JsonNode; query: JsonNode;
+proc call*(call_568762: Call_StartQuorumLoss_568752; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Induces quorum loss for a given stateful service partition.  This API is useful for a temporary quorum loss situation on your service.
   ## 
@@ -5878,16 +5878,16 @@ proc call*(call_594533: Call_StartQuorumLoss_594523; path: JsonNode; query: Json
   ## This can only be called on stateful persisted (HasPersistedState==true) services.  Do not use this API on stateless services or stateful in-memory only services.
   ## 
   ## 
-  let valid = call_594533.validator(path, query, header, formData, body)
-  let scheme = call_594533.pickScheme
+  let valid = call_568762.validator(path, query, header, formData, body)
+  let scheme = call_568762.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594533.url(scheme.get, call_594533.host, call_594533.base,
-                         call_594533.route, valid.getOrDefault("path"),
+  let url = call_568762.url(scheme.get, call_568762.host, call_568762.base,
+                         call_568762.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594533, url, valid)
+  result = hook(call_568762, url, valid)
 
-proc call*(call_594534: Call_StartQuorumLoss_594523; partitionId: string;
+proc call*(call_568763: Call_StartQuorumLoss_568752; partitionId: string;
           QuorumLossDuration: int; serviceId: string; OperationId: string;
           timeout: int = 60; QuorumLossMode: string = "Invalid";
           apiVersion: string = "3.0"): Recallable =
@@ -5916,24 +5916,24 @@ proc call*(call_594534: Call_StartQuorumLoss_594523; partitionId: string;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   ##   OperationId: string (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
-  var path_594535 = newJObject()
-  var query_594536 = newJObject()
-  add(query_594536, "timeout", newJInt(timeout))
-  add(query_594536, "QuorumLossMode", newJString(QuorumLossMode))
-  add(query_594536, "api-version", newJString(apiVersion))
-  add(path_594535, "partitionId", newJString(partitionId))
-  add(query_594536, "QuorumLossDuration", newJInt(QuorumLossDuration))
-  add(path_594535, "serviceId", newJString(serviceId))
-  add(query_594536, "OperationId", newJString(OperationId))
-  result = call_594534.call(path_594535, query_594536, nil, nil, nil)
+  var path_568764 = newJObject()
+  var query_568765 = newJObject()
+  add(query_568765, "timeout", newJInt(timeout))
+  add(query_568765, "QuorumLossMode", newJString(QuorumLossMode))
+  add(query_568765, "api-version", newJString(apiVersion))
+  add(path_568764, "partitionId", newJString(partitionId))
+  add(query_568765, "QuorumLossDuration", newJInt(QuorumLossDuration))
+  add(path_568764, "serviceId", newJString(serviceId))
+  add(query_568765, "OperationId", newJString(OperationId))
+  result = call_568763.call(path_568764, query_568765, nil, nil, nil)
 
-var startQuorumLoss* = Call_StartQuorumLoss_594523(name: "startQuorumLoss",
+var startQuorumLoss* = Call_StartQuorumLoss_568752(name: "startQuorumLoss",
     meth: HttpMethod.HttpPost, host: "azure.local:19080", route: "/Faults/Services/{serviceId}/$/GetPartitions/{partitionId}/$/StartQuorumLoss",
-    validator: validate_StartQuorumLoss_594524, base: "", url: url_StartQuorumLoss_594525,
+    validator: validate_StartQuorumLoss_568753, base: "", url: url_StartQuorumLoss_568754,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_StartPartitionRestart_594537 = ref object of OpenApiRestCall_593437
-proc url_StartPartitionRestart_594539(protocol: Scheme; host: string; base: string;
+  Call_StartPartitionRestart_568766 = ref object of OpenApiRestCall_567666
+proc url_StartPartitionRestart_568768(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5952,7 +5952,7 @@ proc url_StartPartitionRestart_594539(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StartPartitionRestart_594538(path: JsonNode; query: JsonNode;
+proc validate_StartPartitionRestart_568767(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This API is useful for testing failover.
   ## 
@@ -5971,16 +5971,16 @@ proc validate_StartPartitionRestart_594538(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_594540 = path.getOrDefault("partitionId")
-  valid_594540 = validateParameter(valid_594540, JString, required = true,
+  var valid_568769 = path.getOrDefault("partitionId")
+  valid_568769 = validateParameter(valid_568769, JString, required = true,
                                  default = nil)
-  if valid_594540 != nil:
-    section.add "partitionId", valid_594540
-  var valid_594541 = path.getOrDefault("serviceId")
-  valid_594541 = validateParameter(valid_594541, JString, required = true,
+  if valid_568769 != nil:
+    section.add "partitionId", valid_568769
+  var valid_568770 = path.getOrDefault("serviceId")
+  valid_568770 = validateParameter(valid_568770, JString, required = true,
                                  default = nil)
-  if valid_594541 != nil:
-    section.add "serviceId", valid_594541
+  if valid_568770 != nil:
+    section.add "serviceId", valid_568770
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -5995,28 +5995,28 @@ proc validate_StartPartitionRestart_594538(path: JsonNode; query: JsonNode;
   ##   OperationId: JString (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
   section = newJObject()
-  var valid_594542 = query.getOrDefault("timeout")
-  valid_594542 = validateParameter(valid_594542, JInt, required = false,
+  var valid_568771 = query.getOrDefault("timeout")
+  valid_568771 = validateParameter(valid_568771, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594542 != nil:
-    section.add "timeout", valid_594542
+  if valid_568771 != nil:
+    section.add "timeout", valid_568771
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594543 = query.getOrDefault("api-version")
-  valid_594543 = validateParameter(valid_594543, JString, required = true,
+  var valid_568772 = query.getOrDefault("api-version")
+  valid_568772 = validateParameter(valid_568772, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594543 != nil:
-    section.add "api-version", valid_594543
-  var valid_594544 = query.getOrDefault("RestartPartitionMode")
-  valid_594544 = validateParameter(valid_594544, JString, required = true,
+  if valid_568772 != nil:
+    section.add "api-version", valid_568772
+  var valid_568773 = query.getOrDefault("RestartPartitionMode")
+  valid_568773 = validateParameter(valid_568773, JString, required = true,
                                  default = newJString("Invalid"))
-  if valid_594544 != nil:
-    section.add "RestartPartitionMode", valid_594544
-  var valid_594545 = query.getOrDefault("OperationId")
-  valid_594545 = validateParameter(valid_594545, JString, required = true,
+  if valid_568773 != nil:
+    section.add "RestartPartitionMode", valid_568773
+  var valid_568774 = query.getOrDefault("OperationId")
+  valid_568774 = validateParameter(valid_568774, JString, required = true,
                                  default = nil)
-  if valid_594545 != nil:
-    section.add "OperationId", valid_594545
+  if valid_568774 != nil:
+    section.add "OperationId", valid_568774
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6025,7 +6025,7 @@ proc validate_StartPartitionRestart_594538(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594546: Call_StartPartitionRestart_594537; path: JsonNode;
+proc call*(call_568775: Call_StartPartitionRestart_568766; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This API is useful for testing failover.
   ## 
@@ -6034,16 +6034,16 @@ proc call*(call_594546: Call_StartPartitionRestart_594537; path: JsonNode;
   ## Call the GetPartitionRestartProgress API using the same OperationId to get the progress.
   ## 
   ## 
-  let valid = call_594546.validator(path, query, header, formData, body)
-  let scheme = call_594546.pickScheme
+  let valid = call_568775.validator(path, query, header, formData, body)
+  let scheme = call_568775.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594546.url(scheme.get, call_594546.host, call_594546.base,
-                         call_594546.route, valid.getOrDefault("path"),
+  let url = call_568775.url(scheme.get, call_568775.host, call_568775.base,
+                         call_568775.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594546, url, valid)
+  result = hook(call_568775, url, valid)
 
-proc call*(call_594547: Call_StartPartitionRestart_594537; partitionId: string;
+proc call*(call_568776: Call_StartPartitionRestart_568766; partitionId: string;
           serviceId: string; OperationId: string; timeout: int = 60;
           apiVersion: string = "3.0"; RestartPartitionMode: string = "Invalid"): Recallable =
   ## startPartitionRestart
@@ -6068,24 +6068,24 @@ proc call*(call_594547: Call_StartPartitionRestart_594537; partitionId: string;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   ##   OperationId: string (required)
   ##              : A GUID that identifies a call of this API.  This is passed into the corresponding GetProgress API
-  var path_594548 = newJObject()
-  var query_594549 = newJObject()
-  add(query_594549, "timeout", newJInt(timeout))
-  add(query_594549, "api-version", newJString(apiVersion))
-  add(query_594549, "RestartPartitionMode", newJString(RestartPartitionMode))
-  add(path_594548, "partitionId", newJString(partitionId))
-  add(path_594548, "serviceId", newJString(serviceId))
-  add(query_594549, "OperationId", newJString(OperationId))
-  result = call_594547.call(path_594548, query_594549, nil, nil, nil)
+  var path_568777 = newJObject()
+  var query_568778 = newJObject()
+  add(query_568778, "timeout", newJInt(timeout))
+  add(query_568778, "api-version", newJString(apiVersion))
+  add(query_568778, "RestartPartitionMode", newJString(RestartPartitionMode))
+  add(path_568777, "partitionId", newJString(partitionId))
+  add(path_568777, "serviceId", newJString(serviceId))
+  add(query_568778, "OperationId", newJString(OperationId))
+  result = call_568776.call(path_568777, query_568778, nil, nil, nil)
 
-var startPartitionRestart* = Call_StartPartitionRestart_594537(
+var startPartitionRestart* = Call_StartPartitionRestart_568766(
     name: "startPartitionRestart", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Faults/Services/{serviceId}/$/GetPartitions/{partitionId}/$/StartRestart",
-    validator: validate_StartPartitionRestart_594538, base: "",
-    url: url_StartPartitionRestart_594539, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_StartPartitionRestart_568767, base: "",
+    url: url_StartPartitionRestart_568768, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetImageStoreRootContent_594550 = ref object of OpenApiRestCall_593437
-proc url_GetImageStoreRootContent_594552(protocol: Scheme; host: string;
+  Call_GetImageStoreRootContent_568779 = ref object of OpenApiRestCall_567666
+proc url_GetImageStoreRootContent_568781(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -6093,7 +6093,7 @@ proc url_GetImageStoreRootContent_594552(protocol: Scheme; host: string;
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetImageStoreRootContent_594551(path: JsonNode; query: JsonNode;
+proc validate_GetImageStoreRootContent_568780(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the information about the image store content at the root of the image store.
   ## 
@@ -6107,18 +6107,18 @@ proc validate_GetImageStoreRootContent_594551(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594553 = query.getOrDefault("timeout")
-  valid_594553 = validateParameter(valid_594553, JInt, required = false,
+  var valid_568782 = query.getOrDefault("timeout")
+  valid_568782 = validateParameter(valid_568782, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594553 != nil:
-    section.add "timeout", valid_594553
+  if valid_568782 != nil:
+    section.add "timeout", valid_568782
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594554 = query.getOrDefault("api-version")
-  valid_594554 = validateParameter(valid_594554, JString, required = true,
+  var valid_568783 = query.getOrDefault("api-version")
+  valid_568783 = validateParameter(valid_568783, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594554 != nil:
-    section.add "api-version", valid_594554
+  if valid_568783 != nil:
+    section.add "api-version", valid_568783
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6127,20 +6127,20 @@ proc validate_GetImageStoreRootContent_594551(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594555: Call_GetImageStoreRootContent_594550; path: JsonNode;
+proc call*(call_568784: Call_GetImageStoreRootContent_568779; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the information about the image store content at the root of the image store.
   ## 
-  let valid = call_594555.validator(path, query, header, formData, body)
-  let scheme = call_594555.pickScheme
+  let valid = call_568784.validator(path, query, header, formData, body)
+  let scheme = call_568784.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594555.url(scheme.get, call_594555.host, call_594555.base,
-                         call_594555.route, valid.getOrDefault("path"),
+  let url = call_568784.url(scheme.get, call_568784.host, call_568784.base,
+                         call_568784.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594555, url, valid)
+  result = hook(call_568784, url, valid)
 
-proc call*(call_594556: Call_GetImageStoreRootContent_594550; timeout: int = 60;
+proc call*(call_568785: Call_GetImageStoreRootContent_568779; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## getImageStoreRootContent
   ## Returns the information about the image store content at the root of the image store.
@@ -6148,26 +6148,26 @@ proc call*(call_594556: Call_GetImageStoreRootContent_594550; timeout: int = 60;
   ##          : The server timeout for performing the operation in seconds. This specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
   ##   apiVersion: string (required)
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
-  var query_594557 = newJObject()
-  add(query_594557, "timeout", newJInt(timeout))
-  add(query_594557, "api-version", newJString(apiVersion))
-  result = call_594556.call(nil, query_594557, nil, nil, nil)
+  var query_568786 = newJObject()
+  add(query_568786, "timeout", newJInt(timeout))
+  add(query_568786, "api-version", newJString(apiVersion))
+  result = call_568785.call(nil, query_568786, nil, nil, nil)
 
-var getImageStoreRootContent* = Call_GetImageStoreRootContent_594550(
+var getImageStoreRootContent* = Call_GetImageStoreRootContent_568779(
     name: "getImageStoreRootContent", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/ImageStore",
-    validator: validate_GetImageStoreRootContent_594551, base: "",
-    url: url_GetImageStoreRootContent_594552, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetImageStoreRootContent_568780, base: "",
+    url: url_GetImageStoreRootContent_568781, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_CopyImageStoreContent_594558 = ref object of OpenApiRestCall_593437
-proc url_CopyImageStoreContent_594560(protocol: Scheme; host: string; base: string;
+  Call_CopyImageStoreContent_568787 = ref object of OpenApiRestCall_567666
+proc url_CopyImageStoreContent_568789(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CopyImageStoreContent_594559(path: JsonNode; query: JsonNode;
+proc validate_CopyImageStoreContent_568788(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Copies the image store content from the source image store relative path to the destination image store relative path.
   ## 
@@ -6181,18 +6181,18 @@ proc validate_CopyImageStoreContent_594559(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594561 = query.getOrDefault("timeout")
-  valid_594561 = validateParameter(valid_594561, JInt, required = false,
+  var valid_568790 = query.getOrDefault("timeout")
+  valid_568790 = validateParameter(valid_568790, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594561 != nil:
-    section.add "timeout", valid_594561
+  if valid_568790 != nil:
+    section.add "timeout", valid_568790
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594562 = query.getOrDefault("api-version")
-  valid_594562 = validateParameter(valid_594562, JString, required = true,
+  var valid_568791 = query.getOrDefault("api-version")
+  valid_568791 = validateParameter(valid_568791, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594562 != nil:
-    section.add "api-version", valid_594562
+  if valid_568791 != nil:
+    section.add "api-version", valid_568791
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6206,20 +6206,20 @@ proc validate_CopyImageStoreContent_594559(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594564: Call_CopyImageStoreContent_594558; path: JsonNode;
+proc call*(call_568793: Call_CopyImageStoreContent_568787; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Copies the image store content from the source image store relative path to the destination image store relative path.
   ## 
-  let valid = call_594564.validator(path, query, header, formData, body)
-  let scheme = call_594564.pickScheme
+  let valid = call_568793.validator(path, query, header, formData, body)
+  let scheme = call_568793.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594564.url(scheme.get, call_594564.host, call_594564.base,
-                         call_594564.route, valid.getOrDefault("path"),
+  let url = call_568793.url(scheme.get, call_568793.host, call_568793.base,
+                         call_568793.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594564, url, valid)
+  result = hook(call_568793, url, valid)
 
-proc call*(call_594565: Call_CopyImageStoreContent_594558;
+proc call*(call_568794: Call_CopyImageStoreContent_568787;
           ImageStoreCopyDescription: JsonNode; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## copyImageStoreContent
@@ -6230,22 +6230,22 @@ proc call*(call_594565: Call_CopyImageStoreContent_594558;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   ImageStoreCopyDescription: JObject (required)
   ##                            : Describes the copy description for the image store.
-  var query_594566 = newJObject()
-  var body_594567 = newJObject()
-  add(query_594566, "timeout", newJInt(timeout))
-  add(query_594566, "api-version", newJString(apiVersion))
+  var query_568795 = newJObject()
+  var body_568796 = newJObject()
+  add(query_568795, "timeout", newJInt(timeout))
+  add(query_568795, "api-version", newJString(apiVersion))
   if ImageStoreCopyDescription != nil:
-    body_594567 = ImageStoreCopyDescription
-  result = call_594565.call(nil, query_594566, nil, nil, body_594567)
+    body_568796 = ImageStoreCopyDescription
+  result = call_568794.call(nil, query_568795, nil, nil, body_568796)
 
-var copyImageStoreContent* = Call_CopyImageStoreContent_594558(
+var copyImageStoreContent* = Call_CopyImageStoreContent_568787(
     name: "copyImageStoreContent", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/ImageStore/$/Copy",
-    validator: validate_CopyImageStoreContent_594559, base: "",
-    url: url_CopyImageStoreContent_594560, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_CopyImageStoreContent_568788, base: "",
+    url: url_CopyImageStoreContent_568789, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_UploadFile_594578 = ref object of OpenApiRestCall_593437
-proc url_UploadFile_594580(protocol: Scheme; host: string; base: string; route: string;
+  Call_UploadFile_568807 = ref object of OpenApiRestCall_567666
+proc url_UploadFile_568809(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6260,7 +6260,7 @@ proc url_UploadFile_594580(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UploadFile_594579(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UploadFile_568808(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Uploads contents of the file to the image store. Use this API if the file is small enough to upload again if the connection fails. The file's data needs to be added to the request body. The contents will be uploaded to the specified path.
   ## 
@@ -6272,11 +6272,11 @@ proc validate_UploadFile_594579(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `contentPath` field"
-  var valid_594581 = path.getOrDefault("contentPath")
-  valid_594581 = validateParameter(valid_594581, JString, required = true,
+  var valid_568810 = path.getOrDefault("contentPath")
+  valid_568810 = validateParameter(valid_568810, JString, required = true,
                                  default = nil)
-  if valid_594581 != nil:
-    section.add "contentPath", valid_594581
+  if valid_568810 != nil:
+    section.add "contentPath", valid_568810
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -6284,18 +6284,18 @@ proc validate_UploadFile_594579(path: JsonNode; query: JsonNode; header: JsonNod
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594582 = query.getOrDefault("timeout")
-  valid_594582 = validateParameter(valid_594582, JInt, required = false,
+  var valid_568811 = query.getOrDefault("timeout")
+  valid_568811 = validateParameter(valid_568811, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594582 != nil:
-    section.add "timeout", valid_594582
+  if valid_568811 != nil:
+    section.add "timeout", valid_568811
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594583 = query.getOrDefault("api-version")
-  valid_594583 = validateParameter(valid_594583, JString, required = true,
+  var valid_568812 = query.getOrDefault("api-version")
+  valid_568812 = validateParameter(valid_568812, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594583 != nil:
-    section.add "api-version", valid_594583
+  if valid_568812 != nil:
+    section.add "api-version", valid_568812
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6304,20 +6304,20 @@ proc validate_UploadFile_594579(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594584: Call_UploadFile_594578; path: JsonNode; query: JsonNode;
+proc call*(call_568813: Call_UploadFile_568807; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Uploads contents of the file to the image store. Use this API if the file is small enough to upload again if the connection fails. The file's data needs to be added to the request body. The contents will be uploaded to the specified path.
   ## 
-  let valid = call_594584.validator(path, query, header, formData, body)
-  let scheme = call_594584.pickScheme
+  let valid = call_568813.validator(path, query, header, formData, body)
+  let scheme = call_568813.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594584.url(scheme.get, call_594584.host, call_594584.base,
-                         call_594584.route, valid.getOrDefault("path"),
+  let url = call_568813.url(scheme.get, call_568813.host, call_568813.base,
+                         call_568813.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594584, url, valid)
+  result = hook(call_568813, url, valid)
 
-proc call*(call_594585: Call_UploadFile_594578; contentPath: string;
+proc call*(call_568814: Call_UploadFile_568807; contentPath: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## uploadFile
   ## Uploads contents of the file to the image store. Use this API if the file is small enough to upload again if the connection fails. The file's data needs to be added to the request body. The contents will be uploaded to the specified path.
@@ -6327,23 +6327,23 @@ proc call*(call_594585: Call_UploadFile_594578; contentPath: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   contentPath: string (required)
   ##              : Relative path to file or folder in the image store from its root.
-  var path_594586 = newJObject()
-  var query_594587 = newJObject()
-  add(query_594587, "timeout", newJInt(timeout))
-  add(query_594587, "api-version", newJString(apiVersion))
-  add(path_594586, "contentPath", newJString(contentPath))
-  result = call_594585.call(path_594586, query_594587, nil, nil, nil)
+  var path_568815 = newJObject()
+  var query_568816 = newJObject()
+  add(query_568816, "timeout", newJInt(timeout))
+  add(query_568816, "api-version", newJString(apiVersion))
+  add(path_568815, "contentPath", newJString(contentPath))
+  result = call_568814.call(path_568815, query_568816, nil, nil, nil)
 
-var uploadFile* = Call_UploadFile_594578(name: "uploadFile",
+var uploadFile* = Call_UploadFile_568807(name: "uploadFile",
                                       meth: HttpMethod.HttpPut,
                                       host: "azure.local:19080",
                                       route: "/ImageStore/{contentPath}",
-                                      validator: validate_UploadFile_594579,
-                                      base: "", url: url_UploadFile_594580,
+                                      validator: validate_UploadFile_568808,
+                                      base: "", url: url_UploadFile_568809,
                                       schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetImageStoreContent_594568 = ref object of OpenApiRestCall_593437
-proc url_GetImageStoreContent_594570(protocol: Scheme; host: string; base: string;
+  Call_GetImageStoreContent_568797 = ref object of OpenApiRestCall_567666
+proc url_GetImageStoreContent_568799(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6358,7 +6358,7 @@ proc url_GetImageStoreContent_594570(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetImageStoreContent_594569(path: JsonNode; query: JsonNode;
+proc validate_GetImageStoreContent_568798(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the information about the image store content at the specified contentPath relative to the root of the image store.
   ## 
@@ -6370,11 +6370,11 @@ proc validate_GetImageStoreContent_594569(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `contentPath` field"
-  var valid_594571 = path.getOrDefault("contentPath")
-  valid_594571 = validateParameter(valid_594571, JString, required = true,
+  var valid_568800 = path.getOrDefault("contentPath")
+  valid_568800 = validateParameter(valid_568800, JString, required = true,
                                  default = nil)
-  if valid_594571 != nil:
-    section.add "contentPath", valid_594571
+  if valid_568800 != nil:
+    section.add "contentPath", valid_568800
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -6382,18 +6382,18 @@ proc validate_GetImageStoreContent_594569(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594572 = query.getOrDefault("timeout")
-  valid_594572 = validateParameter(valid_594572, JInt, required = false,
+  var valid_568801 = query.getOrDefault("timeout")
+  valid_568801 = validateParameter(valid_568801, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594572 != nil:
-    section.add "timeout", valid_594572
+  if valid_568801 != nil:
+    section.add "timeout", valid_568801
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594573 = query.getOrDefault("api-version")
-  valid_594573 = validateParameter(valid_594573, JString, required = true,
+  var valid_568802 = query.getOrDefault("api-version")
+  valid_568802 = validateParameter(valid_568802, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594573 != nil:
-    section.add "api-version", valid_594573
+  if valid_568802 != nil:
+    section.add "api-version", valid_568802
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6402,20 +6402,20 @@ proc validate_GetImageStoreContent_594569(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594574: Call_GetImageStoreContent_594568; path: JsonNode;
+proc call*(call_568803: Call_GetImageStoreContent_568797; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the information about the image store content at the specified contentPath relative to the root of the image store.
   ## 
-  let valid = call_594574.validator(path, query, header, formData, body)
-  let scheme = call_594574.pickScheme
+  let valid = call_568803.validator(path, query, header, formData, body)
+  let scheme = call_568803.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594574.url(scheme.get, call_594574.host, call_594574.base,
-                         call_594574.route, valid.getOrDefault("path"),
+  let url = call_568803.url(scheme.get, call_568803.host, call_568803.base,
+                         call_568803.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594574, url, valid)
+  result = hook(call_568803, url, valid)
 
-proc call*(call_594575: Call_GetImageStoreContent_594568; contentPath: string;
+proc call*(call_568804: Call_GetImageStoreContent_568797; contentPath: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getImageStoreContent
   ## Returns the information about the image store content at the specified contentPath relative to the root of the image store.
@@ -6425,21 +6425,21 @@ proc call*(call_594575: Call_GetImageStoreContent_594568; contentPath: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   contentPath: string (required)
   ##              : Relative path to file or folder in the image store from its root.
-  var path_594576 = newJObject()
-  var query_594577 = newJObject()
-  add(query_594577, "timeout", newJInt(timeout))
-  add(query_594577, "api-version", newJString(apiVersion))
-  add(path_594576, "contentPath", newJString(contentPath))
-  result = call_594575.call(path_594576, query_594577, nil, nil, nil)
+  var path_568805 = newJObject()
+  var query_568806 = newJObject()
+  add(query_568806, "timeout", newJInt(timeout))
+  add(query_568806, "api-version", newJString(apiVersion))
+  add(path_568805, "contentPath", newJString(contentPath))
+  result = call_568804.call(path_568805, query_568806, nil, nil, nil)
 
-var getImageStoreContent* = Call_GetImageStoreContent_594568(
+var getImageStoreContent* = Call_GetImageStoreContent_568797(
     name: "getImageStoreContent", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/ImageStore/{contentPath}",
-    validator: validate_GetImageStoreContent_594569, base: "",
-    url: url_GetImageStoreContent_594570, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetImageStoreContent_568798, base: "",
+    url: url_GetImageStoreContent_568799, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_DeleteImageStoreContent_594588 = ref object of OpenApiRestCall_593437
-proc url_DeleteImageStoreContent_594590(protocol: Scheme; host: string; base: string;
+  Call_DeleteImageStoreContent_568817 = ref object of OpenApiRestCall_567666
+proc url_DeleteImageStoreContent_568819(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -6455,7 +6455,7 @@ proc url_DeleteImageStoreContent_594590(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeleteImageStoreContent_594589(path: JsonNode; query: JsonNode;
+proc validate_DeleteImageStoreContent_568818(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes existing image store content being found within the given image store relative path. This can be used to delete uploaded application packages once they are provisioned.
   ## 
@@ -6467,11 +6467,11 @@ proc validate_DeleteImageStoreContent_594589(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `contentPath` field"
-  var valid_594591 = path.getOrDefault("contentPath")
-  valid_594591 = validateParameter(valid_594591, JString, required = true,
+  var valid_568820 = path.getOrDefault("contentPath")
+  valid_568820 = validateParameter(valid_568820, JString, required = true,
                                  default = nil)
-  if valid_594591 != nil:
-    section.add "contentPath", valid_594591
+  if valid_568820 != nil:
+    section.add "contentPath", valid_568820
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -6479,18 +6479,18 @@ proc validate_DeleteImageStoreContent_594589(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594592 = query.getOrDefault("timeout")
-  valid_594592 = validateParameter(valid_594592, JInt, required = false,
+  var valid_568821 = query.getOrDefault("timeout")
+  valid_568821 = validateParameter(valid_568821, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594592 != nil:
-    section.add "timeout", valid_594592
+  if valid_568821 != nil:
+    section.add "timeout", valid_568821
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594593 = query.getOrDefault("api-version")
-  valid_594593 = validateParameter(valid_594593, JString, required = true,
+  var valid_568822 = query.getOrDefault("api-version")
+  valid_568822 = validateParameter(valid_568822, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594593 != nil:
-    section.add "api-version", valid_594593
+  if valid_568822 != nil:
+    section.add "api-version", valid_568822
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6499,20 +6499,20 @@ proc validate_DeleteImageStoreContent_594589(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594594: Call_DeleteImageStoreContent_594588; path: JsonNode;
+proc call*(call_568823: Call_DeleteImageStoreContent_568817; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes existing image store content being found within the given image store relative path. This can be used to delete uploaded application packages once they are provisioned.
   ## 
-  let valid = call_594594.validator(path, query, header, formData, body)
-  let scheme = call_594594.pickScheme
+  let valid = call_568823.validator(path, query, header, formData, body)
+  let scheme = call_568823.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594594.url(scheme.get, call_594594.host, call_594594.base,
-                         call_594594.route, valid.getOrDefault("path"),
+  let url = call_568823.url(scheme.get, call_568823.host, call_568823.base,
+                         call_568823.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594594, url, valid)
+  result = hook(call_568823, url, valid)
 
-proc call*(call_594595: Call_DeleteImageStoreContent_594588; contentPath: string;
+proc call*(call_568824: Call_DeleteImageStoreContent_568817; contentPath: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## deleteImageStoreContent
   ## Deletes existing image store content being found within the given image store relative path. This can be used to delete uploaded application packages once they are provisioned.
@@ -6522,28 +6522,28 @@ proc call*(call_594595: Call_DeleteImageStoreContent_594588; contentPath: string
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   contentPath: string (required)
   ##              : Relative path to file or folder in the image store from its root.
-  var path_594596 = newJObject()
-  var query_594597 = newJObject()
-  add(query_594597, "timeout", newJInt(timeout))
-  add(query_594597, "api-version", newJString(apiVersion))
-  add(path_594596, "contentPath", newJString(contentPath))
-  result = call_594595.call(path_594596, query_594597, nil, nil, nil)
+  var path_568825 = newJObject()
+  var query_568826 = newJObject()
+  add(query_568826, "timeout", newJInt(timeout))
+  add(query_568826, "api-version", newJString(apiVersion))
+  add(path_568825, "contentPath", newJString(contentPath))
+  result = call_568824.call(path_568825, query_568826, nil, nil, nil)
 
-var deleteImageStoreContent* = Call_DeleteImageStoreContent_594588(
+var deleteImageStoreContent* = Call_DeleteImageStoreContent_568817(
     name: "deleteImageStoreContent", meth: HttpMethod.HttpDelete,
     host: "azure.local:19080", route: "/ImageStore/{contentPath}",
-    validator: validate_DeleteImageStoreContent_594589, base: "",
-    url: url_DeleteImageStoreContent_594590, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_DeleteImageStoreContent_568818, base: "",
+    url: url_DeleteImageStoreContent_568819, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetNodeInfoList_594598 = ref object of OpenApiRestCall_593437
-proc url_GetNodeInfoList_594600(protocol: Scheme; host: string; base: string;
+  Call_GetNodeInfoList_568827 = ref object of OpenApiRestCall_567666
+proc url_GetNodeInfoList_568829(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetNodeInfoList_594599(path: JsonNode; query: JsonNode;
+proc validate_GetNodeInfoList_568828(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## The Nodes endpoint returns information about the nodes in the Service Fabric Cluster. The respons include the name, status, id, health, uptime and other details about the node.
@@ -6573,28 +6573,28 @@ proc validate_GetNodeInfoList_594599(path: JsonNode; query: JsonNode;
   ##   ContinuationToken: JString
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
   section = newJObject()
-  var valid_594601 = query.getOrDefault("timeout")
-  valid_594601 = validateParameter(valid_594601, JInt, required = false,
+  var valid_568830 = query.getOrDefault("timeout")
+  valid_568830 = validateParameter(valid_568830, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594601 != nil:
-    section.add "timeout", valid_594601
+  if valid_568830 != nil:
+    section.add "timeout", valid_568830
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594602 = query.getOrDefault("api-version")
-  valid_594602 = validateParameter(valid_594602, JString, required = true,
+  var valid_568831 = query.getOrDefault("api-version")
+  valid_568831 = validateParameter(valid_568831, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594602 != nil:
-    section.add "api-version", valid_594602
-  var valid_594603 = query.getOrDefault("NodeStatusFilter")
-  valid_594603 = validateParameter(valid_594603, JString, required = false,
+  if valid_568831 != nil:
+    section.add "api-version", valid_568831
+  var valid_568832 = query.getOrDefault("NodeStatusFilter")
+  valid_568832 = validateParameter(valid_568832, JString, required = false,
                                  default = newJString("default"))
-  if valid_594603 != nil:
-    section.add "NodeStatusFilter", valid_594603
-  var valid_594604 = query.getOrDefault("ContinuationToken")
-  valid_594604 = validateParameter(valid_594604, JString, required = false,
+  if valid_568832 != nil:
+    section.add "NodeStatusFilter", valid_568832
+  var valid_568833 = query.getOrDefault("ContinuationToken")
+  valid_568833 = validateParameter(valid_568833, JString, required = false,
                                  default = nil)
-  if valid_594604 != nil:
-    section.add "ContinuationToken", valid_594604
+  if valid_568833 != nil:
+    section.add "ContinuationToken", valid_568833
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6603,20 +6603,20 @@ proc validate_GetNodeInfoList_594599(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594605: Call_GetNodeInfoList_594598; path: JsonNode; query: JsonNode;
+proc call*(call_568834: Call_GetNodeInfoList_568827; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Nodes endpoint returns information about the nodes in the Service Fabric Cluster. The respons include the name, status, id, health, uptime and other details about the node.
   ## 
-  let valid = call_594605.validator(path, query, header, formData, body)
-  let scheme = call_594605.pickScheme
+  let valid = call_568834.validator(path, query, header, formData, body)
+  let scheme = call_568834.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594605.url(scheme.get, call_594605.host, call_594605.base,
-                         call_594605.route, valid.getOrDefault("path"),
+  let url = call_568834.url(scheme.get, call_568834.host, call_568834.base,
+                         call_568834.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594605, url, valid)
+  result = hook(call_568834, url, valid)
 
-proc call*(call_594606: Call_GetNodeInfoList_594598; timeout: int = 60;
+proc call*(call_568835: Call_GetNodeInfoList_568827; timeout: int = 60;
           apiVersion: string = "3.0"; NodeStatusFilter: string = "default";
           ContinuationToken: string = ""): Recallable =
   ## getNodeInfoList
@@ -6640,20 +6640,20 @@ proc call*(call_594606: Call_GetNodeInfoList_594598; timeout: int = 60;
   ## 
   ##   ContinuationToken: string
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
-  var query_594607 = newJObject()
-  add(query_594607, "timeout", newJInt(timeout))
-  add(query_594607, "api-version", newJString(apiVersion))
-  add(query_594607, "NodeStatusFilter", newJString(NodeStatusFilter))
-  add(query_594607, "ContinuationToken", newJString(ContinuationToken))
-  result = call_594606.call(nil, query_594607, nil, nil, nil)
+  var query_568836 = newJObject()
+  add(query_568836, "timeout", newJInt(timeout))
+  add(query_568836, "api-version", newJString(apiVersion))
+  add(query_568836, "NodeStatusFilter", newJString(NodeStatusFilter))
+  add(query_568836, "ContinuationToken", newJString(ContinuationToken))
+  result = call_568835.call(nil, query_568836, nil, nil, nil)
 
-var getNodeInfoList* = Call_GetNodeInfoList_594598(name: "getNodeInfoList",
+var getNodeInfoList* = Call_GetNodeInfoList_568827(name: "getNodeInfoList",
     meth: HttpMethod.HttpGet, host: "azure.local:19080", route: "/Nodes",
-    validator: validate_GetNodeInfoList_594599, base: "", url: url_GetNodeInfoList_594600,
+    validator: validate_GetNodeInfoList_568828, base: "", url: url_GetNodeInfoList_568829,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetNodeInfo_594608 = ref object of OpenApiRestCall_593437
-proc url_GetNodeInfo_594610(protocol: Scheme; host: string; base: string;
+  Call_GetNodeInfo_568837 = ref object of OpenApiRestCall_567666
+proc url_GetNodeInfo_568839(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6668,7 +6668,7 @@ proc url_GetNodeInfo_594610(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetNodeInfo_594609(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GetNodeInfo_568838(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the information about a specific node in the Service Fabric Cluster.The respons include the name, status, id, health, uptime and other details about the node.
   ## 
@@ -6679,11 +6679,11 @@ proc validate_GetNodeInfo_594609(path: JsonNode; query: JsonNode; header: JsonNo
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594611 = path.getOrDefault("nodeName")
-  valid_594611 = validateParameter(valid_594611, JString, required = true,
+  var valid_568840 = path.getOrDefault("nodeName")
+  valid_568840 = validateParameter(valid_568840, JString, required = true,
                                  default = nil)
-  if valid_594611 != nil:
-    section.add "nodeName", valid_594611
+  if valid_568840 != nil:
+    section.add "nodeName", valid_568840
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -6691,18 +6691,18 @@ proc validate_GetNodeInfo_594609(path: JsonNode; query: JsonNode; header: JsonNo
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594612 = query.getOrDefault("timeout")
-  valid_594612 = validateParameter(valid_594612, JInt, required = false,
+  var valid_568841 = query.getOrDefault("timeout")
+  valid_568841 = validateParameter(valid_568841, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594612 != nil:
-    section.add "timeout", valid_594612
+  if valid_568841 != nil:
+    section.add "timeout", valid_568841
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594613 = query.getOrDefault("api-version")
-  valid_594613 = validateParameter(valid_594613, JString, required = true,
+  var valid_568842 = query.getOrDefault("api-version")
+  valid_568842 = validateParameter(valid_568842, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594613 != nil:
-    section.add "api-version", valid_594613
+  if valid_568842 != nil:
+    section.add "api-version", valid_568842
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6711,20 +6711,20 @@ proc validate_GetNodeInfo_594609(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594614: Call_GetNodeInfo_594608; path: JsonNode; query: JsonNode;
+proc call*(call_568843: Call_GetNodeInfo_568837; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the information about a specific node in the Service Fabric Cluster.The respons include the name, status, id, health, uptime and other details about the node.
   ## 
-  let valid = call_594614.validator(path, query, header, formData, body)
-  let scheme = call_594614.pickScheme
+  let valid = call_568843.validator(path, query, header, formData, body)
+  let scheme = call_568843.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594614.url(scheme.get, call_594614.host, call_594614.base,
-                         call_594614.route, valid.getOrDefault("path"),
+  let url = call_568843.url(scheme.get, call_568843.host, call_568843.base,
+                         call_568843.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594614, url, valid)
+  result = hook(call_568843, url, valid)
 
-proc call*(call_594615: Call_GetNodeInfo_594608; nodeName: string; timeout: int = 60;
+proc call*(call_568844: Call_GetNodeInfo_568837; nodeName: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## getNodeInfo
   ## Gets the information about a specific node in the Service Fabric Cluster.The respons include the name, status, id, health, uptime and other details about the node.
@@ -6734,23 +6734,23 @@ proc call*(call_594615: Call_GetNodeInfo_594608; nodeName: string; timeout: int 
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   nodeName: string (required)
   ##           : The name of the node.
-  var path_594616 = newJObject()
-  var query_594617 = newJObject()
-  add(query_594617, "timeout", newJInt(timeout))
-  add(query_594617, "api-version", newJString(apiVersion))
-  add(path_594616, "nodeName", newJString(nodeName))
-  result = call_594615.call(path_594616, query_594617, nil, nil, nil)
+  var path_568845 = newJObject()
+  var query_568846 = newJObject()
+  add(query_568846, "timeout", newJInt(timeout))
+  add(query_568846, "api-version", newJString(apiVersion))
+  add(path_568845, "nodeName", newJString(nodeName))
+  result = call_568844.call(path_568845, query_568846, nil, nil, nil)
 
-var getNodeInfo* = Call_GetNodeInfo_594608(name: "getNodeInfo",
+var getNodeInfo* = Call_GetNodeInfo_568837(name: "getNodeInfo",
                                         meth: HttpMethod.HttpGet,
                                         host: "azure.local:19080",
                                         route: "/Nodes/{nodeName}",
-                                        validator: validate_GetNodeInfo_594609,
-                                        base: "", url: url_GetNodeInfo_594610,
+                                        validator: validate_GetNodeInfo_568838,
+                                        base: "", url: url_GetNodeInfo_568839,
                                         schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_EnableNode_594618 = ref object of OpenApiRestCall_593437
-proc url_EnableNode_594620(protocol: Scheme; host: string; base: string; route: string;
+  Call_EnableNode_568847 = ref object of OpenApiRestCall_567666
+proc url_EnableNode_568849(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6766,7 +6766,7 @@ proc url_EnableNode_594620(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnableNode_594619(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EnableNode_568848(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Activates a Service Fabric cluster node which is currently deactivated. Once activated, the node will again become a viable target for placing new replicas, and any deactivated replicas remaining on the node will be reactivated.
   ## 
@@ -6777,11 +6777,11 @@ proc validate_EnableNode_594619(path: JsonNode; query: JsonNode; header: JsonNod
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594621 = path.getOrDefault("nodeName")
-  valid_594621 = validateParameter(valid_594621, JString, required = true,
+  var valid_568850 = path.getOrDefault("nodeName")
+  valid_568850 = validateParameter(valid_568850, JString, required = true,
                                  default = nil)
-  if valid_594621 != nil:
-    section.add "nodeName", valid_594621
+  if valid_568850 != nil:
+    section.add "nodeName", valid_568850
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -6789,18 +6789,18 @@ proc validate_EnableNode_594619(path: JsonNode; query: JsonNode; header: JsonNod
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594622 = query.getOrDefault("timeout")
-  valid_594622 = validateParameter(valid_594622, JInt, required = false,
+  var valid_568851 = query.getOrDefault("timeout")
+  valid_568851 = validateParameter(valid_568851, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594622 != nil:
-    section.add "timeout", valid_594622
+  if valid_568851 != nil:
+    section.add "timeout", valid_568851
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594623 = query.getOrDefault("api-version")
-  valid_594623 = validateParameter(valid_594623, JString, required = true,
+  var valid_568852 = query.getOrDefault("api-version")
+  valid_568852 = validateParameter(valid_568852, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594623 != nil:
-    section.add "api-version", valid_594623
+  if valid_568852 != nil:
+    section.add "api-version", valid_568852
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6809,20 +6809,20 @@ proc validate_EnableNode_594619(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594624: Call_EnableNode_594618; path: JsonNode; query: JsonNode;
+proc call*(call_568853: Call_EnableNode_568847; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Activates a Service Fabric cluster node which is currently deactivated. Once activated, the node will again become a viable target for placing new replicas, and any deactivated replicas remaining on the node will be reactivated.
   ## 
-  let valid = call_594624.validator(path, query, header, formData, body)
-  let scheme = call_594624.pickScheme
+  let valid = call_568853.validator(path, query, header, formData, body)
+  let scheme = call_568853.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594624.url(scheme.get, call_594624.host, call_594624.base,
-                         call_594624.route, valid.getOrDefault("path"),
+  let url = call_568853.url(scheme.get, call_568853.host, call_568853.base,
+                         call_568853.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594624, url, valid)
+  result = hook(call_568853, url, valid)
 
-proc call*(call_594625: Call_EnableNode_594618; nodeName: string; timeout: int = 60;
+proc call*(call_568854: Call_EnableNode_568847; nodeName: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## enableNode
   ## Activates a Service Fabric cluster node which is currently deactivated. Once activated, the node will again become a viable target for placing new replicas, and any deactivated replicas remaining on the node will be reactivated.
@@ -6832,23 +6832,23 @@ proc call*(call_594625: Call_EnableNode_594618; nodeName: string; timeout: int =
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   nodeName: string (required)
   ##           : The name of the node.
-  var path_594626 = newJObject()
-  var query_594627 = newJObject()
-  add(query_594627, "timeout", newJInt(timeout))
-  add(query_594627, "api-version", newJString(apiVersion))
-  add(path_594626, "nodeName", newJString(nodeName))
-  result = call_594625.call(path_594626, query_594627, nil, nil, nil)
+  var path_568855 = newJObject()
+  var query_568856 = newJObject()
+  add(query_568856, "timeout", newJInt(timeout))
+  add(query_568856, "api-version", newJString(apiVersion))
+  add(path_568855, "nodeName", newJString(nodeName))
+  result = call_568854.call(path_568855, query_568856, nil, nil, nil)
 
-var enableNode* = Call_EnableNode_594618(name: "enableNode",
+var enableNode* = Call_EnableNode_568847(name: "enableNode",
                                       meth: HttpMethod.HttpPost,
                                       host: "azure.local:19080",
                                       route: "/Nodes/{nodeName}/$/Activate",
-                                      validator: validate_EnableNode_594619,
-                                      base: "", url: url_EnableNode_594620,
+                                      validator: validate_EnableNode_568848,
+                                      base: "", url: url_EnableNode_568849,
                                       schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_DisableNode_594628 = ref object of OpenApiRestCall_593437
-proc url_DisableNode_594630(protocol: Scheme; host: string; base: string;
+  Call_DisableNode_568857 = ref object of OpenApiRestCall_567666
+proc url_DisableNode_568859(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6864,7 +6864,7 @@ proc url_DisableNode_594630(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisableNode_594629(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisableNode_568858(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Deactivate a Service Fabric cluster node with the specified deactivation intent. Once the deactivation is in progress, the deactivation intent can be increased, but not decreased (for example, a node which is was deactivated with the Pause intent can be deactivated further with Restart, but not the other way around. Nodes may be reactivated using the Activate a node operation any time after they are deactivated. If the deactivation is not complete this will cancel the deactivation. A node which goes down and comes back up while deactivated will still need to be reactivated before services will be placed on that node.
   ## 
@@ -6875,11 +6875,11 @@ proc validate_DisableNode_594629(path: JsonNode; query: JsonNode; header: JsonNo
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594631 = path.getOrDefault("nodeName")
-  valid_594631 = validateParameter(valid_594631, JString, required = true,
+  var valid_568860 = path.getOrDefault("nodeName")
+  valid_568860 = validateParameter(valid_568860, JString, required = true,
                                  default = nil)
-  if valid_594631 != nil:
-    section.add "nodeName", valid_594631
+  if valid_568860 != nil:
+    section.add "nodeName", valid_568860
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -6887,18 +6887,18 @@ proc validate_DisableNode_594629(path: JsonNode; query: JsonNode; header: JsonNo
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594632 = query.getOrDefault("timeout")
-  valid_594632 = validateParameter(valid_594632, JInt, required = false,
+  var valid_568861 = query.getOrDefault("timeout")
+  valid_568861 = validateParameter(valid_568861, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594632 != nil:
-    section.add "timeout", valid_594632
+  if valid_568861 != nil:
+    section.add "timeout", valid_568861
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594633 = query.getOrDefault("api-version")
-  valid_594633 = validateParameter(valid_594633, JString, required = true,
+  var valid_568862 = query.getOrDefault("api-version")
+  valid_568862 = validateParameter(valid_568862, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594633 != nil:
-    section.add "api-version", valid_594633
+  if valid_568862 != nil:
+    section.add "api-version", valid_568862
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6912,20 +6912,20 @@ proc validate_DisableNode_594629(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594635: Call_DisableNode_594628; path: JsonNode; query: JsonNode;
+proc call*(call_568864: Call_DisableNode_568857; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deactivate a Service Fabric cluster node with the specified deactivation intent. Once the deactivation is in progress, the deactivation intent can be increased, but not decreased (for example, a node which is was deactivated with the Pause intent can be deactivated further with Restart, but not the other way around. Nodes may be reactivated using the Activate a node operation any time after they are deactivated. If the deactivation is not complete this will cancel the deactivation. A node which goes down and comes back up while deactivated will still need to be reactivated before services will be placed on that node.
   ## 
-  let valid = call_594635.validator(path, query, header, formData, body)
-  let scheme = call_594635.pickScheme
+  let valid = call_568864.validator(path, query, header, formData, body)
+  let scheme = call_568864.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594635.url(scheme.get, call_594635.host, call_594635.base,
-                         call_594635.route, valid.getOrDefault("path"),
+  let url = call_568864.url(scheme.get, call_568864.host, call_568864.base,
+                         call_568864.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594635, url, valid)
+  result = hook(call_568864, url, valid)
 
-proc call*(call_594636: Call_DisableNode_594628; nodeName: string;
+proc call*(call_568865: Call_DisableNode_568857; nodeName: string;
           DeactivationIntentDescription: JsonNode; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## disableNode
@@ -6938,25 +6938,25 @@ proc call*(call_594636: Call_DisableNode_594628; nodeName: string;
   ##           : The name of the node.
   ##   DeactivationIntentDescription: JObject (required)
   ##                                : Describes the intent or reason for deactivating the node.
-  var path_594637 = newJObject()
-  var query_594638 = newJObject()
-  var body_594639 = newJObject()
-  add(query_594638, "timeout", newJInt(timeout))
-  add(query_594638, "api-version", newJString(apiVersion))
-  add(path_594637, "nodeName", newJString(nodeName))
+  var path_568866 = newJObject()
+  var query_568867 = newJObject()
+  var body_568868 = newJObject()
+  add(query_568867, "timeout", newJInt(timeout))
+  add(query_568867, "api-version", newJString(apiVersion))
+  add(path_568866, "nodeName", newJString(nodeName))
   if DeactivationIntentDescription != nil:
-    body_594639 = DeactivationIntentDescription
-  result = call_594636.call(path_594637, query_594638, nil, nil, body_594639)
+    body_568868 = DeactivationIntentDescription
+  result = call_568865.call(path_568866, query_568867, nil, nil, body_568868)
 
-var disableNode* = Call_DisableNode_594628(name: "disableNode",
+var disableNode* = Call_DisableNode_568857(name: "disableNode",
                                         meth: HttpMethod.HttpPost,
                                         host: "azure.local:19080", route: "/Nodes/{nodeName}/$/Deactivate",
-                                        validator: validate_DisableNode_594629,
-                                        base: "", url: url_DisableNode_594630,
+                                        validator: validate_DisableNode_568858,
+                                        base: "", url: url_DisableNode_568859,
                                         schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_DeployedServicePackageToNode_594640 = ref object of OpenApiRestCall_593437
-proc url_DeployedServicePackageToNode_594642(protocol: Scheme; host: string;
+  Call_DeployedServicePackageToNode_568869 = ref object of OpenApiRestCall_567666
+proc url_DeployedServicePackageToNode_568871(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6972,7 +6972,7 @@ proc url_DeployedServicePackageToNode_594642(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeployedServicePackageToNode_594641(path: JsonNode; query: JsonNode;
+proc validate_DeployedServicePackageToNode_568870(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Downloads packages associated with specified service manifest to image cache on specified node.
   ## 
@@ -6984,11 +6984,11 @@ proc validate_DeployedServicePackageToNode_594641(path: JsonNode; query: JsonNod
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594643 = path.getOrDefault("nodeName")
-  valid_594643 = validateParameter(valid_594643, JString, required = true,
+  var valid_568872 = path.getOrDefault("nodeName")
+  valid_568872 = validateParameter(valid_568872, JString, required = true,
                                  default = nil)
-  if valid_594643 != nil:
-    section.add "nodeName", valid_594643
+  if valid_568872 != nil:
+    section.add "nodeName", valid_568872
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -6996,18 +6996,18 @@ proc validate_DeployedServicePackageToNode_594641(path: JsonNode; query: JsonNod
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594644 = query.getOrDefault("timeout")
-  valid_594644 = validateParameter(valid_594644, JInt, required = false,
+  var valid_568873 = query.getOrDefault("timeout")
+  valid_568873 = validateParameter(valid_568873, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594644 != nil:
-    section.add "timeout", valid_594644
+  if valid_568873 != nil:
+    section.add "timeout", valid_568873
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594645 = query.getOrDefault("api-version")
-  valid_594645 = validateParameter(valid_594645, JString, required = true,
+  var valid_568874 = query.getOrDefault("api-version")
+  valid_568874 = validateParameter(valid_568874, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594645 != nil:
-    section.add "api-version", valid_594645
+  if valid_568874 != nil:
+    section.add "api-version", valid_568874
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7021,21 +7021,21 @@ proc validate_DeployedServicePackageToNode_594641(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594647: Call_DeployedServicePackageToNode_594640; path: JsonNode;
+proc call*(call_568876: Call_DeployedServicePackageToNode_568869; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Downloads packages associated with specified service manifest to image cache on specified node.
   ## 
   ## 
-  let valid = call_594647.validator(path, query, header, formData, body)
-  let scheme = call_594647.pickScheme
+  let valid = call_568876.validator(path, query, header, formData, body)
+  let scheme = call_568876.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594647.url(scheme.get, call_594647.host, call_594647.base,
-                         call_594647.route, valid.getOrDefault("path"),
+  let url = call_568876.url(scheme.get, call_568876.host, call_568876.base,
+                         call_568876.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594647, url, valid)
+  result = hook(call_568876, url, valid)
 
-proc call*(call_594648: Call_DeployedServicePackageToNode_594640; nodeName: string;
+proc call*(call_568877: Call_DeployedServicePackageToNode_568869; nodeName: string;
           DeployServicePackageToNodeDescription: JsonNode; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## deployedServicePackageToNode
@@ -7049,25 +7049,25 @@ proc call*(call_594648: Call_DeployedServicePackageToNode_594640; nodeName: stri
   ##           : The name of the node.
   ##   DeployServicePackageToNodeDescription: JObject (required)
   ##                                        : Describes information for deploying a service package to a Service Fabric node.
-  var path_594649 = newJObject()
-  var query_594650 = newJObject()
-  var body_594651 = newJObject()
-  add(query_594650, "timeout", newJInt(timeout))
-  add(query_594650, "api-version", newJString(apiVersion))
-  add(path_594649, "nodeName", newJString(nodeName))
+  var path_568878 = newJObject()
+  var query_568879 = newJObject()
+  var body_568880 = newJObject()
+  add(query_568879, "timeout", newJInt(timeout))
+  add(query_568879, "api-version", newJString(apiVersion))
+  add(path_568878, "nodeName", newJString(nodeName))
   if DeployServicePackageToNodeDescription != nil:
-    body_594651 = DeployServicePackageToNodeDescription
-  result = call_594648.call(path_594649, query_594650, nil, nil, body_594651)
+    body_568880 = DeployServicePackageToNodeDescription
+  result = call_568877.call(path_568878, query_568879, nil, nil, body_568880)
 
-var deployedServicePackageToNode* = Call_DeployedServicePackageToNode_594640(
+var deployedServicePackageToNode* = Call_DeployedServicePackageToNode_568869(
     name: "deployedServicePackageToNode", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/DeployServicePackage",
-    validator: validate_DeployedServicePackageToNode_594641, base: "",
-    url: url_DeployedServicePackageToNode_594642,
+    validator: validate_DeployedServicePackageToNode_568870, base: "",
+    url: url_DeployedServicePackageToNode_568871,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedApplicationInfoList_594652 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedApplicationInfoList_594654(protocol: Scheme; host: string;
+  Call_GetDeployedApplicationInfoList_568881 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedApplicationInfoList_568883(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7083,7 +7083,7 @@ proc url_GetDeployedApplicationInfoList_594654(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedApplicationInfoList_594653(path: JsonNode;
+proc validate_GetDeployedApplicationInfoList_568882(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list of applications deployed on a Service Fabric node.
   ## 
@@ -7094,11 +7094,11 @@ proc validate_GetDeployedApplicationInfoList_594653(path: JsonNode;
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594655 = path.getOrDefault("nodeName")
-  valid_594655 = validateParameter(valid_594655, JString, required = true,
+  var valid_568884 = path.getOrDefault("nodeName")
+  valid_568884 = validateParameter(valid_568884, JString, required = true,
                                  default = nil)
-  if valid_594655 != nil:
-    section.add "nodeName", valid_594655
+  if valid_568884 != nil:
+    section.add "nodeName", valid_568884
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -7106,18 +7106,18 @@ proc validate_GetDeployedApplicationInfoList_594653(path: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594656 = query.getOrDefault("timeout")
-  valid_594656 = validateParameter(valid_594656, JInt, required = false,
+  var valid_568885 = query.getOrDefault("timeout")
+  valid_568885 = validateParameter(valid_568885, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594656 != nil:
-    section.add "timeout", valid_594656
+  if valid_568885 != nil:
+    section.add "timeout", valid_568885
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594657 = query.getOrDefault("api-version")
-  valid_594657 = validateParameter(valid_594657, JString, required = true,
+  var valid_568886 = query.getOrDefault("api-version")
+  valid_568886 = validateParameter(valid_568886, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594657 != nil:
-    section.add "api-version", valid_594657
+  if valid_568886 != nil:
+    section.add "api-version", valid_568886
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7126,20 +7126,20 @@ proc validate_GetDeployedApplicationInfoList_594653(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594658: Call_GetDeployedApplicationInfoList_594652; path: JsonNode;
+proc call*(call_568887: Call_GetDeployedApplicationInfoList_568881; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list of applications deployed on a Service Fabric node.
   ## 
-  let valid = call_594658.validator(path, query, header, formData, body)
-  let scheme = call_594658.pickScheme
+  let valid = call_568887.validator(path, query, header, formData, body)
+  let scheme = call_568887.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594658.url(scheme.get, call_594658.host, call_594658.base,
-                         call_594658.route, valid.getOrDefault("path"),
+  let url = call_568887.url(scheme.get, call_568887.host, call_568887.base,
+                         call_568887.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594658, url, valid)
+  result = hook(call_568887, url, valid)
 
-proc call*(call_594659: Call_GetDeployedApplicationInfoList_594652;
+proc call*(call_568888: Call_GetDeployedApplicationInfoList_568881;
           nodeName: string; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getDeployedApplicationInfoList
   ## Gets the list of applications deployed on a Service Fabric node.
@@ -7149,22 +7149,22 @@ proc call*(call_594659: Call_GetDeployedApplicationInfoList_594652;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   nodeName: string (required)
   ##           : The name of the node.
-  var path_594660 = newJObject()
-  var query_594661 = newJObject()
-  add(query_594661, "timeout", newJInt(timeout))
-  add(query_594661, "api-version", newJString(apiVersion))
-  add(path_594660, "nodeName", newJString(nodeName))
-  result = call_594659.call(path_594660, query_594661, nil, nil, nil)
+  var path_568889 = newJObject()
+  var query_568890 = newJObject()
+  add(query_568890, "timeout", newJInt(timeout))
+  add(query_568890, "api-version", newJString(apiVersion))
+  add(path_568889, "nodeName", newJString(nodeName))
+  result = call_568888.call(path_568889, query_568890, nil, nil, nil)
 
-var getDeployedApplicationInfoList* = Call_GetDeployedApplicationInfoList_594652(
+var getDeployedApplicationInfoList* = Call_GetDeployedApplicationInfoList_568881(
     name: "getDeployedApplicationInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications",
-    validator: validate_GetDeployedApplicationInfoList_594653, base: "",
-    url: url_GetDeployedApplicationInfoList_594654,
+    validator: validate_GetDeployedApplicationInfoList_568882, base: "",
+    url: url_GetDeployedApplicationInfoList_568883,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedApplicationInfo_594662 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedApplicationInfo_594664(protocol: Scheme; host: string;
+  Call_GetDeployedApplicationInfo_568891 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedApplicationInfo_568893(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7182,7 +7182,7 @@ proc url_GetDeployedApplicationInfo_594664(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedApplicationInfo_594663(path: JsonNode; query: JsonNode;
+proc validate_GetDeployedApplicationInfo_568892(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the information about an application deployed on a Service Fabric node.
   ## 
@@ -7195,16 +7195,16 @@ proc validate_GetDeployedApplicationInfo_594663(path: JsonNode; query: JsonNode;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594665 = path.getOrDefault("nodeName")
-  valid_594665 = validateParameter(valid_594665, JString, required = true,
+  var valid_568894 = path.getOrDefault("nodeName")
+  valid_568894 = validateParameter(valid_568894, JString, required = true,
                                  default = nil)
-  if valid_594665 != nil:
-    section.add "nodeName", valid_594665
-  var valid_594666 = path.getOrDefault("applicationId")
-  valid_594666 = validateParameter(valid_594666, JString, required = true,
+  if valid_568894 != nil:
+    section.add "nodeName", valid_568894
+  var valid_568895 = path.getOrDefault("applicationId")
+  valid_568895 = validateParameter(valid_568895, JString, required = true,
                                  default = nil)
-  if valid_594666 != nil:
-    section.add "applicationId", valid_594666
+  if valid_568895 != nil:
+    section.add "applicationId", valid_568895
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -7212,18 +7212,18 @@ proc validate_GetDeployedApplicationInfo_594663(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594667 = query.getOrDefault("timeout")
-  valid_594667 = validateParameter(valid_594667, JInt, required = false,
+  var valid_568896 = query.getOrDefault("timeout")
+  valid_568896 = validateParameter(valid_568896, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594667 != nil:
-    section.add "timeout", valid_594667
+  if valid_568896 != nil:
+    section.add "timeout", valid_568896
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594668 = query.getOrDefault("api-version")
-  valid_594668 = validateParameter(valid_594668, JString, required = true,
+  var valid_568897 = query.getOrDefault("api-version")
+  valid_568897 = validateParameter(valid_568897, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594668 != nil:
-    section.add "api-version", valid_594668
+  if valid_568897 != nil:
+    section.add "api-version", valid_568897
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7232,20 +7232,20 @@ proc validate_GetDeployedApplicationInfo_594663(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594669: Call_GetDeployedApplicationInfo_594662; path: JsonNode;
+proc call*(call_568898: Call_GetDeployedApplicationInfo_568891; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the information about an application deployed on a Service Fabric node.
   ## 
-  let valid = call_594669.validator(path, query, header, formData, body)
-  let scheme = call_594669.pickScheme
+  let valid = call_568898.validator(path, query, header, formData, body)
+  let scheme = call_568898.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594669.url(scheme.get, call_594669.host, call_594669.base,
-                         call_594669.route, valid.getOrDefault("path"),
+  let url = call_568898.url(scheme.get, call_568898.host, call_568898.base,
+                         call_568898.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594669, url, valid)
+  result = hook(call_568898, url, valid)
 
-proc call*(call_594670: Call_GetDeployedApplicationInfo_594662; nodeName: string;
+proc call*(call_568899: Call_GetDeployedApplicationInfo_568891; nodeName: string;
           applicationId: string; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getDeployedApplicationInfo
   ## Gets the information about an application deployed on a Service Fabric node.
@@ -7257,24 +7257,24 @@ proc call*(call_594670: Call_GetDeployedApplicationInfo_594662; nodeName: string
   ##           : The name of the node.
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594671 = newJObject()
-  var query_594672 = newJObject()
-  add(query_594672, "timeout", newJInt(timeout))
-  add(query_594672, "api-version", newJString(apiVersion))
-  add(path_594671, "nodeName", newJString(nodeName))
-  add(path_594671, "applicationId", newJString(applicationId))
-  result = call_594670.call(path_594671, query_594672, nil, nil, nil)
+  var path_568900 = newJObject()
+  var query_568901 = newJObject()
+  add(query_568901, "timeout", newJInt(timeout))
+  add(query_568901, "api-version", newJString(apiVersion))
+  add(path_568900, "nodeName", newJString(nodeName))
+  add(path_568900, "applicationId", newJString(applicationId))
+  result = call_568899.call(path_568900, query_568901, nil, nil, nil)
 
-var getDeployedApplicationInfo* = Call_GetDeployedApplicationInfo_594662(
+var getDeployedApplicationInfo* = Call_GetDeployedApplicationInfo_568891(
     name: "getDeployedApplicationInfo", meth: HttpMethod.HttpGet,
     host: "azure.local:19080",
     route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}",
-    validator: validate_GetDeployedApplicationInfo_594663, base: "",
-    url: url_GetDeployedApplicationInfo_594664,
+    validator: validate_GetDeployedApplicationInfo_568892, base: "",
+    url: url_GetDeployedApplicationInfo_568893,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedCodePackageInfoList_594673 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedCodePackageInfoList_594675(protocol: Scheme; host: string;
+  Call_GetDeployedCodePackageInfoList_568902 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedCodePackageInfoList_568904(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7293,7 +7293,7 @@ proc url_GetDeployedCodePackageInfoList_594675(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedCodePackageInfoList_594674(path: JsonNode;
+proc validate_GetDeployedCodePackageInfoList_568903(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list of code packages deployed on a Service Fabric node for the given application.
   ## 
@@ -7306,16 +7306,16 @@ proc validate_GetDeployedCodePackageInfoList_594674(path: JsonNode;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594676 = path.getOrDefault("nodeName")
-  valid_594676 = validateParameter(valid_594676, JString, required = true,
+  var valid_568905 = path.getOrDefault("nodeName")
+  valid_568905 = validateParameter(valid_568905, JString, required = true,
                                  default = nil)
-  if valid_594676 != nil:
-    section.add "nodeName", valid_594676
-  var valid_594677 = path.getOrDefault("applicationId")
-  valid_594677 = validateParameter(valid_594677, JString, required = true,
+  if valid_568905 != nil:
+    section.add "nodeName", valid_568905
+  var valid_568906 = path.getOrDefault("applicationId")
+  valid_568906 = validateParameter(valid_568906, JString, required = true,
                                  default = nil)
-  if valid_594677 != nil:
-    section.add "applicationId", valid_594677
+  if valid_568906 != nil:
+    section.add "applicationId", valid_568906
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -7327,28 +7327,28 @@ proc validate_GetDeployedCodePackageInfoList_594674(path: JsonNode;
   ##   CodePackageName: JString
   ##                  : The name of code package specified in service manifest registered as part of an application type in a Service Fabric cluster.
   section = newJObject()
-  var valid_594678 = query.getOrDefault("timeout")
-  valid_594678 = validateParameter(valid_594678, JInt, required = false,
+  var valid_568907 = query.getOrDefault("timeout")
+  valid_568907 = validateParameter(valid_568907, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594678 != nil:
-    section.add "timeout", valid_594678
+  if valid_568907 != nil:
+    section.add "timeout", valid_568907
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594679 = query.getOrDefault("api-version")
-  valid_594679 = validateParameter(valid_594679, JString, required = true,
+  var valid_568908 = query.getOrDefault("api-version")
+  valid_568908 = validateParameter(valid_568908, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594679 != nil:
-    section.add "api-version", valid_594679
-  var valid_594680 = query.getOrDefault("ServiceManifestName")
-  valid_594680 = validateParameter(valid_594680, JString, required = false,
+  if valid_568908 != nil:
+    section.add "api-version", valid_568908
+  var valid_568909 = query.getOrDefault("ServiceManifestName")
+  valid_568909 = validateParameter(valid_568909, JString, required = false,
                                  default = nil)
-  if valid_594680 != nil:
-    section.add "ServiceManifestName", valid_594680
-  var valid_594681 = query.getOrDefault("CodePackageName")
-  valid_594681 = validateParameter(valid_594681, JString, required = false,
+  if valid_568909 != nil:
+    section.add "ServiceManifestName", valid_568909
+  var valid_568910 = query.getOrDefault("CodePackageName")
+  valid_568910 = validateParameter(valid_568910, JString, required = false,
                                  default = nil)
-  if valid_594681 != nil:
-    section.add "CodePackageName", valid_594681
+  if valid_568910 != nil:
+    section.add "CodePackageName", valid_568910
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7357,20 +7357,20 @@ proc validate_GetDeployedCodePackageInfoList_594674(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594682: Call_GetDeployedCodePackageInfoList_594673; path: JsonNode;
+proc call*(call_568911: Call_GetDeployedCodePackageInfoList_568902; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list of code packages deployed on a Service Fabric node for the given application.
   ## 
-  let valid = call_594682.validator(path, query, header, formData, body)
-  let scheme = call_594682.pickScheme
+  let valid = call_568911.validator(path, query, header, formData, body)
+  let scheme = call_568911.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594682.url(scheme.get, call_594682.host, call_594682.base,
-                         call_594682.route, valid.getOrDefault("path"),
+  let url = call_568911.url(scheme.get, call_568911.host, call_568911.base,
+                         call_568911.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594682, url, valid)
+  result = hook(call_568911, url, valid)
 
-proc call*(call_594683: Call_GetDeployedCodePackageInfoList_594673;
+proc call*(call_568912: Call_GetDeployedCodePackageInfoList_568902;
           nodeName: string; applicationId: string; timeout: int = 60;
           apiVersion: string = "3.0"; ServiceManifestName: string = "";
           CodePackageName: string = ""): Recallable =
@@ -7388,25 +7388,25 @@ proc call*(call_594683: Call_GetDeployedCodePackageInfoList_594673;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   CodePackageName: string
   ##                  : The name of code package specified in service manifest registered as part of an application type in a Service Fabric cluster.
-  var path_594684 = newJObject()
-  var query_594685 = newJObject()
-  add(query_594685, "timeout", newJInt(timeout))
-  add(query_594685, "api-version", newJString(apiVersion))
-  add(path_594684, "nodeName", newJString(nodeName))
-  add(query_594685, "ServiceManifestName", newJString(ServiceManifestName))
-  add(path_594684, "applicationId", newJString(applicationId))
-  add(query_594685, "CodePackageName", newJString(CodePackageName))
-  result = call_594683.call(path_594684, query_594685, nil, nil, nil)
+  var path_568913 = newJObject()
+  var query_568914 = newJObject()
+  add(query_568914, "timeout", newJInt(timeout))
+  add(query_568914, "api-version", newJString(apiVersion))
+  add(path_568913, "nodeName", newJString(nodeName))
+  add(query_568914, "ServiceManifestName", newJString(ServiceManifestName))
+  add(path_568913, "applicationId", newJString(applicationId))
+  add(query_568914, "CodePackageName", newJString(CodePackageName))
+  result = call_568912.call(path_568913, query_568914, nil, nil, nil)
 
-var getDeployedCodePackageInfoList* = Call_GetDeployedCodePackageInfoList_594673(
+var getDeployedCodePackageInfoList* = Call_GetDeployedCodePackageInfoList_568902(
     name: "getDeployedCodePackageInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetCodePackages",
-    validator: validate_GetDeployedCodePackageInfoList_594674, base: "",
-    url: url_GetDeployedCodePackageInfoList_594675,
+    validator: validate_GetDeployedCodePackageInfoList_568903, base: "",
+    url: url_GetDeployedCodePackageInfoList_568904,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RestartDeployedCodePackage_594686 = ref object of OpenApiRestCall_593437
-proc url_RestartDeployedCodePackage_594688(protocol: Scheme; host: string;
+  Call_RestartDeployedCodePackage_568915 = ref object of OpenApiRestCall_567666
+proc url_RestartDeployedCodePackage_568917(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7425,7 +7425,7 @@ proc url_RestartDeployedCodePackage_594688(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RestartDeployedCodePackage_594687(path: JsonNode; query: JsonNode;
+proc validate_RestartDeployedCodePackage_568916(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Restarts a code package deployed on a Service Fabric node in a cluster. This aborts the code package process, which will restart all the user service replicas hosted in that process.
   ## 
@@ -7438,16 +7438,16 @@ proc validate_RestartDeployedCodePackage_594687(path: JsonNode; query: JsonNode;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594689 = path.getOrDefault("nodeName")
-  valid_594689 = validateParameter(valid_594689, JString, required = true,
+  var valid_568918 = path.getOrDefault("nodeName")
+  valid_568918 = validateParameter(valid_568918, JString, required = true,
                                  default = nil)
-  if valid_594689 != nil:
-    section.add "nodeName", valid_594689
-  var valid_594690 = path.getOrDefault("applicationId")
-  valid_594690 = validateParameter(valid_594690, JString, required = true,
+  if valid_568918 != nil:
+    section.add "nodeName", valid_568918
+  var valid_568919 = path.getOrDefault("applicationId")
+  valid_568919 = validateParameter(valid_568919, JString, required = true,
                                  default = nil)
-  if valid_594690 != nil:
-    section.add "applicationId", valid_594690
+  if valid_568919 != nil:
+    section.add "applicationId", valid_568919
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -7455,18 +7455,18 @@ proc validate_RestartDeployedCodePackage_594687(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594691 = query.getOrDefault("timeout")
-  valid_594691 = validateParameter(valid_594691, JInt, required = false,
+  var valid_568920 = query.getOrDefault("timeout")
+  valid_568920 = validateParameter(valid_568920, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594691 != nil:
-    section.add "timeout", valid_594691
+  if valid_568920 != nil:
+    section.add "timeout", valid_568920
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594692 = query.getOrDefault("api-version")
-  valid_594692 = validateParameter(valid_594692, JString, required = true,
+  var valid_568921 = query.getOrDefault("api-version")
+  valid_568921 = validateParameter(valid_568921, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594692 != nil:
-    section.add "api-version", valid_594692
+  if valid_568921 != nil:
+    section.add "api-version", valid_568921
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7480,20 +7480,20 @@ proc validate_RestartDeployedCodePackage_594687(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594694: Call_RestartDeployedCodePackage_594686; path: JsonNode;
+proc call*(call_568923: Call_RestartDeployedCodePackage_568915; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restarts a code package deployed on a Service Fabric node in a cluster. This aborts the code package process, which will restart all the user service replicas hosted in that process.
   ## 
-  let valid = call_594694.validator(path, query, header, formData, body)
-  let scheme = call_594694.pickScheme
+  let valid = call_568923.validator(path, query, header, formData, body)
+  let scheme = call_568923.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594694.url(scheme.get, call_594694.host, call_594694.base,
-                         call_594694.route, valid.getOrDefault("path"),
+  let url = call_568923.url(scheme.get, call_568923.host, call_568923.base,
+                         call_568923.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594694, url, valid)
+  result = hook(call_568923, url, valid)
 
-proc call*(call_594695: Call_RestartDeployedCodePackage_594686; nodeName: string;
+proc call*(call_568924: Call_RestartDeployedCodePackage_568915; nodeName: string;
           applicationId: string; RestartDeployedCodePackageDescription: JsonNode;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## restartDeployedCodePackage
@@ -7508,26 +7508,26 @@ proc call*(call_594695: Call_RestartDeployedCodePackage_594686; nodeName: string
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   RestartDeployedCodePackageDescription: JObject (required)
   ##                                        : Describes the deployed code package on Service Fabric node to restart.
-  var path_594696 = newJObject()
-  var query_594697 = newJObject()
-  var body_594698 = newJObject()
-  add(query_594697, "timeout", newJInt(timeout))
-  add(query_594697, "api-version", newJString(apiVersion))
-  add(path_594696, "nodeName", newJString(nodeName))
-  add(path_594696, "applicationId", newJString(applicationId))
+  var path_568925 = newJObject()
+  var query_568926 = newJObject()
+  var body_568927 = newJObject()
+  add(query_568926, "timeout", newJInt(timeout))
+  add(query_568926, "api-version", newJString(apiVersion))
+  add(path_568925, "nodeName", newJString(nodeName))
+  add(path_568925, "applicationId", newJString(applicationId))
   if RestartDeployedCodePackageDescription != nil:
-    body_594698 = RestartDeployedCodePackageDescription
-  result = call_594695.call(path_594696, query_594697, nil, nil, body_594698)
+    body_568927 = RestartDeployedCodePackageDescription
+  result = call_568924.call(path_568925, query_568926, nil, nil, body_568927)
 
-var restartDeployedCodePackage* = Call_RestartDeployedCodePackage_594686(
+var restartDeployedCodePackage* = Call_RestartDeployedCodePackage_568915(
     name: "restartDeployedCodePackage", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetCodePackages/$/Restart",
-    validator: validate_RestartDeployedCodePackage_594687, base: "",
-    url: url_RestartDeployedCodePackage_594688,
+    validator: validate_RestartDeployedCodePackage_568916, base: "",
+    url: url_RestartDeployedCodePackage_568917,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedApplicationHealthUsingPolicy_594712 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedApplicationHealthUsingPolicy_594714(protocol: Scheme;
+  Call_GetDeployedApplicationHealthUsingPolicy_568941 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedApplicationHealthUsingPolicy_568943(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7546,7 +7546,7 @@ proc url_GetDeployedApplicationHealthUsingPolicy_594714(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedApplicationHealthUsingPolicy_594713(path: JsonNode;
+proc validate_GetDeployedApplicationHealthUsingPolicy_568942(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the information about health of an application deployed on a Service Fabric node using the specified policy. Use EventsHealthStateFilter to optionally filter for the collection of HealthEvent objects reported on the deployed application based on health state. Use DeployedServicePackagesHealthStateFilter to optionally filter for DeployedServicePackageHealth children based on health state. Use ApplicationHealthPolicy to optionally override the health policies used to evaluate the health. This API only uses 'ConsiderWarningAsError' field of the ApplicationHealthPolicy. The rest of the fields are ignored while evaluating the health of the deployed application.
   ## 
@@ -7560,16 +7560,16 @@ proc validate_GetDeployedApplicationHealthUsingPolicy_594713(path: JsonNode;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594715 = path.getOrDefault("nodeName")
-  valid_594715 = validateParameter(valid_594715, JString, required = true,
+  var valid_568944 = path.getOrDefault("nodeName")
+  valid_568944 = validateParameter(valid_568944, JString, required = true,
                                  default = nil)
-  if valid_594715 != nil:
-    section.add "nodeName", valid_594715
-  var valid_594716 = path.getOrDefault("applicationId")
-  valid_594716 = validateParameter(valid_594716, JString, required = true,
+  if valid_568944 != nil:
+    section.add "nodeName", valid_568944
+  var valid_568945 = path.getOrDefault("applicationId")
+  valid_568945 = validateParameter(valid_568945, JString, required = true,
                                  default = nil)
-  if valid_594716 != nil:
-    section.add "applicationId", valid_594716
+  if valid_568945 != nil:
+    section.add "applicationId", valid_568945
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -7605,28 +7605,28 @@ proc validate_GetDeployedApplicationHealthUsingPolicy_594713(path: JsonNode;
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594717 = query.getOrDefault("timeout")
-  valid_594717 = validateParameter(valid_594717, JInt, required = false,
+  var valid_568946 = query.getOrDefault("timeout")
+  valid_568946 = validateParameter(valid_568946, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594717 != nil:
-    section.add "timeout", valid_594717
+  if valid_568946 != nil:
+    section.add "timeout", valid_568946
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594718 = query.getOrDefault("api-version")
-  valid_594718 = validateParameter(valid_594718, JString, required = true,
+  var valid_568947 = query.getOrDefault("api-version")
+  valid_568947 = validateParameter(valid_568947, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594718 != nil:
-    section.add "api-version", valid_594718
-  var valid_594719 = query.getOrDefault("DeployedServicePackagesHealthStateFilter")
-  valid_594719 = validateParameter(valid_594719, JInt, required = false,
+  if valid_568947 != nil:
+    section.add "api-version", valid_568947
+  var valid_568948 = query.getOrDefault("DeployedServicePackagesHealthStateFilter")
+  valid_568948 = validateParameter(valid_568948, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594719 != nil:
-    section.add "DeployedServicePackagesHealthStateFilter", valid_594719
-  var valid_594720 = query.getOrDefault("EventsHealthStateFilter")
-  valid_594720 = validateParameter(valid_594720, JInt, required = false,
+  if valid_568948 != nil:
+    section.add "DeployedServicePackagesHealthStateFilter", valid_568948
+  var valid_568949 = query.getOrDefault("EventsHealthStateFilter")
+  valid_568949 = validateParameter(valid_568949, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594720 != nil:
-    section.add "EventsHealthStateFilter", valid_594720
+  if valid_568949 != nil:
+    section.add "EventsHealthStateFilter", valid_568949
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7641,22 +7641,22 @@ proc validate_GetDeployedApplicationHealthUsingPolicy_594713(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594722: Call_GetDeployedApplicationHealthUsingPolicy_594712;
+proc call*(call_568951: Call_GetDeployedApplicationHealthUsingPolicy_568941;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the information about health of an application deployed on a Service Fabric node using the specified policy. Use EventsHealthStateFilter to optionally filter for the collection of HealthEvent objects reported on the deployed application based on health state. Use DeployedServicePackagesHealthStateFilter to optionally filter for DeployedServicePackageHealth children based on health state. Use ApplicationHealthPolicy to optionally override the health policies used to evaluate the health. This API only uses 'ConsiderWarningAsError' field of the ApplicationHealthPolicy. The rest of the fields are ignored while evaluating the health of the deployed application.
   ## 
   ## 
-  let valid = call_594722.validator(path, query, header, formData, body)
-  let scheme = call_594722.pickScheme
+  let valid = call_568951.validator(path, query, header, formData, body)
+  let scheme = call_568951.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594722.url(scheme.get, call_594722.host, call_594722.base,
-                         call_594722.route, valid.getOrDefault("path"),
+  let url = call_568951.url(scheme.get, call_568951.host, call_568951.base,
+                         call_568951.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594722, url, valid)
+  result = hook(call_568951, url, valid)
 
-proc call*(call_594723: Call_GetDeployedApplicationHealthUsingPolicy_594712;
+proc call*(call_568952: Call_GetDeployedApplicationHealthUsingPolicy_568941;
           nodeName: string; applicationId: string; timeout: int = 60;
           apiVersion: string = "3.0"; ApplicationHealthPolicy: JsonNode = nil;
           DeployedServicePackagesHealthStateFilter: int = 0;
@@ -7704,30 +7704,30 @@ proc call*(call_594723: Call_GetDeployedApplicationHealthUsingPolicy_594712;
   ## 
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594724 = newJObject()
-  var query_594725 = newJObject()
-  var body_594726 = newJObject()
-  add(query_594725, "timeout", newJInt(timeout))
-  add(query_594725, "api-version", newJString(apiVersion))
-  add(path_594724, "nodeName", newJString(nodeName))
+  var path_568953 = newJObject()
+  var query_568954 = newJObject()
+  var body_568955 = newJObject()
+  add(query_568954, "timeout", newJInt(timeout))
+  add(query_568954, "api-version", newJString(apiVersion))
+  add(path_568953, "nodeName", newJString(nodeName))
   if ApplicationHealthPolicy != nil:
-    body_594726 = ApplicationHealthPolicy
-  add(query_594725, "DeployedServicePackagesHealthStateFilter",
+    body_568955 = ApplicationHealthPolicy
+  add(query_568954, "DeployedServicePackagesHealthStateFilter",
       newJInt(DeployedServicePackagesHealthStateFilter))
-  add(query_594725, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_594724, "applicationId", newJString(applicationId))
-  result = call_594723.call(path_594724, query_594725, nil, nil, body_594726)
+  add(query_568954, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_568953, "applicationId", newJString(applicationId))
+  result = call_568952.call(path_568953, query_568954, nil, nil, body_568955)
 
-var getDeployedApplicationHealthUsingPolicy* = Call_GetDeployedApplicationHealthUsingPolicy_594712(
+var getDeployedApplicationHealthUsingPolicy* = Call_GetDeployedApplicationHealthUsingPolicy_568941(
     name: "getDeployedApplicationHealthUsingPolicy", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetHealth",
-    validator: validate_GetDeployedApplicationHealthUsingPolicy_594713, base: "",
-    url: url_GetDeployedApplicationHealthUsingPolicy_594714,
+    validator: validate_GetDeployedApplicationHealthUsingPolicy_568942, base: "",
+    url: url_GetDeployedApplicationHealthUsingPolicy_568943,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedApplicationHealth_594699 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedApplicationHealth_594701(protocol: Scheme; host: string;
+  Call_GetDeployedApplicationHealth_568928 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedApplicationHealth_568930(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7746,7 +7746,7 @@ proc url_GetDeployedApplicationHealth_594701(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedApplicationHealth_594700(path: JsonNode; query: JsonNode;
+proc validate_GetDeployedApplicationHealth_568929(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the information about health of an application deployed on a Service Fabric node. Use EventsHealthStateFilter to optionally filter for the collection of HealthEvent objects reported on the deployed application based on health state. Use DeployedServicePackagesHealthStateFilter to optionally filter for DeployedServicePackageHealth children based on health state.
   ## 
@@ -7759,16 +7759,16 @@ proc validate_GetDeployedApplicationHealth_594700(path: JsonNode; query: JsonNod
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594702 = path.getOrDefault("nodeName")
-  valid_594702 = validateParameter(valid_594702, JString, required = true,
+  var valid_568931 = path.getOrDefault("nodeName")
+  valid_568931 = validateParameter(valid_568931, JString, required = true,
                                  default = nil)
-  if valid_594702 != nil:
-    section.add "nodeName", valid_594702
-  var valid_594703 = path.getOrDefault("applicationId")
-  valid_594703 = validateParameter(valid_594703, JString, required = true,
+  if valid_568931 != nil:
+    section.add "nodeName", valid_568931
+  var valid_568932 = path.getOrDefault("applicationId")
+  valid_568932 = validateParameter(valid_568932, JString, required = true,
                                  default = nil)
-  if valid_594703 != nil:
-    section.add "applicationId", valid_594703
+  if valid_568932 != nil:
+    section.add "applicationId", valid_568932
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -7804,28 +7804,28 @@ proc validate_GetDeployedApplicationHealth_594700(path: JsonNode; query: JsonNod
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594704 = query.getOrDefault("timeout")
-  valid_594704 = validateParameter(valid_594704, JInt, required = false,
+  var valid_568933 = query.getOrDefault("timeout")
+  valid_568933 = validateParameter(valid_568933, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594704 != nil:
-    section.add "timeout", valid_594704
+  if valid_568933 != nil:
+    section.add "timeout", valid_568933
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594705 = query.getOrDefault("api-version")
-  valid_594705 = validateParameter(valid_594705, JString, required = true,
+  var valid_568934 = query.getOrDefault("api-version")
+  valid_568934 = validateParameter(valid_568934, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594705 != nil:
-    section.add "api-version", valid_594705
-  var valid_594706 = query.getOrDefault("DeployedServicePackagesHealthStateFilter")
-  valid_594706 = validateParameter(valid_594706, JInt, required = false,
+  if valid_568934 != nil:
+    section.add "api-version", valid_568934
+  var valid_568935 = query.getOrDefault("DeployedServicePackagesHealthStateFilter")
+  valid_568935 = validateParameter(valid_568935, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594706 != nil:
-    section.add "DeployedServicePackagesHealthStateFilter", valid_594706
-  var valid_594707 = query.getOrDefault("EventsHealthStateFilter")
-  valid_594707 = validateParameter(valid_594707, JInt, required = false,
+  if valid_568935 != nil:
+    section.add "DeployedServicePackagesHealthStateFilter", valid_568935
+  var valid_568936 = query.getOrDefault("EventsHealthStateFilter")
+  valid_568936 = validateParameter(valid_568936, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594707 != nil:
-    section.add "EventsHealthStateFilter", valid_594707
+  if valid_568936 != nil:
+    section.add "EventsHealthStateFilter", valid_568936
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7834,20 +7834,20 @@ proc validate_GetDeployedApplicationHealth_594700(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594708: Call_GetDeployedApplicationHealth_594699; path: JsonNode;
+proc call*(call_568937: Call_GetDeployedApplicationHealth_568928; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the information about health of an application deployed on a Service Fabric node. Use EventsHealthStateFilter to optionally filter for the collection of HealthEvent objects reported on the deployed application based on health state. Use DeployedServicePackagesHealthStateFilter to optionally filter for DeployedServicePackageHealth children based on health state.
   ## 
-  let valid = call_594708.validator(path, query, header, formData, body)
-  let scheme = call_594708.pickScheme
+  let valid = call_568937.validator(path, query, header, formData, body)
+  let scheme = call_568937.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594708.url(scheme.get, call_594708.host, call_594708.base,
-                         call_594708.route, valid.getOrDefault("path"),
+  let url = call_568937.url(scheme.get, call_568937.host, call_568937.base,
+                         call_568937.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594708, url, valid)
+  result = hook(call_568937, url, valid)
 
-proc call*(call_594709: Call_GetDeployedApplicationHealth_594699; nodeName: string;
+proc call*(call_568938: Call_GetDeployedApplicationHealth_568928; nodeName: string;
           applicationId: string; timeout: int = 60; apiVersion: string = "3.0";
           DeployedServicePackagesHealthStateFilter: int = 0;
           EventsHealthStateFilter: int = 0): Recallable =
@@ -7889,27 +7889,27 @@ proc call*(call_594709: Call_GetDeployedApplicationHealth_594699; nodeName: stri
   ## 
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594710 = newJObject()
-  var query_594711 = newJObject()
-  add(query_594711, "timeout", newJInt(timeout))
-  add(query_594711, "api-version", newJString(apiVersion))
-  add(path_594710, "nodeName", newJString(nodeName))
-  add(query_594711, "DeployedServicePackagesHealthStateFilter",
+  var path_568939 = newJObject()
+  var query_568940 = newJObject()
+  add(query_568940, "timeout", newJInt(timeout))
+  add(query_568940, "api-version", newJString(apiVersion))
+  add(path_568939, "nodeName", newJString(nodeName))
+  add(query_568940, "DeployedServicePackagesHealthStateFilter",
       newJInt(DeployedServicePackagesHealthStateFilter))
-  add(query_594711, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_594710, "applicationId", newJString(applicationId))
-  result = call_594709.call(path_594710, query_594711, nil, nil, nil)
+  add(query_568940, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_568939, "applicationId", newJString(applicationId))
+  result = call_568938.call(path_568939, query_568940, nil, nil, nil)
 
-var getDeployedApplicationHealth* = Call_GetDeployedApplicationHealth_594699(
+var getDeployedApplicationHealth* = Call_GetDeployedApplicationHealth_568928(
     name: "getDeployedApplicationHealth", meth: HttpMethod.HttpGet,
     host: "azure.local:19080",
     route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetHealth",
-    validator: validate_GetDeployedApplicationHealth_594700, base: "",
-    url: url_GetDeployedApplicationHealth_594701,
+    validator: validate_GetDeployedApplicationHealth_568929, base: "",
+    url: url_GetDeployedApplicationHealth_568930,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedServiceReplicaInfoList_594727 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedServiceReplicaInfoList_594729(protocol: Scheme; host: string;
+  Call_GetDeployedServiceReplicaInfoList_568956 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedServiceReplicaInfoList_568958(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7928,7 +7928,7 @@ proc url_GetDeployedServiceReplicaInfoList_594729(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedServiceReplicaInfoList_594728(path: JsonNode;
+proc validate_GetDeployedServiceReplicaInfoList_568957(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list containing the information about replicas deployed on a Service Fabric node. The information include partition id, replica id, status of the replica, name of the service, name of the service type and other information. Use PartitionId or ServiceManifestName query parameters to return information about the deployed replicas matching the specified values for those parameters.
   ## 
@@ -7941,16 +7941,16 @@ proc validate_GetDeployedServiceReplicaInfoList_594728(path: JsonNode;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594730 = path.getOrDefault("nodeName")
-  valid_594730 = validateParameter(valid_594730, JString, required = true,
+  var valid_568959 = path.getOrDefault("nodeName")
+  valid_568959 = validateParameter(valid_568959, JString, required = true,
                                  default = nil)
-  if valid_594730 != nil:
-    section.add "nodeName", valid_594730
-  var valid_594731 = path.getOrDefault("applicationId")
-  valid_594731 = validateParameter(valid_594731, JString, required = true,
+  if valid_568959 != nil:
+    section.add "nodeName", valid_568959
+  var valid_568960 = path.getOrDefault("applicationId")
+  valid_568960 = validateParameter(valid_568960, JString, required = true,
                                  default = nil)
-  if valid_594731 != nil:
-    section.add "applicationId", valid_594731
+  if valid_568960 != nil:
+    section.add "applicationId", valid_568960
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -7962,28 +7962,28 @@ proc validate_GetDeployedServiceReplicaInfoList_594728(path: JsonNode;
   ##   PartitionId: JString
   ##              : The identity of the partition.
   section = newJObject()
-  var valid_594732 = query.getOrDefault("timeout")
-  valid_594732 = validateParameter(valid_594732, JInt, required = false,
+  var valid_568961 = query.getOrDefault("timeout")
+  valid_568961 = validateParameter(valid_568961, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594732 != nil:
-    section.add "timeout", valid_594732
+  if valid_568961 != nil:
+    section.add "timeout", valid_568961
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594733 = query.getOrDefault("api-version")
-  valid_594733 = validateParameter(valid_594733, JString, required = true,
+  var valid_568962 = query.getOrDefault("api-version")
+  valid_568962 = validateParameter(valid_568962, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594733 != nil:
-    section.add "api-version", valid_594733
-  var valid_594734 = query.getOrDefault("ServiceManifestName")
-  valid_594734 = validateParameter(valid_594734, JString, required = false,
+  if valid_568962 != nil:
+    section.add "api-version", valid_568962
+  var valid_568963 = query.getOrDefault("ServiceManifestName")
+  valid_568963 = validateParameter(valid_568963, JString, required = false,
                                  default = nil)
-  if valid_594734 != nil:
-    section.add "ServiceManifestName", valid_594734
-  var valid_594735 = query.getOrDefault("PartitionId")
-  valid_594735 = validateParameter(valid_594735, JString, required = false,
+  if valid_568963 != nil:
+    section.add "ServiceManifestName", valid_568963
+  var valid_568964 = query.getOrDefault("PartitionId")
+  valid_568964 = validateParameter(valid_568964, JString, required = false,
                                  default = nil)
-  if valid_594735 != nil:
-    section.add "PartitionId", valid_594735
+  if valid_568964 != nil:
+    section.add "PartitionId", valid_568964
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7992,21 +7992,21 @@ proc validate_GetDeployedServiceReplicaInfoList_594728(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594736: Call_GetDeployedServiceReplicaInfoList_594727;
+proc call*(call_568965: Call_GetDeployedServiceReplicaInfoList_568956;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the list containing the information about replicas deployed on a Service Fabric node. The information include partition id, replica id, status of the replica, name of the service, name of the service type and other information. Use PartitionId or ServiceManifestName query parameters to return information about the deployed replicas matching the specified values for those parameters.
   ## 
-  let valid = call_594736.validator(path, query, header, formData, body)
-  let scheme = call_594736.pickScheme
+  let valid = call_568965.validator(path, query, header, formData, body)
+  let scheme = call_568965.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594736.url(scheme.get, call_594736.host, call_594736.base,
-                         call_594736.route, valid.getOrDefault("path"),
+  let url = call_568965.url(scheme.get, call_568965.host, call_568965.base,
+                         call_568965.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594736, url, valid)
+  result = hook(call_568965, url, valid)
 
-proc call*(call_594737: Call_GetDeployedServiceReplicaInfoList_594727;
+proc call*(call_568966: Call_GetDeployedServiceReplicaInfoList_568956;
           nodeName: string; applicationId: string; timeout: int = 60;
           apiVersion: string = "3.0"; ServiceManifestName: string = "";
           PartitionId: string = ""): Recallable =
@@ -8024,26 +8024,26 @@ proc call*(call_594737: Call_GetDeployedServiceReplicaInfoList_594727;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   PartitionId: string
   ##              : The identity of the partition.
-  var path_594738 = newJObject()
-  var query_594739 = newJObject()
-  add(query_594739, "timeout", newJInt(timeout))
-  add(query_594739, "api-version", newJString(apiVersion))
-  add(path_594738, "nodeName", newJString(nodeName))
-  add(query_594739, "ServiceManifestName", newJString(ServiceManifestName))
-  add(path_594738, "applicationId", newJString(applicationId))
-  add(query_594739, "PartitionId", newJString(PartitionId))
-  result = call_594737.call(path_594738, query_594739, nil, nil, nil)
+  var path_568967 = newJObject()
+  var query_568968 = newJObject()
+  add(query_568968, "timeout", newJInt(timeout))
+  add(query_568968, "api-version", newJString(apiVersion))
+  add(path_568967, "nodeName", newJString(nodeName))
+  add(query_568968, "ServiceManifestName", newJString(ServiceManifestName))
+  add(path_568967, "applicationId", newJString(applicationId))
+  add(query_568968, "PartitionId", newJString(PartitionId))
+  result = call_568966.call(path_568967, query_568968, nil, nil, nil)
 
-var getDeployedServiceReplicaInfoList* = Call_GetDeployedServiceReplicaInfoList_594727(
+var getDeployedServiceReplicaInfoList* = Call_GetDeployedServiceReplicaInfoList_568956(
     name: "getDeployedServiceReplicaInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080",
     route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetReplicas",
-    validator: validate_GetDeployedServiceReplicaInfoList_594728, base: "",
-    url: url_GetDeployedServiceReplicaInfoList_594729,
+    validator: validate_GetDeployedServiceReplicaInfoList_568957, base: "",
+    url: url_GetDeployedServiceReplicaInfoList_568958,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedServicePackageInfoList_594740 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedServicePackageInfoList_594742(protocol: Scheme; host: string;
+  Call_GetDeployedServicePackageInfoList_568969 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedServicePackageInfoList_568971(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8062,7 +8062,7 @@ proc url_GetDeployedServicePackageInfoList_594742(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedServicePackageInfoList_594741(path: JsonNode;
+proc validate_GetDeployedServicePackageInfoList_568970(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the information about the service packages deployed on a Service Fabric node for the given application.
   ## 
@@ -8075,16 +8075,16 @@ proc validate_GetDeployedServicePackageInfoList_594741(path: JsonNode;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594743 = path.getOrDefault("nodeName")
-  valid_594743 = validateParameter(valid_594743, JString, required = true,
+  var valid_568972 = path.getOrDefault("nodeName")
+  valid_568972 = validateParameter(valid_568972, JString, required = true,
                                  default = nil)
-  if valid_594743 != nil:
-    section.add "nodeName", valid_594743
-  var valid_594744 = path.getOrDefault("applicationId")
-  valid_594744 = validateParameter(valid_594744, JString, required = true,
+  if valid_568972 != nil:
+    section.add "nodeName", valid_568972
+  var valid_568973 = path.getOrDefault("applicationId")
+  valid_568973 = validateParameter(valid_568973, JString, required = true,
                                  default = nil)
-  if valid_594744 != nil:
-    section.add "applicationId", valid_594744
+  if valid_568973 != nil:
+    section.add "applicationId", valid_568973
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -8092,18 +8092,18 @@ proc validate_GetDeployedServicePackageInfoList_594741(path: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594745 = query.getOrDefault("timeout")
-  valid_594745 = validateParameter(valid_594745, JInt, required = false,
+  var valid_568974 = query.getOrDefault("timeout")
+  valid_568974 = validateParameter(valid_568974, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594745 != nil:
-    section.add "timeout", valid_594745
+  if valid_568974 != nil:
+    section.add "timeout", valid_568974
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594746 = query.getOrDefault("api-version")
-  valid_594746 = validateParameter(valid_594746, JString, required = true,
+  var valid_568975 = query.getOrDefault("api-version")
+  valid_568975 = validateParameter(valid_568975, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594746 != nil:
-    section.add "api-version", valid_594746
+  if valid_568975 != nil:
+    section.add "api-version", valid_568975
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8112,21 +8112,21 @@ proc validate_GetDeployedServicePackageInfoList_594741(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594747: Call_GetDeployedServicePackageInfoList_594740;
+proc call*(call_568976: Call_GetDeployedServicePackageInfoList_568969;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns the information about the service packages deployed on a Service Fabric node for the given application.
   ## 
-  let valid = call_594747.validator(path, query, header, formData, body)
-  let scheme = call_594747.pickScheme
+  let valid = call_568976.validator(path, query, header, formData, body)
+  let scheme = call_568976.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594747.url(scheme.get, call_594747.host, call_594747.base,
-                         call_594747.route, valid.getOrDefault("path"),
+  let url = call_568976.url(scheme.get, call_568976.host, call_568976.base,
+                         call_568976.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594747, url, valid)
+  result = hook(call_568976, url, valid)
 
-proc call*(call_594748: Call_GetDeployedServicePackageInfoList_594740;
+proc call*(call_568977: Call_GetDeployedServicePackageInfoList_568969;
           nodeName: string; applicationId: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## getDeployedServicePackageInfoList
@@ -8139,23 +8139,23 @@ proc call*(call_594748: Call_GetDeployedServicePackageInfoList_594740;
   ##           : The name of the node.
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594749 = newJObject()
-  var query_594750 = newJObject()
-  add(query_594750, "timeout", newJInt(timeout))
-  add(query_594750, "api-version", newJString(apiVersion))
-  add(path_594749, "nodeName", newJString(nodeName))
-  add(path_594749, "applicationId", newJString(applicationId))
-  result = call_594748.call(path_594749, query_594750, nil, nil, nil)
+  var path_568978 = newJObject()
+  var query_568979 = newJObject()
+  add(query_568979, "timeout", newJInt(timeout))
+  add(query_568979, "api-version", newJString(apiVersion))
+  add(path_568978, "nodeName", newJString(nodeName))
+  add(path_568978, "applicationId", newJString(applicationId))
+  result = call_568977.call(path_568978, query_568979, nil, nil, nil)
 
-var getDeployedServicePackageInfoList* = Call_GetDeployedServicePackageInfoList_594740(
+var getDeployedServicePackageInfoList* = Call_GetDeployedServicePackageInfoList_568969(
     name: "getDeployedServicePackageInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetServicePackages",
-    validator: validate_GetDeployedServicePackageInfoList_594741, base: "",
-    url: url_GetDeployedServicePackageInfoList_594742,
+    validator: validate_GetDeployedServicePackageInfoList_568970, base: "",
+    url: url_GetDeployedServicePackageInfoList_568971,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedServicePackageInfoListByName_594751 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedServicePackageInfoListByName_594753(protocol: Scheme;
+  Call_GetDeployedServicePackageInfoListByName_568980 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedServicePackageInfoListByName_568982(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8177,7 +8177,7 @@ proc url_GetDeployedServicePackageInfoListByName_594753(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedServicePackageInfoListByName_594752(path: JsonNode;
+proc validate_GetDeployedServicePackageInfoListByName_568981(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the information about the service packages deployed on a Service Fabric node for the given application. These results are of service packages whose name match exactly the service package name specified as the parameter.
   ## 
@@ -8192,21 +8192,21 @@ proc validate_GetDeployedServicePackageInfoListByName_594752(path: JsonNode;
   ##                     : The name of the service package.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594754 = path.getOrDefault("nodeName")
-  valid_594754 = validateParameter(valid_594754, JString, required = true,
+  var valid_568983 = path.getOrDefault("nodeName")
+  valid_568983 = validateParameter(valid_568983, JString, required = true,
                                  default = nil)
-  if valid_594754 != nil:
-    section.add "nodeName", valid_594754
-  var valid_594755 = path.getOrDefault("applicationId")
-  valid_594755 = validateParameter(valid_594755, JString, required = true,
+  if valid_568983 != nil:
+    section.add "nodeName", valid_568983
+  var valid_568984 = path.getOrDefault("applicationId")
+  valid_568984 = validateParameter(valid_568984, JString, required = true,
                                  default = nil)
-  if valid_594755 != nil:
-    section.add "applicationId", valid_594755
-  var valid_594756 = path.getOrDefault("servicePackageName")
-  valid_594756 = validateParameter(valid_594756, JString, required = true,
+  if valid_568984 != nil:
+    section.add "applicationId", valid_568984
+  var valid_568985 = path.getOrDefault("servicePackageName")
+  valid_568985 = validateParameter(valid_568985, JString, required = true,
                                  default = nil)
-  if valid_594756 != nil:
-    section.add "servicePackageName", valid_594756
+  if valid_568985 != nil:
+    section.add "servicePackageName", valid_568985
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -8214,18 +8214,18 @@ proc validate_GetDeployedServicePackageInfoListByName_594752(path: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594757 = query.getOrDefault("timeout")
-  valid_594757 = validateParameter(valid_594757, JInt, required = false,
+  var valid_568986 = query.getOrDefault("timeout")
+  valid_568986 = validateParameter(valid_568986, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594757 != nil:
-    section.add "timeout", valid_594757
+  if valid_568986 != nil:
+    section.add "timeout", valid_568986
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594758 = query.getOrDefault("api-version")
-  valid_594758 = validateParameter(valid_594758, JString, required = true,
+  var valid_568987 = query.getOrDefault("api-version")
+  valid_568987 = validateParameter(valid_568987, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594758 != nil:
-    section.add "api-version", valid_594758
+  if valid_568987 != nil:
+    section.add "api-version", valid_568987
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8234,21 +8234,21 @@ proc validate_GetDeployedServicePackageInfoListByName_594752(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594759: Call_GetDeployedServicePackageInfoListByName_594751;
+proc call*(call_568988: Call_GetDeployedServicePackageInfoListByName_568980;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns the information about the service packages deployed on a Service Fabric node for the given application. These results are of service packages whose name match exactly the service package name specified as the parameter.
   ## 
-  let valid = call_594759.validator(path, query, header, formData, body)
-  let scheme = call_594759.pickScheme
+  let valid = call_568988.validator(path, query, header, formData, body)
+  let scheme = call_568988.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594759.url(scheme.get, call_594759.host, call_594759.base,
-                         call_594759.route, valid.getOrDefault("path"),
+  let url = call_568988.url(scheme.get, call_568988.host, call_568988.base,
+                         call_568988.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594759, url, valid)
+  result = hook(call_568988, url, valid)
 
-proc call*(call_594760: Call_GetDeployedServicePackageInfoListByName_594751;
+proc call*(call_568989: Call_GetDeployedServicePackageInfoListByName_568980;
           nodeName: string; applicationId: string; servicePackageName: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getDeployedServicePackageInfoListByName
@@ -8263,24 +8263,24 @@ proc call*(call_594760: Call_GetDeployedServicePackageInfoListByName_594751;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   servicePackageName: string (required)
   ##                     : The name of the service package.
-  var path_594761 = newJObject()
-  var query_594762 = newJObject()
-  add(query_594762, "timeout", newJInt(timeout))
-  add(query_594762, "api-version", newJString(apiVersion))
-  add(path_594761, "nodeName", newJString(nodeName))
-  add(path_594761, "applicationId", newJString(applicationId))
-  add(path_594761, "servicePackageName", newJString(servicePackageName))
-  result = call_594760.call(path_594761, query_594762, nil, nil, nil)
+  var path_568990 = newJObject()
+  var query_568991 = newJObject()
+  add(query_568991, "timeout", newJInt(timeout))
+  add(query_568991, "api-version", newJString(apiVersion))
+  add(path_568990, "nodeName", newJString(nodeName))
+  add(path_568990, "applicationId", newJString(applicationId))
+  add(path_568990, "servicePackageName", newJString(servicePackageName))
+  result = call_568989.call(path_568990, query_568991, nil, nil, nil)
 
-var getDeployedServicePackageInfoListByName* = Call_GetDeployedServicePackageInfoListByName_594751(
+var getDeployedServicePackageInfoListByName* = Call_GetDeployedServicePackageInfoListByName_568980(
     name: "getDeployedServicePackageInfoListByName", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetServicePackages/{servicePackageName}",
-    validator: validate_GetDeployedServicePackageInfoListByName_594752, base: "",
-    url: url_GetDeployedServicePackageInfoListByName_594753,
+    validator: validate_GetDeployedServicePackageInfoListByName_568981, base: "",
+    url: url_GetDeployedServicePackageInfoListByName_568982,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedServicePackageHealthUsingPolicy_594776 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedServicePackageHealthUsingPolicy_594778(protocol: Scheme;
+  Call_GetDeployedServicePackageHealthUsingPolicy_569005 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedServicePackageHealthUsingPolicy_569007(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8303,7 +8303,7 @@ proc url_GetDeployedServicePackageHealthUsingPolicy_594778(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedServicePackageHealthUsingPolicy_594777(path: JsonNode;
+proc validate_GetDeployedServicePackageHealthUsingPolicy_569006(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the information about health of an service package for a specific application deployed on a Service Fabric node. using the specified policy. Use EventsHealthStateFilter to optionally filter for the collection of HealthEvent objects reported on the deployed service package based on health state. Use ApplicationHealthPolicy to optionally override the health policies used to evaluate the health. This API only uses 'ConsiderWarningAsError' field of the ApplicationHealthPolicy. The rest of the fields are ignored while evaluating the health of the deployed service package.
   ## 
@@ -8319,21 +8319,21 @@ proc validate_GetDeployedServicePackageHealthUsingPolicy_594777(path: JsonNode;
   ##                     : The name of the service package.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594779 = path.getOrDefault("nodeName")
-  valid_594779 = validateParameter(valid_594779, JString, required = true,
+  var valid_569008 = path.getOrDefault("nodeName")
+  valid_569008 = validateParameter(valid_569008, JString, required = true,
                                  default = nil)
-  if valid_594779 != nil:
-    section.add "nodeName", valid_594779
-  var valid_594780 = path.getOrDefault("applicationId")
-  valid_594780 = validateParameter(valid_594780, JString, required = true,
+  if valid_569008 != nil:
+    section.add "nodeName", valid_569008
+  var valid_569009 = path.getOrDefault("applicationId")
+  valid_569009 = validateParameter(valid_569009, JString, required = true,
                                  default = nil)
-  if valid_594780 != nil:
-    section.add "applicationId", valid_594780
-  var valid_594781 = path.getOrDefault("servicePackageName")
-  valid_594781 = validateParameter(valid_594781, JString, required = true,
+  if valid_569009 != nil:
+    section.add "applicationId", valid_569009
+  var valid_569010 = path.getOrDefault("servicePackageName")
+  valid_569010 = validateParameter(valid_569010, JString, required = true,
                                  default = nil)
-  if valid_594781 != nil:
-    section.add "servicePackageName", valid_594781
+  if valid_569010 != nil:
+    section.add "servicePackageName", valid_569010
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -8354,23 +8354,23 @@ proc validate_GetDeployedServicePackageHealthUsingPolicy_594777(path: JsonNode;
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594782 = query.getOrDefault("timeout")
-  valid_594782 = validateParameter(valid_594782, JInt, required = false,
+  var valid_569011 = query.getOrDefault("timeout")
+  valid_569011 = validateParameter(valid_569011, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594782 != nil:
-    section.add "timeout", valid_594782
+  if valid_569011 != nil:
+    section.add "timeout", valid_569011
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594783 = query.getOrDefault("api-version")
-  valid_594783 = validateParameter(valid_594783, JString, required = true,
+  var valid_569012 = query.getOrDefault("api-version")
+  valid_569012 = validateParameter(valid_569012, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594783 != nil:
-    section.add "api-version", valid_594783
-  var valid_594784 = query.getOrDefault("EventsHealthStateFilter")
-  valid_594784 = validateParameter(valid_594784, JInt, required = false,
+  if valid_569012 != nil:
+    section.add "api-version", valid_569012
+  var valid_569013 = query.getOrDefault("EventsHealthStateFilter")
+  valid_569013 = validateParameter(valid_569013, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594784 != nil:
-    section.add "EventsHealthStateFilter", valid_594784
+  if valid_569013 != nil:
+    section.add "EventsHealthStateFilter", valid_569013
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8385,22 +8385,22 @@ proc validate_GetDeployedServicePackageHealthUsingPolicy_594777(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594786: Call_GetDeployedServicePackageHealthUsingPolicy_594776;
+proc call*(call_569015: Call_GetDeployedServicePackageHealthUsingPolicy_569005;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the information about health of an service package for a specific application deployed on a Service Fabric node. using the specified policy. Use EventsHealthStateFilter to optionally filter for the collection of HealthEvent objects reported on the deployed service package based on health state. Use ApplicationHealthPolicy to optionally override the health policies used to evaluate the health. This API only uses 'ConsiderWarningAsError' field of the ApplicationHealthPolicy. The rest of the fields are ignored while evaluating the health of the deployed service package.
   ## 
   ## 
-  let valid = call_594786.validator(path, query, header, formData, body)
-  let scheme = call_594786.pickScheme
+  let valid = call_569015.validator(path, query, header, formData, body)
+  let scheme = call_569015.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594786.url(scheme.get, call_594786.host, call_594786.base,
-                         call_594786.route, valid.getOrDefault("path"),
+  let url = call_569015.url(scheme.get, call_569015.host, call_569015.base,
+                         call_569015.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594786, url, valid)
+  result = hook(call_569015, url, valid)
 
-proc call*(call_594787: Call_GetDeployedServicePackageHealthUsingPolicy_594776;
+proc call*(call_569016: Call_GetDeployedServicePackageHealthUsingPolicy_569005;
           nodeName: string; applicationId: string; servicePackageName: string;
           timeout: int = 60; apiVersion: string = "3.0";
           ApplicationHealthPolicy: JsonNode = nil; EventsHealthStateFilter: int = 0): Recallable =
@@ -8434,28 +8434,28 @@ proc call*(call_594787: Call_GetDeployedServicePackageHealthUsingPolicy_594776;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   servicePackageName: string (required)
   ##                     : The name of the service package.
-  var path_594788 = newJObject()
-  var query_594789 = newJObject()
-  var body_594790 = newJObject()
-  add(query_594789, "timeout", newJInt(timeout))
-  add(query_594789, "api-version", newJString(apiVersion))
-  add(path_594788, "nodeName", newJString(nodeName))
+  var path_569017 = newJObject()
+  var query_569018 = newJObject()
+  var body_569019 = newJObject()
+  add(query_569018, "timeout", newJInt(timeout))
+  add(query_569018, "api-version", newJString(apiVersion))
+  add(path_569017, "nodeName", newJString(nodeName))
   if ApplicationHealthPolicy != nil:
-    body_594790 = ApplicationHealthPolicy
-  add(query_594789, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_594788, "applicationId", newJString(applicationId))
-  add(path_594788, "servicePackageName", newJString(servicePackageName))
-  result = call_594787.call(path_594788, query_594789, nil, nil, body_594790)
+    body_569019 = ApplicationHealthPolicy
+  add(query_569018, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_569017, "applicationId", newJString(applicationId))
+  add(path_569017, "servicePackageName", newJString(servicePackageName))
+  result = call_569016.call(path_569017, query_569018, nil, nil, body_569019)
 
-var getDeployedServicePackageHealthUsingPolicy* = Call_GetDeployedServicePackageHealthUsingPolicy_594776(
+var getDeployedServicePackageHealthUsingPolicy* = Call_GetDeployedServicePackageHealthUsingPolicy_569005(
     name: "getDeployedServicePackageHealthUsingPolicy", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetServicePackages/{servicePackageName}/$/GetHealth",
-    validator: validate_GetDeployedServicePackageHealthUsingPolicy_594777,
-    base: "", url: url_GetDeployedServicePackageHealthUsingPolicy_594778,
+    validator: validate_GetDeployedServicePackageHealthUsingPolicy_569006,
+    base: "", url: url_GetDeployedServicePackageHealthUsingPolicy_569007,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedServicePackageHealth_594763 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedServicePackageHealth_594765(protocol: Scheme; host: string;
+  Call_GetDeployedServicePackageHealth_568992 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedServicePackageHealth_568994(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8478,7 +8478,7 @@ proc url_GetDeployedServicePackageHealth_594765(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedServicePackageHealth_594764(path: JsonNode;
+proc validate_GetDeployedServicePackageHealth_568993(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the information about health of service package for a specific application deployed on a Service Fabric node. Use EventsHealthStateFilter to optionally filter for the collection of HealthEvent objects reported on the deployed service package based on health state.
   ## 
@@ -8493,21 +8493,21 @@ proc validate_GetDeployedServicePackageHealth_594764(path: JsonNode;
   ##                     : The name of the service package.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594766 = path.getOrDefault("nodeName")
-  valid_594766 = validateParameter(valid_594766, JString, required = true,
+  var valid_568995 = path.getOrDefault("nodeName")
+  valid_568995 = validateParameter(valid_568995, JString, required = true,
                                  default = nil)
-  if valid_594766 != nil:
-    section.add "nodeName", valid_594766
-  var valid_594767 = path.getOrDefault("applicationId")
-  valid_594767 = validateParameter(valid_594767, JString, required = true,
+  if valid_568995 != nil:
+    section.add "nodeName", valid_568995
+  var valid_568996 = path.getOrDefault("applicationId")
+  valid_568996 = validateParameter(valid_568996, JString, required = true,
                                  default = nil)
-  if valid_594767 != nil:
-    section.add "applicationId", valid_594767
-  var valid_594768 = path.getOrDefault("servicePackageName")
-  valid_594768 = validateParameter(valid_594768, JString, required = true,
+  if valid_568996 != nil:
+    section.add "applicationId", valid_568996
+  var valid_568997 = path.getOrDefault("servicePackageName")
+  valid_568997 = validateParameter(valid_568997, JString, required = true,
                                  default = nil)
-  if valid_594768 != nil:
-    section.add "servicePackageName", valid_594768
+  if valid_568997 != nil:
+    section.add "servicePackageName", valid_568997
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -8528,23 +8528,23 @@ proc validate_GetDeployedServicePackageHealth_594764(path: JsonNode;
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594769 = query.getOrDefault("timeout")
-  valid_594769 = validateParameter(valid_594769, JInt, required = false,
+  var valid_568998 = query.getOrDefault("timeout")
+  valid_568998 = validateParameter(valid_568998, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594769 != nil:
-    section.add "timeout", valid_594769
+  if valid_568998 != nil:
+    section.add "timeout", valid_568998
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594770 = query.getOrDefault("api-version")
-  valid_594770 = validateParameter(valid_594770, JString, required = true,
+  var valid_568999 = query.getOrDefault("api-version")
+  valid_568999 = validateParameter(valid_568999, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594770 != nil:
-    section.add "api-version", valid_594770
-  var valid_594771 = query.getOrDefault("EventsHealthStateFilter")
-  valid_594771 = validateParameter(valid_594771, JInt, required = false,
+  if valid_568999 != nil:
+    section.add "api-version", valid_568999
+  var valid_569000 = query.getOrDefault("EventsHealthStateFilter")
+  valid_569000 = validateParameter(valid_569000, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594771 != nil:
-    section.add "EventsHealthStateFilter", valid_594771
+  if valid_569000 != nil:
+    section.add "EventsHealthStateFilter", valid_569000
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8553,21 +8553,21 @@ proc validate_GetDeployedServicePackageHealth_594764(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594772: Call_GetDeployedServicePackageHealth_594763;
+proc call*(call_569001: Call_GetDeployedServicePackageHealth_568992;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the information about health of service package for a specific application deployed on a Service Fabric node. Use EventsHealthStateFilter to optionally filter for the collection of HealthEvent objects reported on the deployed service package based on health state.
   ## 
-  let valid = call_594772.validator(path, query, header, formData, body)
-  let scheme = call_594772.pickScheme
+  let valid = call_569001.validator(path, query, header, formData, body)
+  let scheme = call_569001.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594772.url(scheme.get, call_594772.host, call_594772.base,
-                         call_594772.route, valid.getOrDefault("path"),
+  let url = call_569001.url(scheme.get, call_569001.host, call_569001.base,
+                         call_569001.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594772, url, valid)
+  result = hook(call_569001, url, valid)
 
-proc call*(call_594773: Call_GetDeployedServicePackageHealth_594763;
+proc call*(call_569002: Call_GetDeployedServicePackageHealth_568992;
           nodeName: string; applicationId: string; servicePackageName: string;
           timeout: int = 60; apiVersion: string = "3.0";
           EventsHealthStateFilter: int = 0): Recallable =
@@ -8596,25 +8596,25 @@ proc call*(call_594773: Call_GetDeployedServicePackageHealth_594763;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   servicePackageName: string (required)
   ##                     : The name of the service package.
-  var path_594774 = newJObject()
-  var query_594775 = newJObject()
-  add(query_594775, "timeout", newJInt(timeout))
-  add(query_594775, "api-version", newJString(apiVersion))
-  add(path_594774, "nodeName", newJString(nodeName))
-  add(query_594775, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_594774, "applicationId", newJString(applicationId))
-  add(path_594774, "servicePackageName", newJString(servicePackageName))
-  result = call_594773.call(path_594774, query_594775, nil, nil, nil)
+  var path_569003 = newJObject()
+  var query_569004 = newJObject()
+  add(query_569004, "timeout", newJInt(timeout))
+  add(query_569004, "api-version", newJString(apiVersion))
+  add(path_569003, "nodeName", newJString(nodeName))
+  add(query_569004, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_569003, "applicationId", newJString(applicationId))
+  add(path_569003, "servicePackageName", newJString(servicePackageName))
+  result = call_569002.call(path_569003, query_569004, nil, nil, nil)
 
-var getDeployedServicePackageHealth* = Call_GetDeployedServicePackageHealth_594763(
+var getDeployedServicePackageHealth* = Call_GetDeployedServicePackageHealth_568992(
     name: "getDeployedServicePackageHealth", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetServicePackages/{servicePackageName}/$/GetHealth",
-    validator: validate_GetDeployedServicePackageHealth_594764, base: "",
-    url: url_GetDeployedServicePackageHealth_594765,
+    validator: validate_GetDeployedServicePackageHealth_568993, base: "",
+    url: url_GetDeployedServicePackageHealth_568994,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ReportDeployedServicePackageHealth_594791 = ref object of OpenApiRestCall_593437
-proc url_ReportDeployedServicePackageHealth_594793(protocol: Scheme; host: string;
+  Call_ReportDeployedServicePackageHealth_569020 = ref object of OpenApiRestCall_567666
+proc url_ReportDeployedServicePackageHealth_569022(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8637,7 +8637,7 @@ proc url_ReportDeployedServicePackageHealth_594793(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportDeployedServicePackageHealth_594792(path: JsonNode;
+proc validate_ReportDeployedServicePackageHealth_569021(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reports health state of the service package of the application deployed on a Service Fabric node. The report must contain the information about the source of the health report and property on which it is reported.
   ## The report is sent to a Service Fabric gateway Service, which forwards to the health store.
@@ -8657,21 +8657,21 @@ proc validate_ReportDeployedServicePackageHealth_594792(path: JsonNode;
   ##                     : The name of the service package.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594794 = path.getOrDefault("nodeName")
-  valid_594794 = validateParameter(valid_594794, JString, required = true,
+  var valid_569023 = path.getOrDefault("nodeName")
+  valid_569023 = validateParameter(valid_569023, JString, required = true,
                                  default = nil)
-  if valid_594794 != nil:
-    section.add "nodeName", valid_594794
-  var valid_594795 = path.getOrDefault("applicationId")
-  valid_594795 = validateParameter(valid_594795, JString, required = true,
+  if valid_569023 != nil:
+    section.add "nodeName", valid_569023
+  var valid_569024 = path.getOrDefault("applicationId")
+  valid_569024 = validateParameter(valid_569024, JString, required = true,
                                  default = nil)
-  if valid_594795 != nil:
-    section.add "applicationId", valid_594795
-  var valid_594796 = path.getOrDefault("servicePackageName")
-  valid_594796 = validateParameter(valid_594796, JString, required = true,
+  if valid_569024 != nil:
+    section.add "applicationId", valid_569024
+  var valid_569025 = path.getOrDefault("servicePackageName")
+  valid_569025 = validateParameter(valid_569025, JString, required = true,
                                  default = nil)
-  if valid_594796 != nil:
-    section.add "servicePackageName", valid_594796
+  if valid_569025 != nil:
+    section.add "servicePackageName", valid_569025
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -8679,18 +8679,18 @@ proc validate_ReportDeployedServicePackageHealth_594792(path: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594797 = query.getOrDefault("timeout")
-  valid_594797 = validateParameter(valid_594797, JInt, required = false,
+  var valid_569026 = query.getOrDefault("timeout")
+  valid_569026 = validateParameter(valid_569026, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594797 != nil:
-    section.add "timeout", valid_594797
+  if valid_569026 != nil:
+    section.add "timeout", valid_569026
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594798 = query.getOrDefault("api-version")
-  valid_594798 = validateParameter(valid_594798, JString, required = true,
+  var valid_569027 = query.getOrDefault("api-version")
+  valid_569027 = validateParameter(valid_569027, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594798 != nil:
-    section.add "api-version", valid_594798
+  if valid_569027 != nil:
+    section.add "api-version", valid_569027
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8704,7 +8704,7 @@ proc validate_ReportDeployedServicePackageHealth_594792(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594800: Call_ReportDeployedServicePackageHealth_594791;
+proc call*(call_569029: Call_ReportDeployedServicePackageHealth_569020;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Reports health state of the service package of the application deployed on a Service Fabric node. The report must contain the information about the source of the health report and property on which it is reported.
@@ -8714,16 +8714,16 @@ proc call*(call_594800: Call_ReportDeployedServicePackageHealth_594791;
   ## To see whether the report was applied in the health store, get deployed service package health and check that the report appears in the HealthEvents section.
   ## 
   ## 
-  let valid = call_594800.validator(path, query, header, formData, body)
-  let scheme = call_594800.pickScheme
+  let valid = call_569029.validator(path, query, header, formData, body)
+  let scheme = call_569029.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594800.url(scheme.get, call_594800.host, call_594800.base,
-                         call_594800.route, valid.getOrDefault("path"),
+  let url = call_569029.url(scheme.get, call_569029.host, call_569029.base,
+                         call_569029.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594800, url, valid)
+  result = hook(call_569029, url, valid)
 
-proc call*(call_594801: Call_ReportDeployedServicePackageHealth_594791;
+proc call*(call_569030: Call_ReportDeployedServicePackageHealth_569020;
           nodeName: string; HealthInformation: JsonNode; applicationId: string;
           servicePackageName: string; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## reportDeployedServicePackageHealth
@@ -8745,27 +8745,27 @@ proc call*(call_594801: Call_ReportDeployedServicePackageHealth_594791;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   ##   servicePackageName: string (required)
   ##                     : The name of the service package.
-  var path_594802 = newJObject()
-  var query_594803 = newJObject()
-  var body_594804 = newJObject()
-  add(query_594803, "timeout", newJInt(timeout))
-  add(query_594803, "api-version", newJString(apiVersion))
-  add(path_594802, "nodeName", newJString(nodeName))
+  var path_569031 = newJObject()
+  var query_569032 = newJObject()
+  var body_569033 = newJObject()
+  add(query_569032, "timeout", newJInt(timeout))
+  add(query_569032, "api-version", newJString(apiVersion))
+  add(path_569031, "nodeName", newJString(nodeName))
   if HealthInformation != nil:
-    body_594804 = HealthInformation
-  add(path_594802, "applicationId", newJString(applicationId))
-  add(path_594802, "servicePackageName", newJString(servicePackageName))
-  result = call_594801.call(path_594802, query_594803, nil, nil, body_594804)
+    body_569033 = HealthInformation
+  add(path_569031, "applicationId", newJString(applicationId))
+  add(path_569031, "servicePackageName", newJString(servicePackageName))
+  result = call_569030.call(path_569031, query_569032, nil, nil, body_569033)
 
-var reportDeployedServicePackageHealth* = Call_ReportDeployedServicePackageHealth_594791(
+var reportDeployedServicePackageHealth* = Call_ReportDeployedServicePackageHealth_569020(
     name: "reportDeployedServicePackageHealth", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetServicePackages/{servicePackageName}/$/ReportHealth",
-    validator: validate_ReportDeployedServicePackageHealth_594792, base: "",
-    url: url_ReportDeployedServicePackageHealth_594793,
+    validator: validate_ReportDeployedServicePackageHealth_569021, base: "",
+    url: url_ReportDeployedServicePackageHealth_569022,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedServiceTypeInfoList_594805 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedServiceTypeInfoList_594807(protocol: Scheme; host: string;
+  Call_GetDeployedServiceTypeInfoList_569034 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedServiceTypeInfoList_569036(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8784,7 +8784,7 @@ proc url_GetDeployedServiceTypeInfoList_594807(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedServiceTypeInfoList_594806(path: JsonNode;
+proc validate_GetDeployedServiceTypeInfoList_569035(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list containing the information about service types from the applications deployed on a node in a Service Fabric cluster. The response includes the name of the service type, its registration status, the code package that registered it and activation id of the service package.
   ## 
@@ -8797,16 +8797,16 @@ proc validate_GetDeployedServiceTypeInfoList_594806(path: JsonNode;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594808 = path.getOrDefault("nodeName")
-  valid_594808 = validateParameter(valid_594808, JString, required = true,
+  var valid_569037 = path.getOrDefault("nodeName")
+  valid_569037 = validateParameter(valid_569037, JString, required = true,
                                  default = nil)
-  if valid_594808 != nil:
-    section.add "nodeName", valid_594808
-  var valid_594809 = path.getOrDefault("applicationId")
-  valid_594809 = validateParameter(valid_594809, JString, required = true,
+  if valid_569037 != nil:
+    section.add "nodeName", valid_569037
+  var valid_569038 = path.getOrDefault("applicationId")
+  valid_569038 = validateParameter(valid_569038, JString, required = true,
                                  default = nil)
-  if valid_594809 != nil:
-    section.add "applicationId", valid_594809
+  if valid_569038 != nil:
+    section.add "applicationId", valid_569038
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -8816,23 +8816,23 @@ proc validate_GetDeployedServiceTypeInfoList_594806(path: JsonNode;
   ##   ServiceManifestName: JString
   ##                      : The name of the service manifest to filter the list of deployed service type information. If specified, the response will only contain the information about service types that are defined in this service manifest.
   section = newJObject()
-  var valid_594810 = query.getOrDefault("timeout")
-  valid_594810 = validateParameter(valid_594810, JInt, required = false,
+  var valid_569039 = query.getOrDefault("timeout")
+  valid_569039 = validateParameter(valid_569039, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594810 != nil:
-    section.add "timeout", valid_594810
+  if valid_569039 != nil:
+    section.add "timeout", valid_569039
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594811 = query.getOrDefault("api-version")
-  valid_594811 = validateParameter(valid_594811, JString, required = true,
+  var valid_569040 = query.getOrDefault("api-version")
+  valid_569040 = validateParameter(valid_569040, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594811 != nil:
-    section.add "api-version", valid_594811
-  var valid_594812 = query.getOrDefault("ServiceManifestName")
-  valid_594812 = validateParameter(valid_594812, JString, required = false,
+  if valid_569040 != nil:
+    section.add "api-version", valid_569040
+  var valid_569041 = query.getOrDefault("ServiceManifestName")
+  valid_569041 = validateParameter(valid_569041, JString, required = false,
                                  default = nil)
-  if valid_594812 != nil:
-    section.add "ServiceManifestName", valid_594812
+  if valid_569041 != nil:
+    section.add "ServiceManifestName", valid_569041
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8841,20 +8841,20 @@ proc validate_GetDeployedServiceTypeInfoList_594806(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594813: Call_GetDeployedServiceTypeInfoList_594805; path: JsonNode;
+proc call*(call_569042: Call_GetDeployedServiceTypeInfoList_569034; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list containing the information about service types from the applications deployed on a node in a Service Fabric cluster. The response includes the name of the service type, its registration status, the code package that registered it and activation id of the service package.
   ## 
-  let valid = call_594813.validator(path, query, header, formData, body)
-  let scheme = call_594813.pickScheme
+  let valid = call_569042.validator(path, query, header, formData, body)
+  let scheme = call_569042.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594813.url(scheme.get, call_594813.host, call_594813.base,
-                         call_594813.route, valid.getOrDefault("path"),
+  let url = call_569042.url(scheme.get, call_569042.host, call_569042.base,
+                         call_569042.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594813, url, valid)
+  result = hook(call_569042, url, valid)
 
-proc call*(call_594814: Call_GetDeployedServiceTypeInfoList_594805;
+proc call*(call_569043: Call_GetDeployedServiceTypeInfoList_569034;
           nodeName: string; applicationId: string; timeout: int = 60;
           apiVersion: string = "3.0"; ServiceManifestName: string = ""): Recallable =
   ## getDeployedServiceTypeInfoList
@@ -8869,24 +8869,24 @@ proc call*(call_594814: Call_GetDeployedServiceTypeInfoList_594805;
   ##                      : The name of the service manifest to filter the list of deployed service type information. If specified, the response will only contain the information about service types that are defined in this service manifest.
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594815 = newJObject()
-  var query_594816 = newJObject()
-  add(query_594816, "timeout", newJInt(timeout))
-  add(query_594816, "api-version", newJString(apiVersion))
-  add(path_594815, "nodeName", newJString(nodeName))
-  add(query_594816, "ServiceManifestName", newJString(ServiceManifestName))
-  add(path_594815, "applicationId", newJString(applicationId))
-  result = call_594814.call(path_594815, query_594816, nil, nil, nil)
+  var path_569044 = newJObject()
+  var query_569045 = newJObject()
+  add(query_569045, "timeout", newJInt(timeout))
+  add(query_569045, "api-version", newJString(apiVersion))
+  add(path_569044, "nodeName", newJString(nodeName))
+  add(query_569045, "ServiceManifestName", newJString(ServiceManifestName))
+  add(path_569044, "applicationId", newJString(applicationId))
+  result = call_569043.call(path_569044, query_569045, nil, nil, nil)
 
-var getDeployedServiceTypeInfoList* = Call_GetDeployedServiceTypeInfoList_594805(
+var getDeployedServiceTypeInfoList* = Call_GetDeployedServiceTypeInfoList_569034(
     name: "getDeployedServiceTypeInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetServiceTypes",
-    validator: validate_GetDeployedServiceTypeInfoList_594806, base: "",
-    url: url_GetDeployedServiceTypeInfoList_594807,
+    validator: validate_GetDeployedServiceTypeInfoList_569035, base: "",
+    url: url_GetDeployedServiceTypeInfoList_569036,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedServiceTypeInfoByName_594817 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedServiceTypeInfoByName_594819(protocol: Scheme; host: string;
+  Call_GetDeployedServiceTypeInfoByName_569046 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedServiceTypeInfoByName_569048(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8907,7 +8907,7 @@ proc url_GetDeployedServiceTypeInfoByName_594819(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedServiceTypeInfoByName_594818(path: JsonNode;
+proc validate_GetDeployedServiceTypeInfoByName_569047(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the information about a specified service type of the application deployed on a node in a Service Fabric cluster. The response includes the name of the service type, its registration status, the code package that registered it and activation id of the service package.
   ## 
@@ -8923,21 +8923,21 @@ proc validate_GetDeployedServiceTypeInfoByName_594818(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `serviceTypeName` field"
-  var valid_594820 = path.getOrDefault("serviceTypeName")
-  valid_594820 = validateParameter(valid_594820, JString, required = true,
+  var valid_569049 = path.getOrDefault("serviceTypeName")
+  valid_569049 = validateParameter(valid_569049, JString, required = true,
                                  default = nil)
-  if valid_594820 != nil:
-    section.add "serviceTypeName", valid_594820
-  var valid_594821 = path.getOrDefault("nodeName")
-  valid_594821 = validateParameter(valid_594821, JString, required = true,
+  if valid_569049 != nil:
+    section.add "serviceTypeName", valid_569049
+  var valid_569050 = path.getOrDefault("nodeName")
+  valid_569050 = validateParameter(valid_569050, JString, required = true,
                                  default = nil)
-  if valid_594821 != nil:
-    section.add "nodeName", valid_594821
-  var valid_594822 = path.getOrDefault("applicationId")
-  valid_594822 = validateParameter(valid_594822, JString, required = true,
+  if valid_569050 != nil:
+    section.add "nodeName", valid_569050
+  var valid_569051 = path.getOrDefault("applicationId")
+  valid_569051 = validateParameter(valid_569051, JString, required = true,
                                  default = nil)
-  if valid_594822 != nil:
-    section.add "applicationId", valid_594822
+  if valid_569051 != nil:
+    section.add "applicationId", valid_569051
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -8947,23 +8947,23 @@ proc validate_GetDeployedServiceTypeInfoByName_594818(path: JsonNode;
   ##   ServiceManifestName: JString
   ##                      : The name of the service manifest to filter the list of deployed service type information. If specified, the response will only contain the information about service types that are defined in this service manifest.
   section = newJObject()
-  var valid_594823 = query.getOrDefault("timeout")
-  valid_594823 = validateParameter(valid_594823, JInt, required = false,
+  var valid_569052 = query.getOrDefault("timeout")
+  valid_569052 = validateParameter(valid_569052, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594823 != nil:
-    section.add "timeout", valid_594823
+  if valid_569052 != nil:
+    section.add "timeout", valid_569052
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594824 = query.getOrDefault("api-version")
-  valid_594824 = validateParameter(valid_594824, JString, required = true,
+  var valid_569053 = query.getOrDefault("api-version")
+  valid_569053 = validateParameter(valid_569053, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594824 != nil:
-    section.add "api-version", valid_594824
-  var valid_594825 = query.getOrDefault("ServiceManifestName")
-  valid_594825 = validateParameter(valid_594825, JString, required = false,
+  if valid_569053 != nil:
+    section.add "api-version", valid_569053
+  var valid_569054 = query.getOrDefault("ServiceManifestName")
+  valid_569054 = validateParameter(valid_569054, JString, required = false,
                                  default = nil)
-  if valid_594825 != nil:
-    section.add "ServiceManifestName", valid_594825
+  if valid_569054 != nil:
+    section.add "ServiceManifestName", valid_569054
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8972,21 +8972,21 @@ proc validate_GetDeployedServiceTypeInfoByName_594818(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594826: Call_GetDeployedServiceTypeInfoByName_594817;
+proc call*(call_569055: Call_GetDeployedServiceTypeInfoByName_569046;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the information about a specified service type of the application deployed on a node in a Service Fabric cluster. The response includes the name of the service type, its registration status, the code package that registered it and activation id of the service package.
   ## 
-  let valid = call_594826.validator(path, query, header, formData, body)
-  let scheme = call_594826.pickScheme
+  let valid = call_569055.validator(path, query, header, formData, body)
+  let scheme = call_569055.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594826.url(scheme.get, call_594826.host, call_594826.base,
-                         call_594826.route, valid.getOrDefault("path"),
+  let url = call_569055.url(scheme.get, call_569055.host, call_569055.base,
+                         call_569055.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594826, url, valid)
+  result = hook(call_569055, url, valid)
 
-proc call*(call_594827: Call_GetDeployedServiceTypeInfoByName_594817;
+proc call*(call_569056: Call_GetDeployedServiceTypeInfoByName_569046;
           serviceTypeName: string; nodeName: string; applicationId: string;
           timeout: int = 60; apiVersion: string = "3.0";
           ServiceManifestName: string = ""): Recallable =
@@ -9004,25 +9004,25 @@ proc call*(call_594827: Call_GetDeployedServiceTypeInfoByName_594817;
   ##                      : The name of the service manifest to filter the list of deployed service type information. If specified, the response will only contain the information about service types that are defined in this service manifest.
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594828 = newJObject()
-  var query_594829 = newJObject()
-  add(query_594829, "timeout", newJInt(timeout))
-  add(path_594828, "serviceTypeName", newJString(serviceTypeName))
-  add(query_594829, "api-version", newJString(apiVersion))
-  add(path_594828, "nodeName", newJString(nodeName))
-  add(query_594829, "ServiceManifestName", newJString(ServiceManifestName))
-  add(path_594828, "applicationId", newJString(applicationId))
-  result = call_594827.call(path_594828, query_594829, nil, nil, nil)
+  var path_569057 = newJObject()
+  var query_569058 = newJObject()
+  add(query_569058, "timeout", newJInt(timeout))
+  add(path_569057, "serviceTypeName", newJString(serviceTypeName))
+  add(query_569058, "api-version", newJString(apiVersion))
+  add(path_569057, "nodeName", newJString(nodeName))
+  add(query_569058, "ServiceManifestName", newJString(ServiceManifestName))
+  add(path_569057, "applicationId", newJString(applicationId))
+  result = call_569056.call(path_569057, query_569058, nil, nil, nil)
 
-var getDeployedServiceTypeInfoByName* = Call_GetDeployedServiceTypeInfoByName_594817(
+var getDeployedServiceTypeInfoByName* = Call_GetDeployedServiceTypeInfoByName_569046(
     name: "getDeployedServiceTypeInfoByName", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/GetServiceTypes/{serviceTypeName}",
-    validator: validate_GetDeployedServiceTypeInfoByName_594818, base: "",
-    url: url_GetDeployedServiceTypeInfoByName_594819,
+    validator: validate_GetDeployedServiceTypeInfoByName_569047, base: "",
+    url: url_GetDeployedServiceTypeInfoByName_569048,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ReportDeployedApplicationHealth_594830 = ref object of OpenApiRestCall_593437
-proc url_ReportDeployedApplicationHealth_594832(protocol: Scheme; host: string;
+  Call_ReportDeployedApplicationHealth_569059 = ref object of OpenApiRestCall_567666
+proc url_ReportDeployedApplicationHealth_569061(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9041,7 +9041,7 @@ proc url_ReportDeployedApplicationHealth_594832(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportDeployedApplicationHealth_594831(path: JsonNode;
+proc validate_ReportDeployedApplicationHealth_569060(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reports health state of the application deployed on a Service Fabric node. The report must contain the information about the source of the health report and property on which it is reported.
   ## The report is sent to a Service Fabric gateway Service, which forwards to the health store.
@@ -9059,16 +9059,16 @@ proc validate_ReportDeployedApplicationHealth_594831(path: JsonNode;
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594833 = path.getOrDefault("nodeName")
-  valid_594833 = validateParameter(valid_594833, JString, required = true,
+  var valid_569062 = path.getOrDefault("nodeName")
+  valid_569062 = validateParameter(valid_569062, JString, required = true,
                                  default = nil)
-  if valid_594833 != nil:
-    section.add "nodeName", valid_594833
-  var valid_594834 = path.getOrDefault("applicationId")
-  valid_594834 = validateParameter(valid_594834, JString, required = true,
+  if valid_569062 != nil:
+    section.add "nodeName", valid_569062
+  var valid_569063 = path.getOrDefault("applicationId")
+  valid_569063 = validateParameter(valid_569063, JString, required = true,
                                  default = nil)
-  if valid_594834 != nil:
-    section.add "applicationId", valid_594834
+  if valid_569063 != nil:
+    section.add "applicationId", valid_569063
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -9076,18 +9076,18 @@ proc validate_ReportDeployedApplicationHealth_594831(path: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594835 = query.getOrDefault("timeout")
-  valid_594835 = validateParameter(valid_594835, JInt, required = false,
+  var valid_569064 = query.getOrDefault("timeout")
+  valid_569064 = validateParameter(valid_569064, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594835 != nil:
-    section.add "timeout", valid_594835
+  if valid_569064 != nil:
+    section.add "timeout", valid_569064
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594836 = query.getOrDefault("api-version")
-  valid_594836 = validateParameter(valid_594836, JString, required = true,
+  var valid_569065 = query.getOrDefault("api-version")
+  valid_569065 = validateParameter(valid_569065, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594836 != nil:
-    section.add "api-version", valid_594836
+  if valid_569065 != nil:
+    section.add "api-version", valid_569065
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9101,7 +9101,7 @@ proc validate_ReportDeployedApplicationHealth_594831(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594838: Call_ReportDeployedApplicationHealth_594830;
+proc call*(call_569067: Call_ReportDeployedApplicationHealth_569059;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Reports health state of the application deployed on a Service Fabric node. The report must contain the information about the source of the health report and property on which it is reported.
@@ -9111,16 +9111,16 @@ proc call*(call_594838: Call_ReportDeployedApplicationHealth_594830;
   ## To see whether the report was applied in the health store, get deployed application health and check that the report appears in the HealthEvents section.
   ## 
   ## 
-  let valid = call_594838.validator(path, query, header, formData, body)
-  let scheme = call_594838.pickScheme
+  let valid = call_569067.validator(path, query, header, formData, body)
+  let scheme = call_569067.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594838.url(scheme.get, call_594838.host, call_594838.base,
-                         call_594838.route, valid.getOrDefault("path"),
+  let url = call_569067.url(scheme.get, call_569067.host, call_569067.base,
+                         call_569067.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594838, url, valid)
+  result = hook(call_569067, url, valid)
 
-proc call*(call_594839: Call_ReportDeployedApplicationHealth_594830;
+proc call*(call_569068: Call_ReportDeployedApplicationHealth_569059;
           nodeName: string; HealthInformation: JsonNode; applicationId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## reportDeployedApplicationHealth
@@ -9140,26 +9140,26 @@ proc call*(call_594839: Call_ReportDeployedApplicationHealth_594830;
   ##                    : Describes the health information for the health report. This information needs to be present in all of the health reports sent to the health manager.
   ##   applicationId: string (required)
   ##                : The identity of the application. This is typically the full name of the application without the 'fabric:' URI scheme.
-  var path_594840 = newJObject()
-  var query_594841 = newJObject()
-  var body_594842 = newJObject()
-  add(query_594841, "timeout", newJInt(timeout))
-  add(query_594841, "api-version", newJString(apiVersion))
-  add(path_594840, "nodeName", newJString(nodeName))
+  var path_569069 = newJObject()
+  var query_569070 = newJObject()
+  var body_569071 = newJObject()
+  add(query_569070, "timeout", newJInt(timeout))
+  add(query_569070, "api-version", newJString(apiVersion))
+  add(path_569069, "nodeName", newJString(nodeName))
   if HealthInformation != nil:
-    body_594842 = HealthInformation
-  add(path_594840, "applicationId", newJString(applicationId))
-  result = call_594839.call(path_594840, query_594841, nil, nil, body_594842)
+    body_569071 = HealthInformation
+  add(path_569069, "applicationId", newJString(applicationId))
+  result = call_569068.call(path_569069, query_569070, nil, nil, body_569071)
 
-var reportDeployedApplicationHealth* = Call_ReportDeployedApplicationHealth_594830(
+var reportDeployedApplicationHealth* = Call_ReportDeployedApplicationHealth_569059(
     name: "reportDeployedApplicationHealth", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetApplications/{applicationId}/$/ReportHealth",
-    validator: validate_ReportDeployedApplicationHealth_594831, base: "",
-    url: url_ReportDeployedApplicationHealth_594832,
+    validator: validate_ReportDeployedApplicationHealth_569060, base: "",
+    url: url_ReportDeployedApplicationHealth_569061,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetNodeHealthUsingPolicy_594854 = ref object of OpenApiRestCall_593437
-proc url_GetNodeHealthUsingPolicy_594856(protocol: Scheme; host: string;
+  Call_GetNodeHealthUsingPolicy_569083 = ref object of OpenApiRestCall_567666
+proc url_GetNodeHealthUsingPolicy_569085(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -9176,7 +9176,7 @@ proc url_GetNodeHealthUsingPolicy_594856(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetNodeHealthUsingPolicy_594855(path: JsonNode; query: JsonNode;
+proc validate_GetNodeHealthUsingPolicy_569084(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the health of a Service Fabric node. Use EventsHealthStateFilter to filter the collection of health events reported on the node based on the health state. Use ClusterHealthPolicy in the POST body to override the health policies used to evaluate the health. If the node that you specify by name does not exist in the health store, this returns an error.
   ## 
@@ -9187,11 +9187,11 @@ proc validate_GetNodeHealthUsingPolicy_594855(path: JsonNode; query: JsonNode;
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594857 = path.getOrDefault("nodeName")
-  valid_594857 = validateParameter(valid_594857, JString, required = true,
+  var valid_569086 = path.getOrDefault("nodeName")
+  valid_569086 = validateParameter(valid_569086, JString, required = true,
                                  default = nil)
-  if valid_594857 != nil:
-    section.add "nodeName", valid_594857
+  if valid_569086 != nil:
+    section.add "nodeName", valid_569086
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -9212,23 +9212,23 @@ proc validate_GetNodeHealthUsingPolicy_594855(path: JsonNode; query: JsonNode;
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594858 = query.getOrDefault("timeout")
-  valid_594858 = validateParameter(valid_594858, JInt, required = false,
+  var valid_569087 = query.getOrDefault("timeout")
+  valid_569087 = validateParameter(valid_569087, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594858 != nil:
-    section.add "timeout", valid_594858
+  if valid_569087 != nil:
+    section.add "timeout", valid_569087
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594859 = query.getOrDefault("api-version")
-  valid_594859 = validateParameter(valid_594859, JString, required = true,
+  var valid_569088 = query.getOrDefault("api-version")
+  valid_569088 = validateParameter(valid_569088, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594859 != nil:
-    section.add "api-version", valid_594859
-  var valid_594860 = query.getOrDefault("EventsHealthStateFilter")
-  valid_594860 = validateParameter(valid_594860, JInt, required = false,
+  if valid_569088 != nil:
+    section.add "api-version", valid_569088
+  var valid_569089 = query.getOrDefault("EventsHealthStateFilter")
+  valid_569089 = validateParameter(valid_569089, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594860 != nil:
-    section.add "EventsHealthStateFilter", valid_594860
+  if valid_569089 != nil:
+    section.add "EventsHealthStateFilter", valid_569089
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9241,20 +9241,20 @@ proc validate_GetNodeHealthUsingPolicy_594855(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594862: Call_GetNodeHealthUsingPolicy_594854; path: JsonNode;
+proc call*(call_569091: Call_GetNodeHealthUsingPolicy_569083; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health of a Service Fabric node. Use EventsHealthStateFilter to filter the collection of health events reported on the node based on the health state. Use ClusterHealthPolicy in the POST body to override the health policies used to evaluate the health. If the node that you specify by name does not exist in the health store, this returns an error.
   ## 
-  let valid = call_594862.validator(path, query, header, formData, body)
-  let scheme = call_594862.pickScheme
+  let valid = call_569091.validator(path, query, header, formData, body)
+  let scheme = call_569091.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594862.url(scheme.get, call_594862.host, call_594862.base,
-                         call_594862.route, valid.getOrDefault("path"),
+  let url = call_569091.url(scheme.get, call_569091.host, call_569091.base,
+                         call_569091.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594862, url, valid)
+  result = hook(call_569091, url, valid)
 
-proc call*(call_594863: Call_GetNodeHealthUsingPolicy_594854; nodeName: string;
+proc call*(call_569092: Call_GetNodeHealthUsingPolicy_569083; nodeName: string;
           timeout: int = 60; apiVersion: string = "3.0";
           EventsHealthStateFilter: int = 0; ClusterHealthPolicy: JsonNode = nil): Recallable =
   ## getNodeHealthUsingPolicy
@@ -9280,25 +9280,25 @@ proc call*(call_594863: Call_GetNodeHealthUsingPolicy_594854; nodeName: string;
   ## 
   ##   ClusterHealthPolicy: JObject
   ##                      : Describes the health policies used to evaluate the health of a cluster or node. If not present, the health evaluation uses the health policy from cluster manifest or the default health policy.
-  var path_594864 = newJObject()
-  var query_594865 = newJObject()
-  var body_594866 = newJObject()
-  add(query_594865, "timeout", newJInt(timeout))
-  add(query_594865, "api-version", newJString(apiVersion))
-  add(path_594864, "nodeName", newJString(nodeName))
-  add(query_594865, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  var path_569093 = newJObject()
+  var query_569094 = newJObject()
+  var body_569095 = newJObject()
+  add(query_569094, "timeout", newJInt(timeout))
+  add(query_569094, "api-version", newJString(apiVersion))
+  add(path_569093, "nodeName", newJString(nodeName))
+  add(query_569094, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
   if ClusterHealthPolicy != nil:
-    body_594866 = ClusterHealthPolicy
-  result = call_594863.call(path_594864, query_594865, nil, nil, body_594866)
+    body_569095 = ClusterHealthPolicy
+  result = call_569092.call(path_569093, query_569094, nil, nil, body_569095)
 
-var getNodeHealthUsingPolicy* = Call_GetNodeHealthUsingPolicy_594854(
+var getNodeHealthUsingPolicy* = Call_GetNodeHealthUsingPolicy_569083(
     name: "getNodeHealthUsingPolicy", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetHealth",
-    validator: validate_GetNodeHealthUsingPolicy_594855, base: "",
-    url: url_GetNodeHealthUsingPolicy_594856, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetNodeHealthUsingPolicy_569084, base: "",
+    url: url_GetNodeHealthUsingPolicy_569085, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetNodeHealth_594843 = ref object of OpenApiRestCall_593437
-proc url_GetNodeHealth_594845(protocol: Scheme; host: string; base: string;
+  Call_GetNodeHealth_569072 = ref object of OpenApiRestCall_567666
+proc url_GetNodeHealth_569074(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9314,7 +9314,7 @@ proc url_GetNodeHealth_594845(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetNodeHealth_594844(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GetNodeHealth_569073(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the health of a Service Fabric node. Use EventsHealthStateFilter to filter the collection of health events reported on the node based on the health state. If the node that you specify by name does not exist in the health store, this returns an error.
   ## 
@@ -9325,11 +9325,11 @@ proc validate_GetNodeHealth_594844(path: JsonNode; query: JsonNode; header: Json
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594846 = path.getOrDefault("nodeName")
-  valid_594846 = validateParameter(valid_594846, JString, required = true,
+  var valid_569075 = path.getOrDefault("nodeName")
+  valid_569075 = validateParameter(valid_569075, JString, required = true,
                                  default = nil)
-  if valid_594846 != nil:
-    section.add "nodeName", valid_594846
+  if valid_569075 != nil:
+    section.add "nodeName", valid_569075
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -9350,23 +9350,23 @@ proc validate_GetNodeHealth_594844(path: JsonNode; query: JsonNode; header: Json
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594847 = query.getOrDefault("timeout")
-  valid_594847 = validateParameter(valid_594847, JInt, required = false,
+  var valid_569076 = query.getOrDefault("timeout")
+  valid_569076 = validateParameter(valid_569076, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594847 != nil:
-    section.add "timeout", valid_594847
+  if valid_569076 != nil:
+    section.add "timeout", valid_569076
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594848 = query.getOrDefault("api-version")
-  valid_594848 = validateParameter(valid_594848, JString, required = true,
+  var valid_569077 = query.getOrDefault("api-version")
+  valid_569077 = validateParameter(valid_569077, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594848 != nil:
-    section.add "api-version", valid_594848
-  var valid_594849 = query.getOrDefault("EventsHealthStateFilter")
-  valid_594849 = validateParameter(valid_594849, JInt, required = false,
+  if valid_569077 != nil:
+    section.add "api-version", valid_569077
+  var valid_569078 = query.getOrDefault("EventsHealthStateFilter")
+  valid_569078 = validateParameter(valid_569078, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594849 != nil:
-    section.add "EventsHealthStateFilter", valid_594849
+  if valid_569078 != nil:
+    section.add "EventsHealthStateFilter", valid_569078
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9375,20 +9375,20 @@ proc validate_GetNodeHealth_594844(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594850: Call_GetNodeHealth_594843; path: JsonNode; query: JsonNode;
+proc call*(call_569079: Call_GetNodeHealth_569072; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health of a Service Fabric node. Use EventsHealthStateFilter to filter the collection of health events reported on the node based on the health state. If the node that you specify by name does not exist in the health store, this returns an error.
   ## 
-  let valid = call_594850.validator(path, query, header, formData, body)
-  let scheme = call_594850.pickScheme
+  let valid = call_569079.validator(path, query, header, formData, body)
+  let scheme = call_569079.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594850.url(scheme.get, call_594850.host, call_594850.base,
-                         call_594850.route, valid.getOrDefault("path"),
+  let url = call_569079.url(scheme.get, call_569079.host, call_569079.base,
+                         call_569079.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594850, url, valid)
+  result = hook(call_569079, url, valid)
 
-proc call*(call_594851: Call_GetNodeHealth_594843; nodeName: string;
+proc call*(call_569080: Call_GetNodeHealth_569072; nodeName: string;
           timeout: int = 60; apiVersion: string = "3.0";
           EventsHealthStateFilter: int = 0): Recallable =
   ## getNodeHealth
@@ -9412,21 +9412,21 @@ proc call*(call_594851: Call_GetNodeHealth_594843; nodeName: string;
   ## - Error - Filter that matches input with HealthState value Error. The value is 8.
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
-  var path_594852 = newJObject()
-  var query_594853 = newJObject()
-  add(query_594853, "timeout", newJInt(timeout))
-  add(query_594853, "api-version", newJString(apiVersion))
-  add(path_594852, "nodeName", newJString(nodeName))
-  add(query_594853, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  result = call_594851.call(path_594852, query_594853, nil, nil, nil)
+  var path_569081 = newJObject()
+  var query_569082 = newJObject()
+  add(query_569082, "timeout", newJInt(timeout))
+  add(query_569082, "api-version", newJString(apiVersion))
+  add(path_569081, "nodeName", newJString(nodeName))
+  add(query_569082, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  result = call_569080.call(path_569081, query_569082, nil, nil, nil)
 
-var getNodeHealth* = Call_GetNodeHealth_594843(name: "getNodeHealth",
+var getNodeHealth* = Call_GetNodeHealth_569072(name: "getNodeHealth",
     meth: HttpMethod.HttpGet, host: "azure.local:19080",
-    route: "/Nodes/{nodeName}/$/GetHealth", validator: validate_GetNodeHealth_594844,
-    base: "", url: url_GetNodeHealth_594845, schemes: {Scheme.Https, Scheme.Http})
+    route: "/Nodes/{nodeName}/$/GetHealth", validator: validate_GetNodeHealth_569073,
+    base: "", url: url_GetNodeHealth_569074, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetNodeLoadInfo_594867 = ref object of OpenApiRestCall_593437
-proc url_GetNodeLoadInfo_594869(protocol: Scheme; host: string; base: string;
+  Call_GetNodeLoadInfo_569096 = ref object of OpenApiRestCall_567666
+proc url_GetNodeLoadInfo_569098(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9442,7 +9442,7 @@ proc url_GetNodeLoadInfo_594869(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetNodeLoadInfo_594868(path: JsonNode; query: JsonNode;
+proc validate_GetNodeLoadInfo_569097(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the load information of a Service Fabric node.
@@ -9454,11 +9454,11 @@ proc validate_GetNodeLoadInfo_594868(path: JsonNode; query: JsonNode;
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594870 = path.getOrDefault("nodeName")
-  valid_594870 = validateParameter(valid_594870, JString, required = true,
+  var valid_569099 = path.getOrDefault("nodeName")
+  valid_569099 = validateParameter(valid_569099, JString, required = true,
                                  default = nil)
-  if valid_594870 != nil:
-    section.add "nodeName", valid_594870
+  if valid_569099 != nil:
+    section.add "nodeName", valid_569099
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -9466,18 +9466,18 @@ proc validate_GetNodeLoadInfo_594868(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594871 = query.getOrDefault("timeout")
-  valid_594871 = validateParameter(valid_594871, JInt, required = false,
+  var valid_569100 = query.getOrDefault("timeout")
+  valid_569100 = validateParameter(valid_569100, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594871 != nil:
-    section.add "timeout", valid_594871
+  if valid_569100 != nil:
+    section.add "timeout", valid_569100
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594872 = query.getOrDefault("api-version")
-  valid_594872 = validateParameter(valid_594872, JString, required = true,
+  var valid_569101 = query.getOrDefault("api-version")
+  valid_569101 = validateParameter(valid_569101, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594872 != nil:
-    section.add "api-version", valid_594872
+  if valid_569101 != nil:
+    section.add "api-version", valid_569101
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9486,20 +9486,20 @@ proc validate_GetNodeLoadInfo_594868(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594873: Call_GetNodeLoadInfo_594867; path: JsonNode; query: JsonNode;
+proc call*(call_569102: Call_GetNodeLoadInfo_569096; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the load information of a Service Fabric node.
   ## 
-  let valid = call_594873.validator(path, query, header, formData, body)
-  let scheme = call_594873.pickScheme
+  let valid = call_569102.validator(path, query, header, formData, body)
+  let scheme = call_569102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594873.url(scheme.get, call_594873.host, call_594873.base,
-                         call_594873.route, valid.getOrDefault("path"),
+  let url = call_569102.url(scheme.get, call_569102.host, call_569102.base,
+                         call_569102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594873, url, valid)
+  result = hook(call_569102, url, valid)
 
-proc call*(call_594874: Call_GetNodeLoadInfo_594867; nodeName: string;
+proc call*(call_569103: Call_GetNodeLoadInfo_569096; nodeName: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getNodeLoadInfo
   ## Gets the load information of a Service Fabric node.
@@ -9509,21 +9509,21 @@ proc call*(call_594874: Call_GetNodeLoadInfo_594867; nodeName: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   nodeName: string (required)
   ##           : The name of the node.
-  var path_594875 = newJObject()
-  var query_594876 = newJObject()
-  add(query_594876, "timeout", newJInt(timeout))
-  add(query_594876, "api-version", newJString(apiVersion))
-  add(path_594875, "nodeName", newJString(nodeName))
-  result = call_594874.call(path_594875, query_594876, nil, nil, nil)
+  var path_569104 = newJObject()
+  var query_569105 = newJObject()
+  add(query_569105, "timeout", newJInt(timeout))
+  add(query_569105, "api-version", newJString(apiVersion))
+  add(path_569104, "nodeName", newJString(nodeName))
+  result = call_569103.call(path_569104, query_569105, nil, nil, nil)
 
-var getNodeLoadInfo* = Call_GetNodeLoadInfo_594867(name: "getNodeLoadInfo",
+var getNodeLoadInfo* = Call_GetNodeLoadInfo_569096(name: "getNodeLoadInfo",
     meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Nodes/{nodeName}/$/GetLoadInformation",
-    validator: validate_GetNodeLoadInfo_594868, base: "", url: url_GetNodeLoadInfo_594869,
+    validator: validate_GetNodeLoadInfo_569097, base: "", url: url_GetNodeLoadInfo_569098,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RemoveReplica_594877 = ref object of OpenApiRestCall_593437
-proc url_RemoveReplica_594879(protocol: Scheme; host: string; base: string;
+  Call_RemoveReplica_569106 = ref object of OpenApiRestCall_567666
+proc url_RemoveReplica_569108(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9545,7 +9545,7 @@ proc url_RemoveReplica_594879(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemoveReplica_594878(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RemoveReplica_569107(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## This API simulates a Service Fabric replica failure by removing a replica from a Service Fabric cluster. The removal closes the replica, transitions the replica to the role None, and then removes all of the state information of the replica from the cluster. This API tests the replica state removal path, and simulates the report fault permanent path through client APIs. Warning - There are no safety checks performed when this API is used. Incorrect use of this API can lead to data loss for stateful services.In addition, the forceRemove flag impacts all other replicas hosted in the same process.
   ## 
@@ -9560,21 +9560,21 @@ proc validate_RemoveReplica_594878(path: JsonNode; query: JsonNode; header: Json
   ##              : The identity of the partition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `replicaId` field"
-  var valid_594880 = path.getOrDefault("replicaId")
-  valid_594880 = validateParameter(valid_594880, JString, required = true,
+  var valid_569109 = path.getOrDefault("replicaId")
+  valid_569109 = validateParameter(valid_569109, JString, required = true,
                                  default = nil)
-  if valid_594880 != nil:
-    section.add "replicaId", valid_594880
-  var valid_594881 = path.getOrDefault("nodeName")
-  valid_594881 = validateParameter(valid_594881, JString, required = true,
+  if valid_569109 != nil:
+    section.add "replicaId", valid_569109
+  var valid_569110 = path.getOrDefault("nodeName")
+  valid_569110 = validateParameter(valid_569110, JString, required = true,
                                  default = nil)
-  if valid_594881 != nil:
-    section.add "nodeName", valid_594881
-  var valid_594882 = path.getOrDefault("partitionId")
-  valid_594882 = validateParameter(valid_594882, JString, required = true,
+  if valid_569110 != nil:
+    section.add "nodeName", valid_569110
+  var valid_569111 = path.getOrDefault("partitionId")
+  valid_569111 = validateParameter(valid_569111, JString, required = true,
                                  default = nil)
-  if valid_594882 != nil:
-    section.add "partitionId", valid_594882
+  if valid_569111 != nil:
+    section.add "partitionId", valid_569111
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -9584,22 +9584,22 @@ proc validate_RemoveReplica_594878(path: JsonNode; query: JsonNode; header: Json
   ##   ForceRemove: JBool
   ##              : Remove a Service Fabric application or service forcefully without going through the graceful shutdown sequence. This parameter can be used to forcefully delete an application or service for which delete is timing out due to issues in the service code that prevents graceful close of replicas.
   section = newJObject()
-  var valid_594883 = query.getOrDefault("timeout")
-  valid_594883 = validateParameter(valid_594883, JInt, required = false,
+  var valid_569112 = query.getOrDefault("timeout")
+  valid_569112 = validateParameter(valid_569112, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594883 != nil:
-    section.add "timeout", valid_594883
+  if valid_569112 != nil:
+    section.add "timeout", valid_569112
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594884 = query.getOrDefault("api-version")
-  valid_594884 = validateParameter(valid_594884, JString, required = true,
+  var valid_569113 = query.getOrDefault("api-version")
+  valid_569113 = validateParameter(valid_569113, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594884 != nil:
-    section.add "api-version", valid_594884
-  var valid_594885 = query.getOrDefault("ForceRemove")
-  valid_594885 = validateParameter(valid_594885, JBool, required = false, default = nil)
-  if valid_594885 != nil:
-    section.add "ForceRemove", valid_594885
+  if valid_569113 != nil:
+    section.add "api-version", valid_569113
+  var valid_569114 = query.getOrDefault("ForceRemove")
+  valid_569114 = validateParameter(valid_569114, JBool, required = false, default = nil)
+  if valid_569114 != nil:
+    section.add "ForceRemove", valid_569114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9608,20 +9608,20 @@ proc validate_RemoveReplica_594878(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594886: Call_RemoveReplica_594877; path: JsonNode; query: JsonNode;
+proc call*(call_569115: Call_RemoveReplica_569106; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This API simulates a Service Fabric replica failure by removing a replica from a Service Fabric cluster. The removal closes the replica, transitions the replica to the role None, and then removes all of the state information of the replica from the cluster. This API tests the replica state removal path, and simulates the report fault permanent path through client APIs. Warning - There are no safety checks performed when this API is used. Incorrect use of this API can lead to data loss for stateful services.In addition, the forceRemove flag impacts all other replicas hosted in the same process.
   ## 
-  let valid = call_594886.validator(path, query, header, formData, body)
-  let scheme = call_594886.pickScheme
+  let valid = call_569115.validator(path, query, header, formData, body)
+  let scheme = call_569115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594886.url(scheme.get, call_594886.host, call_594886.base,
-                         call_594886.route, valid.getOrDefault("path"),
+  let url = call_569115.url(scheme.get, call_569115.host, call_569115.base,
+                         call_569115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594886, url, valid)
+  result = hook(call_569115, url, valid)
 
-proc call*(call_594887: Call_RemoveReplica_594877; replicaId: string;
+proc call*(call_569116: Call_RemoveReplica_569106; replicaId: string;
           nodeName: string; partitionId: string; timeout: int = 60;
           apiVersion: string = "3.0"; ForceRemove: bool = false): Recallable =
   ## removeReplica
@@ -9638,23 +9638,23 @@ proc call*(call_594887: Call_RemoveReplica_594877; replicaId: string;
   ##           : The name of the node.
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_594888 = newJObject()
-  var query_594889 = newJObject()
-  add(path_594888, "replicaId", newJString(replicaId))
-  add(query_594889, "timeout", newJInt(timeout))
-  add(query_594889, "api-version", newJString(apiVersion))
-  add(query_594889, "ForceRemove", newJBool(ForceRemove))
-  add(path_594888, "nodeName", newJString(nodeName))
-  add(path_594888, "partitionId", newJString(partitionId))
-  result = call_594887.call(path_594888, query_594889, nil, nil, nil)
+  var path_569117 = newJObject()
+  var query_569118 = newJObject()
+  add(path_569117, "replicaId", newJString(replicaId))
+  add(query_569118, "timeout", newJInt(timeout))
+  add(query_569118, "api-version", newJString(apiVersion))
+  add(query_569118, "ForceRemove", newJBool(ForceRemove))
+  add(path_569117, "nodeName", newJString(nodeName))
+  add(path_569117, "partitionId", newJString(partitionId))
+  result = call_569116.call(path_569117, query_569118, nil, nil, nil)
 
-var removeReplica* = Call_RemoveReplica_594877(name: "removeReplica",
+var removeReplica* = Call_RemoveReplica_569106(name: "removeReplica",
     meth: HttpMethod.HttpPost, host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetPartitions/{partitionId}/$/GetReplicas/{replicaId}/$/Delete",
-    validator: validate_RemoveReplica_594878, base: "", url: url_RemoveReplica_594879,
+    validator: validate_RemoveReplica_569107, base: "", url: url_RemoveReplica_569108,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetDeployedServiceReplicaDetailInfo_594890 = ref object of OpenApiRestCall_593437
-proc url_GetDeployedServiceReplicaDetailInfo_594892(protocol: Scheme; host: string;
+  Call_GetDeployedServiceReplicaDetailInfo_569119 = ref object of OpenApiRestCall_567666
+proc url_GetDeployedServiceReplicaDetailInfo_569121(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9676,7 +9676,7 @@ proc url_GetDeployedServiceReplicaDetailInfo_594892(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetDeployedServiceReplicaDetailInfo_594891(path: JsonNode;
+proc validate_GetDeployedServiceReplicaDetailInfo_569120(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the replica deployed on a Service Fabric node. The information include service kind, service name, current service operation, current service operation start date time, partition id, replica/instance id, reported load and other information.
   ## 
@@ -9691,21 +9691,21 @@ proc validate_GetDeployedServiceReplicaDetailInfo_594891(path: JsonNode;
   ##              : The identity of the partition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `replicaId` field"
-  var valid_594893 = path.getOrDefault("replicaId")
-  valid_594893 = validateParameter(valid_594893, JString, required = true,
+  var valid_569122 = path.getOrDefault("replicaId")
+  valid_569122 = validateParameter(valid_569122, JString, required = true,
                                  default = nil)
-  if valid_594893 != nil:
-    section.add "replicaId", valid_594893
-  var valid_594894 = path.getOrDefault("nodeName")
-  valid_594894 = validateParameter(valid_594894, JString, required = true,
+  if valid_569122 != nil:
+    section.add "replicaId", valid_569122
+  var valid_569123 = path.getOrDefault("nodeName")
+  valid_569123 = validateParameter(valid_569123, JString, required = true,
                                  default = nil)
-  if valid_594894 != nil:
-    section.add "nodeName", valid_594894
-  var valid_594895 = path.getOrDefault("partitionId")
-  valid_594895 = validateParameter(valid_594895, JString, required = true,
+  if valid_569123 != nil:
+    section.add "nodeName", valid_569123
+  var valid_569124 = path.getOrDefault("partitionId")
+  valid_569124 = validateParameter(valid_569124, JString, required = true,
                                  default = nil)
-  if valid_594895 != nil:
-    section.add "partitionId", valid_594895
+  if valid_569124 != nil:
+    section.add "partitionId", valid_569124
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -9713,18 +9713,18 @@ proc validate_GetDeployedServiceReplicaDetailInfo_594891(path: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594896 = query.getOrDefault("timeout")
-  valid_594896 = validateParameter(valid_594896, JInt, required = false,
+  var valid_569125 = query.getOrDefault("timeout")
+  valid_569125 = validateParameter(valid_569125, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594896 != nil:
-    section.add "timeout", valid_594896
+  if valid_569125 != nil:
+    section.add "timeout", valid_569125
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594897 = query.getOrDefault("api-version")
-  valid_594897 = validateParameter(valid_594897, JString, required = true,
+  var valid_569126 = query.getOrDefault("api-version")
+  valid_569126 = validateParameter(valid_569126, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594897 != nil:
-    section.add "api-version", valid_594897
+  if valid_569126 != nil:
+    section.add "api-version", valid_569126
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9733,21 +9733,21 @@ proc validate_GetDeployedServiceReplicaDetailInfo_594891(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594898: Call_GetDeployedServiceReplicaDetailInfo_594890;
+proc call*(call_569127: Call_GetDeployedServiceReplicaDetailInfo_569119;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the details of the replica deployed on a Service Fabric node. The information include service kind, service name, current service operation, current service operation start date time, partition id, replica/instance id, reported load and other information.
   ## 
-  let valid = call_594898.validator(path, query, header, formData, body)
-  let scheme = call_594898.pickScheme
+  let valid = call_569127.validator(path, query, header, formData, body)
+  let scheme = call_569127.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594898.url(scheme.get, call_594898.host, call_594898.base,
-                         call_594898.route, valid.getOrDefault("path"),
+  let url = call_569127.url(scheme.get, call_569127.host, call_569127.base,
+                         call_569127.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594898, url, valid)
+  result = hook(call_569127, url, valid)
 
-proc call*(call_594899: Call_GetDeployedServiceReplicaDetailInfo_594890;
+proc call*(call_569128: Call_GetDeployedServiceReplicaDetailInfo_569119;
           replicaId: string; nodeName: string; partitionId: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## getDeployedServiceReplicaDetailInfo
@@ -9762,24 +9762,24 @@ proc call*(call_594899: Call_GetDeployedServiceReplicaDetailInfo_594890;
   ##           : The name of the node.
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_594900 = newJObject()
-  var query_594901 = newJObject()
-  add(path_594900, "replicaId", newJString(replicaId))
-  add(query_594901, "timeout", newJInt(timeout))
-  add(query_594901, "api-version", newJString(apiVersion))
-  add(path_594900, "nodeName", newJString(nodeName))
-  add(path_594900, "partitionId", newJString(partitionId))
-  result = call_594899.call(path_594900, query_594901, nil, nil, nil)
+  var path_569129 = newJObject()
+  var query_569130 = newJObject()
+  add(path_569129, "replicaId", newJString(replicaId))
+  add(query_569130, "timeout", newJInt(timeout))
+  add(query_569130, "api-version", newJString(apiVersion))
+  add(path_569129, "nodeName", newJString(nodeName))
+  add(path_569129, "partitionId", newJString(partitionId))
+  result = call_569128.call(path_569129, query_569130, nil, nil, nil)
 
-var getDeployedServiceReplicaDetailInfo* = Call_GetDeployedServiceReplicaDetailInfo_594890(
+var getDeployedServiceReplicaDetailInfo* = Call_GetDeployedServiceReplicaDetailInfo_569119(
     name: "getDeployedServiceReplicaDetailInfo", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetPartitions/{partitionId}/$/GetReplicas/{replicaId}/$/GetDetail",
-    validator: validate_GetDeployedServiceReplicaDetailInfo_594891, base: "",
-    url: url_GetDeployedServiceReplicaDetailInfo_594892,
+    validator: validate_GetDeployedServiceReplicaDetailInfo_569120, base: "",
+    url: url_GetDeployedServiceReplicaDetailInfo_569121,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RestartReplica_594902 = ref object of OpenApiRestCall_593437
-proc url_RestartReplica_594904(protocol: Scheme; host: string; base: string;
+  Call_RestartReplica_569131 = ref object of OpenApiRestCall_567666
+proc url_RestartReplica_569133(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9801,7 +9801,7 @@ proc url_RestartReplica_594904(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RestartReplica_594903(path: JsonNode; query: JsonNode;
+proc validate_RestartReplica_569132(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Restarts a service replica of a persisted service running on a node. Warning - There are no safety checks performed when this API is used. Incorrect use of this API can lead to availability loss for stateful services.
@@ -9817,21 +9817,21 @@ proc validate_RestartReplica_594903(path: JsonNode; query: JsonNode;
   ##              : The identity of the partition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `replicaId` field"
-  var valid_594905 = path.getOrDefault("replicaId")
-  valid_594905 = validateParameter(valid_594905, JString, required = true,
+  var valid_569134 = path.getOrDefault("replicaId")
+  valid_569134 = validateParameter(valid_569134, JString, required = true,
                                  default = nil)
-  if valid_594905 != nil:
-    section.add "replicaId", valid_594905
-  var valid_594906 = path.getOrDefault("nodeName")
-  valid_594906 = validateParameter(valid_594906, JString, required = true,
+  if valid_569134 != nil:
+    section.add "replicaId", valid_569134
+  var valid_569135 = path.getOrDefault("nodeName")
+  valid_569135 = validateParameter(valid_569135, JString, required = true,
                                  default = nil)
-  if valid_594906 != nil:
-    section.add "nodeName", valid_594906
-  var valid_594907 = path.getOrDefault("partitionId")
-  valid_594907 = validateParameter(valid_594907, JString, required = true,
+  if valid_569135 != nil:
+    section.add "nodeName", valid_569135
+  var valid_569136 = path.getOrDefault("partitionId")
+  valid_569136 = validateParameter(valid_569136, JString, required = true,
                                  default = nil)
-  if valid_594907 != nil:
-    section.add "partitionId", valid_594907
+  if valid_569136 != nil:
+    section.add "partitionId", valid_569136
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -9839,18 +9839,18 @@ proc validate_RestartReplica_594903(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594908 = query.getOrDefault("timeout")
-  valid_594908 = validateParameter(valid_594908, JInt, required = false,
+  var valid_569137 = query.getOrDefault("timeout")
+  valid_569137 = validateParameter(valid_569137, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594908 != nil:
-    section.add "timeout", valid_594908
+  if valid_569137 != nil:
+    section.add "timeout", valid_569137
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594909 = query.getOrDefault("api-version")
-  valid_594909 = validateParameter(valid_594909, JString, required = true,
+  var valid_569138 = query.getOrDefault("api-version")
+  valid_569138 = validateParameter(valid_569138, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594909 != nil:
-    section.add "api-version", valid_594909
+  if valid_569138 != nil:
+    section.add "api-version", valid_569138
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9859,20 +9859,20 @@ proc validate_RestartReplica_594903(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594910: Call_RestartReplica_594902; path: JsonNode; query: JsonNode;
+proc call*(call_569139: Call_RestartReplica_569131; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restarts a service replica of a persisted service running on a node. Warning - There are no safety checks performed when this API is used. Incorrect use of this API can lead to availability loss for stateful services.
   ## 
-  let valid = call_594910.validator(path, query, header, formData, body)
-  let scheme = call_594910.pickScheme
+  let valid = call_569139.validator(path, query, header, formData, body)
+  let scheme = call_569139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594910.url(scheme.get, call_594910.host, call_594910.base,
-                         call_594910.route, valid.getOrDefault("path"),
+  let url = call_569139.url(scheme.get, call_569139.host, call_569139.base,
+                         call_569139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594910, url, valid)
+  result = hook(call_569139, url, valid)
 
-proc call*(call_594911: Call_RestartReplica_594902; replicaId: string;
+proc call*(call_569140: Call_RestartReplica_569131; replicaId: string;
           nodeName: string; partitionId: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## restartReplica
@@ -9887,22 +9887,22 @@ proc call*(call_594911: Call_RestartReplica_594902; replicaId: string;
   ##           : The name of the node.
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_594912 = newJObject()
-  var query_594913 = newJObject()
-  add(path_594912, "replicaId", newJString(replicaId))
-  add(query_594913, "timeout", newJInt(timeout))
-  add(query_594913, "api-version", newJString(apiVersion))
-  add(path_594912, "nodeName", newJString(nodeName))
-  add(path_594912, "partitionId", newJString(partitionId))
-  result = call_594911.call(path_594912, query_594913, nil, nil, nil)
+  var path_569141 = newJObject()
+  var query_569142 = newJObject()
+  add(path_569141, "replicaId", newJString(replicaId))
+  add(query_569142, "timeout", newJInt(timeout))
+  add(query_569142, "api-version", newJString(apiVersion))
+  add(path_569141, "nodeName", newJString(nodeName))
+  add(path_569141, "partitionId", newJString(partitionId))
+  result = call_569140.call(path_569141, query_569142, nil, nil, nil)
 
-var restartReplica* = Call_RestartReplica_594902(name: "restartReplica",
+var restartReplica* = Call_RestartReplica_569131(name: "restartReplica",
     meth: HttpMethod.HttpPost, host: "azure.local:19080", route: "/Nodes/{nodeName}/$/GetPartitions/{partitionId}/$/GetReplicas/{replicaId}/$/Restart",
-    validator: validate_RestartReplica_594903, base: "", url: url_RestartReplica_594904,
+    validator: validate_RestartReplica_569132, base: "", url: url_RestartReplica_569133,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RemoveNodeState_594914 = ref object of OpenApiRestCall_593437
-proc url_RemoveNodeState_594916(protocol: Scheme; host: string; base: string;
+  Call_RemoveNodeState_569143 = ref object of OpenApiRestCall_567666
+proc url_RemoveNodeState_569145(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9918,7 +9918,7 @@ proc url_RemoveNodeState_594916(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemoveNodeState_594915(path: JsonNode; query: JsonNode;
+proc validate_RemoveNodeState_569144(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Notifies Service Fabric that the persisted state on a node has been permanently removed or lost.  This implies that it is not possible to recover the persisted state of that node. This generally happens if a hard disk has been wiped clean, or if a hard disk crashes. The node has to be down for this operation to be successful. This operation lets Service Fabric know that the replicas on that node no longer exist, and that Service Fabric should stop waiting for those replicas to come back up. Do not run this cmdlet if the state on the node has not been removed and the node can comes back up with its state intact.
@@ -9930,11 +9930,11 @@ proc validate_RemoveNodeState_594915(path: JsonNode; query: JsonNode;
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594917 = path.getOrDefault("nodeName")
-  valid_594917 = validateParameter(valid_594917, JString, required = true,
+  var valid_569146 = path.getOrDefault("nodeName")
+  valid_569146 = validateParameter(valid_569146, JString, required = true,
                                  default = nil)
-  if valid_594917 != nil:
-    section.add "nodeName", valid_594917
+  if valid_569146 != nil:
+    section.add "nodeName", valid_569146
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -9942,18 +9942,18 @@ proc validate_RemoveNodeState_594915(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594918 = query.getOrDefault("timeout")
-  valid_594918 = validateParameter(valid_594918, JInt, required = false,
+  var valid_569147 = query.getOrDefault("timeout")
+  valid_569147 = validateParameter(valid_569147, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594918 != nil:
-    section.add "timeout", valid_594918
+  if valid_569147 != nil:
+    section.add "timeout", valid_569147
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594919 = query.getOrDefault("api-version")
-  valid_594919 = validateParameter(valid_594919, JString, required = true,
+  var valid_569148 = query.getOrDefault("api-version")
+  valid_569148 = validateParameter(valid_569148, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594919 != nil:
-    section.add "api-version", valid_594919
+  if valid_569148 != nil:
+    section.add "api-version", valid_569148
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9962,20 +9962,20 @@ proc validate_RemoveNodeState_594915(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594920: Call_RemoveNodeState_594914; path: JsonNode; query: JsonNode;
+proc call*(call_569149: Call_RemoveNodeState_569143; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Notifies Service Fabric that the persisted state on a node has been permanently removed or lost.  This implies that it is not possible to recover the persisted state of that node. This generally happens if a hard disk has been wiped clean, or if a hard disk crashes. The node has to be down for this operation to be successful. This operation lets Service Fabric know that the replicas on that node no longer exist, and that Service Fabric should stop waiting for those replicas to come back up. Do not run this cmdlet if the state on the node has not been removed and the node can comes back up with its state intact.
   ## 
-  let valid = call_594920.validator(path, query, header, formData, body)
-  let scheme = call_594920.pickScheme
+  let valid = call_569149.validator(path, query, header, formData, body)
+  let scheme = call_569149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594920.url(scheme.get, call_594920.host, call_594920.base,
-                         call_594920.route, valid.getOrDefault("path"),
+  let url = call_569149.url(scheme.get, call_569149.host, call_569149.base,
+                         call_569149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594920, url, valid)
+  result = hook(call_569149, url, valid)
 
-proc call*(call_594921: Call_RemoveNodeState_594914; nodeName: string;
+proc call*(call_569150: Call_RemoveNodeState_569143; nodeName: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## removeNodeState
   ## Notifies Service Fabric that the persisted state on a node has been permanently removed or lost.  This implies that it is not possible to recover the persisted state of that node. This generally happens if a hard disk has been wiped clean, or if a hard disk crashes. The node has to be down for this operation to be successful. This operation lets Service Fabric know that the replicas on that node no longer exist, and that Service Fabric should stop waiting for those replicas to come back up. Do not run this cmdlet if the state on the node has not been removed and the node can comes back up with its state intact.
@@ -9985,21 +9985,21 @@ proc call*(call_594921: Call_RemoveNodeState_594914; nodeName: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   nodeName: string (required)
   ##           : The name of the node.
-  var path_594922 = newJObject()
-  var query_594923 = newJObject()
-  add(query_594923, "timeout", newJInt(timeout))
-  add(query_594923, "api-version", newJString(apiVersion))
-  add(path_594922, "nodeName", newJString(nodeName))
-  result = call_594921.call(path_594922, query_594923, nil, nil, nil)
+  var path_569151 = newJObject()
+  var query_569152 = newJObject()
+  add(query_569152, "timeout", newJInt(timeout))
+  add(query_569152, "api-version", newJString(apiVersion))
+  add(path_569151, "nodeName", newJString(nodeName))
+  result = call_569150.call(path_569151, query_569152, nil, nil, nil)
 
-var removeNodeState* = Call_RemoveNodeState_594914(name: "removeNodeState",
+var removeNodeState* = Call_RemoveNodeState_569143(name: "removeNodeState",
     meth: HttpMethod.HttpPost, host: "azure.local:19080",
     route: "/Nodes/{nodeName}/$/RemoveNodeState",
-    validator: validate_RemoveNodeState_594915, base: "", url: url_RemoveNodeState_594916,
+    validator: validate_RemoveNodeState_569144, base: "", url: url_RemoveNodeState_569145,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ReportNodeHealth_594924 = ref object of OpenApiRestCall_593437
-proc url_ReportNodeHealth_594926(protocol: Scheme; host: string; base: string;
+  Call_ReportNodeHealth_569153 = ref object of OpenApiRestCall_567666
+proc url_ReportNodeHealth_569155(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10015,7 +10015,7 @@ proc url_ReportNodeHealth_594926(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportNodeHealth_594925(path: JsonNode; query: JsonNode;
+proc validate_ReportNodeHealth_569154(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Reports health state of the specified Service Fabric node. The report must contain the information about the source of the health report and property on which it is reported.
@@ -10032,11 +10032,11 @@ proc validate_ReportNodeHealth_594925(path: JsonNode; query: JsonNode;
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594927 = path.getOrDefault("nodeName")
-  valid_594927 = validateParameter(valid_594927, JString, required = true,
+  var valid_569156 = path.getOrDefault("nodeName")
+  valid_569156 = validateParameter(valid_569156, JString, required = true,
                                  default = nil)
-  if valid_594927 != nil:
-    section.add "nodeName", valid_594927
+  if valid_569156 != nil:
+    section.add "nodeName", valid_569156
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -10044,18 +10044,18 @@ proc validate_ReportNodeHealth_594925(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594928 = query.getOrDefault("timeout")
-  valid_594928 = validateParameter(valid_594928, JInt, required = false,
+  var valid_569157 = query.getOrDefault("timeout")
+  valid_569157 = validateParameter(valid_569157, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594928 != nil:
-    section.add "timeout", valid_594928
+  if valid_569157 != nil:
+    section.add "timeout", valid_569157
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594929 = query.getOrDefault("api-version")
-  valid_594929 = validateParameter(valid_594929, JString, required = true,
+  var valid_569158 = query.getOrDefault("api-version")
+  valid_569158 = validateParameter(valid_569158, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594929 != nil:
-    section.add "api-version", valid_594929
+  if valid_569158 != nil:
+    section.add "api-version", valid_569158
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10069,7 +10069,7 @@ proc validate_ReportNodeHealth_594925(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594931: Call_ReportNodeHealth_594924; path: JsonNode;
+proc call*(call_569160: Call_ReportNodeHealth_569153; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reports health state of the specified Service Fabric node. The report must contain the information about the source of the health report and property on which it is reported.
   ## The report is sent to a Service Fabric gateway node, which forwards to the health store.
@@ -10078,16 +10078,16 @@ proc call*(call_594931: Call_ReportNodeHealth_594924; path: JsonNode;
   ## To see whether the report was applied in the health store, run GetNodeHealth and check that the report appears in the HealthEvents section.
   ## 
   ## 
-  let valid = call_594931.validator(path, query, header, formData, body)
-  let scheme = call_594931.pickScheme
+  let valid = call_569160.validator(path, query, header, formData, body)
+  let scheme = call_569160.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594931.url(scheme.get, call_594931.host, call_594931.base,
-                         call_594931.route, valid.getOrDefault("path"),
+  let url = call_569160.url(scheme.get, call_569160.host, call_569160.base,
+                         call_569160.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594931, url, valid)
+  result = hook(call_569160, url, valid)
 
-proc call*(call_594932: Call_ReportNodeHealth_594924; nodeName: string;
+proc call*(call_569161: Call_ReportNodeHealth_569153; nodeName: string;
           HealthInformation: JsonNode; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## reportNodeHealth
   ## Reports health state of the specified Service Fabric node. The report must contain the information about the source of the health report and property on which it is reported.
@@ -10104,24 +10104,24 @@ proc call*(call_594932: Call_ReportNodeHealth_594924; nodeName: string;
   ##           : The name of the node.
   ##   HealthInformation: JObject (required)
   ##                    : Describes the health information for the health report. This information needs to be present in all of the health reports sent to the health manager.
-  var path_594933 = newJObject()
-  var query_594934 = newJObject()
-  var body_594935 = newJObject()
-  add(query_594934, "timeout", newJInt(timeout))
-  add(query_594934, "api-version", newJString(apiVersion))
-  add(path_594933, "nodeName", newJString(nodeName))
+  var path_569162 = newJObject()
+  var query_569163 = newJObject()
+  var body_569164 = newJObject()
+  add(query_569163, "timeout", newJInt(timeout))
+  add(query_569163, "api-version", newJString(apiVersion))
+  add(path_569162, "nodeName", newJString(nodeName))
   if HealthInformation != nil:
-    body_594935 = HealthInformation
-  result = call_594932.call(path_594933, query_594934, nil, nil, body_594935)
+    body_569164 = HealthInformation
+  result = call_569161.call(path_569162, query_569163, nil, nil, body_569164)
 
-var reportNodeHealth* = Call_ReportNodeHealth_594924(name: "reportNodeHealth",
+var reportNodeHealth* = Call_ReportNodeHealth_569153(name: "reportNodeHealth",
     meth: HttpMethod.HttpPost, host: "azure.local:19080",
     route: "/Nodes/{nodeName}/$/ReportHealth",
-    validator: validate_ReportNodeHealth_594925, base: "",
-    url: url_ReportNodeHealth_594926, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_ReportNodeHealth_569154, base: "",
+    url: url_ReportNodeHealth_569155, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RestartNode_594936 = ref object of OpenApiRestCall_593437
-proc url_RestartNode_594938(protocol: Scheme; host: string; base: string;
+  Call_RestartNode_569165 = ref object of OpenApiRestCall_567666
+proc url_RestartNode_569167(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10137,7 +10137,7 @@ proc url_RestartNode_594938(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RestartNode_594937(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RestartNode_569166(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Restarts a Service Fabric cluster node that is already started.
   ## 
@@ -10148,11 +10148,11 @@ proc validate_RestartNode_594937(path: JsonNode; query: JsonNode; header: JsonNo
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594939 = path.getOrDefault("nodeName")
-  valid_594939 = validateParameter(valid_594939, JString, required = true,
+  var valid_569168 = path.getOrDefault("nodeName")
+  valid_569168 = validateParameter(valid_569168, JString, required = true,
                                  default = nil)
-  if valid_594939 != nil:
-    section.add "nodeName", valid_594939
+  if valid_569168 != nil:
+    section.add "nodeName", valid_569168
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -10160,18 +10160,18 @@ proc validate_RestartNode_594937(path: JsonNode; query: JsonNode; header: JsonNo
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594940 = query.getOrDefault("timeout")
-  valid_594940 = validateParameter(valid_594940, JInt, required = false,
+  var valid_569169 = query.getOrDefault("timeout")
+  valid_569169 = validateParameter(valid_569169, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594940 != nil:
-    section.add "timeout", valid_594940
+  if valid_569169 != nil:
+    section.add "timeout", valid_569169
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594941 = query.getOrDefault("api-version")
-  valid_594941 = validateParameter(valid_594941, JString, required = true,
+  var valid_569170 = query.getOrDefault("api-version")
+  valid_569170 = validateParameter(valid_569170, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594941 != nil:
-    section.add "api-version", valid_594941
+  if valid_569170 != nil:
+    section.add "api-version", valid_569170
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10185,20 +10185,20 @@ proc validate_RestartNode_594937(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594943: Call_RestartNode_594936; path: JsonNode; query: JsonNode;
+proc call*(call_569172: Call_RestartNode_569165; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restarts a Service Fabric cluster node that is already started.
   ## 
-  let valid = call_594943.validator(path, query, header, formData, body)
-  let scheme = call_594943.pickScheme
+  let valid = call_569172.validator(path, query, header, formData, body)
+  let scheme = call_569172.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594943.url(scheme.get, call_594943.host, call_594943.base,
-                         call_594943.route, valid.getOrDefault("path"),
+  let url = call_569172.url(scheme.get, call_569172.host, call_569172.base,
+                         call_569172.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594943, url, valid)
+  result = hook(call_569172, url, valid)
 
-proc call*(call_594944: Call_RestartNode_594936; nodeName: string;
+proc call*(call_569173: Call_RestartNode_569165; nodeName: string;
           RestartNodeDescription: JsonNode; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## restartNode
@@ -10211,26 +10211,26 @@ proc call*(call_594944: Call_RestartNode_594936; nodeName: string;
   ##           : The name of the node.
   ##   RestartNodeDescription: JObject (required)
   ##                         : The instance of the node to be restarted and a flag indicating the need to take dump of the fabric process.
-  var path_594945 = newJObject()
-  var query_594946 = newJObject()
-  var body_594947 = newJObject()
-  add(query_594946, "timeout", newJInt(timeout))
-  add(query_594946, "api-version", newJString(apiVersion))
-  add(path_594945, "nodeName", newJString(nodeName))
+  var path_569174 = newJObject()
+  var query_569175 = newJObject()
+  var body_569176 = newJObject()
+  add(query_569175, "timeout", newJInt(timeout))
+  add(query_569175, "api-version", newJString(apiVersion))
+  add(path_569174, "nodeName", newJString(nodeName))
   if RestartNodeDescription != nil:
-    body_594947 = RestartNodeDescription
-  result = call_594944.call(path_594945, query_594946, nil, nil, body_594947)
+    body_569176 = RestartNodeDescription
+  result = call_569173.call(path_569174, query_569175, nil, nil, body_569176)
 
-var restartNode* = Call_RestartNode_594936(name: "restartNode",
+var restartNode* = Call_RestartNode_569165(name: "restartNode",
                                         meth: HttpMethod.HttpPost,
                                         host: "azure.local:19080",
                                         route: "/Nodes/{nodeName}/$/Restart",
-                                        validator: validate_RestartNode_594937,
-                                        base: "", url: url_RestartNode_594938,
+                                        validator: validate_RestartNode_569166,
+                                        base: "", url: url_RestartNode_569167,
                                         schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_StartNode_594948 = ref object of OpenApiRestCall_593437
-proc url_StartNode_594950(protocol: Scheme; host: string; base: string; route: string;
+  Call_StartNode_569177 = ref object of OpenApiRestCall_567666
+proc url_StartNode_569179(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10246,7 +10246,7 @@ proc url_StartNode_594950(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StartNode_594949(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_StartNode_569178(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Starts a Service Fabric cluster node that is already stopped.
   ## 
@@ -10257,11 +10257,11 @@ proc validate_StartNode_594949(path: JsonNode; query: JsonNode; header: JsonNode
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594951 = path.getOrDefault("nodeName")
-  valid_594951 = validateParameter(valid_594951, JString, required = true,
+  var valid_569180 = path.getOrDefault("nodeName")
+  valid_569180 = validateParameter(valid_569180, JString, required = true,
                                  default = nil)
-  if valid_594951 != nil:
-    section.add "nodeName", valid_594951
+  if valid_569180 != nil:
+    section.add "nodeName", valid_569180
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -10269,18 +10269,18 @@ proc validate_StartNode_594949(path: JsonNode; query: JsonNode; header: JsonNode
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594952 = query.getOrDefault("timeout")
-  valid_594952 = validateParameter(valid_594952, JInt, required = false,
+  var valid_569181 = query.getOrDefault("timeout")
+  valid_569181 = validateParameter(valid_569181, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594952 != nil:
-    section.add "timeout", valid_594952
+  if valid_569181 != nil:
+    section.add "timeout", valid_569181
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594953 = query.getOrDefault("api-version")
-  valid_594953 = validateParameter(valid_594953, JString, required = true,
+  var valid_569182 = query.getOrDefault("api-version")
+  valid_569182 = validateParameter(valid_569182, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594953 != nil:
-    section.add "api-version", valid_594953
+  if valid_569182 != nil:
+    section.add "api-version", valid_569182
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10294,20 +10294,20 @@ proc validate_StartNode_594949(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594955: Call_StartNode_594948; path: JsonNode; query: JsonNode;
+proc call*(call_569184: Call_StartNode_569177; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts a Service Fabric cluster node that is already stopped.
   ## 
-  let valid = call_594955.validator(path, query, header, formData, body)
-  let scheme = call_594955.pickScheme
+  let valid = call_569184.validator(path, query, header, formData, body)
+  let scheme = call_569184.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594955.url(scheme.get, call_594955.host, call_594955.base,
-                         call_594955.route, valid.getOrDefault("path"),
+  let url = call_569184.url(scheme.get, call_569184.host, call_569184.base,
+                         call_569184.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594955, url, valid)
+  result = hook(call_569184, url, valid)
 
-proc call*(call_594956: Call_StartNode_594948; nodeName: string;
+proc call*(call_569185: Call_StartNode_569177; nodeName: string;
           StartNodeDescription: JsonNode; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## startNode
@@ -10320,25 +10320,25 @@ proc call*(call_594956: Call_StartNode_594948; nodeName: string;
   ##           : The name of the node.
   ##   StartNodeDescription: JObject (required)
   ##                       : The instance id of the stopped node that needs to be started.
-  var path_594957 = newJObject()
-  var query_594958 = newJObject()
-  var body_594959 = newJObject()
-  add(query_594958, "timeout", newJInt(timeout))
-  add(query_594958, "api-version", newJString(apiVersion))
-  add(path_594957, "nodeName", newJString(nodeName))
+  var path_569186 = newJObject()
+  var query_569187 = newJObject()
+  var body_569188 = newJObject()
+  add(query_569187, "timeout", newJInt(timeout))
+  add(query_569187, "api-version", newJString(apiVersion))
+  add(path_569186, "nodeName", newJString(nodeName))
   if StartNodeDescription != nil:
-    body_594959 = StartNodeDescription
-  result = call_594956.call(path_594957, query_594958, nil, nil, body_594959)
+    body_569188 = StartNodeDescription
+  result = call_569185.call(path_569186, query_569187, nil, nil, body_569188)
 
-var startNode* = Call_StartNode_594948(name: "startNode", meth: HttpMethod.HttpPost,
+var startNode* = Call_StartNode_569177(name: "startNode", meth: HttpMethod.HttpPost,
                                     host: "azure.local:19080",
                                     route: "/Nodes/{nodeName}/$/Start",
-                                    validator: validate_StartNode_594949,
-                                    base: "", url: url_StartNode_594950,
+                                    validator: validate_StartNode_569178,
+                                    base: "", url: url_StartNode_569179,
                                     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_StopNode_594960 = ref object of OpenApiRestCall_593437
-proc url_StopNode_594962(protocol: Scheme; host: string; base: string; route: string;
+  Call_StopNode_569189 = ref object of OpenApiRestCall_567666
+proc url_StopNode_569191(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10354,7 +10354,7 @@ proc url_StopNode_594962(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StopNode_594961(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_StopNode_569190(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Stops a Service Fabric cluster node that is in a started state. The node will stay down until start node is called.
   ## 
@@ -10365,11 +10365,11 @@ proc validate_StopNode_594961(path: JsonNode; query: JsonNode; header: JsonNode;
   ##           : The name of the node.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `nodeName` field"
-  var valid_594963 = path.getOrDefault("nodeName")
-  valid_594963 = validateParameter(valid_594963, JString, required = true,
+  var valid_569192 = path.getOrDefault("nodeName")
+  valid_569192 = validateParameter(valid_569192, JString, required = true,
                                  default = nil)
-  if valid_594963 != nil:
-    section.add "nodeName", valid_594963
+  if valid_569192 != nil:
+    section.add "nodeName", valid_569192
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -10377,18 +10377,18 @@ proc validate_StopNode_594961(path: JsonNode; query: JsonNode; header: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594964 = query.getOrDefault("timeout")
-  valid_594964 = validateParameter(valid_594964, JInt, required = false,
+  var valid_569193 = query.getOrDefault("timeout")
+  valid_569193 = validateParameter(valid_569193, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594964 != nil:
-    section.add "timeout", valid_594964
+  if valid_569193 != nil:
+    section.add "timeout", valid_569193
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594965 = query.getOrDefault("api-version")
-  valid_594965 = validateParameter(valid_594965, JString, required = true,
+  var valid_569194 = query.getOrDefault("api-version")
+  valid_569194 = validateParameter(valid_569194, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594965 != nil:
-    section.add "api-version", valid_594965
+  if valid_569194 != nil:
+    section.add "api-version", valid_569194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10402,20 +10402,20 @@ proc validate_StopNode_594961(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594967: Call_StopNode_594960; path: JsonNode; query: JsonNode;
+proc call*(call_569196: Call_StopNode_569189; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stops a Service Fabric cluster node that is in a started state. The node will stay down until start node is called.
   ## 
-  let valid = call_594967.validator(path, query, header, formData, body)
-  let scheme = call_594967.pickScheme
+  let valid = call_569196.validator(path, query, header, formData, body)
+  let scheme = call_569196.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594967.url(scheme.get, call_594967.host, call_594967.base,
-                         call_594967.route, valid.getOrDefault("path"),
+  let url = call_569196.url(scheme.get, call_569196.host, call_569196.base,
+                         call_569196.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594967, url, valid)
+  result = hook(call_569196, url, valid)
 
-proc call*(call_594968: Call_StopNode_594960; nodeName: string;
+proc call*(call_569197: Call_StopNode_569189; nodeName: string;
           StopNodeDescription: JsonNode; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## stopNode
   ## Stops a Service Fabric cluster node that is in a started state. The node will stay down until start node is called.
@@ -10427,25 +10427,25 @@ proc call*(call_594968: Call_StopNode_594960; nodeName: string;
   ##           : The name of the node.
   ##   StopNodeDescription: JObject (required)
   ##                      : The instance id of the stopped node that needs to be stopped.
-  var path_594969 = newJObject()
-  var query_594970 = newJObject()
-  var body_594971 = newJObject()
-  add(query_594970, "timeout", newJInt(timeout))
-  add(query_594970, "api-version", newJString(apiVersion))
-  add(path_594969, "nodeName", newJString(nodeName))
+  var path_569198 = newJObject()
+  var query_569199 = newJObject()
+  var body_569200 = newJObject()
+  add(query_569199, "timeout", newJInt(timeout))
+  add(query_569199, "api-version", newJString(apiVersion))
+  add(path_569198, "nodeName", newJString(nodeName))
   if StopNodeDescription != nil:
-    body_594971 = StopNodeDescription
-  result = call_594968.call(path_594969, query_594970, nil, nil, body_594971)
+    body_569200 = StopNodeDescription
+  result = call_569197.call(path_569198, query_569199, nil, nil, body_569200)
 
-var stopNode* = Call_StopNode_594960(name: "stopNode", meth: HttpMethod.HttpPost,
+var stopNode* = Call_StopNode_569189(name: "stopNode", meth: HttpMethod.HttpPost,
                                   host: "azure.local:19080",
                                   route: "/Nodes/{nodeName}/$/Stop",
-                                  validator: validate_StopNode_594961, base: "",
-                                  url: url_StopNode_594962,
+                                  validator: validate_StopNode_569190, base: "",
+                                  url: url_StopNode_569191,
                                   schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetPartitionInfo_594972 = ref object of OpenApiRestCall_593437
-proc url_GetPartitionInfo_594974(protocol: Scheme; host: string; base: string;
+  Call_GetPartitionInfo_569201 = ref object of OpenApiRestCall_567666
+proc url_GetPartitionInfo_569203(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10460,7 +10460,7 @@ proc url_GetPartitionInfo_594974(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetPartitionInfo_594973(path: JsonNode; query: JsonNode;
+proc validate_GetPartitionInfo_569202(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## The Partitions endpoint returns information about the specified partition. The response include the partition id, partitioning scheme information, keys supported by the partition, status, health and other details about the partition.
@@ -10473,11 +10473,11 @@ proc validate_GetPartitionInfo_594973(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_594975 = path.getOrDefault("partitionId")
-  valid_594975 = validateParameter(valid_594975, JString, required = true,
+  var valid_569204 = path.getOrDefault("partitionId")
+  valid_569204 = validateParameter(valid_569204, JString, required = true,
                                  default = nil)
-  if valid_594975 != nil:
-    section.add "partitionId", valid_594975
+  if valid_569204 != nil:
+    section.add "partitionId", valid_569204
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -10485,18 +10485,18 @@ proc validate_GetPartitionInfo_594973(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_594976 = query.getOrDefault("timeout")
-  valid_594976 = validateParameter(valid_594976, JInt, required = false,
+  var valid_569205 = query.getOrDefault("timeout")
+  valid_569205 = validateParameter(valid_569205, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594976 != nil:
-    section.add "timeout", valid_594976
+  if valid_569205 != nil:
+    section.add "timeout", valid_569205
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594977 = query.getOrDefault("api-version")
-  valid_594977 = validateParameter(valid_594977, JString, required = true,
+  var valid_569206 = query.getOrDefault("api-version")
+  valid_569206 = validateParameter(valid_569206, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594977 != nil:
-    section.add "api-version", valid_594977
+  if valid_569206 != nil:
+    section.add "api-version", valid_569206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10505,20 +10505,20 @@ proc validate_GetPartitionInfo_594973(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594978: Call_GetPartitionInfo_594972; path: JsonNode;
+proc call*(call_569207: Call_GetPartitionInfo_569201; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Partitions endpoint returns information about the specified partition. The response include the partition id, partitioning scheme information, keys supported by the partition, status, health and other details about the partition.
   ## 
-  let valid = call_594978.validator(path, query, header, formData, body)
-  let scheme = call_594978.pickScheme
+  let valid = call_569207.validator(path, query, header, formData, body)
+  let scheme = call_569207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594978.url(scheme.get, call_594978.host, call_594978.base,
-                         call_594978.route, valid.getOrDefault("path"),
+  let url = call_569207.url(scheme.get, call_569207.host, call_569207.base,
+                         call_569207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594978, url, valid)
+  result = hook(call_569207, url, valid)
 
-proc call*(call_594979: Call_GetPartitionInfo_594972; partitionId: string;
+proc call*(call_569208: Call_GetPartitionInfo_569201; partitionId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getPartitionInfo
   ## The Partitions endpoint returns information about the specified partition. The response include the partition id, partitioning scheme information, keys supported by the partition, status, health and other details about the partition.
@@ -10528,20 +10528,20 @@ proc call*(call_594979: Call_GetPartitionInfo_594972; partitionId: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_594980 = newJObject()
-  var query_594981 = newJObject()
-  add(query_594981, "timeout", newJInt(timeout))
-  add(query_594981, "api-version", newJString(apiVersion))
-  add(path_594980, "partitionId", newJString(partitionId))
-  result = call_594979.call(path_594980, query_594981, nil, nil, nil)
+  var path_569209 = newJObject()
+  var query_569210 = newJObject()
+  add(query_569210, "timeout", newJInt(timeout))
+  add(query_569210, "api-version", newJString(apiVersion))
+  add(path_569209, "partitionId", newJString(partitionId))
+  result = call_569208.call(path_569209, query_569210, nil, nil, nil)
 
-var getPartitionInfo* = Call_GetPartitionInfo_594972(name: "getPartitionInfo",
+var getPartitionInfo* = Call_GetPartitionInfo_569201(name: "getPartitionInfo",
     meth: HttpMethod.HttpGet, host: "azure.local:19080",
-    route: "/Partitions/{partitionId}", validator: validate_GetPartitionInfo_594973,
-    base: "", url: url_GetPartitionInfo_594974, schemes: {Scheme.Https, Scheme.Http})
+    route: "/Partitions/{partitionId}", validator: validate_GetPartitionInfo_569202,
+    base: "", url: url_GetPartitionInfo_569203, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetPartitionHealthUsingPolicy_594994 = ref object of OpenApiRestCall_593437
-proc url_GetPartitionHealthUsingPolicy_594996(protocol: Scheme; host: string;
+  Call_GetPartitionHealthUsingPolicy_569223 = ref object of OpenApiRestCall_567666
+proc url_GetPartitionHealthUsingPolicy_569225(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10557,7 +10557,7 @@ proc url_GetPartitionHealthUsingPolicy_594996(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetPartitionHealthUsingPolicy_594995(path: JsonNode; query: JsonNode;
+proc validate_GetPartitionHealthUsingPolicy_569224(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the health information of the specified partition.
   ## If the application health policy is specified, the health evaluation uses it to get the aggregated health state.
@@ -10575,11 +10575,11 @@ proc validate_GetPartitionHealthUsingPolicy_594995(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_594997 = path.getOrDefault("partitionId")
-  valid_594997 = validateParameter(valid_594997, JString, required = true,
+  var valid_569226 = path.getOrDefault("partitionId")
+  valid_569226 = validateParameter(valid_569226, JString, required = true,
                                  default = nil)
-  if valid_594997 != nil:
-    section.add "partitionId", valid_594997
+  if valid_569226 != nil:
+    section.add "partitionId", valid_569226
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -10610,28 +10610,28 @@ proc validate_GetPartitionHealthUsingPolicy_594995(path: JsonNode; query: JsonNo
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594998 = query.getOrDefault("timeout")
-  valid_594998 = validateParameter(valid_594998, JInt, required = false,
+  var valid_569227 = query.getOrDefault("timeout")
+  valid_569227 = validateParameter(valid_569227, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594998 != nil:
-    section.add "timeout", valid_594998
+  if valid_569227 != nil:
+    section.add "timeout", valid_569227
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594999 = query.getOrDefault("api-version")
-  valid_594999 = validateParameter(valid_594999, JString, required = true,
+  var valid_569228 = query.getOrDefault("api-version")
+  valid_569228 = validateParameter(valid_569228, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594999 != nil:
-    section.add "api-version", valid_594999
-  var valid_595000 = query.getOrDefault("ReplicasHealthStateFilter")
-  valid_595000 = validateParameter(valid_595000, JInt, required = false,
+  if valid_569228 != nil:
+    section.add "api-version", valid_569228
+  var valid_569229 = query.getOrDefault("ReplicasHealthStateFilter")
+  valid_569229 = validateParameter(valid_569229, JInt, required = false,
                                  default = newJInt(0))
-  if valid_595000 != nil:
-    section.add "ReplicasHealthStateFilter", valid_595000
-  var valid_595001 = query.getOrDefault("EventsHealthStateFilter")
-  valid_595001 = validateParameter(valid_595001, JInt, required = false,
+  if valid_569229 != nil:
+    section.add "ReplicasHealthStateFilter", valid_569229
+  var valid_569230 = query.getOrDefault("EventsHealthStateFilter")
+  valid_569230 = validateParameter(valid_569230, JInt, required = false,
                                  default = newJInt(0))
-  if valid_595001 != nil:
-    section.add "EventsHealthStateFilter", valid_595001
+  if valid_569230 != nil:
+    section.add "EventsHealthStateFilter", valid_569230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10646,7 +10646,7 @@ proc validate_GetPartitionHealthUsingPolicy_594995(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_595003: Call_GetPartitionHealthUsingPolicy_594994; path: JsonNode;
+proc call*(call_569232: Call_GetPartitionHealthUsingPolicy_569223; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health information of the specified partition.
   ## If the application health policy is specified, the health evaluation uses it to get the aggregated health state.
@@ -10656,16 +10656,16 @@ proc call*(call_595003: Call_GetPartitionHealthUsingPolicy_594994; path: JsonNod
   ## If you specify a partition that does not exist in the health store, this cmdlet returns an error.
   ## 
   ## 
-  let valid = call_595003.validator(path, query, header, formData, body)
-  let scheme = call_595003.pickScheme
+  let valid = call_569232.validator(path, query, header, formData, body)
+  let scheme = call_569232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595003.url(scheme.get, call_595003.host, call_595003.base,
-                         call_595003.route, valid.getOrDefault("path"),
+  let url = call_569232.url(scheme.get, call_569232.host, call_569232.base,
+                         call_569232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595003, url, valid)
+  result = hook(call_569232, url, valid)
 
-proc call*(call_595004: Call_GetPartitionHealthUsingPolicy_594994;
+proc call*(call_569233: Call_GetPartitionHealthUsingPolicy_569223;
           partitionId: string; timeout: int = 60; apiVersion: string = "3.0";
           ReplicasHealthStateFilter: int = 0;
           ApplicationHealthPolicy: JsonNode = nil; EventsHealthStateFilter: int = 0): Recallable =
@@ -10710,28 +10710,28 @@ proc call*(call_595004: Call_GetPartitionHealthUsingPolicy_594994;
   ## 
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_595005 = newJObject()
-  var query_595006 = newJObject()
-  var body_595007 = newJObject()
-  add(query_595006, "timeout", newJInt(timeout))
-  add(query_595006, "api-version", newJString(apiVersion))
-  add(query_595006, "ReplicasHealthStateFilter",
+  var path_569234 = newJObject()
+  var query_569235 = newJObject()
+  var body_569236 = newJObject()
+  add(query_569235, "timeout", newJInt(timeout))
+  add(query_569235, "api-version", newJString(apiVersion))
+  add(query_569235, "ReplicasHealthStateFilter",
       newJInt(ReplicasHealthStateFilter))
   if ApplicationHealthPolicy != nil:
-    body_595007 = ApplicationHealthPolicy
-  add(query_595006, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_595005, "partitionId", newJString(partitionId))
-  result = call_595004.call(path_595005, query_595006, nil, nil, body_595007)
+    body_569236 = ApplicationHealthPolicy
+  add(query_569235, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_569234, "partitionId", newJString(partitionId))
+  result = call_569233.call(path_569234, query_569235, nil, nil, body_569236)
 
-var getPartitionHealthUsingPolicy* = Call_GetPartitionHealthUsingPolicy_594994(
+var getPartitionHealthUsingPolicy* = Call_GetPartitionHealthUsingPolicy_569223(
     name: "getPartitionHealthUsingPolicy", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Partitions/{partitionId}/$/GetHealth",
-    validator: validate_GetPartitionHealthUsingPolicy_594995, base: "",
-    url: url_GetPartitionHealthUsingPolicy_594996,
+    validator: validate_GetPartitionHealthUsingPolicy_569224, base: "",
+    url: url_GetPartitionHealthUsingPolicy_569225,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetPartitionHealth_594982 = ref object of OpenApiRestCall_593437
-proc url_GetPartitionHealth_594984(protocol: Scheme; host: string; base: string;
+  Call_GetPartitionHealth_569211 = ref object of OpenApiRestCall_567666
+proc url_GetPartitionHealth_569213(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10747,7 +10747,7 @@ proc url_GetPartitionHealth_594984(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetPartitionHealth_594983(path: JsonNode; query: JsonNode;
+proc validate_GetPartitionHealth_569212(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the health information of the specified partition.
@@ -10764,11 +10764,11 @@ proc validate_GetPartitionHealth_594983(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_594985 = path.getOrDefault("partitionId")
-  valid_594985 = validateParameter(valid_594985, JString, required = true,
+  var valid_569214 = path.getOrDefault("partitionId")
+  valid_569214 = validateParameter(valid_569214, JString, required = true,
                                  default = nil)
-  if valid_594985 != nil:
-    section.add "partitionId", valid_594985
+  if valid_569214 != nil:
+    section.add "partitionId", valid_569214
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -10799,28 +10799,28 @@ proc validate_GetPartitionHealth_594983(path: JsonNode; query: JsonNode;
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_594986 = query.getOrDefault("timeout")
-  valid_594986 = validateParameter(valid_594986, JInt, required = false,
+  var valid_569215 = query.getOrDefault("timeout")
+  valid_569215 = validateParameter(valid_569215, JInt, required = false,
                                  default = newJInt(60))
-  if valid_594986 != nil:
-    section.add "timeout", valid_594986
+  if valid_569215 != nil:
+    section.add "timeout", valid_569215
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594987 = query.getOrDefault("api-version")
-  valid_594987 = validateParameter(valid_594987, JString, required = true,
+  var valid_569216 = query.getOrDefault("api-version")
+  valid_569216 = validateParameter(valid_569216, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_594987 != nil:
-    section.add "api-version", valid_594987
-  var valid_594988 = query.getOrDefault("ReplicasHealthStateFilter")
-  valid_594988 = validateParameter(valid_594988, JInt, required = false,
+  if valid_569216 != nil:
+    section.add "api-version", valid_569216
+  var valid_569217 = query.getOrDefault("ReplicasHealthStateFilter")
+  valid_569217 = validateParameter(valid_569217, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594988 != nil:
-    section.add "ReplicasHealthStateFilter", valid_594988
-  var valid_594989 = query.getOrDefault("EventsHealthStateFilter")
-  valid_594989 = validateParameter(valid_594989, JInt, required = false,
+  if valid_569217 != nil:
+    section.add "ReplicasHealthStateFilter", valid_569217
+  var valid_569218 = query.getOrDefault("EventsHealthStateFilter")
+  valid_569218 = validateParameter(valid_569218, JInt, required = false,
                                  default = newJInt(0))
-  if valid_594989 != nil:
-    section.add "EventsHealthStateFilter", valid_594989
+  if valid_569218 != nil:
+    section.add "EventsHealthStateFilter", valid_569218
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10829,7 +10829,7 @@ proc validate_GetPartitionHealth_594983(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594990: Call_GetPartitionHealth_594982; path: JsonNode;
+proc call*(call_569219: Call_GetPartitionHealth_569211; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health information of the specified partition.
   ## Use EventsHealthStateFilter to filter the collection of health events reported on the service based on the health state.
@@ -10837,16 +10837,16 @@ proc call*(call_594990: Call_GetPartitionHealth_594982; path: JsonNode;
   ## If you specify a partition that does not exist in the health store, this cmdlet returns an error.
   ## 
   ## 
-  let valid = call_594990.validator(path, query, header, formData, body)
-  let scheme = call_594990.pickScheme
+  let valid = call_569219.validator(path, query, header, formData, body)
+  let scheme = call_569219.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594990.url(scheme.get, call_594990.host, call_594990.base,
-                         call_594990.route, valid.getOrDefault("path"),
+  let url = call_569219.url(scheme.get, call_569219.host, call_569219.base,
+                         call_569219.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594990, url, valid)
+  result = hook(call_569219, url, valid)
 
-proc call*(call_594991: Call_GetPartitionHealth_594982; partitionId: string;
+proc call*(call_569220: Call_GetPartitionHealth_569211; partitionId: string;
           timeout: int = 60; apiVersion: string = "3.0";
           ReplicasHealthStateFilter: int = 0; EventsHealthStateFilter: int = 0): Recallable =
   ## getPartitionHealth
@@ -10884,24 +10884,24 @@ proc call*(call_594991: Call_GetPartitionHealth_594982; partitionId: string;
   ## 
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_594992 = newJObject()
-  var query_594993 = newJObject()
-  add(query_594993, "timeout", newJInt(timeout))
-  add(query_594993, "api-version", newJString(apiVersion))
-  add(query_594993, "ReplicasHealthStateFilter",
+  var path_569221 = newJObject()
+  var query_569222 = newJObject()
+  add(query_569222, "timeout", newJInt(timeout))
+  add(query_569222, "api-version", newJString(apiVersion))
+  add(query_569222, "ReplicasHealthStateFilter",
       newJInt(ReplicasHealthStateFilter))
-  add(query_594993, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_594992, "partitionId", newJString(partitionId))
-  result = call_594991.call(path_594992, query_594993, nil, nil, nil)
+  add(query_569222, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_569221, "partitionId", newJString(partitionId))
+  result = call_569220.call(path_569221, query_569222, nil, nil, nil)
 
-var getPartitionHealth* = Call_GetPartitionHealth_594982(
+var getPartitionHealth* = Call_GetPartitionHealth_569211(
     name: "getPartitionHealth", meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Partitions/{partitionId}/$/GetHealth",
-    validator: validate_GetPartitionHealth_594983, base: "",
-    url: url_GetPartitionHealth_594984, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetPartitionHealth_569212, base: "",
+    url: url_GetPartitionHealth_569213, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetPartitionLoadInformation_595008 = ref object of OpenApiRestCall_593437
-proc url_GetPartitionLoadInformation_595010(protocol: Scheme; host: string;
+  Call_GetPartitionLoadInformation_569237 = ref object of OpenApiRestCall_567666
+proc url_GetPartitionLoadInformation_569239(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10917,7 +10917,7 @@ proc url_GetPartitionLoadInformation_595010(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetPartitionLoadInformation_595009(path: JsonNode; query: JsonNode;
+proc validate_GetPartitionLoadInformation_569238(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns information about the specified partition.
   ## The response includes a list of load information.
@@ -10932,11 +10932,11 @@ proc validate_GetPartitionLoadInformation_595009(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_595011 = path.getOrDefault("partitionId")
-  valid_595011 = validateParameter(valid_595011, JString, required = true,
+  var valid_569240 = path.getOrDefault("partitionId")
+  valid_569240 = validateParameter(valid_569240, JString, required = true,
                                  default = nil)
-  if valid_595011 != nil:
-    section.add "partitionId", valid_595011
+  if valid_569240 != nil:
+    section.add "partitionId", valid_569240
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -10944,18 +10944,18 @@ proc validate_GetPartitionLoadInformation_595009(path: JsonNode; query: JsonNode
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595012 = query.getOrDefault("timeout")
-  valid_595012 = validateParameter(valid_595012, JInt, required = false,
+  var valid_569241 = query.getOrDefault("timeout")
+  valid_569241 = validateParameter(valid_569241, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595012 != nil:
-    section.add "timeout", valid_595012
+  if valid_569241 != nil:
+    section.add "timeout", valid_569241
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595013 = query.getOrDefault("api-version")
-  valid_595013 = validateParameter(valid_595013, JString, required = true,
+  var valid_569242 = query.getOrDefault("api-version")
+  valid_569242 = validateParameter(valid_569242, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595013 != nil:
-    section.add "api-version", valid_595013
+  if valid_569242 != nil:
+    section.add "api-version", valid_569242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10964,23 +10964,23 @@ proc validate_GetPartitionLoadInformation_595009(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_595014: Call_GetPartitionLoadInformation_595008; path: JsonNode;
+proc call*(call_569243: Call_GetPartitionLoadInformation_569237; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns information about the specified partition.
   ## The response includes a list of load information.
   ## Each information includes load metric name, value and last reported time in UTC.
   ## 
   ## 
-  let valid = call_595014.validator(path, query, header, formData, body)
-  let scheme = call_595014.pickScheme
+  let valid = call_569243.validator(path, query, header, formData, body)
+  let scheme = call_569243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595014.url(scheme.get, call_595014.host, call_595014.base,
-                         call_595014.route, valid.getOrDefault("path"),
+  let url = call_569243.url(scheme.get, call_569243.host, call_569243.base,
+                         call_569243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595014, url, valid)
+  result = hook(call_569243, url, valid)
 
-proc call*(call_595015: Call_GetPartitionLoadInformation_595008;
+proc call*(call_569244: Call_GetPartitionLoadInformation_569237;
           partitionId: string; timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getPartitionLoadInformation
   ## Returns information about the specified partition.
@@ -10993,23 +10993,23 @@ proc call*(call_595015: Call_GetPartitionLoadInformation_595008;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_595016 = newJObject()
-  var query_595017 = newJObject()
-  add(query_595017, "timeout", newJInt(timeout))
-  add(query_595017, "api-version", newJString(apiVersion))
-  add(path_595016, "partitionId", newJString(partitionId))
-  result = call_595015.call(path_595016, query_595017, nil, nil, nil)
+  var path_569245 = newJObject()
+  var query_569246 = newJObject()
+  add(query_569246, "timeout", newJInt(timeout))
+  add(query_569246, "api-version", newJString(apiVersion))
+  add(path_569245, "partitionId", newJString(partitionId))
+  result = call_569244.call(path_569245, query_569246, nil, nil, nil)
 
-var getPartitionLoadInformation* = Call_GetPartitionLoadInformation_595008(
+var getPartitionLoadInformation* = Call_GetPartitionLoadInformation_569237(
     name: "getPartitionLoadInformation", meth: HttpMethod.HttpGet,
     host: "azure.local:19080",
     route: "/Partitions/{partitionId}/$/GetLoadInformation",
-    validator: validate_GetPartitionLoadInformation_595009, base: "",
-    url: url_GetPartitionLoadInformation_595010,
+    validator: validate_GetPartitionLoadInformation_569238, base: "",
+    url: url_GetPartitionLoadInformation_569239,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetReplicaInfoList_595018 = ref object of OpenApiRestCall_593437
-proc url_GetReplicaInfoList_595020(protocol: Scheme; host: string; base: string;
+  Call_GetReplicaInfoList_569247 = ref object of OpenApiRestCall_567666
+proc url_GetReplicaInfoList_569249(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11025,7 +11025,7 @@ proc url_GetReplicaInfoList_595020(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetReplicaInfoList_595019(path: JsonNode; query: JsonNode;
+proc validate_GetReplicaInfoList_569248(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## The GetReplicas endpoint returns information about the replicas of the specified partition. The respons include the id, role, status, health, node name, uptime, and other details about the replica.
@@ -11038,11 +11038,11 @@ proc validate_GetReplicaInfoList_595019(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_595021 = path.getOrDefault("partitionId")
-  valid_595021 = validateParameter(valid_595021, JString, required = true,
+  var valid_569250 = path.getOrDefault("partitionId")
+  valid_569250 = validateParameter(valid_569250, JString, required = true,
                                  default = nil)
-  if valid_595021 != nil:
-    section.add "partitionId", valid_595021
+  if valid_569250 != nil:
+    section.add "partitionId", valid_569250
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -11052,23 +11052,23 @@ proc validate_GetReplicaInfoList_595019(path: JsonNode; query: JsonNode;
   ##   ContinuationToken: JString
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
   section = newJObject()
-  var valid_595022 = query.getOrDefault("timeout")
-  valid_595022 = validateParameter(valid_595022, JInt, required = false,
+  var valid_569251 = query.getOrDefault("timeout")
+  valid_569251 = validateParameter(valid_569251, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595022 != nil:
-    section.add "timeout", valid_595022
+  if valid_569251 != nil:
+    section.add "timeout", valid_569251
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595023 = query.getOrDefault("api-version")
-  valid_595023 = validateParameter(valid_595023, JString, required = true,
+  var valid_569252 = query.getOrDefault("api-version")
+  valid_569252 = validateParameter(valid_569252, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595023 != nil:
-    section.add "api-version", valid_595023
-  var valid_595024 = query.getOrDefault("ContinuationToken")
-  valid_595024 = validateParameter(valid_595024, JString, required = false,
+  if valid_569252 != nil:
+    section.add "api-version", valid_569252
+  var valid_569253 = query.getOrDefault("ContinuationToken")
+  valid_569253 = validateParameter(valid_569253, JString, required = false,
                                  default = nil)
-  if valid_595024 != nil:
-    section.add "ContinuationToken", valid_595024
+  if valid_569253 != nil:
+    section.add "ContinuationToken", valid_569253
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11077,20 +11077,20 @@ proc validate_GetReplicaInfoList_595019(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595025: Call_GetReplicaInfoList_595018; path: JsonNode;
+proc call*(call_569254: Call_GetReplicaInfoList_569247; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetReplicas endpoint returns information about the replicas of the specified partition. The respons include the id, role, status, health, node name, uptime, and other details about the replica.
   ## 
-  let valid = call_595025.validator(path, query, header, formData, body)
-  let scheme = call_595025.pickScheme
+  let valid = call_569254.validator(path, query, header, formData, body)
+  let scheme = call_569254.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595025.url(scheme.get, call_595025.host, call_595025.base,
-                         call_595025.route, valid.getOrDefault("path"),
+  let url = call_569254.url(scheme.get, call_569254.host, call_569254.base,
+                         call_569254.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595025, url, valid)
+  result = hook(call_569254, url, valid)
 
-proc call*(call_595026: Call_GetReplicaInfoList_595018; partitionId: string;
+proc call*(call_569255: Call_GetReplicaInfoList_569247; partitionId: string;
           timeout: int = 60; apiVersion: string = "3.0"; ContinuationToken: string = ""): Recallable =
   ## getReplicaInfoList
   ## The GetReplicas endpoint returns information about the replicas of the specified partition. The respons include the id, role, status, health, node name, uptime, and other details about the replica.
@@ -11102,22 +11102,22 @@ proc call*(call_595026: Call_GetReplicaInfoList_595018; partitionId: string;
   ##              : The identity of the partition.
   ##   ContinuationToken: string
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
-  var path_595027 = newJObject()
-  var query_595028 = newJObject()
-  add(query_595028, "timeout", newJInt(timeout))
-  add(query_595028, "api-version", newJString(apiVersion))
-  add(path_595027, "partitionId", newJString(partitionId))
-  add(query_595028, "ContinuationToken", newJString(ContinuationToken))
-  result = call_595026.call(path_595027, query_595028, nil, nil, nil)
+  var path_569256 = newJObject()
+  var query_569257 = newJObject()
+  add(query_569257, "timeout", newJInt(timeout))
+  add(query_569257, "api-version", newJString(apiVersion))
+  add(path_569256, "partitionId", newJString(partitionId))
+  add(query_569257, "ContinuationToken", newJString(ContinuationToken))
+  result = call_569255.call(path_569256, query_569257, nil, nil, nil)
 
-var getReplicaInfoList* = Call_GetReplicaInfoList_595018(
+var getReplicaInfoList* = Call_GetReplicaInfoList_569247(
     name: "getReplicaInfoList", meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Partitions/{partitionId}/$/GetReplicas",
-    validator: validate_GetReplicaInfoList_595019, base: "",
-    url: url_GetReplicaInfoList_595020, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetReplicaInfoList_569248, base: "",
+    url: url_GetReplicaInfoList_569249, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetReplicaInfo_595029 = ref object of OpenApiRestCall_593437
-proc url_GetReplicaInfo_595031(protocol: Scheme; host: string; base: string;
+  Call_GetReplicaInfo_569258 = ref object of OpenApiRestCall_567666
+proc url_GetReplicaInfo_569260(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11135,7 +11135,7 @@ proc url_GetReplicaInfo_595031(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetReplicaInfo_595030(path: JsonNode; query: JsonNode;
+proc validate_GetReplicaInfo_569259(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## The respons include the id, role, status, health, node name, uptime, and other details about the replica.
@@ -11149,16 +11149,16 @@ proc validate_GetReplicaInfo_595030(path: JsonNode; query: JsonNode;
   ##              : The identity of the partition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `replicaId` field"
-  var valid_595032 = path.getOrDefault("replicaId")
-  valid_595032 = validateParameter(valid_595032, JString, required = true,
+  var valid_569261 = path.getOrDefault("replicaId")
+  valid_569261 = validateParameter(valid_569261, JString, required = true,
                                  default = nil)
-  if valid_595032 != nil:
-    section.add "replicaId", valid_595032
-  var valid_595033 = path.getOrDefault("partitionId")
-  valid_595033 = validateParameter(valid_595033, JString, required = true,
+  if valid_569261 != nil:
+    section.add "replicaId", valid_569261
+  var valid_569262 = path.getOrDefault("partitionId")
+  valid_569262 = validateParameter(valid_569262, JString, required = true,
                                  default = nil)
-  if valid_595033 != nil:
-    section.add "partitionId", valid_595033
+  if valid_569262 != nil:
+    section.add "partitionId", valid_569262
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -11168,23 +11168,23 @@ proc validate_GetReplicaInfo_595030(path: JsonNode; query: JsonNode;
   ##   ContinuationToken: JString
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
   section = newJObject()
-  var valid_595034 = query.getOrDefault("timeout")
-  valid_595034 = validateParameter(valid_595034, JInt, required = false,
+  var valid_569263 = query.getOrDefault("timeout")
+  valid_569263 = validateParameter(valid_569263, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595034 != nil:
-    section.add "timeout", valid_595034
+  if valid_569263 != nil:
+    section.add "timeout", valid_569263
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595035 = query.getOrDefault("api-version")
-  valid_595035 = validateParameter(valid_595035, JString, required = true,
+  var valid_569264 = query.getOrDefault("api-version")
+  valid_569264 = validateParameter(valid_569264, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595035 != nil:
-    section.add "api-version", valid_595035
-  var valid_595036 = query.getOrDefault("ContinuationToken")
-  valid_595036 = validateParameter(valid_595036, JString, required = false,
+  if valid_569264 != nil:
+    section.add "api-version", valid_569264
+  var valid_569265 = query.getOrDefault("ContinuationToken")
+  valid_569265 = validateParameter(valid_569265, JString, required = false,
                                  default = nil)
-  if valid_595036 != nil:
-    section.add "ContinuationToken", valid_595036
+  if valid_569265 != nil:
+    section.add "ContinuationToken", valid_569265
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11193,20 +11193,20 @@ proc validate_GetReplicaInfo_595030(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595037: Call_GetReplicaInfo_595029; path: JsonNode; query: JsonNode;
+proc call*(call_569266: Call_GetReplicaInfo_569258; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The respons include the id, role, status, health, node name, uptime, and other details about the replica.
   ## 
-  let valid = call_595037.validator(path, query, header, formData, body)
-  let scheme = call_595037.pickScheme
+  let valid = call_569266.validator(path, query, header, formData, body)
+  let scheme = call_569266.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595037.url(scheme.get, call_595037.host, call_595037.base,
-                         call_595037.route, valid.getOrDefault("path"),
+  let url = call_569266.url(scheme.get, call_569266.host, call_569266.base,
+                         call_569266.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595037, url, valid)
+  result = hook(call_569266, url, valid)
 
-proc call*(call_595038: Call_GetReplicaInfo_595029; replicaId: string;
+proc call*(call_569267: Call_GetReplicaInfo_569258; replicaId: string;
           partitionId: string; timeout: int = 60; apiVersion: string = "3.0";
           ContinuationToken: string = ""): Recallable =
   ## getReplicaInfo
@@ -11221,23 +11221,23 @@ proc call*(call_595038: Call_GetReplicaInfo_595029; replicaId: string;
   ##              : The identity of the partition.
   ##   ContinuationToken: string
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
-  var path_595039 = newJObject()
-  var query_595040 = newJObject()
-  add(path_595039, "replicaId", newJString(replicaId))
-  add(query_595040, "timeout", newJInt(timeout))
-  add(query_595040, "api-version", newJString(apiVersion))
-  add(path_595039, "partitionId", newJString(partitionId))
-  add(query_595040, "ContinuationToken", newJString(ContinuationToken))
-  result = call_595038.call(path_595039, query_595040, nil, nil, nil)
+  var path_569268 = newJObject()
+  var query_569269 = newJObject()
+  add(path_569268, "replicaId", newJString(replicaId))
+  add(query_569269, "timeout", newJInt(timeout))
+  add(query_569269, "api-version", newJString(apiVersion))
+  add(path_569268, "partitionId", newJString(partitionId))
+  add(query_569269, "ContinuationToken", newJString(ContinuationToken))
+  result = call_569267.call(path_569268, query_569269, nil, nil, nil)
 
-var getReplicaInfo* = Call_GetReplicaInfo_595029(name: "getReplicaInfo",
+var getReplicaInfo* = Call_GetReplicaInfo_569258(name: "getReplicaInfo",
     meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Partitions/{partitionId}/$/GetReplicas/{replicaId}",
-    validator: validate_GetReplicaInfo_595030, base: "", url: url_GetReplicaInfo_595031,
+    validator: validate_GetReplicaInfo_569259, base: "", url: url_GetReplicaInfo_569260,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetReplicaHealthUsingPolicy_595053 = ref object of OpenApiRestCall_593437
-proc url_GetReplicaHealthUsingPolicy_595055(protocol: Scheme; host: string;
+  Call_GetReplicaHealthUsingPolicy_569282 = ref object of OpenApiRestCall_567666
+proc url_GetReplicaHealthUsingPolicy_569284(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11256,7 +11256,7 @@ proc url_GetReplicaHealthUsingPolicy_595055(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetReplicaHealthUsingPolicy_595054(path: JsonNode; query: JsonNode;
+proc validate_GetReplicaHealthUsingPolicy_569283(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the health of a Service Fabric stateful service replica or stateless service instance.
   ## Use EventsHealthStateFilter to filter the collection of health events reported on the cluster based on the health state.
@@ -11272,16 +11272,16 @@ proc validate_GetReplicaHealthUsingPolicy_595054(path: JsonNode; query: JsonNode
   ##              : The identity of the partition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `replicaId` field"
-  var valid_595056 = path.getOrDefault("replicaId")
-  valid_595056 = validateParameter(valid_595056, JString, required = true,
+  var valid_569285 = path.getOrDefault("replicaId")
+  valid_569285 = validateParameter(valid_569285, JString, required = true,
                                  default = nil)
-  if valid_595056 != nil:
-    section.add "replicaId", valid_595056
-  var valid_595057 = path.getOrDefault("partitionId")
-  valid_595057 = validateParameter(valid_595057, JString, required = true,
+  if valid_569285 != nil:
+    section.add "replicaId", valid_569285
+  var valid_569286 = path.getOrDefault("partitionId")
+  valid_569286 = validateParameter(valid_569286, JString, required = true,
                                  default = nil)
-  if valid_595057 != nil:
-    section.add "partitionId", valid_595057
+  if valid_569286 != nil:
+    section.add "partitionId", valid_569286
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -11302,23 +11302,23 @@ proc validate_GetReplicaHealthUsingPolicy_595054(path: JsonNode; query: JsonNode
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_595058 = query.getOrDefault("timeout")
-  valid_595058 = validateParameter(valid_595058, JInt, required = false,
+  var valid_569287 = query.getOrDefault("timeout")
+  valid_569287 = validateParameter(valid_569287, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595058 != nil:
-    section.add "timeout", valid_595058
+  if valid_569287 != nil:
+    section.add "timeout", valid_569287
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595059 = query.getOrDefault("api-version")
-  valid_595059 = validateParameter(valid_595059, JString, required = true,
+  var valid_569288 = query.getOrDefault("api-version")
+  valid_569288 = validateParameter(valid_569288, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595059 != nil:
-    section.add "api-version", valid_595059
-  var valid_595060 = query.getOrDefault("EventsHealthStateFilter")
-  valid_595060 = validateParameter(valid_595060, JInt, required = false,
+  if valid_569288 != nil:
+    section.add "api-version", valid_569288
+  var valid_569289 = query.getOrDefault("EventsHealthStateFilter")
+  valid_569289 = validateParameter(valid_569289, JInt, required = false,
                                  default = newJInt(0))
-  if valid_595060 != nil:
-    section.add "EventsHealthStateFilter", valid_595060
+  if valid_569289 != nil:
+    section.add "EventsHealthStateFilter", valid_569289
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11333,23 +11333,23 @@ proc validate_GetReplicaHealthUsingPolicy_595054(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_595062: Call_GetReplicaHealthUsingPolicy_595053; path: JsonNode;
+proc call*(call_569291: Call_GetReplicaHealthUsingPolicy_569282; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health of a Service Fabric stateful service replica or stateless service instance.
   ## Use EventsHealthStateFilter to filter the collection of health events reported on the cluster based on the health state.
   ## Use ApplicationHealthPolicy to optionally override the health policies used to evaluate the health. This API only uses 'ConsiderWarningAsError' field of the ApplicationHealthPolicy. The rest of the fields are ignored while evaluating the health of the replica.
   ## 
   ## 
-  let valid = call_595062.validator(path, query, header, formData, body)
-  let scheme = call_595062.pickScheme
+  let valid = call_569291.validator(path, query, header, formData, body)
+  let scheme = call_569291.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595062.url(scheme.get, call_595062.host, call_595062.base,
-                         call_595062.route, valid.getOrDefault("path"),
+  let url = call_569291.url(scheme.get, call_569291.host, call_569291.base,
+                         call_569291.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595062, url, valid)
+  result = hook(call_569291, url, valid)
 
-proc call*(call_595063: Call_GetReplicaHealthUsingPolicy_595053; replicaId: string;
+proc call*(call_569292: Call_GetReplicaHealthUsingPolicy_569282; replicaId: string;
           partitionId: string; timeout: int = 60; apiVersion: string = "3.0";
           ApplicationHealthPolicy: JsonNode = nil; EventsHealthStateFilter: int = 0): Recallable =
   ## getReplicaHealthUsingPolicy
@@ -11382,28 +11382,28 @@ proc call*(call_595063: Call_GetReplicaHealthUsingPolicy_595053; replicaId: stri
   ## 
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_595064 = newJObject()
-  var query_595065 = newJObject()
-  var body_595066 = newJObject()
-  add(path_595064, "replicaId", newJString(replicaId))
-  add(query_595065, "timeout", newJInt(timeout))
-  add(query_595065, "api-version", newJString(apiVersion))
+  var path_569293 = newJObject()
+  var query_569294 = newJObject()
+  var body_569295 = newJObject()
+  add(path_569293, "replicaId", newJString(replicaId))
+  add(query_569294, "timeout", newJInt(timeout))
+  add(query_569294, "api-version", newJString(apiVersion))
   if ApplicationHealthPolicy != nil:
-    body_595066 = ApplicationHealthPolicy
-  add(query_595065, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_595064, "partitionId", newJString(partitionId))
-  result = call_595063.call(path_595064, query_595065, nil, nil, body_595066)
+    body_569295 = ApplicationHealthPolicy
+  add(query_569294, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_569293, "partitionId", newJString(partitionId))
+  result = call_569292.call(path_569293, query_569294, nil, nil, body_569295)
 
-var getReplicaHealthUsingPolicy* = Call_GetReplicaHealthUsingPolicy_595053(
+var getReplicaHealthUsingPolicy* = Call_GetReplicaHealthUsingPolicy_569282(
     name: "getReplicaHealthUsingPolicy", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/Partitions/{partitionId}/$/GetReplicas/{replicaId}/$/GetHealth",
-    validator: validate_GetReplicaHealthUsingPolicy_595054, base: "",
-    url: url_GetReplicaHealthUsingPolicy_595055,
+    validator: validate_GetReplicaHealthUsingPolicy_569283, base: "",
+    url: url_GetReplicaHealthUsingPolicy_569284,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetReplicaHealth_595041 = ref object of OpenApiRestCall_593437
-proc url_GetReplicaHealth_595043(protocol: Scheme; host: string; base: string;
+  Call_GetReplicaHealth_569270 = ref object of OpenApiRestCall_567666
+proc url_GetReplicaHealth_569272(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11422,7 +11422,7 @@ proc url_GetReplicaHealth_595043(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetReplicaHealth_595042(path: JsonNode; query: JsonNode;
+proc validate_GetReplicaHealth_569271(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets the health of a Service Fabric replica.
@@ -11438,16 +11438,16 @@ proc validate_GetReplicaHealth_595042(path: JsonNode; query: JsonNode;
   ##              : The identity of the partition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `replicaId` field"
-  var valid_595044 = path.getOrDefault("replicaId")
-  valid_595044 = validateParameter(valid_595044, JString, required = true,
+  var valid_569273 = path.getOrDefault("replicaId")
+  valid_569273 = validateParameter(valid_569273, JString, required = true,
                                  default = nil)
-  if valid_595044 != nil:
-    section.add "replicaId", valid_595044
-  var valid_595045 = path.getOrDefault("partitionId")
-  valid_595045 = validateParameter(valid_595045, JString, required = true,
+  if valid_569273 != nil:
+    section.add "replicaId", valid_569273
+  var valid_569274 = path.getOrDefault("partitionId")
+  valid_569274 = validateParameter(valid_569274, JString, required = true,
                                  default = nil)
-  if valid_595045 != nil:
-    section.add "partitionId", valid_595045
+  if valid_569274 != nil:
+    section.add "partitionId", valid_569274
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -11468,23 +11468,23 @@ proc validate_GetReplicaHealth_595042(path: JsonNode; query: JsonNode;
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_595046 = query.getOrDefault("timeout")
-  valid_595046 = validateParameter(valid_595046, JInt, required = false,
+  var valid_569275 = query.getOrDefault("timeout")
+  valid_569275 = validateParameter(valid_569275, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595046 != nil:
-    section.add "timeout", valid_595046
+  if valid_569275 != nil:
+    section.add "timeout", valid_569275
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595047 = query.getOrDefault("api-version")
-  valid_595047 = validateParameter(valid_595047, JString, required = true,
+  var valid_569276 = query.getOrDefault("api-version")
+  valid_569276 = validateParameter(valid_569276, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595047 != nil:
-    section.add "api-version", valid_595047
-  var valid_595048 = query.getOrDefault("EventsHealthStateFilter")
-  valid_595048 = validateParameter(valid_595048, JInt, required = false,
+  if valid_569276 != nil:
+    section.add "api-version", valid_569276
+  var valid_569277 = query.getOrDefault("EventsHealthStateFilter")
+  valid_569277 = validateParameter(valid_569277, JInt, required = false,
                                  default = newJInt(0))
-  if valid_595048 != nil:
-    section.add "EventsHealthStateFilter", valid_595048
+  if valid_569277 != nil:
+    section.add "EventsHealthStateFilter", valid_569277
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11493,22 +11493,22 @@ proc validate_GetReplicaHealth_595042(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595049: Call_GetReplicaHealth_595041; path: JsonNode;
+proc call*(call_569278: Call_GetReplicaHealth_569270; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health of a Service Fabric replica.
   ## Use EventsHealthStateFilter to filter the collection of health events reported on the replica based on the health state.
   ## 
   ## 
-  let valid = call_595049.validator(path, query, header, formData, body)
-  let scheme = call_595049.pickScheme
+  let valid = call_569278.validator(path, query, header, formData, body)
+  let scheme = call_569278.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595049.url(scheme.get, call_595049.host, call_595049.base,
-                         call_595049.route, valid.getOrDefault("path"),
+  let url = call_569278.url(scheme.get, call_569278.host, call_569278.base,
+                         call_569278.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595049, url, valid)
+  result = hook(call_569278, url, valid)
 
-proc call*(call_595050: Call_GetReplicaHealth_595041; replicaId: string;
+proc call*(call_569279: Call_GetReplicaHealth_569270; replicaId: string;
           partitionId: string; timeout: int = 60; apiVersion: string = "3.0";
           EventsHealthStateFilter: int = 0): Recallable =
   ## getReplicaHealth
@@ -11536,23 +11536,23 @@ proc call*(call_595050: Call_GetReplicaHealth_595041; replicaId: string;
   ## 
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_595051 = newJObject()
-  var query_595052 = newJObject()
-  add(path_595051, "replicaId", newJString(replicaId))
-  add(query_595052, "timeout", newJInt(timeout))
-  add(query_595052, "api-version", newJString(apiVersion))
-  add(query_595052, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_595051, "partitionId", newJString(partitionId))
-  result = call_595050.call(path_595051, query_595052, nil, nil, nil)
+  var path_569280 = newJObject()
+  var query_569281 = newJObject()
+  add(path_569280, "replicaId", newJString(replicaId))
+  add(query_569281, "timeout", newJInt(timeout))
+  add(query_569281, "api-version", newJString(apiVersion))
+  add(query_569281, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_569280, "partitionId", newJString(partitionId))
+  result = call_569279.call(path_569280, query_569281, nil, nil, nil)
 
-var getReplicaHealth* = Call_GetReplicaHealth_595041(name: "getReplicaHealth",
+var getReplicaHealth* = Call_GetReplicaHealth_569270(name: "getReplicaHealth",
     meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Partitions/{partitionId}/$/GetReplicas/{replicaId}/$/GetHealth",
-    validator: validate_GetReplicaHealth_595042, base: "",
-    url: url_GetReplicaHealth_595043, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetReplicaHealth_569271, base: "",
+    url: url_GetReplicaHealth_569272, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ReportReplicaHealth_595067 = ref object of OpenApiRestCall_593437
-proc url_ReportReplicaHealth_595069(protocol: Scheme; host: string; base: string;
+  Call_ReportReplicaHealth_569296 = ref object of OpenApiRestCall_567666
+proc url_ReportReplicaHealth_569298(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11571,7 +11571,7 @@ proc url_ReportReplicaHealth_595069(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportReplicaHealth_595068(path: JsonNode; query: JsonNode;
+proc validate_ReportReplicaHealth_569297(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Reports health state of the specified Service Fabric replica. The report must contain the information about the source of the health report and property on which it is reported.
@@ -11590,16 +11590,16 @@ proc validate_ReportReplicaHealth_595068(path: JsonNode; query: JsonNode;
   ##              : The identity of the partition.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `replicaId` field"
-  var valid_595070 = path.getOrDefault("replicaId")
-  valid_595070 = validateParameter(valid_595070, JString, required = true,
+  var valid_569299 = path.getOrDefault("replicaId")
+  valid_569299 = validateParameter(valid_569299, JString, required = true,
                                  default = nil)
-  if valid_595070 != nil:
-    section.add "replicaId", valid_595070
-  var valid_595071 = path.getOrDefault("partitionId")
-  valid_595071 = validateParameter(valid_595071, JString, required = true,
+  if valid_569299 != nil:
+    section.add "replicaId", valid_569299
+  var valid_569300 = path.getOrDefault("partitionId")
+  valid_569300 = validateParameter(valid_569300, JString, required = true,
                                  default = nil)
-  if valid_595071 != nil:
-    section.add "partitionId", valid_595071
+  if valid_569300 != nil:
+    section.add "partitionId", valid_569300
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -11612,23 +11612,23 @@ proc validate_ReportReplicaHealth_595068(path: JsonNode; query: JsonNode;
   ## - Stateful - Uses Service Fabric to make its state or part of its state highly available and reliable. The value is 2.
   ## 
   section = newJObject()
-  var valid_595072 = query.getOrDefault("timeout")
-  valid_595072 = validateParameter(valid_595072, JInt, required = false,
+  var valid_569301 = query.getOrDefault("timeout")
+  valid_569301 = validateParameter(valid_569301, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595072 != nil:
-    section.add "timeout", valid_595072
+  if valid_569301 != nil:
+    section.add "timeout", valid_569301
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595073 = query.getOrDefault("api-version")
-  valid_595073 = validateParameter(valid_595073, JString, required = true,
+  var valid_569302 = query.getOrDefault("api-version")
+  valid_569302 = validateParameter(valid_569302, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595073 != nil:
-    section.add "api-version", valid_595073
-  var valid_595074 = query.getOrDefault("ServiceKind")
-  valid_595074 = validateParameter(valid_595074, JString, required = true,
+  if valid_569302 != nil:
+    section.add "api-version", valid_569302
+  var valid_569303 = query.getOrDefault("ServiceKind")
+  valid_569303 = validateParameter(valid_569303, JString, required = true,
                                  default = newJString("Stateful"))
-  if valid_595074 != nil:
-    section.add "ServiceKind", valid_595074
+  if valid_569303 != nil:
+    section.add "ServiceKind", valid_569303
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11642,7 +11642,7 @@ proc validate_ReportReplicaHealth_595068(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595076: Call_ReportReplicaHealth_595067; path: JsonNode;
+proc call*(call_569305: Call_ReportReplicaHealth_569296; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reports health state of the specified Service Fabric replica. The report must contain the information about the source of the health report and property on which it is reported.
   ## The report is sent to a Service Fabric gateway Replica, which forwards to the health store.
@@ -11651,16 +11651,16 @@ proc call*(call_595076: Call_ReportReplicaHealth_595067; path: JsonNode;
   ## To see whether the report was applied in the health store, run GetReplicaHealth and check that the report appears in the HealthEvents section.
   ## 
   ## 
-  let valid = call_595076.validator(path, query, header, formData, body)
-  let scheme = call_595076.pickScheme
+  let valid = call_569305.validator(path, query, header, formData, body)
+  let scheme = call_569305.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595076.url(scheme.get, call_595076.host, call_595076.base,
-                         call_595076.route, valid.getOrDefault("path"),
+  let url = call_569305.url(scheme.get, call_569305.host, call_569305.base,
+                         call_569305.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595076, url, valid)
+  result = hook(call_569305, url, valid)
 
-proc call*(call_595077: Call_ReportReplicaHealth_595067; replicaId: string;
+proc call*(call_569306: Call_ReportReplicaHealth_569296; replicaId: string;
           HealthInformation: JsonNode; partitionId: string; timeout: int = 60;
           apiVersion: string = "3.0"; ServiceKind: string = "Stateful"): Recallable =
   ## reportReplicaHealth
@@ -11685,26 +11685,26 @@ proc call*(call_595077: Call_ReportReplicaHealth_595067; replicaId: string;
   ## - Stateless - Does not use Service Fabric to make its state highly available or reliable. The value is 1
   ## - Stateful - Uses Service Fabric to make its state or part of its state highly available and reliable. The value is 2.
   ## 
-  var path_595078 = newJObject()
-  var query_595079 = newJObject()
-  var body_595080 = newJObject()
-  add(path_595078, "replicaId", newJString(replicaId))
-  add(query_595079, "timeout", newJInt(timeout))
-  add(query_595079, "api-version", newJString(apiVersion))
+  var path_569307 = newJObject()
+  var query_569308 = newJObject()
+  var body_569309 = newJObject()
+  add(path_569307, "replicaId", newJString(replicaId))
+  add(query_569308, "timeout", newJInt(timeout))
+  add(query_569308, "api-version", newJString(apiVersion))
   if HealthInformation != nil:
-    body_595080 = HealthInformation
-  add(path_595078, "partitionId", newJString(partitionId))
-  add(query_595079, "ServiceKind", newJString(ServiceKind))
-  result = call_595077.call(path_595078, query_595079, nil, nil, body_595080)
+    body_569309 = HealthInformation
+  add(path_569307, "partitionId", newJString(partitionId))
+  add(query_569308, "ServiceKind", newJString(ServiceKind))
+  result = call_569306.call(path_569307, query_569308, nil, nil, body_569309)
 
-var reportReplicaHealth* = Call_ReportReplicaHealth_595067(
+var reportReplicaHealth* = Call_ReportReplicaHealth_569296(
     name: "reportReplicaHealth", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Partitions/{partitionId}/$/GetReplicas/{replicaId}/$/ReportHealth",
-    validator: validate_ReportReplicaHealth_595068, base: "",
-    url: url_ReportReplicaHealth_595069, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_ReportReplicaHealth_569297, base: "",
+    url: url_ReportReplicaHealth_569298, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetServiceNameInfo_595081 = ref object of OpenApiRestCall_593437
-proc url_GetServiceNameInfo_595083(protocol: Scheme; host: string; base: string;
+  Call_GetServiceNameInfo_569310 = ref object of OpenApiRestCall_567666
+proc url_GetServiceNameInfo_569312(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11720,7 +11720,7 @@ proc url_GetServiceNameInfo_595083(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetServiceNameInfo_595082(path: JsonNode; query: JsonNode;
+proc validate_GetServiceNameInfo_569311(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## The GetServiceName endpoint returns the name of the service for the specified partition.
@@ -11733,11 +11733,11 @@ proc validate_GetServiceNameInfo_595082(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_595084 = path.getOrDefault("partitionId")
-  valid_595084 = validateParameter(valid_595084, JString, required = true,
+  var valid_569313 = path.getOrDefault("partitionId")
+  valid_569313 = validateParameter(valid_569313, JString, required = true,
                                  default = nil)
-  if valid_595084 != nil:
-    section.add "partitionId", valid_595084
+  if valid_569313 != nil:
+    section.add "partitionId", valid_569313
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -11745,18 +11745,18 @@ proc validate_GetServiceNameInfo_595082(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595085 = query.getOrDefault("timeout")
-  valid_595085 = validateParameter(valid_595085, JInt, required = false,
+  var valid_569314 = query.getOrDefault("timeout")
+  valid_569314 = validateParameter(valid_569314, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595085 != nil:
-    section.add "timeout", valid_595085
+  if valid_569314 != nil:
+    section.add "timeout", valid_569314
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595086 = query.getOrDefault("api-version")
-  valid_595086 = validateParameter(valid_595086, JString, required = true,
+  var valid_569315 = query.getOrDefault("api-version")
+  valid_569315 = validateParameter(valid_569315, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595086 != nil:
-    section.add "api-version", valid_595086
+  if valid_569315 != nil:
+    section.add "api-version", valid_569315
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11765,20 +11765,20 @@ proc validate_GetServiceNameInfo_595082(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595087: Call_GetServiceNameInfo_595081; path: JsonNode;
+proc call*(call_569316: Call_GetServiceNameInfo_569310; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetServiceName endpoint returns the name of the service for the specified partition.
   ## 
-  let valid = call_595087.validator(path, query, header, formData, body)
-  let scheme = call_595087.pickScheme
+  let valid = call_569316.validator(path, query, header, formData, body)
+  let scheme = call_569316.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595087.url(scheme.get, call_595087.host, call_595087.base,
-                         call_595087.route, valid.getOrDefault("path"),
+  let url = call_569316.url(scheme.get, call_569316.host, call_569316.base,
+                         call_569316.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595087, url, valid)
+  result = hook(call_569316, url, valid)
 
-proc call*(call_595088: Call_GetServiceNameInfo_595081; partitionId: string;
+proc call*(call_569317: Call_GetServiceNameInfo_569310; partitionId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getServiceNameInfo
   ## The GetServiceName endpoint returns the name of the service for the specified partition.
@@ -11788,21 +11788,21 @@ proc call*(call_595088: Call_GetServiceNameInfo_595081; partitionId: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_595089 = newJObject()
-  var query_595090 = newJObject()
-  add(query_595090, "timeout", newJInt(timeout))
-  add(query_595090, "api-version", newJString(apiVersion))
-  add(path_595089, "partitionId", newJString(partitionId))
-  result = call_595088.call(path_595089, query_595090, nil, nil, nil)
+  var path_569318 = newJObject()
+  var query_569319 = newJObject()
+  add(query_569319, "timeout", newJInt(timeout))
+  add(query_569319, "api-version", newJString(apiVersion))
+  add(path_569318, "partitionId", newJString(partitionId))
+  result = call_569317.call(path_569318, query_569319, nil, nil, nil)
 
-var getServiceNameInfo* = Call_GetServiceNameInfo_595081(
+var getServiceNameInfo* = Call_GetServiceNameInfo_569310(
     name: "getServiceNameInfo", meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Partitions/{partitionId}/$/GetServiceName",
-    validator: validate_GetServiceNameInfo_595082, base: "",
-    url: url_GetServiceNameInfo_595083, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetServiceNameInfo_569311, base: "",
+    url: url_GetServiceNameInfo_569312, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RecoverPartition_595091 = ref object of OpenApiRestCall_593437
-proc url_RecoverPartition_595093(protocol: Scheme; host: string; base: string;
+  Call_RecoverPartition_569320 = ref object of OpenApiRestCall_567666
+proc url_RecoverPartition_569322(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11818,7 +11818,7 @@ proc url_RecoverPartition_595093(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoverPartition_595092(path: JsonNode; query: JsonNode;
+proc validate_RecoverPartition_569321(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Indicates to the Service Fabric cluster that it should attempt to recover a specific partition which is currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
@@ -11831,11 +11831,11 @@ proc validate_RecoverPartition_595092(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_595094 = path.getOrDefault("partitionId")
-  valid_595094 = validateParameter(valid_595094, JString, required = true,
+  var valid_569323 = path.getOrDefault("partitionId")
+  valid_569323 = validateParameter(valid_569323, JString, required = true,
                                  default = nil)
-  if valid_595094 != nil:
-    section.add "partitionId", valid_595094
+  if valid_569323 != nil:
+    section.add "partitionId", valid_569323
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -11843,18 +11843,18 @@ proc validate_RecoverPartition_595092(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595095 = query.getOrDefault("timeout")
-  valid_595095 = validateParameter(valid_595095, JInt, required = false,
+  var valid_569324 = query.getOrDefault("timeout")
+  valid_569324 = validateParameter(valid_569324, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595095 != nil:
-    section.add "timeout", valid_595095
+  if valid_569324 != nil:
+    section.add "timeout", valid_569324
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595096 = query.getOrDefault("api-version")
-  valid_595096 = validateParameter(valid_595096, JString, required = true,
+  var valid_569325 = query.getOrDefault("api-version")
+  valid_569325 = validateParameter(valid_569325, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595096 != nil:
-    section.add "api-version", valid_595096
+  if valid_569325 != nil:
+    section.add "api-version", valid_569325
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11863,20 +11863,20 @@ proc validate_RecoverPartition_595092(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595097: Call_RecoverPartition_595091; path: JsonNode;
+proc call*(call_569326: Call_RecoverPartition_569320; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Indicates to the Service Fabric cluster that it should attempt to recover a specific partition which is currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
   ## 
-  let valid = call_595097.validator(path, query, header, formData, body)
-  let scheme = call_595097.pickScheme
+  let valid = call_569326.validator(path, query, header, formData, body)
+  let scheme = call_569326.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595097.url(scheme.get, call_595097.host, call_595097.base,
-                         call_595097.route, valid.getOrDefault("path"),
+  let url = call_569326.url(scheme.get, call_569326.host, call_569326.base,
+                         call_569326.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595097, url, valid)
+  result = hook(call_569326, url, valid)
 
-proc call*(call_595098: Call_RecoverPartition_595091; partitionId: string;
+proc call*(call_569327: Call_RecoverPartition_569320; partitionId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## recoverPartition
   ## Indicates to the Service Fabric cluster that it should attempt to recover a specific partition which is currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
@@ -11886,21 +11886,21 @@ proc call*(call_595098: Call_RecoverPartition_595091; partitionId: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_595099 = newJObject()
-  var query_595100 = newJObject()
-  add(query_595100, "timeout", newJInt(timeout))
-  add(query_595100, "api-version", newJString(apiVersion))
-  add(path_595099, "partitionId", newJString(partitionId))
-  result = call_595098.call(path_595099, query_595100, nil, nil, nil)
+  var path_569328 = newJObject()
+  var query_569329 = newJObject()
+  add(query_569329, "timeout", newJInt(timeout))
+  add(query_569329, "api-version", newJString(apiVersion))
+  add(path_569328, "partitionId", newJString(partitionId))
+  result = call_569327.call(path_569328, query_569329, nil, nil, nil)
 
-var recoverPartition* = Call_RecoverPartition_595091(name: "recoverPartition",
+var recoverPartition* = Call_RecoverPartition_569320(name: "recoverPartition",
     meth: HttpMethod.HttpPost, host: "azure.local:19080",
     route: "/Partitions/{partitionId}/$/Recover",
-    validator: validate_RecoverPartition_595092, base: "",
-    url: url_RecoverPartition_595093, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_RecoverPartition_569321, base: "",
+    url: url_RecoverPartition_569322, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ReportPartitionHealth_595101 = ref object of OpenApiRestCall_593437
-proc url_ReportPartitionHealth_595103(protocol: Scheme; host: string; base: string;
+  Call_ReportPartitionHealth_569330 = ref object of OpenApiRestCall_567666
+proc url_ReportPartitionHealth_569332(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11916,7 +11916,7 @@ proc url_ReportPartitionHealth_595103(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportPartitionHealth_595102(path: JsonNode; query: JsonNode;
+proc validate_ReportPartitionHealth_569331(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reports health state of the specified Service Fabric partition. The report must contain the information about the source of the health report and property on which it is reported.
   ## The report is sent to a Service Fabric gateway Partition, which forwards to the health store.
@@ -11933,11 +11933,11 @@ proc validate_ReportPartitionHealth_595102(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_595104 = path.getOrDefault("partitionId")
-  valid_595104 = validateParameter(valid_595104, JString, required = true,
+  var valid_569333 = path.getOrDefault("partitionId")
+  valid_569333 = validateParameter(valid_569333, JString, required = true,
                                  default = nil)
-  if valid_595104 != nil:
-    section.add "partitionId", valid_595104
+  if valid_569333 != nil:
+    section.add "partitionId", valid_569333
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -11945,18 +11945,18 @@ proc validate_ReportPartitionHealth_595102(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595105 = query.getOrDefault("timeout")
-  valid_595105 = validateParameter(valid_595105, JInt, required = false,
+  var valid_569334 = query.getOrDefault("timeout")
+  valid_569334 = validateParameter(valid_569334, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595105 != nil:
-    section.add "timeout", valid_595105
+  if valid_569334 != nil:
+    section.add "timeout", valid_569334
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595106 = query.getOrDefault("api-version")
-  valid_595106 = validateParameter(valid_595106, JString, required = true,
+  var valid_569335 = query.getOrDefault("api-version")
+  valid_569335 = validateParameter(valid_569335, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595106 != nil:
-    section.add "api-version", valid_595106
+  if valid_569335 != nil:
+    section.add "api-version", valid_569335
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11970,7 +11970,7 @@ proc validate_ReportPartitionHealth_595102(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595108: Call_ReportPartitionHealth_595101; path: JsonNode;
+proc call*(call_569337: Call_ReportPartitionHealth_569330; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reports health state of the specified Service Fabric partition. The report must contain the information about the source of the health report and property on which it is reported.
   ## The report is sent to a Service Fabric gateway Partition, which forwards to the health store.
@@ -11979,16 +11979,16 @@ proc call*(call_595108: Call_ReportPartitionHealth_595101; path: JsonNode;
   ## To see whether the report was applied in the health store, run GetPartitionHealth and check that the report appears in the HealthEvents section.
   ## 
   ## 
-  let valid = call_595108.validator(path, query, header, formData, body)
-  let scheme = call_595108.pickScheme
+  let valid = call_569337.validator(path, query, header, formData, body)
+  let scheme = call_569337.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595108.url(scheme.get, call_595108.host, call_595108.base,
-                         call_595108.route, valid.getOrDefault("path"),
+  let url = call_569337.url(scheme.get, call_569337.host, call_569337.base,
+                         call_569337.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595108, url, valid)
+  result = hook(call_569337, url, valid)
 
-proc call*(call_595109: Call_ReportPartitionHealth_595101;
+proc call*(call_569338: Call_ReportPartitionHealth_569330;
           HealthInformation: JsonNode; partitionId: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## reportPartitionHealth
@@ -12006,24 +12006,24 @@ proc call*(call_595109: Call_ReportPartitionHealth_595101;
   ##                    : Describes the health information for the health report. This information needs to be present in all of the health reports sent to the health manager.
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_595110 = newJObject()
-  var query_595111 = newJObject()
-  var body_595112 = newJObject()
-  add(query_595111, "timeout", newJInt(timeout))
-  add(query_595111, "api-version", newJString(apiVersion))
+  var path_569339 = newJObject()
+  var query_569340 = newJObject()
+  var body_569341 = newJObject()
+  add(query_569340, "timeout", newJInt(timeout))
+  add(query_569340, "api-version", newJString(apiVersion))
   if HealthInformation != nil:
-    body_595112 = HealthInformation
-  add(path_595110, "partitionId", newJString(partitionId))
-  result = call_595109.call(path_595110, query_595111, nil, nil, body_595112)
+    body_569341 = HealthInformation
+  add(path_569339, "partitionId", newJString(partitionId))
+  result = call_569338.call(path_569339, query_569340, nil, nil, body_569341)
 
-var reportPartitionHealth* = Call_ReportPartitionHealth_595101(
+var reportPartitionHealth* = Call_ReportPartitionHealth_569330(
     name: "reportPartitionHealth", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Partitions/{partitionId}/$/ReportHealth",
-    validator: validate_ReportPartitionHealth_595102, base: "",
-    url: url_ReportPartitionHealth_595103, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_ReportPartitionHealth_569331, base: "",
+    url: url_ReportPartitionHealth_569332, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ResetPartitionLoad_595113 = ref object of OpenApiRestCall_593437
-proc url_ResetPartitionLoad_595115(protocol: Scheme; host: string; base: string;
+  Call_ResetPartitionLoad_569342 = ref object of OpenApiRestCall_567666
+proc url_ResetPartitionLoad_569344(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12039,7 +12039,7 @@ proc url_ResetPartitionLoad_595115(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResetPartitionLoad_595114(path: JsonNode; query: JsonNode;
+proc validate_ResetPartitionLoad_569343(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Resets the current load of a Service Fabric partition to the default load for the service.
@@ -12052,11 +12052,11 @@ proc validate_ResetPartitionLoad_595114(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `partitionId` field"
-  var valid_595116 = path.getOrDefault("partitionId")
-  valid_595116 = validateParameter(valid_595116, JString, required = true,
+  var valid_569345 = path.getOrDefault("partitionId")
+  valid_569345 = validateParameter(valid_569345, JString, required = true,
                                  default = nil)
-  if valid_595116 != nil:
-    section.add "partitionId", valid_595116
+  if valid_569345 != nil:
+    section.add "partitionId", valid_569345
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -12064,18 +12064,18 @@ proc validate_ResetPartitionLoad_595114(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595117 = query.getOrDefault("timeout")
-  valid_595117 = validateParameter(valid_595117, JInt, required = false,
+  var valid_569346 = query.getOrDefault("timeout")
+  valid_569346 = validateParameter(valid_569346, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595117 != nil:
-    section.add "timeout", valid_595117
+  if valid_569346 != nil:
+    section.add "timeout", valid_569346
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595118 = query.getOrDefault("api-version")
-  valid_595118 = validateParameter(valid_595118, JString, required = true,
+  var valid_569347 = query.getOrDefault("api-version")
+  valid_569347 = validateParameter(valid_569347, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595118 != nil:
-    section.add "api-version", valid_595118
+  if valid_569347 != nil:
+    section.add "api-version", valid_569347
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12084,20 +12084,20 @@ proc validate_ResetPartitionLoad_595114(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595119: Call_ResetPartitionLoad_595113; path: JsonNode;
+proc call*(call_569348: Call_ResetPartitionLoad_569342; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resets the current load of a Service Fabric partition to the default load for the service.
   ## 
-  let valid = call_595119.validator(path, query, header, formData, body)
-  let scheme = call_595119.pickScheme
+  let valid = call_569348.validator(path, query, header, formData, body)
+  let scheme = call_569348.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595119.url(scheme.get, call_595119.host, call_595119.base,
-                         call_595119.route, valid.getOrDefault("path"),
+  let url = call_569348.url(scheme.get, call_569348.host, call_569348.base,
+                         call_569348.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595119, url, valid)
+  result = hook(call_569348, url, valid)
 
-proc call*(call_595120: Call_ResetPartitionLoad_595113; partitionId: string;
+proc call*(call_569349: Call_ResetPartitionLoad_569342; partitionId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## resetPartitionLoad
   ## Resets the current load of a Service Fabric partition to the default load for the service.
@@ -12107,21 +12107,21 @@ proc call*(call_595120: Call_ResetPartitionLoad_595113; partitionId: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   partitionId: string (required)
   ##              : The identity of the partition.
-  var path_595121 = newJObject()
-  var query_595122 = newJObject()
-  add(query_595122, "timeout", newJInt(timeout))
-  add(query_595122, "api-version", newJString(apiVersion))
-  add(path_595121, "partitionId", newJString(partitionId))
-  result = call_595120.call(path_595121, query_595122, nil, nil, nil)
+  var path_569350 = newJObject()
+  var query_569351 = newJObject()
+  add(query_569351, "timeout", newJInt(timeout))
+  add(query_569351, "api-version", newJString(apiVersion))
+  add(path_569350, "partitionId", newJString(partitionId))
+  result = call_569349.call(path_569350, query_569351, nil, nil, nil)
 
-var resetPartitionLoad* = Call_ResetPartitionLoad_595113(
+var resetPartitionLoad* = Call_ResetPartitionLoad_569342(
     name: "resetPartitionLoad", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Partitions/{partitionId}/$/ResetLoad",
-    validator: validate_ResetPartitionLoad_595114, base: "",
-    url: url_ResetPartitionLoad_595115, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_ResetPartitionLoad_569343, base: "",
+    url: url_ResetPartitionLoad_569344, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_RecoverServicePartitions_595123 = ref object of OpenApiRestCall_593437
-proc url_RecoverServicePartitions_595125(protocol: Scheme; host: string;
+  Call_RecoverServicePartitions_569352 = ref object of OpenApiRestCall_567666
+proc url_RecoverServicePartitions_569354(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -12138,7 +12138,7 @@ proc url_RecoverServicePartitions_595125(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecoverServicePartitions_595124(path: JsonNode; query: JsonNode;
+proc validate_RecoverServicePartitions_569353(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Indicates to the Service Fabric cluster that it should attempt to recover the specified service which is currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
   ## 
@@ -12149,11 +12149,11 @@ proc validate_RecoverServicePartitions_595124(path: JsonNode; query: JsonNode;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `serviceId` field"
-  var valid_595126 = path.getOrDefault("serviceId")
-  valid_595126 = validateParameter(valid_595126, JString, required = true,
+  var valid_569355 = path.getOrDefault("serviceId")
+  valid_569355 = validateParameter(valid_569355, JString, required = true,
                                  default = nil)
-  if valid_595126 != nil:
-    section.add "serviceId", valid_595126
+  if valid_569355 != nil:
+    section.add "serviceId", valid_569355
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -12161,18 +12161,18 @@ proc validate_RecoverServicePartitions_595124(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595127 = query.getOrDefault("timeout")
-  valid_595127 = validateParameter(valid_595127, JInt, required = false,
+  var valid_569356 = query.getOrDefault("timeout")
+  valid_569356 = validateParameter(valid_569356, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595127 != nil:
-    section.add "timeout", valid_595127
+  if valid_569356 != nil:
+    section.add "timeout", valid_569356
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595128 = query.getOrDefault("api-version")
-  valid_595128 = validateParameter(valid_595128, JString, required = true,
+  var valid_569357 = query.getOrDefault("api-version")
+  valid_569357 = validateParameter(valid_569357, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595128 != nil:
-    section.add "api-version", valid_595128
+  if valid_569357 != nil:
+    section.add "api-version", valid_569357
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12181,20 +12181,20 @@ proc validate_RecoverServicePartitions_595124(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595129: Call_RecoverServicePartitions_595123; path: JsonNode;
+proc call*(call_569358: Call_RecoverServicePartitions_569352; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Indicates to the Service Fabric cluster that it should attempt to recover the specified service which is currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
   ## 
-  let valid = call_595129.validator(path, query, header, formData, body)
-  let scheme = call_595129.pickScheme
+  let valid = call_569358.validator(path, query, header, formData, body)
+  let scheme = call_569358.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595129.url(scheme.get, call_595129.host, call_595129.base,
-                         call_595129.route, valid.getOrDefault("path"),
+  let url = call_569358.url(scheme.get, call_569358.host, call_569358.base,
+                         call_569358.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595129, url, valid)
+  result = hook(call_569358, url, valid)
 
-proc call*(call_595130: Call_RecoverServicePartitions_595123; serviceId: string;
+proc call*(call_569359: Call_RecoverServicePartitions_569352; serviceId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## recoverServicePartitions
   ## Indicates to the Service Fabric cluster that it should attempt to recover the specified service which is currently stuck in quorum loss. This operation should only be performed if it is known that the replicas that are down cannot be recovered. Incorrect use of this API can cause potential data loss.
@@ -12204,22 +12204,22 @@ proc call*(call_595130: Call_RecoverServicePartitions_595123; serviceId: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   serviceId: string (required)
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
-  var path_595131 = newJObject()
-  var query_595132 = newJObject()
-  add(query_595132, "timeout", newJInt(timeout))
-  add(query_595132, "api-version", newJString(apiVersion))
-  add(path_595131, "serviceId", newJString(serviceId))
-  result = call_595130.call(path_595131, query_595132, nil, nil, nil)
+  var path_569360 = newJObject()
+  var query_569361 = newJObject()
+  add(query_569361, "timeout", newJInt(timeout))
+  add(query_569361, "api-version", newJString(apiVersion))
+  add(path_569360, "serviceId", newJString(serviceId))
+  result = call_569359.call(path_569360, query_569361, nil, nil, nil)
 
-var recoverServicePartitions* = Call_RecoverServicePartitions_595123(
+var recoverServicePartitions* = Call_RecoverServicePartitions_569352(
     name: "recoverServicePartitions", meth: HttpMethod.HttpPost,
     host: "azure.local:19080",
     route: "/Services/$/{serviceId}/$/GetPartitions/$/Recover",
-    validator: validate_RecoverServicePartitions_595124, base: "",
-    url: url_RecoverServicePartitions_595125, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_RecoverServicePartitions_569353, base: "",
+    url: url_RecoverServicePartitions_569354, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_DeleteService_595133 = ref object of OpenApiRestCall_593437
-proc url_DeleteService_595135(protocol: Scheme; host: string; base: string;
+  Call_DeleteService_569362 = ref object of OpenApiRestCall_567666
+proc url_DeleteService_569364(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12235,7 +12235,7 @@ proc url_DeleteService_595135(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeleteService_595134(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DeleteService_569363(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing Service Fabric service. A service must be created before it can be deleted. By default Service Fabric will try to close service replicas in a graceful manner and then delete the service. However if service is having issues closing the replica gracefully, the delete operation may take a long time or get stuck. Use the optional ForceRemove flag to skip the graceful close sequence and forcefully delete the service.
   ## 
@@ -12246,11 +12246,11 @@ proc validate_DeleteService_595134(path: JsonNode; query: JsonNode; header: Json
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `serviceId` field"
-  var valid_595136 = path.getOrDefault("serviceId")
-  valid_595136 = validateParameter(valid_595136, JString, required = true,
+  var valid_569365 = path.getOrDefault("serviceId")
+  valid_569365 = validateParameter(valid_569365, JString, required = true,
                                  default = nil)
-  if valid_595136 != nil:
-    section.add "serviceId", valid_595136
+  if valid_569365 != nil:
+    section.add "serviceId", valid_569365
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -12260,22 +12260,22 @@ proc validate_DeleteService_595134(path: JsonNode; query: JsonNode; header: Json
   ##   ForceRemove: JBool
   ##              : Remove a Service Fabric application or service forcefully without going through the graceful shutdown sequence. This parameter can be used to forcefully delete an application or service for which delete is timing out due to issues in the service code that prevents graceful close of replicas.
   section = newJObject()
-  var valid_595137 = query.getOrDefault("timeout")
-  valid_595137 = validateParameter(valid_595137, JInt, required = false,
+  var valid_569366 = query.getOrDefault("timeout")
+  valid_569366 = validateParameter(valid_569366, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595137 != nil:
-    section.add "timeout", valid_595137
+  if valid_569366 != nil:
+    section.add "timeout", valid_569366
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595138 = query.getOrDefault("api-version")
-  valid_595138 = validateParameter(valid_595138, JString, required = true,
+  var valid_569367 = query.getOrDefault("api-version")
+  valid_569367 = validateParameter(valid_569367, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595138 != nil:
-    section.add "api-version", valid_595138
-  var valid_595139 = query.getOrDefault("ForceRemove")
-  valid_595139 = validateParameter(valid_595139, JBool, required = false, default = nil)
-  if valid_595139 != nil:
-    section.add "ForceRemove", valid_595139
+  if valid_569367 != nil:
+    section.add "api-version", valid_569367
+  var valid_569368 = query.getOrDefault("ForceRemove")
+  valid_569368 = validateParameter(valid_569368, JBool, required = false, default = nil)
+  if valid_569368 != nil:
+    section.add "ForceRemove", valid_569368
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12284,20 +12284,20 @@ proc validate_DeleteService_595134(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_595140: Call_DeleteService_595133; path: JsonNode; query: JsonNode;
+proc call*(call_569369: Call_DeleteService_569362; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing Service Fabric service. A service must be created before it can be deleted. By default Service Fabric will try to close service replicas in a graceful manner and then delete the service. However if service is having issues closing the replica gracefully, the delete operation may take a long time or get stuck. Use the optional ForceRemove flag to skip the graceful close sequence and forcefully delete the service.
   ## 
-  let valid = call_595140.validator(path, query, header, formData, body)
-  let scheme = call_595140.pickScheme
+  let valid = call_569369.validator(path, query, header, formData, body)
+  let scheme = call_569369.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595140.url(scheme.get, call_595140.host, call_595140.base,
-                         call_595140.route, valid.getOrDefault("path"),
+  let url = call_569369.url(scheme.get, call_569369.host, call_569369.base,
+                         call_569369.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595140, url, valid)
+  result = hook(call_569369, url, valid)
 
-proc call*(call_595141: Call_DeleteService_595133; serviceId: string;
+proc call*(call_569370: Call_DeleteService_569362; serviceId: string;
           timeout: int = 60; apiVersion: string = "3.0"; ForceRemove: bool = false): Recallable =
   ## deleteService
   ## Deletes an existing Service Fabric service. A service must be created before it can be deleted. By default Service Fabric will try to close service replicas in a graceful manner and then delete the service. However if service is having issues closing the replica gracefully, the delete operation may take a long time or get stuck. Use the optional ForceRemove flag to skip the graceful close sequence and forcefully delete the service.
@@ -12309,21 +12309,21 @@ proc call*(call_595141: Call_DeleteService_595133; serviceId: string;
   ##              : Remove a Service Fabric application or service forcefully without going through the graceful shutdown sequence. This parameter can be used to forcefully delete an application or service for which delete is timing out due to issues in the service code that prevents graceful close of replicas.
   ##   serviceId: string (required)
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
-  var path_595142 = newJObject()
-  var query_595143 = newJObject()
-  add(query_595143, "timeout", newJInt(timeout))
-  add(query_595143, "api-version", newJString(apiVersion))
-  add(query_595143, "ForceRemove", newJBool(ForceRemove))
-  add(path_595142, "serviceId", newJString(serviceId))
-  result = call_595141.call(path_595142, query_595143, nil, nil, nil)
+  var path_569371 = newJObject()
+  var query_569372 = newJObject()
+  add(query_569372, "timeout", newJInt(timeout))
+  add(query_569372, "api-version", newJString(apiVersion))
+  add(query_569372, "ForceRemove", newJBool(ForceRemove))
+  add(path_569371, "serviceId", newJString(serviceId))
+  result = call_569370.call(path_569371, query_569372, nil, nil, nil)
 
-var deleteService* = Call_DeleteService_595133(name: "deleteService",
+var deleteService* = Call_DeleteService_569362(name: "deleteService",
     meth: HttpMethod.HttpPost, host: "azure.local:19080",
-    route: "/Services/{serviceId}/$/Delete", validator: validate_DeleteService_595134,
-    base: "", url: url_DeleteService_595135, schemes: {Scheme.Https, Scheme.Http})
+    route: "/Services/{serviceId}/$/Delete", validator: validate_DeleteService_569363,
+    base: "", url: url_DeleteService_569364, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetApplicationNameInfo_595144 = ref object of OpenApiRestCall_593437
-proc url_GetApplicationNameInfo_595146(protocol: Scheme; host: string; base: string;
+  Call_GetApplicationNameInfo_569373 = ref object of OpenApiRestCall_567666
+proc url_GetApplicationNameInfo_569375(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12339,7 +12339,7 @@ proc url_GetApplicationNameInfo_595146(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetApplicationNameInfo_595145(path: JsonNode; query: JsonNode;
+proc validate_GetApplicationNameInfo_569374(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The GetApplicationName endpoint returns the name of the application for the specified service.
   ## 
@@ -12350,11 +12350,11 @@ proc validate_GetApplicationNameInfo_595145(path: JsonNode; query: JsonNode;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `serviceId` field"
-  var valid_595147 = path.getOrDefault("serviceId")
-  valid_595147 = validateParameter(valid_595147, JString, required = true,
+  var valid_569376 = path.getOrDefault("serviceId")
+  valid_569376 = validateParameter(valid_569376, JString, required = true,
                                  default = nil)
-  if valid_595147 != nil:
-    section.add "serviceId", valid_595147
+  if valid_569376 != nil:
+    section.add "serviceId", valid_569376
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -12362,18 +12362,18 @@ proc validate_GetApplicationNameInfo_595145(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595148 = query.getOrDefault("timeout")
-  valid_595148 = validateParameter(valid_595148, JInt, required = false,
+  var valid_569377 = query.getOrDefault("timeout")
+  valid_569377 = validateParameter(valid_569377, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595148 != nil:
-    section.add "timeout", valid_595148
+  if valid_569377 != nil:
+    section.add "timeout", valid_569377
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595149 = query.getOrDefault("api-version")
-  valid_595149 = validateParameter(valid_595149, JString, required = true,
+  var valid_569378 = query.getOrDefault("api-version")
+  valid_569378 = validateParameter(valid_569378, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595149 != nil:
-    section.add "api-version", valid_595149
+  if valid_569378 != nil:
+    section.add "api-version", valid_569378
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12382,20 +12382,20 @@ proc validate_GetApplicationNameInfo_595145(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595150: Call_GetApplicationNameInfo_595144; path: JsonNode;
+proc call*(call_569379: Call_GetApplicationNameInfo_569373; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The GetApplicationName endpoint returns the name of the application for the specified service.
   ## 
-  let valid = call_595150.validator(path, query, header, formData, body)
-  let scheme = call_595150.pickScheme
+  let valid = call_569379.validator(path, query, header, formData, body)
+  let scheme = call_569379.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595150.url(scheme.get, call_595150.host, call_595150.base,
-                         call_595150.route, valid.getOrDefault("path"),
+  let url = call_569379.url(scheme.get, call_569379.host, call_569379.base,
+                         call_569379.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595150, url, valid)
+  result = hook(call_569379, url, valid)
 
-proc call*(call_595151: Call_GetApplicationNameInfo_595144; serviceId: string;
+proc call*(call_569380: Call_GetApplicationNameInfo_569373; serviceId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getApplicationNameInfo
   ## The GetApplicationName endpoint returns the name of the application for the specified service.
@@ -12405,22 +12405,22 @@ proc call*(call_595151: Call_GetApplicationNameInfo_595144; serviceId: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   serviceId: string (required)
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
-  var path_595152 = newJObject()
-  var query_595153 = newJObject()
-  add(query_595153, "timeout", newJInt(timeout))
-  add(query_595153, "api-version", newJString(apiVersion))
-  add(path_595152, "serviceId", newJString(serviceId))
-  result = call_595151.call(path_595152, query_595153, nil, nil, nil)
+  var path_569381 = newJObject()
+  var query_569382 = newJObject()
+  add(query_569382, "timeout", newJInt(timeout))
+  add(query_569382, "api-version", newJString(apiVersion))
+  add(path_569381, "serviceId", newJString(serviceId))
+  result = call_569380.call(path_569381, query_569382, nil, nil, nil)
 
-var getApplicationNameInfo* = Call_GetApplicationNameInfo_595144(
+var getApplicationNameInfo* = Call_GetApplicationNameInfo_569373(
     name: "getApplicationNameInfo", meth: HttpMethod.HttpGet,
     host: "azure.local:19080",
     route: "/Services/{serviceId}/$/GetApplicationName",
-    validator: validate_GetApplicationNameInfo_595145, base: "",
-    url: url_GetApplicationNameInfo_595146, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetApplicationNameInfo_569374, base: "",
+    url: url_GetApplicationNameInfo_569375, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetServiceDescription_595154 = ref object of OpenApiRestCall_593437
-proc url_GetServiceDescription_595156(protocol: Scheme; host: string; base: string;
+  Call_GetServiceDescription_569383 = ref object of OpenApiRestCall_567666
+proc url_GetServiceDescription_569385(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12436,7 +12436,7 @@ proc url_GetServiceDescription_595156(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetServiceDescription_595155(path: JsonNode; query: JsonNode;
+proc validate_GetServiceDescription_569384(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the description of an existing Service Fabric service. A service must be created before its description can be obtained.
   ## 
@@ -12447,11 +12447,11 @@ proc validate_GetServiceDescription_595155(path: JsonNode; query: JsonNode;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `serviceId` field"
-  var valid_595157 = path.getOrDefault("serviceId")
-  valid_595157 = validateParameter(valid_595157, JString, required = true,
+  var valid_569386 = path.getOrDefault("serviceId")
+  valid_569386 = validateParameter(valid_569386, JString, required = true,
                                  default = nil)
-  if valid_595157 != nil:
-    section.add "serviceId", valid_595157
+  if valid_569386 != nil:
+    section.add "serviceId", valid_569386
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -12459,18 +12459,18 @@ proc validate_GetServiceDescription_595155(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595158 = query.getOrDefault("timeout")
-  valid_595158 = validateParameter(valid_595158, JInt, required = false,
+  var valid_569387 = query.getOrDefault("timeout")
+  valid_569387 = validateParameter(valid_569387, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595158 != nil:
-    section.add "timeout", valid_595158
+  if valid_569387 != nil:
+    section.add "timeout", valid_569387
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595159 = query.getOrDefault("api-version")
-  valid_595159 = validateParameter(valid_595159, JString, required = true,
+  var valid_569388 = query.getOrDefault("api-version")
+  valid_569388 = validateParameter(valid_569388, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595159 != nil:
-    section.add "api-version", valid_595159
+  if valid_569388 != nil:
+    section.add "api-version", valid_569388
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12479,20 +12479,20 @@ proc validate_GetServiceDescription_595155(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595160: Call_GetServiceDescription_595154; path: JsonNode;
+proc call*(call_569389: Call_GetServiceDescription_569383; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the description of an existing Service Fabric service. A service must be created before its description can be obtained.
   ## 
-  let valid = call_595160.validator(path, query, header, formData, body)
-  let scheme = call_595160.pickScheme
+  let valid = call_569389.validator(path, query, header, formData, body)
+  let scheme = call_569389.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595160.url(scheme.get, call_595160.host, call_595160.base,
-                         call_595160.route, valid.getOrDefault("path"),
+  let url = call_569389.url(scheme.get, call_569389.host, call_569389.base,
+                         call_569389.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595160, url, valid)
+  result = hook(call_569389, url, valid)
 
-proc call*(call_595161: Call_GetServiceDescription_595154; serviceId: string;
+proc call*(call_569390: Call_GetServiceDescription_569383; serviceId: string;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## getServiceDescription
   ## Gets the description of an existing Service Fabric service. A service must be created before its description can be obtained.
@@ -12502,21 +12502,21 @@ proc call*(call_595161: Call_GetServiceDescription_595154; serviceId: string;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   serviceId: string (required)
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
-  var path_595162 = newJObject()
-  var query_595163 = newJObject()
-  add(query_595163, "timeout", newJInt(timeout))
-  add(query_595163, "api-version", newJString(apiVersion))
-  add(path_595162, "serviceId", newJString(serviceId))
-  result = call_595161.call(path_595162, query_595163, nil, nil, nil)
+  var path_569391 = newJObject()
+  var query_569392 = newJObject()
+  add(query_569392, "timeout", newJInt(timeout))
+  add(query_569392, "api-version", newJString(apiVersion))
+  add(path_569391, "serviceId", newJString(serviceId))
+  result = call_569390.call(path_569391, query_569392, nil, nil, nil)
 
-var getServiceDescription* = Call_GetServiceDescription_595154(
+var getServiceDescription* = Call_GetServiceDescription_569383(
     name: "getServiceDescription", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Services/{serviceId}/$/GetDescription",
-    validator: validate_GetServiceDescription_595155, base: "",
-    url: url_GetServiceDescription_595156, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetServiceDescription_569384, base: "",
+    url: url_GetServiceDescription_569385, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetServiceHealthUsingPolicy_595176 = ref object of OpenApiRestCall_593437
-proc url_GetServiceHealthUsingPolicy_595178(protocol: Scheme; host: string;
+  Call_GetServiceHealthUsingPolicy_569405 = ref object of OpenApiRestCall_567666
+proc url_GetServiceHealthUsingPolicy_569407(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12532,7 +12532,7 @@ proc url_GetServiceHealthUsingPolicy_595178(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetServiceHealthUsingPolicy_595177(path: JsonNode; query: JsonNode;
+proc validate_GetServiceHealthUsingPolicy_569406(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the health information of the specified service.
   ## If the application health policy is specified, the health evaluation uses it to get the aggregated health state.
@@ -12549,11 +12549,11 @@ proc validate_GetServiceHealthUsingPolicy_595177(path: JsonNode; query: JsonNode
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `serviceId` field"
-  var valid_595179 = path.getOrDefault("serviceId")
-  valid_595179 = validateParameter(valid_595179, JString, required = true,
+  var valid_569408 = path.getOrDefault("serviceId")
+  valid_569408 = validateParameter(valid_569408, JString, required = true,
                                  default = nil)
-  if valid_595179 != nil:
-    section.add "serviceId", valid_595179
+  if valid_569408 != nil:
+    section.add "serviceId", valid_569408
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -12588,28 +12588,28 @@ proc validate_GetServiceHealthUsingPolicy_595177(path: JsonNode; query: JsonNode
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_595180 = query.getOrDefault("timeout")
-  valid_595180 = validateParameter(valid_595180, JInt, required = false,
+  var valid_569409 = query.getOrDefault("timeout")
+  valid_569409 = validateParameter(valid_569409, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595180 != nil:
-    section.add "timeout", valid_595180
+  if valid_569409 != nil:
+    section.add "timeout", valid_569409
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595181 = query.getOrDefault("api-version")
-  valid_595181 = validateParameter(valid_595181, JString, required = true,
+  var valid_569410 = query.getOrDefault("api-version")
+  valid_569410 = validateParameter(valid_569410, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595181 != nil:
-    section.add "api-version", valid_595181
-  var valid_595182 = query.getOrDefault("EventsHealthStateFilter")
-  valid_595182 = validateParameter(valid_595182, JInt, required = false,
+  if valid_569410 != nil:
+    section.add "api-version", valid_569410
+  var valid_569411 = query.getOrDefault("EventsHealthStateFilter")
+  valid_569411 = validateParameter(valid_569411, JInt, required = false,
                                  default = newJInt(0))
-  if valid_595182 != nil:
-    section.add "EventsHealthStateFilter", valid_595182
-  var valid_595183 = query.getOrDefault("PartitionsHealthStateFilter")
-  valid_595183 = validateParameter(valid_595183, JInt, required = false,
+  if valid_569411 != nil:
+    section.add "EventsHealthStateFilter", valid_569411
+  var valid_569412 = query.getOrDefault("PartitionsHealthStateFilter")
+  valid_569412 = validateParameter(valid_569412, JInt, required = false,
                                  default = newJInt(0))
-  if valid_595183 != nil:
-    section.add "PartitionsHealthStateFilter", valid_595183
+  if valid_569412 != nil:
+    section.add "PartitionsHealthStateFilter", valid_569412
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12624,7 +12624,7 @@ proc validate_GetServiceHealthUsingPolicy_595177(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_595185: Call_GetServiceHealthUsingPolicy_595176; path: JsonNode;
+proc call*(call_569414: Call_GetServiceHealthUsingPolicy_569405; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health information of the specified service.
   ## If the application health policy is specified, the health evaluation uses it to get the aggregated health state.
@@ -12634,16 +12634,16 @@ proc call*(call_595185: Call_GetServiceHealthUsingPolicy_595176; path: JsonNode;
   ## If you specify a service that does not exist in the health store, this cmdlet returns an error.
   ## 
   ## 
-  let valid = call_595185.validator(path, query, header, formData, body)
-  let scheme = call_595185.pickScheme
+  let valid = call_569414.validator(path, query, header, formData, body)
+  let scheme = call_569414.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595185.url(scheme.get, call_595185.host, call_595185.base,
-                         call_595185.route, valid.getOrDefault("path"),
+  let url = call_569414.url(scheme.get, call_569414.host, call_569414.base,
+                         call_569414.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595185, url, valid)
+  result = hook(call_569414, url, valid)
 
-proc call*(call_595186: Call_GetServiceHealthUsingPolicy_595176; serviceId: string;
+proc call*(call_569415: Call_GetServiceHealthUsingPolicy_569405; serviceId: string;
           timeout: int = 60; apiVersion: string = "3.0";
           ApplicationHealthPolicy: JsonNode = nil; EventsHealthStateFilter: int = 0;
           PartitionsHealthStateFilter: int = 0): Recallable =
@@ -12692,28 +12692,28 @@ proc call*(call_595186: Call_GetServiceHealthUsingPolicy_595176; serviceId: stri
   ## - Error - Filter that matches input with HealthState value Error. The value is 8.
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
-  var path_595187 = newJObject()
-  var query_595188 = newJObject()
-  var body_595189 = newJObject()
-  add(query_595188, "timeout", newJInt(timeout))
-  add(query_595188, "api-version", newJString(apiVersion))
+  var path_569416 = newJObject()
+  var query_569417 = newJObject()
+  var body_569418 = newJObject()
+  add(query_569417, "timeout", newJInt(timeout))
+  add(query_569417, "api-version", newJString(apiVersion))
   if ApplicationHealthPolicy != nil:
-    body_595189 = ApplicationHealthPolicy
-  add(query_595188, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_595187, "serviceId", newJString(serviceId))
-  add(query_595188, "PartitionsHealthStateFilter",
+    body_569418 = ApplicationHealthPolicy
+  add(query_569417, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_569416, "serviceId", newJString(serviceId))
+  add(query_569417, "PartitionsHealthStateFilter",
       newJInt(PartitionsHealthStateFilter))
-  result = call_595186.call(path_595187, query_595188, nil, nil, body_595189)
+  result = call_569415.call(path_569416, query_569417, nil, nil, body_569418)
 
-var getServiceHealthUsingPolicy* = Call_GetServiceHealthUsingPolicy_595176(
+var getServiceHealthUsingPolicy* = Call_GetServiceHealthUsingPolicy_569405(
     name: "getServiceHealthUsingPolicy", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Services/{serviceId}/$/GetHealth",
-    validator: validate_GetServiceHealthUsingPolicy_595177, base: "",
-    url: url_GetServiceHealthUsingPolicy_595178,
+    validator: validate_GetServiceHealthUsingPolicy_569406, base: "",
+    url: url_GetServiceHealthUsingPolicy_569407,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetServiceHealth_595164 = ref object of OpenApiRestCall_593437
-proc url_GetServiceHealth_595166(protocol: Scheme; host: string; base: string;
+  Call_GetServiceHealth_569393 = ref object of OpenApiRestCall_567666
+proc url_GetServiceHealth_569395(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12729,7 +12729,7 @@ proc url_GetServiceHealth_595166(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetServiceHealth_595165(path: JsonNode; query: JsonNode;
+proc validate_GetServiceHealth_569394(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets the health information of the specified service.
@@ -12745,11 +12745,11 @@ proc validate_GetServiceHealth_595165(path: JsonNode; query: JsonNode;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `serviceId` field"
-  var valid_595167 = path.getOrDefault("serviceId")
-  valid_595167 = validateParameter(valid_595167, JString, required = true,
+  var valid_569396 = path.getOrDefault("serviceId")
+  valid_569396 = validateParameter(valid_569396, JString, required = true,
                                  default = nil)
-  if valid_595167 != nil:
-    section.add "serviceId", valid_595167
+  if valid_569396 != nil:
+    section.add "serviceId", valid_569396
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -12784,28 +12784,28 @@ proc validate_GetServiceHealth_595165(path: JsonNode; query: JsonNode;
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
   section = newJObject()
-  var valid_595168 = query.getOrDefault("timeout")
-  valid_595168 = validateParameter(valid_595168, JInt, required = false,
+  var valid_569397 = query.getOrDefault("timeout")
+  valid_569397 = validateParameter(valid_569397, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595168 != nil:
-    section.add "timeout", valid_595168
+  if valid_569397 != nil:
+    section.add "timeout", valid_569397
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595169 = query.getOrDefault("api-version")
-  valid_595169 = validateParameter(valid_595169, JString, required = true,
+  var valid_569398 = query.getOrDefault("api-version")
+  valid_569398 = validateParameter(valid_569398, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595169 != nil:
-    section.add "api-version", valid_595169
-  var valid_595170 = query.getOrDefault("EventsHealthStateFilter")
-  valid_595170 = validateParameter(valid_595170, JInt, required = false,
+  if valid_569398 != nil:
+    section.add "api-version", valid_569398
+  var valid_569399 = query.getOrDefault("EventsHealthStateFilter")
+  valid_569399 = validateParameter(valid_569399, JInt, required = false,
                                  default = newJInt(0))
-  if valid_595170 != nil:
-    section.add "EventsHealthStateFilter", valid_595170
-  var valid_595171 = query.getOrDefault("PartitionsHealthStateFilter")
-  valid_595171 = validateParameter(valid_595171, JInt, required = false,
+  if valid_569399 != nil:
+    section.add "EventsHealthStateFilter", valid_569399
+  var valid_569400 = query.getOrDefault("PartitionsHealthStateFilter")
+  valid_569400 = validateParameter(valid_569400, JInt, required = false,
                                  default = newJInt(0))
-  if valid_595171 != nil:
-    section.add "PartitionsHealthStateFilter", valid_595171
+  if valid_569400 != nil:
+    section.add "PartitionsHealthStateFilter", valid_569400
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12814,7 +12814,7 @@ proc validate_GetServiceHealth_595165(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595172: Call_GetServiceHealth_595164; path: JsonNode;
+proc call*(call_569401: Call_GetServiceHealth_569393; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the health information of the specified service.
   ## Use EventsHealthStateFilter to filter the collection of health events reported on the service based on the health state.
@@ -12822,16 +12822,16 @@ proc call*(call_595172: Call_GetServiceHealth_595164; path: JsonNode;
   ## If you specify a service that does not exist in the health store, this cmdlet returns an error.
   ## 
   ## 
-  let valid = call_595172.validator(path, query, header, formData, body)
-  let scheme = call_595172.pickScheme
+  let valid = call_569401.validator(path, query, header, formData, body)
+  let scheme = call_569401.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595172.url(scheme.get, call_595172.host, call_595172.base,
-                         call_595172.route, valid.getOrDefault("path"),
+  let url = call_569401.url(scheme.get, call_569401.host, call_569401.base,
+                         call_569401.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595172, url, valid)
+  result = hook(call_569401, url, valid)
 
-proc call*(call_595173: Call_GetServiceHealth_595164; serviceId: string;
+proc call*(call_569402: Call_GetServiceHealth_569393; serviceId: string;
           timeout: int = 60; apiVersion: string = "3.0";
           EventsHealthStateFilter: int = 0; PartitionsHealthStateFilter: int = 0): Recallable =
   ## getServiceHealth
@@ -12873,24 +12873,24 @@ proc call*(call_595173: Call_GetServiceHealth_595164; serviceId: string;
   ## - Error - Filter that matches input with HealthState value Error. The value is 8.
   ## - All - Filter that matches input with any HealthState value. The value is 65535.
   ## 
-  var path_595174 = newJObject()
-  var query_595175 = newJObject()
-  add(query_595175, "timeout", newJInt(timeout))
-  add(query_595175, "api-version", newJString(apiVersion))
-  add(query_595175, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
-  add(path_595174, "serviceId", newJString(serviceId))
-  add(query_595175, "PartitionsHealthStateFilter",
+  var path_569403 = newJObject()
+  var query_569404 = newJObject()
+  add(query_569404, "timeout", newJInt(timeout))
+  add(query_569404, "api-version", newJString(apiVersion))
+  add(query_569404, "EventsHealthStateFilter", newJInt(EventsHealthStateFilter))
+  add(path_569403, "serviceId", newJString(serviceId))
+  add(query_569404, "PartitionsHealthStateFilter",
       newJInt(PartitionsHealthStateFilter))
-  result = call_595173.call(path_595174, query_595175, nil, nil, nil)
+  result = call_569402.call(path_569403, query_569404, nil, nil, nil)
 
-var getServiceHealth* = Call_GetServiceHealth_595164(name: "getServiceHealth",
+var getServiceHealth* = Call_GetServiceHealth_569393(name: "getServiceHealth",
     meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Services/{serviceId}/$/GetHealth",
-    validator: validate_GetServiceHealth_595165, base: "",
-    url: url_GetServiceHealth_595166, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetServiceHealth_569394, base: "",
+    url: url_GetServiceHealth_569395, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetPartitionInfoList_595190 = ref object of OpenApiRestCall_593437
-proc url_GetPartitionInfoList_595192(protocol: Scheme; host: string; base: string;
+  Call_GetPartitionInfoList_569419 = ref object of OpenApiRestCall_567666
+proc url_GetPartitionInfoList_569421(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12906,7 +12906,7 @@ proc url_GetPartitionInfoList_595192(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetPartitionInfoList_595191(path: JsonNode; query: JsonNode;
+proc validate_GetPartitionInfoList_569420(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list of partitions of a Service Fabric service. The response include the partition id, partitioning scheme information, keys supported by the partition, status, health and other details about the partition.
   ## 
@@ -12917,11 +12917,11 @@ proc validate_GetPartitionInfoList_595191(path: JsonNode; query: JsonNode;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `serviceId` field"
-  var valid_595193 = path.getOrDefault("serviceId")
-  valid_595193 = validateParameter(valid_595193, JString, required = true,
+  var valid_569422 = path.getOrDefault("serviceId")
+  valid_569422 = validateParameter(valid_569422, JString, required = true,
                                  default = nil)
-  if valid_595193 != nil:
-    section.add "serviceId", valid_595193
+  if valid_569422 != nil:
+    section.add "serviceId", valid_569422
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -12931,23 +12931,23 @@ proc validate_GetPartitionInfoList_595191(path: JsonNode; query: JsonNode;
   ##   ContinuationToken: JString
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
   section = newJObject()
-  var valid_595194 = query.getOrDefault("timeout")
-  valid_595194 = validateParameter(valid_595194, JInt, required = false,
+  var valid_569423 = query.getOrDefault("timeout")
+  valid_569423 = validateParameter(valid_569423, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595194 != nil:
-    section.add "timeout", valid_595194
+  if valid_569423 != nil:
+    section.add "timeout", valid_569423
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595195 = query.getOrDefault("api-version")
-  valid_595195 = validateParameter(valid_595195, JString, required = true,
+  var valid_569424 = query.getOrDefault("api-version")
+  valid_569424 = validateParameter(valid_569424, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595195 != nil:
-    section.add "api-version", valid_595195
-  var valid_595196 = query.getOrDefault("ContinuationToken")
-  valid_595196 = validateParameter(valid_595196, JString, required = false,
+  if valid_569424 != nil:
+    section.add "api-version", valid_569424
+  var valid_569425 = query.getOrDefault("ContinuationToken")
+  valid_569425 = validateParameter(valid_569425, JString, required = false,
                                  default = nil)
-  if valid_595196 != nil:
-    section.add "ContinuationToken", valid_595196
+  if valid_569425 != nil:
+    section.add "ContinuationToken", valid_569425
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12956,20 +12956,20 @@ proc validate_GetPartitionInfoList_595191(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595197: Call_GetPartitionInfoList_595190; path: JsonNode;
+proc call*(call_569426: Call_GetPartitionInfoList_569419; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list of partitions of a Service Fabric service. The response include the partition id, partitioning scheme information, keys supported by the partition, status, health and other details about the partition.
   ## 
-  let valid = call_595197.validator(path, query, header, formData, body)
-  let scheme = call_595197.pickScheme
+  let valid = call_569426.validator(path, query, header, formData, body)
+  let scheme = call_569426.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595197.url(scheme.get, call_595197.host, call_595197.base,
-                         call_595197.route, valid.getOrDefault("path"),
+  let url = call_569426.url(scheme.get, call_569426.host, call_569426.base,
+                         call_569426.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595197, url, valid)
+  result = hook(call_569426, url, valid)
 
-proc call*(call_595198: Call_GetPartitionInfoList_595190; serviceId: string;
+proc call*(call_569427: Call_GetPartitionInfoList_569419; serviceId: string;
           timeout: int = 60; apiVersion: string = "3.0"; ContinuationToken: string = ""): Recallable =
   ## getPartitionInfoList
   ## Gets the list of partitions of a Service Fabric service. The response include the partition id, partitioning scheme information, keys supported by the partition, status, health and other details about the partition.
@@ -12981,22 +12981,22 @@ proc call*(call_595198: Call_GetPartitionInfoList_595190; serviceId: string;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   ##   ContinuationToken: string
   ##                    : The continuation token parameter is used to obtain next set of results. A continuation token with a non empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
-  var path_595199 = newJObject()
-  var query_595200 = newJObject()
-  add(query_595200, "timeout", newJInt(timeout))
-  add(query_595200, "api-version", newJString(apiVersion))
-  add(path_595199, "serviceId", newJString(serviceId))
-  add(query_595200, "ContinuationToken", newJString(ContinuationToken))
-  result = call_595198.call(path_595199, query_595200, nil, nil, nil)
+  var path_569428 = newJObject()
+  var query_569429 = newJObject()
+  add(query_569429, "timeout", newJInt(timeout))
+  add(query_569429, "api-version", newJString(apiVersion))
+  add(path_569428, "serviceId", newJString(serviceId))
+  add(query_569429, "ContinuationToken", newJString(ContinuationToken))
+  result = call_569427.call(path_569428, query_569429, nil, nil, nil)
 
-var getPartitionInfoList* = Call_GetPartitionInfoList_595190(
+var getPartitionInfoList* = Call_GetPartitionInfoList_569419(
     name: "getPartitionInfoList", meth: HttpMethod.HttpGet,
     host: "azure.local:19080", route: "/Services/{serviceId}/$/GetPartitions",
-    validator: validate_GetPartitionInfoList_595191, base: "",
-    url: url_GetPartitionInfoList_595192, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_GetPartitionInfoList_569420, base: "",
+    url: url_GetPartitionInfoList_569421, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ReportServiceHealth_595201 = ref object of OpenApiRestCall_593437
-proc url_ReportServiceHealth_595203(protocol: Scheme; host: string; base: string;
+  Call_ReportServiceHealth_569430 = ref object of OpenApiRestCall_567666
+proc url_ReportServiceHealth_569432(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13012,7 +13012,7 @@ proc url_ReportServiceHealth_595203(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReportServiceHealth_595202(path: JsonNode; query: JsonNode;
+proc validate_ReportServiceHealth_569431(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Reports health state of the specified Service Fabric service. The report must contain the information about the source of the health report and property on which it is reported.
@@ -13029,11 +13029,11 @@ proc validate_ReportServiceHealth_595202(path: JsonNode; query: JsonNode;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `serviceId` field"
-  var valid_595204 = path.getOrDefault("serviceId")
-  valid_595204 = validateParameter(valid_595204, JString, required = true,
+  var valid_569433 = path.getOrDefault("serviceId")
+  valid_569433 = validateParameter(valid_569433, JString, required = true,
                                  default = nil)
-  if valid_595204 != nil:
-    section.add "serviceId", valid_595204
+  if valid_569433 != nil:
+    section.add "serviceId", valid_569433
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -13041,18 +13041,18 @@ proc validate_ReportServiceHealth_595202(path: JsonNode; query: JsonNode;
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595205 = query.getOrDefault("timeout")
-  valid_595205 = validateParameter(valid_595205, JInt, required = false,
+  var valid_569434 = query.getOrDefault("timeout")
+  valid_569434 = validateParameter(valid_569434, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595205 != nil:
-    section.add "timeout", valid_595205
+  if valid_569434 != nil:
+    section.add "timeout", valid_569434
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595206 = query.getOrDefault("api-version")
-  valid_595206 = validateParameter(valid_595206, JString, required = true,
+  var valid_569435 = query.getOrDefault("api-version")
+  valid_569435 = validateParameter(valid_569435, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595206 != nil:
-    section.add "api-version", valid_595206
+  if valid_569435 != nil:
+    section.add "api-version", valid_569435
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13066,7 +13066,7 @@ proc validate_ReportServiceHealth_595202(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595208: Call_ReportServiceHealth_595201; path: JsonNode;
+proc call*(call_569437: Call_ReportServiceHealth_569430; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reports health state of the specified Service Fabric service. The report must contain the information about the source of the health report and property on which it is reported.
   ## The report is sent to a Service Fabric gateway Service, which forwards to the health store.
@@ -13075,16 +13075,16 @@ proc call*(call_595208: Call_ReportServiceHealth_595201; path: JsonNode;
   ## To see whether the report was applied in the health store, run GetServiceHealth and check that the report appears in the HealthEvents section.
   ## 
   ## 
-  let valid = call_595208.validator(path, query, header, formData, body)
-  let scheme = call_595208.pickScheme
+  let valid = call_569437.validator(path, query, header, formData, body)
+  let scheme = call_569437.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595208.url(scheme.get, call_595208.host, call_595208.base,
-                         call_595208.route, valid.getOrDefault("path"),
+  let url = call_569437.url(scheme.get, call_569437.host, call_569437.base,
+                         call_569437.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595208, url, valid)
+  result = hook(call_569437, url, valid)
 
-proc call*(call_595209: Call_ReportServiceHealth_595201;
+proc call*(call_569438: Call_ReportServiceHealth_569430;
           HealthInformation: JsonNode; serviceId: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## reportServiceHealth
@@ -13102,24 +13102,24 @@ proc call*(call_595209: Call_ReportServiceHealth_595201;
   ##                    : Describes the health information for the health report. This information needs to be present in all of the health reports sent to the health manager.
   ##   serviceId: string (required)
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
-  var path_595210 = newJObject()
-  var query_595211 = newJObject()
-  var body_595212 = newJObject()
-  add(query_595211, "timeout", newJInt(timeout))
-  add(query_595211, "api-version", newJString(apiVersion))
+  var path_569439 = newJObject()
+  var query_569440 = newJObject()
+  var body_569441 = newJObject()
+  add(query_569440, "timeout", newJInt(timeout))
+  add(query_569440, "api-version", newJString(apiVersion))
   if HealthInformation != nil:
-    body_595212 = HealthInformation
-  add(path_595210, "serviceId", newJString(serviceId))
-  result = call_595209.call(path_595210, query_595211, nil, nil, body_595212)
+    body_569441 = HealthInformation
+  add(path_569439, "serviceId", newJString(serviceId))
+  result = call_569438.call(path_569439, query_569440, nil, nil, body_569441)
 
-var reportServiceHealth* = Call_ReportServiceHealth_595201(
+var reportServiceHealth* = Call_ReportServiceHealth_569430(
     name: "reportServiceHealth", meth: HttpMethod.HttpPost,
     host: "azure.local:19080", route: "/Services/{serviceId}/$/ReportHealth",
-    validator: validate_ReportServiceHealth_595202, base: "",
-    url: url_ReportServiceHealth_595203, schemes: {Scheme.Https, Scheme.Http})
+    validator: validate_ReportServiceHealth_569431, base: "",
+    url: url_ReportServiceHealth_569432, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_ResolveService_595213 = ref object of OpenApiRestCall_593437
-proc url_ResolveService_595215(protocol: Scheme; host: string; base: string;
+  Call_ResolveService_569442 = ref object of OpenApiRestCall_567666
+proc url_ResolveService_569444(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13135,7 +13135,7 @@ proc url_ResolveService_595215(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ResolveService_595214(path: JsonNode; query: JsonNode;
+proc validate_ResolveService_569443(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Resolve a Service Fabric service partition, to get the endpoints of the service replicas.
@@ -13147,11 +13147,11 @@ proc validate_ResolveService_595214(path: JsonNode; query: JsonNode;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `serviceId` field"
-  var valid_595216 = path.getOrDefault("serviceId")
-  valid_595216 = validateParameter(valid_595216, JString, required = true,
+  var valid_569445 = path.getOrDefault("serviceId")
+  valid_569445 = validateParameter(valid_569445, JString, required = true,
                                  default = nil)
-  if valid_595216 != nil:
-    section.add "serviceId", valid_595216
+  if valid_569445 != nil:
+    section.add "serviceId", valid_569445
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -13169,32 +13169,32 @@ proc validate_ResolveService_595214(path: JsonNode; query: JsonNode;
   ##   PreviousRspVersion: JString
   ##                     : The value in the Version field of the response that was received previously. This is required if the user knows that the result that was got previously is stale.
   section = newJObject()
-  var valid_595217 = query.getOrDefault("timeout")
-  valid_595217 = validateParameter(valid_595217, JInt, required = false,
+  var valid_569446 = query.getOrDefault("timeout")
+  valid_569446 = validateParameter(valid_569446, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595217 != nil:
-    section.add "timeout", valid_595217
-  var valid_595218 = query.getOrDefault("PartitionKeyValue")
-  valid_595218 = validateParameter(valid_595218, JString, required = false,
+  if valid_569446 != nil:
+    section.add "timeout", valid_569446
+  var valid_569447 = query.getOrDefault("PartitionKeyValue")
+  valid_569447 = validateParameter(valid_569447, JString, required = false,
                                  default = nil)
-  if valid_595218 != nil:
-    section.add "PartitionKeyValue", valid_595218
+  if valid_569447 != nil:
+    section.add "PartitionKeyValue", valid_569447
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595219 = query.getOrDefault("api-version")
-  valid_595219 = validateParameter(valid_595219, JString, required = true,
+  var valid_569448 = query.getOrDefault("api-version")
+  valid_569448 = validateParameter(valid_569448, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595219 != nil:
-    section.add "api-version", valid_595219
-  var valid_595220 = query.getOrDefault("PartitionKeyType")
-  valid_595220 = validateParameter(valid_595220, JInt, required = false, default = nil)
-  if valid_595220 != nil:
-    section.add "PartitionKeyType", valid_595220
-  var valid_595221 = query.getOrDefault("PreviousRspVersion")
-  valid_595221 = validateParameter(valid_595221, JString, required = false,
+  if valid_569448 != nil:
+    section.add "api-version", valid_569448
+  var valid_569449 = query.getOrDefault("PartitionKeyType")
+  valid_569449 = validateParameter(valid_569449, JInt, required = false, default = nil)
+  if valid_569449 != nil:
+    section.add "PartitionKeyType", valid_569449
+  var valid_569450 = query.getOrDefault("PreviousRspVersion")
+  valid_569450 = validateParameter(valid_569450, JString, required = false,
                                  default = nil)
-  if valid_595221 != nil:
-    section.add "PreviousRspVersion", valid_595221
+  if valid_569450 != nil:
+    section.add "PreviousRspVersion", valid_569450
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13203,20 +13203,20 @@ proc validate_ResolveService_595214(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595222: Call_ResolveService_595213; path: JsonNode; query: JsonNode;
+proc call*(call_569451: Call_ResolveService_569442; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resolve a Service Fabric service partition, to get the endpoints of the service replicas.
   ## 
-  let valid = call_595222.validator(path, query, header, formData, body)
-  let scheme = call_595222.pickScheme
+  let valid = call_569451.validator(path, query, header, formData, body)
+  let scheme = call_569451.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595222.url(scheme.get, call_595222.host, call_595222.base,
-                         call_595222.route, valid.getOrDefault("path"),
+  let url = call_569451.url(scheme.get, call_569451.host, call_569451.base,
+                         call_569451.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595222, url, valid)
+  result = hook(call_569451, url, valid)
 
-proc call*(call_595223: Call_ResolveService_595213; serviceId: string;
+proc call*(call_569452: Call_ResolveService_569442; serviceId: string;
           timeout: int = 60; PartitionKeyValue: string = ""; apiVersion: string = "3.0";
           PartitionKeyType: int = 0; PreviousRspVersion: string = ""): Recallable =
   ## resolveService
@@ -13237,24 +13237,24 @@ proc call*(call_595223: Call_ResolveService_595213; serviceId: string;
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   ##   PreviousRspVersion: string
   ##                     : The value in the Version field of the response that was received previously. This is required if the user knows that the result that was got previously is stale.
-  var path_595224 = newJObject()
-  var query_595225 = newJObject()
-  add(query_595225, "timeout", newJInt(timeout))
-  add(query_595225, "PartitionKeyValue", newJString(PartitionKeyValue))
-  add(query_595225, "api-version", newJString(apiVersion))
-  add(query_595225, "PartitionKeyType", newJInt(PartitionKeyType))
-  add(path_595224, "serviceId", newJString(serviceId))
-  add(query_595225, "PreviousRspVersion", newJString(PreviousRspVersion))
-  result = call_595223.call(path_595224, query_595225, nil, nil, nil)
+  var path_569453 = newJObject()
+  var query_569454 = newJObject()
+  add(query_569454, "timeout", newJInt(timeout))
+  add(query_569454, "PartitionKeyValue", newJString(PartitionKeyValue))
+  add(query_569454, "api-version", newJString(apiVersion))
+  add(query_569454, "PartitionKeyType", newJInt(PartitionKeyType))
+  add(path_569453, "serviceId", newJString(serviceId))
+  add(query_569454, "PreviousRspVersion", newJString(PreviousRspVersion))
+  result = call_569452.call(path_569453, query_569454, nil, nil, nil)
 
-var resolveService* = Call_ResolveService_595213(name: "resolveService",
+var resolveService* = Call_ResolveService_569442(name: "resolveService",
     meth: HttpMethod.HttpGet, host: "azure.local:19080",
     route: "/Services/{serviceId}/$/ResolvePartition",
-    validator: validate_ResolveService_595214, base: "", url: url_ResolveService_595215,
+    validator: validate_ResolveService_569443, base: "", url: url_ResolveService_569444,
     schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_UpdateService_595226 = ref object of OpenApiRestCall_593437
-proc url_UpdateService_595228(protocol: Scheme; host: string; base: string;
+  Call_UpdateService_569455 = ref object of OpenApiRestCall_567666
+proc url_UpdateService_569457(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13270,7 +13270,7 @@ proc url_UpdateService_595228(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UpdateService_595227(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UpdateService_569456(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the specified service using the given update description.
   ## 
@@ -13281,11 +13281,11 @@ proc validate_UpdateService_595227(path: JsonNode; query: JsonNode; header: Json
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `serviceId` field"
-  var valid_595229 = path.getOrDefault("serviceId")
-  valid_595229 = validateParameter(valid_595229, JString, required = true,
+  var valid_569458 = path.getOrDefault("serviceId")
+  valid_569458 = validateParameter(valid_569458, JString, required = true,
                                  default = nil)
-  if valid_595229 != nil:
-    section.add "serviceId", valid_595229
+  if valid_569458 != nil:
+    section.add "serviceId", valid_569458
   result.add "path", section
   ## parameters in `query` object:
   ##   timeout: JInt
@@ -13293,18 +13293,18 @@ proc validate_UpdateService_595227(path: JsonNode; query: JsonNode; header: Json
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595230 = query.getOrDefault("timeout")
-  valid_595230 = validateParameter(valid_595230, JInt, required = false,
+  var valid_569459 = query.getOrDefault("timeout")
+  valid_569459 = validateParameter(valid_569459, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595230 != nil:
-    section.add "timeout", valid_595230
+  if valid_569459 != nil:
+    section.add "timeout", valid_569459
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595231 = query.getOrDefault("api-version")
-  valid_595231 = validateParameter(valid_595231, JString, required = true,
+  var valid_569460 = query.getOrDefault("api-version")
+  valid_569460 = validateParameter(valid_569460, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595231 != nil:
-    section.add "api-version", valid_595231
+  if valid_569460 != nil:
+    section.add "api-version", valid_569460
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13318,20 +13318,20 @@ proc validate_UpdateService_595227(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_595233: Call_UpdateService_595226; path: JsonNode; query: JsonNode;
+proc call*(call_569462: Call_UpdateService_569455; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specified service using the given update description.
   ## 
-  let valid = call_595233.validator(path, query, header, formData, body)
-  let scheme = call_595233.pickScheme
+  let valid = call_569462.validator(path, query, header, formData, body)
+  let scheme = call_569462.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595233.url(scheme.get, call_595233.host, call_595233.base,
-                         call_595233.route, valid.getOrDefault("path"),
+  let url = call_569462.url(scheme.get, call_569462.host, call_569462.base,
+                         call_569462.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595233, url, valid)
+  result = hook(call_569462, url, valid)
 
-proc call*(call_595234: Call_UpdateService_595226;
+proc call*(call_569463: Call_UpdateService_569455;
           ServiceUpdateDescription: JsonNode; serviceId: string; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## updateService
@@ -13344,30 +13344,30 @@ proc call*(call_595234: Call_UpdateService_595226;
   ##                           : The updated configuration for the service.
   ##   serviceId: string (required)
   ##            : The identity of the service. This is typically the full name of the service without the 'fabric:' URI scheme.
-  var path_595235 = newJObject()
-  var query_595236 = newJObject()
-  var body_595237 = newJObject()
-  add(query_595236, "timeout", newJInt(timeout))
-  add(query_595236, "api-version", newJString(apiVersion))
+  var path_569464 = newJObject()
+  var query_569465 = newJObject()
+  var body_569466 = newJObject()
+  add(query_569465, "timeout", newJInt(timeout))
+  add(query_569465, "api-version", newJString(apiVersion))
   if ServiceUpdateDescription != nil:
-    body_595237 = ServiceUpdateDescription
-  add(path_595235, "serviceId", newJString(serviceId))
-  result = call_595234.call(path_595235, query_595236, nil, nil, body_595237)
+    body_569466 = ServiceUpdateDescription
+  add(path_569464, "serviceId", newJString(serviceId))
+  result = call_569463.call(path_569464, query_569465, nil, nil, body_569466)
 
-var updateService* = Call_UpdateService_595226(name: "updateService",
+var updateService* = Call_UpdateService_569455(name: "updateService",
     meth: HttpMethod.HttpPost, host: "azure.local:19080",
-    route: "/Services/{serviceId}/$/Update", validator: validate_UpdateService_595227,
-    base: "", url: url_UpdateService_595228, schemes: {Scheme.Https, Scheme.Http})
+    route: "/Services/{serviceId}/$/Update", validator: validate_UpdateService_569456,
+    base: "", url: url_UpdateService_569457, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_GetChaosReport_595238 = ref object of OpenApiRestCall_593437
-proc url_GetChaosReport_595240(protocol: Scheme; host: string; base: string;
+  Call_GetChaosReport_569467 = ref object of OpenApiRestCall_567666
+proc url_GetChaosReport_569469(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetChaosReport_595239(path: JsonNode; query: JsonNode;
+proc validate_GetChaosReport_569468(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## You can either specify the ContinuationToken to get the next segment of the Chaos report or you can specify the time-range
@@ -13393,33 +13393,33 @@ proc validate_GetChaosReport_595239(path: JsonNode; query: JsonNode;
   ##               : The count of ticks representing the start time of the time range for which a Chaos report is to be generated. Please consult [DateTime.Ticks 
   ## Property](https://msdn.microsoft.com/en-us/library/system.datetime.ticks%28v=vs.110%29) for details about tick.
   section = newJObject()
-  var valid_595241 = query.getOrDefault("timeout")
-  valid_595241 = validateParameter(valid_595241, JInt, required = false,
+  var valid_569470 = query.getOrDefault("timeout")
+  valid_569470 = validateParameter(valid_569470, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595241 != nil:
-    section.add "timeout", valid_595241
+  if valid_569470 != nil:
+    section.add "timeout", valid_569470
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595242 = query.getOrDefault("api-version")
-  valid_595242 = validateParameter(valid_595242, JString, required = true,
+  var valid_569471 = query.getOrDefault("api-version")
+  valid_569471 = validateParameter(valid_569471, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595242 != nil:
-    section.add "api-version", valid_595242
-  var valid_595243 = query.getOrDefault("EndTimeUtc")
-  valid_595243 = validateParameter(valid_595243, JString, required = false,
+  if valid_569471 != nil:
+    section.add "api-version", valid_569471
+  var valid_569472 = query.getOrDefault("EndTimeUtc")
+  valid_569472 = validateParameter(valid_569472, JString, required = false,
                                  default = nil)
-  if valid_595243 != nil:
-    section.add "EndTimeUtc", valid_595243
-  var valid_595244 = query.getOrDefault("ContinuationToken")
-  valid_595244 = validateParameter(valid_595244, JString, required = false,
+  if valid_569472 != nil:
+    section.add "EndTimeUtc", valid_569472
+  var valid_569473 = query.getOrDefault("ContinuationToken")
+  valid_569473 = validateParameter(valid_569473, JString, required = false,
                                  default = nil)
-  if valid_595244 != nil:
-    section.add "ContinuationToken", valid_595244
-  var valid_595245 = query.getOrDefault("StartTimeUtc")
-  valid_595245 = validateParameter(valid_595245, JString, required = false,
+  if valid_569473 != nil:
+    section.add "ContinuationToken", valid_569473
+  var valid_569474 = query.getOrDefault("StartTimeUtc")
+  valid_569474 = validateParameter(valid_569474, JString, required = false,
                                  default = nil)
-  if valid_595245 != nil:
-    section.add "StartTimeUtc", valid_595245
+  if valid_569474 != nil:
+    section.add "StartTimeUtc", valid_569474
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13428,23 +13428,23 @@ proc validate_GetChaosReport_595239(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595246: Call_GetChaosReport_595238; path: JsonNode; query: JsonNode;
+proc call*(call_569475: Call_GetChaosReport_569467; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## You can either specify the ContinuationToken to get the next segment of the Chaos report or you can specify the time-range
   ## through StartTimeUtc and EndTimeUtc, but you cannot specify both the ContinuationToken and the time-range in the same call.
   ## When there are more than 100 Chaos events, the Chaos report is returned in segments where a segment contains no more than 100 Chaos events.
   ## 
   ## 
-  let valid = call_595246.validator(path, query, header, formData, body)
-  let scheme = call_595246.pickScheme
+  let valid = call_569475.validator(path, query, header, formData, body)
+  let scheme = call_569475.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595246.url(scheme.get, call_595246.host, call_595246.base,
-                         call_595246.route, valid.getOrDefault("path"),
+  let url = call_569475.url(scheme.get, call_569475.host, call_569475.base,
+                         call_569475.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595246, url, valid)
+  result = hook(call_569475, url, valid)
 
-proc call*(call_595247: Call_GetChaosReport_595238; timeout: int = 60;
+proc call*(call_569476: Call_GetChaosReport_569467; timeout: int = 60;
           apiVersion: string = "3.0"; EndTimeUtc: string = "";
           ContinuationToken: string = ""; StartTimeUtc: string = ""): Recallable =
   ## getChaosReport
@@ -13464,28 +13464,28 @@ proc call*(call_595247: Call_GetChaosReport_595238; timeout: int = 60;
   ##   StartTimeUtc: string
   ##               : The count of ticks representing the start time of the time range for which a Chaos report is to be generated. Please consult [DateTime.Ticks 
   ## Property](https://msdn.microsoft.com/en-us/library/system.datetime.ticks%28v=vs.110%29) for details about tick.
-  var query_595248 = newJObject()
-  add(query_595248, "timeout", newJInt(timeout))
-  add(query_595248, "api-version", newJString(apiVersion))
-  add(query_595248, "EndTimeUtc", newJString(EndTimeUtc))
-  add(query_595248, "ContinuationToken", newJString(ContinuationToken))
-  add(query_595248, "StartTimeUtc", newJString(StartTimeUtc))
-  result = call_595247.call(nil, query_595248, nil, nil, nil)
+  var query_569477 = newJObject()
+  add(query_569477, "timeout", newJInt(timeout))
+  add(query_569477, "api-version", newJString(apiVersion))
+  add(query_569477, "EndTimeUtc", newJString(EndTimeUtc))
+  add(query_569477, "ContinuationToken", newJString(ContinuationToken))
+  add(query_569477, "StartTimeUtc", newJString(StartTimeUtc))
+  result = call_569476.call(nil, query_569477, nil, nil, nil)
 
-var getChaosReport* = Call_GetChaosReport_595238(name: "getChaosReport",
+var getChaosReport* = Call_GetChaosReport_569467(name: "getChaosReport",
     meth: HttpMethod.HttpGet, host: "azure.local:19080",
-    route: "/Tools/Chaos/$/Report", validator: validate_GetChaosReport_595239,
-    base: "", url: url_GetChaosReport_595240, schemes: {Scheme.Https, Scheme.Http})
+    route: "/Tools/Chaos/$/Report", validator: validate_GetChaosReport_569468,
+    base: "", url: url_GetChaosReport_569469, schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_StartChaos_595249 = ref object of OpenApiRestCall_593437
-proc url_StartChaos_595251(protocol: Scheme; host: string; base: string; route: string;
+  Call_StartChaos_569478 = ref object of OpenApiRestCall_567666
+proc url_StartChaos_569480(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_StartChaos_595250(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_StartChaos_569479(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## If Chaos is not already running in the cluster, it starts Chaos with the passed in Chaos parameters.
   ## If Chaos is already running when this call is made, the call fails with the error code FABRIC_E_CHAOS_ALREADY_RUNNING.
@@ -13502,18 +13502,18 @@ proc validate_StartChaos_595250(path: JsonNode; query: JsonNode; header: JsonNod
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595252 = query.getOrDefault("timeout")
-  valid_595252 = validateParameter(valid_595252, JInt, required = false,
+  var valid_569481 = query.getOrDefault("timeout")
+  valid_569481 = validateParameter(valid_569481, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595252 != nil:
-    section.add "timeout", valid_595252
+  if valid_569481 != nil:
+    section.add "timeout", valid_569481
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595253 = query.getOrDefault("api-version")
-  valid_595253 = validateParameter(valid_595253, JString, required = true,
+  var valid_569482 = query.getOrDefault("api-version")
+  valid_569482 = validateParameter(valid_569482, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595253 != nil:
-    section.add "api-version", valid_595253
+  if valid_569482 != nil:
+    section.add "api-version", valid_569482
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13527,23 +13527,23 @@ proc validate_StartChaos_595250(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_595255: Call_StartChaos_595249; path: JsonNode; query: JsonNode;
+proc call*(call_569484: Call_StartChaos_569478; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## If Chaos is not already running in the cluster, it starts Chaos with the passed in Chaos parameters.
   ## If Chaos is already running when this call is made, the call fails with the error code FABRIC_E_CHAOS_ALREADY_RUNNING.
   ## Please refer to the article [Induce controlled Chaos in Service Fabric clusters](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-controlled-chaos) for more details.
   ## 
   ## 
-  let valid = call_595255.validator(path, query, header, formData, body)
-  let scheme = call_595255.pickScheme
+  let valid = call_569484.validator(path, query, header, formData, body)
+  let scheme = call_569484.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595255.url(scheme.get, call_595255.host, call_595255.base,
-                         call_595255.route, valid.getOrDefault("path"),
+  let url = call_569484.url(scheme.get, call_569484.host, call_569484.base,
+                         call_569484.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595255, url, valid)
+  result = hook(call_569484, url, valid)
 
-proc call*(call_595256: Call_StartChaos_595249; ChaosParameters: JsonNode;
+proc call*(call_569485: Call_StartChaos_569478; ChaosParameters: JsonNode;
           timeout: int = 60; apiVersion: string = "3.0"): Recallable =
   ## startChaos
   ## If Chaos is not already running in the cluster, it starts Chaos with the passed in Chaos parameters.
@@ -13556,31 +13556,31 @@ proc call*(call_595256: Call_StartChaos_595249; ChaosParameters: JsonNode;
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
   ##   ChaosParameters: JObject (required)
   ##                  : Describes all the parameters to configure a Chaos run.
-  var query_595257 = newJObject()
-  var body_595258 = newJObject()
-  add(query_595257, "timeout", newJInt(timeout))
-  add(query_595257, "api-version", newJString(apiVersion))
+  var query_569486 = newJObject()
+  var body_569487 = newJObject()
+  add(query_569486, "timeout", newJInt(timeout))
+  add(query_569486, "api-version", newJString(apiVersion))
   if ChaosParameters != nil:
-    body_595258 = ChaosParameters
-  result = call_595256.call(nil, query_595257, nil, nil, body_595258)
+    body_569487 = ChaosParameters
+  result = call_569485.call(nil, query_569486, nil, nil, body_569487)
 
-var startChaos* = Call_StartChaos_595249(name: "startChaos",
+var startChaos* = Call_StartChaos_569478(name: "startChaos",
                                       meth: HttpMethod.HttpPost,
                                       host: "azure.local:19080",
                                       route: "/Tools/Chaos/$/Start",
-                                      validator: validate_StartChaos_595250,
-                                      base: "", url: url_StartChaos_595251,
+                                      validator: validate_StartChaos_569479,
+                                      base: "", url: url_StartChaos_569480,
                                       schemes: {Scheme.Https, Scheme.Http})
 type
-  Call_StopChaos_595259 = ref object of OpenApiRestCall_593437
-proc url_StopChaos_595261(protocol: Scheme; host: string; base: string; route: string;
+  Call_StopChaos_569488 = ref object of OpenApiRestCall_567666
+proc url_StopChaos_569490(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_StopChaos_595260(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_StopChaos_569489(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Stops Chaos from scheduling further faults; but, the in-flight faults are not affected.
   ## 
@@ -13594,18 +13594,18 @@ proc validate_StopChaos_595260(path: JsonNode; query: JsonNode; header: JsonNode
   ##   api-version: JString (required)
   ##              : The version of the API. This is a required parameter and it's value must be "3.0".
   section = newJObject()
-  var valid_595262 = query.getOrDefault("timeout")
-  valid_595262 = validateParameter(valid_595262, JInt, required = false,
+  var valid_569491 = query.getOrDefault("timeout")
+  valid_569491 = validateParameter(valid_569491, JInt, required = false,
                                  default = newJInt(60))
-  if valid_595262 != nil:
-    section.add "timeout", valid_595262
+  if valid_569491 != nil:
+    section.add "timeout", valid_569491
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595263 = query.getOrDefault("api-version")
-  valid_595263 = validateParameter(valid_595263, JString, required = true,
+  var valid_569492 = query.getOrDefault("api-version")
+  valid_569492 = validateParameter(valid_569492, JString, required = true,
                                  default = newJString("3.0"))
-  if valid_595263 != nil:
-    section.add "api-version", valid_595263
+  if valid_569492 != nil:
+    section.add "api-version", valid_569492
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13614,20 +13614,20 @@ proc validate_StopChaos_595260(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_595264: Call_StopChaos_595259; path: JsonNode; query: JsonNode;
+proc call*(call_569493: Call_StopChaos_569488; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stops Chaos from scheduling further faults; but, the in-flight faults are not affected.
   ## 
-  let valid = call_595264.validator(path, query, header, formData, body)
-  let scheme = call_595264.pickScheme
+  let valid = call_569493.validator(path, query, header, formData, body)
+  let scheme = call_569493.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595264.url(scheme.get, call_595264.host, call_595264.base,
-                         call_595264.route, valid.getOrDefault("path"),
+  let url = call_569493.url(scheme.get, call_569493.host, call_569493.base,
+                         call_569493.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595264, url, valid)
+  result = hook(call_569493, url, valid)
 
-proc call*(call_595265: Call_StopChaos_595259; timeout: int = 60;
+proc call*(call_569494: Call_StopChaos_569488; timeout: int = 60;
           apiVersion: string = "3.0"): Recallable =
   ## stopChaos
   ## Stops Chaos from scheduling further faults; but, the in-flight faults are not affected.
@@ -13635,16 +13635,16 @@ proc call*(call_595265: Call_StopChaos_595259; timeout: int = 60;
   ##          : The server timeout for performing the operation in seconds. This specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
   ##   apiVersion: string (required)
   ##             : The version of the API. This is a required parameter and it's value must be "3.0".
-  var query_595266 = newJObject()
-  add(query_595266, "timeout", newJInt(timeout))
-  add(query_595266, "api-version", newJString(apiVersion))
-  result = call_595265.call(nil, query_595266, nil, nil, nil)
+  var query_569495 = newJObject()
+  add(query_569495, "timeout", newJInt(timeout))
+  add(query_569495, "api-version", newJString(apiVersion))
+  result = call_569494.call(nil, query_569495, nil, nil, nil)
 
-var stopChaos* = Call_StopChaos_595259(name: "stopChaos", meth: HttpMethod.HttpPost,
+var stopChaos* = Call_StopChaos_569488(name: "stopChaos", meth: HttpMethod.HttpPost,
                                     host: "azure.local:19080",
                                     route: "/Tools/Chaos/$/Stop",
-                                    validator: validate_StopChaos_595260,
-                                    base: "", url: url_StopChaos_595261,
+                                    validator: validate_StopChaos_569489,
+                                    base: "", url: url_StopChaos_569490,
                                     schemes: {Scheme.Https, Scheme.Http})
 export
   rest

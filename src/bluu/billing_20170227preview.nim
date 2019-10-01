@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, openapi/rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, strutils, httpcore
 
 ## auto-generated via openapi macro
 ## title: BillingClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_574457 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_574457](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_574457): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -70,7 +70,7 @@ type
   PathTokenKind = enum
     ConstantSegment, VariableSegment
   PathToken = tuple[kind: PathTokenKind, value: string]
-proc queryString(query: JsonNode): string =
+proc queryString(query: JsonNode): string {.used.} =
   var qs: seq[KeyVal]
   if query == nil:
     return ""
@@ -78,7 +78,7 @@ proc queryString(query: JsonNode): string =
     qs.add (key: k, val: v.getStr)
   result = encodeQuery(qs)
 
-proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] =
+proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.used.} =
   ## reconstitute a path with constants and variable values taken from json
   var head: string
   if segments.len == 0:
@@ -103,15 +103,15 @@ const
   macServiceName = "billing"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593646 = ref object of OpenApiRestCall_593424
-proc url_OperationsList_593648(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_574679 = ref object of OpenApiRestCall_574457
+proc url_OperationsList_574681(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_574680(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available billing REST API operations.
@@ -126,11 +126,11 @@ proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593807 = query.getOrDefault("api-version")
-  valid_593807 = validateParameter(valid_593807, JString, required = true,
+  var valid_574840 = query.getOrDefault("api-version")
+  valid_574840 = validateParameter(valid_574840, JString, required = true,
                                  default = nil)
-  if valid_593807 != nil:
-    section.add "api-version", valid_593807
+  if valid_574840 != nil:
+    section.add "api-version", valid_574840
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +139,36 @@ proc validate_OperationsList_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593830: Call_OperationsList_593646; path: JsonNode; query: JsonNode;
+proc call*(call_574863: Call_OperationsList_574679; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available billing REST API operations.
   ## 
-  let valid = call_593830.validator(path, query, header, formData, body)
-  let scheme = call_593830.pickScheme
+  let valid = call_574863.validator(path, query, header, formData, body)
+  let scheme = call_574863.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593830.url(scheme.get, call_593830.host, call_593830.base,
-                         call_593830.route, valid.getOrDefault("path"),
+  let url = call_574863.url(scheme.get, call_574863.host, call_574863.base,
+                         call_574863.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593830, url, valid)
+  result = hook(call_574863, url, valid)
 
-proc call*(call_593901: Call_OperationsList_593646; apiVersion: string): Recallable =
+proc call*(call_574934: Call_OperationsList_574679; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available billing REST API operations.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2017-02-27-preview.
-  var query_593902 = newJObject()
-  add(query_593902, "api-version", newJString(apiVersion))
-  result = call_593901.call(nil, query_593902, nil, nil, nil)
+  var query_574935 = newJObject()
+  add(query_574935, "api-version", newJString(apiVersion))
+  result = call_574934.call(nil, query_574935, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593646(name: "operationsList",
+var operationsList* = Call_OperationsList_574679(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Billing/operations",
-    validator: validate_OperationsList_593647, base: "", url: url_OperationsList_593648,
+    validator: validate_OperationsList_574680, base: "", url: url_OperationsList_574681,
     schemes: {Scheme.Https})
 type
-  Call_InvoicesList_593942 = ref object of OpenApiRestCall_593424
-proc url_InvoicesList_593944(protocol: Scheme; host: string; base: string;
+  Call_InvoicesList_574975 = ref object of OpenApiRestCall_574457
+proc url_InvoicesList_574977(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +184,7 @@ proc url_InvoicesList_593944(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoicesList_593943(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_InvoicesList_574976(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the available invoices for a subscription in reverse chronological order beginning with the most recent invoice. In preview, invoices are available via this API only for invoice periods which end December 1, 2016 or later
   ## 
@@ -197,11 +197,11 @@ proc validate_InvoicesList_593943(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  var valid_574993 = path.getOrDefault("subscriptionId")
+  valid_574993 = validateParameter(valid_574993, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
+  if valid_574993 != nil:
+    section.add "subscriptionId", valid_574993
   result.add "path", section
   ## parameters in `query` object:
   ##   $expand: JString
@@ -215,32 +215,32 @@ proc validate_InvoicesList_593943(path: JsonNode; query: JsonNode; header: JsonN
   ##   $filter: JString
   ##          : May be used to filter invoices by invoicePeriodEndDate. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'
   section = newJObject()
-  var valid_593961 = query.getOrDefault("$expand")
-  valid_593961 = validateParameter(valid_593961, JString, required = false,
+  var valid_574994 = query.getOrDefault("$expand")
+  valid_574994 = validateParameter(valid_574994, JString, required = false,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "$expand", valid_593961
+  if valid_574994 != nil:
+    section.add "$expand", valid_574994
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593962 = query.getOrDefault("api-version")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_574995 = query.getOrDefault("api-version")
+  valid_574995 = validateParameter(valid_574995, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "api-version", valid_593962
-  var valid_593963 = query.getOrDefault("$top")
-  valid_593963 = validateParameter(valid_593963, JInt, required = false, default = nil)
-  if valid_593963 != nil:
-    section.add "$top", valid_593963
-  var valid_593964 = query.getOrDefault("$skiptoken")
-  valid_593964 = validateParameter(valid_593964, JString, required = false,
+  if valid_574995 != nil:
+    section.add "api-version", valid_574995
+  var valid_574996 = query.getOrDefault("$top")
+  valid_574996 = validateParameter(valid_574996, JInt, required = false, default = nil)
+  if valid_574996 != nil:
+    section.add "$top", valid_574996
+  var valid_574997 = query.getOrDefault("$skiptoken")
+  valid_574997 = validateParameter(valid_574997, JString, required = false,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "$skiptoken", valid_593964
-  var valid_593965 = query.getOrDefault("$filter")
-  valid_593965 = validateParameter(valid_593965, JString, required = false,
+  if valid_574997 != nil:
+    section.add "$skiptoken", valid_574997
+  var valid_574998 = query.getOrDefault("$filter")
+  valid_574998 = validateParameter(valid_574998, JString, required = false,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "$filter", valid_593965
+  if valid_574998 != nil:
+    section.add "$filter", valid_574998
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -249,21 +249,21 @@ proc validate_InvoicesList_593943(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593966: Call_InvoicesList_593942; path: JsonNode; query: JsonNode;
+proc call*(call_574999: Call_InvoicesList_574975; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the available invoices for a subscription in reverse chronological order beginning with the most recent invoice. In preview, invoices are available via this API only for invoice periods which end December 1, 2016 or later
   ## 
   ## https://go.microsoft.com/fwlink/?linkid=842057
-  let valid = call_593966.validator(path, query, header, formData, body)
-  let scheme = call_593966.pickScheme
+  let valid = call_574999.validator(path, query, header, formData, body)
+  let scheme = call_574999.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593966.url(scheme.get, call_593966.host, call_593966.base,
-                         call_593966.route, valid.getOrDefault("path"),
+  let url = call_574999.url(scheme.get, call_574999.host, call_574999.base,
+                         call_574999.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593966, url, valid)
+  result = hook(call_574999, url, valid)
 
-proc call*(call_593967: Call_InvoicesList_593942; apiVersion: string;
+proc call*(call_575000: Call_InvoicesList_574975; apiVersion: string;
           subscriptionId: string; Expand: string = ""; Top: int = 0;
           Skiptoken: string = ""; Filter: string = ""): Recallable =
   ## invoicesList
@@ -281,23 +281,23 @@ proc call*(call_593967: Call_InvoicesList_593942; apiVersion: string;
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
   ##   Filter: string
   ##         : May be used to filter invoices by invoicePeriodEndDate. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'
-  var path_593968 = newJObject()
-  var query_593969 = newJObject()
-  add(query_593969, "$expand", newJString(Expand))
-  add(query_593969, "api-version", newJString(apiVersion))
-  add(path_593968, "subscriptionId", newJString(subscriptionId))
-  add(query_593969, "$top", newJInt(Top))
-  add(query_593969, "$skiptoken", newJString(Skiptoken))
-  add(query_593969, "$filter", newJString(Filter))
-  result = call_593967.call(path_593968, query_593969, nil, nil, nil)
+  var path_575001 = newJObject()
+  var query_575002 = newJObject()
+  add(query_575002, "$expand", newJString(Expand))
+  add(query_575002, "api-version", newJString(apiVersion))
+  add(path_575001, "subscriptionId", newJString(subscriptionId))
+  add(query_575002, "$top", newJInt(Top))
+  add(query_575002, "$skiptoken", newJString(Skiptoken))
+  add(query_575002, "$filter", newJString(Filter))
+  result = call_575000.call(path_575001, query_575002, nil, nil, nil)
 
-var invoicesList* = Call_InvoicesList_593942(name: "invoicesList",
+var invoicesList* = Call_InvoicesList_574975(name: "invoicesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/invoices",
-    validator: validate_InvoicesList_593943, base: "", url: url_InvoicesList_593944,
+    validator: validate_InvoicesList_574976, base: "", url: url_InvoicesList_574977,
     schemes: {Scheme.Https})
 type
-  Call_InvoicesGetLatest_593970 = ref object of OpenApiRestCall_593424
-proc url_InvoicesGetLatest_593972(protocol: Scheme; host: string; base: string;
+  Call_InvoicesGetLatest_575003 = ref object of OpenApiRestCall_574457
+proc url_InvoicesGetLatest_575005(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -314,7 +314,7 @@ proc url_InvoicesGetLatest_593972(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoicesGetLatest_593971(path: JsonNode; query: JsonNode;
+proc validate_InvoicesGetLatest_575004(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets the most recent invoice. When getting a single invoice, the downloadUrl property is expanded automatically.
@@ -327,11 +327,11 @@ proc validate_InvoicesGetLatest_593971(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593973 = path.getOrDefault("subscriptionId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_575006 = path.getOrDefault("subscriptionId")
+  valid_575006 = validateParameter(valid_575006, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "subscriptionId", valid_593973
+  if valid_575006 != nil:
+    section.add "subscriptionId", valid_575006
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -339,11 +339,11 @@ proc validate_InvoicesGetLatest_593971(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593974 = query.getOrDefault("api-version")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
+  var valid_575007 = query.getOrDefault("api-version")
+  valid_575007 = validateParameter(valid_575007, JString, required = true,
                                  default = nil)
-  if valid_593974 != nil:
-    section.add "api-version", valid_593974
+  if valid_575007 != nil:
+    section.add "api-version", valid_575007
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -352,20 +352,20 @@ proc validate_InvoicesGetLatest_593971(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593975: Call_InvoicesGetLatest_593970; path: JsonNode;
+proc call*(call_575008: Call_InvoicesGetLatest_575003; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the most recent invoice. When getting a single invoice, the downloadUrl property is expanded automatically.
   ## 
-  let valid = call_593975.validator(path, query, header, formData, body)
-  let scheme = call_593975.pickScheme
+  let valid = call_575008.validator(path, query, header, formData, body)
+  let scheme = call_575008.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593975.url(scheme.get, call_593975.host, call_593975.base,
-                         call_593975.route, valid.getOrDefault("path"),
+  let url = call_575008.url(scheme.get, call_575008.host, call_575008.base,
+                         call_575008.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593975, url, valid)
+  result = hook(call_575008, url, valid)
 
-proc call*(call_593976: Call_InvoicesGetLatest_593970; apiVersion: string;
+proc call*(call_575009: Call_InvoicesGetLatest_575003; apiVersion: string;
           subscriptionId: string): Recallable =
   ## invoicesGetLatest
   ## Gets the most recent invoice. When getting a single invoice, the downloadUrl property is expanded automatically.
@@ -373,19 +373,19 @@ proc call*(call_593976: Call_InvoicesGetLatest_593970; apiVersion: string;
   ##             : Version of the API to be used with the client request. The current version is 2017-02-27-preview.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_593977 = newJObject()
-  var query_593978 = newJObject()
-  add(query_593978, "api-version", newJString(apiVersion))
-  add(path_593977, "subscriptionId", newJString(subscriptionId))
-  result = call_593976.call(path_593977, query_593978, nil, nil, nil)
+  var path_575010 = newJObject()
+  var query_575011 = newJObject()
+  add(query_575011, "api-version", newJString(apiVersion))
+  add(path_575010, "subscriptionId", newJString(subscriptionId))
+  result = call_575009.call(path_575010, query_575011, nil, nil, nil)
 
-var invoicesGetLatest* = Call_InvoicesGetLatest_593970(name: "invoicesGetLatest",
+var invoicesGetLatest* = Call_InvoicesGetLatest_575003(name: "invoicesGetLatest",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/invoices/latest",
-    validator: validate_InvoicesGetLatest_593971, base: "",
-    url: url_InvoicesGetLatest_593972, schemes: {Scheme.Https})
+    validator: validate_InvoicesGetLatest_575004, base: "",
+    url: url_InvoicesGetLatest_575005, schemes: {Scheme.Https})
 type
-  Call_InvoicesGet_593979 = ref object of OpenApiRestCall_593424
-proc url_InvoicesGet_593981(protocol: Scheme; host: string; base: string;
+  Call_InvoicesGet_575012 = ref object of OpenApiRestCall_574457
+proc url_InvoicesGet_575014(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -403,7 +403,7 @@ proc url_InvoicesGet_593981(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoicesGet_593980(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_InvoicesGet_575013(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a named invoice resource. When getting a single invoice, the downloadUrl property is expanded automatically.
   ## 
@@ -417,16 +417,16 @@ proc validate_InvoicesGet_593980(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593982 = path.getOrDefault("subscriptionId")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
+  var valid_575015 = path.getOrDefault("subscriptionId")
+  valid_575015 = validateParameter(valid_575015, JString, required = true,
                                  default = nil)
-  if valid_593982 != nil:
-    section.add "subscriptionId", valid_593982
-  var valid_593983 = path.getOrDefault("invoiceName")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  if valid_575015 != nil:
+    section.add "subscriptionId", valid_575015
+  var valid_575016 = path.getOrDefault("invoiceName")
+  valid_575016 = validateParameter(valid_575016, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "invoiceName", valid_593983
+  if valid_575016 != nil:
+    section.add "invoiceName", valid_575016
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -434,11 +434,11 @@ proc validate_InvoicesGet_593980(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593984 = query.getOrDefault("api-version")
-  valid_593984 = validateParameter(valid_593984, JString, required = true,
+  var valid_575017 = query.getOrDefault("api-version")
+  valid_575017 = validateParameter(valid_575017, JString, required = true,
                                  default = nil)
-  if valid_593984 != nil:
-    section.add "api-version", valid_593984
+  if valid_575017 != nil:
+    section.add "api-version", valid_575017
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -447,20 +447,20 @@ proc validate_InvoicesGet_593980(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593985: Call_InvoicesGet_593979; path: JsonNode; query: JsonNode;
+proc call*(call_575018: Call_InvoicesGet_575012; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a named invoice resource. When getting a single invoice, the downloadUrl property is expanded automatically.
   ## 
-  let valid = call_593985.validator(path, query, header, formData, body)
-  let scheme = call_593985.pickScheme
+  let valid = call_575018.validator(path, query, header, formData, body)
+  let scheme = call_575018.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593985.url(scheme.get, call_593985.host, call_593985.base,
-                         call_593985.route, valid.getOrDefault("path"),
+  let url = call_575018.url(scheme.get, call_575018.host, call_575018.base,
+                         call_575018.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593985, url, valid)
+  result = hook(call_575018, url, valid)
 
-proc call*(call_593986: Call_InvoicesGet_593979; apiVersion: string;
+proc call*(call_575019: Call_InvoicesGet_575012; apiVersion: string;
           subscriptionId: string; invoiceName: string): Recallable =
   ## invoicesGet
   ## Gets a named invoice resource. When getting a single invoice, the downloadUrl property is expanded automatically.
@@ -470,18 +470,18 @@ proc call*(call_593986: Call_InvoicesGet_593979; apiVersion: string;
   ##                 : Azure Subscription ID.
   ##   invoiceName: string (required)
   ##              : The name of an invoice resource.
-  var path_593987 = newJObject()
-  var query_593988 = newJObject()
-  add(query_593988, "api-version", newJString(apiVersion))
-  add(path_593987, "subscriptionId", newJString(subscriptionId))
-  add(path_593987, "invoiceName", newJString(invoiceName))
-  result = call_593986.call(path_593987, query_593988, nil, nil, nil)
+  var path_575020 = newJObject()
+  var query_575021 = newJObject()
+  add(query_575021, "api-version", newJString(apiVersion))
+  add(path_575020, "subscriptionId", newJString(subscriptionId))
+  add(path_575020, "invoiceName", newJString(invoiceName))
+  result = call_575019.call(path_575020, query_575021, nil, nil, nil)
 
-var invoicesGet* = Call_InvoicesGet_593979(name: "invoicesGet",
+var invoicesGet* = Call_InvoicesGet_575012(name: "invoicesGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/invoices/{invoiceName}",
-                                        validator: validate_InvoicesGet_593980,
-                                        base: "", url: url_InvoicesGet_593981,
+                                        validator: validate_InvoicesGet_575013,
+                                        base: "", url: url_InvoicesGet_575014,
                                         schemes: {Scheme.Https})
 export
   rest
