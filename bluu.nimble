@@ -1,4 +1,4 @@
-version = "0.0.3"
+version = "0.0.4"
 author = "disruptek"
 description = "Microsoft Azure Cloud Computing Platform and Services (MAC) APIs"
 license = "MIT"
